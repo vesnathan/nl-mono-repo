@@ -1,0 +1,22 @@
+postFrontEndDeploy:
+  handler: resources/Lambda/handlers/postFrontEndDeploy.handler
+  runtime: nodejs20.x
+  # 600s timeout because the function waits for cloudfront invalidation
+  timeout: 600
+  iamRoleStatementsName: cwl-postFrontEndDeploy-iam-role-${opt:stage}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+      - "cloudfront:CreateInvalidation"
+      - "cloudfront:GetInvalidation"
+      Resource: "*"
+
+cwlDataTableStreamFunction:
+  name: cwlDataTableStreamFunction
+  handler: resources/Lambda/handlers/cwlDataTableStreamFn.handler
+  timeout: 20
+  events:
+    - stream:
+        type: dynamodb
+        arn: !GetAtt cwlDataTable.StreamArn
+        batchSize: 10

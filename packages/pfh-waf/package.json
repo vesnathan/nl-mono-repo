@@ -1,0 +1,12 @@
+{
+  "name": "cwl-waf",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "deploy": "ts-node -T ./scripts/deployWAF.ts"
+  },
+  "dependencies": {
+    "sharedScripts": "*"
+  }
+}

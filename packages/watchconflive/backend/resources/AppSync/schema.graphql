@@ -1,0 +1,66 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  # ----- User
+  getCWLUser(userId: String!): CWLUser
+    @aws_cognito_user_pools(cognito_groups: ["Client", "Admin"])
+
+  getCWLDataForUser(userId: String!): GetcwlDataForUserResponse
+    @aws_cognito_user_pools
+
+
+
+  # ----- User/cognito
+  registerClientUserUnauth(input: CreateCWLUserInput!): RegisterResult! @aws_iam
+  adminSetUserMFAPreference(
+    input: AdminSetUserMFAPreferenceInput!
+  ): AdminSetUserMFAPreferenceResult! @aws_cognito_user_pools
+  associateSoftwareToken(accessToken: String!): associateSoftwareTokenResult!
+    @aws_cognito_user_pools
+  verifySoftwareToken(
+    input: VerifySoftwareTokenInput!
+  ): VerifySoftwareTokenResult! @aws_cognito_user_pools
+  # userId will be retrieved from context.identity
+  updateMyCWLUserData(input: UpdateCWLUserInput!): CWLUser!
+    @aws_cognito_user_pools
+
+  # ----- CWL
+  addCwlData(input: AddCwlDataInput!): Boolean @aws_cognito_user_pools(cognito_groups: ["Admin", "Client"])
+
+  # ----- File
+  generateS3UploadURL(
+    input: GenerateS3UploadURLInput!
+  ): GenerateS3UploadURLReponse! @aws_cognito_user_pools
+  generateS3SignedURL(bucketName: String!, fileKey: String!): String!
+    @aws_cognito_user_pools
+  deleteS3Object(location: S3FileLocationInput!): Boolean
+    @aws_cognito_user_pools
+  moveObjectToPermanentLocation(
+    tempLocation: S3FileLocationInput!
+  ): S3FileLocation! @aws_cognito_user_pools
+
+input AdminSetUserMFAPreferenceInput {
+  userId: String!
+  userEmail: String!
+}
+
+type AdminSetUserMFAPreferenceResult {
+  userId: String!
+}
+
+type associateSoftwareTokenResult {
+  secretCode: String!
+}
+
+type VerifySoftwareTokenResult {
+  status: String!
+}
+
+input VerifySoftwareTokenInput {
+  AccessToken: String!
+  FriendlyDeviceName: String!
+  UserCode: String!
+}

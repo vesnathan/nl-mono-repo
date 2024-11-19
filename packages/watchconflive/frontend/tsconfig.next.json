@@ -1,0 +1,15 @@
+// tsconfig for nextJS apps
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  }
+}

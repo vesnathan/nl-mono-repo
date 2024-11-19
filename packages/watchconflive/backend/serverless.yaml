@@ -1,0 +1,91 @@
+org: vesnathan
+app: conference-watch-live
+service: pc-app
+
+configValidationMode: error
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: ap-southeast-2
+  stage: ${opt:stage}
+  vpc:
+    securityGroupIds:
+      - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
+    subnetIds:
+      - subnet-0bde333055c0097d9
+      - subnet-097defc7059421596
+      - subnet-05c6ed321be99adc4
+
+  environment:
+    USER_FILES_BUCKET_NAME: cwl-user-files-${opt:stage}
+    STAGE: ${opt:stage}
+
+    cwlUserPoolId: !ImportValue cwlUserPoolId-${opt:stage}
+    cwlDataTableName: !Ref cwlDataTable
+    cwlNotificationTableName: !Ref cwlNotificationTable
+
+    # used in postFrontendDeployHandler
+    cwlCloudFrontDistributionId: !Ref CWLCloudFrontDistribution
+    cwlCloudFrontDomainName: !GetAtt CWLCloudFrontDistribution.DomainName
+    cwlBucket: !Ref CWLBucket
+
+outputs:
+  cwlDataTableName: !Ref cwlDataTable
+  cwlIdentityPoolId: !Ref CWLIdentityPool
+  cwlGraphQLUrl: !GetAtt GraphQlApi.GraphQLUrl
+  cwlCloudFrontDomainName: !GetAtt CWLCloudFrontDistribution.DomainName
+  cwlUserPoolId: !ImportValue cwlUserPoolId-${opt:stage}
+  cwlUserPoolClientId: !ImportValue cwlUserPoolClientId-${opt:stage}
+    
+plugins:
+  - serverless-esbuild
+  - serverless-s3-sync
+  - serverless-appsync-plugin
+  - serverless-iam-roles-per-function
+  - serverless-prune-plugin
+
+package:
+  individually: true
+
+custom:
+  CWLbucketName: cwl-${opt:stage}
+  s3Sync:
+    - bucketName: ${self:custom.CWLbucketName}
+      localDir: ../frontend/out/
+
+  esbuild:
+    target: node20
+    packager: yarn
+    # uncomment this if need to debug the build process
+    # keepOutputDirectory: true
+    packagerOptions:
+      noInstall: true
+  prune:
+    automatic: true
+    number: 0
+
+appSync:
+  ${file(./resources/AppSync/appSync.yaml)}
+
+resources:   
+  - Resources:
+    
+  - ${file(./resources/S3/s3.yaml)}
+  - ${file(./resources/Cloudfront/cloudfront.yaml)}
+  - ${file(./resources/DynamoDb/dynamoDb.yaml)}
+  - ${file(./resources/Cognito/cognito.yaml)}  
+  - ${file(./resources/WebACLAssociation/WebACLAssociation.yaml)}
+  - Outputs:
+      CWLAppsyncUrl:
+        Value: !GetAtt GraphQlApi.GraphQLUrl
+        Export:
+          Name: CWLAppsyncUrl-${opt:stage}
+      CWLAppsyncRealtimeUrl:
+        Value: !GetAtt GraphQlApi.RealtimeUrl
+        Export:
+          Name: CWLAppsyncRealtimeUrl-${opt:stage}
+
+functions: ${file(./resources/Lambda/lambda.yaml)}

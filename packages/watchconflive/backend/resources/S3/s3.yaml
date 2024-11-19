@@ -1,0 +1,33 @@
+CWLResources:
+  # bucket for storing nextjs/react app
+  CWLBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ${self:custom.CWLbucketName}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  CWLBucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket:
+        Ref: "CWLBucket"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action:
+              - s3:GetObject
+              - s3:ListBucket
+            Resource: 
+              - !Sub ${CWLBucket.Arn}
+              - !Sub ${CWLBucket.Arn}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CWLCloudFrontDistribution}
+

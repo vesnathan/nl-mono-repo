@@ -1,0 +1,6 @@
+Resources: 
+  WebACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn : !GetAtt GraphQlApi.Arn
+      WebACLArn: !ImportValue AppsyncWAFArn-${opt:stage}

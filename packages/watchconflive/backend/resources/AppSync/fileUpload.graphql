@@ -1,0 +1,9 @@
+input ProfilePictureFileUploadInput {
+  fileName: String!
+}
+
+type GenerateS3UploadURLReponse {
+  url: String!
+  fileLocation: S3FileLocation!
+  fields: AWSJSON! # Record<string, string>
+}

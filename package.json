@@ -1,0 +1,14 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "lerna": "^8.1.9"
+  },
+  "scripts": {
+    "build-gql": "lerna run build-gql"
+  }
+}
