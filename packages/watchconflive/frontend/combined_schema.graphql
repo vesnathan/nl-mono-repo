@@ -1,3 +1,34 @@
+input GenerateS3UploadURLInput {
+  ProfilePicture: ProfilePictureFileUploadInput
+}
+
+input defaultFileUploadInput {
+  fileName: String!
+  contentType: String!
+  fileId: String!
+}
+
+input ProfilePictureFileUploadInput {
+  fileName: String!
+}
+
+
+
+
+
+
+
+
+
+
+
+
+type GenerateS3UploadURLReponse {
+  url: String!
+  fileLocation: S3FileLocation!
+  fields: AWSJSON! # Record<string, string>. These fields should be appended to formData
+}
+
 schema {
   query: Query
   mutation: Mutation
@@ -55,4 +86,37 @@ input VerifySoftwareTokenInput {
   AccessToken: String!
   FriendlyDeviceName: String!
   UserCode: String!
+}
+
+type CWLUser @aws_cognito_user_pools {
+  userId: String!
+  userAddedById: String
+
+  PrivacyPolicy: String
+  TermsAndConditions: String
+
+  userEmail: String!
+  userFirstName: String!
+  userLastName: String!
+  userPhone: String
+  userTitle: String
+  userAddress: Address
+  userPostalAddress: Address
+
+  userProfilePicture: S3FileLocation
+
+  # ISO date
+  userCreated: String!
+
+  organizationId: String
+
+}
+type S3FileLocation {
+  Bucket: String!
+  Key: String!
+}
+
+input S3FileLocationInput {
+  Bucket: String!
+  Key: String!
 }

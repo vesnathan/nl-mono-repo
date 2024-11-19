@@ -1,6 +1,6 @@
 org: vesnathan
-app: conference-watch-live
-service: pc-app
+app: nl-mono-repo
+service: cloudwatchlive
 
 configValidationMode: error
 

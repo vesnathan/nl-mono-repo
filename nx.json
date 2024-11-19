@@ -1,0 +1,13 @@
+{
+  "targetDefaults": {
+    "deploy": {
+      "dependsOn": [
+        {
+          "dependencies": true,
+          "target": "deploy",
+          "params": "forward"
+        }
+      ]
+    }
+  }
+}

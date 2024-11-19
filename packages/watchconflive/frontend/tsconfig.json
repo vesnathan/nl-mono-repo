@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.next.json",
+  "extends": "../../../tsconfig.next.json",
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -33,6 +33,6 @@
       "@/graphQL/*": ["./src/graphQL/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/functions/v"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/functions/v", "../../sharedScripts/buildGqlTypesOnBackend.ts", "../../sharedScripts/execCommandAsPromise.ts", "../backend/scripts/deployCWL.ts", "../../sharedScripts/mergeGraphqlFiles.ts"],
   "exclude": ["node_modules"]
 }

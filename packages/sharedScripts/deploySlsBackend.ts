@@ -6,7 +6,7 @@ import { hideBin } from "yargs/helpers";
 import fs from "fs";
 import path from "path";
 import { ValidEnv, validEnvironments } from "../watchconflive/frontend/src/config/validEnvs";
-import { execCommandAsPromise } from "../watchconflive/scripts/execCommandAsPromise";
+import { execCommandAsPromise } from "./execCommandAsPromise";
 
 const addWAFOutputToEnvVariables = async (options: {
   stage: string | undefined;

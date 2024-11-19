@@ -16,7 +16,7 @@ import {
   adminSetUserMFAPreferenceMutationFn,
   associateSoftwareTokenMutationFn,
   verifySoftwareTokenMutationFn,
-} from "@/graphQL/mutations/useMutations";
+} from "@/graphQL/mutations/userMutations";
 import { useGraphqlMutation } from "@/hooks/useGraphQlMutation";
 import { useEffectOnce } from "@/hooks/useEffectOnce";
 import { Progress } from "@nextui-org/react";

@@ -1,9 +1,30 @@
+input GenerateS3UploadURLInput {
+  ProfilePicture: ProfilePictureFileUploadInput
+}
+
+input defaultFileUploadInput {
+  fileName: String!
+  contentType: String!
+  fileId: String!
+}
+
 input ProfilePictureFileUploadInput {
   fileName: String!
 }
 
+
+
+
+
+
+
+
+
+
+
+
 type GenerateS3UploadURLReponse {
   url: String!
   fileLocation: S3FileLocation!
-  fields: AWSJSON! # Record<string, string>
+  fields: AWSJSON! # Record<string, string>. These fields should be appended to formData
 }

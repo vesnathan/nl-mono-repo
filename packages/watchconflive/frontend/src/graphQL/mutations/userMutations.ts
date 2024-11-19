@@ -7,6 +7,7 @@ import {
     verifySoftwareTokenMutation,
     verifySoftwareTokenMutationVariables,
   } from "@/graphql/gqlTypes";
+  
   import { GraphQLResult, generateClient } from "aws-amplify/api";
 
   const client = generateClient();

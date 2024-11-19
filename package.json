@@ -2,13 +2,25 @@
   "name": "root",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/watchconflive/frontend",
+    "packages/watchconflive/backend",
+    "packages/sharedScripts",
+    "packages/cwl-waf",
+    "packages/wcl-types"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "graphql": "^16.9.0"
+  },
   "devDependencies": {
-    "lerna": "^8.1.9"
+    "@aws-amplify/cli": "^12.13.1",
+    "@types/node": "^22.9.0",
+    "lerna": "^8.1.9",
+    "ts-node": "10.9.2"
   },
   "scripts": {
-    "build-gql": "lerna run build-gql"
+    "build-gql": "lerna run build-gql --stream --concurrency 1",
+    "reset-modules": "rm -rf node_modules/ packages/**/*/node_modules",
+    "deploy-cwl": "lerna run deploy --concurrency 1 --stream  --scope wclbackend --",
+    "deploy-waf": "lerna run deploy --concurrency 1 --stream --scope cwl-waf --"
   }
 }

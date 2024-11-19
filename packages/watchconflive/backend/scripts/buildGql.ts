@@ -1,11 +1,10 @@
 import path from "path";
-import { buildGqlTypesOnBackend } from "fta-scripts/scripts/buildGqlTypesOnBackend";
-
+import { buildGqlTypesOnBackend } from "sharedScripts/buildGqlTypesOnBackend";
 const buildGql = async () => {
   await buildGqlTypesOnBackend({
     INPUT_DIRS: [
       path.resolve("resources/AppSync"),
-      path.resolve("../../fta-types/graphql"),
+      path.resolve("../../wcl-types/graphql"),
       path.resolve("scripts/customAppsyncTypes.graphql"),
     ],
     COMBINED_FILE_PATH: path.resolve("combined_schema.graphql"),

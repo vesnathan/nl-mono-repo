@@ -1,0 +1,26 @@
+{
+    "folder-path-color.folders": [
+        { "path": "packages/watchconflive", "color": "blue" },
+        { "path": "packages/sharedScripts", "color": "green" },
+        { "path": "packages/cwl-waf", "color": "yellow" },
+    ],
+    "eslint.workingDirectories": [{ "mode": "auto" }],
+    // "search.exclude": {
+    //     "node_modules": true,
+    //     "**/combined_schema.graphql": true,
+    //     "**/gqlTypes.ts": true,
+    //     "**/.serverless": true,
+    //     "**/.next": true,
+    //     "**/out": true,
+    // },
+    "colorize.languages": [
+        "javascript",
+      ],
+    "colorize.include": [
+        "**/packages/personal-financial-health/**",
+        "**/packages/shared-aws-assets/**",
+        "**/packages/fta-shared-frontend/**",
+        "**/packages/h5p-fta-questionnaire/**",
+        "**/packages/admin-portal/**",
+    ],
+}

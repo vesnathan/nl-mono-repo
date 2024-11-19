@@ -2,182 +2,16 @@ name: cwl-appsync-api-${opt:stage}
 authentication:
   type: AMAZON_COGNITO_USER_POOLS
   config:
-    userPoolId: !ImportValue ftaUserPoolId-${opt:stage}
+    userPoolId: !ImportValue cwlUserPoolId-${opt:stage}
     defaultEffect: ALLOW
 additionalAuthentications:
   - type: AWS_IAM
       
 schema:
   - resources/AppSync/**/*.graphql
-  - ../../fta-types/graphql/**/*.graphql
+  - ../../wcl-types/graphql/**/*.graphql
 
 resolvers:
-  # region Pfh data
-  Query.getCWLDataForUser:
-    dataSource: cwlLatestDataTable
-    kind: UNIT
-    code: ./resources/AppSync/resolvers/PfhData/Queries/Query.getCWLDataForUser.ts
-
-  Mutation.addPfhData:
-    kind: PIPELINE
-    functions:
-      - dataSource:
-          type: AWS_LAMBDA
-          config:
-            function:
-              name: cwl-mutation-addPfhData_01_validatePermission
-              handler: "./resources/AppSync/resolvers/PfhData/Mutations/Mutation_addPfhData_01_validatePermission.handler"
-      - dataSource:
-          type: AWS_LAMBDA
-          config:
-            function:
-              # add customized name since default name is over limit of 64 character
-              name: cwl-${opt:stage}-mutation-addPfhData_02_writeHistory
-              handler: "./resources/AppSync/resolvers/PfhData/Mutations/Mutation_addPfhData_02_writeHistory.handler"
-              iamRoleStatementsName: cwl-mutation-addPfhData-write-history-iam-role-${opt:stage}
-              iamRoleStatements:
-              - Effect: Allow
-                Action: s3:PutObject
-                Resource: !Sub arn:aws:s3:::${self:custom.CWLHistoryDataBucketName}/*
-              - Effect: Allow
-                Action: kms:GenerateDataKey
-                Resource: !ImportValue ftaKMSKeyArn-${opt:stage}
-      - dataSource: 
-          type: AWS_LAMBDA
-          config:
-            function:
-              name: cwl-mutation-addPfhData_03_writeLatest
-              handler: ./resources/AppSync/resolvers/PfhData/Mutations/Mutation_addPfhData_03_writeLatest.handler
-              iamRoleStatementsName: cwl-mutation-addPfhData-writeLatest-iam-role-${opt:stage}
-              iamRoleStatements:
-              - Effect: Allow
-                Action: dynamodb:BatchWriteItem
-                Resource: !GetAtt cwlLatestDataTable.Arn
-
-  # endregion Pfh data
-
-  # region Pfh score
-  Query.getPfhScoreAggregated:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          name: cwl-${opt:stage}-Query-getPfhScoreAggregated
-          handler: "./resources/AppSync/resolvers/PfhScore/Query_getPfhScoreAggregated.handler"
-
-  Mutation.savePfhScore:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          name: cwl-${opt:stage}-mutation-savePfhScore
-          handler: "./resources/AppSync/resolvers/PfhScore/Mutation_savePfhScore.handler"
-
-  # endregion Pfh data
-
-  # region notifications
-  FTAUser.cwlNotifications:
-    dataSource: cwlNotificationTable
-    kind: UNIT
-    code: resources/AppSync/resolvers/users/Queries/FTAUser.cwlNotifications.ts
-
-  Mutation.createPfhNotification:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          handler: resources/AppSync/resolvers/PfhNotification/Mutation_createPfhNotification.handler
-          iamRoleStatementsName: cwl-mutation-createPfhNotification-iam-role-${opt:stage}
-          iamRoleStatements:
-          - Effect: Allow
-            Action: dynamodb:PutItem
-            Resource: !GetAtt cwlNotificationTable.Arn
-
-  Mutation.markNotificationAsRead:
-    dataSource: cwlNotificationTable
-    kind: UNIT
-    code: resources/AppSync/resolvers/PfhNotification/Mutation.markNotificationAsRead.ts
-
-  Mutation.clearMyPfhNotifications:
-    dataSource: cwlNotificationTable
-    kind: UNIT
-    code: resources/AppSync/resolvers/PfhNotification/Mutation.clearMyPfhNotifications.ts
-    substitutions:
-      tableName: !Ref cwlNotificationTable
-
-  Mutation.markAsDeletedNotification:
-    dataSource: cwlNotificationTable
-    kind: UNIT
-    code: resources/AppSync/resolvers/PfhNotification/Mutation.markAsDeletedNotification.ts
-    substitutions:
-      tableName: !Ref cwlNotificationTable
-
-  Mutation.markAsArchivedNotification:
-    dataSource: cwlNotificationTable
-    kind: UNIT
-    code: resources/AppSync/resolvers/PfhNotification/Mutation.markAsArchivedNotification.ts
-    substitutions:
-      tableName: !Ref cwlNotificationTable
-  # endregion notifications
-
-  # region user
-  Query.getCWLUser:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          name: cwl-query-getPfhUser
-          handler: resources/AppSync/resolvers/users/Queries/Query_getCWLUser.handler
-
-  Mutation.updateMyFTAUserData:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          name: cwl-mutation-updateMyFTAUserData
-          handler: resources/AppSync/resolvers/users/Mutations/Mutation_updateMyFTAUserData.handler
-
-  Mutation.registerClientUserUnauth:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          # add customized name since default name is over limit of 64 character
-          name: cwl-${opt:stage}-mutation-Mutation_registerClientUserUnauth
-          handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_registerClientUserUnauth.handler"
-          iamRoleStatementsName: cwl-mutation-registerClientUserUnauth-iam-role-${opt:stage}
-          iamRoleStatements:
-            - Effect: Allow
-              Action: 
-                - cognito-idp:AdminCreateUser
-                - cognito-idp:ListUsers
-              Resource: !ImportValue ftaUserPoolArn-${opt:stage}
-            - Effect: "Allow"
-              Action:
-                - sts:AssumeRole
-              Resource: ${self:provider.environment.MONGODB_READWRITE_ROLE_ARN}
-
-  Mutation.adminSetUserMFAPreference:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          # add customized name since default name is over limit of 64 character
-          name: cwl-${opt:stage}-mutation-Mutation_adminSetUserMFAPreference
-          handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_adminSetUserMFAPreference.handler"
-          iamRoleStatementsName: cwl-mutation-adminSetUserMFAPreference-iam-role-${opt:stage}
-          iamRoleStatements:
-            - Effect: Allow
-              Action: "cognito-idp:AdminSetUserMFAPreference"
-              Resource: !ImportValue ftaUserPoolArn-${opt:stage}
-
   Mutation.associateSoftwareToken:
     kind: UNIT
     dataSource:
@@ -191,7 +25,7 @@ resolvers:
           iamRoleStatements:
             - Effect: Allow
               Action: "cognito-idp:associateSoftwareToken"
-              Resource: !ImportValue ftaUserPoolArn-${opt:stage}
+              Resource: !ImportValue cwlUserPoolArn-${opt:stage}
 
   Mutation.verifySoftwareToken:
     kind: UNIT
@@ -206,7 +40,7 @@ resolvers:
           iamRoleStatements:
             - Effect: Allow
               Action: "cognito-idp:verifySoftwareToken"
-              Resource: !ImportValue ftaUserPoolArn-${opt:stage}
+              Resource: !ImportValue cwlUserPoolArn-${opt:stage}
   # endregion user
 
   # region file
@@ -221,10 +55,10 @@ resolvers:
           iamRoleStatements:
             - Effect: Allow
               Action: s3:PutObject # createPresignedPost needs this under the hood
-              Resource: arn:aws:s3:::fta-user-files-${opt:stage}/*
+              Resource: arn:aws:s3:::cwl-user-files-${opt:stage}/*
             - Effect: Allow
               Action: kms:GenerateDataKey
-              Resource: !ImportValue ftaKMSKeyArn-${opt:stage}
+              Resource: !ImportValue cwlKMSKeyArn-${opt:stage}
 
   Mutation.generateS3SignedURL:
     kind: UNIT
@@ -239,10 +73,10 @@ resolvers:
               Action:
                 - s3:GetObject
                 - s3:HeadObject
-              Resource: arn:aws:s3:::fta-user-files-${opt:stage}/*
+              Resource: arn:aws:s3:::cwl-user-files-${opt:stage}/*
             - Effect: Allow
               Action: kms:Decrypt
-              Resource: !ImportValue ftaKMSKeyArn-${opt:stage}
+              Resource: !ImportValue cwlKMSKeyArn-${opt:stage}
 
   Mutation.deleteS3Object:
     kind: UNIT
@@ -260,7 +94,7 @@ resolvers:
                 - s3:HeadObject
                 - s3:GetObject
               Resource:
-                - arn:aws:s3:::fta-user-files-${opt:stage}/*
+                - arn:aws:s3:::cwl-user-files-${opt:stage}/*
 
   Mutation.moveObjectToPermanentLocation:
     kind: UNIT
@@ -278,73 +112,20 @@ resolvers:
                 - s3:CopyObject
                 - s3:PutObject
               Resource:
-                - arn:aws:s3:::fta-user-files-${opt:stage}/*
+                - arn:aws:s3:::cwl-user-files-${opt:stage}/*
             - Effect: Allow
               Action: 
                 - kms:Decrypt
                 - kms:GenerateDataKey
-              Resource: !ImportValue ftaKMSKeyArn-${opt:stage}
+              Resource: !ImportValue cwlKMSKeyArn-${opt:stage}
 
   # endregion file
 
-  # region proxy
-  Query.getMoodleAPIRequest:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          handler: ./resources/AppSync/resolvers/proxy/Query_getMoodleAPIRequest.handler
-
-  Query.getCDSApi:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          handler: ./resources/AppSync/resolvers/proxy/Query_getCDSApi.handler
-
-  Query.getOmniLifeAPI:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          handler: ./resources/AppSync/resolvers/proxy/Query_getOmniLifeAPI.handler
-  # endregion proxy
-
-  # region email
-  Mutation.sendPfhReportToEmail:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          handler: ./resources/AppSync/resolvers/email/Mutation_sendPfhReportToEmail.handler
-          iamRoleStatementsName: cwl-mutation-sendPfhReportToEmail-${opt:stage}
-          iamRoleStatements:
-            - Effect: Allow
-              Action: sts:AssumeRole
-              Resource: 
-                - ${self:provider.environment.SES_ROLE_ARN}
-                - ${self:provider.environment.MONGODB_READWRITE_ROLE_ARN}
-            - Effect: Allow
-              Action: s3:GetObject
-              Resource: arn:aws:s3:::fta-user-files-${opt:stage}/*
-            - Effect: Allow
-              Action: kms:Decrypt
-              Resource: !ImportValue ftaKMSKeyArn-${opt:stage}
-
-  # endregion email
+  
 
 dataSources:
   cwlLatestDataTable:
     type: AMAZON_DYNAMODB
     config:
       tableName: !Ref cwlLatestDataTable
-
-  cwlNotificationTable:
-    type: AMAZON_DYNAMODB
-    config:
-      tableName: !Ref cwlNotificationTable
 

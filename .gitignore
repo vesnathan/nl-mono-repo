@@ -27,7 +27,9 @@
 **/*.tsbuildinfo
 **/next-env.d.ts
 gqlTypes.ts
+.nx/cache
 
 .serverless
 lerna-debug.log
 WAF_output.json
+.nx

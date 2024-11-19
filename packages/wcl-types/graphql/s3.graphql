@@ -1,0 +1,9 @@
+type S3FileLocation {
+  Bucket: String!
+  Key: String!
+}
+
+input S3FileLocationInput {
+  Bucket: String!
+  Key: String!
+}

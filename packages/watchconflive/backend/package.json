@@ -1,0 +1,13 @@
+{
+  "name": "wclbackend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "sharedScripts": "*",
+    "wclfrontend": "*"
+  },
+  "scripts" : {
+    "build-gql": "ts-node ./scripts/buildGql.ts"
+  }
+}

@@ -1,13 +1,13 @@
-org: transfigr
-app: fta-mono-repo
-service: pfh-waf
+org: vesnathan
+app: nl-mono-repo
+service: waf
 
 configValidationMode: error
 
 frameworkVersion: "3"
 
 outputs:
-  CloudFrontWAFArn: !GetAtt PFHWAF.Arn
+  CloudFrontWAFArn: !GetAtt CWLWAF.Arn
 
 provider:
   name: aws
@@ -17,10 +17,10 @@ provider:
 
 resources:
   Resources:
-    PFHWAF:
+    CWLWAF:
       Type: "AWS::WAFv2::WebACL"
       Properties:
-        Name: PFHWAF
+        Name: CWLWAF
         Scope: CLOUDFRONT
         DefaultAction:
           Allow: {}
