@@ -1,3 +1,9 @@
+enum CognitoUserGroup {
+  Client
+  Admin
+  Adviser
+}
+
 type CWLUser @aws_cognito_user_pools {
   userId: String!
   userAddedById: String
@@ -10,8 +16,7 @@ type CWLUser @aws_cognito_user_pools {
   userLastName: String!
   userPhone: String
   userTitle: String
-  userAddress: Address
-  userPostalAddress: Address
+
 
   userProfilePicture: S3FileLocation
 

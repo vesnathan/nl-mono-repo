@@ -1,0 +1,5 @@
+node_modules
+.serverless
+.build
+gqlTypes.ts
+combined_schema.graphql

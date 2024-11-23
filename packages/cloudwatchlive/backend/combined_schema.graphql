@@ -1,0 +1,157 @@
+input GenerateS3UploadURLInput {
+  ProfilePicture: ProfilePictureFileUploadInput
+}
+
+input defaultFileUploadInput {
+  fileName: String!
+  contentType: String!
+  fileId: String!
+}
+
+input ProfilePictureFileUploadInput {
+  fileName: String!
+}
+
+type GenerateS3UploadURLReponse {
+  url: String!
+  fileLocation: S3FileLocation!
+  fields: AWSJSON! # Record<string, string>. These fields should be appended to formData
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  getAuthorizedUser(userId: String!): CWLUser
+  getCWLDataForUser(userId: String!): GetCwlDataForUserResponse
+    @aws_cognito_user_pools
+}
+
+type Mutation {
+
+  # ----- User/cognito
+
+  associateSoftwareToken(accessToken: String!): associateSoftwareTokenResult!
+    @aws_cognito_user_pools
+  verifySoftwareToken(
+    input: VerifySoftwareTokenInput!
+  ): VerifySoftwareTokenResult! @aws_cognito_user_pools
+  # userId will be retrieved from context.identity
+
+
+  # ----- File
+  generateS3UploadURL(
+    input: GenerateS3UploadURLInput!
+  ): GenerateS3UploadURLReponse! @aws_cognito_user_pools
+  generateS3SignedURL(bucketName: String!, fileKey: String!): String!
+    @aws_cognito_user_pools
+  deleteS3Object(location: S3FileLocationInput!): Boolean
+    @aws_cognito_user_pools
+  moveObjectToPermanentLocation(
+    tempLocation: S3FileLocationInput!
+  ): S3FileLocation! @aws_cognito_user_pools
+}
+
+
+input AdminSetUserMFAPreferenceInput {
+  userId: String!
+  userEmail: String!
+}
+
+type AdminSetUserMFAPreferenceResult {
+  userId: String!
+}
+
+type associateSoftwareTokenResult {
+  secretCode: String!
+}
+
+type VerifySoftwareTokenResult {
+  status: String!
+}
+
+input VerifySoftwareTokenInput {
+  AccessToken: String!
+  FriendlyDeviceName: String!
+  UserCode: String!
+}
+
+type CwlDataValues @aws_cognito_user_pools {
+  events: String
+}
+
+type GetCwlDataForUserResponse @aws_cognito_user_pools {
+  dataValues: CwlDataValues
+  lastUpdate: String
+}
+
+type CWLDataItem @aws_cognito_user_pools {
+  userId: String!
+  fieldName: String!
+  fieldValue: String!
+  lastUpdate: String!
+}
+
+
+
+enum CognitoUserGroup {
+  Client
+  Admin
+  Adviser
+}
+
+type CWLUser @aws_cognito_user_pools {
+  userId: String!
+  userAddedById: String
+
+  PrivacyPolicy: String
+  TermsAndConditions: String
+
+  userEmail: String!
+  userFirstName: String!
+  userLastName: String!
+  userPhone: String
+  userTitle: String
+
+
+  userProfilePicture: S3FileLocation
+
+  # ISO date
+  userCreated: String!
+
+  organizationId: String
+
+}
+type S3FileLocation {
+  Bucket: String!
+  Key: String!
+}
+
+input S3FileLocationInput {
+  Bucket: String!
+  Key: String!
+}
+
+# These types are added by AppSync. We redefined them here so that it works with "graphql-schema-typescript" package
+# These shouldn't be included in schema file otherwise it'll complain about duplicate type definition
+
+# Scalar type: https://docs.aws.amazon.com/appsync/latest/devguide/scalars.html
+scalar AWSDate
+scalar AWSTime
+scalar AWSDateTime
+scalar AWSTimestamp
+scalar AWSEmail
+scalar AWSJSON
+scalar AWSURL
+scalar AWSPhone
+scalar AWSIPAddress
+
+# auth directives https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#using-additional-authorization-modes
+directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
+directive @aws_auth(cognito_groups: [String!]!) on FIELD_DEFINITION
+directive @aws_api_key on FIELD_DEFINITION | OBJECT
+directive @aws_iam on FIELD_DEFINITION | OBJECT
+directive @aws_oidc on FIELD_DEFINITION | OBJECT
+directive @aws_cognito_user_pools(cognito_groups: [String!]) on FIELD_DEFINITION | OBJECT

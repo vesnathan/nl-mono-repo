@@ -1,0 +1,6 @@
+Resources:
+  cwlSecurityGroupFromSharedVPC:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: vpc-068e93923337a96e7
+      GroupDescription: "Security group for shared cwlVPC"

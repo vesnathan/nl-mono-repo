@@ -1,6 +1,6 @@
 
 import path from "path";
-import { deploySlsBackend } from "sharedScripts/deploySlsBackend"
+import { deploySlsBackend } from "shared/scripts/deploySlsBackend";
 
 const start = async () => {
   await deploySlsBackend({

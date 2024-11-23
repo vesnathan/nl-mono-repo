@@ -1,0 +1,32 @@
+{
+  "name": "shared-aws-assets",
+  "version": "1.0.0",
+  "main": "handler.js",
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "@types/escape-string-regexp": "^2.0.3",
+    "@types/sanitize-html": "^2.13.0",
+    "@types/validator": "^13.12.2",
+    "axios": "1.7.7",
+    "escape-string-regexp": "^5.0.0",
+    "lodash": "^4.17.21",
+    "sanitize-html": "^2.13.1",
+    "shared": "*"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-dynamodb": "3.669.0",
+    "@aws-sdk/util-dynamodb": "3.669.0",
+    "serverless": "3.38.0",
+    "serverless-appsync-plugin": "2.6.0",
+    "serverless-esbuild": "1.51.0",
+    "serverless-iam-roles-per-function": "3.2.0",
+    "serverless-s3-sync": "3.1.0",
+    "validator": "13.11.0"
+  },
+  "scripts": {
+    "predeploy": "yarn build-gql && yarn tsc",
+    "deploy": "ts-node -T ./scripts/deployShared.ts",
+    "build-gql": "ts-node -T ./scripts/buildGql.ts"
+  }
+}

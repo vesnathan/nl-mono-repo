@@ -7,6 +7,6 @@
     "deploy": "ts-node -T ./scripts/deployWAF.ts"
   },
   "dependencies": {
-    "sharedScripts": "*"
+    "shared": "*"
   }
 }

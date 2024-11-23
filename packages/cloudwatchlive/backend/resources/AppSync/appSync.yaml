@@ -1,0 +1,135 @@
+name: cwl-appsync-api-${opt:stage}
+authentication:
+  type: AMAZON_COGNITO_USER_POOLS
+  config:
+    userPoolId: !ImportValue cwlUserPoolId-${opt:stage}
+    defaultEffect: ALLOW
+additionalAuthentications:
+  - type: AWS_IAM
+      
+schema:
+  - resources/AppSync/**/*.graphql
+  - ../../wcl-types/graphql/**/*.graphql
+
+resolvers:
+  Query.getCWLDataForUser:
+    dataSource: cwlDataTable
+    kind: UNIT
+    code: ./resources/AppSync/resolvers/users/Queries/Query.getCWLDataForUser.ts
+  Mutation.associateSoftwareToken:
+    kind: UNIT
+    dataSource:
+      type: AWS_LAMBDA
+      config:
+        function:
+          # add customized name since default name is over limit of 64 character
+          name: cwl-${opt:stage}-mutation-Mutation_associateSoftwareToken
+          handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_associateSoftwareToken.handler"
+          iamRoleStatementsName: cwl-mutation-associateSoftwareToken-iam-role-${opt:stage}
+          iamRoleStatements:
+            - Effect: Allow
+              Action: "cognito-idp:associateSoftwareToken"
+              Resource: !ImportValue cwlUserPoolArn-${opt:stage}
+
+  Mutation.verifySoftwareToken:
+    kind: UNIT
+    dataSource:
+      type: AWS_LAMBDA
+      config:
+        function:
+          # add customized name since default name is over limit of 64 character
+          name: cwl-${opt:stage}-mutation-Mutation_verifySoftwareToken
+          handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_verifySoftwareToken.handler"
+          iamRoleStatementsName: cwl-mutation-verifySoftwareToken-iam-role-${opt:stage}
+          iamRoleStatements:
+            - Effect: Allow
+              Action: "cognito-idp:verifySoftwareToken"
+              Resource: !ImportValue cwlUserPoolArn-${opt:stage}
+  # endregion user
+
+  # region file
+  Mutation.generateS3UploadURL:
+    kind: UNIT
+    dataSource:
+      type: AWS_LAMBDA
+      config:
+        function:
+          handler: ./resources/AppSync/resolvers/files/Mutation_generateS3UploadURL.handler
+          iamRoleStatementsName: cwl-mutation-generateS3UploadURL-${opt:stage}
+          iamRoleStatements:
+            - Effect: Allow
+              Action: s3:PutObject # createPresignedPost needs this under the hood
+              Resource: arn:aws:s3:::cwl-user-files-${opt:stage}/*
+            - Effect: Allow
+              Action: kms:GenerateDataKey
+              Resource: !ImportValue cwlKMSKeyArn-${opt:stage}
+
+  Mutation.generateS3SignedURL:
+    kind: UNIT
+    dataSource:
+      type: AWS_LAMBDA
+      config:
+        function:
+          handler: ./resources/AppSync/resolvers/files/Mutation_generateS3SignedURL.handler
+          iamRoleStatementsName: cwl-mutation-generateS3SignedURL-${opt:stage}
+          iamRoleStatements:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:HeadObject
+              Resource: arn:aws:s3:::cwl-user-files-${opt:stage}/*
+            - Effect: Allow
+              Action: kms:Decrypt
+              Resource: !ImportValue cwlKMSKeyArn-${opt:stage}
+
+  Mutation.deleteS3Object:
+    kind: UNIT
+    dataSource:
+      type: AWS_LAMBDA
+      config:
+        function:
+          handler: ./resources/AppSync/resolvers/files/Mutation_deleteS3Object.handler
+          iamRoleStatementsName: cwl-mutation-deleteS3Object-${opt:stage}
+          iamRoleStatements:
+            - Effect: Allow
+              Action:
+                - s3:DeleteObject
+                # HeadObject also requires GetObject permission to work
+                - s3:HeadObject
+                - s3:GetObject
+              Resource:
+                - arn:aws:s3:::cwl-user-files-${opt:stage}/*
+
+  Mutation.moveObjectToPermanentLocation:
+    kind: UNIT
+    dataSource:
+      type: AWS_LAMBDA
+      config:
+        function:
+          name: cwl-${opt:stage}-mutation-moveObjToPermLoc
+          handler: ./resources/AppSync/resolvers/files/Mutation_moveObjectToPermanentLocation.handler
+          iamRoleStatementsName: cwl-mutation-moveObjectToPermanentLocation-${opt:stage}
+          iamRoleStatements:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:CopyObject
+                - s3:PutObject
+              Resource:
+                - arn:aws:s3:::cwl-user-files-${opt:stage}/*
+            - Effect: Allow
+              Action: 
+                - kms:Decrypt
+                - kms:GenerateDataKey
+              Resource: !ImportValue cwlKMSKeyArn-${opt:stage}
+
+  # endregion file
+
+  
+
+dataSources:
+  cwlDataTable:
+    type: AMAZON_DYNAMODB
+    config:
+      tableName: !Ref cwlDataTable
+

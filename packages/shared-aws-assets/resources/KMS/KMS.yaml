@@ -1,0 +1,14 @@
+Resources:
+  cwlKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: "KMS key for S3 and DynamoDB encryption"
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action:
+              - "kms:*"
+            Resource: "*"

@@ -1,0 +1,20 @@
+{
+  "nldev": {
+    "cwlUserPoolId": "ap-southeast-2_h0RcZ6354",
+    "cwlUserPoolClientId": "5f9206c80ucse1ivv87ji2f505",
+    "cwlIdentityPoolId": "ap-southeast-2:bdf30a0f-1667-4c5c-a0a1-01416c97529e",
+    "cwlGraphQLUrl": "https://zqgmhjrj3zb65p6smegi5l7evq.appsync-api.ap-southeast-2.amazonaws.com/graphql"
+  },
+  "staging": {
+    "cwlUserPoolId": "ap-southeast-2_h0RcZ6354",
+    "cwlUserPoolClientId": "5f9206c80ucse1ivv87ji2f505",
+    "cwlIdentityPoolId": "ap-southeast-2:bdf30a0f-1667-4c5c-a0a1-01416c97529e",
+    "cwlGraphQLUrl": "https://zqgmhjrj3zb65p6smegi5l7evq.appsync-api.ap-southeast-2.amazonaws.com/graphql"
+  },
+  "production": {
+    "cwlUserPoolId": "ap-southeast-2_h0RcZ6354",
+    "cwlUserPoolClientId": "5f9206c80ucse1ivv87ji2f505",
+    "cwlIdentityPoolId": "ap-southeast-2:bdf30a0f-1667-4c5c-a0a1-01416c97529e",
+    "cwlGraphQLUrl": "https://zqgmhjrj3zb65p6smegi5l7evq.appsync-api.ap-southeast-2.amazonaws.com/graphql"
+  }
+}

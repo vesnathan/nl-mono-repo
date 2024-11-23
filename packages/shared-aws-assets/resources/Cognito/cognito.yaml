@@ -1,0 +1,29 @@
+Resources:
+
+  cognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UsernameAttributes:
+        - email
+      UserPoolName: "cwlUserPool-${opt:stage}"
+      UserPoolAddOns:
+        AdvancedSecurityMode: ENFORCED
+      DeletionProtection: ACTIVE
+      MfaConfiguration: "OPTIONAL"
+      EnabledMfas:
+        - "SOFTWARE_TOKEN_MFA"
+
+  cognitoUserPoolClient: 
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: Web-${opt:stage}
+      UserPoolId: !Ref cognitoUserPool
+      PreventUserExistenceErrors: "ENABLED"
+      AccessTokenValidity: 30
+      IdTokenValidity: 30
+      RefreshTokenValidity: 1
+
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days

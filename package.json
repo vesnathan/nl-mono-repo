@@ -2,14 +2,18 @@
   "name": "root",
   "private": true,
   "workspaces": [
-    "packages/watchconflive/frontend",
-    "packages/watchconflive/backend",
-    "packages/sharedScripts",
+    "packages/cloudwatchlive/frontend",
+    "packages/cloudwatchlive/backend",
+    "packages/shared",
     "packages/cwl-waf",
-    "packages/wcl-types"
+    "packages/wcl-types",
+    "packages/shared-aws-assets"
   ],
   "dependencies": {
-    "graphql": "^16.9.0"
+    "global": "^4.4.0",
+    "graphql": "^16.9.0",
+    "knip": "^5.37.2",
+    "serverless": "3"
   },
   "devDependencies": {
     "@aws-amplify/cli": "^12.13.1",
@@ -20,7 +24,10 @@
   "scripts": {
     "build-gql": "lerna run build-gql --stream --concurrency 1",
     "reset-modules": "rm -rf node_modules/ packages/**/*/node_modules",
-    "deploy-cwl": "lerna run deploy --concurrency 1 --stream  --scope wclbackend --",
-    "deploy-waf": "lerna run deploy --concurrency 1 --stream --scope cwl-waf --"
+    "deploy-cwl": "lerna run deploy --concurrency 1 --stream  --scope cwlbackend --",
+    "deploy-waf": "lerna run deploy --concurrency 1 --stream --scope cwl-waf --",
+    "deploy-shared": "lerna run deploy --concurrency 1 --stream --scope shared-aws-assets --",
+    "knip": "knip",
+    "dev-cwl": "cd packages/cloudwatchlive/frontend && yarn dev"
   }
 }

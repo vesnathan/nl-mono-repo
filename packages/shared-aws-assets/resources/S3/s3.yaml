@@ -1,0 +1,37 @@
+Resources:
+  cwlUserFileBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: cwl-user-files-${opt:stage}
+      # block all public access
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref cwlKMSKey
+            BucketKeyEnabled: true
+
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins:
+              - "*"
+            AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - DELETE
+              - HEAD
+            MaxAge: 3000
+      LifecycleConfiguration:
+        Rules:
+          - Id: TempFolderDeletion
+            Prefix: temp/
+            Status: Enabled
+            ExpirationInDays: 1

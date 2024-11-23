@@ -1,0 +1,13 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/yargs": "^17.0.33",
+    "graphql-schema-typescript": "^1.6.1"
+  },
+  "dependencies": {
+    "@types/yargs": "^17.0.33"
+  }
+}
