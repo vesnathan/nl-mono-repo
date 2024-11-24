@@ -1,6 +1,6 @@
 import type { Config } from "tailwindcss";
 
-export const tailwindTheme = {
+export const CWLTailwindTheme = {
   gridTemplateColumns: {
     "24": "repeat(24, minmax(0, 1fr))",
   },

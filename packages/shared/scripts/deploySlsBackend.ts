@@ -125,16 +125,16 @@ export const deploySlsBackend = async (options: {
         await execCommandAsPromise(`cd ../frontend && yarn build`);
       }
       console.log("Deploying serverless...");
-      await execCommandAsPromise(`npx sls deploy --stage ${STAGE} ${VERBOSE}`);
+      await execCommandAsPromise(`npx serverless deploy --stage ${STAGE} ${VERBOSE}`);
     } else {
       console.log("Deploying serverless...");
       if (!options.hasFrontendDeployment) {
         await execCommandAsPromise(
-          `npx sls deploy --stage ${STAGE} ${VERBOSE}`,
+          `npx serverless deploy --stage ${STAGE} ${VERBOSE}`,
         );
       } else {
         await execCommandAsPromise(
-          `npx sls deploy --stage ${STAGE} --nos3sync ${VERBOSE}`,
+          `npx serverless deploy --stage ${STAGE} --nos3sync ${VERBOSE}`,
         );
       }
     }
@@ -150,12 +150,12 @@ export const deploySlsBackend = async (options: {
 
     let slsOutputChanged = false;
     const outputFromSls = await execCommandAsPromise(
-      `npx sls output list --stage ${STAGE}`,
+      `npx serverless output list --stage ${STAGE}`,
       { captureStdOut: true },
     );
     const outputLines = outputFromSls.split("\n");
 
-    console.log("Writing sls output...");
+    console.log("Writing serverless output...");
     options.outputs.forEach((outputOption) => {
       const { OUTPUT_PATH, OUTPUT_KEYS } = outputOption;
 
@@ -187,12 +187,12 @@ export const deploySlsBackend = async (options: {
       );
       if (outputOption.consoleLog) {
         console.log(
-          `sls output (stage ${STAGE}):`,
+          `serverless output (stage ${STAGE}):`,
           JSON.stringify(SLS_OUTPUT_JSON[STAGE], null, 2),
         );
       }
 
-      console.log("sls output updated to", OUTPUT_PATH);
+      console.log("serverless output updated to", OUTPUT_PATH);
     });
 
     return { slsOutputChanged };
@@ -217,7 +217,7 @@ export const deploySlsBackend = async (options: {
     // 3b. cloud front invalidation
     console.log("Invoking post frontend deployment function");
     await execCommandAsPromise(
-      `npx sls invoke --function postFrontEndDeploy --stage ${STAGE}`,
+      `npx serverless invoke --function postFrontEndDeploy --stage ${STAGE}`,
     );
   }
 };

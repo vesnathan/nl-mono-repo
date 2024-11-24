@@ -1,6 +1,10 @@
 import React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSetGlobalMessage } from "@/components/common/GlobalMessage";
+import { cwlAuthConfirmResetPassword } from "@/functions/cwlAuthConfirmResetPassword";
+import { cwlAuthConfirmSignIn } from "@/functions/cwlAuthConfirmSignIn";
+import { cwlAuthResetPassword } from "@/functions/cwlAuthResetPassword";
+import { cwlAuthSignIn } from "@/functions/cwlAuthSignIn";
 
 
 export const useLoginController = (options: {
@@ -43,6 +47,7 @@ export const useLoginController = (options: {
       onNewPasswordRequired?: () => void;
       onTOTPRequired?: () => void;
     }) => {
+      console.log("here")
       // remove all query to ensure no stale data
       // in case user logout and then login to a different account
       queryClient.removeQueries({
@@ -78,6 +83,7 @@ export const useLoginController = (options: {
       challengeResponse: string;
       challengeType: "newpassword" | "TOTP";
     }) => {
+      console.log("here")
       const { challengeResponse, challengeType } = input;
       setErrorMessage("");
       await cwlAuthConfirmSignIn({

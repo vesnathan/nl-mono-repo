@@ -13,12 +13,19 @@ type Mutation {
 
   # ----- User/cognito
 
+  # ----- User/cognito
+  registerClientUserUnauth(input: CreateCWLUserInput!): RegisterResult! @aws_iam
+  adminSetUserMFAPreference(
+    input: AdminSetUserMFAPreferenceInput!
+  ): AdminSetUserMFAPreferenceResult! @aws_cognito_user_pools
   associateSoftwareToken(accessToken: String!): associateSoftwareTokenResult!
     @aws_cognito_user_pools
   verifySoftwareToken(
     input: VerifySoftwareTokenInput!
   ): VerifySoftwareTokenResult! @aws_cognito_user_pools
   # userId will be retrieved from context.identity
+  updateMyCWLUserData(input: UpdateCWLUserInput!): CWLUser!
+    @aws_cognito_user_pools
 
 
   # ----- File
@@ -34,6 +41,24 @@ type Mutation {
   ): S3FileLocation! @aws_cognito_user_pools
 }
 
+
+type RegisterResult @aws_iam {
+  userId: String!
+}
+
+input CreateCWLUserInput {
+  userTitle: String
+  userFirstName: String!
+  userLastName: String!
+  userEmail: String!
+}
+
+input UpdateCWLUserInput {
+  userTitle: String
+  userFirstName: String!
+  userLastName: String!
+  userEmail: String!
+}
 
 input AdminSetUserMFAPreferenceInput {
   userId: String!
@@ -73,5 +98,7 @@ type CWLDataItem @aws_cognito_user_pools {
   fieldValue: String!
   lastUpdate: String!
 }
+
+
 
 

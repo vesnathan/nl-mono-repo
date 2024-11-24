@@ -28,17 +28,8 @@ export const LoginForm: React.FC<Props> = ({
   };
 
   return (
-    <>
-      <form
-        className="px-6"
-        onSubmit={(e) => {
-          e.preventDefault();
-          signInMutation.mutate({
-            username: userEmail,
-            password: userPassword,
-          });
-        }}
-      >
+    <div className="p-5">
+
         <h5 className="font-bold text-heading06 text-neutral-900">
           Welcome back!
         </h5>
@@ -63,6 +54,15 @@ export const LoginForm: React.FC<Props> = ({
             isDisabled={
               !!(!userEmail || !userPassword || signInMutation.isPending)
             }
+            onClick={(e) => {
+                e.preventDefault();
+                signInMutation.mutate({
+                  username: userEmail,
+                  password: userPassword,
+                });
+              }}
+            color="primary"
+           
           />
         </div>
         <div className="mt-4 mb-4">
@@ -79,9 +79,9 @@ export const LoginForm: React.FC<Props> = ({
             </span>
           </div>
         </div>
-      </form>
+
       {!!renderFooter && <Divider />}
       {renderFooter?.()}
-    </>
+    </div>
   );
 };

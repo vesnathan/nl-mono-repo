@@ -1,9 +1,9 @@
 {
   "nldev": {
-    "cwlUserPoolId": "ap-southeast-2_h0RcZ6354",
-    "cwlUserPoolClientId": "5f9206c80ucse1ivv87ji2f505",
-    "cwlIdentityPoolId": "ap-southeast-2:bdf30a0f-1667-4c5c-a0a1-01416c97529e",
-    "cwlGraphQLUrl": "https://zqgmhjrj3zb65p6smegi5l7evq.appsync-api.ap-southeast-2.amazonaws.com/graphql"
+    "cwlUserPoolId": "ap-southeast-2_laW5LjkC0",
+    "cwlUserPoolClientId": "kmajlc5ep46n07g6n461eb09m",
+    "cwlIdentityPoolId": "ap-southeast-2:e166dc3e-f501-425c-93b1-ba0d68041eef",
+    "cwlGraphQLUrl": "https://xipfn7jjo5a3je6dvechfqciem.appsync-api.ap-southeast-2.amazonaws.com/graphql"
   },
   "staging": {
     "cwlUserPoolId": "ap-southeast-2_h0RcZ6354",

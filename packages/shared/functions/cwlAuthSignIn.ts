@@ -1,6 +1,6 @@
 import { signIn as amplifySignIn } from "aws-amplify/auth";
 import to from "await-to-js";
-import { cwlAuthSignOut } from "@/functions/cwlAuthSignOut";
+import { cwlAuthSignOut } from "./cwlAuthSignOut";
 
 type SignInInput = {
   username: string;
@@ -17,7 +17,6 @@ type SignInInput = {
 };
 
 export const cwlAuthSignIn = async (input: SignInInput) => {
-  // TODO Work out why the below sign out isn't working
   await cwlAuthSignOut();
   const [signInError, signInResult] = await to(
     amplifySignIn({
@@ -26,7 +25,6 @@ export const cwlAuthSignIn = async (input: SignInInput) => {
     }),
   );
   if (signInError) {
-    console.log("error");
     if (signInError.name === "UserNotFoundException") {
       input.onUserNotFound();
     } else if (signInError.name === "NotAuthorizedException") {
