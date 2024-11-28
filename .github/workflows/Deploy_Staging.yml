@@ -1,0 +1,49 @@
+name: Deploy_staging
+on:
+  push:
+    branches:
+      - deploy_staging*
+
+jobs:
+  Deploy:
+    name: Deploy Staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@master
+        with:
+          persist-credentials: false
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "npm"
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: cache-node-modules
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock', '**/package.json') }}
+
+      - name: Yarn Install
+        run: |
+          yarn install --frozen-lockfile
+          yarn build-gql
+
+      - name: Deploy all to staging
+        run: yarn deploy-all-ci --stage staging --fe
+        env:
+          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
+
+      - name: e2e tests
+        run: |
+          yarn playwright install 
+          yarn letterbin
+          STAGE=staging yarn test:e2e
+        working-directory: packages/personal-financial-health/frontend
+        env:
+          CWL_DEFAULT_PASSWORD: ${{ secrets.CWL_DEFAULT_PASSWORD || 'default_password' }}
+          CWL_RESET_PW_NEW: ${{ secrets.CWL_RESET_PW_NEW }}

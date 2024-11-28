@@ -2,15 +2,15 @@
 
 import { Progress } from "@nextui-org/react";
 import { LOGIN_PATH } from "@/constants/layout/navigation/navigation";
-import {
-  getCWLUserQueryFn,
-  getCWLUserQueryKey,
-} from "@/graphQL/queries/userQueries";
 import { useUserStore } from "@/stores/userStore";
 import { useQuery } from "@tanstack/react-query";
 import { DataFetchError } from "@/components/common/DataFetchError";
 import { useRouter } from "next/navigation";
 import { FC, PropsWithChildren, useEffect } from "react";
+import {
+  getCWLUserQueryFn,
+  getCWLUserQueryKey,
+} from "../graphql/queries/userQueries";
 
 type Props = PropsWithChildren & {
   userId: string;
@@ -27,7 +27,7 @@ export const CWLUserStoreSetup: FC<Props> = ({ userId, children }) => {
     queryKey,
   });
 
-  const CWLUser = data?.data.getCWLUser;
+  const CWLUser = data?.data?.getCWLUser;
   useEffect(() => {
     if (CWLUser) {
       setUser(CWLUser);

@@ -1,6 +1,6 @@
 const NOT_EMPTY = /^(?!\s*$).+/;
 const EMAIL =
-  // eslint-disable-next-line no-useless-escape
+  // eslint-disable-next-line no-useless-escape, security/detect-unsafe-regex
   /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/;
 const ACCEPTED_STRING = /^[ A-Za-z0-9_@./!$%()_#&+-?'"/\r\n]*$/;
 const PASSWORD_LENGTH = /^(?!\s*$).{8,}$/;

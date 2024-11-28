@@ -12,7 +12,7 @@ type UpdatePasswordInput = {
   wrongOldPassword: () => void;
 };
 
-export const ftaAuthUpdatePassword = async (input: UpdatePasswordInput) => {
+export const AuthUpdatePassword = async (input: UpdatePasswordInput) => {
   const [updatePasswordError] = await to(
     amplifyUpdatePassword({
       oldPassword: input.oldPassword,

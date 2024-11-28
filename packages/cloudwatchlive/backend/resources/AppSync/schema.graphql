@@ -7,6 +7,8 @@ type Query {
   getAuthorizedUser(userId: String!): CWLUser
   getCWLDataForUser(userId: String!): GetCwlDataForUserResponse
     @aws_cognito_user_pools
+  getCWLUser(userId: String!): CWLUser
+    @aws_cognito_user_pools
 }
 
 type Mutation {
@@ -40,7 +42,6 @@ type Mutation {
     tempLocation: S3FileLocationInput!
   ): S3FileLocation! @aws_cognito_user_pools
 }
-
 
 type RegisterResult @aws_iam {
   userId: String!

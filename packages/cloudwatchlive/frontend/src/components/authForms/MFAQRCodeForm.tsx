@@ -24,8 +24,7 @@ const generateQR = async (text: string, email: string) => {
         IS_PRODUCTION ? "" : `%20${environment}`
       }:${email}?secret=${text}&issuer=Personal%20Financial%20Health`,
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error generating QR code", error);
   }
   return null;

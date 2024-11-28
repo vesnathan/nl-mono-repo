@@ -1,29 +1,21 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useUserStore } from "@/stores/userStore";
+import React from "react";
 import { LOGIN_PATH } from "@/constants/layout/navigation/navigation";
+import { CWLUserStoreSetup } from "@/stores/CWLUserStoreSetup";
+import { RequireLoggedIn } from "./RequireLoggedIn";
+import { NextRedirect } from "./NextRedirect";
 
-interface RequireAuthProps {
+interface Props {
   children: React.ReactNode;
 }
-
-const RequireAuth = ({ children }: RequireAuthProps) => {
-  const { userId } = useUserStore(({ user }) => user);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!userId) {
-      router.replace(LOGIN_PATH);
-    }
-  }, [userId, router]);
-
-  if (!userId) {
-    return null; // Render nothing while redirecting
-  }
-
-  return <>{children}</>;
+export const RequireAuth: React.FC<Props> = ({ children }) => {
+  return (
+    <RequireLoggedIn
+      renderNotLoggedIn={() => {
+        return <NextRedirect path={LOGIN_PATH} />;
+      }}
+      renderLoggedIn={({ userId }) => (
+        <CWLUserStoreSetup userId={userId}>{children}</CWLUserStoreSetup>
+      )}
+    />
+  );
 };
-
-export default RequireAuth;

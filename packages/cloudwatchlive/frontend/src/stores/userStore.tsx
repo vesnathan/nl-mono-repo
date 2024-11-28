@@ -1,7 +1,5 @@
 import { create } from "zustand";
-import {
-  CWLUser,
-} from "@/graphql/gqlTypes";
+import { CWLUser } from "@/graphql/gqlTypes";
 
 const createDefaultCWLUser = (): CWLUser => ({
   __typename: "CWLUser",

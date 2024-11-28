@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, EffectCallback, useRef } from "react";
 
 export function useEffectOnce(effectCallback: EffectCallback) {

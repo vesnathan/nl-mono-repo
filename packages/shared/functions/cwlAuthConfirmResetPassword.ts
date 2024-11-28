@@ -12,7 +12,7 @@ type ConfirmResetPasswordInput = {
   onUnhandledError: (error: Error) => void;
 };
 
-export const ftaAuthConfirmResetPassword = async (
+export const cwlAuthConfirmResetPassword = async (
   input: ConfirmResetPasswordInput,
 ) => {
   const [confirmResetPasswordError] = await to(

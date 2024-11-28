@@ -9,6 +9,7 @@ type ProcessEnv = {
   cwlBucket: string;
   cwlHistoryDataBucketName: string;
   cwlDataTable: string;
+  cwlUserTable: string;
 };
 export const getProcessEnv = (): ProcessEnv => {
   return process.env as ProcessEnv;

@@ -1,11 +1,12 @@
 import { useSetGlobalMessage } from "@/components/common/GlobalMessage";
 import { useEffectOnce } from "./useEffectOnce";
-import { useRouter } from "next/navigation";
 
-export const useSessionTimeout = (timeoutDurationMs: number) => {
+export const useSessionTimeout = (input: {
+  timeoutDurationMS: number;
+  handleLogout: () => void;
+}) => {
   const setGlobalMessage = useSetGlobalMessage();
-  const router = useRouter();
-
+  const { timeoutDurationMS, handleLogout } = input;
   const updateLastAccessTime = () => {
     localStorage.setItem("lastAccessTime", Date.now().toString());
   };
@@ -15,18 +16,18 @@ export const useSessionTimeout = (timeoutDurationMs: number) => {
       localStorage.getItem("lastAccessTime") || "0",
       10,
     );
-    if (Date.now() - lastAccessTime > timeoutDurationMs) {
+    if (Date.now() - lastAccessTime > timeoutDurationMS) {
       setGlobalMessage({
         content: "You have been logged out due to inactivity.",
         color: "error",
       });
-      router.push("/login");
+      handleLogout();
     }
   };
 
   useEffectOnce(() => {
     updateLastAccessTime();
-    const interval = setInterval(checkIdleTime, timeoutDurationMs);
+    const interval = setInterval(checkIdleTime, 5 * 1000 * 60);
 
     const observer = new PerformanceObserver((list) => {
       list.getEntries().forEach((entry) => {

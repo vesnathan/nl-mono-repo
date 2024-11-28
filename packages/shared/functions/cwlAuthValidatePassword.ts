@@ -25,7 +25,7 @@ export type ValidatePWResult = {
   message: string;
   satisfied: boolean;
 }[];
-export const ftaAuthValidatePassword = (password: string): ValidatePWResult => {
+export const cwlAuthValidatePassword = (password: string): ValidatePWResult => {
   return validationConfigs.map((validation) => ({
     message: validation.message,
     satisfied: validation.regexp.test(password),

@@ -1,9 +1,9 @@
 {
     "folder-path-color.folders": [
         { "path": "packages/cloudwatchlive", "color": "blue" },
-        { "path": "packages/shared", "color": "green" },
         { "path": "packages/cwl-waf", "color": "yellow" },
-        { "path": "packages/shared-aws-assets", "color": "pink" },
+        { "path": "packages/shared-aws-assets", "color": "orange" },
+        { "path": "packages/shared/", "color": "green" }
     ],
     "eslint.workingDirectories": [{ "mode": "auto" }],
     // "search.exclude": {

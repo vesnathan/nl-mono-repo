@@ -10,7 +10,7 @@ type ResetPasswordInput = {
   onUnhandledError: (error: Error) => void;
 };
 
-export const ftaAuthResetPassword = async (input: ResetPasswordInput) => {
+export const cwlAuthResetPassword = async (input: ResetPasswordInput) => {
   const [resetPasswordError, resetPasswordResult] = await to(
     amplifyResetPassword({
       username: input.username,

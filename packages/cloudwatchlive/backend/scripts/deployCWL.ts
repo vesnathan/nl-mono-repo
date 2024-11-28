@@ -17,6 +17,8 @@ const start = async () => {
           "cwlUserPoolClientId",
           "cwlIdentityPoolId",
           "cwlGraphQLUrl",
+          "cwlUserTableArn",
+          "cwlUserTableId",
           "apiURL",
         ],
         consoleLog: true,

@@ -3,7 +3,6 @@ import React from "react";
 import { CWLButton } from "../common/CWLButton";
 import { CWLTextField } from "../common/CWLTextField";
 
-
 type Props = {
   loginController: LoginController;
 };

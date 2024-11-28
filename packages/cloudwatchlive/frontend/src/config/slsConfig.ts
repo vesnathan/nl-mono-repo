@@ -1,6 +1,7 @@
+import CWLOutputJSON from "cwlbackend/config/cwlSlsOutput.json";
 import { isValidEnv } from "./validEnvs";
 import environment from "./masterConfig";
-import CWLOutputJSON from "../../../backend/config/cwlSlsOutput.json";
+
 type CWLOutput = {
   cwlUserPoolId: string;
   cwlUserPoolClientId: string;
@@ -20,6 +21,7 @@ export function getSlsOutput<T extends keyof SlsOutputMap>(
   }
 
   type SlsOutput = SlsOutputMap[T];
+  // eslint-disable-next-line sonarjs/no-small-switch
   switch (outputType) {
     case "CWL": {
       const slsOutput: CWLOutput = CWLOutputJSON[environment];

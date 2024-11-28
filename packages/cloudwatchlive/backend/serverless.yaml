@@ -24,6 +24,7 @@ provider:
     STAGE: ${opt:stage}
 
     cwlUserPoolId: !ImportValue cwlUserPoolId-${opt:stage}
+    cwlUserTableArn: !ImportValue cwlUserTableArn-${opt:stage}
     cwlDataTableName: !Ref cwlDataTable
 
     # used in postFrontendDeployHandler
@@ -33,6 +34,7 @@ provider:
 
 outputs:
   cwlDataTableName: !Ref cwlDataTable
+  cwlUserTableArn: !ImportValue cwlUserTableArn-${opt:stage}
   cwlIdentityPoolId: !Ref CWLIdentityPool
   cwlGraphQLUrl: !GetAtt GraphQlApi.GraphQLUrl
   cwlCloudFrontDomainName: !GetAtt CWLCloudFrontDistribution.DomainName

@@ -22,7 +22,6 @@ const useMessageStore = create<MessageStore>((set) => ({
 export const useSetGlobalMessage = () =>
   useMessageStore((state) => state.setMessage);
 
-
 export const GlobalMessage: React.FC = () => {
   const globalMessage = useMessageStore((state) => state.message);
   const setGlobalMessage = useSetGlobalMessage();

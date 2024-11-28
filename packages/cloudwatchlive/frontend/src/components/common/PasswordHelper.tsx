@@ -1,6 +1,6 @@
 import React from "react";
 import TinyTickSvgComponent from "@/components/icons/TinyTickSvgComponent";
-import { ValidatePWResult } from "../../functions/cwlAuthValidatePassword";
+import { ValidatePWResult } from "shared/functions/cwlAuthValidatePassword";
 
 interface PasswordHelperProps {
   validateResult: ValidatePWResult;

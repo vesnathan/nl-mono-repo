@@ -60,8 +60,6 @@ export function useGraphqlMutation<TData, TVariables>(
     },
     onSettled: options.onSettled,
     onError: (error, variables) => {
-      // console error so we can debug with Sentry's replay session
-      console.error("Mutation error", { error, variables });
 
       const parseGraphQLError = (): GraphQLError | null => {
         const parseResult = graphqlErrorSchema.safeParse(error);

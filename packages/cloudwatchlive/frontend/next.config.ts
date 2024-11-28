@@ -2,20 +2,18 @@
 
 const nextConfig = {
   env: {
-      NEXT_PUBLIC_ENVIRONMENT: process.env.NEXT_PUBLIC_ENVIRONMENT,
+    NEXT_PUBLIC_ENVIRONMENT: process.env.NEXT_PUBLIC_ENVIRONMENT,
   },
   compiler: {
-      styledComponents: true,
+    styledComponents: true,
   },
-  output: 'export',
+  output: "export",
   images: {
-      unoptimized: true
+    unoptimized: true,
   },
   transpilePackages: ["cloudwatchlive"],
-  pageExtensions: ['tsx'],
+  pageExtensions: ["tsx", "mdx"],
   // needed to make the url works on cloudfront
-  trailingSlash: true
-}
-;
-
+  trailingSlash: true,
+};
 export default nextConfig;

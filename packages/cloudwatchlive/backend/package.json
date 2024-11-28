@@ -20,7 +20,8 @@
     "serverless-iam-roles-per-function": "3.2.0",
     "serverless-prune-plugin": "2.0.2",
     "serverless-s3-sync": "3.1.0",
-    "shared": "*"
+    "shared": "*",
+    "shared-aws-assets": "*"
   },
   "scripts": {
     "build-gql": "ts-node ./scripts/buildGql.ts",

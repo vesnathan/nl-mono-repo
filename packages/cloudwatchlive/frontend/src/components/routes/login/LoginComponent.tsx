@@ -1,14 +1,13 @@
 import { DEFAULT_REDIRECT_PATH } from "@/constants/layout/navigation/navigation";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { LoginForm } from "../authForms/LoginForm";
 import { useLoginController } from "@/hooks/useLoginController";
-import { NewPasswordForm } from "../authForms/NewPasswordForm";
-import { TOTPForm } from "../authForms/TOTPForm";
-import { ForgotPasswordEmailForm } from "../authForms/ForgotPasswordEmailForm";
-import { ForgotPasswordResetCodeForm } from "../authForms/ForgotPasswordResetCodeForm";
 import { exhaustiveCheck } from "@/utils/typeUtils";
-
+import { LoginForm } from "../../authForms/LoginForm";
+import { NewPasswordForm } from "../../authForms/NewPasswordForm";
+import { TOTPForm } from "../../authForms/TOTPForm";
+import { ForgotPasswordEmailForm } from "../../authForms/ForgotPasswordEmailForm";
+import { ForgotPasswordResetCodeForm } from "../../authForms/ForgotPasswordResetCodeForm";
 
 const LoginComponent = () => {
   const router = useRouter();
@@ -18,7 +17,6 @@ const LoginComponent = () => {
     },
     captureUnknownError: (err: unknown) => {
       console.error(err);
-    
     },
   });
   const { activeStep, setActiveStep } = loginController;
@@ -26,11 +24,7 @@ const LoginComponent = () => {
   const renderForm = () => {
     switch (activeStep) {
       case "login-enter-credentials":
-        return (
-          <LoginForm
-            loginController={loginController}
-          />
-        );
+        return <LoginForm loginController={loginController} />;
       case "login-enter-TOTP-code":
         return <TOTPForm loginController={loginController} />;
       case "login-enter-new-password":

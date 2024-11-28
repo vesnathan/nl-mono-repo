@@ -12,10 +12,17 @@ schema:
   - ../../wcl-types/graphql/**/*.graphql
 
 resolvers:
+  Query.getCWLUser:
+    dataSource: cwlUserTable
+    kind: UNIT
+    code: ./resources/AppSync/resolvers/users/Queries/Query.getCWLUser.ts
+    
+
   Query.getCWLDataForUser:
     dataSource: cwlDataTable
     kind: UNIT
     code: ./resources/AppSync/resolvers/users/Queries/Query.getCWLDataForUser.ts
+
   Mutation.associateSoftwareToken:
     kind: UNIT
     dataSource:
@@ -132,4 +139,9 @@ dataSources:
     type: AMAZON_DYNAMODB
     config:
       tableName: !Ref cwlDataTable
+  cwlUserTable:
+    type: AMAZON_DYNAMODB
+    config:
+      tableName: !ImportValue cwlUserTableArn-${opt:stage}
+
 

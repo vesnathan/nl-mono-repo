@@ -23,7 +23,7 @@ export function request(ctx: CTX) {
   const identity = ctx.identity as AppSyncIdentityCognito;
   if (identity.username !== userId && !isAdminUserGroup(identity)) {
     return util.error(
-      "User is not allowed to retrieve pfh data of a different user",
+      "User is not allowed to retrieve data of a different user",
       "Unauthorized",
     );
   }

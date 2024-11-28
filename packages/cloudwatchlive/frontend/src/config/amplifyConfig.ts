@@ -1,5 +1,5 @@
 import type { ResourcesConfig } from "aws-amplify";
-import { getSlsOutput } from "./config/slsConfig";
+import { getSlsOutput } from "./slsConfig";
 
 const SLS_OUTPUT = getSlsOutput("CWL");
 const AWS_REGION = "ap-southeast-2";

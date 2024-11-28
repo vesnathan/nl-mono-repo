@@ -1,11 +1,10 @@
 import React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSetGlobalMessage } from "@/components/common/GlobalMessage";
-import { cwlAuthConfirmResetPassword } from "@/functions/cwlAuthConfirmResetPassword";
-import { cwlAuthConfirmSignIn } from "@/functions/cwlAuthConfirmSignIn";
-import { cwlAuthResetPassword } from "@/functions/cwlAuthResetPassword";
-import { cwlAuthSignIn } from "@/functions/cwlAuthSignIn";
-
+import { cwlAuthConfirmResetPassword } from "shared/functions/cwlAuthConfirmResetPassword";
+import { cwlAuthConfirmSignIn } from "shared/functions/cwlAuthConfirmSignIn";
+import { cwlAuthResetPassword } from "shared/functions/cwlAuthResetPassword";
+import { cwlAuthSignIn } from "shared/functions/cwlAuthSignIn";
 
 export const useLoginController = (options: {
   onLoginSuccess: () => void;
@@ -47,7 +46,6 @@ export const useLoginController = (options: {
       onNewPasswordRequired?: () => void;
       onTOTPRequired?: () => void;
     }) => {
-      console.log("here")
       // remove all query to ensure no stale data
       // in case user logout and then login to a different account
       queryClient.removeQueries({
@@ -83,7 +81,6 @@ export const useLoginController = (options: {
       challengeResponse: string;
       challengeType: "newpassword" | "TOTP";
     }) => {
-      console.log("here")
       const { challengeResponse, challengeType } = input;
       setErrorMessage("");
       await cwlAuthConfirmSignIn({
@@ -153,6 +150,11 @@ export const useLoginController = (options: {
           });
           input.onSuccess();
         },
+
+        onLimitExceeded: () =>
+          setErrorMessage(
+            "You have exceeded the number of attempts to reset your password. Please try again later.",
+          ),
         onCodeExpired: () => setErrorMessage("Your code has been expired"),
         onInvalidCode: () => setErrorMessage("Invalid password reset code"),
         onUnhandledError: (err) => {

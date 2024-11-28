@@ -1,10 +1,9 @@
 import { LoginController } from "@/hooks/useLoginController";
 import { Divider } from "@nextui-org/react";
 import React from "react";
+import { REGEX } from "@/constants/layout/navigation/RegEx";
 import { CWLButton } from "../common/CWLButton";
 import { CWLTextField } from "../common/CWLTextField";
-import { REGEX } from "@/constants/layout/navigation/RegEx";
-
 
 type Props = {
   loginController: LoginController;
@@ -55,7 +54,6 @@ export const ForgotPasswordEmailForm: React.FC<Props> = ({
         <div className="flex flex-col gap-2.5">
           <CWLTextField
             label="Email Address"
-            testId="forgot-password-email-input"
             value={forgetPWEmail}
             onClear={() => setForgetPWEmail("")}
             onChange={(e) => setForgetPWEmail(e.target.value)}

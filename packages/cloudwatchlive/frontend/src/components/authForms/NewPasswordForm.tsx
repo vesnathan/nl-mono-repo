@@ -1,11 +1,10 @@
 import React from "react";
 import { Divider } from "@nextui-org/react";
 import { LoginController } from "@/hooks/useLoginController";
+import { cwlAuthValidatePassword } from "shared/functions/cwlAuthValidatePassword";
 import { CWLButton } from "../common/CWLButton";
 import { CWLTextField } from "../common/CWLTextField";
-import { cwlAuthValidatePassword } from "@/functions/cwlAuthValidatePassword";
 import PasswordHelper from "../common/PasswordHelper";
-
 
 type Props = {
   loginController: LoginController;
@@ -51,12 +50,7 @@ export const NewPasswordForm: React.FC<Props> = ({
   };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        submitHandler();
-      }}
-    >
+    <>
       <div className="px-6 pb-6">
         <div className="my-4">
           <div className="text-neutral-900 text-heading06 font-bold text-left">
@@ -72,7 +66,6 @@ export const NewPasswordForm: React.FC<Props> = ({
             New Password
           </span>
           <CWLTextField
-            testId="new-password-input"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="Enter your new password"
@@ -82,7 +75,6 @@ export const NewPasswordForm: React.FC<Props> = ({
             Confirm Password
           </span>
           <CWLTextField
-            testId="confirm-new-password-input"
             value={confirmNewPassword}
             onChange={(e) => setConfirmNewPassword(e.target.value)}
             placeholder="Enter your password again"
@@ -100,9 +92,10 @@ export const NewPasswordForm: React.FC<Props> = ({
             buttonText="Submit"
             additionalClassName="h-[40px] w-full"
             isDisabled={buttonDisabled}
+            onClick={() => submitHandler()}
           />
         </div>
       </div>
-    </form>
+    </>
   );
 };

@@ -1,6 +1,5 @@
-import { Button } from "@nextui-org/react";
+import { Button, cn } from "@nextui-org/react";
 import React from "react";
-import { cn } from "@nextui-org/react"
 
 export const CWLButtonColors = [
   "primary",
@@ -37,7 +36,7 @@ export const CWLButton: React.FC<CWLButtonProps> = ({
   const buttonClassName = React.useMemo<string>(() => {
     if (isDisabled) {
       return cn(
-        "bg-neutral-0",
+        "bg-neutral-50",
         "border-neutral-100",
         "font-semibold",
         "text-neutral-200",
@@ -46,14 +45,14 @@ export const CWLButton: React.FC<CWLButtonProps> = ({
     }
 
     const primaryColor = cn(
-      "bg-primary-500",
-      "border-primary-500",
+      "bg-primary-400",
+      "border-primary-400",
       "text-white",
-      "hover:bg-primary-400",
-      "hover:border-primary-400",
-      "active:bg-primary-0",
+      "hover:bg-primary-500",
+      "hover:border-primary-500",
+      "active:bg-primary-300",
       "active:border-primary-300",
-      "active:text-primary-400",
+      "active:text-primary-500",
     );
     if (color === "primary") {
       return primaryColor;
@@ -90,11 +89,7 @@ export const CWLButton: React.FC<CWLButtonProps> = ({
       size={size || "sm"}
       variant="ghost"
       radius="sm"
-      className={cn(
-        "rounded-[6px]",
-        buttonClassName,
-        additionalClassName,
-      )}
+      className={cn("rounded-[6px]", buttonClassName, additionalClassName)}
       onClick={onClick}
       disabled={isDisabled}
       startContent={frontIcon}

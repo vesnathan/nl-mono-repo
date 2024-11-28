@@ -1,4 +1,4 @@
-import { cwlAuthSignOut } from "@/functions/cwlAuthSignOut";
+import { cwlAuthSignOut } from "shared/functions/cwlAuthSignOut";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { LOGIN_PATH } from "@/constants/layout/navigation/navigation";

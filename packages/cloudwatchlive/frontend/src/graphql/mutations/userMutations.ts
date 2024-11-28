@@ -1,3 +1,4 @@
+import { GraphQLResult, generateClient } from "aws-amplify/api";
 import {
   registerClientUserUnauthMutation,
   registerClientUserUnauthMutationVariables,
@@ -10,7 +11,6 @@ import {
   verifySoftwareTokenMutation,
   verifySoftwareTokenMutationVariables,
 } from "../gqlTypes";
-import { GraphQLResult, generateClient } from "aws-amplify/api";
 
 const client = generateClient();
 
@@ -26,13 +26,11 @@ const registerClientUserUnauthMutationStr = `
 export const registerClientUserUnauthMutationFn = async (options: {
   variables: registerClientUserUnauthMutationVariables;
 }) => {
-
-    return client.graphql({
-      query: registerClientUserUnauthMutationStr,
-      variables: options.variables,
-      authMode: "iam",
-    }) as Promise<GraphQLResult<registerClientUserUnauthMutation>>;
-  
+  return client.graphql({
+    query: registerClientUserUnauthMutationStr,
+    variables: options.variables,
+    authMode: "iam",
+  }) as Promise<GraphQLResult<registerClientUserUnauthMutation>>;
 };
 
 // ------------------- update user data----------------
@@ -48,13 +46,11 @@ const updateMyCWLUserDataMutationStr = `
 export const updateMyCWLUserDataMutationFn = async (options: {
   variables: updateMyCWLUserDataMutationVariables;
 }) => {
-
-    return client.graphql({
-      query: updateMyCWLUserDataMutationStr,
-      variables: options.variables,
-      authMode: "userPool",
-    }) as Promise<GraphQLResult<updateMyCWLUserDataMutation>>;
-  
+  return client.graphql({
+    query: updateMyCWLUserDataMutationStr,
+    variables: options.variables,
+    authMode: "userPool",
+  }) as Promise<GraphQLResult<updateMyCWLUserDataMutation>>;
 };
 
 const adminSetUserMFAPreferenceMutationStr = `
@@ -68,13 +64,11 @@ const adminSetUserMFAPreferenceMutationStr = `
 export const adminSetUserMFAPreferenceMutationFn = async (options: {
   variables: adminSetUserMFAPreferenceMutationVariables;
 }) => {
-
-    return client.graphql({
-      query: adminSetUserMFAPreferenceMutationStr,
-      variables: options.variables,
-      authMode: "userPool",
-    }) as Promise<GraphQLResult<adminSetUserMFAPreferenceMutation>>;
-  
+  return client.graphql({
+    query: adminSetUserMFAPreferenceMutationStr,
+    variables: options.variables,
+    authMode: "userPool",
+  }) as Promise<GraphQLResult<adminSetUserMFAPreferenceMutation>>;
 };
 
 const associateSoftwareTokenMutationStr = `
@@ -88,13 +82,11 @@ const associateSoftwareTokenMutationStr = `
 export const associateSoftwareTokenMutationFn = async (options: {
   variables: associateSoftwareTokenMutationVariables;
 }) => {
-
-    return client.graphql({
-      query: associateSoftwareTokenMutationStr,
-      variables: options.variables,
-      authMode: "userPool",
-    }) as Promise<GraphQLResult<associateSoftwareTokenMutation>>;
-  
+  return client.graphql({
+    query: associateSoftwareTokenMutationStr,
+    variables: options.variables,
+    authMode: "userPool",
+  }) as Promise<GraphQLResult<associateSoftwareTokenMutation>>;
 };
 
 const verifySoftwareTokenMutationStr = `
@@ -108,11 +100,9 @@ const verifySoftwareTokenMutationStr = `
 export const verifySoftwareTokenMutationFn = async (options: {
   variables: verifySoftwareTokenMutationVariables;
 }) => {
-  
-    return client.graphql({
-      query: verifySoftwareTokenMutationStr,
-      variables: options.variables,
-      authMode: "userPool",
-    }) as Promise<GraphQLResult<verifySoftwareTokenMutation>>;
-  
+  return client.graphql({
+    query: verifySoftwareTokenMutationStr,
+    variables: options.variables,
+    authMode: "userPool",
+  }) as Promise<GraphQLResult<verifySoftwareTokenMutation>>;
 };

@@ -1,23 +1,16 @@
 /* eslint-disable react/no-unstable-nested-components */
-import React, { PropsWithChildren } from "react";
+import React from "react";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { useEffectOnce } from "@/hooks/useEffectOnce";
 import { CWLButton } from "@/components/common/CWLButton";
 
-type ExtraProps = {
-  tags?: Record<string, string | number | boolean | null | undefined>;
-  componentName: string;
-};
-
-const ErrorBoundaryFallback: React.FC<FallbackProps & ExtraProps> = ({
+const ErrorBoundaryFallback: React.FC<FallbackProps> = ({
   error,
   resetErrorBoundary,
 }) => {
   useEffectOnce(() => {
     // eslint-disable-next-line no-console
     console.error(error);
-
-    
   });
   return (
     <div className="bg-error-500 p-2 shadow-md text-center">
@@ -27,22 +20,12 @@ const ErrorBoundaryFallback: React.FC<FallbackProps & ExtraProps> = ({
   );
 };
 
-type Props = PropsWithChildren<ExtraProps>;
-export const CWLErrorBoundary: React.FC<Props> = ({
-  tags,
-  componentName,
-  children,
-}) => {
+type Props = React.PropsWithChildren<object>;
+export const CWLErrorBoundary: React.FC<Props> = ({ children }) => {
   return (
     <ErrorBoundary
       fallbackRender={(fallbackProps) => {
-        return (
-          <ErrorBoundaryFallback
-            {...fallbackProps}
-            tags={tags}
-            componentName={componentName}
-          />
-        );
+        return <ErrorBoundaryFallback {...fallbackProps} />;
       }}
     >
       {children}

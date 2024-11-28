@@ -3,7 +3,8 @@
     "cwlUserPoolId": "ap-southeast-2_laW5LjkC0",
     "cwlUserPoolClientId": "kmajlc5ep46n07g6n461eb09m",
     "cwlIdentityPoolId": "ap-southeast-2:e166dc3e-f501-425c-93b1-ba0d68041eef",
-    "cwlGraphQLUrl": "https://xipfn7jjo5a3je6dvechfqciem.appsync-api.ap-southeast-2.amazonaws.com/graphql"
+    "cwlGraphQLUrl": "https://xipfn7jjo5a3je6dvechfqciem.appsync-api.ap-southeast-2.amazonaws.com/graphql",
+    "cwlUserTableArn": "arn:aws:dynamodb:ap-southeast-2:430118819356:table/aws-shared-resources-nldev-cwlUserTable-TCO2CIIKRW6R"
   },
   "staging": {
     "cwlUserPoolId": "ap-southeast-2_h0RcZ6354",

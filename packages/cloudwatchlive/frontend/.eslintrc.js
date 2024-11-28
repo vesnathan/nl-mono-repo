@@ -38,6 +38,7 @@ module.exports = {
     "plugin:sonarjs/recommended",
     "plugin:security/recommended",
     "plugin:react-hooks/recommended",
+    "next/typescript",
   ],
   ignorePatterns: [
     "lint-staged.config.js",

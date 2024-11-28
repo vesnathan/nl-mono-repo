@@ -9,15 +9,16 @@ const tailwindConfig = {
   screens: {
     xs: "0px",
   },
-  theme: {
-    extend: {
-      gridTemplateColumns: CWLTailwindTheme.gridTemplateColumns,
-      fontSize: CWLTailwindTheme.fontSize,
-      fontWeight: CWLTailwindTheme.fontWeight,
-      colors: CWLTailwindTheme.colors, // Explicitly extend colors
-    },
-  },
+  // theme: {
+  //   extend: {
+  //     gridTemplateColumns: CWLTailwindTheme.gridTemplateColumns,
+  //     fontSize: CWLTailwindTheme.fontSize,
+  //     fontWeight: CWLTailwindTheme.fontWeight,
+  //     colors: CWLTailwindTheme.colors, // Explicitly extend colors
+  //   },
+  // },
   plugins: [
+    require('daisyui'),
     nextui({
       themes: {
         dark: {
