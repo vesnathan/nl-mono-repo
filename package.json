@@ -13,7 +13,8 @@
     "global": "^4.4.0",
     "graphql": "^16.9.0",
     "knip": "^5.37.2",
-    "serverless": "3"
+    "serverless": "3",
+    "@aws-sdk/client-cognito-identity-provider": "3.669.0"
   },
   "devDependencies": {
     "@aws-amplify/cli": "12.10.1",

@@ -31,6 +31,20 @@ export const mainNavConfig = {
       return <Icon icon="clarity:calendar-line" />;
     },
   },
+  clients: {
+    title: "Clients",
+    path: "/clients",
+    icon: () => {
+      return <Icon icon="clarity:users-line" />;
+    },
+  },
+  logout: {
+    title: "Log out",
+    path: "/logout",
+    icon: () => {
+      return <Icon icon="clarity:logout-line" />;
+    },
+  },
 } as const satisfies SidebarItems;
 
 export const DEFAULT_REDIRECT_PATH = mainNavConfig.dashboard.path;

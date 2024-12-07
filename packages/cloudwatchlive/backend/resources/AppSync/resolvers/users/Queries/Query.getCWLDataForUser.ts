@@ -1,5 +1,5 @@
 import { AttributeValue } from "@aws-sdk/client-dynamodb";
-import { isAdminUserGroup } from "../../../../../../../shared/functions/cognitoUserGroup";
+import { isSuperAdminUserGroup } from "shared/functions/userGroup";
 import { CWLDataItem, Query, QueryToGetCWLDataForUserArgs } from "../../gqlTypes";
 import {
   util,
@@ -21,7 +21,7 @@ export function request(ctx: CTX) {
   }
 
   const identity = ctx.identity as AppSyncIdentityCognito;
-  if (identity.username !== userId && !isAdminUserGroup(identity)) {
+  if (identity.username !== userId && !isSuperAdminUserGroup(identity)) {
     return util.error(
       "User is not allowed to retrieve data of a different user",
       "Unauthorized",

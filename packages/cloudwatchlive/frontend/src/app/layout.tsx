@@ -8,39 +8,31 @@ import { ReactNode } from "react";
 import { Amplify } from "aws-amplify";
 import { NextUIProvider } from "@nextui-org/react";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-import { AMPLIFY_CONFIG } from "../config/amplifyConfig";
 import { useLogoutFn } from "@/hooks/useLogoutFn";
+import { AMPLIFY_CONFIG } from "../config/amplifyConfig";
 
 const metadata = {
   title: "Cloud Watch Live",
   description: "Live Conference Streaming Software",
 };
 
-const renderMainLayoutContent = (children: ReactNode) => {
-  return (
-    <div>
-      <main>{children}</main>
-    </div>
-  );
-};
-
 Amplify.configure(AMPLIFY_CONFIG);
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-
-  const protectedContent = (
-    <RequireAuth>
-      <RequireMFA>{renderMainLayoutContent(children)}</RequireMFA>
-    </RequireAuth>
-  );
-
   const handleLogout = useLogoutFn();
 
+  // Handle session timeout globally
   useSessionTimeout({
-    timeoutDurationMS: 24 * 60 * 60 * 1000,
+    timeoutDurationMS: 24 * 60 * 60 * 1000, // 24 hours
     handleLogout,
   });
+
+  const isProtectedPage =
+    pathname !== "/login" &&
+    pathname !== "/login/" &&
+    pathname !== "/logout" &&
+    pathname !== "/logout/";
 
   return (
     <html lang="en" data-theme="lemonade">
@@ -62,9 +54,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           }
         >
           <NextUIProvider>
-            {pathname === "/login/" || pathname === "/login"
-              ? renderMainLayoutContent(children)
-              : protectedContent}
+            {!isProtectedPage ? (
+              <div>
+                <main>{children}</main>
+              </div>
+            ) : (
+              <RequireAuth>
+                <RequireMFA>
+                  <main>{children}</main>
+                </RequireMFA>
+              </RequireAuth>
+            )}
           </NextUIProvider>
         </QueryClientProvider>
       </body>

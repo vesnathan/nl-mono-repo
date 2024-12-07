@@ -1,10 +1,10 @@
 {
   "nldev": {
-    "cwlUserPoolId": "ap-southeast-2_laW5LjkC0",
-    "cwlUserPoolClientId": "kmajlc5ep46n07g6n461eb09m",
-    "cwlIdentityPoolId": "ap-southeast-2:e166dc3e-f501-425c-93b1-ba0d68041eef",
-    "cwlGraphQLUrl": "https://xipfn7jjo5a3je6dvechfqciem.appsync-api.ap-southeast-2.amazonaws.com/graphql",
-    "cwlUserTableArn": "arn:aws:dynamodb:ap-southeast-2:430118819356:table/aws-shared-resources-nldev-cwlUserTable-TCO2CIIKRW6R"
+    "cwlUserPoolId": "ap-southeast-2_jM7s6qrWK",
+    "cwlUserPoolClientId": "41ggao3fqrh747nvcr3rookklv",
+    "cwlIdentityPoolId": "ap-southeast-2:801bae16-2134-4e6e-8346-d3910de988b5",
+    "cwlGraphQLUrl": "https://sip5o5g64bf2powrmmxsa4pmni.appsync-api.ap-southeast-2.amazonaws.com/graphql",
+    "cwlUserTableArn": "arn:aws:dynamodb:ap-southeast-2:430118819356:table/aws-shared-resources-nldev-cwlUserTable-AKRLI4QZOX8Q"
   },
   "staging": {
     "cwlUserPoolId": "ap-southeast-2_h0RcZ6354",

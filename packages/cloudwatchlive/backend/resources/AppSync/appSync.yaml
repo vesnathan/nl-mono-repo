@@ -29,6 +29,7 @@ resolvers:
       type: AWS_LAMBDA
       config:
         function:
+          timeout: 900
           # add customized name since default name is over limit of 64 character
           name: cwl-${opt:stage}-mutation-Mutation_associateSoftwareToken
           handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_associateSoftwareToken.handler"

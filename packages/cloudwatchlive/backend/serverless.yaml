@@ -15,9 +15,8 @@ provider:
     securityGroupIds:
       - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
     subnetIds:
-      - subnet-0419dfd8897b83f8f
-      - subnet-02df704b4191ede01
-      - subnet-0e9d1073a877caa27
+      - !ImportValue sharedSubnet1-${opt:stage}
+      - !ImportValue sharedSubnet2-${opt:stage}
 
   environment:
     USER_FILES_BUCKET_NAME: cwl-user-files-${opt:stage}

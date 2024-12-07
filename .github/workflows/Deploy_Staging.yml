@@ -43,7 +43,7 @@ jobs:
           yarn playwright install 
           yarn letterbin
           STAGE=staging yarn test:e2e
-        working-directory: packages/personal-financial-health/frontend
+        working-directory: packages/cloudwatchlive/frontend
         env:
           CWL_DEFAULT_PASSWORD: ${{ secrets.CWL_DEFAULT_PASSWORD || 'default_password' }}
           CWL_RESET_PW_NEW: ${{ secrets.CWL_RESET_PW_NEW }}

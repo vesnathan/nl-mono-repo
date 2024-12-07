@@ -1,6 +1,77 @@
 Resources:
+  SharedVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: shared-vpc
+  SharedSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref SharedVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: shared-subnet-1
+
+  SharedSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref SharedVPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: shared-subnet-2
+
+  SharedInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: shared-igw
+
+  SharedVPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref SharedVPC
+      InternetGatewayId: !Ref SharedInternetGateway
+
+  SharedRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref SharedVPC
+      Tags:
+        - Key: Name
+          Value: shared-route-table
+
+  SharedRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref SharedRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref SharedInternetGateway
+
+  SharedSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SharedSubnet1
+      RouteTableId: !Ref SharedRouteTable
+
+  SharedSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SharedSubnet2
+      RouteTableId: !Ref SharedRouteTable
+         
   cwlSecurityGroupFromSharedVPC:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId: vpc-068e93923337a96e7
+      VpcId: !Ref SharedVPC
       GroupDescription: "Security group for shared cwlVPC"

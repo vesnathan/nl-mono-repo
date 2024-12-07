@@ -34,5 +34,5 @@ jobs:
           yarn build-gql
 
       - name: Build (all)
-        working-directory: packages/personal-financial-health/frontend
+        working-directory: packages/cloudwatchlive/frontend
         run: NEXT_PUBLIC_ENVIRONMENT=staging yarn build

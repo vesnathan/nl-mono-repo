@@ -10,11 +10,17 @@ const cognito = new CognitoIdentityProvider();
 
 export const handler = async (event: any): Promise<OUTPUT> => {
   const { accessToken } = event.arguments as MutationToAssociateSoftwareTokenArgs;
+  console.log("accessToken", accessToken);
   const lambdaEnv = getProcessEnv();
-
-  const response = await cognito.associateSoftwareToken({
-    AccessToken: accessToken,
-  });
-  
-  return { secretCode: response.SecretCode || "" };
+  console.log("cognito", cognito);
+  try {
+    const response = await cognito.associateSoftwareToken({
+      AccessToken: accessToken,
+    });
+    console.log("response", response);
+    return { secretCode: response.SecretCode || "" };
+  } catch (error) {
+    console.error("Error associating software token", error);
+    throw new Error("Failed to associate software token");
+  }
 };

@@ -82,11 +82,14 @@ const associateSoftwareTokenMutationStr = `
 export const associateSoftwareTokenMutationFn = async (options: {
   variables: associateSoftwareTokenMutationVariables;
 }) => {
-  return client.graphql({
+  const returnVal = client.graphql({
     query: associateSoftwareTokenMutationStr,
     variables: options.variables,
     authMode: "userPool",
   }) as Promise<GraphQLResult<associateSoftwareTokenMutation>>;
+  // eslint-disable-next-line no-console
+  console.log("returnValue", returnVal);
+  return returnVal;
 };
 
 const verifySoftwareTokenMutationStr = `

@@ -1,5 +1,5 @@
 import { CognitoIdentityProvider, MessageActionType } from "@aws-sdk/client-cognito-identity-provider";
-import { CognitoUserGroup, CWLUser } from "../../cloudwatchlive/backend/resources/AppSync/resolvers/gqlTypes";
+import { UserGroup, CWLUser } from "../../cloudwatchlive/backend/resources/AppSync/resolvers/gqlTypes";
 import { generatePassword } from "./generatePassword";
 import { SERVER_ERROR_CODE } from "shared/constants/serverErrorCode";
 
@@ -12,7 +12,7 @@ type CreateCWLUserInput = {
 const cognito = new CognitoIdentityProvider();
 export const addUserToCognito = async (input: {
   createCWLUserInput: CreateCWLUserInput;
-  cognitoGroups: CognitoUserGroup[];
+  cognitoGroups: UserGroup[];
   UserPoolId: string;
   CognitoMessageAction: MessageActionType | undefined
 }): Promise<CWLUser> => {

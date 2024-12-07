@@ -15,9 +15,8 @@ provider:
     securityGroupIds:
       - !GetAtt cwlSecurityGroupFromSharedVPC.GroupId
     subnetIds:
-      - subnet-0419dfd8897b83f8f
-      - subnet-02df704b4191ede01
-      - subnet-0e9d1073a877caa27
+      - !ImportValue sharedSubnet1-${opt:stage}
+      - !ImportValue sharedSubnet2-${opt:stage}
   environment:
     STAGE: ${opt:stage}
 
@@ -88,4 +87,14 @@ resources:
         Value: !GetAtt APPSYNCWAF.Arn
         Export:
           Name: AppsyncWAFArn-${opt:stage}
+
+      SharedSubnet1Id:
+        Value: !Ref SharedSubnet1
+        Export:
+          Name: sharedSubnet1-${opt:stage}
+          
+      SharedSubnet2Id:
+        Value: !Ref SharedSubnet2
+        Export:
+          Name: sharedSubnet2-${opt:stage}
 

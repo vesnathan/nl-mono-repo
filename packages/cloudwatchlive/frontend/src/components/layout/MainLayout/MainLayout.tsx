@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { PropsWithChildren } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@nextui-org/react";
 import { CWLErrorBoundary } from "@/components/common/ErrorBoundary";
+import { mainNavConfig } from "@/constants/layout/navigation/navigation";
 import {
   MainLayoutSidebar,
   SidebarItems,
@@ -11,34 +12,30 @@ import {
 } from "./MainLayoutSidebar";
 import Header from "./Header/Header";
 
-export interface MainLayoutProps {
-  // sidebar props
-  mainNavItems: SidebarItems;
-
-  // content props
-  children: React.ReactNode;
-
-  // style override
+export interface MainLayoutProps extends PropsWithChildren {
+  sidebarConfig?: SidebarItems;
   classNames?: {
     mainContainer?: string;
     contentWrapper?: string;
   };
 }
 
-export const MainLayout = ({
-  // sidebar
-  mainNavItems,
-
-  // content
+export const MainLayout: React.FC<MainLayoutProps> = ({
+  sidebarConfig,
   children,
-
-  // style override
   classNames,
-}: MainLayoutProps) => {
+}) => {
   const sidebarWidth = useSidebarWidth();
   const xOffset = sidebarWidth;
   const pathname = usePathname();
-  const activeSidebarItem = Object.values(mainNavItems).find((item) => {
+
+  const getVisibleSidebarItems = (): SidebarItems => {
+    return sidebarConfig || mainNavConfig;
+  };
+
+  const visibleSidebarItems = getVisibleSidebarItems();
+
+  const activeSidebarItem = Object.values(visibleSidebarItems).find((item) => {
     return pathname.startsWith(item.path);
   });
 
@@ -46,7 +43,7 @@ export const MainLayout = ({
     <>
       <div>
         <MainLayoutSidebar
-          items={mainNavItems}
+          items={visibleSidebarItems}
           activeSidebarItem={activeSidebarItem}
         />
       </div>
@@ -67,13 +64,12 @@ export const MainLayout = ({
         <div
           className={cn(
             "relative grow",
-
             `
-                p-0
-                md:p-5
-                lg:p-6
-                xl:p-10
-              `,
+              p-0
+              md:p-5
+              lg:p-6
+              xl:p-10
+            `,
             classNames?.contentWrapper,
           )}
         >
@@ -83,3 +79,5 @@ export const MainLayout = ({
     </>
   );
 };
+
+export default MainLayout;

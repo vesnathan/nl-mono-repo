@@ -8,6 +8,7 @@ const createDefaultCWLUser = (): CWLUser => ({
   userFirstName: "",
   userLastName: "",
   userCreated: "",
+  userGroups: [],
 });
 
 // --------------------user store-----------

@@ -124,10 +124,14 @@ type CWLDataItem @aws_cognito_user_pools {
 
 
 
-enum CognitoUserGroup {
-  Client
-  Admin
-  Adviser
+enum UserGroup {
+  SuperAdmin
+  EventCompanyAdmin
+  EventCompanyStaff
+  TechCompanyAdmin
+  TechCompanyStaff
+  RegisteredAtendee
+  UnregisteredAttendee
 }
 
 type CWLUser @aws_cognito_user_pools {
@@ -143,7 +147,7 @@ type CWLUser @aws_cognito_user_pools {
   userProfilePicture: S3FileLocation
   userCreated: String!
   organizationId: String
-
+  userGroups: [UserGroup]
 }
 type S3FileLocation {
   Bucket: String!

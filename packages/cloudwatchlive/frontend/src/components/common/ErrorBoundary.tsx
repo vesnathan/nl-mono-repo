@@ -13,7 +13,7 @@ const ErrorBoundaryFallback: React.FC<FallbackProps> = ({
     console.error(error);
   });
   return (
-    <div className="bg-error-500 p-2 shadow-md text-center">
+    <div className="bg-red-500 p-2 shadow-md text-center">
       <span className="text-white">An unexpected error has occurred</span>
       <CWLButton buttonText="Retry" onClick={resetErrorBoundary} />
     </div>

@@ -1,5 +1,4 @@
 import { nextui } from "@nextui-org/react";
-import { CWLTailwindTheme } from "./src/config/CWLTailwindTheme";
 
 const tailwindConfig = {
   content: [
@@ -9,16 +8,7 @@ const tailwindConfig = {
   screens: {
     xs: "0px",
   },
-  // theme: {
-  //   extend: {
-  //     gridTemplateColumns: CWLTailwindTheme.gridTemplateColumns,
-  //     fontSize: CWLTailwindTheme.fontSize,
-  //     fontWeight: CWLTailwindTheme.fontWeight,
-  //     colors: CWLTailwindTheme.colors, // Explicitly extend colors
-  //   },
-  // },
   plugins: [
-    require('daisyui'),
     nextui({
       themes: {
         dark: {
