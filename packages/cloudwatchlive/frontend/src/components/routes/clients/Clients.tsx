@@ -1,3 +1,5 @@
+"use client";
+
 import { CWLButton } from "@/components/common/CWLButton";
 import { UserGroup } from "@/graphql/gqlTypes";
 import { useUserStore } from "@/stores/userStore";
