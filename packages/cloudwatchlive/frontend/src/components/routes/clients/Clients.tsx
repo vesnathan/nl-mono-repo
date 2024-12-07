@@ -5,5 +5,8 @@ import { useUserStore } from "@/stores/userStore";
 export const Clients = () => {
   const user = useUserStore((state) => state.user);
   const isSuperAdminUser = user.userGroups?.includes("SuperAdmin" as UserGroup);
+
+  // eslint-disable-next-line no-console
+  console.log("isSuperAdminUser", isSuperAdminUser);
   return <CWLButton buttonText="New client" />;
 };

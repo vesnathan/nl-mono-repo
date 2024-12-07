@@ -1,13 +1,13 @@
 // Duplicate of packages/personal-financial-health/frontend/src/graphql/mutations/fileMutations.ts
 import { GraphQLResult, generateClient } from "aws-amplify/api";
 import {
-  deleteS3ObjectMutation,
-  deleteS3ObjectMutationVariables,
-  generateS3SignedURLMutation,
-  generateS3SignedURLMutationVariables,
-  generateS3UploadURLMutation,
   generateS3UploadURLMutationVariables,
-} from "~graphql/gqlTypes";
+  generateS3UploadURLMutation,
+  generateS3SignedURLMutationVariables,
+  generateS3SignedURLMutation,
+  deleteS3ObjectMutationVariables,
+  deleteS3ObjectMutation,
+} from "../gqlTypes";
 
 const amplifyGqlClient = generateClient();
 

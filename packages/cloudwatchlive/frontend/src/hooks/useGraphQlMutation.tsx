@@ -59,8 +59,7 @@ export function useGraphqlMutation<TData, TVariables>(
       options.onSuccess?.(data, variables);
     },
     onSettled: options.onSettled,
-    onError: (error, variables) => {
-
+    onError: (error) => {
       const parseGraphQLError = (): GraphQLError | null => {
         const parseResult = graphqlErrorSchema.safeParse(error);
         if (parseResult.success) {
