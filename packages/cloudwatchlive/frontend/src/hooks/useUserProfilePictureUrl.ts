@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { generateS3SignedURLMutationFn } from "@/graphql/queries/fileUploadQueries";
 import UserPlaceholder from "../assets/images/user-placeholder.png";
 
-const DEFAULT_IMAGE_URL = UserPlaceholder;
+const DEFAULT_IMAGE_URL = UserPlaceholder.src;
 
 export const useUserProfilePictureUrl = (): string => {
   const { userProfilePicture } = useUserStore((userStore) => userStore.user);
