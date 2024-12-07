@@ -56,6 +56,8 @@
     "knip": "knip",
     "dev-cwl": "cd packages/cloudwatchlive/frontend && yarn dev",
     "build": "lerna run build --stream",
-    "lint": "lerna run lint --stream"
+    "lint": "lerna run lint --stream",
+    "tsc": "lerna run tsc --stream",
+    "test": "lerna run test --stream"
   }
 }
