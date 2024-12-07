@@ -55,6 +55,7 @@
     "deploy-shared": "lerna run deploy --concurrency 1 --stream --scope shared-aws-assets --",
     "knip": "knip",
     "dev-cwl": "cd packages/cloudwatchlive/frontend && yarn dev",
-    "build": "lerna run build --stream"
+    "build": "lerna run build --stream",
+    "lint": "lerna run lint --stream"
   }
 }
