@@ -1,14 +1,7 @@
 import { Button, cn } from "@nextui-org/react";
 import React from "react";
 
-export const CWLButtonColors = [
-  "primary",
-  "secondary",
-  "error",
-  "transparent",
-] as const;
-
-type CWLButtonColor = (typeof CWLButtonColors)[number];
+type CWLButtonColor = "primary" | "secondary" | "error" | "transparent";
 
 type CWLButtonProps = {
   id?: string;
