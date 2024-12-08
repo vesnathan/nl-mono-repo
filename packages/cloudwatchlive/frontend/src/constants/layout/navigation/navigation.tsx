@@ -12,7 +12,7 @@ interface NavItemData {
   renderWrapper?: (node: ReactNode) => ReactNode;
 }
 
-export interface SidebarItems {
+interface SidebarItems {
   [key: string]: NavItemData;
 }
 
