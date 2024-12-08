@@ -42,7 +42,7 @@ const ExtendedNextUIInput = extendVariants(Input, {
   },
 });
 
-export interface CWLTextFieldProps {
+interface CWLTextFieldProps {
   id?: string;
   testId?: string;
   type?: "text" | "number" | "date" | "password" | "time";
