@@ -10,7 +10,7 @@ import ArrowLeftSvg from "../../../assets/images/SVGR/arrowLeftSvg";
 import ArrowRightSvg from "../../../assets/images/SVGR/arrowRightSvg";
 import CWALogo from "../../../assets/images/logo/logo.png";
 
-export interface SubheaderItem {
+interface SubheaderItem {
   label: string;
   tabValue: string | null;
 }

@@ -12,7 +12,7 @@ import {
 } from "./MainLayoutSidebar";
 import Header from "./Header/Header";
 
-export interface MainLayoutProps extends PropsWithChildren {
+interface MainLayoutProps extends PropsWithChildren {
   sidebarConfig?: SidebarItems;
   classNames?: {
     mainContainer?: string;
@@ -20,7 +20,7 @@ export interface MainLayoutProps extends PropsWithChildren {
   };
 }
 
-export const MainLayout: React.FC<MainLayoutProps> = ({
+const MainLayout: React.FC<MainLayoutProps> = ({
   sidebarConfig,
   children,
   classNames,

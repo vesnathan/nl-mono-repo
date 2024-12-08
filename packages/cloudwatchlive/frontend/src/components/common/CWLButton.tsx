@@ -8,9 +8,9 @@ export const CWLButtonColors = [
   "transparent",
 ] as const;
 
-export type CWLButtonColor = (typeof CWLButtonColors)[number];
+type CWLButtonColor = (typeof CWLButtonColors)[number];
 
-export type CWLButtonProps = {
+type CWLButtonProps = {
   id?: string;
   buttonText: React.ReactNode;
   size?: "sm" | "md";
