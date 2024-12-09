@@ -10,6 +10,7 @@ import { NextUIProvider } from "@nextui-org/react";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { useLogoutFn } from "@/hooks/useLogoutFn";
 import { AMPLIFY_CONFIG } from "../config/amplifyConfig";
+import "./globals.css";
 
 const metadata = {
   title: "Cloud Watch Live",
@@ -28,11 +29,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     handleLogout,
   });
 
-  const isProtectedPage =
-    pathname !== "/login" &&
-    pathname !== "/login/" &&
-    pathname !== "/logout" &&
-    pathname !== "/logout/";
+  const isUnprotectedPage =
+    pathname === "/login" ||
+    pathname === "/login/" ||
+    pathname === "/logout" ||
+    pathname === "/logout/";
 
   return (
     <html lang="en" data-theme="lemonade">
@@ -54,10 +55,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           }
         >
           <NextUIProvider>
-            {!isProtectedPage ? (
-              <div>
-                <main>{children}</main>
-              </div>
+            {!isUnprotectedPage ? (
+              <div>{children}</div>
             ) : (
               <RequireAuth>
                 {/* <RequireMFA> */}
