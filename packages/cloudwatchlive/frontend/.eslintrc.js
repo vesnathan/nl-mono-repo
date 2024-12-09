@@ -57,6 +57,7 @@ module.exports = {
     ".next/s",
   ],
   rules: {
+    "camelcase": "off",
     "no-console": ["error", { "allow": ["warn", "error", "info"] }],
     "no-use-before-define": ["error", { variables: false }],
     "sonarjs/prefer-single-boolean-return": "off",

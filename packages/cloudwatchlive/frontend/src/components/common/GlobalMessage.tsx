@@ -1,11 +1,11 @@
 "use client";
 
-import { Alert, AlertColor, Snackbar } from "@mui/material";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { create } from "zustand";
+import { Card, Button } from "@nextui-org/react";
 
 type MessageData = {
-  color: AlertColor;
+  color: "success" | "warning" | "error" | "info";
   content: React.ReactNode;
 };
 
@@ -25,29 +25,62 @@ export const useSetGlobalMessage = () =>
 export const GlobalMessage: React.FC = () => {
   const globalMessage = useMessageStore((state) => state.message);
   const setGlobalMessage = useSetGlobalMessage();
-  const closeMessage = () => setGlobalMessage(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-  if (!globalMessage) {
-    return null;
-  }
+  const closeMessage = () => {
+    setGlobalMessage(null);
+    setIsVisible(false);
+  };
+
+  // eslint-disable-next-line consistent-return
+  useEffect(() => {
+    if (globalMessage) {
+      setIsVisible(true);
+
+      if (globalMessage.color !== "error") {
+        const timeout = setTimeout(closeMessage, 3000);
+        return () => clearTimeout(timeout); // Explicit return for the cleanup function
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [globalMessage]);
+
+  if (!globalMessage || !isVisible) return null;
 
   return (
-    <Snackbar
-      open={!!globalMessage}
-      // if error message keep it there until user close it manually
-      autoHideDuration={globalMessage.color === "error" ? undefined : 3000}
-      onClose={closeMessage}
-      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+    <div
+      style={{
+        position: "fixed",
+        bottom: "16px",
+        left: "16px",
+        zIndex: 9999,
+        maxWidth: "300px",
+      }}
     >
-      <Alert
-        onClose={closeMessage}
-        severity={globalMessage.color}
-        variant="filled"
-        color={globalMessage.color}
-        sx={{ width: "100%" }}
+      <Card
+        style={{
+          backgroundColor:
+            globalMessage.color === "success"
+              ? "#4caf50"
+              : globalMessage.color === "warning"
+                ? "#ff9800"
+                : globalMessage.color === "error"
+                  ? "#f44336"
+                  : "#2196f3",
+          color: "white",
+        }}
       >
-        {globalMessage.content}
-      </Alert>
-    </Snackbar>
+        <div style={{ padding: "16px" }}>
+          <p style={{ margin: 0 }}>{globalMessage.content}</p>
+          <Button
+            size="sm"
+            onClick={closeMessage}
+            style={{ marginTop: "8px", color: "white" }}
+          >
+            Close
+          </Button>
+        </div>
+      </Card>
+    </div>
   );
 };

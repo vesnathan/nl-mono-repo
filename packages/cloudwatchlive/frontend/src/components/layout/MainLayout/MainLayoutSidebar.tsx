@@ -1,11 +1,11 @@
 "use client";
 
 import { useSidebarStore } from "@/stores/sidebarStore";
-import { useMediaQuery } from "@mui/material";
 import { cn } from "@nextui-org/react";
 import { ReactNode, useEffect } from "react";
 import NextLink from "next/link";
 import NextImage from "next/image";
+import { useMediaQuery } from "shared/hooks/useMediaQuery";
 import ArrowLeftSvg from "../../../assets/images/SVGR/arrowLeftSvg";
 import ArrowRightSvg from "../../../assets/images/SVGR/arrowRightSvg";
 import CWALogo from "../../../assets/images/logo/logo.png";

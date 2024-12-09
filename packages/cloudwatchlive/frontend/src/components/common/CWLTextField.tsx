@@ -42,7 +42,7 @@ const ExtendedNextUIInput = extendVariants(Input, {
   },
 });
 
-interface CWLTextFieldProps {
+export interface CWLTextFieldProps {
   id?: string;
   testId?: string;
   type?: "text" | "number" | "date" | "password" | "time";
@@ -203,7 +203,7 @@ export const CWLTextField = React.forwardRef<
         {!!helperText && (
           <span
             className={cn(
-              "text-caption text-neutral-600 font-regular",
+              "text-[10px] text-neutral-600 font-regular",
               "ml-1 mt-1.5",
               isError && "text-error-400",
               classNames?.helperText,
