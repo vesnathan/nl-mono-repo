@@ -10,7 +10,6 @@ import { ForgotPasswordEmailForm } from "../../authForms/ForgotPasswordEmailForm
 import { ForgotPasswordResetCodeForm } from "../../authForms/ForgotPasswordResetCodeForm";
 
 const LoginComponent = () => {
-  console.log("LoginComponent");
   const router = useRouter();
   const loginController = useLoginController({
     onLoginSuccess: () => {

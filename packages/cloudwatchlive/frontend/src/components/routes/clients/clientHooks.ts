@@ -13,7 +13,6 @@ export const useSaveClientMutation = (input: { onSuccess: () => void }) => {
     mutationFn: async (_clientData: CWLClient) => {
       const clientData: CWLClient = { ..._clientData };
 
-
       await saveToDbMutation.mutateAsync({
         fieldUpdates,
         dataSet: "assets",
@@ -21,5 +20,4 @@ export const useSaveClientMutation = (input: { onSuccess: () => void }) => {
       });
     },
   });
-
 };
