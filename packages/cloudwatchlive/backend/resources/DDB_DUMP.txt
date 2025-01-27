@@ -1,0 +1,57 @@
+{
+  "userId": {
+    "S": "69be4448-e0e1-70e6-5213-064579ca4b72"
+  },
+  "organizationId": {
+    "S": ""
+  },
+  "PrivacyPolicy": {
+    "BOOL": true
+  },
+  "TermsAndConditions": {
+    "BOOL": true
+  },
+  "userAddedById": {
+    "S": ""
+  },
+  "userCreated": {
+    "S": "1733530302"
+  },
+  "userEmail": {
+    "S": "vesnathan@gmail.com"
+  },
+  "userFirstName": {
+    "S": "Nathan"
+  },
+  "userGroups": {
+    "L": [
+      {
+        "S": "SuperAdmin"
+      },
+      {
+        "SS": [
+          "SuperAdmin"
+        ]
+      }
+    ]
+  },
+  "userLastName": {
+    "S": "Loudon"
+  },
+  "userPhone": {
+    "S": "0421 569 854"
+  },
+  "userProfilePicture": {
+    "M": {
+      "Bucket": {
+        "S": ""
+      },
+      "Key": {
+        "S": ""
+      }
+    }
+  },
+  "userTitle": {
+    "S": "Mr"
+  }
+}

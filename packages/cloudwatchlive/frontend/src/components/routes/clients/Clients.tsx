@@ -25,6 +25,7 @@ export const Clients = () => {
   const [showAddNewUserModal, setShowAddNewUserModal] = useState(false);
   const user = useUserStore((state) => state.user);
   const isSuperAdminUser = user.userGroups?.includes("SuperAdmin" as UserGroup);
+  const [buttonText, setButtonText] = useState("Next");
 
   const SuperAdminAddClientFormRef =
     useRef<SuperAdminAddClientFormRefType>(null);
@@ -64,7 +65,10 @@ export const Clients = () => {
           <ModalBody className="p-0 m-0">
             <Divider />
             <div className="p-5">
-              <SuperAdminAddClientForm ref={SuperAdminAddClientFormRef} />
+              <SuperAdminAddClientForm
+                ref={SuperAdminAddClientFormRef}
+                onFormComplete={() => setButtonText("Save")}
+              />
             </div>
             <Divider />
           </ModalBody>
@@ -74,7 +78,7 @@ export const Clients = () => {
               onClick={() => setShowAddNewUserModal(false)}
               color="transparent"
             />
-            <CWLButton buttonText="Save" onClick={onSubmit} />
+            <CWLButton buttonText={buttonText} onClick={onSubmit} />
           </ModalFooter>
         </ModalContent>
       </Modal>

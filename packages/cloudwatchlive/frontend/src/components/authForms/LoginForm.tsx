@@ -33,7 +33,7 @@ export const LoginForm: React.FC<Props> = ({
         Welcome back!
       </h5>
       <p className="font-regular text-body2 mb-5 text-neutral-700">
-        Please log in using your credentials
+        Please log in to continue.
       </p>
       <CWLTextField
         label="Email address:"

@@ -33,10 +33,17 @@ resolvers:
           # add customized name since default name is over limit of 64 character
           name: cwl-${opt:stage}-mutation-Mutation_associateSoftwareToken
           handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_associateSoftwareToken.handler"
+          vpc:
+            securityGroupIds:
+              - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
+            subnetIds:
+              - !ImportValue privateSubnet1-${opt:stage}
+              - !ImportValue privateSubnet2-${opt:stage}
           iamRoleStatementsName: cwl-mutation-associateSoftwareToken-iam-role-${opt:stage}
           iamRoleStatements:
             - Effect: Allow
-              Action: "cognito-idp:associateSoftwareToken"
+              Action: 
+              - "cognito-idp:associateSoftwareToken"
               Resource: !ImportValue cwlUserPoolArn-${opt:stage}
 
   Mutation.verifySoftwareToken:
@@ -143,6 +150,6 @@ dataSources:
   cwlUserTable:
     type: AMAZON_DYNAMODB
     config:
-      tableName: !ImportValue cwlUserTableArn-${opt:stage}
+      tableName: !ImportValue cwlUserTableName-${opt:stage}
 
 

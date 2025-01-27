@@ -4,9 +4,11 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "deploy": "ts-node -T ./scripts/deployWAF.ts"
+    "deploy": "ts-node -T ./scripts/deployWAF.ts",
+    "remove-stack": "ts-node -T ./scripts/removeWAF.ts"
   },
   "dependencies": {
     "shared": "*"
   }
+
 }

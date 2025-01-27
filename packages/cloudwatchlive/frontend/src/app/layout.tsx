@@ -1,7 +1,7 @@
 "use client";
 
 import { RequireAuth } from "@/components/common/RequireAuth";
-// import RequireMFA from "@/components/common/RequireMFA";
+import RequireMFA from "@/components/common/RequireMFA";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
@@ -29,11 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     handleLogout,
   });
 
-  const isUnprotectedPage =
-    pathname === "/login" ||
-    pathname === "/login/" ||
-    pathname === "/logout" ||
-    pathname === "/logout/";
+  const isUnprotectedPage = pathname === "/login" || pathname === "/login/";
 
   return (
     <html lang="en" data-theme="lemonade">
@@ -55,13 +51,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           }
         >
           <NextUIProvider>
-            {!isUnprotectedPage ? (
+            {isUnprotectedPage ? (
               <div>{children}</div>
             ) : (
               <RequireAuth>
-                {/* <RequireMFA> */}
-                <main>{children}</main>
-                {/* </RequireMFA> */}
+                <RequireMFA>
+                  <main>{children}</main>
+                </RequireMFA>
               </RequireAuth>
             )}
           </NextUIProvider>

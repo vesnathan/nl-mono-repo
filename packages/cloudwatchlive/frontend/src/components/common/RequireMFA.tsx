@@ -51,6 +51,9 @@ const RequireMFA = ({ children }: Props) => {
       setAssociateToken(data.associateSoftwareToken.secretCode);
       setLoading(false);
     },
+    onError(error) {
+      console.error(error);
+    },
     invalidateKeys: [],
     mutationFn: async (variables: associateSoftwareTokenMutationVariables) => {
       return associateSoftwareTokenMutationFn({ variables });
