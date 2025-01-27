@@ -22,7 +22,7 @@ const generateQR = async (text: string, email: string) => {
     return await QRCode.toDataURL(
       `otpauth://totp/Financial%20Training%20Australia${
         IS_PRODUCTION ? "" : `%20${environment}`
-      }:${email}?secret=${text}&issuer=Personal%20Financial%20Health`,
+      }:${email}?secret=${text}&issuer=Cloudwatch%20Live`,
     );
   } catch (error) {
     console.error("Error generating QR code", error);

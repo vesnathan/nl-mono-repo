@@ -24,6 +24,7 @@
   },
   "scripts": {
     "build-gql": "ts-node ./scripts/buildGql.ts",
-    "deploy": "ts-node -T ./scripts/deployCWL.ts"
+    "deploy": "ts-node -T ./scripts/deployCWL.ts",
+    "remove-stack": "ts-node -T ./scripts/removeCwl.ts"
   }
 }

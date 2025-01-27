@@ -13,10 +13,7 @@ const addWAFOutputToEnvVariables = async (options: {
 }) => {
   // should matched with serverless.yaml of cwl-waf
   const WAF_OUTPUT_NAMES = ["CloudFrontWAFArn"];
-  // log current path
-  console.log("Current path:", process.cwd());
   const WAFOutputPath = path.resolve("/home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cwl-waf/WAF_output.json");
-  console.log("WAFOutputPath", WAFOutputPath);
   if (!fs.existsSync(WAFOutputPath)) {
     throw new Error(
       "WAF output file not found. Make sure to deploy WAF from cwl-waf package first.",

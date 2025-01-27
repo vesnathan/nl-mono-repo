@@ -38,11 +38,17 @@ resources:
   - ${file(./resources/WebACL/WebACL.yaml)}
   # cloud formation outputs. The values can be referenced by other serverless.yml using !ImportValue <Export.Name>
   - Outputs:
+          
       cwlSecurityGroupFromSharedVPCId:
         Value: !GetAtt cwlSecurityGroupFromSharedVPC.GroupId
         Export:
           Name: cwlSecurityGroupFromSharedVPCId-${opt:stage}
 
+      cwlSecurityGroupFromSharedVPC: 
+        Value: !Ref cwlSecurityGroupFromSharedVPC
+        Export:
+          Name: cwlSecurityGroupFromSharedVPC-${opt:stage}
+          
       cwlKMSKey:
         Value: !Ref cwlKMSKey
         Export:
