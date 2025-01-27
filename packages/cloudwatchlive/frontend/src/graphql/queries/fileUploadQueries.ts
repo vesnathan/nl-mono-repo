@@ -1,4 +1,4 @@
-// Duplicate of packages/personal-financial-health/frontend/src/graphql/mutations/fileMutations.ts
+// Duplicate of packages/cloudwatch-live/frontend/src/graphql/mutations/fileMutations.ts
 import { GraphQLResult, generateClient } from "aws-amplify/api";
 import {
   generateS3UploadURLMutationVariables,

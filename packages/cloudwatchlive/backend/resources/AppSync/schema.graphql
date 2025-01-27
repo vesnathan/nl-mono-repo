@@ -29,6 +29,8 @@ type Mutation {
   updateMyCWLUserData(input: UpdateCWLUserInput!): CWLUser!
     @aws_cognito_user_pools
 
+  # ----- Client
+  saveClient(input: CreateCWLClientInput!): CreateCWLClientResult! @aws_cognito_user_pools
 
   # ----- File
   generateS3UploadURL(
@@ -41,6 +43,27 @@ type Mutation {
   moveObjectToPermanentLocation(
     tempLocation: S3FileLocationInput!
   ): S3FileLocation! @aws_cognito_user_pools
+}
+
+input CreateCWLClientInput {
+  id: String!
+  orgName: String!
+  createdDate: String!
+  createdBy: String!
+  addressLine1: String!
+  addressLine2: String
+  city: String!
+  state: String!
+  country: String!
+  postalCode: String!
+  contactName: String!
+  contactEmail: String!
+  contactPhone: String!
+  contactRole: String!
+}
+
+type CreateCWLClientResult {
+  id: String!
 }
 
 type RegisterResult @aws_iam {

@@ -1,7 +1,6 @@
 import React from "react";
 import { Card, CardBody } from "@nextui-org/react";
 import LoginBackground from "@/assets/images/login-bg.png";
-import "../../app/globals.css";
 import Image from "next/image";
 import Logo from "../../assets/images/logo/logo.png";
 
