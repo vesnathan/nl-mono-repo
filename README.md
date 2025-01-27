@@ -5,12 +5,13 @@ Install dependencies: After cloning repo, run "yarn" from root. Lerna will go th
 ## Deploy assets
 
 Run in order: 
-  "yarn build-gql" to build types  
-  "yarn deploy-waf" to deploy WAF
-  "yarn deploy-shared" to deploy shared DB assets 
-  "yarn deploy-cwl" to deploy Cloud Watch Live
-  TODO: Script this
-
+  "yarn build-gql" to build types in all packages that have build-gql scripts  
+  "yarn build" to run build script in packages that have it (CWL FE)  
+  "yarn deploy-waf" to deploy WAF  
+  "yarn deploy-shared" to deploy shared DB assets  
+  "yarn deploy-cwl" to deploy Cloud Watch Live  
+  TODO: Script this  
+  
 ## Launch dev site
 Run:  
   yarn dev-cwl  
