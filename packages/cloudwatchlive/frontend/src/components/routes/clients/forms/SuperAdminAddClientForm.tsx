@@ -22,11 +22,16 @@ export type SuperAdminAddClientFormRefType = {
   form: UseFormReturn<CWLClient>;
 };
 
+type Props = {
+  onFormComplete: () => void;
+};
+
 const SuperAdminAddClientFormComponent = (
-  props: object,
+  props: Props,
   ref: React.ForwardedRef<SuperAdminAddClientFormRefType>,
 ) => {
-  //
+  const { onFormComplete } = props;
+
   const form: UseFormReturn<Client_CWLClient> = useForm<Client_CWLClient>({
     defaultValues: createEmptySuperAdminClient(),
     resolver: zodResolver(SuperAdminAddClientFormValidationSchema),
@@ -34,7 +39,6 @@ const SuperAdminAddClientFormComponent = (
 
   const [expanded, setExpanded] = useState<string>("org");
   const containerRef = useRef<HTMLDivElement>(null);
-
   const watchedValues = form.watch();
 
   useEffect(() => {
@@ -61,6 +65,16 @@ const SuperAdminAddClientFormComponent = (
 
     return false;
   };
+
+  useEffect(() => {
+    const allCompleted =
+      OrgDetailsSchema.safeParse(watchedValues).success &&
+      ContactDetailsSchema.safeParse(watchedValues).success;
+
+    if (allCompleted) {
+      onFormComplete();
+    }
+  }, [watchedValues, onFormComplete]);
 
   const handleBlurForTransition = () => {
     if (expanded === "org" && isSectionComplete("org")) {

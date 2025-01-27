@@ -23,20 +23,6 @@ const start = async () => {
         ],
         consoleLog: true,
       },
-      // // write sls output for e2e test
-      // {
-      //   OUTPUT_PATH: path.resolve("../frontend/playwright/setupTest.json"),
-      //   // these keys should match with outputs from serverless.yml
-      //   OUTPUT_KEYS: [
-      //     "cwlDataTable",
-      //     "cwlSetupTestIAMAccessKey",
-      //     "cwlSetupTestIAMAccessSecret",
-      //     "cwlSetupTestIAMRoleArn",
-      //     "cwlGraphQLUrl",
-      //     "cwlCloudFrontDomainName",
-      //     "cwlUserPoolId",
-      //   ].filter((v) => !!v),
-      // },
     ],
   });
 };

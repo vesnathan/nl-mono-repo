@@ -26,6 +26,7 @@
   "scripts": {
     "predeploy": "yarn build-gql && yarn tsc",
     "deploy": "ts-node -T ./scripts/deployShared.ts",
+    "remove-stack": "ts-node -T ./scripts/removeShared.ts",
     "build-gql": "ts-node -T ./scripts/buildGql.ts"
   }
 }

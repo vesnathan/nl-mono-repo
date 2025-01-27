@@ -30,6 +30,7 @@ provider:
     cwlCloudFrontDistributionId: !Ref CWLCloudFrontDistribution
     cwlCloudFrontDomainName: !GetAtt CWLCloudFrontDistribution.DomainName
     cwlBucket: !Ref CWLBucket
+    cwlSecurityGroupFromSharedVPC: !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
 
 outputs:
   cwlDataTableName: !Ref cwlDataTable
@@ -39,7 +40,9 @@ outputs:
   cwlCloudFrontDomainName: !GetAtt CWLCloudFrontDistribution.DomainName
   cwlUserPoolId: !ImportValue cwlUserPoolId-${opt:stage}
   cwlUserPoolClientId: !ImportValue cwlUserPoolClientId-${opt:stage}
-    
+  cwlSecurityGroupFromSharedVPC: !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
+  cwlSecurityGroupFromSharedVPCId: !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
+
 plugins:
   - serverless-esbuild
   - serverless-s3-sync

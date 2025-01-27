@@ -8,7 +8,6 @@ Resources:
       UserPoolName: "cwlUserPool-${opt:stage}"
       UserPoolAddOns:
         AdvancedSecurityMode: ENFORCED
-      DeletionProtection: ACTIVE
       MfaConfiguration: "OPTIONAL"
       EnabledMfas:
         - "SOFTWARE_TOKEN_MFA"
