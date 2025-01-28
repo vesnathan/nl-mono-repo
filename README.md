@@ -20,9 +20,9 @@ Run:
 
 ## Remove Stacks
   Run in order:  
-    "yarn deploy-cwl --stage <stage>"" to remove Cloud Watch Live  
-    "yarn deploy-shared --stage <stage>"" to remove shared DB assets  
-    "yarn deploy-waf --stage <stage>" to remove WAF  
+    "yarn remove-cwl --stage &lt;stage&gt;" to remove Cloud Watch Live  
+    "yarn remove-shared --stage &lt;stage&gt;" to remove shared DB assets  
+    "yarn remove-waf --stage &lt;stage&gt;" to remove WAF  
     TODO: Script this  
     
 

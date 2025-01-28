@@ -95,7 +95,8 @@ export const associateSoftwareTokenMutationFn = async (options: {
 const verifySoftwareTokenMutationStr = `
   mutation verifySoftwareToken($input: VerifySoftwareTokenInput!) {
     verifySoftwareToken(input: $input) {
-      status
+      success
+      message
     }
   }
 `;
