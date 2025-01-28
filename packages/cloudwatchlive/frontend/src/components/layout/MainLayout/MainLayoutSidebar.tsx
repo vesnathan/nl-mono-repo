@@ -2,101 +2,13 @@
 
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { cn } from "@nextui-org/react";
-import { ReactNode, useEffect } from "react";
-import NextLink from "next/link";
+import { useEffect } from "react";
 import NextImage from "next/image";
 import { useMediaQuery } from "shared/hooks/useMediaQuery";
 import ArrowLeftSvg from "../../../assets/images/SVGR/arrowLeftSvg";
 import ArrowRightSvg from "../../../assets/images/SVGR/arrowRightSvg";
 import CWALogo from "../../../assets/images/logo/logo.png";
-
-interface SubheaderItem {
-  label: string;
-  tabValue: string | null;
-}
-
-export interface NavItemData {
-  id?: string;
-  isPlaceholder?: boolean;
-  title: string;
-  shortTitle?: string;
-  path: string;
-  icon: ReactNode | ((isActive: boolean) => ReactNode);
-  subNavItems?: SubheaderItem[];
-  hidden?: boolean;
-  hiddenFromProd?: boolean;
-  renderWrapper?: (node: ReactNode) => ReactNode;
-}
-
-interface NavItemProps {
-  item: NavItemData;
-  collapsed: boolean;
-  isActive: boolean;
-}
-
-function NavItem({
-  isActive,
-  item: {
-    id,
-    isPlaceholder,
-    shortTitle,
-    title,
-    path,
-    icon,
-    renderWrapper = (node) => node,
-  },
-  collapsed,
-}: NavItemProps) {
-  const renderIcon = () => {
-    if (isPlaceholder) {
-      return <span className="bg-neutral-100 w-5 h-5" />;
-    }
-    return <span>{typeof icon === "function" ? icon(isActive) : icon}</span>;
-  };
-
-  const renderText = () => {
-    if (isPlaceholder) {
-      return (
-        <span
-          className={cn(
-            "bg-neutral-100 w-full",
-            collapsed ? "h-full" : "self-stretch",
-          )}
-        />
-      );
-    }
-    return (
-      <span className={cn(collapsed ? "text-sm leading-[30px]" : "text-base")}>
-        {collapsed && (shortTitle || title)}
-        {!collapsed && title}
-      </span>
-    );
-  };
-
-  const renderNavItem = () => {
-    return renderWrapper(
-      <NextLink href={path} id={id}>
-        <div
-          className={cn(
-            "flex p-2.5 items-center rounded",
-            "font-medium",
-            collapsed ? "flex-col gap-1 w-16 h-16 mb-1" : "gap-3",
-            isActive && !isPlaceholder
-              ? "bg-primary-500 text-white"
-              : "hover:bg-neutral-0 text-neutral-800",
-          )}
-        >
-          {renderIcon()}
-          {renderText()}
-        </div>
-      </NextLink>,
-    );
-  };
-
-  renderNavItem();
-
-  return <>{renderNavItem()}</>;
-}
+import { NavItem, NavItemData } from "./SideBarNavItem";
 
 const DRAWER_WIDTH = 240;
 const DRAWER_WIDTH_COLLAPSED = 100;
@@ -202,8 +114,8 @@ export function MainLayoutSidebar({
         {/* Item list */}
         <div
           className={cn(
-            "flex flex-col w-full",
-            collapsed ? "px-[18px]" : "px-3.5",
+            "flex flex-col w-full items-center",
+            collapsed ? "px-[18px]" : "",
             "overflow-y-auto",
           )}
         >
