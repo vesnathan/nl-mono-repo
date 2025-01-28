@@ -30,7 +30,6 @@ resolvers:
       config:
         function:
           timeout: 900
-          # add customized name since default name is over limit of 64 character
           name: cwl-${opt:stage}-mutation-Mutation_associateSoftwareToken
           handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_associateSoftwareToken.handler"
           vpc:
@@ -52,13 +51,39 @@ resolvers:
       type: AWS_LAMBDA
       config:
         function:
-          # add customized name since default name is over limit of 64 character
           name: cwl-${opt:stage}-mutation-Mutation_verifySoftwareToken
           handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_verifySoftwareToken.handler"
+          timeout: 900
+          vpc:
+            securityGroupIds:
+              - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
+            subnetIds:
+              - !ImportValue privateSubnet1-${opt:stage}
+              - !ImportValue privateSubnet2-${opt:stage}
           iamRoleStatementsName: cwl-mutation-verifySoftwareToken-iam-role-${opt:stage}
           iamRoleStatements:
             - Effect: Allow
               Action: "cognito-idp:verifySoftwareToken"
+              Resource: !ImportValue cwlUserPoolArn-${opt:stage}
+
+  Mutation.adminSetUserMFAPreference:
+    kind: UNIT
+    dataSource:
+      type: AWS_LAMBDA
+      config:
+        function:
+          name: cwl-${opt:stage}-mutation-adminSetUserMFAPreference
+          handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_adminSetUserMFAPreference.handler"
+          vpc:
+            securityGroupIds:
+              - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
+            subnetIds:
+              - !ImportValue privateSubnet1-${opt:stage}
+              - !ImportValue privateSubnet2-${opt:stage}
+          iamRoleStatementsName: cwl-mutation-adminSetUserMFAPreference-iam-role-${opt:stage}
+          iamRoleStatements:
+            - Effect: Allow
+              Action: "cognito-idp:AdminSetUserMFAPreference"
               Resource: !ImportValue cwlUserPoolArn-${opt:stage}
   # endregion user
 

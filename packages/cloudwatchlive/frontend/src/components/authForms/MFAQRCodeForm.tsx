@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import { CWLButton } from "@/components/common/CWLButton";
 import { CWLTextField } from "@/components/common/CWLTextField";
 import environment, { IS_PRODUCTION } from "@/config/masterConfig";
+import { useSetGlobalMessage } from "../common/GlobalMessage";
 
 export type VerifyArgs = {
   FriendlyDeviceName: string;
@@ -37,9 +38,12 @@ export const MFAQRCodeForm: React.FC<Props> = ({
   handleLogout,
   isLoading,
 }) => {
+  //
   const [qrCode, setQRCode] = useState<string | null>(null);
   const [totpCode, setTotpCode] = useState<string | null>(null);
   const [deviceName, setDeviceName] = useState<string | null>(null);
+  const setGlobalMessage = useSetGlobalMessage();
+
   useEffect(() => {
     const generateQRCode = async () => {
       const code = await generateQR(associateToken, email);
@@ -48,6 +52,20 @@ export const MFAQRCodeForm: React.FC<Props> = ({
 
     generateQRCode();
   }, [associateToken, email]);
+
+  const handleSubmit = () => {
+    if (!totpCode || totpCode.length !== 6) {
+      setGlobalMessage({
+        content: "Please enter a valid 6-digit verification code",
+        color: "error",
+      });
+      return;
+    }
+    onVerify({
+      FriendlyDeviceName: deviceName || "",
+      UserCode: totpCode || "",
+    });
+  };
 
   return (
     <form
@@ -97,6 +115,9 @@ export const MFAQRCodeForm: React.FC<Props> = ({
           buttonText="Submit"
           additionalClassName="w-[140px] h-[40px]"
           isDisabled={!totpCode || isLoading}
+          onClick={() => {
+            handleSubmit();
+          }}
         />
         <CWLButton
           buttonText="Sign out"
