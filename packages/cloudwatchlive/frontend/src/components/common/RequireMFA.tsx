@@ -33,7 +33,6 @@ const RequireMFA = ({ children }: Props) => {
   const [associateToken, setAssociateToken] = useState<string>("");
   const { userId } = useUserStore(({ user }) => user);
   const userEmail = useUserStore(({ user }) => user.userEmail);
-  console.log("userEmail", userEmail);
   const adminSetUserMFAPreferenceMutation = useGraphqlMutation({
     onSuccess: () => {
       setIsMFAEnabled(true);
