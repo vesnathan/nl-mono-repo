@@ -13,6 +13,26 @@ Run in order:
   "yarn deploy-shared --stage <stage>"" to deploy shared DB assets  
   "yarn deploy-cwl --stage <stage>"" to deploy Cloud Watch Live  
   TODO: Script this  
+    
+  Add a user to Cognito.  
+  Add that user to CWLUsersTable:  
+  {
+ "userId": "&lt;userName from Cognito (is a uuid)&gt;",
+ "organizationId": "",
+ "PrivacyPolicy": "",
+ "TermsAndConditions": "",
+ "userAddedById": "",
+ "userCreated": "",
+ "userEmail": "&lt;A valid email (code will be sent here)&gt;",
+ "userFirstName": "John",
+ "userLastName": "Doe",
+ "userPhone": "",
+ "userProfilePicture": {
+  "Bucket": "",
+  "Key": ""
+ },
+ "userTitle": ""
+}
   
 ## Launch dev site
 Run:  
