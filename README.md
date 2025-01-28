@@ -16,29 +16,29 @@ Run in order:
     
   Add a user to Cognito.  
   Add that user to CWLUsersTable:  
-  {
- "userId": "&lt;userName from Cognito (is a uuid)&gt;",
- "organizationId": "",
- "PrivacyPolicy": "",
- "TermsAndConditions": "",
- "userAddedById": "",
- "userCreated": "",
- "userEmail": "&lt;A valid email (code will be sent here)&gt;",
- "userFirstName": "John",
- "userLastName": "Doe",
- "userPhone": "",
- "userProfilePicture": {
-  "Bucket": "",
-  "Key": ""
- },
- "userTitle": ""
-}
-  
-## Launch dev site
+  {  
+ "userId": "&lt;userName from Cognito (is a uuid)&gt;",  
+ "organizationId": "",  
+ "PrivacyPolicy": "",  
+ "TermsAndConditions": "",  
+ "userAddedById": "",  
+ "userCreated": "",  
+ "userEmail": "&lt;A valid email (code will be sent here)&gt;",  
+ "userFirstName": "John",  
+ "userLastName": "Doe",  
+ "userPhone": "",  
+ "userProfilePicture": {  
+  "Bucket": "",  
+  "Key": ""  
+ },  
+ "userTitle": ""  
+}  
+   
+## Launch dev site  
 Run:  
   yarn dev-cwl  
-
-## Remove Stacks
+  
+## Remove Stacks  
   Run in order:  
     "yarn remove-cwl --stage &lt;stage&gt;" to remove Cloud Watch Live  
     "yarn remove-shared --stage &lt;stage&gt;" to remove shared DB assets  
