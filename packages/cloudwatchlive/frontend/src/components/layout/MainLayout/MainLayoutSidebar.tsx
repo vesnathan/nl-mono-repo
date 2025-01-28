@@ -113,11 +113,7 @@ export function MainLayoutSidebar({
 
         {/* Item list */}
         <div
-          className={cn(
-            "flex flex-col w-full items-center",
-            collapsed ? "px-[18px]" : "",
-            "overflow-y-auto",
-          )}
+          className={cn("flex flex-col w-full items-center", "overflow-y-auto")}
         >
           {Object.values(items).map((item) => {
             const isActive = activeSidebarItem?.path === item.path;
