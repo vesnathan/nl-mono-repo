@@ -9,6 +9,7 @@ import { Amplify } from "aws-amplify";
 import { NextUIProvider } from "@nextui-org/react";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { useLogoutFn } from "@/hooks/useLogoutFn";
+import { GlobalMessage } from "@/components/common/GlobalMessage";
 import { AMPLIFY_CONFIG } from "../config/amplifyConfig";
 import "./globals.css";
 
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           }
         >
           <NextUIProvider>
+            <GlobalMessage />
             {isUnprotectedPage ? (
               <div>{children}</div>
             ) : (

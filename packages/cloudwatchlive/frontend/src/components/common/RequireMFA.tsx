@@ -33,7 +33,7 @@ const RequireMFA = ({ children }: Props) => {
   const [associateToken, setAssociateToken] = useState<string>("");
   const { userId } = useUserStore(({ user }) => user);
   const userEmail = useUserStore(({ user }) => user.userEmail);
-
+  console.log("userEmail", userEmail);
   const adminSetUserMFAPreferenceMutation = useGraphqlMutation({
     onSuccess: () => {
       setIsMFAEnabled(true);
@@ -76,6 +76,13 @@ const RequireMFA = ({ children }: Props) => {
           userEmail,
         },
       });
+    },
+    getErrorMessage: (error, context) => {
+      if (context.graphQLError) {
+        const firstError = context.graphQLError.errors[0];
+        return firstError?.message || "Failed to verify the software token.";
+      }
+      return "An unexpected error occurred during token verification.";
     },
     invalidateKeys: [],
     mutationFn: async (input: VerifyArgs) => {
