@@ -46,8 +46,6 @@ export const useLoginController = (options: {
       onNewPasswordRequired?: () => void;
       onTOTPRequired?: () => void;
     }) => {
-      // remove all query to ensure no stale data
-      // in case user logout and then login to a different account
       queryClient.removeQueries({
         type: "all",
       });

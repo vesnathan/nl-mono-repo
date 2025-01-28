@@ -11,16 +11,7 @@ export const TOTPForm: React.FC<Props> = ({ loginController }) => {
   const { errorMessage, TOTPCode, setTOTPCode, confirmSignInMutation } =
     loginController;
   return (
-    <form
-      className="px-6 pb-6"
-      onSubmit={(e) => {
-        e.preventDefault();
-        confirmSignInMutation.mutate({
-          challengeResponse: TOTPCode,
-          challengeType: "TOTP",
-        });
-      }}
-    >
+    <div className="p-5">
       <div className="my-5">
         <div className="text-neutral-700 text-body2 font-regular text-left">
           Please enter the code from your authentication Application
@@ -43,8 +34,14 @@ export const TOTPForm: React.FC<Props> = ({ loginController }) => {
           buttonText="Submit"
           additionalClassName="w-[140px] m-auto h-[40px]"
           isDisabled={confirmSignInMutation.isPending}
+          onClick={() => {
+            confirmSignInMutation.mutate({
+              challengeResponse: TOTPCode,
+              challengeType: "TOTP",
+            });
+          }}
         />
       </div>
-    </form>
+    </div>
   );
 };
