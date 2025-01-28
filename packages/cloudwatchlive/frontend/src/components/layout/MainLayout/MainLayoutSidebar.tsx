@@ -66,7 +66,9 @@ function NavItem({
       );
     }
     return (
-      <span className={cn(collapsed ? "text-sm leading-[30px]" : "text-base")}>
+      <span
+        className={cn(collapsed ? "text-[12px] leading-[30px]" : "text-base")}
+      >
         {collapsed && (shortTitle || title)}
         {!collapsed && title}
       </span>
@@ -78,9 +80,9 @@ function NavItem({
       <NextLink href={path} id={id}>
         <div
           className={cn(
-            "flex p-2.5 items-center rounded",
+            "flex justify-center items-center rounded",
             "font-medium",
-            collapsed ? "flex-col gap-1 w-16 h-16 mb-1" : "gap-3",
+            collapsed ? "flex-col gap-1 w-20 h-20 mb-1 " : "gap-3",
             isActive && !isPlaceholder
               ? "bg-primary-500 text-white"
               : "hover:bg-neutral-0 text-neutral-800",
@@ -201,11 +203,7 @@ export function MainLayoutSidebar({
 
         {/* Item list */}
         <div
-          className={cn(
-            "flex flex-col w-full",
-            collapsed ? "px-[18px]" : "px-3.5",
-            "overflow-y-auto",
-          )}
+          className={cn("flex flex-col w-full items-center", "overflow-y-auto")}
         >
           {Object.values(items).map((item) => {
             const isActive = activeSidebarItem?.path === item.path;
