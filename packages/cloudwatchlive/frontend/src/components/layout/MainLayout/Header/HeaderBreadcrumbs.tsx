@@ -1,7 +1,7 @@
 import { Divider } from "@nextui-org/react";
 import { useSearchParams } from "next/navigation";
 import React, { useMemo } from "react";
-import { NavItemData } from "../MainLayoutSidebar";
+import { NavItemData } from "../SideBarNavItem";
 
 interface HeaderBreadcrumbsProps {
   activeSidebarItem: NavItemData | undefined;
