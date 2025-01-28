@@ -1,6 +1,6 @@
 import { cn } from "@nextui-org/react";
-import { NavItemData } from "../MainLayoutSidebar";
 import HeaderBreadcrumbs from "./HeaderBreadcrumbs";
+import { NavItemData } from "../SideBarNavItem";
 
 interface HeaderProps {
   activeSidebarItem: NavItemData | undefined;
