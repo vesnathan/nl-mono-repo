@@ -98,7 +98,8 @@ type associateSoftwareTokenResult {
 }
 
 type VerifySoftwareTokenResult {
-  status: String!
+  success: Boolean!
+  message: String!
 }
 
 input VerifySoftwareTokenInput {

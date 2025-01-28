@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { create } from "zustand";
-import { Card, Button } from "@nextui-org/react";
+import { Card } from "@nextui-org/react";
 
 type MessageData = {
   color: "success" | "warning" | "error" | "info";
@@ -72,13 +72,20 @@ export const GlobalMessage: React.FC = () => {
       >
         <div style={{ padding: "16px" }}>
           <p style={{ margin: 0 }}>{globalMessage.content}</p>
-          <Button
-            size="sm"
+          <div
             onClick={closeMessage}
-            style={{ marginTop: "8px", color: "white" }}
+            style={{
+              marginTop: "8px",
+              color: "white",
+              textDecoration: "underline",
+              cursor: "pointer",
+            }}
+            tabIndex={0}
+            role="button"
+            onKeyDown={() => {}}
           >
             Close
-          </Button>
+          </div>
         </div>
       </Card>
     </div>
