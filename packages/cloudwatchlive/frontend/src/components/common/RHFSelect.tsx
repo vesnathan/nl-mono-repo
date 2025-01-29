@@ -21,7 +21,7 @@ export type RHFTextFieldProps<
   ) => string | boolean | undefined;
 };
 
-export function RHFTextField<
+export function RHFSelect<
   TValues extends FieldValues,
   TPath extends FieldPath<TValues>,
 >(props: RHFTextFieldProps<TValues, TPath>) {

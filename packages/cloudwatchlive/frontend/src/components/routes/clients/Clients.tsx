@@ -26,7 +26,7 @@ export const Clients = () => {
   // Refs for each user type
   const superAdminFormRef =
     useRef<UseFormReturn<Record<string, unknown>>>(null);
-  const eventCompanyFormRef =
+  const eventCompanyAdminFormRef =
     useRef<UseFormReturn<Record<string, unknown>>>(null);
 
   const submitMutation = useSaveClientMutation({
@@ -39,7 +39,7 @@ export const Clients = () => {
     const formRef = isSuperAdminUser
       ? superAdminFormRef
       : isEventCompanyAdmin
-        ? eventCompanyFormRef
+        ? eventCompanyAdminFormRef
         : null;
 
     if (formRef?.current) {
@@ -55,23 +55,58 @@ export const Clients = () => {
       id: "org",
       schema: OrgDetailsSchema,
       fields: [
-        { name: "orgName", label: "Organisation Name" },
-        { name: "addressLine1", label: "Address Line 1" },
-        { name: "addressLine2", label: "Address Line 2" },
-        { name: "city", label: "City" },
-        { name: "state", label: "State" },
-        { name: "country", label: "Country" },
-        { name: "postalCode", label: "Postal Code" },
+        {
+          name: "orgName",
+          label: "Organisation Name",
+          colSpan: "1",
+          type: "text",
+        },
+        {
+          name: "addressLine1",
+          label: "Address Line 1",
+          colSpan: "1",
+          type: "text",
+        },
+        {
+          name: "addressLine2",
+          label: "Address Line 2",
+          colSpan: "1",
+          type: "text",
+        },
+        {
+          name: "city",
+          label: "City",
+          colSpan: "2",
+          type: "text",
+        },
+        {
+          name: "state",
+          label: "State",
+          type: "text",
+          colSpan: "2",
+        },
+        {
+          name: "country",
+          label: "Country",
+          type: "text",
+          colSpan: "2",
+        },
+        {
+          name: "postalCode",
+          label: "Postal Code",
+          type: "text",
+          colSpan: "2",
+        },
       ],
     },
     {
       id: "contacts",
       schema: ContactDetailsSchema,
       fields: [
-        { name: "contactName", label: "Contact Name" },
-        { name: "contactEmail", label: "Contact Email" },
-        { name: "contactPhone", label: "Contact Phone" },
-        { name: "contactRole", label: "Contact Role" },
+        { name: "contactName", label: "Contact Name", type: "text" },
+        { name: "contactEmail", label: "Contact Email", type: "text" },
+        { name: "contactPhone", label: "Contact Phone", type: "text" },
+        { name: "contactRole", label: "Contact Role", type: "text" },
       ],
     },
   ];
@@ -85,8 +120,8 @@ export const Clients = () => {
         contactNumber: z.string().nonempty("Contact Number is required"),
       }),
       fields: [
-        { name: "companyName", label: "Company Name" },
-        { name: "contactNumber", label: "Contact Number" },
+        { name: "companyName", label: "Company Name", type: "text" },
+        { name: "contactNumber", label: "Contact Number", type: "text" },
       ],
     },
     {
@@ -96,8 +131,8 @@ export const Clients = () => {
         eventDate: z.string().nonempty("Event Date is required"),
       }),
       fields: [
-        { name: "eventName", label: "Event Name" },
-        { name: "eventDate", label: "Event Date" },
+        { name: "eventName", label: "Event Name", type: "text" },
+        { name: "eventDate", label: "Event Date", type: "text" },
       ],
     },
   ];
@@ -106,7 +141,7 @@ export const Clients = () => {
   const formRef = isSuperAdminUser
     ? superAdminFormRef
     : isEventCompanyAdmin
-      ? eventCompanyFormRef
+      ? eventCompanyAdminFormRef
       : null;
 
   const steps = isSuperAdminUser
