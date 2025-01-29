@@ -12,7 +12,7 @@ Resources:
       EnabledMfas:
         - "SOFTWARE_TOKEN_MFA"
 
-  cognitoUserPoolClient: 
+  cognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
       ClientName: Web-${opt:stage}
@@ -21,11 +21,20 @@ Resources:
       AccessTokenValidity: 30
       IdTokenValidity: 30
       RefreshTokenValidity: 1
-
       TokenValidityUnits:
         AccessToken: minutes
         IdToken: minutes
         RefreshToken: days
+      ReadAttributes:
+        - "cognito:groups"
+      WriteAttributes: []
+      ExplicitAuthFlows:
+        - "ALLOW_REFRESH_TOKEN_AUTH"
+        - "ALLOW_USER_PASSWORD_AUTH"
+      SupportedIdentityProviders:
+        - COGNITO
+      EnableTokenRevocation: true
+
 
   superAdminGroup:
     Type: AWS::Cognito::UserPoolGroup
