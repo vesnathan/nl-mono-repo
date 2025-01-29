@@ -203,9 +203,8 @@ export const CWLTextField = React.forwardRef<
         {!!helperText && (
           <span
             className={cn(
-              "text-[10px] text-neutral-600 font-regular",
+              " text-red-400 font-bold text-sm",
               "ml-1 mt-1.5",
-              isError && "text-error-400",
               classNames?.helperText,
             )}
           >
