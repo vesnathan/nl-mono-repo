@@ -32,6 +32,7 @@ export function RHFTextField<
     customValidation,
     ...cwlTextFieldProps
   } = props;
+
   return (
     <Controller
       control={form.control}
@@ -40,29 +41,22 @@ export function RHFTextField<
         required: requiredMessage,
         validate: customValidation,
       }}
-      render={({ field, fieldState }) => {
-        return (
-          <CWLTextField
-            isError={!!fieldState.error}
-            helperText={fieldState.error?.message}
-            value={field.value ?? ""}
-            onClear={
-              !isClearable
-                ? undefined
-                : () => {
-                    field.onChange("");
-                  }
-            }
-            {...cwlTextFieldProps}
-            id={cwlTextFieldProps.id ?? fieldPath}
-            testId={cwlTextFieldProps.testId ?? fieldPath}
-            onChange={(e, newValue) => {
-              field.onChange(newValue);
-              cwlTextFieldProps.onChange?.(e, newValue);
-            }}
-          />
-        );
-      }}
+      render={({ field, fieldState }) => (
+        <CWLTextField
+          helperText={fieldState.error?.message || ""}
+          isError={!!fieldState.error}
+          value={field.value ?? ""}
+          onClear={isClearable ? () => field.onChange("") : undefined}
+          {...cwlTextFieldProps}
+          id={cwlTextFieldProps.id ?? fieldPath}
+          testId={cwlTextFieldProps.testId ?? fieldPath}
+          onChange={(e, newValue) => {
+            field.onChange(newValue);
+            form.clearErrors(fieldPath); // Clear the error for this field
+            cwlTextFieldProps.onChange?.(e, newValue);
+          }}
+        />
+      )}
     />
   );
 }

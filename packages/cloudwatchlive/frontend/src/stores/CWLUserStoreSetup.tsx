@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { DataFetchError } from "@/components/common/DataFetchError";
 import { useRouter } from "next/navigation";
 import { FC, PropsWithChildren, useEffect } from "react";
+import { fetchAuthSession } from "@aws-amplify/auth";
 import {
   getCWLUserQueryFn,
   getCWLUserQueryKey,
@@ -17,6 +18,7 @@ type Props = PropsWithChildren & {
 };
 export const CWLUserStoreSetup: FC<Props> = ({ userId, children }) => {
   const setUser = useUserStore((state) => state.setUser);
+  const setUserGroups = useUserStore((state) => state.setUserGroups);
   const router = useRouter();
 
   const queryKey = getCWLUserQueryKey(userId);
@@ -28,11 +30,30 @@ export const CWLUserStoreSetup: FC<Props> = ({ userId, children }) => {
   });
 
   const CWLUser = data?.data?.getCWLUser;
+
   useEffect(() => {
-    if (CWLUser) {
-      setUser(CWLUser);
-    }
-  }, [CWLUser, setUser]);
+    const fetchUserGroups = async () => {
+      if (CWLUser) {
+        setUser(CWLUser);
+
+        const getUserGroups = async () => {
+          try {
+            const userSession = await fetchAuthSession();
+            return (
+              userSession?.tokens?.idToken?.payload["cognito:groups"] ?? []
+            );
+          } catch {
+            return [];
+          }
+        };
+        const userGroups = await getUserGroups();
+        // TODO: Something weird going on with the AWS type here
+        setUserGroups(userGroups as string[]);
+      }
+    };
+
+    fetchUserGroups();
+  }, [CWLUser, setUser, setUserGroups]);
 
   if (isPending) {
     return (
