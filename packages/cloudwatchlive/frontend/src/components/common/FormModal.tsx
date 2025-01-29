@@ -19,7 +19,14 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import { CWLButton } from "@/components/common/CWLButton";
+import { RHFSelect } from "@/components/common/RHFSelect";
 
+/** Types for your step config */
+export type FormFieldType = "text" | "select";
+
+/**
+ * We add colSpan as an explicit property for the grid columns.
+ */
 export type FormStep<T extends Record<string, unknown>> = {
   id: string;
   schema: ZodObject<ZodRawShape>;
@@ -27,7 +34,9 @@ export type FormStep<T extends Record<string, unknown>> = {
     name: FieldPath<T>;
     label: string;
     placeholder?: string;
-    type?: string;
+    type: FormFieldType;
+    colSpan?: "1" | "2"; // or "3" | "4" if you had more columns
+    options?: { value: string; label: string }[];
   }[];
 };
 
@@ -87,15 +96,37 @@ export const FormModal = forwardRef(
 
           <Divider />
           <ModalBody className="mb-5">
-            {steps[currentStep].fields.map((field) => (
-              <RHFTextField
-                key={field.name}
-                form={form}
-                fieldPath={field.name}
-                label={field.label}
-                placeholder={field.placeholder}
-              />
-            ))}
+            {/* 
+              We'll use a 2-column grid with some gap.
+              The user can define colSpan: "1" or "2" 
+              in each field to control the width.
+            */}
+            <div className="grid grid-cols-2 gap-4">
+              {steps[currentStep].fields.map((field) => {
+                const span =
+                  field.colSpan === "1" ? "col-span-2" : "col-span-1";
+                return (
+                  <div key={field.name} className={span}>
+                    {field.type === "select" ? (
+                      <RHFSelect
+                        form={form}
+                        fieldPath={field.name}
+                        label={field.label}
+                        placeholder={field.placeholder}
+                      />
+                    ) : (
+                      <RHFTextField
+                        form={form}
+                        fieldPath={field.name}
+                        label={field.label}
+                        placeholder={field.placeholder}
+                        type={field.type}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </ModalBody>
           <Divider />
           <ModalFooter>
