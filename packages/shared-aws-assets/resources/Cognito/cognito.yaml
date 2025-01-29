@@ -26,3 +26,84 @@ Resources:
         AccessToken: minutes
         IdToken: minutes
         RefreshToken: days
+
+  superAdminGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: "SuperAdmin"
+      UserPoolId: !Ref cognitoUserPool
+      Description: "Administrators of the entire application"
+      Precedence: 1
+
+
+  techCompanyAdminGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: "TechCompanyAdmin"
+      UserPoolId: !Ref cognitoUserPool
+      Description: "Admins for tech companies"
+      Precedence: 2
+
+  techCompanyStaffGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: "TechCompanyStaff"
+      UserPoolId: !Ref cognitoUserPool
+      Description: "Employees of tech companies"
+      Precedence: 2
+
+  eventCompanyAdminGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: "EventCompanyAdmin"
+      UserPoolId: !Ref cognitoUserPool
+      Description: "Adminis for event companies"
+      Precedence: 2
+
+  eventCompanyStaffGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: "EventCompanyStaff"
+      UserPoolId: !Ref cognitoUserPool
+      Description: "Employees of event companies"
+      Precedence: 2
+
+  eventClientAdminGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: "EventClientAdmin"
+      UserPoolId: !Ref cognitoUserPool
+      Description: "Admins for event clients"
+      Precedence: 2
+
+  eventClientStaffGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: "EventClientStaff"
+      UserPoolId: !Ref cognitoUserPool
+      Description: "Employees of event clients"
+      Precedence: 2
+
+  eventSpeakerGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: "EventSpeaker"
+      UserPoolId: !Ref cognitoUserPool
+      Description: "Event speakers"
+      Precedence: 3
+
+  RegisteredAttendeeGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: "RegisteredAttendee"
+      UserPoolId: !Ref cognitoUserPool
+      Description: "Registered Event attendees"
+      Precedence: 3
+
+  UnregisteredAttendeeGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: "UnregisteredAttendee"
+      UserPoolId: !Ref cognitoUserPool
+      Description: "Unregistered Event attendees"
+      Precedence: 3
