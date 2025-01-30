@@ -1,5 +1,3 @@
-"use client";
-
 import { forwardRef, useImperativeHandle, useState } from "react";
 import {
   useForm,
@@ -25,7 +23,7 @@ import { RHFSelect } from "@/components/common/RHFSelect";
 export type FormFieldType = "text" | "select";
 
 /**
- * We add colSpan as an explicit property for the grid columns.
+ * We organize fields based on their `row` property.
  */
 export type FormStep<T extends Record<string, unknown>> = {
   id: string;
@@ -35,7 +33,7 @@ export type FormStep<T extends Record<string, unknown>> = {
     label: string;
     placeholder?: string;
     type: FormFieldType;
-    colSpan?: "1" | "2"; // or "3" | "4" if you had more columns
+    row: number;
     options?: { value: string; label: string }[];
   }[];
 };
@@ -89,6 +87,16 @@ export const FormModal = forwardRef(
       onSubmit(data);
     });
 
+    // Group fields by row
+    const groupedFields = steps[currentStep].fields.reduce(
+      (acc, field) => {
+        if (!acc[field.row]) acc[field.row] = [];
+        acc[field.row].push(field);
+        return acc;
+      },
+      {} as Record<number, FormStep<T>["fields"]>,
+    );
+
     return (
       <Modal isOpen={isOpen} onClose={onClose} aria-labelledby="modal-title">
         <ModalContent>
@@ -96,36 +104,62 @@ export const FormModal = forwardRef(
 
           <Divider />
           <ModalBody className="mb-5">
-            {/* 
-              We'll use a 2-column grid with some gap.
-              The user can define colSpan: "1" or "2" 
-              in each field to control the width.
-            */}
-            <div className="grid grid-cols-2 gap-4">
-              {steps[currentStep].fields.map((field) => {
-                const span =
-                  field.colSpan === "1" ? "col-span-2" : "col-span-1";
-                return (
-                  <div key={field.name} className={span}>
-                    {field.type === "select" ? (
-                      <RHFSelect
-                        form={form}
-                        fieldPath={field.name}
-                        label={field.label}
-                        placeholder={field.placeholder}
-                      />
-                    ) : (
-                      <RHFTextField
-                        form={form}
-                        fieldPath={field.name}
-                        label={field.label}
-                        placeholder={field.placeholder}
-                        type={field.type}
-                      />
-                    )}
-                  </div>
-                );
-              })}
+            {/* Step Indicators */}
+            {steps.length > 1 && (
+              <div className="relative my-5">
+                <div className="flex justify-between mb-2">
+                  {steps.map((step, index) => (
+                    <span
+                      key={step.id}
+                      className={`text-sm font-medium ${
+                        index === currentStep ? "text-primary" : "text-gray-500"
+                      }`}
+                      style={{ textAlign: "center", width: "100%" }}
+                    >
+                      {index === currentStep && step.id}
+                    </span>
+                  ))}
+                </div>
+                <div className="w-full h-2 bg-gray-200 rounded-lg">
+                  <div
+                    className="h-2 bg-primary rounded-lg transition-all"
+                    style={{
+                      width: `${((currentStep + 1) / steps.length) * 100}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            <div className="space-y-4">
+              {Object.entries(groupedFields).map(([row, fields]) => (
+                <div
+                  key={row}
+                  className={`grid ${
+                    fields.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                  } gap-4`}
+                >
+                  {fields.map((field) => (
+                    <div key={field.name}>
+                      {field.type === "select" ? (
+                        <RHFSelect
+                          form={form}
+                          fieldPath={field.name}
+                          label={field.label}
+                          placeholder={field.placeholder}
+                        />
+                      ) : (
+                        <RHFTextField
+                          form={form}
+                          fieldPath={field.name}
+                          label={field.label}
+                          placeholder={field.placeholder}
+                          type={field.type}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))}
             </div>
           </ModalBody>
           <Divider />
