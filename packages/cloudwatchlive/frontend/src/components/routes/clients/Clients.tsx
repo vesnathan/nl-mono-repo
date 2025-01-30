@@ -52,61 +52,61 @@ export const Clients = () => {
   // Steps for SuperAdminUser
   const superAdminSteps: FormStep<Record<string, unknown>>[] = [
     {
-      id: "org",
+      id: "Company Details",
       schema: OrgDetailsSchema,
       fields: [
         {
           name: "orgName",
           label: "Organisation Name",
-          colSpan: "1",
+          row: 1,
           type: "text",
         },
         {
           name: "addressLine1",
           label: "Address Line 1",
-          colSpan: "1",
+          row: 2,
           type: "text",
         },
         {
           name: "addressLine2",
           label: "Address Line 2",
-          colSpan: "1",
+          row: 3,
           type: "text",
         },
         {
           name: "city",
           label: "City",
-          colSpan: "2",
+          row: 4,
           type: "text",
         },
         {
           name: "state",
           label: "State",
           type: "text",
-          colSpan: "2",
+          row: 4,
         },
         {
           name: "country",
           label: "Country",
           type: "text",
-          colSpan: "2",
+          row: 5,
         },
         {
           name: "postalCode",
           label: "Postal Code",
           type: "text",
-          colSpan: "2",
+          row: 5,
         },
       ],
     },
     {
-      id: "contacts",
+      id: "Contact Details",
       schema: ContactDetailsSchema,
       fields: [
-        { name: "contactName", label: "Contact Name", type: "text" },
-        { name: "contactEmail", label: "Contact Email", type: "text" },
-        { name: "contactPhone", label: "Contact Phone", type: "text" },
-        { name: "contactRole", label: "Contact Role", type: "text" },
+        { name: "contactName", label: "Contact Name", type: "text", row: 1 },
+        { name: "contactEmail", label: "Contact Email", type: "text", row: 2 },
+        { name: "contactPhone", label: "Contact Phone", type: "text", row: 3 },
+        { name: "contactRole", label: "Contact Role", type: "text", row: 4 },
       ],
     },
   ];
@@ -120,8 +120,13 @@ export const Clients = () => {
         contactNumber: z.string().nonempty("Contact Number is required"),
       }),
       fields: [
-        { name: "companyName", label: "Company Name", type: "text" },
-        { name: "contactNumber", label: "Contact Number", type: "text" },
+        { name: "companyName", label: "Company Name", type: "text", row: 1 },
+        {
+          name: "contactNumber",
+          label: "Contact Number",
+          type: "text",
+          row: 2,
+        },
       ],
     },
     {
@@ -131,8 +136,8 @@ export const Clients = () => {
         eventDate: z.string().nonempty("Event Date is required"),
       }),
       fields: [
-        { name: "eventName", label: "Event Name", type: "text" },
-        { name: "eventDate", label: "Event Date", type: "text" },
+        { name: "eventName", label: "Event Name", type: "text", row: 1 },
+        { name: "eventDate", label: "Event Date", type: "text", row: 2 },
       ],
     },
   ];
