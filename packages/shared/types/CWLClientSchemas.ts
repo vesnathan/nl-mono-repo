@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
-import { addRequiredValidation } from "shared/utils/zodUtils";
 
-// Section-specific schemas
+// Section-specific schemas for SuperAdmin Clients
 export const OrgDetailsSchema = z.object({
   orgName: z.string().min(1, "Organisation name is required"),
   addressLine1: z.string().min(1, "Address line 1 is required"),
@@ -19,7 +18,7 @@ export const ContactDetailsSchema = z.object({
   contactRole: z.string().min(1, "Contact role is required"),
 });
 
-// Main client schema combining the sections
+// Schema for SuperAdmin Clients
 export const Client_CWLClientSchema = OrgDetailsSchema.merge(ContactDetailsSchema).extend({
   id: z.string().default(() => uuidv4()),
   createdDate: z.string().default(() => new Date().toISOString()),
@@ -29,7 +28,7 @@ export const Client_CWLClientSchema = OrgDetailsSchema.merge(ContactDetailsSchem
 
 export type Client_CWLClient = z.infer<typeof Client_CWLClientSchema>;
 
-// Utility function to create an empty client
+// Utility function to create an empty SuperAdmin Client
 export const createEmptySuperAdminClient = (): Client_CWLClient => {
   return {
     id: uuidv4(),
@@ -52,7 +51,20 @@ export const createEmptySuperAdminClient = (): Client_CWLClient => {
 // Validation schema for SuperAdmin Add Client form
 export const SuperAdminAddClientFormValidationSchema = Client_CWLClientSchema.superRefine(
   (val, ctx) => {
-    const addFieldValidation = (field: string, message: string) => {
+    const requiredFields = [
+      { field: "orgName", message: "Please enter the name of the organisation" },
+      { field: "addressLine1", message: "Please enter the organisation's address" },
+      { field: "city", message: "Please enter the organisation's city" },
+      { field: "state", message: "Please enter the organisation's state" },
+      { field: "country", message: "Please enter the organisation's country" },
+      { field: "postalCode", message: "Please enter the organisation's postal code" },
+      { field: "contactName", message: "Please enter the contact's name" },
+      { field: "contactEmail", message: "Please enter the contact's email" },
+      { field: "contactPhone", message: "Please enter the contact's phone number" },
+      { field: "contactRole", message: "Please enter the contact's role" },
+    ];
+
+    requiredFields.forEach(({ field, message }) => {
       if (!val[field as keyof typeof val]) {
         ctx.addIssue({
           path: [field],
@@ -60,31 +72,37 @@ export const SuperAdminAddClientFormValidationSchema = Client_CWLClientSchema.su
           code: z.ZodIssueCode.custom,
         });
       }
-    };
-
-    // Apply required field validation
-    addFieldValidation("orgName", "Please enter the name of the organisation");
-    addFieldValidation("addressLine1", "Please enter the organisation's address");
-    addFieldValidation("city", "Please enter the organisation's city");
-    addFieldValidation("state", "Please enter the organisation's state");
-    addFieldValidation("country", "Please enter the organisation's country");
-    addFieldValidation("postalCode", "Please enter the organisation's postal code");
-    addFieldValidation("contactName", "Please enter the contact's name");
-    addFieldValidation("contactEmail", "Please enter the contact's email");
-    addFieldValidation("contactPhone", "Please enter the contact's phone number");
-    addFieldValidation("contactRole", "Please enter the contact's role");
+    });
   }
 );
 
-// Event company client schema for other types of clients
-export const Client_EventCompanyClient = OrgDetailsSchema.merge(ContactDetailsSchema).extend({
+// **Schema for EventCompanyAdmin Clients** (Only Four Fields)
+export const EventCompanyClientSchema = z.object({
   id: z.string().default(() => uuidv4()),
   createdDate: z.string().default(() => new Date().toISOString()),
   createdBy: z.string(),
-  addressLine2: z.string().optional(),
+  companyName: z.string().min(1, "Company Name is required"),
+  contactNumber: z.string().min(1, "Contact Number is required"),
+  eventName: z.string().min(1, "Event Name is required"),
+  eventDate: z.string().min(1, "Event Date is required"),
 });
 
-// Unified schema for all client types
-const CWLClientSchema = z.union([Client_CWLClientSchema, Client_EventCompanyClient]);
+export type EventCompanyClient = z.infer<typeof EventCompanyClientSchema>;
+
+// Utility function to create an empty Event Company Client
+export const createEmptyEventCompanyClient = (): EventCompanyClient => {
+  return {
+    id: uuidv4(),
+    createdDate: new Date().toISOString(),
+    createdBy: "69be4448-e0e1-70e6-5213-064579ca4b72",
+    companyName: "",
+    contactNumber: "",
+    eventName: "",
+    eventDate: "",
+  };
+};
+
+// **Unified Schema** for all client types
+export const CWLClientSchema = z.union([Client_CWLClientSchema, EventCompanyClientSchema]);
 
 export type CWLClient = z.infer<typeof CWLClientSchema>;
