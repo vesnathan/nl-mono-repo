@@ -23,6 +23,16 @@ resolvers:
     kind: UNIT
     code: ./resources/AppSync/resolvers/users/Queries/Query.getCWLDataForUser.ts
 
+  Mutation.saveSuperAdminClient:
+    kind: PIPELINE
+    functions:
+      - dataSource:
+          type: AWS_LAMBDA
+          config:
+            function:
+              name: cwl-${opt:stage}-mutation-createCognitoUser
+              handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_createCognitoUser.handler"
+
   Mutation.associateSoftwareToken:
     kind: UNIT
     dataSource:
