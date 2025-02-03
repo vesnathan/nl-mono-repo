@@ -1,32 +1,27 @@
+// EventCompanyAdminForm.tsx
+
 "use client";
 
 import React, { forwardRef, useImperativeHandle } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RHFTextField } from "@/components/common/RHFTextfield";
-import { useSaveClientMutation } from "../clientHooks";
-
-const EventCompanySchema = z.object({
-  companyName: z.string().nonempty("Company Name is required"),
-  contactNumber: z.string().nonempty("Contact Number is required"),
-  eventName: z.string().nonempty("Event Name is required"),
-  eventDate: z.string().nonempty("Event Date is required"),
-});
+import {
+  EventCompanyClient,
+  EventCompanyClientSchema,
+  createEmptyEventCompanyClient,
+} from "shared/types/CWLClientSchemas";
+import { useSaveEventCompanyAdimnClientMutation } from "../clientHooks";
 
 export const EventCompanyAdminForm = forwardRef(
   ({ onClose }: { onClose: () => void }, ref) => {
-    const form = useForm({
-      defaultValues: {
-        companyName: "",
-        contactNumber: "",
-        eventName: "",
-        eventDate: "",
-      },
-      resolver: zodResolver(EventCompanySchema),
+    const totalSteps = 1; // Single-step form
+    const form = useForm<EventCompanyClient>({
+      defaultValues: createEmptyEventCompanyClient(),
+      resolver: zodResolver(EventCompanyClientSchema), // Correct resolver
     });
 
-    const submitMutation = useSaveClientMutation({
+    const submitMutation = useSaveEventCompanyAdimnClientMutation({
       onSuccess: () => {
         onClose();
       },
@@ -34,10 +29,17 @@ export const EventCompanyAdminForm = forwardRef(
 
     useImperativeHandle(ref, () => ({
       submit: () => {
-        form.handleSubmit((data) => {
+        form.handleSubmit((data: EventCompanyClient) => {
           submitMutation.mutate(data);
         })();
       },
+      nextStep: async () => {
+        return form.trigger();
+      },
+      previousStep: () => {},
+      reset: () => form.reset(),
+      getStep: () => 1,
+      getTotalSteps: () => totalSteps,
     }));
 
     return (
