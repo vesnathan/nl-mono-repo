@@ -50,7 +50,8 @@ type Mutation {
     @aws_cognito_user_pools
 
   # ----- Client
-  saveSuperAdminClient(input: SaveSuperAdminClientInput!): SaveSuperAdminClientResult! @aws_cognito_user_pools
+  saveSuperAdminClient(input: SaveClientInput!): SaveClientResult! @aws_cognito_user_pools
+  saveEventCompanyAdminClient(input: SaveClientInput!): SaveClientResult! @aws_cognito_user_pools
 
   # ----- File
   generateS3UploadURL(
@@ -65,7 +66,7 @@ type Mutation {
   ): S3FileLocation! @aws_cognito_user_pools
 }
 
-input SaveSuperAdminClientInput {
+input SaveClientInput {
   orgId: String!
   orgName: String!
   clientType: String!
@@ -80,10 +81,12 @@ input SaveSuperAdminClientInput {
   contactEmail: String!
   contactPhone: String!
   contactRole: String!
+  sendConfirmationEmail: Boolean!
 }
 
-type SaveSuperAdminClientResult {
-  id: String!
+type SaveClientResult {
+  success: Boolean!
+  message: String!
 }
 
 type RegisterResult @aws_iam {

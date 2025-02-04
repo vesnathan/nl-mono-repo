@@ -1,57 +1,23 @@
 import { GraphQLResult, generateClient } from "aws-amplify/api";
 import {
-  registerClientUserUnauthMutation,
-  registerClientUserUnauthMutationVariables,
-  updateMyCWLUserDataMutation,
-  updateMyCWLUserDataMutationVariables,
   adminSetUserMFAPreferenceMutation,
   adminSetUserMFAPreferenceMutationVariables,
   associateSoftwareTokenMutationVariables,
   associateSoftwareTokenMutation,
   verifySoftwareTokenMutation,
   verifySoftwareTokenMutationVariables,
+  SaveClientInput,
+  SaveClientResult,
 } from "../gqlTypes";
 
+export const userMutationKeys = {
+  saveSuperAdminClient: "saveSuperAdminClient",
+  saveEventCompanyAdminClient: "saveEventCompanyAdminClient",
+};
+
+const amplifyGraphqlClient = generateClient();
+
 const client = generateClient();
-
-// ------------------- register ----------------
-const registerClientUserUnauthMutationStr = `
-  mutation registerClientUserUnauth($input: CreateCWLUserInput!) {
-    registerClientUserUnauth(input: $input) {
-      userId
-    }
-  }
-`;
-
-export const registerClientUserUnauthMutationFn = async (options: {
-  variables: registerClientUserUnauthMutationVariables;
-}) => {
-  return client.graphql({
-    query: registerClientUserUnauthMutationStr,
-    variables: options.variables,
-    authMode: "iam",
-  }) as Promise<GraphQLResult<registerClientUserUnauthMutation>>;
-};
-
-// ------------------- update user data----------------
-
-const updateMyCWLUserDataMutationStr = `
-  mutation updateMyCWLUserData($input: UpdateCWLUserInput!) {
-    updateMyCWLUserData(input: $input) {
-      userId
-    }
-  }
-`;
-
-export const updateMyCWLUserDataMutationFn = async (options: {
-  variables: updateMyCWLUserDataMutationVariables;
-}) => {
-  return client.graphql({
-    query: updateMyCWLUserDataMutationStr,
-    variables: options.variables,
-    authMode: "userPool",
-  }) as Promise<GraphQLResult<updateMyCWLUserDataMutation>>;
-};
 
 const adminSetUserMFAPreferenceMutationStr = `
   mutation adminSetUserMFAPreference($input: AdminSetUserMFAPreferenceInput!) {
@@ -106,4 +72,51 @@ export const verifySoftwareTokenMutationFn = async (options: {
     variables: options.variables,
     authMode: "userPool",
   }) as Promise<GraphQLResult<verifySoftwareTokenMutation>>;
+};
+
+// saveSuperAdminClientMutationFn Mutation
+const saveSuperAdminClientMutationStr = `
+    mutation SaveSuperAdminClient($input: SaveClientInput!) {
+      saveSuperAdminClient(input: $input) {
+        success
+        message
+      }
+    }
+`;
+export const saveSuperAdminClientQueryKey = () => [
+  userMutationKeys.saveSuperAdminClient,
+];
+
+export const saveSuperAdminClientMutationFn = async (variables: {
+  input: SaveClientInput;
+}) => {
+  return amplifyGraphqlClient.graphql({
+    query: saveSuperAdminClientMutationStr,
+    variables,
+    authMode: "userPool",
+  }) as Promise<GraphQLResult<SaveClientResult>>;
+};
+
+// saveEventCompanyAdminClientMutationFn Mutation
+const saveEventCompanyAdminClientQueryStr = `
+    mutation SaveEventCompanyAdminClient($input: SaveClientInput!) {
+      saveSuperAdminClient(input: $input) {
+          success
+          message
+      }
+    }
+`;
+
+export const saveEventCompanyAdminClientQueryKey = () => [
+  userMutationKeys.saveEventCompanyAdminClient,
+];
+
+export const saveEventCompanyAdminClientMutationFn = async (
+  variables: SaveClientInput,
+) => {
+  return amplifyGraphqlClient.graphql({
+    query: saveEventCompanyAdminClientQueryStr,
+    variables,
+    authMode: "userPool",
+  }) as Promise<GraphQLResult<SaveClientResult>>;
 };

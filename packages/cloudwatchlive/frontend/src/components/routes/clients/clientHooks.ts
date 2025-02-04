@@ -1,8 +1,8 @@
 import {
   saveEventCompanyAdminClientMutationFn,
   saveSuperAdminClientMutationFn,
-  userQueryKeys,
-} from "@/graphql/queries/userQueries";
+  userMutationKeys,
+} from "@/graphql/mutations/userMutations";
 import { useGraphqlMutation } from "@/hooks/useGraphQlMutation";
 import {
   CWLClient,
@@ -27,12 +27,13 @@ export const useSaveSuperAdminClientMutation = (options?: {
     onSuccess,
     getSuccessMessage,
     invalidateKeys: invalidate
-      ? [userQueryKeys.saveSuperAdminClient, ...additionalInvalidationKeys]
+      ? [userMutationKeys.saveSuperAdminClient, ...additionalInvalidationKeys]
       : [],
     mutationFn: (input: CWLClient) => {
       if (input.clientType === "SuperAdmin") {
         // ✅ SuperAdmin Client Mutation
         const {
+          orgId,
           orgName,
           clientType,
           addressLine1,
@@ -41,25 +42,32 @@ export const useSaveSuperAdminClientMutation = (options?: {
           state,
           country,
           postalCode,
+          contactId,
           contactName,
           contactEmail,
           contactPhone,
           contactRole,
+          sendConfirmationEmail,
         } = input as Client_CWLSuperAdminClient;
 
         return saveSuperAdminClientMutationFn({
-          orgName,
-          clientType,
-          addressLine1,
-          addressLine2,
-          city,
-          state,
-          country,
-          postalCode,
-          contactName,
-          contactEmail,
-          contactPhone,
-          contactRole,
+          input: {
+            orgId,
+            orgName,
+            clientType,
+            addressLine1,
+            addressLine2,
+            city,
+            state,
+            country,
+            postalCode,
+            contactId,
+            contactName,
+            contactEmail,
+            contactPhone,
+            contactRole,
+            sendConfirmationEmail,
+          },
         });
       }
       throw new Error("Invalid clientType provided.");
@@ -84,10 +92,11 @@ export const useSaveEventCompanyAdimnClientMutation = (options?: {
     onSuccess,
     getSuccessMessage,
     invalidateKeys: invalidate
-      ? [userQueryKeys.saveSuperAdminClient, ...additionalInvalidationKeys]
+      ? [userMutationKeys.saveSuperAdminClient, ...additionalInvalidationKeys]
       : [],
     mutationFn: (input: EventCompanyClient) => {
       const {
+        orgId,
         orgName,
         clientType,
         addressLine1,
@@ -96,13 +105,16 @@ export const useSaveEventCompanyAdimnClientMutation = (options?: {
         state,
         country,
         postalCode,
+        contactId,
         contactName,
         contactEmail,
         contactPhone,
         contactRole,
+        sendConfirmationEmail,
       } = input;
 
       return saveEventCompanyAdminClientMutationFn({
+        orgId,
         orgName,
         clientType,
         addressLine1,
@@ -111,10 +123,12 @@ export const useSaveEventCompanyAdimnClientMutation = (options?: {
         state,
         country,
         postalCode,
+        contactId,
         contactName,
         contactEmail,
         contactPhone,
         contactRole,
+        sendConfirmationEmail,
       });
     },
   });
