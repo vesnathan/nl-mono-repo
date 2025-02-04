@@ -1,6 +1,7 @@
 /// CWLClientSchemas.ts
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
+import { send } from "process";
 
 // ----------------------
 // Organization Details Schema (Step 1)
@@ -8,6 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 export const OrgDetailsSchema = z.object({
   clientType: z.literal("SuperAdmin"),
   orgName: z.string().min(1, "Organisation name is required"),
+  orgId: z.string().default(() => uuidv4()),
   addressLine1: z.string().min(1, "Address line 1 is required"),
   addressLine2: z.string().optional(),
   city: z.string().min(1, "City is required"),
@@ -20,10 +22,12 @@ export const OrgDetailsSchema = z.object({
 // Contact Details Schema (Step 2)
 // ----------------------
 export const ContactDetailsSchema = z.object({
+  contactId: z.string().default(() => uuidv4()),
   contactName: z.string().min(1, "Contact name is required"),
   contactEmail: z.string().min(1, "Contact email is required"),
   contactPhone: z.string().min(1, "Contact phone is required"),
   contactRole: z.string().min(1, "Contact role is required"),
+  sendConfirmationEmail: z.boolean().default(true),
 });
 
 // ----------------------
@@ -44,6 +48,7 @@ export type Client_CWLSuperAdminClient = z.infer<
 // Utility function to create an empty SuperAdmin Client
 export const createEmptySuperAdminClient = (): Client_CWLSuperAdminClient => ({
   clientType: "SuperAdmin",
+  orgId: uuidv4(),
   orgName: "",
   addressLine1: "",
   addressLine2: "",
@@ -51,10 +56,12 @@ export const createEmptySuperAdminClient = (): Client_CWLSuperAdminClient => ({
   state: "",
   country: "",
   postalCode: "",
+  contactId: uuidv4(),
   contactName: "",
   contactEmail: "",
   contactPhone: "",
   contactRole: "",
+  sendConfirmationEmail: true,
 });
 
 
@@ -108,6 +115,7 @@ export const EventCompanyClientSchema = z.object({
   contactEmail: z.string().min(1, "Contact email is required"),
   contactPhone: z.string().min(1, "Contact phone is required"),
   contactRole: z.string().min(1, "Contact role is required"),
+  sendConfirmationEmail: z.boolean().default(true),
 });
 
 export type EventCompanyClient = z.infer<typeof EventCompanyClientSchema>;
@@ -130,6 +138,7 @@ export const createEmptyEventCompanyClient = (): EventCompanyClient => ({
   contactEmail: "",
   contactPhone: "",
   contactRole: "",
+  sendConfirmationEmail: true,
 });
 
 // ----------------------
