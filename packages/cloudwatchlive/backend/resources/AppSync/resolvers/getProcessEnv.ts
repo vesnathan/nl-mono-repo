@@ -1,16 +1,21 @@
-// mapped to serverless.yml [provider.environment]
-type ProcessEnv = {
-  USER_FILES_BUCKET_NAME: string;
-  STAGE: string;
+import { z } from "zod";
 
-  cwlUserPoolId: string;
-  cwlCloudFrontDistributionId: string;
-  cwlCloudFrontDomainName: string;
-  cwlBucket: string;
-  cwlHistoryDataBucketName: string;
-  cwlDataTable: string;
-  cwlUserTable: string;
-};
+const ProcessEnvSchema = z.object({
+  USER_FILES_BUCKET_NAME: z.string(),
+  STAGE: z.string(),
+  cwlUserPoolId: z.string(),
+  cwlCloudFrontDistributionId: z.string(),
+  cwlCloudFrontDomainName: z.string(),
+  cwlBucket: z.string(),
+  cwlUserTableArn: z.string(),
+});
+
+type ProcessEnv = z.infer<typeof ProcessEnvSchema>;
+
 export const getProcessEnv = (): ProcessEnv => {
-  return process.env as ProcessEnv;
+  const parsed = ProcessEnvSchema.safeParse(process.env);
+  if (!parsed.success) {
+    throw new Error(`Invalid environment variables: ${JSON.stringify(parsed.error.format(), null, 2)}`);
+  }
+  return parsed.data;
 };

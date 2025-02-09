@@ -1,143 +1,140 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import { UseFormReturn } from "react-hook-form";
-import {
-  CWLClient,
-  createEmptySuperAdminClient,
-  OrgDetailsSchema,
-  ContactDetailsSchema,
-} from "shared/types/CWLClient";
-import { FormModal, FormStep } from "@/components/common/FormModal";
-import { CWLButton } from "@/components/common/CWLButton";
+import React, { useRef, useState, useEffect } from "react";
 import { useUserStore } from "@/stores/userStore";
-import { UserGroup } from "@/graphql/gqlTypes";
-import { z } from "zod";
-import { useSaveClientMutation } from "./clientHooks";
+import { ClientType } from "@/graphql/gqlTypes";
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Divider,
+} from "@nextui-org/react";
+import { CWLButton } from "@/components/common/CWLButton";
+import { AddUserForm } from "./forms/AddUserForm";
 
 export const Clients = () => {
-  const [showAddNewUserModal, setShowAddNewUserModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentForm, setCurrentForm] = useState<
+    "SuperAdmin" | "EventCompanyAdmin" | null
+  >(null);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [totalSteps, setTotalSteps] = useState(1);
+
   const userGroups = useUserStore((state) => state.userGroups);
-  const isSuperAdminUser = userGroups.includes("SuperAdmin" as UserGroup);
-  const isEventCompanyAdmin = userGroups.includes(
-    "EventCompanyAdmin" as UserGroup,
-  );
+  const isSuperAdminUser = userGroups.includes("SuperAdmin" as ClientType);
 
-  // Refs for each user type
-  const superAdminFormRef =
-    useRef<UseFormReturn<Record<string, unknown>>>(null);
-  const eventCompanyFormRef =
-    useRef<UseFormReturn<Record<string, unknown>>>(null);
+  // Define separate refs for each form
+  const addUserFormRef = useRef<{
+    submit: () => void;
+    nextStep: () => Promise<boolean>;
+    previousStep: () => void;
+    reset: () => void;
+    getStep: () => number;
+    getTotalSteps: () => number;
+  } | null>(null);
 
-  const submitMutation = useSaveClientMutation({
-    onSuccess: () => {
-      setShowAddNewUserModal(false);
-    },
-  });
+  useEffect(() => {
+    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
+      setCurrentStep(addUserFormRef.current.getStep());
+      setTotalSteps(addUserFormRef.current.getTotalSteps());
+    }
+  }, [isModalOpen, currentForm]);
 
-  const onSubmit = () => {
-    const formRef = isSuperAdminUser
-      ? superAdminFormRef
-      : isEventCompanyAdmin
-        ? eventCompanyFormRef
-        : null;
+  const handleOpenModal = () => {
+    if (isSuperAdminUser) setCurrentForm("SuperAdmin");
+    setIsModalOpen(true);
+  };
 
-    if (formRef?.current) {
-      formRef.current.handleSubmit((data) => {
-        submitMutation.mutate(data as CWLClient);
-      }, console.error)();
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCurrentForm(null);
+    setCurrentStep(1);
+  };
+
+  const handleSubmit = () => {
+    if (currentForm === "SuperAdmin") {
+      addUserFormRef.current?.submit();
     }
   };
 
-  // Steps for SuperAdminUser
-  const superAdminSteps: FormStep<Record<string, unknown>>[] = [
-    {
-      id: "org",
-      schema: OrgDetailsSchema,
-      fields: [
-        { name: "orgName", label: "Organisation Name" },
-        { name: "addressLine1", label: "Address Line 1" },
-        { name: "addressLine2", label: "Address Line 2" },
-        { name: "city", label: "City" },
-        { name: "state", label: "State" },
-        { name: "country", label: "Country" },
-        { name: "postalCode", label: "Postal Code" },
-      ],
-    },
-    {
-      id: "contacts",
-      schema: ContactDetailsSchema,
-      fields: [
-        { name: "contactName", label: "Contact Name" },
-        { name: "contactEmail", label: "Contact Email" },
-        { name: "contactPhone", label: "Contact Phone" },
-        { name: "contactRole", label: "Contact Role" },
-      ],
-    },
-  ];
+  const handleNext = async () => {
+    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
+      const success = await addUserFormRef.current.nextStep();
+      if (success) setCurrentStep((prev) => prev + 1);
+    }
+  };
 
-  // Steps for EventCompanyAdmin
-  const eventCompanySteps: FormStep<Record<string, unknown>>[] = [
-    {
-      id: "eventCompanyDetails",
-      schema: z.object({
-        companyName: z.string().nonempty("Company Name is required"),
-        contactNumber: z.string().nonempty("Contact Number is required"),
-      }),
-      fields: [
-        { name: "companyName", label: "Company Name" },
-        { name: "contactNumber", label: "Contact Number" },
-      ],
-    },
-    {
-      id: "eventDetails",
-      schema: z.object({
-        eventName: z.string().nonempty("Event Name is required"),
-        eventDate: z.string().nonempty("Event Date is required"),
-      }),
-      fields: [
-        { name: "eventName", label: "Event Name" },
-        { name: "eventDate", label: "Event Date" },
-      ],
-    },
-  ];
+  const handlePrevious = () => {
+    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
+      addUserFormRef.current.previousStep();
+      setCurrentStep((prev) => prev - 1);
+    }
+  };
 
-  // Determine which form to render
-  const formRef = isSuperAdminUser
-    ? superAdminFormRef
-    : isEventCompanyAdmin
-      ? eventCompanyFormRef
-      : null;
-
-  const steps = isSuperAdminUser
-    ? superAdminSteps
-    : isEventCompanyAdmin
-      ? eventCompanySteps
-      : [];
-
-  const initialValues = isSuperAdminUser
-    ? createEmptySuperAdminClient()
-    : isEventCompanyAdmin
-      ? { companyName: "", contactNumber: "", eventName: "", eventDate: "" }
-      : {};
+  const handleReset = () => {
+    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
+      addUserFormRef.current.reset();
+      setCurrentStep(1);
+    }
+  };
 
   return (
     <>
-      <FormModal
-        ref={formRef}
-        isOpen={showAddNewUserModal}
-        onClose={() => setShowAddNewUserModal(false)}
-        initialValues={initialValues}
-        steps={steps}
-        onSubmit={onSubmit}
-        modalTitle={
-          isSuperAdminUser ? "Add New Client" : "Add New Event Company"
-        }
-      />
-      <CWLButton
-        buttonText="New client"
-        onClick={() => setShowAddNewUserModal(true)}
-      />
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        aria-labelledby="client-modal-title"
+      >
+        <ModalContent>
+          <ModalHeader id="client-modal-title">Add New Client</ModalHeader>
+          <Divider />
+          <ModalBody className="mb-5">
+            {currentForm === "SuperAdmin" && (
+              <AddUserForm ref={addUserFormRef} onClose={handleCloseModal} />
+            )}
+          </ModalBody>
+          <Divider />
+          <ModalFooter className="flex justify-between">
+            {/* Reset Button (Hard Left) */}
+            <CWLButton
+              buttonText="Reset"
+              onClick={handleReset}
+              color="secondary"
+            />
+
+            <div className="flex space-x-2">
+              {/* Previous Button (Only if not on Step 1) */}
+              {totalSteps > 1 && currentStep > 1 && (
+                <CWLButton
+                  buttonText="Previous"
+                  onClick={handlePrevious}
+                  color="secondary"
+                />
+              )}
+              {/* Next Button (Only if not on last step) */}
+              {totalSteps > 1 && currentStep < totalSteps && (
+                <CWLButton
+                  buttonText="Next"
+                  onClick={handleNext}
+                  color="primary"
+                />
+              )}
+              {/* Submit Button (Only on last step) */}
+              {currentStep === totalSteps && (
+                <CWLButton
+                  buttonText="Submit"
+                  onClick={handleSubmit}
+                  color="primary"
+                />
+              )}
+            </div>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <CWLButton buttonText="New Client" onClick={handleOpenModal} />
     </>
   );
 };

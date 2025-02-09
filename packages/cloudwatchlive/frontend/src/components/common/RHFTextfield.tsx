@@ -15,6 +15,7 @@ export type RHFTextFieldProps<
   fieldPath: TPath;
   isClearable?: boolean;
   requiredMessage?: string;
+  customClassName?: string;
   customValidation?: (
     fieldValue: PathValue<TValues, TPath>,
   ) => string | boolean | undefined;
@@ -30,6 +31,7 @@ export function RHFTextField<
     isClearable,
     requiredMessage,
     customValidation,
+    customClassName,
     ...cwlTextFieldProps
   } = props;
 
@@ -55,6 +57,7 @@ export function RHFTextField<
             form.clearErrors(fieldPath); // Clear the error for this field
             cwlTextFieldProps.onChange?.(e, newValue);
           }}
+          customClassName={customClassName}
         />
       )}
     />

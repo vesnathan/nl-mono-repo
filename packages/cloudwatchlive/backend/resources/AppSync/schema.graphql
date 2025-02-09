@@ -4,9 +4,6 @@ schema {
 }
 
 type Query {
-  getAuthorizedUser(userId: String!): CWLUser
-  getCWLDataForUser(userId: String!): GetCwlDataForUserResponse
-    @aws_cognito_user_pools
   getCWLUser(userId: String!): CWLUser
     @aws_cognito_user_pools
 }
@@ -15,73 +12,26 @@ type Mutation {
 
   # ----- User/cognito
 
-  # ----- User/cognito
-  registerClientUserUnauth(input: CreateCWLUserInput!): RegisterResult! @aws_iam
   adminSetUserMFAPreference(
     input: AdminSetUserMFAPreferenceInput!
-  ): AdminSetUserMFAPreferenceResult! @aws_cognito_user_pools
+  ): StandardResult! @aws_cognito_user_pools
+  
   associateSoftwareToken(accessToken: String!): associateSoftwareTokenResult!
     @aws_cognito_user_pools
+  
   verifySoftwareToken(
     input: VerifySoftwareTokenInput!
-  ): VerifySoftwareTokenResult! @aws_cognito_user_pools
-  # userId will be retrieved from context.identity
-  updateMyCWLUserData(input: UpdateCWLUserInput!): CWLUser!
-    @aws_cognito_user_pools
+  ): StandardResult! @aws_cognito_user_pools
+
 
   # ----- Client
-  saveClient(input: CreateCWLClientInput!): CreateCWLClientResult! @aws_cognito_user_pools
-
-  # ----- File
-  generateS3UploadURL(
-    input: GenerateS3UploadURLInput!
-  ): GenerateS3UploadURLReponse! @aws_cognito_user_pools
-  generateS3SignedURL(bucketName: String!, fileKey: String!): String!
-    @aws_cognito_user_pools
-  deleteS3Object(location: S3FileLocationInput!): Boolean
-    @aws_cognito_user_pools
-  moveObjectToPermanentLocation(
-    tempLocation: S3FileLocationInput!
-  ): S3FileLocation! @aws_cognito_user_pools
+  saveSuperAdminClient(input: CWLUserInput!): StandardResult! @aws_cognito_user_pools
+  saveEventCompanyAdminClient(input: CWLUserInput!): StandardResult! @aws_cognito_user_pools
 }
 
-input CreateCWLClientInput {
-  id: String!
-  orgName: String!
-  createdDate: String!
-  createdBy: String!
-  addressLine1: String!
-  addressLine2: String
-  city: String!
-  state: String!
-  country: String!
-  postalCode: String!
-  contactName: String!
-  contactEmail: String!
-  contactPhone: String!
-  contactRole: String!
-}
-
-type CreateCWLClientResult {
-  id: String!
-}
-
-type RegisterResult @aws_iam {
-  userId: String!
-}
-
-input CreateCWLUserInput {
-  userTitle: String
-  userFirstName: String!
-  userLastName: String!
-  userEmail: String!
-}
-
-input UpdateCWLUserInput {
-  userTitle: String
-  userFirstName: String!
-  userLastName: String!
-  userEmail: String!
+type StandardResult {
+  statusCode: String!
+  body: String!
 }
 
 input AdminSetUserMFAPreferenceInput {
@@ -108,21 +58,6 @@ input VerifySoftwareTokenInput {
   UserCode: String!
 }
 
-type CwlDataValues @aws_cognito_user_pools {
-  events: String
-}
-
-type GetCwlDataForUserResponse @aws_cognito_user_pools {
-  dataValues: CwlDataValues
-  lastUpdate: String
-}
-
-type CWLDataItem @aws_cognito_user_pools {
-  userId: String!
-  fieldName: String!
-  fieldValue: String!
-  lastUpdate: String!
-}
 
 
 

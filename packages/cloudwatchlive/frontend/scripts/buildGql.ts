@@ -1,7 +1,6 @@
-
 import path from "path";
-import { execCommandAsPromise } from "../../../shared/scripts/execCommandAsPromise";
-import { mergeGraphqlFiles } from "../../../shared/scripts/mergeGraphqlFiles";
+import { execCommandAsPromise } from "shared/scripts/execCommandAsPromise";
+import { mergeGraphqlFiles } from "shared/scripts/mergeGraphqlFiles";
 
 const buildGql = async () => {
   // recursively look through schema folder and grab files ended with .graphql
@@ -11,7 +10,7 @@ const buildGql = async () => {
   mergeGraphqlFiles({
     INPUT_DIRS: [
       path.resolve("../backend/resources/AppSync"),
-      path.resolve("../../wcl-types/graphql"),
+      path.resolve("../../shared/types"),
     ],
     // the output file is then used by amplify codegen defined in `.graphqlconfig.yml`
     OUTPUT_FILE_PATH: path.resolve("combined_schema.graphql"),

@@ -1,11 +1,16 @@
+import { CWLUser } from "@/graphql/gqlTypes";
 import {
-  saveClientMutationFn,
-  userQueryKeys,
-} from "@/graphql/queries/userQueries";
+  saveSuperAdminClientMutationFn,
+  userMutationKeys,
+} from "@/graphql/mutations/userMutations";
 import { useGraphqlMutation } from "@/hooks/useGraphQlMutation";
-import { CWLClient } from "shared/types/CWLClient";
 
-export const useSaveClientMutation = (options?: {
+type MutationInput = Omit<
+  CWLUser,
+  "__typename" | "userId" | "privacyPolicy" | "termsAndConditions"
+>;
+
+export const useSaveSuperAdminClientMutation = (options?: {
   onSuccess?: () => void;
   getSuccessMessage?: () => string;
   invalidate?: boolean;
@@ -17,44 +22,34 @@ export const useSaveClientMutation = (options?: {
     invalidate = true,
     additionalInvalidationKeys = [],
   } = options || {};
+
   return useGraphqlMutation({
     onSuccess,
     getSuccessMessage,
     invalidateKeys: invalidate
-      ? [userQueryKeys.saveClient, ...additionalInvalidationKeys]
+      ? [userMutationKeys.saveSuperAdminClient, ...additionalInvalidationKeys]
       : [],
-    mutationFn: (input: CWLClient) => {
+    mutationFn: (input: MutationInput) => {
       const {
-        id,
-        orgName,
-        createdDate,
-        createdBy,
-        addressLine1,
-        addressLine2,
-        city,
-        state,
-        country,
-        postalCode,
-        contactName,
-        contactEmail,
-        contactPhone,
-        contactRole,
+        userFirstName = "",
+        userLastName = "",
+        userEmail = "",
+        userPhone = "",
+        userRole = "",
+        userTitle = "",
+        organizationId = "",
       } = input;
-      return saveClientMutationFn({
-        id,
-        orgName,
-        createdDate,
-        createdBy,
-        addressLine1,
-        addressLine2,
-        city,
-        state,
-        country,
-        postalCode,
-        contactName,
-        contactEmail,
-        contactPhone,
-        contactRole,
+
+      return saveSuperAdminClientMutationFn({
+        input: {
+          userLastName,
+          userFirstName,
+          userEmail,
+          userPhone,
+          userRole,
+          userTitle,
+          organizationId,
+        },
       });
     },
   });
