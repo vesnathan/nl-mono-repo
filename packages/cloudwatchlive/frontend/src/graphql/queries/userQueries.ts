@@ -13,17 +13,13 @@ const getCWLUserQueryStr = `
       getCWLUser(userId: $userId) {
         userId
         userAddedById
-        PrivacyPolicy
-        TermsAndConditions
+        privacyPolicy
+        termsAndConditions
         userFirstName
         userLastName     
         userEmail
         userPhone
         userTitle
-        userProfilePicture {
-          Bucket
-          Key
-        }
         userCreated
         organizationId 
       }

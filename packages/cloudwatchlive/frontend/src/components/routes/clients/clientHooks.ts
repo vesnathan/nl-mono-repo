@@ -1,14 +1,14 @@
+import { CWLUser } from "@/graphql/gqlTypes";
 import {
-  saveEventCompanyAdminClientMutationFn,
   saveSuperAdminClientMutationFn,
   userMutationKeys,
 } from "@/graphql/mutations/userMutations";
 import { useGraphqlMutation } from "@/hooks/useGraphQlMutation";
-import {
-  CWLClient,
-  Client_CWLSuperAdminClient,
-  EventCompanyClient,
-} from "shared/types/CWLClientSchemas";
+
+type MutationInput = Omit<
+  CWLUser,
+  "__typename" | "userId" | "privacyPolicy" | "termsAndConditions"
+>;
 
 export const useSaveSuperAdminClientMutation = (options?: {
   onSuccess?: () => void;
@@ -29,106 +29,27 @@ export const useSaveSuperAdminClientMutation = (options?: {
     invalidateKeys: invalidate
       ? [userMutationKeys.saveSuperAdminClient, ...additionalInvalidationKeys]
       : [],
-    mutationFn: (input: CWLClient) => {
-      if (input.clientType === "SuperAdmin") {
-        // ✅ SuperAdmin Client Mutation
-        const {
-          orgId,
-          orgName,
-          clientType,
-          addressLine1,
-          addressLine2,
-          city,
-          state,
-          country,
-          postalCode,
-          contactId,
-          contactName,
-          contactEmail,
-          contactPhone,
-          contactRole,
-          sendConfirmationEmail,
-        } = input as Client_CWLSuperAdminClient;
-
-        return saveSuperAdminClientMutationFn({
-          input: {
-            orgId,
-            orgName,
-            clientType,
-            addressLine1,
-            addressLine2,
-            city,
-            state,
-            country,
-            postalCode,
-            contactId,
-            contactName,
-            contactEmail,
-            contactPhone,
-            contactRole,
-            sendConfirmationEmail,
-          },
-        });
-      }
-      throw new Error("Invalid clientType provided.");
-    },
-  });
-};
-
-export const useSaveEventCompanyAdimnClientMutation = (options?: {
-  onSuccess?: () => void;
-  getSuccessMessage?: () => string;
-  invalidate?: boolean;
-  additionalInvalidationKeys?: string[];
-}) => {
-  const {
-    onSuccess,
-    getSuccessMessage,
-    invalidate = true,
-    additionalInvalidationKeys = [],
-  } = options || {};
-
-  return useGraphqlMutation({
-    onSuccess,
-    getSuccessMessage,
-    invalidateKeys: invalidate
-      ? [userMutationKeys.saveSuperAdminClient, ...additionalInvalidationKeys]
-      : [],
-    mutationFn: (input: EventCompanyClient) => {
+    mutationFn: (input: MutationInput) => {
       const {
-        orgId,
-        orgName,
-        clientType,
-        addressLine1,
-        addressLine2,
-        city,
-        state,
-        country,
-        postalCode,
-        contactId,
-        contactName,
-        contactEmail,
-        contactPhone,
-        contactRole,
-        sendConfirmationEmail,
+        userFirstName = "",
+        userLastName = "",
+        userEmail = "",
+        userPhone = "",
+        userRole = "",
+        userTitle = "",
+        organizationId = "",
       } = input;
 
-      return saveEventCompanyAdminClientMutationFn({
-        orgId,
-        orgName,
-        clientType,
-        addressLine1,
-        addressLine2,
-        city,
-        state,
-        country,
-        postalCode,
-        contactId,
-        contactName,
-        contactEmail,
-        contactPhone,
-        contactRole,
-        sendConfirmationEmail,
+      return saveSuperAdminClientMutationFn({
+        input: {
+          userLastName,
+          userFirstName,
+          userEmail,
+          userPhone,
+          userRole,
+          userTitle,
+          organizationId,
+        },
       });
     },
   });

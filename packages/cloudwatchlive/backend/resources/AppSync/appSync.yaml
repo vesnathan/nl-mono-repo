@@ -9,7 +9,7 @@ additionalAuthentications:
       
 schema:
   - resources/AppSync/**/*.graphql
-  - ../../wcl-types/graphql/**/*.graphql
+  - ../../shared/types/**/*.graphql
 
 resolvers:
   Query.getCWLUser:
@@ -18,11 +18,6 @@ resolvers:
     code: ./resources/AppSync/resolvers/users/Queries/Query.getCWLUser.ts
     
 
-  Query.getCWLDataForUser:
-    dataSource: cwlDataTable
-    kind: UNIT
-    code: ./resources/AppSync/resolvers/users/Queries/Query.getCWLDataForUser.ts
-
   Mutation.saveSuperAdminClient:
     kind: PIPELINE
     functions:
@@ -30,8 +25,60 @@ resolvers:
           type: AWS_LAMBDA
           config:
             function:
+              timeout: 900
               name: cwl-${opt:stage}-mutation-createCognitoUser
-              handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_createCognitoUser.handler"
+              handler: "resources/AppSync/resolvers/users/Mutations/Mutation_createCognitoUser.handler"          
+              iamRoleStatementsName: cwl-mutation-createCognitoUser-iam-role-${opt:stage}
+              iamRoleStatements:
+                - Effect: Allow
+                  Action: 
+                  - "cognito-idp:AdminCreateUser"
+                  - "cognito-idp:ListUsers"
+                  Resource: !ImportValue cwlUserPoolArn-${opt:stage}               
+              vpc:
+                securityGroupIds:
+                  - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
+                subnetIds:
+                  - !ImportValue privateSubnet1-${opt:stage}
+                  - !ImportValue privateSubnet2-${opt:stage}
+      - dataSource:
+          type: AWS_LAMBDA
+          config:
+            function:
+              timeout: 900
+              name: cwl-${opt:stage}-mutation-addUserToGroup
+              handler: "resources/AppSync/resolvers/users/Mutations/Mutation_addUserToGroup.handler"
+              iamRoleStatementsName: cwl-mutation-addUserToGroup-iam-role-${opt:stage}
+              iamRoleStatements:
+                - Effect: Allow
+                  Action: 
+                  - "cognito-idp:AdminAddUserToGroup"
+                  Resource: !ImportValue cwlUserPoolArn-${opt:stage}             
+              vpc:
+                securityGroupIds:
+                  - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
+                subnetIds:
+                  - !ImportValue privateSubnet1-${opt:stage}
+                  - !ImportValue privateSubnet2-${opt:stage}
+      - dataSource:
+          type: AWS_LAMBDA
+          config:
+            function:
+              timeout: 900
+              name: cwl-${opt:stage}-mutation-createCWLUser
+              handler: "resources/AppSync/resolvers/users/Mutations/Mutation_createCWLUser.handler"
+              iamRoleStatementsName: cwl-mutation-createCWLUser-iam-role-${opt:stage}
+              iamRoleStatements:
+                - Effect: Allow
+                  Action: 
+                  - "dynamodb:PutItem"
+                  Resource: !ImportValue cwlUserTableArn-${opt:stage}         
+              vpc:
+                securityGroupIds:
+                  - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
+                subnetIds:
+                  - !ImportValue privateSubnet1-${opt:stage}
+                  - !ImportValue privateSubnet2-${opt:stage}
 
   Mutation.associateSoftwareToken:
     kind: UNIT
@@ -97,83 +144,6 @@ resolvers:
               Resource: !ImportValue cwlUserPoolArn-${opt:stage}
   # endregion user
 
-  # region file
-  Mutation.generateS3UploadURL:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          handler: ./resources/AppSync/resolvers/files/Mutation_generateS3UploadURL.handler
-          iamRoleStatementsName: cwl-mutation-generateS3UploadURL-${opt:stage}
-          iamRoleStatements:
-            - Effect: Allow
-              Action: s3:PutObject # createPresignedPost needs this under the hood
-              Resource: arn:aws:s3:::cwl-user-files-${opt:stage}/*
-            - Effect: Allow
-              Action: kms:GenerateDataKey
-              Resource: !ImportValue cwlKMSKeyArn-${opt:stage}
-
-  Mutation.generateS3SignedURL:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          handler: ./resources/AppSync/resolvers/files/Mutation_generateS3SignedURL.handler
-          iamRoleStatementsName: cwl-mutation-generateS3SignedURL-${opt:stage}
-          iamRoleStatements:
-            - Effect: Allow
-              Action:
-                - s3:GetObject
-                - s3:HeadObject
-              Resource: arn:aws:s3:::cwl-user-files-${opt:stage}/*
-            - Effect: Allow
-              Action: kms:Decrypt
-              Resource: !ImportValue cwlKMSKeyArn-${opt:stage}
-
-  Mutation.deleteS3Object:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          handler: ./resources/AppSync/resolvers/files/Mutation_deleteS3Object.handler
-          iamRoleStatementsName: cwl-mutation-deleteS3Object-${opt:stage}
-          iamRoleStatements:
-            - Effect: Allow
-              Action:
-                - s3:DeleteObject
-                # HeadObject also requires GetObject permission to work
-                - s3:HeadObject
-                - s3:GetObject
-              Resource:
-                - arn:aws:s3:::cwl-user-files-${opt:stage}/*
-
-  Mutation.moveObjectToPermanentLocation:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          name: cwl-${opt:stage}-mutation-moveObjToPermLoc
-          handler: ./resources/AppSync/resolvers/files/Mutation_moveObjectToPermanentLocation.handler
-          iamRoleStatementsName: cwl-mutation-moveObjectToPermanentLocation-${opt:stage}
-          iamRoleStatements:
-            - Effect: Allow
-              Action:
-                - s3:GetObject
-                - s3:CopyObject
-                - s3:PutObject
-              Resource:
-                - arn:aws:s3:::cwl-user-files-${opt:stage}/*
-            - Effect: Allow
-              Action: 
-                - kms:Decrypt
-                - kms:GenerateDataKey
-              Resource: !ImportValue cwlKMSKeyArn-${opt:stage}
-
-  # endregion file
 
   
 

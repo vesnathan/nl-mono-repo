@@ -5,17 +5,15 @@ import {
   PathValue,
   UseFormReturn,
 } from "react-hook-form";
-import { CWLTextField, CWLTextFieldProps } from "./CWLTextField";
+import { CWLSelect, CWLSelectProps } from "./CWLSelect";
 
-export type RHFTextFieldProps<
+type RHFSelectProps<
   TValues extends FieldValues,
   TPath extends FieldPath<TValues>,
-> = Omit<CWLTextFieldProps, "value" | "onClear" | "isError" | "helperText"> & {
+> = Omit<CWLSelectProps, "value" | "isError" | "helperText"> & {
   form: UseFormReturn<TValues>;
   fieldPath: TPath;
-  isClearable?: boolean;
   requiredMessage?: string;
-  customClassName?: string;
   customValidation?: (
     fieldValue: PathValue<TValues, TPath>,
   ) => string | boolean | undefined;
@@ -23,16 +21,14 @@ export type RHFTextFieldProps<
 
 export function RHFSelect<
   TValues extends FieldValues,
-  TPath extends FieldPath<TValues>,
->(props: RHFTextFieldProps<TValues, TPath>) {
+  TPath extends FieldPath<TValues> = FieldPath<TValues>,
+>(props: RHFSelectProps<TValues, TPath>) {
   const {
     form,
     fieldPath,
-    isClearable,
     requiredMessage,
     customValidation,
-    customClassName,
-    ...cwlTextFieldProps
+    ...cwlSelectProps
   } = props;
 
   return (
@@ -43,23 +39,22 @@ export function RHFSelect<
         required: requiredMessage,
         validate: customValidation,
       }}
-      render={({ field, fieldState }) => (
-        <CWLTextField
-          helperText={fieldState.error?.message || ""}
-          isError={!!fieldState.error}
-          value={field.value ?? ""}
-          onClear={isClearable ? () => field.onChange("") : undefined}
-          {...cwlTextFieldProps}
-          id={cwlTextFieldProps.id ?? fieldPath}
-          testId={cwlTextFieldProps.testId ?? fieldPath}
-          onChange={(e, newValue) => {
-            field.onChange(newValue);
-            form.clearErrors(fieldPath); // Clear the error for this field
-            cwlTextFieldProps.onChange?.(e, newValue);
-          }}
-          customClassName={customClassName}
-        />
-      )}
+      render={({ field, fieldState }) => {
+        return (
+          <CWLSelect
+            value={field.value}
+            isError={!!fieldState.error}
+            helperText={fieldState.error?.message}
+            id={cwlSelectProps.id ?? fieldPath}
+            testId={cwlSelectProps.testId ?? fieldPath}
+            {...cwlSelectProps}
+            onChange={(v) => {
+              field.onChange(v);
+              cwlSelectProps?.onChange?.(v);
+            }}
+          />
+        );
+      }}
     />
   );
 }

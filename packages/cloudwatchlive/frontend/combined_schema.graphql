@@ -1,32 +1,9 @@
-input GenerateS3UploadURLInput {
-  ProfilePicture: ProfilePictureFileUploadInput
-}
-
-input defaultFileUploadInput {
-  fileName: String!
-  contentType: String!
-  fileId: String!
-}
-
-input ProfilePictureFileUploadInput {
-  fileName: String!
-}
-
-type GenerateS3UploadURLReponse {
-  url: String!
-  fileLocation: S3FileLocation!
-  fields: AWSJSON! # Record<string, string>. These fields should be appended to formData
-}
-
 schema {
   query: Query
   mutation: Mutation
 }
 
 type Query {
-  getAuthorizedUser(userId: String!): CWLUser
-  getCWLDataForUser(userId: String!): GetCwlDataForUserResponse
-    @aws_cognito_user_pools
   getCWLUser(userId: String!): CWLUser
     @aws_cognito_user_pools
 }
@@ -35,76 +12,26 @@ type Mutation {
 
   # ----- User/cognito
 
-  # ----- User/cognito
-  registerClientUserUnauth(input: CreateCWLUserInput!): RegisterResult! @aws_iam
   adminSetUserMFAPreference(
     input: AdminSetUserMFAPreferenceInput!
-  ): AdminSetUserMFAPreferenceResult! @aws_cognito_user_pools
+  ): StandardResult! @aws_cognito_user_pools
+  
   associateSoftwareToken(accessToken: String!): associateSoftwareTokenResult!
     @aws_cognito_user_pools
+  
   verifySoftwareToken(
     input: VerifySoftwareTokenInput!
-  ): VerifySoftwareTokenResult! @aws_cognito_user_pools
-  # userId will be retrieved from context.identity
-  updateMyCWLUserData(input: UpdateCWLUserInput!): CWLUser!
-    @aws_cognito_user_pools
+  ): StandardResult! @aws_cognito_user_pools
+
 
   # ----- Client
-  saveSuperAdminClient(input: SaveClientInput!): SaveClientResult! @aws_cognito_user_pools
-  saveEventCompanyAdminClient(input: SaveClientInput!): SaveClientResult! @aws_cognito_user_pools
-
-  # ----- File
-  generateS3UploadURL(
-    input: GenerateS3UploadURLInput!
-  ): GenerateS3UploadURLReponse! @aws_cognito_user_pools
-  generateS3SignedURL(bucketName: String!, fileKey: String!): String!
-    @aws_cognito_user_pools
-  deleteS3Object(location: S3FileLocationInput!): Boolean
-    @aws_cognito_user_pools
-  moveObjectToPermanentLocation(
-    tempLocation: S3FileLocationInput!
-  ): S3FileLocation! @aws_cognito_user_pools
+  saveSuperAdminClient(input: CWLUserInput!): StandardResult! @aws_cognito_user_pools
+  saveEventCompanyAdminClient(input: CWLUserInput!): StandardResult! @aws_cognito_user_pools
 }
 
-input SaveClientInput {
-  orgId: String!
-  orgName: String!
-  clientType: String!
-  addressLine1: String!
-  addressLine2: String
-  city: String!
-  state: String!
-  country: String!
-  postalCode: String!
-  contactId: String!
-  contactName: String!
-  contactEmail: String!
-  contactPhone: String!
-  contactRole: String!
-  sendConfirmationEmail: Boolean!
-}
-
-type SaveClientResult {
-  success: Boolean!
-  message: String!
-}
-
-type RegisterResult @aws_iam {
-  userId: String!
-}
-
-input CreateCWLUserInput {
-  userTitle: String
-  userFirstName: String!
-  userLastName: String!
-  userEmail: String!
-}
-
-input UpdateCWLUserInput {
-  userTitle: String
-  userFirstName: String!
-  userLastName: String!
-  userEmail: String!
+type StandardResult {
+  statusCode: String!
+  body: String!
 }
 
 input AdminSetUserMFAPreferenceInput {
@@ -131,27 +58,34 @@ input VerifySoftwareTokenInput {
   UserCode: String!
 }
 
-type CwlDataValues @aws_cognito_user_pools {
-  events: String
+
+
+
+
+
+type CWLOrg @aws_cognito_user_pools {
+  organizationId: String!
+  organizationName: String!
+  addressLine1: String!
+  addressLine2: String!
+  city: String!
+  state: String!
+  country: String!
+  postalCode: String!
+  orgPhone: String!
 }
 
-type GetCwlDataForUserResponse @aws_cognito_user_pools {
-  dataValues: CwlDataValues
-  lastUpdate: String
+input CWLOrgInput {
+  organizationName: String!
+  addressLine1: String!
+  addressLine2: String!
+  city: String!
+  state: String!
+  country: String!
+  postalCode: String!
+  orgPhone: String!
 }
-
-type CWLDataItem @aws_cognito_user_pools {
-  userId: String!
-  fieldName: String!
-  fieldValue: String!
-  lastUpdate: String!
-}
-
-
-
-
-
-enum UserGroup {
+enum ClientType {
   SuperAdmin
   EventCompanyAdmin
   EventCompanyStaff
@@ -163,25 +97,27 @@ enum UserGroup {
 
 type CWLUser @aws_cognito_user_pools {
   userId: String!
-  userAddedById: String
-  PrivacyPolicy: Boolean
-  TermsAndConditions: Boolean
+  organizationId: String!
+  privacyPolicy: Boolean!
+  termsAndConditions: Boolean!
+  userAddedById: String!
+  userCreated: String!
   userEmail: String!
+  userTitle: String!
   userFirstName: String!
   userLastName: String!
-  userPhone: String
-  userTitle: String
-  userProfilePicture: S3FileLocation
-  userCreated: String!
-  organizationId: String
-  userGroups: [UserGroup]
-}
-type S3FileLocation {
-  Bucket: String!
-  Key: String!
+  userPhone: String!
+  userRole: String!
+  clientType: [ClientType!]!
 }
 
-input S3FileLocationInput {
-  Bucket: String!
-  Key: String!
+
+input CWLUserInput {
+  userEmail: String!
+  userTitle: String!
+  userFirstName: String!
+  userLastName: String!
+  userPhone: String!
+  organizationId: String!
+  userRole: String!
 }

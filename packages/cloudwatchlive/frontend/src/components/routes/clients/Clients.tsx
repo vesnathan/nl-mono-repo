@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { useUserStore } from "@/stores/userStore";
-import { UserGroup } from "@/graphql/gqlTypes";
+import { ClientType } from "@/graphql/gqlTypes";
 import {
   Modal,
   ModalBody,
@@ -12,8 +12,7 @@ import {
   Divider,
 } from "@nextui-org/react";
 import { CWLButton } from "@/components/common/CWLButton";
-import { EventCompanyAdminForm } from "./forms/EventCompanyAdminAddClientForm";
-import { SuperAdminForm } from "./forms/SuperAdminAddClientForm";
+import { AddUserForm } from "./forms/AddUserForm";
 
 export const Clients = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,22 +23,10 @@ export const Clients = () => {
   const [totalSteps, setTotalSteps] = useState(1);
 
   const userGroups = useUserStore((state) => state.userGroups);
-  const isSuperAdminUser = userGroups.includes("SuperAdmin" as UserGroup);
-  const isEventCompanyAdmin = userGroups.includes(
-    "EventCompanyAdmin" as UserGroup,
-  );
+  const isSuperAdminUser = userGroups.includes("SuperAdmin" as ClientType);
 
   // Define separate refs for each form
-  const superAdminFormRef = useRef<{
-    submit: () => void;
-    nextStep: () => Promise<boolean>;
-    previousStep: () => void;
-    reset: () => void;
-    getStep: () => number;
-    getTotalSteps: () => number;
-  } | null>(null);
-
-  const eventCompanyFormRef = useRef<{
+  const addUserFormRef = useRef<{
     submit: () => void;
     nextStep: () => Promise<boolean>;
     previousStep: () => void;
@@ -49,21 +36,14 @@ export const Clients = () => {
   } | null>(null);
 
   useEffect(() => {
-    if (currentForm === "SuperAdmin" && superAdminFormRef.current) {
-      setCurrentStep(superAdminFormRef.current.getStep());
-      setTotalSteps(superAdminFormRef.current.getTotalSteps());
-    } else if (
-      currentForm === "EventCompanyAdmin" &&
-      eventCompanyFormRef.current
-    ) {
-      setCurrentStep(eventCompanyFormRef.current.getStep());
-      setTotalSteps(eventCompanyFormRef.current.getTotalSteps());
+    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
+      setCurrentStep(addUserFormRef.current.getStep());
+      setTotalSteps(addUserFormRef.current.getTotalSteps());
     }
   }, [isModalOpen, currentForm]);
 
   const handleOpenModal = () => {
     if (isSuperAdminUser) setCurrentForm("SuperAdmin");
-    else if (isEventCompanyAdmin) setCurrentForm("EventCompanyAdmin");
     setIsModalOpen(true);
   };
 
@@ -75,47 +55,27 @@ export const Clients = () => {
 
   const handleSubmit = () => {
     if (currentForm === "SuperAdmin") {
-      superAdminFormRef.current?.submit();
-    } else if (currentForm === "EventCompanyAdmin") {
-      eventCompanyFormRef.current?.submit();
+      addUserFormRef.current?.submit();
     }
   };
 
   const handleNext = async () => {
-    if (currentForm === "SuperAdmin" && superAdminFormRef.current) {
-      const success = await superAdminFormRef.current.nextStep();
-      if (success) setCurrentStep((prev) => prev + 1);
-    } else if (
-      currentForm === "EventCompanyAdmin" &&
-      eventCompanyFormRef.current
-    ) {
-      const success = await eventCompanyFormRef.current.nextStep();
+    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
+      const success = await addUserFormRef.current.nextStep();
       if (success) setCurrentStep((prev) => prev + 1);
     }
   };
 
   const handlePrevious = () => {
-    if (currentForm === "SuperAdmin" && superAdminFormRef.current) {
-      superAdminFormRef.current.previousStep();
-      setCurrentStep((prev) => prev - 1);
-    } else if (
-      currentForm === "EventCompanyAdmin" &&
-      eventCompanyFormRef.current
-    ) {
-      eventCompanyFormRef.current.previousStep();
+    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
+      addUserFormRef.current.previousStep();
       setCurrentStep((prev) => prev - 1);
     }
   };
 
   const handleReset = () => {
-    if (currentForm === "SuperAdmin" && superAdminFormRef.current) {
-      superAdminFormRef.current.reset();
-      setCurrentStep(1);
-    } else if (
-      currentForm === "EventCompanyAdmin" &&
-      eventCompanyFormRef.current
-    ) {
-      eventCompanyFormRef.current.reset();
+    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
+      addUserFormRef.current.reset();
       setCurrentStep(1);
     }
   };
@@ -132,16 +92,7 @@ export const Clients = () => {
           <Divider />
           <ModalBody className="mb-5">
             {currentForm === "SuperAdmin" && (
-              <SuperAdminForm
-                ref={superAdminFormRef}
-                onClose={handleCloseModal}
-              />
-            )}
-            {currentForm === "EventCompanyAdmin" && (
-              <EventCompanyAdminForm
-                ref={eventCompanyFormRef}
-                onClose={handleCloseModal}
-              />
+              <AddUserForm ref={addUserFormRef} onClose={handleCloseModal} />
             )}
           </ModalBody>
           <Divider />
