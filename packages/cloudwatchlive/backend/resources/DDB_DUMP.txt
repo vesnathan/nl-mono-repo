@@ -5,10 +5,10 @@
   "organizationId": {
     "S": ""
   },
-  "PrivacyPolicy": {
+  "privacyPolicy": {
     "BOOL": true
   },
-  "TermsAndConditions": {
+  "termsAndConditions": {
     "BOOL": true
   },
   "userAddedById": {

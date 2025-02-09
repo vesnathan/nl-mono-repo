@@ -1,5 +1,3 @@
-"use client";
-
 import { forwardRef, useImperativeHandle, useState } from "react";
 import {
   useForm,
@@ -19,7 +17,14 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import { CWLButton } from "@/components/common/CWLButton";
+import { RHFSelect } from "@/components/common/RHFSelect";
 
+/** Types for your step config */
+export type FormFieldType = "text" | "select";
+
+/**
+ * We organize fields based on their `row` property.
+ */
 export type FormStep<T extends Record<string, unknown>> = {
   id: string;
   schema: ZodObject<ZodRawShape>;
@@ -27,7 +32,9 @@ export type FormStep<T extends Record<string, unknown>> = {
     name: FieldPath<T>;
     label: string;
     placeholder?: string;
-    type?: string;
+    type: FormFieldType;
+    row: number;
+    options?: { value: string; label: string }[];
   }[];
 };
 
@@ -80,6 +87,16 @@ export const FormModal = forwardRef(
       onSubmit(data);
     });
 
+    // Group fields by row
+    const groupedFields = steps[currentStep].fields.reduce(
+      (acc, field) => {
+        if (!acc[field.row]) acc[field.row] = [];
+        acc[field.row].push(field);
+        return acc;
+      },
+      {} as Record<number, FormStep<T>["fields"]>,
+    );
+
     return (
       <Modal isOpen={isOpen} onClose={onClose} aria-labelledby="modal-title">
         <ModalContent>
@@ -87,15 +104,63 @@ export const FormModal = forwardRef(
 
           <Divider />
           <ModalBody className="mb-5">
-            {steps[currentStep].fields.map((field) => (
-              <RHFTextField
-                key={field.name}
-                form={form}
-                fieldPath={field.name}
-                label={field.label}
-                placeholder={field.placeholder}
-              />
-            ))}
+            {/* Step Indicators */}
+            {steps.length > 1 && (
+              <div className="relative my-5">
+                <div className="flex justify-between mb-2">
+                  {steps.map((step, index) => (
+                    <span
+                      key={step.id}
+                      className={`text-sm font-medium ${
+                        index === currentStep ? "text-primary" : "text-gray-500"
+                      }`}
+                      style={{ textAlign: "center", width: "100%" }}
+                    >
+                      {index === currentStep && step.id}
+                    </span>
+                  ))}
+                </div>
+                <div className="w-full h-2 bg-gray-200 rounded-lg">
+                  <div
+                    className="h-2 bg-primary rounded-lg transition-all"
+                    style={{
+                      width: `${((currentStep + 1) / steps.length) * 100}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            <div className="space-y-4">
+              {Object.entries(groupedFields).map(([row, fields]) => (
+                <div
+                  key={row}
+                  className={`grid ${
+                    fields.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                  } gap-4`}
+                >
+                  {fields.map((field) => (
+                    <div key={field.name}>
+                      {field.type === "select" ? (
+                        <RHFSelect
+                          form={form}
+                          fieldPath={field.name}
+                          label={field.label}
+                          placeholder={field.placeholder}
+                        />
+                      ) : (
+                        <RHFTextField
+                          form={form}
+                          fieldPath={field.name}
+                          label={field.label}
+                          placeholder={field.placeholder}
+                          type={field.type}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </ModalBody>
           <Divider />
           <ModalFooter>

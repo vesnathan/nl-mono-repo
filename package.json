@@ -6,7 +6,6 @@
     "packages/cloudwatchlive/backend",
     "packages/shared",
     "packages/cwl-waf",
-    "packages/wcl-types",
     "packages/shared-aws-assets"
   ],
   "dependencies": {

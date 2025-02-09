@@ -80,6 +80,8 @@ export interface CWLTextFieldProps {
     placeholder?: string;
   };
 
+  customClassName?: string;
+
   minRows?: number;
   autoFocus?: boolean;
 }
@@ -113,6 +115,7 @@ export const CWLTextField = React.forwardRef<
     inputProps,
     name,
     autoFocus,
+    customClassName,
   } = props;
   const reactId = useId();
   const inputId = id ?? reactId;
@@ -181,6 +184,7 @@ export const CWLTextField = React.forwardRef<
             inputWrapper: cn(isDisabled && "bg-neutral-100"),
             innerWrapper: "flex items-center",
           }}
+          className={customClassName}
           startContent={startContent}
           endContent={
             type === "password" ? (

@@ -1,17 +1,10 @@
 import { GraphQLResult, generateClient } from "aws-amplify/api";
-import {
-  GetCWLUserQuery,
-  GetCWLUserQueryVariables,
-  CreateCWLClientResult,
-  CreateCWLClientInput,
-} from "../gqlTypes";
+import { GetCWLUserQuery, GetCWLUserQueryVariables } from "../gqlTypes";
 
 const amplifyGraphqlClient = generateClient();
 
 export const userQueryKeys = {
   getCWLUser: "getCWLUser",
-  profilePicture: "profilePicture",
-  saveClient: "saveClient",
 };
 
 // getCWLUser Wuery
@@ -20,17 +13,13 @@ const getCWLUserQueryStr = `
       getCWLUser(userId: $userId) {
         userId
         userAddedById
-        PrivacyPolicy
-        TermsAndConditions
+        privacyPolicy
+        termsAndConditions
         userFirstName
         userLastName     
         userEmail
         userPhone
         userTitle
-        userProfilePicture {
-          Bucket
-          Key
-        }
         userCreated
         organizationId 
       }
@@ -48,22 +37,4 @@ export const getCWLUserQueryFn = (variables: GetCWLUserQueryVariables) => {
     variables,
     authMode: "userPool",
   }) as Promise<GraphQLResult<GetCWLUserQuery>>;
-};
-
-// saveClient Mutation
-const saveClientQueryStr = `
-    mutation SaveClient($input: CreateCWLClientInput!) {
-      saveClient(input: $input) {
-          id,
-      }
-    }
-`;
-export const saveClientQueryKey = () => [userQueryKeys.saveClient];
-
-export const saveClientMutationFn = async (variables: CreateCWLClientInput) => {
-  return amplifyGraphqlClient.graphql({
-    query: saveClientQueryStr,
-    variables,
-    authMode: "userPool",
-  }) as Promise<GraphQLResult<CreateCWLClientResult>>;
 };
