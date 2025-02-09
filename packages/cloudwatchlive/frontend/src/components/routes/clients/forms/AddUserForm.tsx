@@ -1,4 +1,4 @@
-// SuperAdminForm.tsx
+/* eslint-disable sonarjs/cognitive-complexity */
 
 "use client";
 
@@ -6,26 +6,36 @@ import React, { forwardRef, useImperativeHandle, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ZodError } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Client_CWLSuperAdminClient,
-  createEmptySuperAdminClient,
-  Client_CWLSuperAdminClientSchema,
-  SuperAdminStep1Schema,
-  SuperAdminStep2Schema,
-} from "shared/types/CWLClientSchemas";
+
 import { RHFSelect } from "@/components/common/RHFSelect";
 import { RHFTextField } from "@/components/common/RHFTextfield";
+
+import { createEmptyCWLOrg, CWLOrgSchema } from "shared/types/CWLOrgSchemas";
+import {
+  createEmptyCWLUser,
+  CWLUserFormValidationSchema,
+  CWLUserSchema,
+} from "shared/types/CWLUserSchemas";
+import { ClientType, CWLUser } from "@/graphql/gqlTypes";
+import { useUserStore } from "@/stores/userStore";
+import { useGetUserJobRoles } from "@/hooks/useGetUserJobRoles";
 import { useSaveSuperAdminClientMutation } from "../clientHooks";
 
-export const SuperAdminForm = forwardRef(
+export const AddUserForm = forwardRef(
   ({ onClose }: { onClose: () => void }, ref) => {
     const [step, setStep] = useState(1);
     const totalSteps = 2;
+    const userGroups = useUserStore(
+      (state) => state.userGroups as ClientType[],
+    );
+    const jobRolesForUserGroup = useGetUserJobRoles(userGroups);
 
-    // Use the full schema for the final submission.
-    const form = useForm<Client_CWLSuperAdminClient>({
-      defaultValues: createEmptySuperAdminClient(),
-      resolver: zodResolver(Client_CWLSuperAdminClientSchema),
+    const form = useForm<CWLUser>({
+      defaultValues: {
+        ...createEmptyCWLUser(),
+        ...createEmptyCWLOrg(),
+      },
+      resolver: zodResolver(CWLUserFormValidationSchema),
     });
 
     const submitMutation = useSaveSuperAdminClientMutation({
@@ -38,7 +48,7 @@ export const SuperAdminForm = forwardRef(
     const mapZodErrorsToForm = (error: ZodError) => {
       error.errors.forEach(({ path, message }) => {
         if (path.length > 0) {
-          form.setError(path[0] as keyof Client_CWLSuperAdminClient, {
+          form.setError(path[0] as keyof CWLUser, {
             message,
           });
         }
@@ -49,7 +59,7 @@ export const SuperAdminForm = forwardRef(
       submit: () => {
         if (step === totalSteps) {
           // Final submission: run the full validation
-          form.handleSubmit((data: Client_CWLSuperAdminClient) => {
+          form.handleSubmit((data: CWLUser) => {
             submitMutation.mutate(data);
           })();
         }
@@ -59,11 +69,11 @@ export const SuperAdminForm = forwardRef(
         try {
           if (step === 1) {
             // Validate Step 1 fields only
-            SuperAdminStep1Schema.parse(values);
+            CWLOrgSchema.parse(values);
             setStep(2);
           } else if (step === 2) {
-            // Optionally, validate Step 2 if needed.
-            SuperAdminStep2Schema.parse(values);
+            // Validate Step 2 fields only
+            CWLUserSchema.parse(values);
           }
           return true;
         } catch (err) {
@@ -90,78 +100,44 @@ export const SuperAdminForm = forwardRef(
           <>
             <RHFTextField
               form={form}
-              fieldPath="orgName"
-              label="Organisation Name"
-              placeholder="Enter organisation name"
+              fieldPath="userFirstName"
+              label="Contact First Name"
+              placeholder="Enter contact first name"
             />
             <RHFTextField
               form={form}
-              fieldPath="addressLine1"
-              label="Address Line 1"
-              placeholder="Enter address line 1"
+              fieldPath="userLastName"
+              label="Contact Last Name"
+              placeholder="Enter contact last name"
             />
             <RHFTextField
               form={form}
-              fieldPath="addressLine2"
-              label="Address Line 2"
-              placeholder="Enter address line 2"
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <RHFTextField
-                form={form}
-                fieldPath="city"
-                label="City"
-                placeholder="Enter city"
-              />
-              <RHFTextField
-                form={form}
-                fieldPath="state"
-                label="State"
-                placeholder="Enter state"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <RHFTextField
-                form={form}
-                fieldPath="country"
-                label="Country"
-                placeholder="Enter country"
-              />
-              <RHFTextField
-                form={form}
-                fieldPath="postalCode"
-                label="Postal Code"
-                placeholder="Enter postal code"
-              />
-            </div>
-          </>
-        )}
-
-        {step === 2 && (
-          <>
-            <RHFTextField
-              form={form}
-              fieldPath="contactName"
-              label="Contact Name"
-              placeholder="Enter contact name"
-            />
-            <RHFTextField
-              form={form}
-              fieldPath="contactEmail"
+              fieldPath="userEmail"
               label="Contact Email"
               placeholder="Enter contact email"
             />
             <RHFTextField
               form={form}
-              fieldPath="contactPhone"
+              fieldPath="userPhone"
               label="Contact Phone"
               placeholder="Enter contact phone"
             />
             <RHFSelect
               form={form}
-              fieldPath="contactRole"
+              fieldPath="userRole"
               label="Contact Role"
               placeholder="Select contact role"
+              options={jobRolesForUserGroup}
+            />
+            <RHFSelect
+              form={form}
+              fieldPath="organizationId"
+              label="Organisation Name"
+              placeholder="Enter organisation name"
+              options={[
+                { id: "1", value: "Org 1" },
+                { id: "2", value: "Org 2" },
+              ]}
             />
           </>
         )}
@@ -169,3 +145,5 @@ export const SuperAdminForm = forwardRef(
     );
   },
 );
+
+AddUserForm.displayName = "SuperAdminForm";

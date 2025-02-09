@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { CWLUser } from "@/graphql/gqlTypes";
+import { ClientType, CWLUser } from "@/graphql/gqlTypes";
 
 const createDefaultCWLUser = (): CWLUser => ({
   __typename: "CWLUser",
@@ -8,7 +8,14 @@ const createDefaultCWLUser = (): CWLUser => ({
   userFirstName: "",
   userLastName: "",
   userCreated: "",
-  userGroups: [],
+  organizationId: "",
+  privacyPolicy: false,
+  termsAndConditions: false,
+  userAddedById: "",
+  clientType: [],
+  userTitle: "",
+  userPhone: "",
+  userRole: "",
 });
 
 // --------------------user store-----------
@@ -16,7 +23,7 @@ type UserStoreType = {
   user: CWLUser;
   setUser: (user: CWLUser) => void;
   userGroups: string[];
-  setUserGroups: (userGroups: string[]) => void;
+  setUserGroups: (userGroups: ClientType[]) => void;
 };
 
 export const useUserStore = create<UserStoreType>((set) => ({

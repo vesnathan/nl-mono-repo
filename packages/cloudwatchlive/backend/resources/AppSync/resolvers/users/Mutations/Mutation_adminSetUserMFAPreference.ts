@@ -15,7 +15,8 @@ export const handler = async (event: any): Promise<OUTPUT> => {
   const UserPoolId = lambdaEnv.cwlUserPoolId;
   const Username = input.userEmail;
 
-  await cognito.adminSetUserMFAPreference({
+  try {
+  const response = await cognito.adminSetUserMFAPreference({
     SoftwareTokenMfaSettings: { 
       "Enabled": true,
       "PreferredMfa": true,
@@ -25,6 +26,13 @@ export const handler = async (event: any): Promise<OUTPUT> => {
   });
   
   return {
-    userId: input.userId,
+    statusCode: "200",
+    body: JSON.stringify({message: "MFA Preference Set"})
   };
+} catch (e) {
+  return {
+    statusCode: "500",
+    body: JSON.stringify({message: e})
+  };
+}
 };

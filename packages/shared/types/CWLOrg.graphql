@@ -1,0 +1,22 @@
+type CWLOrg @aws_cognito_user_pools {
+  organizationId: String!
+  organizationName: String!
+  addressLine1: String!
+  addressLine2: String!
+  city: String!
+  state: String!
+  country: String!
+  postalCode: String!
+  orgPhone: String!
+}
+
+input CWLOrgInput {
+  organizationName: String!
+  addressLine1: String!
+  addressLine2: String!
+  city: String!
+  state: String!
+  country: String!
+  postalCode: String!
+  orgPhone: String!
+}
