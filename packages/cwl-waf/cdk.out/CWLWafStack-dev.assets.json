@@ -1,0 +1,21 @@
+{
+  "version": "41.0.0",
+  "files": {
+    "63f3d0b14388c78ba4bc2ee3a4e48efcf7b717a9fb38e47be599211c5e8d748c": {
+      "displayName": "CWLWafStack-dev Template",
+      "source": {
+        "path": "CWLWafStack-dev.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "430118819356-us-east-1": {
+          "bucketName": "cdk--assets-430118819356-us-east-1",
+          "objectKey": "63f3d0b14388c78ba4bc2ee3a4e48efcf7b717a9fb38e47be599211c5e8d748c.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::430118819356:role/cdk--file-publishing-role-430118819356-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
