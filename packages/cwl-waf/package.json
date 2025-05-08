@@ -1,14 +1,23 @@
 {
   "name": "cwl-waf",
   "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
+  "dependencies": {
+    "aws-cdk-lib": "^2.0.0",
+    "constructs": "^10.0.0",
+    "shared": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.0.0"
+  },
   "scripts": {
-    "deploy": "ts-node -T ./scripts/deployWAF.ts",
+    "cdk": "cdk",
+    "build": "tsc",
+    "deploy": "cdk deploy",
+    "destroy": "cdk destroy",
     "remove-stack": "ts-node -T ./scripts/removeWAF.ts"
   },
-  "dependencies": {
-    "shared": "*"
-  }
-
+  "main": "index.js",
+  "license": "MIT"
 }

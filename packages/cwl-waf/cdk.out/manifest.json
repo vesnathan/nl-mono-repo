@@ -1,0 +1,90 @@
+{
+  "version": "41.0.0",
+  "artifacts": {
+    "CWLWafStack-dev.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "CWLWafStack-dev.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap//version"
+      }
+    },
+    "CWLWafStack-dev": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://430118819356/us-east-1",
+      "properties": {
+        "templateFile": "CWLWafStack-dev.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::430118819356:role/cdk--deploy-role-430118819356-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::430118819356:role/cdk--cfn-exec-role-430118819356-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk--assets-430118819356-us-east-1/63f3d0b14388c78ba4bc2ee3a4e48efcf7b717a9fb38e47be599211c5e8d748c.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap//version",
+        "additionalDependencies": [
+          "CWLWafStack-dev.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::430118819356:role/cdk--lookup-role-430118819356-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap//version"
+        }
+      },
+      "dependencies": [
+        "CWLWafStack-dev.assets"
+      ],
+      "metadata": {
+        "/CWLWafStack-dev/CWLWAF": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CWLWAF"
+          }
+        ],
+        "/CWLWafStack-dev/APPSYNCWAF": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "APPSYNCWAF"
+          }
+        ],
+        "/CWLWafStack-dev/CloudFrontWAFArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CloudFrontWAFArn"
+          }
+        ],
+        "/CWLWafStack-dev/AppSyncWAFArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AppSyncWAFArn"
+          }
+        ],
+        "/CWLWafStack-dev/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/CWLWafStack-dev/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/CWLWafStack-dev/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "CWLWafStack-dev"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  },
+  "minimumCliVersion": "2.1005.0"
+}
