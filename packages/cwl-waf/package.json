@@ -1,23 +1,9 @@
 {
   "name": "cwl-waf",
   "version": "1.0.0",
-  "dependencies": {
-    "aws-cdk-lib": "^2.0.0",
-    "constructs": "^10.0.0",
-    "shared": "*"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "ts-node": "^10.0.0"
-  },
+  "private": true,
   "scripts": {
-    "cdk": "cdk",
-    "build": "tsc",
-    "deploy": "cdk deploy",
-    "destroy": "cdk destroy",
-    "remove-stack": "ts-node -T ./scripts/removeWAF.ts"
-  },
-  "main": "index.js",
-  "license": "MIT"
+    "deploy": "aws cloudformation deploy --template-file cfn-template.yaml --stack-name CWLWafStack-dev --capabilities CAPABILITY_IAM --region us-east-1 --parameter-overrides Stage=dev",
+    "remove": "aws cloudformation delete-stack --stack-name CWLWafStack-dev --region us-east-1"
+  }
 }
