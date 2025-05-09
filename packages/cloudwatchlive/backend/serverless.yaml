@@ -80,7 +80,6 @@ resources:
   - ${file(./resources/Cloudfront/cloudfront.yaml)}
   - ${file(./resources/DynamoDb/dynamoDb.yaml)}
   - ${file(./resources/Cognito/cognito.yaml)}  
-  - ${file(./resources/WebACLAssociation/WebACLAssociation.yaml)}
   - Outputs:
       CWLAppsyncUrl:
         Value: !GetAtt GraphQlApi.GraphQLUrl
