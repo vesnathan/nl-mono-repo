@@ -1,14 +1,9 @@
 {
   "name": "cwl-waf",
   "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
+  "private": true,
   "scripts": {
-    "deploy": "ts-node -T ./scripts/deployWAF.ts",
-    "remove-stack": "ts-node -T ./scripts/removeWAF.ts"
-  },
-  "dependencies": {
-    "shared": "*"
+    "deploy": "aws cloudformation deploy --template-file cfn-template.yaml --stack-name CWLWafStack-dev --capabilities CAPABILITY_IAM --region us-east-1 --parameter-overrides Stage=dev",
+    "remove": "aws cloudformation delete-stack --stack-name CWLWafStack-dev --region us-east-1"
   }
-
 }

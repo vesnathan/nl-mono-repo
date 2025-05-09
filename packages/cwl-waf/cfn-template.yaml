@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: WAF Configuration for CloudFront and AppSync
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    Description: Stage name for resource naming
+
+Resources:
+  CloudFrontWAF:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: CWLWAF
+      Scope: CLOUDFRONT
+      DefaultAction:
+        Allow: {}
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: myWAFMetric
+      Rules:
+        - Name: AWSManagedCommonRuleSet
+          Priority: 1
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedCommonRuleSetMetric
+
+  AppSyncWAF:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: APPSYNCWAF
+      Scope: REGIONAL
+      DefaultAction:
+        Allow: {}
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: APPSYNCWAFMetric
+      Rules:
+        - Name: AWSManagedCommonRuleSet
+          Priority: 1
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+              ExcludedRules:
+                - Name: SizeRestrictions_BODY
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedCommonRuleSetMetric
+
+Outputs:
+  CloudFrontWAFArn:
+    Value: !GetAtt CloudFrontWAF.Arn
+    Export:
+      Name: !Sub CloudFrontWAFArn-${Stage}
+
+  AppSyncWAFArn:
+    Value: !GetAtt AppSyncWAF.Arn
+    Export:
+      Name: !Sub AppsyncWAFArn-${Stage}

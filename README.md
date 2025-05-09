@@ -8,6 +8,12 @@ After cloning repo, run "yarn" from root. Lerna will go through all workspaces l
 Create App in serverless.com dashboard.  
   
 Run in order: 
+
+  
+&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cwl-waf && AWS_PROFILE=nlmonorepo-waf-dev aws cloudformation deploy --template-file cfn-template.yaml --stack-name CWLWafStack-dev --capabilities CAPABILITY_IAM --region us-east-1 --parameter-overrides Stage=dev  
+  
+
+
 &nbsp;"yarn build-gql" to build types in all packages that have build-gql scripts  
 &nbsp;"yarn build" to run build script in packages that have it (CWL FE)  
 &nbsp;"yarn deploy-waf --stage &lt;stage&gt;" to deploy WAF in us-east-1  
