@@ -3,7 +3,7 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
-        WebACLId: ${env:CloudFrontWAFArn}
+        WebACLId: !ImportValue CloudFrontWAFArn-${opt:stage}
         Origins:
           - Id: S3Origin
             DomainName: !GetAtt CWLBucket.RegionalDomainName

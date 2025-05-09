@@ -24,9 +24,8 @@ package:
   individually: true
 
 plugins:
-  - serverless-iam-roles-per-function # https://www.serverless.com/plugins/serverless-iam-roles-per-function
+  - serverless-iam-roles-per-function
   - serverless-prune-plugin
-
 
 resources:
   - Resources:
@@ -35,10 +34,8 @@ resources:
   - ${file(./resources/S3/s3.yaml)}
   - ${file(./resources/VPC/VPC.yaml)}
   - ${file(./resources/KMS/KMS.yaml)}
-  - ${file(./resources/WebACL/WebACL.yaml)}
   # cloud formation outputs. The values can be referenced by other serverless.yml using !ImportValue <Export.Name>
   - Outputs:
-          
       cwlSecurityGroupFromSharedVPCId:
         Value: !GetAtt cwlSecurityGroupFromSharedVPC.GroupId
         Export:
@@ -58,49 +55,4 @@ resources:
         Value: !GetAtt cwlKMSKey.Arn
         Export:
           Name: cwlKMSKeyArn-${opt:stage}
-
-      cwlUserPoolId:
-        Value: !Ref cognitoUserPool
-        Export:
-          Name: cwlUserPoolId-${opt:stage}
-
-      cwlUserPoolArn:
-        Value: !GetAtt cognitoUserPool.Arn
-        Export:
-          Name: cwlUserPoolArn-${opt:stage}
-
-      cwlUserPoolClientId:
-        Value: !Ref cognitoUserPoolClient
-        Export:
-          Name: cwlUserPoolClientId-${opt:stage}
-
-      cwlUserPoolProviderName:
-        Value: !GetAtt cognitoUserPool.ProviderName
-        Export:
-          Name: cwlUserPoolProviderName-${opt:stage}
-
-      cwlUserTableName:
-        Value: !Ref cwlUserTable
-        Export:
-          Name: cwlUserTableName-${opt:stage}
-
-      cwlUserTableArn:
-        Value: !GetAtt cwlUserTable.Arn
-        Export:
-          Name: cwlUserTableArn-${opt:stage}
-
-      AppsyncWAFArn:
-        Value: !GetAtt APPSYNCWAF.Arn
-        Export:
-          Name: AppsyncWAFArn-${opt:stage}
-
-      SharedSubnet1Id:
-        Value: !Ref SharedSubnet1
-        Export:
-          Name: sharedSubnet1-${opt:stage}
-          
-      SharedSubnet2Id:
-        Value: !Ref SharedSubnet2
-        Export:
-          Name: sharedSubnet2-${opt:stage}
 
