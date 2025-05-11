@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Shared AWS resources for CloudWatch Live application'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  TemplatesBucketName:
+    Type: String
+    Description: Name of the S3 bucket containing nested stack templates
+
+Resources:
+  KMSStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.ap-southeast-2.amazonaws.com/resources/KMS/KMS.yaml
+      Parameters:
+        Stage: !Ref Stage
+
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.ap-southeast-2.amazonaws.com/resources/VPC/VPC.yaml
+      Parameters:
+        Stage: !Ref Stage
+
+  CognitoStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.ap-southeast-2.amazonaws.com/resources/Cognito/cognito.yaml
+      Parameters:
+        Stage: !Ref Stage
+
+  S3Stack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: KMSStack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.ap-southeast-2.amazonaws.com/resources/S3/s3.yaml
+      Parameters:
+        Stage: !Ref Stage
+        KMSKeyId: !GetAtt KMSStack.Outputs.cwlKMSKey
+
+  DynamoDBStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: KMSStack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.ap-southeast-2.amazonaws.com/resources/DynamoDb/dynamoDb.yaml
+      Parameters:
+        Stage: !Ref Stage
+        KMSKeyArn: !GetAtt KMSStack.Outputs.cwlKMSKeyArn
+
+Outputs:
+  cwlSecurityGroupFromSharedVPCId:
+    Value: !GetAtt VPCStack.Outputs.cwlSecurityGroupFromSharedVPCId
+    Export:
+      Name: !Sub cwlSecurityGroupFromSharedVPCId-${Stage}
+
+  cwlSecurityGroupFromSharedVPC:
+    Value: !GetAtt VPCStack.Outputs.cwlSecurityGroupFromSharedVPC
+    Export:
+      Name: !Sub cwlSecurityGroupFromSharedVPC-${Stage}
+          
+  cwlKMSKey:
+    Value: !GetAtt KMSStack.Outputs.cwlKMSKey
+    Export:
+      Name: !Sub cwlKMSKey-${Stage}
+
+  cwlKMSKeyArn:
+    Value: !GetAtt KMSStack.Outputs.cwlKMSKeyArn
+    Export:
+      Name: !Sub cwlKMSKeyArn-${Stage}

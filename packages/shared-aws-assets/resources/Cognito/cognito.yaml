@@ -1,11 +1,38 @@
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage
+
 Resources:
+
+  CognitoRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub nl-mono-repo-cognito-${Stage}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-dev
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CognitoManagement
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cognito-idp:*
+                Resource: "*"
 
   cognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
       UsernameAttributes:
         - email
-      UserPoolName: "cwlUserPool-${opt:stage}"
+      UserPoolName: !Sub "cwlUserPool-${Stage}"
       UserPoolAddOns:
         AdvancedSecurityMode: ENFORCED
       MfaConfiguration: "OPTIONAL"
@@ -15,7 +42,7 @@ Resources:
   cognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      ClientName: Web-${opt:stage}
+      ClientName: !Sub "Web-${Stage}"
       UserPoolId: !Ref cognitoUserPool
       PreventUserExistenceErrors: "ENABLED"
       AccessTokenValidity: 30
@@ -115,3 +142,19 @@ Resources:
       UserPoolId: !Ref cognitoUserPool
       Description: "Unregistered Event attendees"
       Precedence: 3
+
+Outputs:
+  cwlUserPoolId:
+    Value: !Ref cognitoUserPool
+    Export:
+      Name: !Sub cwlUserPoolId-${Stage}
+  
+  cwlUserPoolClientId:
+    Value: !Ref cognitoUserPoolClient
+    Export:
+      Name: !Sub cwlUserPoolClientId-${Stage}
+  
+  cwlUserPoolArn:
+    Value: !GetAtt cognitoUserPool.Arn
+    Export:
+      Name: !Sub cwlUserPoolArn-${Stage}
