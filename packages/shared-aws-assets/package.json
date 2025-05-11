@@ -5,9 +5,12 @@
   "private": true,
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-s3": "3.669.0",
+    "@types/js-yaml": "^4.0.9",
     "@types/sanitize-html": "^2.13.0",
     "@types/validator": "^13.12.2",
     "axios": "1.7.7",
+    "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "sanitize-html": "^2.13.1",
     "shared": "*"
@@ -24,9 +27,8 @@
     "validator": "13.11.0"
   },
   "scripts": {
-    "predeploy": "yarn build-gql && yarn tsc",
-    "deploy": "ts-node -T ./scripts/deployShared.ts",
-    "remove-stack": "ts-node -T ./scripts/removeShared.ts",
+    "deploy-shared": "ts-node -T ./scripts/deployShared.ts",
+    "remove-shared": "ts-node -T ./scripts/removeShared.ts",
     "build-gql": "ts-node -T ./scripts/buildGql.ts"
   }
 }
