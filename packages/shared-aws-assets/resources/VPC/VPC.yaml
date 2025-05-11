@@ -1,4 +1,31 @@
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage
+
 Resources:
+  VPCRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub nl-mono-repo-vpc-${Stage}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-dev
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: VPCManagement
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:*
+                Resource: "*"
+
   SharedVPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -147,24 +174,29 @@ Outputs:
   cwlSecurityGroupFromSharedVPCId:
     Value: !GetAtt cwlSecurityGroupFromSharedVPC.GroupId
     Export:
-      Name: cwlSecurityGroupFromSharedVPCId-${opt:stage}
+      Name: !Sub shared-assets-cwlSecurityGroupFromSharedVPCId-${Stage}
+
+  cwlSecurityGroupFromSharedVPC:
+    Value: !Ref cwlSecurityGroupFromSharedVPC
+    Export:
+      Name: !Sub shared-assets-cwlSecurityGroupFromSharedVPC-${Stage}
 
   SharedSubnet1Id:
     Value: !Ref SharedSubnet1
     Export:
-      Name: sharedSubnet1-${opt:stage}
+      Name: !Sub shared-assets-sharedSubnet1-${Stage}
 
   SharedSubnet2Id:
     Value: !Ref SharedSubnet2
     Export:
-      Name: sharedSubnet2-${opt:stage}
+      Name: !Sub shared-assets-sharedSubnet2-${Stage}
 
   PrivateSubnet1Id: 
     Value: !Ref PrivateSubnet1
     Export:
-      Name: privateSubnet1-${opt:stage}
+      Name: !Sub shared-assets-privateSubnet1-${Stage}
 
   PrivateSubnet2Id: 
     Value: !Ref PrivateSubnet2
     Export:
-      Name: privateSubnet2-${opt:stage}
+      Name: !Sub shared-assets-privateSubnet2-${Stage}

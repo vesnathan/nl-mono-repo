@@ -1,9 +1,44 @@
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage
+  KMSKeyId:
+    Type: String
+    Description: KMS Key ID for bucket encryption
+
 Resources:
+  S3Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub nl-mono-repo-s3-${Stage}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-dev
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: S3Management
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/${KMSKeyId}
+
   cwlUserFileBucket:
     Type: AWS::S3::Bucket
+    DependsOn: S3Role
     Properties:
-      BucketName: cwl-user-files-${opt:stage}
-      # block all public access
+      BucketName: !Sub "cwl-user-files-${Stage}"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -13,9 +48,8 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: aws:kms
-              KMSMasterKeyID: !Ref cwlKMSKey
+              KMSMasterKeyID: !Ref KMSKeyId
             BucketKeyEnabled: true
-
       CorsConfiguration:
         CorsRules:
           - AllowedOrigins:
@@ -35,3 +69,14 @@ Resources:
             Prefix: temp/
             Status: Enabled
             ExpirationInDays: 1
+
+Outputs:
+  cwlUserFilesBucketName:
+    Value: !Ref cwlUserFileBucket
+    Export:
+      Name: !Sub cwlUserFilesBucketName-${Stage}
+  
+  cwlUserFilesBucketArn:
+    Value: !GetAtt cwlUserFileBucket.Arn
+    Export:
+      Name: !Sub cwlUserFilesBucketArn-${Stage}
