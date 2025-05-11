@@ -10,12 +10,12 @@ Create App in serverless.com dashboard.
 Run in order: 
 
   
-&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf
-&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn remove-waf
-
-&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared
-&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn remove-shared
-
+&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf  
+&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn remove-waf  
+  
+&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared  
+&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn remove-shared  
+  
 &nbsp;"yarn build-gql" to build types in all packages that have build-gql scripts  
 &nbsp;"yarn build" to run build script in packages that have it (CWL FE)  
 &nbsp;"yarn deploy-waf --stage &lt;stage&gt;" to deploy WAF in us-east-1  
