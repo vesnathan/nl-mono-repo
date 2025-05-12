@@ -10,8 +10,8 @@ Create App in serverless.com dashboard.
 Run in order: 
 
   
-&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf  
-&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn remove-waf  
+&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf  
+&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn remove-waf  
   
 &nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared  
 &nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn remove-shared  
