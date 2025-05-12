@@ -15,6 +15,11 @@ Run in order:
   
 &nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared  
 &nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn remove-shared  
+
+&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn deploy-cwl  
+&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn remove-cwl
+
+&nbsp;cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cloudwatchlive/backend STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn post-deploy
   
 &nbsp;"yarn build-gql" to build types in all packages that have build-gql scripts  
 &nbsp;"yarn build" to run build script in packages that have it (CWL FE)  
