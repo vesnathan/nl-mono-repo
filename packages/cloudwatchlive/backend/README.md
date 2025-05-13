@@ -33,37 +33,52 @@ To deploy CloudWatchLive, you'll need sufficient IAM permissions. The updated de
 2. Create policies using the respective JSON files and attach them to the users
 3. Configure your AWS CLI to use these profiles
 
-## Deployment Flow
+## Deployment Options
 
-The recommended deployment order is:
+You can deploy CloudWatchLive in multiple ways:
 
-### 1. Deploy Web Application Firewall
+### Option 1: Deploy All Stacks from Root (Recommended)
+
+The recommended approach is to use the root-level script that deploys all stacks in the correct order:
+
 ```bash
-cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf
+# Navigate to the root of the mono-repo
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo 
+
+# Deploy all stacks
+STAGE=dev yarn deploy-all
 ```
 
-### 2. Deploy Shared Assets
+This script handles the correct deployment order and dependencies.
 
+### Option 2: Deploy Individual Services
+
+If you need to deploy components individually, use these commands in the specified order:
+
+#### 1. Deploy Web Application Firewall
 ```bash
-cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared
+cd ../cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf
 ```
 
-### 3. Deploy CloudWatchLive Backend
-
+#### 2. Deploy Shared Assets
 ```bash
-cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn deploy
+cd ../shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared
 ```
 
-### 4. Run Post-Deployment Setup (User Creation)
-
+#### 3. Deploy CloudWatchLive Backend
 ```bash
-cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn post-deploy
+cd ../cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn deploy
 ```
 
-Alternatively, you can run both the deployment and post-deployment setup in one command:
+#### 4. Run Post-Deployment Setup (User Creation)
+```bash
+STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn post-deploy
+```
+
+You can also run both the deployment and post-deployment setup in one command:
 
 ```bash
-cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn deploy-full
+STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn deploy-full
 ```
 
 This will create a test user with:
@@ -90,24 +105,37 @@ The CloudWatchLive deployment process:
 
 ## Resource Removal
 
-To remove all deployed resources, execute these commands in reverse order:
+You have two options to remove the deployed resources:
 
-### 1. Remove CloudWatchLive Backend
+### Option 1: Remove All Stacks from Root (Recommended)
 
 ```bash
-cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn remove-cwl
+# Navigate to the root of the mono-repo
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo 
+
+# Remove all stacks
+STAGE=dev yarn remove-all
 ```
 
-### 2. Remove Shared Assets (only if no other services depend on it)
+This script handles removing all stacks in the correct reverse order.
 
+### Option 2: Remove Individual Services
+
+Execute these commands in reverse order:
+
+#### 1. Remove CloudWatchLive Backend
 ```bash
-cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn remove-shared
+STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn remove-cwl
 ```
 
-### 3. Remove WAF (if deployed)
-
+#### 2. Remove Shared Assets (only if no other services depend on it)
 ```bash
-cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn remove-waf
+cd ../shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn remove-shared
+```
+
+#### 3. Remove WAF (if deployed)
+```bash
+cd ../cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn remove-waf
 ```
 
 ## Common Issues and Troubleshooting

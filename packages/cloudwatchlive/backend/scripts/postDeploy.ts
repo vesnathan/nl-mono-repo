@@ -115,12 +115,11 @@ async function setupUser() {
       if (tableExport && tableExport.Value) {
         tableName = tableExport.Value;
       } else {
-        // Try different naming conventions
+        // Use standard naming convention for the stack
         const alternativeExports = [
-          `cwlUsersTable-${stage}`,
-          `UsersTable-${stage}`,
           `cloudwatchlive-backend-${stage}-UsersTable`,
-          `CloudWatchLiveBackend-${stage}-UsersTable`
+          `cwlUsersTable-${stage}`,
+          `UsersTable-${stage}`
         ];
         
         for (const exportName of alternativeExports) {
@@ -145,8 +144,8 @@ async function setupUser() {
       }
       
       if (!tableName) {
-        // Last resort - use a hardcoded name format
-        tableName = `CWLUsersTable-${stage}`;
+        // Last resort - use a hardcoded name format based on standard stack naming
+        tableName = `cloudwatchlive-backend-${stage}-UsersTable`;
         console.log(`Could not find table export, using default name: ${tableName}`);
       } else {
         console.log(`Found table name from exports: ${tableName}`);
