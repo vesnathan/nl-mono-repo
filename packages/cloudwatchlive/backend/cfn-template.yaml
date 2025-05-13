@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch Live Backend Infrastructure'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  TemplatesBucketName:
+    Type: String
+    Description: Name of the S3 bucket containing nested stack templates
+
+Resources:
+  DynamoDBStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/DynamoDB/dynamodb.yaml
+      Parameters:
+        Stage: !Ref Stage
+
+  S3Stack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/S3/s3.yaml
+      Parameters:
+        Stage: !Ref Stage
+
+  CloudFrontStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: S3Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/CloudFront/cloudfront.yaml
+      Parameters:
+        Stage: !Ref Stage
+        CWLBucketName: 
+          Fn::GetAtt: [S3Stack, Outputs.CWLBucketName]
+        CWLBucketArn:
+          Fn::GetAtt: [S3Stack, Outputs.CWLBucketArn]
+        CWLBucketRegionalDomainName:
+          Fn::GetAtt: [S3Stack, Outputs.CWLBucketRegionalDomainName]
+
+  AppSyncStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: DynamoDBStack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appsync.yaml
+      Parameters:
+        Stage: !Ref Stage
+
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [CloudFrontStack, AppSyncStack]
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml
+      Parameters:
+        Stage: !Ref Stage
+        CWLCloudFrontDistributionId: 
+          Fn::GetAtt: [CloudFrontStack, Outputs.CWLCloudFrontDistributionId]
+        CWLCloudFrontDomainName:
+          Fn::GetAtt: [CloudFrontStack, Outputs.CWLCloudFrontDomainName]
+
+Outputs:
+  CWLAppsyncUrl:
+    Value: 
+      Fn::GetAtt: [AppSyncStack, Outputs.CWLAppsyncUrl]
+    Export:
+      Name: !Sub CWLAppsyncUrl-${Stage}
+  
+  CWLAppsyncRealtimeUrl:
+    Value: 
+      Fn::GetAtt: [AppSyncStack, Outputs.CWLAppsyncRealtimeUrl]
+    Export:
+      Name: !Sub CWLAppsyncRealtimeUrl-${Stage}
+  
+  CWLDataTableName:
+    Value: 
+      Fn::GetAtt: [DynamoDBStack, Outputs.CWLDataTableName]
+    Export:
+      Name: !Sub CWLDataTableName-${Stage}
+  
+  CWLDataTableArn:
+    Value: 
+      Fn::GetAtt: [DynamoDBStack, Outputs.CWLDataTableArn]
+    Export:
+      Name: !Sub CWLDataTableArn-${Stage}
+  
+  CWLBucketName:
+    Value: 
+      Fn::GetAtt: [S3Stack, Outputs.CWLBucketName]
+    Export:
+      Name: !Sub CWLBucketName-${Stage}
+  
+  CWLBucketArn:
+    Value: 
+      Fn::GetAtt: [S3Stack, Outputs.CWLBucketArn]
+    Export:
+      Name: !Sub CWLBucketArn-${Stage}
+  
+  CWLCloudFrontDistributionId:
+    Value: 
+      Fn::GetAtt: [CloudFrontStack, Outputs.CWLCloudFrontDistributionId]
+    Export:
+      Name: !Sub CWLCloudFrontDistributionId-${Stage}
+  
+  CWLCloudFrontDomainName:
+    Value: 
+      Fn::GetAtt: [CloudFrontStack, Outputs.CWLCloudFrontDomainName]
+    Export:
+      Name: !Sub CWLCloudFrontDomainName-${Stage}

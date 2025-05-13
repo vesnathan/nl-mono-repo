@@ -5,7 +5,9 @@
   "license": "MIT",
   "dependencies": {
     "@aws-appsync/utils": "^1.10.1",
+    "@aws-sdk/client-cloudformation": "3.669.0",
     "@aws-sdk/client-cloudfront": "3.669.0",
+    "@aws-sdk/client-cognito-identity-provider": "3.669.0",
     "@aws-sdk/client-dynamodb": "3.669.0",
     "@aws-sdk/client-s3": "3.669.0",
     "@aws-sdk/client-ses": "3.669.0",
@@ -14,17 +16,15 @@
     "@aws-sdk/s3-request-presigner": "3.669.0",
     "@aws-sdk/util-dynamodb": "3.669.0",
     "cwlfrontend": "*",
-    "serverless-appsync-plugin": "2.6.0",
-    "serverless-esbuild": "1.51.0",
-    "serverless-iam-roles-per-function": "3.2.0",
-    "serverless-prune-plugin": "2.0.2",
-    "serverless-s3-sync": "3.1.0",
+    "js-yaml": "^4.1.0",
     "shared": "*",
     "shared-aws-assets": "*"
   },
   "scripts": {
     "build-gql": "ts-node ./scripts/buildGql.ts",
     "deploy": "ts-node -T ./scripts/deployCWL.ts",
-    "remove-stack": "ts-node -T ./scripts/removeCwl.ts"
+    "post-deploy": "ts-node -T ./scripts/postDeploy.ts",
+    "deploy-full": "yarn deploy && yarn post-deploy",
+    "remove-cwl": "ts-node -T ./scripts/removeCWL.ts"
   }
 }
