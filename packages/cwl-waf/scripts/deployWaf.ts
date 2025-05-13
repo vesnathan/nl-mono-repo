@@ -1,24 +1,58 @@
-import { CloudFormation, waitUntilStackCreateComplete, waitUntilStackUpdateComplete, StackStatus } from '@aws-sdk/client-cloudformation';
+import { CloudFormation, Capability, StackStatus } from '@aws-sdk/client-cloudformation';
 import path from 'path';
 import fs from 'fs';
+
+const pollStackStatus = async (cfn: CloudFormation, stackName: string): Promise<void> => {
+  while (true) {
+    const { Stacks } = await cfn.describeStacks({ StackName: stackName }).catch(() => ({ Stacks: [] }));
+    const stack = Stacks?.[0];
+
+    if (!stack) {
+      console.log('Stack not found');
+      return;
+    }
+
+    const status = stack.StackStatus;
+    console.log(`Current stack status: ${status}`);
+
+    if (status === StackStatus.DELETE_IN_PROGRESS) {
+      await new Promise(resolve => setTimeout(resolve, 10000));
+      continue;
+    }
+
+    if (status === StackStatus.ROLLBACK_IN_PROGRESS || status === StackStatus.ROLLBACK_COMPLETE) {
+      throw new Error(`Stack ${stackName} is in rollback state: ${status}`);
+    }
+
+    if (status?.endsWith('COMPLETE')) {
+      return;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 10000));
+  }
+};
 
 const deployWaf = async () => {
   const stage = process.env.STAGE || 'dev';
   const stackName = `CWLWafStack-${stage}`;
-  
-  const cfn = new CloudFormation({
-    region: 'us-east-1' // WAF for CloudFront must be in us-east-1
-  });
-
+  const region = 'us-east-1'; // WAF for CloudFront must be in us-east-1
+  const cfn = new CloudFormation({ region });
   const templatePath = path.resolve(__dirname, '../cfn-template.yaml');
   const templateBody = fs.readFileSync(templatePath, 'utf-8');
 
   try {
-    // Check if stack exists
-    const stacks = await cfn.listStacks({});
-    const stackExists = stacks.StackSummaries?.some(
-      stack => stack.StackName === stackName && stack.StackStatus !== StackStatus.DELETE_COMPLETE
-    );
+    const { Stacks } = await cfn.describeStacks({ StackName: stackName }).catch(() => ({ Stacks: [] }));
+    const existingStack = Stacks?.[0];
+    const isRollbackComplete = existingStack?.StackStatus === StackStatus.ROLLBACK_COMPLETE;
+    const isRollbackInProgress = existingStack?.StackStatus === StackStatus.ROLLBACK_IN_PROGRESS;
+    const isDeleteInProgress = existingStack?.StackStatus === StackStatus.DELETE_IN_PROGRESS;
+
+    if (isRollbackComplete || isRollbackInProgress || isDeleteInProgress) {
+      console.log(`Stack ${stackName} is in ${existingStack.StackStatus} state, deleting it first...`);
+      await cfn.deleteStack({ StackName: stackName });
+      await pollStackStatus(cfn, stackName);
+      console.log('Stack deleted successfully');
+    }
 
     const params = {
       StackName: stackName,
@@ -29,52 +63,18 @@ const deployWaf = async () => {
           ParameterValue: stage
         }
       ],
-      Capabilities: ['CAPABILITY_IAM']
+      Capabilities: [Capability.CAPABILITY_NAMED_IAM]
     };
 
-    if (stackExists) {
+    if (existingStack) {
       console.log(`Updating stack ${stackName}...`);
       await cfn.updateStack(params);
-      await waitUntilStackUpdateComplete(
-        { client: cfn, maxWaitTime: 600 },
-        { StackName: stackName }
-      );
     } else {
       console.log(`Creating stack ${stackName}...`);
       await cfn.createStack(params);
-      await waitUntilStackCreateComplete(
-        { client: cfn, maxWaitTime: 600 },
-        { StackName: stackName }
-      );
     }
 
-    // Get stack outputs and save to WAF_output.json
-    const { Stacks } = await cfn.describeStacks({ StackName: stackName });
-    if (Stacks && Stacks[0].Outputs) {
-      const outputs = Stacks[0].Outputs.reduce((acc: Record<string, string>, output) => {
-        if (output.OutputKey && output.OutputValue) {
-          acc[output.OutputKey] = output.OutputValue;
-        }
-        return acc;
-      }, {});
-
-      // Read existing WAF_output.json or create new object
-      const outputPath = path.resolve(__dirname, '../WAF_output.json');
-      let existingOutput = {};
-      if (fs.existsSync(outputPath)) {
-        existingOutput = JSON.parse(fs.readFileSync(outputPath, 'utf-8'));
-      }
-
-      // Update outputs for current stage
-      const updatedOutput = {
-        ...existingOutput,
-        [stage]: outputs
-      };
-
-      fs.writeFileSync(outputPath, JSON.stringify(updatedOutput, null, 2));
-      console.log('WAF outputs saved to WAF_output.json');
-    }
-
+    await pollStackStatus(cfn, stackName);
     console.log('WAF deployment completed successfully');
   } catch (error: any) {
     if (error.message?.includes('No updates are to be performed')) {

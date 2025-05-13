@@ -9,11 +9,11 @@
     "packages/shared-aws-assets"
   ],
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "3.669.0",
     "global": "^4.4.0",
     "graphql": "^16.9.0",
     "knip": "^5.37.2",
-    "serverless": "3",
-    "@aws-sdk/client-cognito-identity-provider": "3.669.0"
+    "serverless": "3"
   },
   "devDependencies": {
     "@aws-amplify/cli": "12.10.1",
@@ -39,7 +39,7 @@
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-sonarjs": "^0.23.0",
     "jest": "29.7.0",
-    "lerna": "8.1.8",
+    "lerna": "^8.2.2",
     "prettier": "^3.1.0",
     "ts-jest": "29.1.2",
     "ts-node": "10.9.2",
@@ -49,6 +49,8 @@
   "scripts": {
     "build-gql": "lerna run build-gql --stream --concurrency 1",
     "reset-modules": "rm -rf node_modules/ packages/**/*/node_modules",
+    "deploy-all": "ts-node scripts/deployAll.ts",
+    "remove-all": "ts-node scripts/removeAll.ts",
     "deploy-cwl": "lerna run deploy --concurrency 1 --stream  --scope cwlbackend --",
     "deploy-waf": "lerna run deploy --concurrency 1 --stream --scope cwl-waf --",
     "deploy-shared": "lerna run deploy --concurrency 1 --stream --scope shared-aws-assets --",
