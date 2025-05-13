@@ -285,7 +285,9 @@ const deployStack = async () => {
   // Create/verify templates bucket first
   await createTemplatesBucket(templatesBucket, region);
 
+  // Use standardized stack name format for nested stacks
   const stackName = `cloudwatchlive-backend-${stage}`;
+  
   const cfn = new CloudFormation({ region });
   const mainTemplatePath = path.resolve(__dirname, '../cfn-template.yaml');
   const templateContent = fs.readFileSync(mainTemplatePath, 'utf-8');

@@ -24,7 +24,6 @@
     "build-gql": "ts-node ./scripts/buildGql.ts",
     "deploy": "ts-node -T ./scripts/deployCWL.ts",
     "post-deploy": "ts-node -T ./scripts/postDeploy.ts",
-    "deploy-full": "yarn deploy && yarn post-deploy",
     "remove-cwl": "ts-node -T ./scripts/removeCWL.ts"
   }
 }
