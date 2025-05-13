@@ -1,5 +1,14 @@
-Resources:
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch Live DynamoDB Resources'
 
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+
+Resources:
+  # Data Table
   cwlDataTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -20,5 +29,13 @@ Resources:
       SSESpecification:
         SSEEnabled: true
       StreamSpecification:
-          StreamViewType: NEW_AND_OLD_IMAGES
+        StreamViewType: NEW_AND_OLD_IMAGES
 
+Outputs:
+  CWLDataTableName:
+    Value: !Ref cwlDataTable
+    Description: Name of the CloudWatchLive data table
+  
+  CWLDataTableArn:
+    Value: !GetAtt cwlDataTable.Arn
+    Description: ARN of the CloudWatchLive data table
