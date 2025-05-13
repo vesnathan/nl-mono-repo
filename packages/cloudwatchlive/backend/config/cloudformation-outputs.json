@@ -1,7 +1,7 @@
 {
   "nldev": {
-    "cwlUserPoolId": "ap-southeast-2_clPxotcOt",
-    "cwlUserPoolClientId": "7v8eavh8aj88fh9mt50vur6gff",
+    "cwlUserPoolId": "ap-southeast-2_A5RuIZZYI",
+    "cwlUserPoolClientId": "u24hrarlastsf1vj6mrmkgni7",
     "cwlIdentityPoolId": "ap-southeast-2:a7462c0d-a7c9-40f9-9444-b8ed89cf83de",
     "cwlGraphQLUrl": "https://vr2njhgskfaqhnksyfjfjdwiga.appsync-api.ap-southeast-2.amazonaws.com/graphql",
     "cwlUserTableArn": "arn:aws:dynamodb:ap-southeast-2:430118819356:table/aws-shared-resources-nldev-cwlUserTable-5QP1C9X6KCAC"

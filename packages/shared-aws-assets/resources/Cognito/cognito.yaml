@@ -153,8 +153,13 @@ Outputs:
     Value: !Ref cognitoUserPoolClient
     Export:
       Name: !Sub cwlUserPoolClientId-${Stage}
-  
+
   cwlUserPoolArn:
     Value: !GetAtt cognitoUserPool.Arn
     Export:
       Name: !Sub cwlUserPoolArn-${Stage}
+  
+  cwlUserPoolProviderName:
+    Value: !GetAtt cognitoUserPool.ProviderName
+    Export:
+      Name: !Sub cwlUserPoolProviderName-${Stage}

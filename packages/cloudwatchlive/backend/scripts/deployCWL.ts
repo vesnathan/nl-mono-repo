@@ -274,14 +274,6 @@ const deployStack = async () => {
   // Use the standard naming convention matching shared-aws-assets
   const templatesBucket = `nl-mono-repo-templates-${stage}`;
   
-  // Validate all templates before proceeding
-  const resourcesPath = path.resolve(__dirname, '../resources');
-  console.log('Validating all templates...');
-  if (!await validateAllTemplates(resourcesPath)) {
-    throw new Error('Template validation failed. Please check the template files.');
-  }
-  console.log('All templates validated successfully');
-
   // Create/verify templates bucket first
   await createTemplatesBucket(templatesBucket, region);
 

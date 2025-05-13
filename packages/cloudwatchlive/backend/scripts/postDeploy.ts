@@ -3,19 +3,68 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { PutCommand, DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import * as fs from 'fs';
 import * as path from 'path';
+import inquirer from 'inquirer';
 
 const region = 'ap-southeast-2';
 const stage = process.env.STAGE || 'dev';
 
-// User details
-const email = 'vesnathan@gmail.com';
-const firstName = 'John';
-const lastName = 'Doe';
+// Constants
 const temporaryPassword = 'Temp1234!'; // This will be changed on first login
+
+interface UserDetails {
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+async function getUserDetails(): Promise<UserDetails> {
+  const questions = [
+    {
+      type: 'input',
+      name: 'email',
+      message: 'Enter the user\'s email address:',
+      validate: (input: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(input)) {
+          return 'Please enter a valid email address';
+        }
+        return true;
+      }
+    },
+    {
+      type: 'input',
+      name: 'firstName',
+      message: 'Enter the user\'s first name:',
+      validate: (input: string) => {
+        if (!input.trim()) {
+          return 'First name cannot be empty';
+        }
+        return true;
+      }
+    },
+    {
+      type: 'input',
+      name: 'lastName',
+      message: 'Enter the user\'s last name:',
+      validate: (input: string) => {
+        if (!input.trim()) {
+          return 'Last name cannot be empty';
+        }
+        return true;
+      }
+    }
+  ];
+
+  return inquirer.prompt(questions);
+}
 
 async function setupUser() {
   try {
     console.log(`Starting post-deployment setup for stage ${stage}...`);
+    
+    // Get user details interactively
+    const userDetails = await getUserDetails();
+    const { email, firstName, lastName } = userDetails;
     
     // Get the Cognito User Pool ID from shared resources
     const userPoolId = await getCognitoUserPoolId();

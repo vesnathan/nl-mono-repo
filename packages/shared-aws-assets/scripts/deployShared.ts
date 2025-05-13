@@ -39,10 +39,14 @@ const cfnSchema = yaml.DEFAULT_SCHEMA.extend({
 });
 
 // Add yaml validation functions
+interface CloudFormationTemplate {
+  Resources?: Record<string, unknown>;
+}
+
 const validateYamlTemplate = (templatePath: string): boolean => {
   try {
     const templateContent = fs.readFileSync(templatePath, 'utf-8');
-    const template = yaml.load(templateContent, { schema: cfnSchema });
+    const template = yaml.load(templateContent, { schema: cfnSchema }) as CloudFormationTemplate;
     
     if (!template || typeof template !== 'object') {
       throw new Error(`Invalid YAML structure in ${templatePath}`);
@@ -309,7 +313,7 @@ const validateKMSTemplate = (templateBody: string) => {
       
       if (principal.Service && Array.isArray(principal.Service)) {
         const validServices = ['dynamodb.amazonaws.com', 's3.amazonaws.com', 'cloudformation.amazonaws.com'];
-        const invalidServices = principal.Service.filter(svc => !validServices.includes(svc));
+        const invalidServices: string[] = (principal.Service as string[]).filter((svc: string) => !validServices.includes(svc));
         if (invalidServices.length > 0) {
           throw new Error(`Invalid service principals in KMS policy: ${invalidServices.join(', ')}`);
         }
@@ -355,15 +359,15 @@ const deployStack = async () => {
     const isRollbackFailed = existingStack?.StackStatus === StackStatus.ROLLBACK_FAILED;
 
     if (isRollbackComplete || isRollbackInProgress || isDeleteInProgress || isDeleteFailed || isRollbackFailed) {
-      console.log(`Stack ${stackName} is in ${existingStack.StackStatus} state, forcing deletion...`);
+      console.log(`Stack ${stackName} is in ${existingStack?.StackStatus ?? 'unknown'} state, forcing deletion...`);
       await forceDeleteStack(cfn, stackName);
-      existingStack = null;
+      existingStack = undefined;
     }
 
     const stackParams = {
       StackName: stackName,
       TemplateBody: templateContent,
-      Capabilities: ['CAPABILITY_NAMED_IAM', 'CAPABILITY_IAM', 'CAPABILITY_AUTO_EXPAND'],
+      Capabilities: [Capability.CAPABILITY_NAMED_IAM, Capability.CAPABILITY_IAM, Capability.CAPABILITY_AUTO_EXPAND],
       Parameters: [
         {
           ParameterKey: 'Stage',
@@ -387,6 +391,11 @@ const deployStack = async () => {
     await pollStackStatus(cfn, stackName);
 
     console.log('Deployment completed successfully');
+    
+    // Generate CWL configuration
+    const { generateCWLConfig } = await import('./generateCWLConfig');
+    await generateCWLConfig();
+
   } catch (error: any) {
     if (error.message?.includes('No updates are to be performed')) {
       console.log('No updates required for the stack');
