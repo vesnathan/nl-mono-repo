@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch Live CloudFront Resources'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  CWLBucketName:
+    Type: String
+    Description: Name of the S3 bucket for CloudFront origin
+  CWLBucketArn:
+    Type: String
+    Description: ARN of the S3 bucket for CloudFront origin
+  CWLBucketRegionalDomainName:
+    Type: String
+    Description: Regional domain name of the S3 bucket for CloudFront origin
+
+Resources:
+  CWLBucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref CWLBucketName
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action:
+              - s3:GetObject
+              - s3:ListBucket
+            Resource: 
+              - !Ref CWLBucketArn
+              - !Sub "${CWLBucketArn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CWLCloudFrontDistribution}"
+
+  CWLCloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties: 
+      OriginAccessControlConfig:
+        Name: CWLBucketOAC
+        Description: Origin Access Control for CWL bucket
+        SigningBehavior: always
+        SigningProtocol: sigv4
+        OriginAccessControlOriginType: s3
+
+  # CloudFront Distribution
+  CWLCloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Sub "CloudFront distribution for CloudWatchLive ${Stage}"
+        Origins:
+          - DomainName: !Ref CWLBucketRegionalDomainName
+            Id: S3Origin
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt CWLCloudFrontOAC.Id
+        DefaultRootObject: index.html
+        Enabled: true
+        HttpVersion: http2
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # CORS-S3Origin
+
+Outputs:
+  CWLCloudFrontDistributionId:
+    Value: !Ref CWLCloudFrontDistribution
+    Description: ID of the CloudFront distribution
+  
+  CWLCloudFrontDomainName:
+    Value: !GetAtt CWLCloudFrontDistribution.DomainName
+    Description: Domain name of the CloudFront distribution
