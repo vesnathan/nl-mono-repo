@@ -7,6 +7,7 @@ After cloning repo, run "yarn" from root. Lerna will go through all workspaces l
 
 You can deploy all stacks at once or deploy them individually. The deployment order is important: WAF → Shared AWS Assets → CloudWatchLive Backend.
 
+
 ### Deploy All Stacks at Once
 
 The recommended way to deploy all stacks is using the root-level script:
@@ -54,6 +55,7 @@ This will create a user with the following details:
 - First Name: John
 - Last Name: Doe
 - Password: Temp1234!  
+
    
 ## Launch dev site  
 Run:  
