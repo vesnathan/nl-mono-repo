@@ -1,22 +1,33 @@
+import type { CloudFormationOutputs } from "shared/config/types";
 import type { ResourcesConfig } from "aws-amplify";
-import { getSlsOutput } from "./slsConfig";
+import config from "shared/config/cloudformation-outputs.json";
+import environment from "./masterConfig";
 
-const SLS_OUTPUT = getSlsOutput("CWL");
 const AWS_REGION = "ap-southeast-2";
+const stage = environment || "dev";
+
+const typedConfig = config as CloudFormationOutputs;
+
+if (!typedConfig[stage]) {
+  throw new Error(
+    `No configuration found for stage ${stage} in cloudformation-outputs.json`,
+  );
+}
+
 export const AMPLIFY_CONFIG: ResourcesConfig = {
   Auth: {
     Cognito: {
-      userPoolId: SLS_OUTPUT.cwlUserPoolId,
-      userPoolClientId: SLS_OUTPUT.cwlUserPoolClientId,
+      userPoolId: typedConfig[stage].cwlUserPoolId,
+      userPoolClientId: typedConfig[stage].cwlUserPoolClientId,
       allowGuestAccess: true,
-      identityPoolId: SLS_OUTPUT.cwlIdentityPoolId,
+      identityPoolId: typedConfig[stage].cwlIdentityPoolId,
     },
   },
   API: {
     GraphQL: {
-      endpoint: SLS_OUTPUT.cwlGraphQLUrl,
+      endpoint: typedConfig[stage].cwlGraphQLUrl,
       region: AWS_REGION,
-      defaultAuthMode: "iam",
+      defaultAuthMode: "userPool",
     },
   },
 };

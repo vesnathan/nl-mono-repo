@@ -3,6 +3,10 @@
 Install dependencies:  
 After cloning repo, run "yarn" from root. Lerna will go through all workspaces listed in package.json in root and install dependencies  
 
+## Configuration Management
+
+CloudFormation outputs from all stacks are stored in `/packages/shared/config/cloudformation-outputs.json`. This file is managed automatically by the deployment scripts and contains stage-specific configurations for all components. When redeploying individual stacks, only their relevant outputs will be updated while preserving other configurations.
+
 ## Deploy Stacks
 
 You can deploy all stacks at once or deploy them individually. The deployment order is important: WAF → Shared AWS Assets → CloudWatchLive Backend.
@@ -13,6 +17,9 @@ You can deploy all stacks at once or deploy them individually. The deployment or
 The recommended way to deploy all stacks is using the root-level script:
 
 ```bash
+# Navigate to the repository root
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo
+
 # Deploy all stacks with default profiles
 STAGE=dev yarn deploy-all
 
@@ -32,22 +39,22 @@ If you prefer deploying stacks individually, use the following commands in this 
 
 #### 1. Deploy Web Application Firewall (WAF)
 ```bash
-cd packages/cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf
 ```
 
 #### 2. Deploy Shared AWS Assets
 ```bash
-cd packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared
 ```
 
 #### 3. Deploy CloudWatchLive Backend
 ```bash
-cd packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn deploy
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn deploy
 ```
 
 #### 4. Create Test User
 ```bash
-cd packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn post-deploy
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn post-deploy
 ```
 
 This will create a user with the following details:
@@ -94,6 +101,6 @@ cd packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yar
 #### 3. Remove Web Application Firewall (WAF)
 ```bash
 cd packages/cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn remove-waf
-```  
-    
+```
+
 

@@ -1,6 +1,14 @@
-# CloudWatchLive Deployment
+# CloudWatchLive Backend Deployment
 
 This directory contains the AWS CloudFormation templates and deployment scripts for the CloudWatchLive backend infrastructure. The deployment now uses a nested stack approach to improve stability and resolve S3 access denied errors.
+
+## Configuration Management
+
+During deployment, this package reads and writes CloudFormation outputs to `/packages/shared/config/cloudformation-outputs.json`. This file is shared across all packages and contains stage-specific configurations. The backend deployment will:
+
+1. Read required configurations (e.g., Cognito User Pool IDs) from the shared outputs file
+2. Write its own outputs (e.g., AppSync URLs) to the same file
+3. Only update its own stage-specific outputs while preserving other configurations
 
 ## Deployment Prerequisites
 
@@ -49,30 +57,28 @@ cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo
 STAGE=dev yarn deploy-all
 ```
 
-This script handles the correct deployment order and dependencies.
-
 ### Option 2: Deploy Individual Services
 
 If you need to deploy components individually, use these commands in the specified order:
 
 #### 1. Deploy Web Application Firewall
 ```bash
-cd ../cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf
 ```
 
 #### 2. Deploy Shared Assets
 ```bash
-cd ../shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared
 ```
 
 #### 3. Deploy CloudWatchLive Backend
 ```bash
-cd ../cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn deploy
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn deploy
 ```
 
 #### 4. Run Post-Deployment Setup (User Creation)
 ```bash
-STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn post-deploy
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn post-deploy
 ```
 
 You can also run both the deployment and post-deployment setup in one command:
@@ -130,12 +136,12 @@ STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev yarn remove-cwl
 
 #### 2. Remove Shared Assets (only if no other services depend on it)
 ```bash
-cd ../shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn remove-shared
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn remove-shared
 ```
 
 #### 3. Remove WAF (if deployed)
 ```bash
-cd ../cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn remove-waf
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn remove-waf
 ```
 
 ## Common Issues and Troubleshooting

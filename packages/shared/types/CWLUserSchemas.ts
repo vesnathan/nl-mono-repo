@@ -2,22 +2,25 @@ import { z } from "zod";
 import { ClientType, CWLUser } from "@/graphql/gqlTypes";
 import { v4 as uuidv4 } from "uuid";
 
-export const createEmptyCWLUser = (): CWLUser => ({
-  __typename: "CWLUser", 
-  userId: uuidv4(),
-  organizationId: "",
-  userEmail: "",
-  userTitle: "",
-  userFirstName: "",
-  userLastName: "",
-  userPhone: "",
-  userRole: "",
-  privacyPolicy: false, 
-  termsAndConditions: false, 
-  userAddedById: "",
-  userCreated: "",
-  clientType: [],
-});
+export const createEmptyCWLUser = (): CWLUser => {
+  const userId = uuidv4();
+  return {
+    __typename: "CWLUser",
+    userId,
+    organizationId: `org_${Math.random().toString(36).substring(2, 15)}`,
+    userEmail: "",
+    userTitle: "Mr",
+    userFirstName: "",
+    userLastName: "",
+    userPhone: "+1234567890",
+    userRole: "Event Coordinator",
+    privacyPolicy: true,
+    termsAndConditions: true,
+    userAddedById: userId,
+    userCreated: new Date().toISOString(),
+    clientType: [ClientType.SuperAdmin],
+  };
+};
 
 export const CWLUserSchema = z.object({
   userId: z.string().default(() => uuidv4()),

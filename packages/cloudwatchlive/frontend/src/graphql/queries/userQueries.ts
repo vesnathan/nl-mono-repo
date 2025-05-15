@@ -8,22 +8,25 @@ export const userQueryKeys = {
 };
 
 // getCWLUser Wuery
-const getCWLUserQueryStr = `
-    query GetCWLUser($userId: String!) {
-      getCWLUser(userId: $userId) {
-        userId
-        userAddedById
-        privacyPolicy
-        termsAndConditions
-        userFirstName
-        userLastName     
-        userEmail
-        userPhone
-        userTitle
-        userCreated
-        organizationId 
-      }
+const getCWLUserQueryStr = /* GraphQL */ `
+  query GetCWLUser($userId: String!) {
+    getCWLUser(userId: $userId) {
+      __typename
+      userId
+      organizationId
+      privacyPolicy
+      termsAndConditions
+      userAddedById
+      userCreated
+      userEmail
+      userTitle
+      userFirstName
+      userLastName
+      userPhone
+      userRole
+      clientType
     }
+  }
 `;
 
 export const getCWLUserQueryKey = (userId: string) => [

@@ -1,4 +1,4 @@
-export const validEnvironments = ["nldev", "staging", "production"] as const;
+export const validEnvironments = ["dev", "staging", "production"] as const;
 
 export type ValidEnv = (typeof validEnvironments)[number];
 

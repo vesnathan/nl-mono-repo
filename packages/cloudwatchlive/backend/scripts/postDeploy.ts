@@ -1,288 +1,151 @@
-import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPasswordCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPasswordCommand, AdminAddUserToGroupCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { PutCommand, DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import * as fs from 'fs';
 import * as path from 'path';
-import inquirer from 'inquirer';
+import * as readline from 'readline';
 
 const region = 'ap-southeast-2';
 const stage = process.env.STAGE || 'dev';
 
 // Constants
-const temporaryPassword = 'Temp1234!'; // This will be changed on first login
+const temporaryPassword = 'Temp1234!';
+const defaultUser = {
+  firstName: 'John', // Fixed value
+  lastName: 'Doe' // Fixed value
+};
 
-interface UserDetails {
-  email: string;
-  firstName: string;
-  lastName: string;
-}
+// Function to prompt for email address
+async function promptForEmail(): Promise<string> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
 
-async function getUserDetails(): Promise<UserDetails> {
-  const questions = [
-    {
-      type: 'input',
-      name: 'email',
-      message: 'Enter the user\'s email address:',
-      validate: (input: string) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(input)) {
-          return 'Please enter a valid email address';
-        }
-        return true;
-      }
-    },
-    {
-      type: 'input',
-      name: 'firstName',
-      message: 'Enter the user\'s first name:',
-      validate: (input: string) => {
-        if (!input.trim()) {
-          return 'First name cannot be empty';
-        }
-        return true;
-      }
-    },
-    {
-      type: 'input',
-      name: 'lastName',
-      message: 'Enter the user\'s last name:',
-      validate: (input: string) => {
-        if (!input.trim()) {
-          return 'Last name cannot be empty';
-        }
-        return true;
-      }
-    }
-  ];
-
-  return inquirer.prompt(questions);
+  return new Promise((resolve) => {
+    rl.question('Please enter the user email address: ', (email) => {
+      rl.close();
+      resolve(email.trim());
+    });
+  });
 }
 
 async function setupUser() {
   try {
     console.log(`Starting post-deployment setup for stage ${stage}...`);
     
-    // Get user details interactively
-    const userDetails = await getUserDetails();
-    const { email, firstName, lastName } = userDetails;
-    
     // Get the Cognito User Pool ID from shared resources
     const userPoolId = await getCognitoUserPoolId();
     console.log(`Using Cognito User Pool ID: ${userPoolId}`);
 
-    // Create user in Cognito (or get existing user)
+    const email = await promptForEmail();
     const cognitoClient = new CognitoIdentityProviderClient({ region });
-    let userId: string;
-    
+    const dynamoClient = DynamoDBDocumentClient.from(new DynamoDBClient({ region }));
+
+    // Create user in Cognito
     try {
       console.log(`Creating user in Cognito: ${email}...`);
-      const createUserResponse = await cognitoClient.send(new AdminCreateUserCommand({
-        UserPoolId: userPoolId,
-        Username: email,
-        TemporaryPassword: temporaryPassword,
-        MessageAction: 'SUPPRESS', // Don't send an email - we'll set the password directly
-        UserAttributes: [
-          {
-            Name: 'email',
-            Value: email,
-          },
-          {
-            Name: 'email_verified',
-            Value: 'true',
-          },
-          {
-            Name: 'given_name',
-            Value: firstName,
-          },
-          {
-            Name: 'family_name',
-            Value: lastName,
-          }
-        ],
-      }));
-
-      userId = createUserResponse.User?.Username || '';
-      if (!userId) {
-        throw new Error('Failed to get user ID from Cognito response');
-      }
-      
-      console.log(`User created in Cognito with ID: ${userId}`);
-    } catch (error: any) {
-      if (error?.__type === 'UsernameExistsException') {
-        console.log(`User ${email} already exists in Cognito. Getting user details...`);
-        
-        // Import the necessary command
-        const { ListUsersCommand } = await import('@aws-sdk/client-cognito-identity-provider');
-        
-        // Look up the user to get their ID
-        const listUsersResponse = await cognitoClient.send(new ListUsersCommand({
+      await cognitoClient.send(
+        new AdminCreateUserCommand({
           UserPoolId: userPoolId,
-          Filter: `email = "${email}"`,
-          Limit: 1
-        }));
-        
-        if (!listUsersResponse.Users || listUsersResponse.Users.length === 0) {
-          throw new Error(`User ${email} exists but could not be found`);
-        }
-        
-        userId = listUsersResponse.Users[0].Username || '';
-        console.log(`Found existing user with ID: ${userId}`);
+          Username: email,
+          TemporaryPassword: temporaryPassword,
+          UserAttributes: [
+            {
+              Name: 'email',
+              Value: email,
+            },
+            {
+              Name: 'given_name',
+              Value: defaultUser.firstName,
+            },
+            {
+              Name: 'family_name',
+              Value: defaultUser.lastName,
+            },
+            {
+              Name: 'email_verified',
+              Value: 'true',
+            },
+          ],
+        })
+      );
+    } catch (error: any) {
+      if (error.name === 'UsernameExistsException') {
+        console.log(`User ${email} already exists in Cognito. Getting user details...`);
       } else {
         throw error;
       }
     }
 
-    // Set the user's password
-    console.log('Setting permanent password...');
-    try {
-      await cognitoClient.send(new AdminSetUserPasswordCommand({
+    // Set permanent password
+    await cognitoClient.send(
+      new AdminSetUserPasswordCommand({
         UserPoolId: userPoolId,
         Username: email,
         Password: temporaryPassword,
         Permanent: true,
-      }));
-      console.log('Password set successfully');
-    } catch (error: any) {
-      console.warn(`Warning: Could not set password. This may be because the user already has a password set or is in a state that doesn't allow password changes.`, error.message);
-    }
-    
+      })
+    );
+
+    // Add user to Event Company Manager group
+    await cognitoClient.send(
+      new AdminAddUserToGroupCommand({
+        UserPoolId: userPoolId,
+        Username: email,
+        GroupName: 'EventCompanyAdmin',
+      })
+    );
+
     // Create or update entry in DynamoDB
     console.log(`Adding user to DynamoDB table...`);
-    const dynamoClient = new DynamoDBClient({ region });
-    const docClient = DynamoDBDocumentClient.from(dynamoClient);
+    // Reuse the existing dynamoClient and docClient
     
-    // Get the correct table name from CloudFormation exports
+    // Get the table name from shared outputs
+    console.log('Looking up DynamoDB table from outputs...');
     let tableName;
     try {
-      const { CloudFormation } = await import('@aws-sdk/client-cloudformation');
-      const cfn = new CloudFormation({ region });
+      const outputsPath = path.resolve(__dirname, '../../shared/config/cloudformation-outputs.json');
       
-      const { Exports } = await cfn.listExports({});
-      // Check for this specific export name from the stack
-      const tableExport = Exports?.find(exp => exp.Name && exp.Name === `CWLUsersTable-${stage}`);
-      
-      if (tableExport && tableExport.Value) {
-        tableName = tableExport.Value;
-      } else {
-        // Use standard naming convention for the stack
-        const alternativeExports = [
-          `cloudwatchlive-backend-${stage}-UsersTable`,
-          `cwlUsersTable-${stage}`,
-          `UsersTable-${stage}`
-        ];
-        
-        for (const exportName of alternativeExports) {
-          const altExport = Exports?.find(exp => exp.Name && exp.Name === exportName);
-          if (altExport && altExport.Value) {
-            tableName = altExport.Value;
-            break;
-          }
-        }
-        
-        // As a fallback, try looking for any export that might be the users table
-        if (!tableName) {
-          const userTableExport = Exports?.find(exp => 
-            exp.Name && exp.Name.toLowerCase().includes('user') && 
-            exp.Name.toLowerCase().includes('table')
-          );
-          
-          if (userTableExport && userTableExport.Value) {
-            tableName = userTableExport.Value;
-          }
-        }
+      if (!fs.existsSync(outputsPath)) {
+        throw new Error(`CloudFormation outputs file not found at ${outputsPath}. Please ensure shared-aws-assets stack is deployed first.`);
       }
       
+      const outputs = JSON.parse(fs.readFileSync(outputsPath, 'utf8'));
+      tableName = outputs[stage]?.cwlUserTableArn;
       if (!tableName) {
-        // Last resort - use a hardcoded name format based on standard stack naming
-        tableName = `cloudwatchlive-backend-${stage}-UsersTable`;
-        console.log(`Could not find table export, using default name: ${tableName}`);
-      } else {
-        console.log(`Found table name from exports: ${tableName}`);
+        throw new Error(`Could not find user table ARN for stage ${stage} in outputs`);
       }
+      console.log(`Using table ARN from outputs: ${tableName}`);
     } catch (error: any) {
-      // Default if we can't look up the name
-      tableName = `CWLUsersTable-${stage}`;
-      console.warn(`Error looking up table name: ${error.message}. Using default: ${tableName}`);
+      console.error('Error looking up table name:', error);
+      throw error;
     }
-    
-    // Import the necessary command
-    const { GetCommand } = await import('@aws-sdk/lib-dynamodb');
-    
-    // Check if the user already exists in DynamoDB
-    let existingUser;
-    try {
-      const getResponse = await docClient.send(new GetCommand({
-        TableName: tableName,
-        Key: {
-          userId: userId
-        }
-      }));
-      existingUser = getResponse.Item;
-    } catch (error: any) {
-      console.log(`Could not check for existing user: ${error.message}`);
-    }
-    
+
     const userItem = {
-      userId: userId,
-      organizationId: existingUser?.organizationId || "",
-      PrivacyPolicy: existingUser?.PrivacyPolicy || "",
-      TermsAndConditions: existingUser?.TermsAndConditions || "",
-      userAddedById: existingUser?.userAddedById || "",
-      userCreated: existingUser?.userCreated || new Date().toISOString(),
+      userId: email,
+      organizationId: "org_" + Math.random().toString(36).substring(2, 15),
+      privacyPolicy: true,
+      termsAndConditions: true,
+      userAddedById: email, // Self-created admin user
+      userCreated: new Date().toISOString(),
       userEmail: email,
-      userFirstName: firstName,
-      userLastName: lastName,
-      userPhone: existingUser?.userPhone || "",
-      userProfilePicture: existingUser?.userProfilePicture || {
-        Bucket: "",
-        Key: ""
-      },
-      userTitle: existingUser?.userTitle || ""
+      userFirstName: defaultUser.firstName,
+      userLastName: defaultUser.lastName,
+      userPhone: "+1234567890",
+      userRole: "Event Coordinator",
+      userTitle: "Mr",
+      clientType: ["SuperAdmin"],  // Default to SuperAdmin for test user
     };
     
-    try {
-      // Try to describe the table first to verify it exists
-      const { DescribeTableCommand } = await import('@aws-sdk/client-dynamodb');
-      await dynamoClient.send(new DescribeTableCommand({ TableName: tableName }));
-      
-      console.log(`Table ${tableName} exists, proceeding with user creation/update`);
-      
-      await docClient.send(new PutCommand({
-        TableName: tableName,
-        Item: userItem
-      }));
-      
-      if (existingUser) {
-        console.log(`User data updated in DynamoDB table ${tableName}`);
-      } else {
-        console.log(`User successfully added to DynamoDB table ${tableName}`);
-      }
-    } catch (error: any) {
-      if (error.__type?.includes('ResourceNotFoundException')) {
-        console.error(`DynamoDB table ${tableName} does not exist. Available tables may not have been exported properly from CloudFormation.`);
-        console.log('Listing all CloudFormation exports to help debug:');
-        
-        const { CloudFormation } = await import('@aws-sdk/client-cloudformation');
-        const cfn = new CloudFormation({ region });
-        const { Exports } = await cfn.listExports({});
-        
-        console.log('Available exports:');
-        Exports?.forEach(exp => {
-          if (exp.Name && exp.Value) {
-            console.log(`  - ${exp.Name}: ${exp.Value}`);
-          }
-        });
-        
-        throw new Error(`DynamoDB table ${tableName} not found. Deployment might not be complete or the table name may be different.`);
-      } else {
-        throw error;
-      }
-    }
-    console.log('Post-deployment setup completed successfully!');
+    await dynamoClient.send(new PutCommand({
+      TableName: tableName,
+      Item: userItem
+    }));
+
     console.log(`User can now log in with email: ${email} and password: ${temporaryPassword}`);
-    
   } catch (error) {
-    console.error('Error during post-deployment setup:', error);
+    console.error('Error setting up user:', error);
     throw error;
   }
 }
@@ -290,27 +153,18 @@ async function setupUser() {
 // Helper function to get Cognito User Pool ID from shared resources outputs
 async function getCognitoUserPoolId(): Promise<string> {
   try {
-    // Try to read from shared outputs first
-    const sharedOutputPath = path.resolve(__dirname, '../../shared-aws-assets/outputs.json');
-    if (fs.existsSync(sharedOutputPath)) {
-      const sharedOutputs = JSON.parse(fs.readFileSync(sharedOutputPath, 'utf8'));
-      if (sharedOutputs.UserPoolId) {
-        return sharedOutputs.UserPoolId;
-      }
+    const outputsPath = path.resolve(__dirname, '../../shared/config/cloudformation-outputs.json');
+    if (!fs.existsSync(outputsPath)) {
+      throw new Error(`CloudFormation outputs file not found at ${outputsPath}. Please ensure shared-aws-assets stack is deployed first.`);
     }
     
-    // If not found, try to get from CloudFormation exports
-    const { CloudFormation } = await import('@aws-sdk/client-cloudformation');
-    const cfn = new CloudFormation({ region });
-    
-    const { Exports } = await cfn.listExports({});
-    const userPoolExport = Exports?.find(exp => exp.Name === `cwlUserPoolId-${stage}`);
-    
-    if (!userPoolExport || !userPoolExport.Value) {
-      throw new Error(`Could not find Cognito User Pool ID export for stage ${stage}`);
+    const outputs = JSON.parse(fs.readFileSync(outputsPath, 'utf8'));
+    const userPoolId = outputs[stage]?.cwlUserPoolId;
+    if (!userPoolId) {
+      throw new Error(`Could not find Cognito User Pool ID for stage ${stage} in outputs`);
     }
     
-    return userPoolExport.Value;
+    return userPoolId;
     
   } catch (error) {
     console.error('Error getting Cognito User Pool ID:', error);

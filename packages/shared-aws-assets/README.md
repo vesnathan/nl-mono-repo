@@ -12,6 +12,17 @@ Shared AWS Assets provides a set of common AWS resources including:
 - S3 buckets for shared storage
 - VPC networking resources
 
+## Configuration Management
+
+During deployment, this package exports CloudFormation outputs to `/packages/shared/config/cloudformation-outputs.json`. This file is the central configuration store for all packages and includes:
+
+- Cognito User Pool IDs
+- DynamoDB Table ARNs
+- AppSync GraphQL URLs
+- Other stage-specific configurations
+
+When redeploying this package, it will only update its own stage-specific outputs while preserving other configurations in the file.
+
 ## Deployment Prerequisites
 
 Before deploying Shared AWS Assets, make sure you have:
@@ -45,12 +56,12 @@ If you need to deploy components individually:
 
 #### 1. Deploy Web Application Firewall first
 ```bash
-cd ../cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf
 ```
 
 #### 2. Deploy Shared Assets
 ```bash
-cd ../shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared
+cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared
 ```
 
 ## Deployment Process Details

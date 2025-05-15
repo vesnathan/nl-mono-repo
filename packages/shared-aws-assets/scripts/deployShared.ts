@@ -3,6 +3,7 @@ import { S3, CreateBucketCommand, GetBucketLocationCommand, PutObjectCommand, Bu
 import path from 'path';
 import fs from 'fs';
 import yaml from 'js-yaml';
+import type { StageConfig, CloudFormationOutputs } from 'shared/config/types';
 
 // Add CloudFormation YAML schema
 const cfnSchema = yaml.DEFAULT_SCHEMA.extend({
@@ -392,10 +393,41 @@ const deployStack = async () => {
 
     console.log('Deployment completed successfully');
     
-    // Generate CWL configuration
-    const { generateCWLConfig } = await import('./generateCWLConfig');
-    await generateCWLConfig();
+    // Write CloudFormation outputs directly to shared package
+    const { Exports = [] } = await cfn.listExports({});
 
+    // Write CloudFormation outputs
+    const cfOutputs = {
+      [stage]: {
+        cwlUserPoolId: Exports.find(e => e.Name === `cwlUserPoolId-${stage}`)?.Value || '',
+        cwlUserPoolClientId: Exports.find(e => e.Name === `cwlUserPoolClientId-${stage}`)?.Value || '',
+        cwlIdentityPoolId: Exports.find(e => e.Name === `cwlIdentityPoolId-${stage}`)?.Value || '',
+        cwlGraphQLUrl: Exports.find(e => e.Name === `CWLAppsyncUrl-${stage}`)?.Value || '',
+        cwlUserTableArn: Exports.find(e => e.Name === `cwlUserTable-${stage}`)?.Value || ''
+      }
+    };
+
+    const outputPath = path.resolve(__dirname, '../../../shared/config/cloudformation-outputs.json');
+    const outputDir = path.dirname(outputPath);
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    // Merge with existing outputs if they exist
+    let existingOutputs = {};
+    if (fs.existsSync(outputPath)) {
+      try {
+        existingOutputs = JSON.parse(fs.readFileSync(outputPath, 'utf-8'));
+      } catch (err) {
+        console.warn('Could not read existing outputs, creating new file');
+      }
+    }
+
+    fs.writeFileSync(
+      outputPath, 
+      JSON.stringify({ ...existingOutputs, ...cfOutputs }, null, 2)
+    );
+    console.log(`Wrote CloudFormation outputs to ${outputPath}`);
   } catch (error: any) {
     if (error.message?.includes('No updates are to be performed')) {
       console.log('No updates required for the stack');
