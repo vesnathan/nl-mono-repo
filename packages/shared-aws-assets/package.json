@@ -5,6 +5,7 @@
   "private": true,
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-cloudformation": "3.669.0",
     "@aws-sdk/client-s3": "3.669.0",
     "@types/js-yaml": "^4.0.9",
     "@types/sanitize-html": "^2.13.0",

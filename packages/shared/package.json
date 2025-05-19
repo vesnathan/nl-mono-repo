@@ -8,6 +8,14 @@
     "graphql-schema-typescript": "^1.6.1"
   },
   "dependencies": {
-    "@types/yargs": "^17.0.33"
+    "@aws-sdk/client-cloudformation": "3.669.0",
+    "@aws-sdk/client-iam": "3.669.0",
+    "@aws-sdk/client-sts": "3.669.0",
+    "@aws-sdk/credential-providers": "3.669.0",
+    "@types/yargs": "^17.0.33",
+    "aws-amplify": "^6.0.16",
+    "await-to-js": "^3.0.0",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
   }
 }

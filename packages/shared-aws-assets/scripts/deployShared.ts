@@ -1,4 +1,4 @@
-import { CloudFormation, Capability, StackStatus, waitUntilStackCreateComplete, waitUntilStackUpdateComplete, waitUntilStackDeleteComplete } from '@aws-sdk/client-cloudformation';
+import { CloudFormation, Capability, StackStatus, waitUntilStackCreateComplete, waitUntilStackUpdateComplete, waitUntilStackDeleteComplete, CreateStackCommandInput, UpdateStackCommandInput } from '@aws-sdk/client-cloudformation';
 import { S3, CreateBucketCommand, GetBucketLocationCommand, PutObjectCommand, BucketLocationConstraint } from '@aws-sdk/client-s3';
 import path from 'path';
 import fs from 'fs';
@@ -49,7 +49,8 @@ const validateYamlTemplate = (templatePath: string): boolean => {
     }
 
     // Basic CloudFormation template validation
-    if (!template.Resources) {
+    const templateObj = template as { Resources?: Record<string, unknown> };
+    if (!templateObj.Resources) {
       throw new Error(`Missing Resources section in ${templatePath}`);
     }
 
@@ -309,7 +310,7 @@ const validateKMSTemplate = (templateBody: string) => {
       
       if (principal.Service && Array.isArray(principal.Service)) {
         const validServices = ['dynamodb.amazonaws.com', 's3.amazonaws.com', 'cloudformation.amazonaws.com'];
-        const invalidServices = principal.Service.filter(svc => !validServices.includes(svc));
+        const invalidServices = principal.Service.filter((svc: string) => !validServices.includes(svc));
         if (invalidServices.length > 0) {
           throw new Error(`Invalid service principals in KMS policy: ${invalidServices.join(', ')}`);
         }
@@ -354,16 +355,16 @@ const deployStack = async () => {
     const isDeleteFailed = existingStack?.StackStatus === StackStatus.DELETE_FAILED;
     const isRollbackFailed = existingStack?.StackStatus === StackStatus.ROLLBACK_FAILED;
 
-    if (isRollbackComplete || isRollbackInProgress || isDeleteInProgress || isDeleteFailed || isRollbackFailed) {
-      console.log(`Stack ${stackName} is in ${existingStack.StackStatus} state, forcing deletion...`);
+    if (existingStack && (isRollbackComplete || isRollbackInProgress || isDeleteInProgress || isDeleteFailed || isRollbackFailed)) {
+      console.log(`Stack ${stackName} is in ${existingStack?.StackStatus} state, forcing deletion...`);
       await forceDeleteStack(cfn, stackName);
-      existingStack = null;
+      existingStack = undefined;
     }
 
     const stackParams = {
       StackName: stackName,
       TemplateBody: templateContent,
-      Capabilities: ['CAPABILITY_NAMED_IAM', 'CAPABILITY_IAM', 'CAPABILITY_AUTO_EXPAND'],
+      Capabilities: [Capability.CAPABILITY_NAMED_IAM, Capability.CAPABILITY_IAM, Capability.CAPABILITY_AUTO_EXPAND],
       Parameters: [
         {
           ParameterKey: 'Stage',
