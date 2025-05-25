@@ -6,7 +6,8 @@
     "packages/cloudwatchlive/backend",
     "packages/shared",
     "packages/cwl-waf",
-    "packages/shared-aws-assets"
+    "packages/shared-aws-assets",
+    "packages/deploy"
   ],
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "3.669.0",
@@ -51,15 +52,11 @@
   "scripts": {
     "build-gql": "lerna run build-gql --stream --concurrency 1",
     "reset-modules": "rm -rf node_modules/ packages/**/*/node_modules",
-    "deploy-cwl": "lerna run deploy --concurrency 1 --stream  --scope cwlbackend --",
-    "deploy-waf": "lerna run deploy --concurrency 1 --stream --scope cwl-waf --",
-    "deploy-shared": "lerna run deploy --concurrency 1 --stream --scope shared-aws-assets --",
-    "remove-cwl": "lerna run remove-stack --concurrency 1 --stream --scope cwlbackend --",
-    "remove-waf": "lerna run remove-stack --concurrency 1 --stream --scope cwl-waf --",
-    "remove-shared": "lerna run remove-stack --concurrency 1 --stream --scope shared-aws-assets --",
     "install-aws-cli-local": "./scripts/install-aws-cli-local.sh",
-    "deploy": "chmod +x ./scripts/deploy.sh && ./scripts/deploy.sh",
-    "cfn-deploy": "chmod +x ./scripts/deploy.sh && ./scripts/deploy.sh",
+    "deploy": "yarn workspace @cwl/deploy deploy",
+    "deploy:waf": "yarn workspace @cwl/deploy deploy:waf",
+    "deploy:shared": "yarn workspace @cwl/deploy deploy:shared",
+    "deploy:cwl": "yarn workspace @cwl/deploy deploy:cwl",
     "knip": "knip",
     "dev-cwl": "cd packages/cloudwatchlive/frontend && yarn dev",
     "build": "lerna run build --stream",

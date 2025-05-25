@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch Live Backend Infrastructure'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  TemplatesBucketName:
+    Type: String
+    Description: Name of the S3 bucket containing nested stack templates
+  KMSKeyId:
+    Type: String
+    Description: KMS Key ID for encryption
+  KMSKeyArn:
+    Type: String
+    Description: KMS Key ARN for encryption
+
+Resources:
+  # DynamoDB Tables
+  DynamoDBStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/DynamoDB/dynamodb.yaml
+      Parameters:
+        Stage: !Ref Stage
+        KMSKeyId: !Ref KMSKeyId
+
+  # S3 Buckets for frontend and assets
+  S3Stack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/S3/s3.yaml
+      Parameters:
+        Stage: !Ref Stage
+        KMSKeyId: !Ref KMSKeyId
+        KMSKeyArn: !Ref KMSKeyArn
+
+  # CloudFront Distribution
+  CloudFrontStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: S3Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/CloudFront/cloudfront.yaml
+      Parameters:
+        Stage: !Ref Stage
+        WebACLId: !ImportValue nlmonorepo-waf-dev-web-acl-id
+        S3BucketDomain: !GetAtt S3Stack.Outputs.WebsiteBucketDomain
+
+  # AppSync API
+  AppSyncStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [DynamoDBStack, CloudFrontStack]
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/AppSync/appsync.yaml
+      Parameters:
+        Stage: !Ref Stage
+        UserPoolId: !ImportValue nlmonorepo-shared-dev-user-pool-id
+        WebACLId: !ImportValue nlmonorepo-waf-dev-web-acl-id
+
+  # Lambda Functions
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [DynamoDBStack, AppSyncStack]
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/Lambda/lambda.yaml
+      Parameters:
+        Stage: !Ref Stage
+        UserPoolId: !ImportValue nlmonorepo-shared-dev-user-pool-id
+        AppSyncApiId: !GetAtt AppSyncStack.Outputs.ApiId
+
+Outputs:
+  ApiUrl:
+    Description: AppSync API URL
+    Value: !GetAtt AppSyncStack.Outputs.ApiUrl
+    Export:
+      Name: !Sub nlmonorepo-cwl-${Stage}-api-url
+
+  ApiId:
+    Description: AppSync API ID
+    Value: !GetAtt AppSyncStack.Outputs.ApiId
+    Export:
+      Name: !Sub nlmonorepo-cwl-${Stage}-api-id
+
+  CloudFrontDomainName:
+    Description: CloudFront Distribution Domain Name
+    Value: !GetAtt CloudFrontStack.Outputs.DomainName
+    Export:
+      Name: !Sub nlmonorepo-cwl-${Stage}-cloudfront-domain
+
+  CloudFrontDistributionId:
+    Description: CloudFront Distribution ID
+    Value: !GetAtt CloudFrontStack.Outputs.DistributionId
+    Export:
+      Name: !Sub nlmonorepo-cwl-${Stage}-cloudfront-id
+
+  WebsiteBucket:
+    Description: S3 bucket for website assets
+    Value: !GetAtt S3Stack.Outputs.WebsiteBucket
+    Export:
+      Name: !Sub nlmonorepo-cwl-${Stage}-website-bucket

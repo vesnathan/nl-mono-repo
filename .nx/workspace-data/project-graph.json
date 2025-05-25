@@ -305,6 +305,100 @@
         "implicitDependencies": []
       }
     },
+    "@cwl/deploy": {
+      "name": "@cwl/deploy",
+      "type": "lib",
+      "data": {
+        "root": "packages/deploy",
+        "name": "@cwl/deploy",
+        "tags": [
+          "npm:public"
+        ],
+        "metadata": {
+          "targetGroups": {
+            "NPM Scripts": [
+              "deploy",
+              "deploy:waf",
+              "deploy:shared",
+              "deploy:cwl"
+            ]
+          },
+          "description": "CloudWatch Live Deployment Scripts",
+          "js": {
+            "packageName": "@cwl/deploy",
+            "packageMain": "index.ts",
+            "isInPackageManagerWorkspaces": true
+          }
+        },
+        "targets": {
+          "deploy": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "deploy"
+            },
+            "metadata": {
+              "scriptContent": "ts-node index.ts",
+              "runCommand": "yarn deploy"
+            },
+            "configurations": {},
+            "parallelism": true,
+            "dependsOn": [
+              {
+                "dependencies": true,
+                "target": "deploy",
+                "params": "forward"
+              }
+            ]
+          },
+          "deploy:waf": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "deploy:waf"
+            },
+            "metadata": {
+              "scriptContent": "ts-node index.ts --package waf",
+              "runCommand": "yarn deploy:waf"
+            },
+            "configurations": {},
+            "parallelism": true
+          },
+          "deploy:shared": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "deploy:shared"
+            },
+            "metadata": {
+              "scriptContent": "ts-node index.ts --package shared",
+              "runCommand": "yarn deploy:shared"
+            },
+            "configurations": {},
+            "parallelism": true
+          },
+          "deploy:cwl": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "deploy:cwl"
+            },
+            "metadata": {
+              "scriptContent": "ts-node index.ts --package cwl",
+              "runCommand": "yarn deploy:cwl"
+            },
+            "configurations": {},
+            "parallelism": true
+          },
+          "nx-release-publish": {
+            "executor": "@nx/js:release-publish",
+            "dependsOn": [
+              "^nx-release-publish"
+            ],
+            "options": {},
+            "configurations": {},
+            "parallelism": true
+          }
+        },
+        "implicitDependencies": []
+      }
+    },
     "shared": {
       "name": "shared",
       "type": "lib",
@@ -17070,6 +17164,53 @@
       {
         "source": "cwl-waf",
         "target": "npm:@aws-sdk/client-cloudformation",
+        "type": "static"
+      }
+    ],
+    "@cwl/deploy": [
+      {
+        "source": "@cwl/deploy",
+        "target": "npm:@types/node",
+        "type": "static"
+      },
+      {
+        "source": "@cwl/deploy",
+        "target": "npm:ts-node",
+        "type": "static"
+      },
+      {
+        "source": "@cwl/deploy",
+        "target": "npm:typescript",
+        "type": "static"
+      },
+      {
+        "source": "@cwl/deploy",
+        "target": "npm:@aws-sdk/client-cloudformation",
+        "type": "static"
+      },
+      {
+        "source": "@cwl/deploy",
+        "target": "npm:@aws-sdk/client-s3",
+        "type": "static"
+      },
+      {
+        "source": "@cwl/deploy",
+        "target": "npm:chalk",
+        "type": "static"
+      },
+      {
+        "source": "@cwl/deploy",
+        "target": "npm:commander",
+        "type": "static"
+      },
+      {
+        "source": "@cwl/deploy",
+        "target": "npm:glob",
+        "type": "static"
+      },
+      {
+        "source": "@cwl/deploy",
+        "target": "npm:inquirer",
         "type": "static"
       }
     ],
@@ -49584,5 +49725,5 @@
   },
   "version": "6.0",
   "errors": [],
-  "computedAt": 1748211123009
+  "computedAt": 1748212147203
 }

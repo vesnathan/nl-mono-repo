@@ -6,12 +6,17 @@ Parameters:
     Type: String
     Description: Deployment stage (e.g., dev, prod)
     AllowedPattern: ^[a-zA-Z0-9-]+$
+  KMSKeyArn:
+    Type: String
+    Description: ARN of KMS key for DynamoDB encryption
+    Default: ""
 
 Resources:
   # Data Table
   cwlDataTable:
     Type: AWS::DynamoDB::Table
     Properties:
+      TableName: !Sub "nlmonorepo-cwl-userdatatable-${Stage}"
       AttributeDefinitions:
         - AttributeName: "userId"
           AttributeType: "S"
@@ -24,8 +29,13 @@ Resources:
           Value: cwlDataTable
       SSESpecification:
         SSEEnabled: true
+        SSEType: !If [HasKMSKey, "KMS", "AES256"] 
+        KMSMasterKeyId: !If [HasKMSKey, !Ref KMSKeyArn, !Ref "AWS::NoValue"]
       StreamSpecification:
         StreamViewType: NEW_AND_OLD_IMAGES
+
+Conditions:
+  HasKMSKey: !Not [!Equals [!Ref KMSKeyArn, ""]]
 
 Outputs:
   CWLDataTableName:

@@ -1,0 +1,202 @@
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage
+
+Resources:
+  VPCRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub nl-mono-repo-vpc-${Stage}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-dev
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: VPCManagement
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:*
+                Resource: "*"
+
+  SharedVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: shared-vpc
+
+  SharedSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref SharedVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: shared-subnet-1
+
+  SharedSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref SharedVPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: shared-subnet-2
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref SharedVPC
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: private-subnet-1
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref SharedVPC
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: private-subnet-2
+
+  SharedInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: shared-igw
+
+  SharedVPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref SharedVPC
+      InternetGatewayId: !Ref SharedInternetGateway
+
+  NatGatewayEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGatewayEIP.AllocationId
+      SubnetId: !Ref SharedSubnet1 # Ensure this is a public subnet
+      Tags:
+        - Key: Name
+          Value: nat-gateway
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref SharedVPC
+      Tags:
+        - Key: Name
+          Value: private-route-table
+
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable
+
+  SharedRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref SharedVPC
+      Tags:
+        - Key: Name
+          Value: shared-route-table
+
+  SharedRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref SharedRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref SharedInternetGateway
+
+  SharedSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SharedSubnet1
+      RouteTableId: !Ref SharedRouteTable
+
+  SharedSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SharedSubnet2
+      RouteTableId: !Ref SharedRouteTable
+
+  cwlSecurityGroupFromSharedVPC:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref SharedVPC
+      GroupDescription: "Security group for shared cwlVPC"
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  cwlSecurityGroupFromSharedVPCId:
+    Value: !GetAtt cwlSecurityGroupFromSharedVPC.GroupId
+    Export:
+      Name: !Sub shared-assets-cwlSecurityGroupFromSharedVPCId-${Stage}
+
+  cwlSecurityGroupFromSharedVPC:
+    Value: !Ref cwlSecurityGroupFromSharedVPC
+    Export:
+      Name: !Sub shared-assets-cwlSecurityGroupFromSharedVPC-${Stage}
+
+  SharedSubnet1Id:
+    Value: !Ref SharedSubnet1
+    Export:
+      Name: !Sub shared-assets-sharedSubnet1-${Stage}
+
+  SharedSubnet2Id:
+    Value: !Ref SharedSubnet2
+    Export:
+      Name: !Sub shared-assets-sharedSubnet2-${Stage}
+
+  PrivateSubnet1Id: 
+    Value: !Ref PrivateSubnet1
+    Export:
+      Name: !Sub shared-assets-privateSubnet1-${Stage}
+
+  PrivateSubnet2Id: 
+    Value: !Ref PrivateSubnet2
+    Export:
+      Name: !Sub shared-assets-privateSubnet2-${Stage}

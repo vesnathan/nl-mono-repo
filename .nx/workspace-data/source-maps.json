@@ -40,19 +40,11 @@
       "packages/cloudwatchlive/backend/package.json",
       "nx/core/package-json"
     ],
-    "metadata.description": [
-      "packages/cloudwatchlive/backend/package.json",
-      "nx/core/package-json"
-    ],
     "metadata.js": [
       "packages/cloudwatchlive/backend/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
-      "packages/cloudwatchlive/backend/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageExports": [
       "packages/cloudwatchlive/backend/package.json",
       "nx/core/package-json"
     ],
@@ -250,23 +242,11 @@
       "packages/cloudwatchlive/frontend/package.json",
       "nx/core/package-json"
     ],
-    "metadata.description": [
-      "packages/cloudwatchlive/frontend/package.json",
-      "nx/core/package-json"
-    ],
     "metadata.js": [
       "packages/cloudwatchlive/frontend/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
-      "packages/cloudwatchlive/frontend/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageExports": [
-      "packages/cloudwatchlive/frontend/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageMain": [
       "packages/cloudwatchlive/frontend/package.json",
       "nx/core/package-json"
     ],
@@ -468,23 +448,11 @@
       "packages/cwl-waf/package.json",
       "nx/core/package-json"
     ],
-    "metadata.description": [
-      "packages/cwl-waf/package.json",
-      "nx/core/package-json"
-    ],
     "metadata.js": [
       "packages/cwl-waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
-      "packages/cwl-waf/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageExports": [
-      "packages/cwl-waf/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageMain": [
       "packages/cwl-waf/package.json",
       "nx/core/package-json"
     ],
@@ -553,6 +521,208 @@
       "nx/core/package-json"
     ]
   },
+  "packages/deploy": {
+    "root": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.executor": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.options": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.metadata": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.options.script": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.metadata.scriptContent": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.metadata.runCommand": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:waf": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:waf.executor": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:waf.options": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:waf.metadata": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:waf.options.script": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:waf.metadata.scriptContent": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:waf.metadata.runCommand": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:shared": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:shared.executor": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:shared.options": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:shared.metadata": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:shared.options.script": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:shared.metadata.scriptContent": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:shared.metadata.runCommand": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:cwl": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:cwl.executor": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:cwl.options": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:cwl.metadata": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:cwl.options.script": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:cwl.metadata.scriptContent": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy:cwl.metadata.runCommand": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.deploy.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
   "packages/shared": {
     "root": [
       "packages/shared/package.json",
@@ -574,19 +744,11 @@
       "packages/shared/package.json",
       "nx/core/package-json"
     ],
-    "metadata.description": [
-      "packages/shared/package.json",
-      "nx/core/package-json"
-    ],
     "metadata.js": [
       "packages/shared/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
-      "packages/shared/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageExports": [
       "packages/shared/package.json",
       "nx/core/package-json"
     ],
@@ -656,19 +818,11 @@
       "packages/shared-aws-assets/package.json",
       "nx/core/package-json"
     ],
-    "metadata.description": [
-      "packages/shared-aws-assets/package.json",
-      "nx/core/package-json"
-    ],
     "metadata.js": [
       "packages/shared-aws-assets/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
-      "packages/shared-aws-assets/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageExports": [
       "packages/shared-aws-assets/package.json",
       "nx/core/package-json"
     ],
