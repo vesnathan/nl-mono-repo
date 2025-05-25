@@ -1,4 +1,5 @@
 import { LoginController } from "@/hooks/useLoginController";
+import { useEnterKeySubmit } from "@/hooks/useEnterKeySubmit";
 import { Divider } from "@nextui-org/react";
 import React from "react";
 import { CWLButton } from "../common/CWLButton";
@@ -22,11 +23,18 @@ export const ForgotPasswordResetCodeForm: React.FC<Props> = ({
   const backToEnterEmail = () => {
     setActiveStep("forgot-password-enter-email");
   };
+
   const submitHandler = () => {
     // NOTE: at this step, there's no backend check to validate whether the entered code is valid or not
     // The code validation will be handled when user enter new password
     setActiveStep("forgot-password-enter-new-password");
   };
+
+  useEnterKeySubmit({
+    onSubmit: submitHandler,
+    isDisabled: !forgetPWCode,
+  });
+
   return (
     <>
       <div className="px-6 pb-6">
@@ -55,9 +63,7 @@ export const ForgotPasswordResetCodeForm: React.FC<Props> = ({
           <CWLButton
             buttonText="Submit"
             additionalClassName="w-[140px] m-auto h-[40px]"
-            onClick={() => {
-              submitHandler();
-            }}
+            onClick={submitHandler}
             isDisabled={!forgetPWCode}
           />
         </div>
@@ -69,9 +75,7 @@ export const ForgotPasswordResetCodeForm: React.FC<Props> = ({
             Use another email address
           </span>
         }
-        onClick={() => {
-          backToEnterEmail();
-        }}
+        onClick={backToEnterEmail}
         additionalClassName="px-6 py-4 h-[56px]"
         color="transparent"
       />
