@@ -1,6 +1,6 @@
 {
   "userId": {
-    "S": "69be4448-e0e1-70e6-5213-064579ca4b72"
+    "S": "<Cognito uuid>"
   },
   "organizationId": {
     "S": ""
@@ -18,10 +18,10 @@
     "S": "1733530302"
   },
   "userEmail": {
-    "S": "vesnathan@gmail.com"
+    "S": "<email address asked for during deployment>"
   },
   "userFirstName": {
-    "S": "Nathan"
+    "S": "John"
   },
   "userGroups": {
     "L": [
@@ -36,7 +36,7 @@
     ]
   },
   "userLastName": {
-    "S": "Loudon"
+    "S": "Doe"
   },
   "userPhone": {
     "S": "0421 569 854"

@@ -32,4 +32,6 @@ gqlTypes.ts
 .serverless
 lerna-debug.log
 WAF_output.json
-.nx
+.nx.env
+temp-aws-config
+access-key.json

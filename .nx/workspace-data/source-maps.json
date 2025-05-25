@@ -1,0 +1,772 @@
+{
+  "packages/cloudwatchlive/backend": {
+    "root": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageExports": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.executor": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.options": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.metadata": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.options.script": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.metadata.scriptContent": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.metadata.runCommand": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.executor": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.options": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.metadata": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.options.script": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.metadata.scriptContent": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.metadata.runCommand": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.post-deploy": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.post-deploy.executor": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.post-deploy.options": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.post-deploy.metadata": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.post-deploy.options.script": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.post-deploy.metadata.scriptContent": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.post-deploy.metadata.runCommand": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-cwl": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-cwl.executor": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-cwl.options": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-cwl.metadata": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-cwl.options.script": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-cwl.metadata.scriptContent": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-cwl.metadata.runCommand": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.deploy.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
+  "packages/cloudwatchlive/frontend": {
+    "root": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.4": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageExports": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.executor": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.options": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.options.script": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata.scriptContent": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata.runCommand": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.executor": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options.script": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.scriptContent": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.runCommand": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.executor": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options.script": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.scriptContent": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.runCommand": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.executor": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options.script": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.scriptContent": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.runCommand": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.executor": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.options": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.metadata": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.options.script": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.metadata.scriptContent": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.metadata.runCommand": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ]
+  },
+  "packages/cwl-waf": {
+    "root": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:private": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageExports": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-waf": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-waf.executor": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-waf.options": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-waf.metadata": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-waf.options.script": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-waf.metadata.scriptContent": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-waf.metadata.runCommand": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-waf": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-waf.executor": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-waf.options": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-waf.metadata": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-waf.options.script": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-waf.metadata.scriptContent": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-waf.metadata.runCommand": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ]
+  },
+  "packages/shared": {
+    "root": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageExports": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ]
+  },
+  "packages/shared-aws-assets": {
+    "root": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:private": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageExports": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-shared": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-shared.executor": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-shared.options": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-shared.metadata": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-shared.options.script": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-shared.metadata.scriptContent": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy-shared.metadata.runCommand": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-shared": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-shared.executor": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-shared.options": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-shared.metadata": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-shared.options.script": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-shared.metadata.scriptContent": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove-shared.metadata.runCommand": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.executor": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.options": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.metadata": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.options.script": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.metadata.scriptContent": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build-gql.metadata.runCommand": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ]
+  }
+}
