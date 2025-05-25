@@ -3,7 +3,7 @@ import { CloudFormation } from '@aws-sdk/client-cloudformation';
 const removeShared = async () => {
   const stage = process.env.STAGE || 'dev';
   const region = 'ap-southeast-2';
-  const stackName = `shared-aws-assets-${stage}`;
+  const stackName = `nlmonorepo-shared-${stage}`;
   const cfn = new CloudFormation({ region });
 
   try {

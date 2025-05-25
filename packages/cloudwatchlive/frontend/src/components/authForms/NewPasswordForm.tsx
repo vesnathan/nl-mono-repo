@@ -1,6 +1,7 @@
 import React from "react";
 import { Divider } from "@nextui-org/react";
 import { LoginController } from "@/hooks/useLoginController";
+import { useEnterKeySubmit } from "@/hooks/useEnterKeySubmit";
 import { cwlAuthValidatePassword } from "shared/functions/cwlAuthValidatePassword";
 import { CWLButton } from "../common/CWLButton";
 import { CWLTextField } from "../common/CWLTextField";
@@ -49,6 +50,11 @@ export const NewPasswordForm: React.FC<Props> = ({
     onSubmit(newPassword);
   };
 
+  useEnterKeySubmit({
+    onSubmit: submitHandler,
+    isDisabled: buttonDisabled,
+  });
+
   return (
     <>
       <div className="px-6 pb-6">
@@ -92,7 +98,7 @@ export const NewPasswordForm: React.FC<Props> = ({
             buttonText="Submit"
             additionalClassName="h-[40px] w-full"
             isDisabled={buttonDisabled}
-            onClick={() => submitHandler()}
+            onClick={submitHandler}
           />
         </div>
       </div>
