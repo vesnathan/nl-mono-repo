@@ -1,0 +1,31 @@
+{
+  "name": "@cwl/deploy",
+  "version": "1.0.0",
+  "description": "CloudWatch Live Deployment Scripts",
+  "main": "index.ts",
+  "scripts": {
+    "deploy": "ts-node -r dotenv/config index.ts",
+    "deploy:waf": "ts-node -r dotenv/config index.ts --package waf",
+    "deploy:shared": "ts-node -r dotenv/config index.ts --package shared",
+    "deploy:cwl": "ts-node -r dotenv/config index.ts --package cwl"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudformation": "^3.300.0",
+    "@aws-sdk/client-s3": "^3.300.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/glob": "^8.1.0",
+    "chalk": "^4.1.2",
+    "commander": "^9.4.0",
+    "dotenv": "^16.5.0",
+    "fs-extra": "^11.3.0",
+    "glob": "^11.0.2",
+    "inquirer": "^8.2.4"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.0.0",
+    "@types/inquirer": "^8.2.4",
+    "@types/node": "^18.11.9",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.3"
+  }
+}

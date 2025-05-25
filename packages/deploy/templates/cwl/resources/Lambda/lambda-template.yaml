@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch Live Lambda Resources'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  CWLCloudFrontDistributionId:
+    Type: String
+    Description: ID of the CloudFront distribution
+  CWLCloudFrontDomainName:
+    Type: String
+    Description: Domain name of the CloudFront distribution
+
+Resources:
+  # Lambda Functions
+  PostFrontEndDeployFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "nlmonorepo-cwl-postfrontenddeploy-${Stage}"
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 600
+      Role: !GetAtt PostFrontEndDeployRole.Arn
+      Code:
+        ZipFile: |
+          const { CloudFront } = require("@aws-sdk/client-cloudfront");
+          
+          exports.handler = async (event) => {
+            console.log('Post front-end deployment handler called');
+            
+            try {
+              const CF = new CloudFront();
+              const DistributionId = process.env.cwlCloudFrontDistributionId;
+              
+              // Create CloudFront invalidation
+              if (DistributionId) {
+                await CF.createInvalidation({
+                  DistributionId,
+                  InvalidationBatch: {
+                    CallerReference: Date.now().toString(),
+                    Paths: {
+                      Quantity: 1,
+                      Items: ["/*"],
+                    },
+                  },
+                });
+                console.log(`Created invalidation for distribution ${DistributionId}`);
+              }
+              
+              return {
+                statusCode: 200,
+                body: JSON.stringify({ success: true })
+              };
+            } catch (error) {
+              console.error('Error in handler:', error);
+              return {
+                statusCode: 500,
+                body: JSON.stringify({ error: error.message })
+              };
+            }
+          };
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+          cwlCloudFrontDistributionId: !Ref CWLCloudFrontDistributionId
+
+  PostFrontEndDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "nlmonorepo-cwl-postfrontenddeploy-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: CloudFrontInvalidation
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudfront:CreateInvalidation
+                  - cloudfront:GetInvalidation
+                Resource: "*"
+
+Outputs:
+  PostFrontEndDeployFunctionArn:
+    Value: !GetAtt PostFrontEndDeployFunction.Arn
+    Description: ARN of the post-frontend-deploy Lambda function
+  
+  PostFrontEndDeployFunctionName:
+    Value: !Ref PostFrontEndDeployFunction
+    Description: Name of the post-frontend-deploy Lambda function

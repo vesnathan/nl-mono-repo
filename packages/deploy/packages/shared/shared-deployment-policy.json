@@ -25,9 +25,11 @@
                 "cognito-idp:*",
                 "kms:*",
                 "dynamodb:*",
-                "s3:*"
-            ],
-            "Resource": "*"
-        }
-    ]
+                "s3:*",
+        "kms:*",
+        "iam:PassRole"
+      ],
+      "Resource": "*"
+    }
+  ]
 }
