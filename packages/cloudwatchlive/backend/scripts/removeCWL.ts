@@ -4,8 +4,8 @@ const removeCWL = async () => {
   const stage = process.env.STAGE || 'dev';
   const region = 'ap-southeast-2';
   
-  // Use the standardized stack name format for nested stacks
-  const stackName = `cloudwatchlive-backend-${stage}`;
+  // Use the standardized stack name format
+  const stackName = `nlmonorepo-cwl-${stage}`;
   
   const cfn = new CloudFormation({ region });
 

@@ -115,40 +115,9 @@ async function setupUser() {
       if (tableExport && tableExport.Value) {
         tableName = tableExport.Value;
       } else {
-        // Use standard naming convention for the stack
-        const alternativeExports = [
-          `cloudwatchlive-backend-${stage}-UsersTable`,
-          `cwlUsersTable-${stage}`,
-          `UsersTable-${stage}`
-        ];
-        
-        for (const exportName of alternativeExports) {
-          const altExport = Exports?.find(exp => exp.Name && exp.Name === exportName);
-          if (altExport && altExport.Value) {
-            tableName = altExport.Value;
-            break;
-          }
-        }
-        
-        // As a fallback, try looking for any export that might be the users table
-        if (!tableName) {
-          const userTableExport = Exports?.find(exp => 
-            exp.Name && exp.Name.toLowerCase().includes('user') && 
-            exp.Name.toLowerCase().includes('table')
-          );
-          
-          if (userTableExport && userTableExport.Value) {
-            tableName = userTableExport.Value;
-          }
-        }
-      }
-      
-      if (!tableName) {
-        // Last resort - use a hardcoded name format based on standard stack naming
-        tableName = `cloudwatchlive-backend-${stage}-UsersTable`;
-        console.log(`Could not find table export, using default name: ${tableName}`);
-      } else {
-        console.log(`Found table name from exports: ${tableName}`);
+        // Use standard naming convention for the table
+        tableName = `nlmonorepo-cwl-userdatatable-${stage}`;
+        console.log(`Could not find table export, using standard name: ${tableName}`);
       }
     } catch (error: any) {
       // Default if we can't look up the name

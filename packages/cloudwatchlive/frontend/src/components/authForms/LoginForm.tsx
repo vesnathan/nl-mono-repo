@@ -1,4 +1,5 @@
 import { LoginController } from "@/hooks/useLoginController";
+import { useEnterKeySubmit } from "@/hooks/useEnterKeySubmit";
 import { Divider } from "@nextui-org/react";
 import React from "react";
 import { CWLButton } from "../common/CWLButton";
@@ -22,6 +23,21 @@ export const LoginForm: React.FC<Props> = ({
     signInMutation,
     setActiveStep,
   } = loginController;
+
+  const isLoginDisabled = !userEmail || !userPassword || signInMutation.isPending;
+
+  const handleLogin = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    signInMutation.mutate({
+      username: userEmail,
+      password: userPassword,
+    });
+  };
+
+  useEnterKeySubmit({
+    onSubmit: handleLogin,
+    isDisabled: isLoginDisabled
+  });
 
   const onForgetPassword = () => {
     setActiveStep("forgot-password-enter-email");
@@ -51,16 +67,8 @@ export const LoginForm: React.FC<Props> = ({
         <CWLButton
           buttonText="Log in"
           additionalClassName="h-[40px] w-full mt-4"
-          isDisabled={
-            !!(!userEmail || !userPassword || signInMutation.isPending)
-          }
-          onClick={(e) => {
-            e.preventDefault();
-            signInMutation.mutate({
-              username: userEmail,
-              password: userPassword,
-            });
-          }}
+          isDisabled={isLoginDisabled}
+          onClick={handleLogin}
           color="primary"
         />
       </div>

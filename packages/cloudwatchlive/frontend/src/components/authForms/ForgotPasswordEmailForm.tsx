@@ -1,4 +1,5 @@
 import { LoginController } from "@/hooks/useLoginController";
+import { useEnterKeySubmit } from "@/hooks/useEnterKeySubmit";
 import { Divider } from "@nextui-org/react";
 import React from "react";
 import { REGEX } from "@/constants/layout/navigation/RegEx";
@@ -18,6 +19,8 @@ export const ForgotPasswordEmailForm: React.FC<Props> = ({
     return REGEX.EMAIL.test(forgetPWEmail);
   }, [forgetPWEmail]);
 
+  const isSubmitDisabled = !emailValid || loginController.sendResetPasswordRequestMutation.isPending;
+
   const backToLogin = () => {
     setActiveStep("login-enter-credentials");
   };
@@ -32,6 +35,11 @@ export const ForgotPasswordEmailForm: React.FC<Props> = ({
       onUserNotFound: goToEnterCode,
     });
   };
+
+  useEnterKeySubmit({
+    onSubmit: submitHandler,
+    isDisabled: isSubmitDisabled
+  });
 
   return (
     <>
@@ -65,10 +73,8 @@ export const ForgotPasswordEmailForm: React.FC<Props> = ({
           <CWLButton
             buttonText="Submit"
             additionalClassName="w-[140px] m-auto h-[40px]"
-            isDisabled={
-              !emailValid ||
-              loginController.sendResetPasswordRequestMutation.isPending
-            }
+            isDisabled={isSubmitDisabled}
+            onClick={submitHandler}
           />
         </div>
       </form>
@@ -77,9 +83,7 @@ export const ForgotPasswordEmailForm: React.FC<Props> = ({
         buttonText={
           <span className="text-neutral-700 text-body2 font-bold">Login</span>
         }
-        onClick={() => {
-          backToLogin();
-        }}
+        onClick={backToLogin}
         additionalClassName="px-6 py-4 h-[56px] text-neutral-700 text-body2 font-bold"
         color="transparent"
       />

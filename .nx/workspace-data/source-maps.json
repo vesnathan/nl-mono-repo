@@ -40,11 +40,19 @@
       "packages/cloudwatchlive/backend/package.json",
       "nx/core/package-json"
     ],
+    "metadata.description": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
     "metadata.js": [
       "packages/cloudwatchlive/backend/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
+      "packages/cloudwatchlive/backend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageExports": [
       "packages/cloudwatchlive/backend/package.json",
       "nx/core/package-json"
     ],
@@ -242,11 +250,23 @@
       "packages/cloudwatchlive/frontend/package.json",
       "nx/core/package-json"
     ],
+    "metadata.description": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
     "metadata.js": [
       "packages/cloudwatchlive/frontend/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageExports": [
+      "packages/cloudwatchlive/frontend/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
       "packages/cloudwatchlive/frontend/package.json",
       "nx/core/package-json"
     ],
@@ -448,11 +468,23 @@
       "packages/cwl-waf/package.json",
       "nx/core/package-json"
     ],
+    "metadata.description": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
     "metadata.js": [
       "packages/cwl-waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageExports": [
+      "packages/cwl-waf/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
       "packages/cwl-waf/package.json",
       "nx/core/package-json"
     ],
@@ -542,11 +574,19 @@
       "packages/shared/package.json",
       "nx/core/package-json"
     ],
+    "metadata.description": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
     "metadata.js": [
       "packages/shared/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
+      "packages/shared/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageExports": [
       "packages/shared/package.json",
       "nx/core/package-json"
     ],
@@ -616,11 +656,19 @@
       "packages/shared-aws-assets/package.json",
       "nx/core/package-json"
     ],
+    "metadata.description": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
     "metadata.js": [
       "packages/shared-aws-assets/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
+      "packages/shared-aws-assets/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageExports": [
       "packages/shared-aws-assets/package.json",
       "nx/core/package-json"
     ],

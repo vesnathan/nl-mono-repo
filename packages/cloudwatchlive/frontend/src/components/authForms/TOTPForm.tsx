@@ -1,4 +1,5 @@
 import { LoginController } from "@/hooks/useLoginController";
+import { useEnterKeySubmit } from "@/hooks/useEnterKeySubmit";
 import React from "react";
 import { CWLButton } from "../common/CWLButton";
 import { CWLTextField } from "../common/CWLTextField";
@@ -10,6 +11,19 @@ type Props = {
 export const TOTPForm: React.FC<Props> = ({ loginController }) => {
   const { errorMessage, TOTPCode, setTOTPCode, confirmSignInMutation } =
     loginController;
+
+  const handleSubmit = () => {
+    confirmSignInMutation.mutate({
+      challengeResponse: TOTPCode,
+      challengeType: "TOTP",
+    });
+  };
+
+  useEnterKeySubmit({
+    onSubmit: handleSubmit,
+    isDisabled: confirmSignInMutation.isPending,
+  });
+
   return (
     <div className="p-5">
       <div className="my-5">
@@ -34,12 +48,7 @@ export const TOTPForm: React.FC<Props> = ({ loginController }) => {
           buttonText="Submit"
           additionalClassName="w-[140px] m-auto h-[40px]"
           isDisabled={confirmSignInMutation.isPending}
-          onClick={() => {
-            confirmSignInMutation.mutate({
-              challengeResponse: TOTPCode,
-              challengeType: "TOTP",
-            });
-          }}
+          onClick={handleSubmit}
         />
       </div>
     </div>

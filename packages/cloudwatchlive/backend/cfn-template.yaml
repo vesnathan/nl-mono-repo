@@ -10,6 +10,15 @@ Parameters:
     Type: String
     Description: Name of the S3 bucket containing nested stack templates
 
+  KMSKeyId:
+    Type: String
+    Description: KMS Key ID for bucket encryption (from shared stack)
+    Default: ""
+  KMSKeyArn:
+    Type: String
+    Description: KMS Key ARN for DynamoDB encryption (from shared stack)
+    Default: ""
+
 Resources:
   DynamoDBStack:
     Type: AWS::CloudFormation::Stack
@@ -17,6 +26,7 @@ Resources:
       TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/DynamoDB/dynamodb.yaml
       Parameters:
         Stage: !Ref Stage
+        KMSKeyArn: !Ref KMSKeyArn
 
   S3Stack:
     Type: AWS::CloudFormation::Stack
@@ -24,6 +34,7 @@ Resources:
       TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/S3/s3.yaml
       Parameters:
         Stage: !Ref Stage
+        KMSKeyId: !Ref KMSKeyId
 
   CloudFrontStack:
     Type: AWS::CloudFormation::Stack

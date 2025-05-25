@@ -70,3 +70,8 @@ Outputs:
     Value: !GetAtt KMSStack.Outputs.cwlKMSKeyArn
     Export:
       Name: !Sub cwlKMSKeyArn-${Stage}
+      
+  cwlUserPoolId:
+    Value: !GetAtt CognitoStack.Outputs.cwlUserPoolId
+    Export:
+      Name: !Sub cwlUserPoolId-${Stage}
