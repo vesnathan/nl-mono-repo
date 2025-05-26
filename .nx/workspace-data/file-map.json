@@ -8,34 +8,199 @@
       "@cwl/deploy": [
         {
           "file": "packages/deploy/index.ts",
-          "hash": "11248812051507240704"
+          "hash": "7339849040625750172"
         },
         {
           "file": "packages/deploy/package.json",
-          "hash": "6297958823949281533",
+          "hash": "6832581998772887963",
           "deps": [
-            "npm:@types/node",
+            "npm:@types/glob",
+            "npm:@types/inquirer",
+            "npm:@types/node@18.19.103",
             "npm:ts-node",
-            "npm:typescript",
-            "npm:@aws-sdk/client-cloudformation",
-            "npm:@aws-sdk/client-s3",
+            "npm:typescript@4.9.5",
+            "npm:@aws-sdk/client-cloudformation@3.817.0",
+            "npm:@aws-sdk/client-s3@3.817.0",
+            "npm:@types/fs-extra",
             "npm:chalk",
-            "npm:commander",
-            "npm:glob",
+            "npm:commander@9.5.0",
+            "npm:dotenv",
+            "npm:fs-extra",
+            "npm:glob@11.0.2",
             "npm:inquirer"
           ]
         },
         {
-          "file": "packages/deploy/stacks/cwl.ts",
-          "hash": "958412573753821408"
+          "file": "packages/deploy/packages/cwl/cwl-deployment-policy.json",
+          "hash": "7844229095979587973"
         },
         {
-          "file": "packages/deploy/stacks/shared.ts",
-          "hash": "6288445351392207367"
+          "file": "packages/deploy/packages/cwl/cwl.ts",
+          "hash": "10557927562693369171"
         },
         {
-          "file": "packages/deploy/stacks/waf.ts",
-          "hash": "18289586123647351025"
+          "file": "packages/deploy/packages/shared/shared-deployment-policy.json",
+          "hash": "115186587836227366"
+        },
+        {
+          "file": "packages/deploy/packages/shared/shared.ts",
+          "hash": "5603948685154458898"
+        },
+        {
+          "file": "packages/deploy/packages/waf/trust-policy.json",
+          "hash": "12379059934409790963"
+        },
+        {
+          "file": "packages/deploy/packages/waf/waf-deployment-policy.json",
+          "hash": "6515917585047219059"
+        },
+        {
+          "file": "packages/deploy/packages/waf/waf.ts",
+          "hash": "16568560432199472357"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/cfn-template.yaml",
+          "hash": "14238504173596233581"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/appSync.yaml",
+          "hash": "6058393739748023312"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/appsync-template.yaml",
+          "hash": "8158676305077156765"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/appsync.yaml",
+          "hash": "10101332230671659421"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/resolvers/getProcessEnv.ts",
+          "hash": "7409323814525091486"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/resolvers/orgs/Queries/Query.getCWLOrgs.ts",
+          "hash": "10441002470891560517"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/resolvers/users/Mutations/Mutation_addUserToGroup.ts",
+          "hash": "14110844705966147151"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/resolvers/users/Mutations/Mutation_adminSetUserMFAPreference.ts",
+          "hash": "8678309357581700401"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/resolvers/users/Mutations/Mutation_associateSoftwareToken.ts",
+          "hash": "9053981552302226811"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/resolvers/users/Mutations/Mutation_createCWLUser.ts",
+          "hash": "6629842489365316466"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/resolvers/users/Mutations/Mutation_createCognitoUser.ts",
+          "hash": "10043026582779695495"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/resolvers/users/Mutations/Mutation_verifySoftwareToken.ts",
+          "hash": "2541723053010665705"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/resolvers/users/Queries/Query.getCWLUser.ts",
+          "hash": "18230703264848290567"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/AppSync/schema.graphql",
+          "hash": "8192082984333627090"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/CloudFront/cloudfront.yaml",
+          "hash": "16518671210420921486"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/Cognito/cognito.yaml",
+          "hash": "13775456382519610517"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/DDB_DUMP.txt",
+          "hash": "9926643873013934379"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/DynamoDB/dynamodb.yaml",
+          "hash": "12362823132017145210"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/Lambda/handlers/postFrontEndDeploy.ts",
+          "hash": "12744561710255255645"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/Lambda/lambda-template.yaml",
+          "hash": "15638176576670176776"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/Lambda/lambda.yaml",
+          "hash": "15638176576670176776"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/S3/s3-template.yaml",
+          "hash": "16955971343556698988"
+        },
+        {
+          "file": "packages/deploy/templates/cwl/resources/S3/s3.yaml",
+          "hash": "4330008803842582381"
+        },
+        {
+          "file": "packages/deploy/templates/shared/cfn-template.yaml",
+          "hash": "7523803453938288939"
+        },
+        {
+          "file": "packages/deploy/templates/shared/resources/Cognito/cognito.yaml",
+          "hash": "411937712603882867"
+        },
+        {
+          "file": "packages/deploy/templates/shared/resources/Cognito/cognito.yaml.bak",
+          "hash": "13035389604855464359"
+        },
+        {
+          "file": "packages/deploy/templates/shared/resources/DynamoDb/dynamoDb.yaml",
+          "hash": "12453065209161026153"
+        },
+        {
+          "file": "packages/deploy/templates/shared/resources/DynamoDb/dynamoDb.yaml.bak",
+          "hash": "9078410146810605069"
+        },
+        {
+          "file": "packages/deploy/templates/shared/resources/KMS/KMS.yaml",
+          "hash": "16604167858804356926"
+        },
+        {
+          "file": "packages/deploy/templates/shared/resources/KMS/KMS.yaml.bak",
+          "hash": "16719839279396549257"
+        },
+        {
+          "file": "packages/deploy/templates/shared/resources/S3/s3.yaml",
+          "hash": "1419162513428447378"
+        },
+        {
+          "file": "packages/deploy/templates/shared/resources/S3/s3.yaml.bak",
+          "hash": "11821876726634673838"
+        },
+        {
+          "file": "packages/deploy/templates/shared/resources/VPC/VPC.yaml",
+          "hash": "10631566745225341261"
+        },
+        {
+          "file": "packages/deploy/templates/shared/resources/gqlTypes.js",
+          "hash": "10533815908077531553"
+        },
+        {
+          "file": "packages/deploy/templates/waf/cfn-template.yaml",
+          "hash": "9995376504768556472"
+        },
+        {
+          "file": "packages/deploy/test-cwl.js",
+          "hash": "6513040485547048452"
         },
         {
           "file": "packages/deploy/tsconfig.json",
@@ -43,11 +208,19 @@
         },
         {
           "file": "packages/deploy/types.ts",
-          "hash": "16817441937317240609"
+          "hash": "7068749688741109834"
+        },
+        {
+          "file": "packages/deploy/utils/aws-credentials.ts",
+          "hash": "8861043768343565739"
         },
         {
           "file": "packages/deploy/utils/aws-utils.ts",
-          "hash": "28996878625830091"
+          "hash": "11899031796986322327"
+        },
+        {
+          "file": "packages/deploy/utils/iam-manager.ts",
+          "hash": "17603211365472910281"
         },
         {
           "file": "packages/deploy/utils/logger.ts",
@@ -55,10 +228,6 @@
         }
       ],
       "cwlfrontend": [
-        {
-          "file": "packages/cloudwatchlive/frontend/.env",
-          "hash": "17746730825331233907"
-        },
         {
           "file": "packages/cloudwatchlive/frontend/.eslintrc.js",
           "hash": "16578683890016746213"
@@ -482,96 +651,6 @@
           "hash": "3453547237647272237"
         }
       ],
-      "shared": [
-        {
-          "file": "packages/shared/constants/serverErrorCode.ts",
-          "hash": "13362639943258846603"
-        },
-        {
-          "file": "packages/shared/functions/cwlAuthConfirmResetPassword.ts",
-          "hash": "7849120466090750772"
-        },
-        {
-          "file": "packages/shared/functions/cwlAuthConfirmSignIn.ts",
-          "hash": "18025103335687021712"
-        },
-        {
-          "file": "packages/shared/functions/cwlAuthResetPassword.ts",
-          "hash": "4099791317823061570"
-        },
-        {
-          "file": "packages/shared/functions/cwlAuthSignIn.ts",
-          "hash": "5432376485143792543"
-        },
-        {
-          "file": "packages/shared/functions/cwlAuthSignOut.ts",
-          "hash": "12755088392679396765"
-        },
-        {
-          "file": "packages/shared/functions/cwlAuthUpdatePassword.tsx",
-          "hash": "1642317609610530194"
-        },
-        {
-          "file": "packages/shared/functions/cwlAuthValidatePassword.ts",
-          "hash": "1604316747533499121"
-        },
-        {
-          "file": "packages/shared/functions/getCognitoUserByEmail.ts",
-          "hash": "11153143955468357963"
-        },
-        {
-          "file": "packages/shared/functions/userGroup.ts",
-          "hash": "6782896039965228334"
-        },
-        {
-          "file": "packages/shared/hooks/useMediaQuery.ts",
-          "hash": "2861488300489531470"
-        },
-        {
-          "file": "packages/shared/package.json",
-          "hash": "8599202309429154806",
-          "deps": [
-            "npm:@types/yargs",
-            "npm:graphql-schema-typescript"
-          ]
-        },
-        {
-          "file": "packages/shared/scripts/buildGqlTypesOnBackend.ts",
-          "hash": "6181542336177140249"
-        },
-        {
-          "file": "packages/shared/scripts/execCommandAsPromise.ts",
-          "hash": "15371014425059727463"
-        },
-        {
-          "file": "packages/shared/scripts/mergeGraphqlFiles.ts",
-          "hash": "15030495809117762536"
-        },
-        {
-          "file": "packages/shared/scripts/removeSlsBackend.ts",
-          "hash": "2475982589801350206"
-        },
-        {
-          "file": "packages/shared/types/CWLOrg.graphql",
-          "hash": "6432765335371651462"
-        },
-        {
-          "file": "packages/shared/types/CWLOrgSchemas.ts",
-          "hash": "3008927968356333422"
-        },
-        {
-          "file": "packages/shared/types/CWLUser.graphql",
-          "hash": "11334944916326098785"
-        },
-        {
-          "file": "packages/shared/types/CWLUserSchemas.ts",
-          "hash": "5067837796561694753"
-        },
-        {
-          "file": "packages/shared/utils/zodUtils.ts",
-          "hash": "16774615472944949140"
-        }
-      ],
       "cwl-waf": [
         {
           "file": "packages/cwl-waf/.gitignore",
@@ -598,10 +677,6 @@
         {
           "file": "packages/cwl-waf/tsconfig.json",
           "hash": "1968868379143095349"
-        },
-        {
-          "file": "packages/cwl-waf/waf-deployment-policy.json",
-          "hash": "10101847547694360371"
         }
       ],
       "shared-aws-assets": [
@@ -616,10 +691,6 @@
         {
           "file": "packages/shared-aws-assets/cfn-template.yaml",
           "hash": "14398702289441525859"
-        },
-        {
-          "file": "packages/shared-aws-assets/initial-deployment-policy.json",
-          "hash": "12577489597968651203"
         },
         {
           "file": "packages/shared-aws-assets/package.json",
@@ -713,6 +784,96 @@
           "hash": "10228426256340855466"
         }
       ],
+      "shared": [
+        {
+          "file": "packages/shared/constants/serverErrorCode.ts",
+          "hash": "13362639943258846603"
+        },
+        {
+          "file": "packages/shared/functions/cwlAuthConfirmResetPassword.ts",
+          "hash": "7849120466090750772"
+        },
+        {
+          "file": "packages/shared/functions/cwlAuthConfirmSignIn.ts",
+          "hash": "18025103335687021712"
+        },
+        {
+          "file": "packages/shared/functions/cwlAuthResetPassword.ts",
+          "hash": "4099791317823061570"
+        },
+        {
+          "file": "packages/shared/functions/cwlAuthSignIn.ts",
+          "hash": "5432376485143792543"
+        },
+        {
+          "file": "packages/shared/functions/cwlAuthSignOut.ts",
+          "hash": "12755088392679396765"
+        },
+        {
+          "file": "packages/shared/functions/cwlAuthUpdatePassword.tsx",
+          "hash": "1642317609610530194"
+        },
+        {
+          "file": "packages/shared/functions/cwlAuthValidatePassword.ts",
+          "hash": "1604316747533499121"
+        },
+        {
+          "file": "packages/shared/functions/getCognitoUserByEmail.ts",
+          "hash": "11153143955468357963"
+        },
+        {
+          "file": "packages/shared/functions/userGroup.ts",
+          "hash": "6782896039965228334"
+        },
+        {
+          "file": "packages/shared/hooks/useMediaQuery.ts",
+          "hash": "2861488300489531470"
+        },
+        {
+          "file": "packages/shared/package.json",
+          "hash": "8599202309429154806",
+          "deps": [
+            "npm:@types/yargs",
+            "npm:graphql-schema-typescript"
+          ]
+        },
+        {
+          "file": "packages/shared/scripts/buildGqlTypesOnBackend.ts",
+          "hash": "6181542336177140249"
+        },
+        {
+          "file": "packages/shared/scripts/execCommandAsPromise.ts",
+          "hash": "15371014425059727463"
+        },
+        {
+          "file": "packages/shared/scripts/mergeGraphqlFiles.ts",
+          "hash": "15030495809117762536"
+        },
+        {
+          "file": "packages/shared/scripts/removeSlsBackend.ts",
+          "hash": "2475982589801350206"
+        },
+        {
+          "file": "packages/shared/types/CWLOrg.graphql",
+          "hash": "6432765335371651462"
+        },
+        {
+          "file": "packages/shared/types/CWLOrgSchemas.ts",
+          "hash": "3008927968356333422"
+        },
+        {
+          "file": "packages/shared/types/CWLUser.graphql",
+          "hash": "11334944916326098785"
+        },
+        {
+          "file": "packages/shared/types/CWLUserSchemas.ts",
+          "hash": "5067837796561694753"
+        },
+        {
+          "file": "packages/shared/utils/zodUtils.ts",
+          "hash": "16774615472944949140"
+        }
+      ],
       "cwlbackend": [
         {
           "file": "packages/cloudwatchlive/backend/README.md",
@@ -729,14 +890,6 @@
         {
           "file": "packages/cloudwatchlive/backend/config/cwlSlsOutput.json",
           "hash": "14239504762162026274"
-        },
-        {
-          "file": "packages/cloudwatchlive/backend/cwl-deployment-policy.json",
-          "hash": "17599003361665014274"
-        },
-        {
-          "file": "packages/cloudwatchlive/backend/initial-deployment-policy.json",
-          "hash": "12215604326742687363"
         },
         {
           "file": "packages/cloudwatchlive/backend/package.json",
@@ -871,10 +1024,6 @@
     },
     "nonProjectFiles": [
       {
-        "file": ".env",
-        "hash": "7841666974632730407"
-      },
-      {
         "file": ".github/workflows/Build_Main.yml",
         "hash": "7862915551379811164"
       },
@@ -892,7 +1041,7 @@
       },
       {
         "file": ".gitignore",
-        "hash": "10685327831112566906"
+        "hash": "7142003109324407868"
       },
       {
         "file": ".prettierrc.cjs",
@@ -916,7 +1065,7 @@
       },
       {
         "file": "package.json",
-        "hash": "10817961844922100136"
+        "hash": "4675742354424859849"
       },
       {
         "file": "scripts/README.md",
@@ -952,7 +1101,7 @@
       },
       {
         "file": "yarn.lock",
-        "hash": "14358925225571619541"
+        "hash": "15520656415667514008"
       }
     ]
   }

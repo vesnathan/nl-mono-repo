@@ -12,6 +12,15 @@ export interface DeploymentOptions {
   autoDeleteFailedStacks?: boolean;
   stage: string;
   packageName?: string; // For single package deployment
+  adminEmail?: string; // Admin user email for user creation
+  skipUserCreation?: boolean; // Skip user creation step
+}
+
+export interface FrontendDeploymentOptions {
+  stage: string;
+  skipBuild?: boolean;
+  skipUpload?: boolean;
+  skipInvalidation?: boolean;
 }
 
 export type StackType = 'waf' | 'shared' | 'cwl';
