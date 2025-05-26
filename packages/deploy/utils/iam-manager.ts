@@ -16,11 +16,13 @@ export class IamManager {
     }
 
     try {
+      logger.info('Getting current IAM user...');
       const response = await this.iam.getUser();
       if (!response.User?.Arn) {
         throw new Error('Failed to get current user ARN');
       }
       this.currentUserArn = response.User.Arn;
+      logger.info(`Current user ARN: ${this.currentUserArn}`);
       return this.currentUserArn;
     } catch (error: any) {
       logger.error(`Failed to get current user: ${error?.message}`);
@@ -30,19 +32,27 @@ export class IamManager {
 
   async setupRole(stackType: StackType, stage: string): Promise<string> {
     const roleName = `${getStackName(stackType, stage)}-role`;
-    const currentUserArn = await this.getCurrentUserArn();
     
     try {
+      logger.info(`Getting current user ARN for role ${roleName}...`);
+      const currentUserArn = await this.getCurrentUserArn();
+      
       // Check if role exists
-      const role = await this.iam.getRole({ RoleName: roleName });
-      logger.info(`Role ${roleName} already exists`);
-      if (!role.Role?.Arn) {
-        throw new Error(`Role ${roleName} exists but has no ARN`);
-      }
-      return role.Role.Arn;
-    } catch (error: any) {
-      if (error.name !== 'NoSuchEntity') {
-        throw error;
+      logger.info(`Checking if role ${roleName} exists...`);
+      try {
+        const role = await this.iam.getRole({ RoleName: roleName });
+        logger.info(`Role ${roleName} already exists`);
+        if (!role.Role?.Arn) {
+          throw new Error(`Role ${roleName} exists but has no ARN`);
+        }
+        return role.Role.Arn;
+      } catch (roleError: any) {
+        // Both NoSuchEntity and "role cannot be found" indicate the role doesn't exist
+        if (!roleError.name?.includes('NoSuchEntity') && !roleError.message?.includes('cannot be found')) {
+          logger.error(`Unexpected error checking role: ${roleError?.message}`);
+          throw roleError;
+        }
+        logger.info(`Role ${roleName} does not exist, creating...`);
       }
 
       // Create role with assume role policy
@@ -67,10 +77,21 @@ export class IamManager {
               Action: 'sts:AssumeRole'
             }
           ]
-        })
+        }),
+        Tags: [
+          {
+            Key: 'Purpose',
+            Value: 'CloudFormation Stack Management'
+          }
+        ]
       });
 
+      if (!createRoleResponse.Role?.Arn) {
+        throw new Error(`Failed to create role ${roleName} - no ARN returned`);
+      }
+
       // Attach policy
+      logger.info(`Attaching policy to role ${roleName}...`);
       const policyDocument = {
         Version: '2012-10-17',
         Statement: [
@@ -89,10 +110,10 @@ export class IamManager {
       });
 
       logger.success(`Created role ${roleName} with policy`);
-      if (!createRoleResponse.Role?.Arn) {
-        throw new Error(`Failed to create role ${roleName} - no ARN returned`);
-      }
       return createRoleResponse.Role.Arn;
+    } catch (error: any) {
+      logger.error(`Failed to setup role ${roleName}: ${error?.message}`);
+      throw error;
     }
   }
 }
