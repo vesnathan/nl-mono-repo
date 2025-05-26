@@ -1,0 +1,45 @@
+{
+  "name": "@cwl/deploy",
+  "version": "1.0.0",
+  "description": "CloudWatch Live Deployment Scripts",
+  "main": "index.ts",
+  "license": "MIT",
+  "scripts": {
+    "deploy": "ts-node -r dotenv/config index.ts",
+    "deploy:waf": "ts-node -r dotenv/config index.ts package --package waf",
+    "deploy:shared": "ts-node -r dotenv/config index.ts package --package shared",
+    "deploy:cwl": "ts-node -r dotenv/config index.ts package --package cwl",
+    "deploy:all": "ts-node -r dotenv/config index.ts all",
+    "update:waf": "ts-node -r dotenv/config index.ts update --package waf",
+    "update:shared": "ts-node -r dotenv/config index.ts update --package shared",
+    "update:cwl": "ts-node -r dotenv/config index.ts update --package cwl",
+    "deploy:frontend": "ts-node -r dotenv/config index.ts frontend deploy",
+    "frontend:build": "ts-node -r dotenv/config index.ts frontend build",
+    "frontend:upload": "ts-node -r dotenv/config index.ts frontend upload",
+    "frontend:invalidate": "ts-node -r dotenv/config index.ts frontend invalidate"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudformation": "^3.300.0",
+    "@aws-sdk/client-cloudfront": "^3.817.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.817.0",
+    "@aws-sdk/client-dynamodb": "^3.817.0",
+    "@aws-sdk/client-s3": "^3.300.0",
+    "@aws-sdk/lib-dynamodb": "^3.817.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/mime-types": "^2.1.4",
+    "chalk": "^4.1.2",
+    "commander": "^9.4.0",
+    "dotenv": "^16.5.0",
+    "fs-extra": "^11.3.0",
+    "glob": "^11.0.2",
+    "inquirer": "^8.2.4",
+    "mime-types": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/inquirer": "^8.2.4",
+    "@types/node": "^18.11.9",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.3"
+  }
+}

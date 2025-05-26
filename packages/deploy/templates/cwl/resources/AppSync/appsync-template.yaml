@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch Live AppSync Resources'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+
+Resources:
+  # AppSync API
+  GraphQlApi:
+    Type: AWS::AppSync::GraphQLApi
+    Properties:
+      Name: !Sub "cwl-appsync-api-${Stage}"
+      AuthenticationType: AMAZON_COGNITO_USER_POOLS
+      UserPoolConfig:
+        UserPoolId:
+          Fn::ImportValue:
+            Fn::Sub: "cwlUserPoolId-${Stage}"
+        DefaultAction: ALLOW
+        AwsRegion: ap-southeast-2
+      AdditionalAuthenticationProviders:
+        - AuthenticationType: AWS_IAM
+
+  # GraphQL Schema - Commented out for initial deployment
+  # Will be added back with proper schema content in later deployments
+  # GraphQlSchema:
+  #   Type: AWS::AppSync::GraphQLSchema
+  #   Properties:
+  #     ApiId: !GetAtt GraphQlApi.ApiId
+  #     Definition: |
+  #       # Schema will be added later
+
+Outputs:
+  CWLAppsyncUrl:
+    Value: !GetAtt GraphQlApi.GraphQLUrl
+    Description: GraphQL URL for the CloudWatchLive AppSync API
+  
+  CWLAppsyncRealtimeUrl:
+    Value: !GetAtt GraphQlApi.RealtimeUrl
+    Description: Realtime URL for the CloudWatchLive AppSync API

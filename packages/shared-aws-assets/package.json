@@ -22,8 +22,6 @@
     "validator": "13.11.0"
   },
   "scripts": {
-    "deploy-shared": "ts-node -T ./scripts/deployShared.ts",
-    "remove-shared": "ts-node -T ./scripts/removeShared.ts",
     "build-gql": "ts-node -T ./scripts/buildGql.ts"
   }
 }
