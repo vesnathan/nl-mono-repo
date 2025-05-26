@@ -2,6 +2,20 @@ import inquirer from 'inquirer';
 import { logger } from './logger';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
+import { AwsCredentialIdentity } from '@aws-sdk/types';
+
+export async function getAwsCredentials(): Promise<AwsCredentialIdentity | undefined> {
+  await configureAwsCredentials();
+  
+  if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+    return {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    };
+  }
+  
+  return undefined;
+}
 
 export async function configureAwsCredentials(): Promise<void> {
   // Only ask for credentials if they're not already set or fail validation

@@ -57,6 +57,7 @@
     "deploy:waf": "yarn workspace @cwl/deploy deploy:waf",
     "deploy:shared": "yarn workspace @cwl/deploy deploy:shared",
     "deploy:cwl": "yarn workspace @cwl/deploy deploy:cwl",
+    "deploy:all": "yarn deploy:waf && yarn deploy:shared && yarn deploy:cwl",
     "knip": "knip",
     "dev-cwl": "cd packages/cloudwatchlive/frontend && yarn dev",
     "build": "lerna run build --stream",

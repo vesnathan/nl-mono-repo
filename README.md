@@ -1,147 +1,369 @@
-## Getting Started
+# CloudWatch Live - Mono Repository
 
-Install dependencies:  
-After cloning repo, run "yarn" from root. Lerna will go through all workspaces listed in package.json in root and install dependencies  
+A comprehensive AWS-based application for real-time CloudWatch log monitoring and management, built with a modern serverless architecture.
 
-## Deployment Options
+## 📋 Table of Contents
 
-For a complete overview of all deployment options, see [DEPLOYMENT-OPTIONS.md](DEPLOYMENT-OPTIONS.md).
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Deployment](#deployment)
+- [Development](#development)
+- [Stack Management](#stack-management)
+- [Contributing](#contributing)
 
-### Option 1: Simplified One-Command CloudFormation Deployment (Recommended)
+## 🎯 Overview
 
-This approach offers the simplest way to deploy the entire application with just your AWS access key and secret key. It:
-1. Creates all necessary IAM resources using CloudFormation
-2. Configures AWS profiles automatically
-3. Deploys all application stacks in the correct order
+CloudWatch Live is a real-time log monitoring and management platform that provides:
+
+- **Real-time log streaming** from AWS CloudWatch
+- **Advanced filtering and search** capabilities
+- **User management** with role-based access control
+- **Multi-tenant architecture** with organization support
+- **Modern React frontend** with Next.js
+- **Serverless backend** using AWS AppSync, Lambda, and DynamoDB
+
+## 🏗 Architecture
+
+The application follows a multi-stack serverless architecture:
+
+- **Frontend**: Next.js React application hosted on CloudFront
+- **Backend**: AWS AppSync GraphQL API with Lambda resolvers
+- **Database**: DynamoDB for user data and configurations
+- **Authentication**: Amazon Cognito for user management
+- **Security**: AWS WAF for application protection
+- **Infrastructure**: CloudFormation for IaC deployment
+
+### Multi-Region Deployment
+- **WAF Stack**: `us-east-1` (required for CloudFront integration)
+- **Application Stacks**: `ap-southeast-2` (Sydney)
+
+## 📁 Project Structure
+
+```
+nl-mono-repo/
+├── packages/
+│   ├── cloudwatchlive/          # Main application
+│   │   ├── backend/             # AppSync API, Lambda functions
+│   │   └── frontend/            # Next.js React application
+│   ├── cwl-waf/                 # Web Application Firewall
+│   ├── deploy/                  # Deployment orchestration
+│   ├── shared/                  # Shared utilities and types
+│   └── shared-aws-assets/       # Shared AWS infrastructure
+├── scripts/                     # Build and deployment scripts
+└── [configuration files]
+```
+
+### Package Details
+
+| Package | Description | Region |
+|---------|-------------|---------|
+| `cloudwatchlive` | Main application (frontend + backend) | ap-southeast-2 |
+| `cwl-waf` | Web Application Firewall rules | us-east-1 |
+| `shared-aws-assets` | VPC, KMS, shared infrastructure | ap-southeast-2 |
+| `deploy` | Deployment orchestration and CLI | - |
+| `shared` | Common utilities and types | - |
+
+## 🚀 Getting Started
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js 18+** and **Yarn**
+- **AWS CLI** configured with appropriate permissions
+- **AWS Account** with CloudFormation, IAM, and service permissions
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd nl-mono-repo
+   ```
+
+2. **Install dependencies**
+   ```bash
+   yarn install
+   ```
+   Lerna will automatically install dependencies for all workspace packages.
+
+3. **Set up environment variables**
+   ```bash
+   # Copy example environment file
+   cp packages/deploy/.env.example packages/deploy/.env
+   
+   # Edit with your AWS credentials
+   vim packages/deploy/.env
+   ```
+
+## 🚢 Deployment
+
+The project offers multiple deployment strategies to suit different use cases and security requirements.
+
+### Option 1: Modern TypeScript Deployment (Recommended)
+
+Use the comprehensive TypeScript deployment tool for the best experience:
 
 ```bash
-# Run the CloudFormation one-command deployment script
+# Interactive deployment - walks you through all options
+cd packages/deploy
+npm run deploy
+
+# Deploy all stacks with admin user
+npm run deploy all --stage dev --admin-email admin@company.com
+
+# Update specific stack and dependencies
+npm run update:shared --stage dev
+```
+
+**Features:**
+- ✅ Interactive CLI with guided prompts
+- ✅ Smart dependency management
+- ✅ Automatic admin user creation
+- ✅ Real-time deployment progress
+- ✅ Comprehensive error handling
+- ✅ Frontend build and deployment
+
+See [packages/deploy/README.md](packages/deploy/README.md) for complete documentation.
+
+### Option 2: Quick CloudFormation Script
+
+For rapid prototyping and simple deployments:
+
+```bash
+# One-command deployment with CloudFormation
 chmod +x ./scripts/cfn-one-deploy.sh
 ./scripts/cfn-one-deploy.sh
 ```
 
-You'll be prompted for:
-- Your AWS access key ID and secret access key
-- The deployment stage (dev, staging, or prod)
+**Best for:**
+- Quick testing and demos
+- Simple AWS setups
+- Getting started quickly
 
-The script handles everything else automatically, including IAM setup and application deployment.
+### Option 3: Manual Stack Deployment
 
-> **Note on AWS IAM Permissions**:  
-> To deploy using this method, you'll need specific IAM permissions to create and manage IAM resources:  
-> - cloudformation:* (to create and manage CloudFormation stacks)  
-> - Various IAM permissions (iam:GetUser, iam:CreateUser, iam:CreateRole, etc.)  
-> 
-> If you encounter "AccessDenied" or "not authorized to perform: iam:*" errors, you have these options:  
-> 1. Request the necessary IAM permissions from your AWS administrator  
-> 2. Use a different AWS user with administrator access  
-> 3. Continue with the script which will offer guidance for handling permission issues  
->  
-> See [CFN_DEPLOYMENT_INSTRUCTIONS.md](CFN_DEPLOYMENT_INSTRUCTIONS.md) for a complete list of required permissions.
+For granular control over each deployment step:
 
-### Option 2: Secure Deployment with AWS STS
+### Option 3: Manual Stack Deployment
 
-For production and secure deployments, you can manually set up AWS Security Token Service (STS) to create temporary credentials. This approach uses IAM roles with least privilege principles.
-
-See the [AWS STS Deployment Guide](AWS-STS-GUIDE.md) for detailed instructions on setting up and using STS for deployments.
-
-## Deploy Stacks Manually
-
-You can deploy all stacks at once or deploy them individually. The deployment order is important: WAF → Shared AWS Assets → CloudWatchLive Backend.
-
-> **Note**: This project uses a multi-region deployment approach:
-> - WAF stack is deployed in **us-east-1** (North Virginia)
-> - Shared Assets and CloudWatchLive stacks are deployed in **ap-southeast-2** (Sydney)
-
-### Deploy All Stacks at Once
-
-The recommended way to deploy all stacks is using the root-level script:
+For granular control over each deployment step:
 
 ```bash
-# Deploy all stacks with default profiles
-STAGE=dev yarn deploy-all
-
-# Deploy with custom AWS profiles
-STAGE=dev AWS_PROFILE_WAF=your-waf-profile AWS_PROFILE_SHARED=your-shared-profile AWS_PROFILE_CWL=your-cwl-profile yarn deploy-all
+# Deploy in this specific order
+yarn deploy-waf    --stage dev  # WAF (us-east-1)
+yarn deploy-shared --stage dev  # Shared assets (ap-southeast-2)
+yarn deploy-cwl    --stage dev  # CloudWatch Live (ap-southeast-2)
 ```
 
-This script will:
-1. Deploy the WAF stack in us-east-1
-2. Deploy the Shared AWS Assets stack in ap-southeast-2
-3. Deploy the CloudWatchLive Backend stack in ap-southeast-2
-4. Run the post-deployment setup to create a test user
+### Deployment Order & Dependencies
 
-### Deploy Individual Stacks
-
-If you prefer deploying stacks individually, use the following commands in this order:
-
-#### 1. Deploy Web Application Firewall (WAF) in us-east-1
-```bash
-cd packages/cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev AWS_REGION=us-east-1 yarn deploy-waf
+```mermaid
+graph TB
+    A[WAF Stack] --> B[Shared Assets Stack]
+    B --> C[CloudWatch Live Stack]
+    C --> D[Frontend Deployment]
 ```
 
-#### 2. Deploy Shared AWS Assets in ap-southeast-2
-```bash
-cd packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev AWS_REGION=ap-southeast-2 yarn deploy-shared
-```
+**Stack Dependencies:**
+- **WAF**: Independent, deployed first
+- **Shared Assets**: Depends on WAF, provides shared infrastructure
+- **CloudWatch Live**: Depends on Shared Assets for VPC, KMS, etc.
 
-#### 3. Deploy CloudWatchLive Backend in ap-southeast-2
-```bash
-cd packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev AWS_REGION=ap-southeast-2 yarn deploy
-```
+## 💻 Development
 
-#### 4. Create Test User
-```bash
-cd packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev AWS_REGION=ap-southeast-2 yarn post-deploy
-```
+### Local Development
 
-This will create a user with the following details:
-- Email: vesnathan@gmail.com
-- First Name: John
-- Last Name: Doe
-- Password: Temp1234!  
-
-   
-## Launch dev site  
-Run:  
-&nbsp;yarn dev-cwl  
-  
-## Remove Stacks
-
-You can remove all stacks at once or remove them individually. The removal order is important (reverse of deployment): CloudWatchLive Backend → Shared AWS Assets → WAF.
-
-> **Note**: Remember that stacks are deployed in different regions:
-> - CloudWatchLive Backend and Shared Assets are in **ap-southeast-2** (Sydney)
-> - WAF stack is in **us-east-1** (North Virginia)
-
-### Remove All Stacks at Once
-
-The recommended way to remove all stacks is using the root-level script:
+Start the development environment:
 
 ```bash
-# Remove all stacks with default profiles
-STAGE=dev yarn remove-all
+# Start frontend development server
+yarn dev-cwl
 
-# Remove with custom AWS profiles
-STAGE=dev AWS_PROFILE_WAF=your-waf-profile AWS_PROFILE_SHARED=your-shared-profile AWS_PROFILE_CWL=your-cwl-profile yarn remove-all
+# This will start the Next.js dev server on http://localhost:3000
 ```
 
-### Remove Individual Stacks
+### Building for Production
 
-If you prefer removing stacks individually, use the following commands in this order:
-
-#### 1. Remove CloudWatchLive Backend (ap-southeast-2)
 ```bash
-cd packages/cloudwatchlive/backend && STAGE=dev AWS_PROFILE=nlmonorepo-cwl-dev AWS_REGION=ap-southeast-2 yarn remove-cwl
+# Build all packages
+yarn build
+
+# Build specific package
+cd packages/cloudwatchlive/frontend
+yarn build
 ```
 
-#### 2. Remove Shared AWS Assets (ap-southeast-2)
+### Testing
+
 ```bash
-cd packages/shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev AWS_REGION=ap-southeast-2 yarn remove-shared
+# Run tests for all packages
+yarn test
+
+# Run tests for specific package
+cd packages/cloudwatchlive/backend
+yarn test
 ```
 
-#### 3. Remove Web Application Firewall (WAF) (us-east-1)
+## 🔧 Stack Management
+
+### Updating Stacks
+
+The deployment tool provides smart update capabilities:
+
 ```bash
-cd packages/cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev AWS_REGION=us-east-1 yarn remove-waf
+# Update shared stack and automatically redeploy dependent CWL stack
+npm run update:shared --stage dev
+
+# Update only WAF (no dependencies)
+npm run update:waf --stage dev
+
+# Update only CWL (no dependents)
+npm run update:cwl --stage dev
 ```
+
+### Frontend-Only Updates
+
+For quick frontend updates without backend changes:
+
+```bash
+cd packages/deploy
+
+# Build and deploy frontend
+npm run frontend:build --stage dev
+npm run frontend:upload --stage dev
+npm run frontend:invalidate --stage dev
+
+# Or all at once
+npm run deploy:frontend --stage dev
+```
+
+### Monitoring Deployments
+
+Monitor deployment progress through:
+- **AWS CloudFormation Console** - Stack events and status
+- **Deployment Logs** - Real-time deployment output
+- **CloudWatch Logs** - Lambda function logs during deployment
+
+## 🗑 Stack Removal
+
+Remove stacks in reverse dependency order:
+
+```bash
+# Remove all stacks
+yarn remove-all --stage dev
+
+# Or remove individually (in this order)
+yarn remove-cwl --stage dev     # CloudWatch Live first
+yarn remove-shared --stage dev  # Shared assets second  
+yarn remove-waf --stage dev     # WAF last
+```
+
+## 🔐 Security & Access Control
+
+### AWS Permissions Required
+
+The deployment requires these AWS permissions:
+- **CloudFormation**: Full access for stack management
+- **IAM**: Role and policy management
+- **S3**: Bucket creation and object management
+- **Lambda**: Function deployment and execution
+- **AppSync**: GraphQL API management
+- **Cognito**: User pool and identity management
+- **DynamoDB**: Table creation and management
+- **CloudFront**: Distribution management
+- **WAF**: Web application firewall rules
+
+### User Management
+
+After deployment, admin users can:
+- Create and manage organizations
+- Set up user access controls
+- Configure CloudWatch log access
+- Manage API permissions
+
+## 📚 Additional Documentation
+
+- [Deployment Guide](packages/deploy/README.md) - Comprehensive deployment documentation
+- [Frontend Documentation](packages/cloudwatchlive/frontend/README.md) - Frontend development guide
+- [Backend Documentation](packages/cloudwatchlive/backend/README.md) - Backend API documentation
+- [AWS STS Guide](AWS-STS-GUIDE.md) - Secure deployment with temporary credentials
+- [CFN Deployment Instructions](CFN_DEPLOYMENT_INSTRUCTIONS.md) - CloudFormation deployment details
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes and test thoroughly
+4. Commit your changes: `git commit -am 'Add feature'`
+5. Push to the branch: `git push origin feature-name`
+6. Submit a pull request
+
+### Development Workflow
+
+1. **Local Testing**: Test changes locally with `yarn dev-cwl`
+2. **Deploy to Dev**: Use `npm run deploy all --stage dev`
+3. **Testing**: Verify functionality in dev environment
+4. **Staging**: Deploy to staging for final testing
+5. **Production**: Deploy to production after approval
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+For issues and questions:
+1. Check existing [documentation](packages/deploy/README.md)
+2. Review [troubleshooting guides](packages/deploy/README.md#troubleshooting)
+3. Create an issue with detailed information about your problem
+
+## ⚡ Quick Reference
+
+### Most Common Commands
+
+```bash
+# 🚀 Deploy everything (recommended for new projects)
+cd packages/deploy && npm run deploy all --stage dev --admin-email admin@company.com
+
+# 🔄 Update shared infrastructure and dependencies
+cd packages/deploy && npm run update:shared --stage dev
+
+# 🌐 Deploy frontend only
+cd packages/deploy && npm run deploy:frontend --stage dev
+
+# 💻 Start local development
+yarn dev-cwl
+
+# 🧹 Remove everything
+yarn remove-all --stage dev
+```
+
+### Stack Commands
+
+```bash
+# Individual stack deployment
+yarn deploy:waf --stage dev     # Deploy WAF only
+yarn deploy:shared --stage dev  # Deploy shared assets only  
+yarn deploy:cwl --stage dev     # Deploy CloudWatch Live only
+
+# Smart updates (deploys dependencies automatically)
+cd packages/deploy
+npm run update:waf --stage dev     # Update WAF (no dependencies)
+npm run update:shared --stage dev  # Update shared + CWL (dependent)
+npm run update:cwl --stage dev     # Update CWL only
+```
+
+### Environment Stages
+
+- **dev** - Development environment
+- **staging** - Staging/testing environment  
+- **prod** - Production environment
+
+---
+
+**Made with ❤️ for real-time AWS CloudWatch log monitoring**
 
 
