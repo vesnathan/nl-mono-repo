@@ -21,9 +21,6 @@
     "shared-aws-assets": "*"
   },
   "scripts": {
-    "build-gql": "ts-node ./scripts/buildGql.ts",
-    "deploy": "ts-node -T ./scripts/deployCWL.ts",
-    "post-deploy": "ts-node -T ./scripts/postDeploy.ts",
-    "remove-cwl": "ts-node -T ./scripts/removeCWL.ts"
+    "build-gql": "ts-node ./scripts/buildGql.ts"
   }
 }

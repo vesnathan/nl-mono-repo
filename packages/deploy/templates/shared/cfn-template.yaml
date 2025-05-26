@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Shared AWS resources for CloudWatch Live application'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  TemplatesBucketName:
+    Type: String
+    Description: Name of the S3 bucket containing nested stack templates
+
+Resources:
+  # KMS Key for encryption
+  KMSStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/KMS/KMS.yaml
+      Parameters:
+        Stage: !Ref Stage
+
+  # S3 Buckets
+  S3Stack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: KMSStack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/S3/s3.yaml
+      Parameters:
+        Stage: !Ref Stage
+        KMSKeyId: !GetAtt KMSStack.Outputs.KMSKeyId
+        KMSKeyArn: !GetAtt KMSStack.Outputs.KMSKeyArn
+
+  # Cognito User Pool
+  CognitoStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/Cognito/cognito.yaml
+      Parameters:
+        Stage: !Ref Stage
+
+  # DynamoDB Tables
+  DynamoDBStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: KMSStack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/DynamoDb/dynamoDb.yaml
+      Parameters:
+        Stage: !Ref Stage
+        KMSKeyArn: !GetAtt KMSStack.Outputs.KMSKeyArn
+
+  # VPC Resources
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/VPC/VPC.yaml
+      Parameters:
+        Stage: !Ref Stage
+
+Outputs:
+  KMSKeyId:
+    Description: KMS Key ID for encryption
+    Value: !GetAtt KMSStack.Outputs.KMSKeyId
+    Export:
+      Name: !Sub nlmonorepo-shared-${Stage}-kms-key-id
+
+  KMSKeyArn:
+    Description: KMS Key ARN
+    Value: !GetAtt KMSStack.Outputs.KMSKeyArn
+    Export:
+      Name: !Sub nlmonorepo-shared-${Stage}-kms-key-arn
+
+  CWLUserPoolId:
+    Description: Cognito User Pool ID
+    Value: !GetAtt CognitoStack.Outputs.UserPoolId
+    Export:
+      Name: !Sub nlmonorepo-shared-${Stage}-user-pool-id
+
+  CWLUserPoolArn:
+    Description: Cognito User Pool ARN
+    Value: !GetAtt CognitoStack.Outputs.UserPoolArn
+    Export:
+      Name: !Sub nlmonorepo-shared-${Stage}-user-pool-arn
+
+  CWLUserPoolClientId:
+    Description: Cognito User Pool Client ID
+    Value: !GetAtt CognitoStack.Outputs.UserPoolClientId
+    Export:
+      Name: !Sub nlmonorepo-shared-${Stage}-user-pool-client-id
+
+  CWLIdentityPoolId:
+    Description: Cognito Identity Pool ID
+    Value: !GetAtt CognitoStack.Outputs.IdentityPoolId
+    Export:
+      Name: !Sub nlmonorepo-shared-${Stage}-identity-pool-id
+
+  VPCID:
+    Description: VPC ID
+    Value: !GetAtt VPCStack.Outputs.VPCID
+    Export:
+      Name: !Sub nlmonorepo-shared-${Stage}-vpc-id

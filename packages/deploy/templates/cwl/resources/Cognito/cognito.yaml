@@ -1,0 +1,86 @@
+Resources:
+  CWLIdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties: 
+      AllowUnauthenticatedIdentities: true
+      CognitoIdentityProviders: 
+        - ClientId: !ImportValue cwlUserPoolClientId-${opt:stage}
+          ProviderName: !ImportValue cwlUserPoolProviderName-${opt:stage}
+      IdentityPoolName: "cwl-cwl-user-${opt:stage}"
+
+  CWLIdentityPoolAttachment:   
+      Type: AWS::Cognito::IdentityPoolRoleAttachment
+      Properties:
+        IdentityPoolId: !Ref CWLIdentityPool
+        Roles:
+          unauthenticated: !GetAtt CWLIdentityUnauthUserIAMRole.Arn
+          authenticated: !GetAtt CWLIdentityAuthUserIAMRole.Arn
+
+  # unauth iam role
+  CWLIdentityUnauthUserIAMRole: 
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "cwl-unauth-role-${opt:stage}"
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated:
+                - "cognito-identity.amazonaws.com"
+            Action:
+              - "sts:AssumeRoleWithWebIdentity"
+            Condition: {
+              StringEquals: {
+                "cognito-identity.amazonaws.com:aud": !Ref CWLIdentityPool
+              },
+              ForAnyValue:StringLike: {
+                "cognito-identity.amazonaws.com:amr": "unauthenticated"
+              }
+            }
+      Description: "Unauth IAM role for CWL users"
+      Policies:
+        - PolicyName: "cwl-unauth-user-policy-${opt:stage}"
+          PolicyDocument: 
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "appSync:GraphQL"
+                Resource:
+                  - !Join ["", [!GetAtt GraphQlApi.Arn, "/types/Mutation/fields/registerClientUserUnauth"]]
+
+  # auth iam role
+  CWLIdentityAuthUserIAMRole: 
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: "cwl-auth-role-${opt:stage}"
+        AssumeRolePolicyDocument: 
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Federated:
+                  - "cognito-identity.amazonaws.com"
+              Action:
+                - "sts:AssumeRoleWithWebIdentity"
+              Condition: {
+                StringEquals: {
+                  "cognito-identity.amazonaws.com:aud": !Ref CWLIdentityPool
+                },
+                ForAnyValue:StringLike: {
+                  "cognito-identity.amazonaws.com:amr": "authenticated"
+                }
+              }
+        Description: "Authenticated IAM role for CWL users"
+        Policies:
+          - PolicyName: "cwl-auth-user-policy-${opt:stage}"
+            PolicyDocument: 
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - "appSync:GraphQL"
+                  Resource: 
+                    # Allow access to all queries and mutations
+                    - !Join ["", [!GetAtt GraphQlApi.Arn, "/*"]]

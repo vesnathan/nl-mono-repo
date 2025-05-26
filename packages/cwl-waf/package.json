@@ -10,8 +10,5 @@
     "ts-node": "10.9.2",
     "typescript": "5.5.4"
   },
-  "scripts": {
-    "deploy-waf": "ts-node -T ./scripts/deployWaf.ts",
-    "remove-waf": "ts-node -T ./scripts/removeWaf.ts"
-  }
+  "scripts": {}
 }

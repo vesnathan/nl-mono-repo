@@ -35,3 +35,4 @@ WAF_output.json
 .nx.env
 temp-aws-config
 access-key.json
+.env
