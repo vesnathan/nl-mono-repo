@@ -13,7 +13,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-dev
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-${Stage}
               Service: cloudformation.amazonaws.com
             Action: sts:AssumeRole
       Policies:
@@ -171,6 +171,12 @@ Resources:
           CidrIp: 0.0.0.0/0
 
 Outputs:
+  VPCID:
+    Value: !Ref SharedVPC
+    Description: VPC ID
+    Export:
+      Name: !Sub shared-assets-vpc-id-${Stage}
+
   cwlSecurityGroupFromSharedVPCId:
     Value: !GetAtt cwlSecurityGroupFromSharedVPC.GroupId
     Export:

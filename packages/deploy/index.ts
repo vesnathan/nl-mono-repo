@@ -7,6 +7,18 @@ import { deployShared } from './packages/shared/shared';
 import { deployCwl } from './packages/cwl/cwl';
 
 async function main() {
+  // Add uncaught exception handlers for debugging
+  process.on('uncaughtException', (error) => {
+    logger.error(`Uncaught Exception: ${error.message}`);
+    logger.error(`Stack: ${error.stack}`);
+    process.exit(1);
+  });
+  
+  process.on('unhandledRejection', (reason, promise) => {
+    logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
+    process.exit(1);
+  });
+
   const program = new Command();
 
   program

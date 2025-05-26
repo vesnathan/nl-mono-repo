@@ -10,13 +10,16 @@ import {
   PutObjectCommand,
   _Object
 } from '@aws-sdk/client-s3';
+import { 
+  IAM,
+  PutRolePolicyCommand
+} from '@aws-sdk/client-iam';
 import { DeploymentOptions, TEMPLATE_PATHS, TEMPLATE_RESOURCES_PATHS, getStackName, getTemplateBucketName } from '../../types';
 import { logger } from '../../utils/logger';
 import { IamManager } from '../../utils/iam-manager';
 import { AwsUtils } from '../../utils/aws-utils';
-import { glob } from 'glob';
-import { createReadStream } from 'fs';
-import { promisify } from 'util';
+import { createReadStream, readdirSync, statSync } from 'fs';
+import { join } from 'path';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
@@ -44,6 +47,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
   // Initialize clients
   const cfn = new CloudFormation({ region: process.env.AWS_REGION });
   const s3 = new S3({ region: process.env.AWS_REGION });
+  const iam = new IAM({ region: process.env.AWS_REGION });
   
   // Set up IAM role
   const iamManager = new IamManager();
@@ -55,19 +59,82 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
   try {
     // Create S3 bucket for templates if it doesn't exist
     try {
+      logger.info(`Checking if templates bucket exists: ${templateBucketName} in region ${process.env.AWS_REGION}`);
       await s3.headBucket({ Bucket: templateBucketName });
-    } catch (error) {
-      logger.info(`Creating templates bucket: ${templateBucketName}`);
-      await s3.createBucket({
-        Bucket: templateBucketName,
-        CreateBucketConfiguration: {
-          LocationConstraint: (process.env.AWS_REGION || 'ap-southeast-2') as 'ap-southeast-2'
-        }
-      });
+      logger.info(`Templates bucket ${templateBucketName} exists`);
+    } catch (error: any) {
+      logger.info(`Creating templates bucket: ${templateBucketName} in region ${process.env.AWS_REGION}`);
+      logger.info(`Error details: ${error.message}`);
+      
+      if (process.env.AWS_REGION === 'us-east-1') {
+        // us-east-1 doesn't need LocationConstraint
+        await s3.createBucket({
+          Bucket: templateBucketName
+        });
+      } else {
+        await s3.createBucket({
+          Bucket: templateBucketName,
+          CreateBucketConfiguration: {
+            LocationConstraint: (process.env.AWS_REGION || 'ap-southeast-2') as 'ap-southeast-2'
+          }
+        });
+      }
+      logger.info(`Created templates bucket: ${templateBucketName}`);
+    }
+
+    // Instead of setting bucket policy, ensure IAM role has proper permissions
+    try {
+      logger.info(`Ensuring CloudFormation role has S3 access to templates bucket...`);
+      
+      // Add specific S3 permissions to the CloudFormation role instead of bucket policy
+      const roleName = `nlmonorepo-shared-${options.stage}-role`;
+      
+      const s3PolicyDocument = {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Effect: 'Allow',
+            Action: [
+              's3:GetObject',
+              's3:GetObjectVersion'
+            ],
+            Resource: [
+              `arn:aws:s3:::${templateBucketName}/*`,
+              `arn:aws:s3:::${templateBucketName}/resources/*`
+            ]
+          },
+          {
+            Effect: 'Allow',
+            Action: [
+              's3:ListBucket'
+            ],
+            Resource: `arn:aws:s3:::${templateBucketName}`
+          }
+        ]
+      };
+
+      // Try to add the policy to the role (this may fail if role doesn't exist yet, which is fine)
+      try {
+        await iam.putRolePolicy({
+          RoleName: roleName,
+          PolicyName: `${roleName}-s3-templates-policy`,
+          PolicyDocument: JSON.stringify(s3PolicyDocument)
+        });
+        logger.success(`Added S3 templates access policy to role ${roleName}`);
+      } catch (roleError: any) {
+        logger.info(`Could not update role policy (role may not exist yet): ${roleError.message}`);
+      }
+      
+    } catch (error: any) {
+      logger.warning(`Failed to configure IAM role S3 access: ${error.message}`);
     }
 
     // Clear existing templates
     logger.info('Clearing existing templates...');
+    logger.info(`Looking for templates in: ${TEMPLATE_RESOURCES_PATHS.shared}`);
+    logger.info(`Current working directory: ${process.cwd()}`);
+    logger.info(`__dirname resolved to: ${__dirname}`);
+    
     const listCommand = new ListObjectsV2Command({ 
       Bucket: templateBucketName, 
       Prefix: 'resources/' 
@@ -85,24 +152,61 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
     }
 
     // Upload nested stack templates
-    const templateFiles = await promisify(glob)('**/*.yaml', {
-      cwd: TEMPLATE_RESOURCES_PATHS.shared,
-      absolute: true
-    }) as string[];
-
-    for (const file of templateFiles) {
-      const key = `resources/${file.replace(TEMPLATE_RESOURCES_PATHS.shared + '/', '')}`;
-      const putCommand = new PutObjectCommand({
-        Bucket: templateBucketName,
-        Key: key,
-        Body: createReadStream(file),
-        ContentType: 'application/x-yaml'
-      });
+    logger.info(`Searching for templates with pattern: **/*.yaml in ${TEMPLATE_RESOURCES_PATHS.shared}`);
+    
+    try {
+      // Use a simpler approach to find YAML files
+      const { readdir, stat } = require('fs').promises;
+      const path = require('path');
       
-      await retryOperation(async () => {
-        await s3.send(putCommand);
-        logger.info(`Uploaded template: ${key}`);
-      });
+      async function findYamlFiles(dir: string): Promise<string[]> {
+        const files: string[] = [];
+        try {
+          const entries = await readdir(dir);
+          for (const entry of entries) {
+            const fullPath = path.join(dir, entry);
+            const stats = await stat(fullPath);
+            if (stats.isDirectory()) {
+              const subFiles = await findYamlFiles(fullPath);
+              files.push(...subFiles);
+            } else if (entry.endsWith('.yaml') || entry.endsWith('.yml')) {
+              files.push(fullPath);
+            }
+          }
+        } catch (err: any) {
+          logger.error(`Error reading directory ${dir}: ${err.message}`);
+        }
+        return files;
+      }
+      
+      const templateFiles = await findYamlFiles(TEMPLATE_RESOURCES_PATHS.shared);
+
+      logger.info(`Found ${templateFiles.length} template files in ${TEMPLATE_RESOURCES_PATHS.shared}`);
+      logger.info(`Template files: ${JSON.stringify(templateFiles, null, 2)}`);
+      
+      if (templateFiles.length === 0) {
+        logger.error('No template files found for shared resources. Check TEMPLATE_RESOURCES_PATHS.shared and file permissions.');
+        throw new Error('No template files found for shared resources.');
+      }
+
+      for (const file of templateFiles) {
+        const relativePath = file.replace(TEMPLATE_RESOURCES_PATHS.shared + '/', '');
+        const key = `resources/${relativePath}`;
+        logger.info(`Uploading template file: ${file} to S3 key: ${key}`);
+        const putCommand = new PutObjectCommand({
+          Bucket: templateBucketName,
+          Key: key,
+          Body: createReadStream(file),
+          ContentType: 'application/x-yaml'
+        });
+        await retryOperation(async () => {
+          await s3.send(putCommand);
+          logger.info(`Uploaded template: ${key}`);
+        });
+      }
+    } catch (error: any) {
+      logger.error(`Template upload operation failed: ${error.message}`);
+      throw error;
     }
 
     // Create or update the main stack
@@ -134,9 +238,24 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
 
     // Create or update the main stack
     try {
-      await cfn.describeStacks({ StackName: stackName });
-      logger.info(`Updating existing stack: ${stackName}`);
-      await cfn.updateStack(stackParams);
+      const stackInfo = await cfn.describeStacks({ StackName: stackName });
+      const stackStatus = stackInfo.Stacks?.[0]?.StackStatus;
+      
+      if (stackStatus === 'ROLLBACK_COMPLETE') {
+        logger.warning(`Stack ${stackName} is in ROLLBACK_COMPLETE state. Deleting and recreating...`);
+        await cfn.deleteStack({ StackName: stackName });
+        
+        // Wait for deletion to complete
+        logger.info('Waiting for stack deletion to complete...');
+        await awsUtils.waitForStackDeletion(stackName);
+        
+        // Now create new stack
+        logger.info(`Creating new stack: ${stackName}`);
+        await cfn.createStack(stackParams);
+      } else {
+        logger.info(`Updating existing stack: ${stackName}`);
+        await cfn.updateStack(stackParams);
+      }
     } catch (error: any) {
       if (error.message?.includes('does not exist')) {
         logger.info(`Creating new stack: ${stackName}`);

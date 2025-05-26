@@ -5,6 +5,9 @@ Parameters:
     KMSKeyId:
       Type: String
       Description: KMS Key ID for bucket encryption
+    KMSKeyArn:
+      Type: String
+      Description: KMS Key ARN for bucket encryption
 
 Resources:
     S3Role:
@@ -16,7 +19,7 @@ Resources:
           Statement:
             - Effect: Allow
               Principal:
-                AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-dev
+                AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-${Stage}
                 Service: cloudformation.amazonaws.com
               Action: sts:AssumeRole
         Policies:

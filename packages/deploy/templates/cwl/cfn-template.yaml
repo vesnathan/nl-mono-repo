@@ -15,6 +15,12 @@ Parameters:
   KMSKeyArn:
     Type: String
     Description: KMS Key ARN for encryption
+  WebAclId:
+    Type: String
+    Description: WAF Web ACL ID from us-east-1 region
+  WebAclArn:
+    Type: String
+    Description: WAF Web ACL ARN from us-east-1 region
 
 Resources:
   # DynamoDB Tables
@@ -24,7 +30,7 @@ Resources:
       TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/DynamoDB/dynamodb.yaml
       Parameters:
         Stage: !Ref Stage
-        KMSKeyId: !Ref KMSKeyId
+        KMSKeyArn: !Ref KMSKeyArn
 
   # S3 Buckets for frontend and assets
   S3Stack:
@@ -34,7 +40,6 @@ Resources:
       Parameters:
         Stage: !Ref Stage
         KMSKeyId: !Ref KMSKeyId
-        KMSKeyArn: !Ref KMSKeyArn
 
   # CloudFront Distribution
   CloudFrontStack:
@@ -44,8 +49,11 @@ Resources:
       TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/CloudFront/cloudfront.yaml
       Parameters:
         Stage: !Ref Stage
-        WebACLId: !ImportValue nlmonorepo-waf-dev-web-acl-id
-        S3BucketDomain: !GetAtt S3Stack.Outputs.WebsiteBucketDomain
+        WebACLId: !Ref WebAclId
+        WebACLArn: !Ref WebAclArn
+        CWLBucketName: !GetAtt S3Stack.Outputs.CWLBucketName
+        CWLBucketArn: !GetAtt S3Stack.Outputs.CWLBucketArn
+        CWLBucketRegionalDomainName: !GetAtt S3Stack.Outputs.CWLBucketRegionalDomainName
 
   # AppSync API
   AppSyncStack:
@@ -55,24 +63,22 @@ Resources:
       TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/AppSync/appsync.yaml
       Parameters:
         Stage: !Ref Stage
-        UserPoolId: !ImportValue nlmonorepo-shared-dev-user-pool-id
-        WebACLId: !ImportValue nlmonorepo-waf-dev-web-acl-id
 
   # Lambda Functions
   LambdaStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [DynamoDBStack, AppSyncStack]
+    DependsOn: [DynamoDBStack, AppSyncStack, CloudFrontStack]
     Properties:
       TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/Lambda/lambda.yaml
       Parameters:
         Stage: !Ref Stage
-        UserPoolId: !ImportValue nlmonorepo-shared-dev-user-pool-id
-        AppSyncApiId: !GetAtt AppSyncStack.Outputs.ApiId
+        CWLCloudFrontDistributionId: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDistributionId
+        CWLCloudFrontDomainName: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDomainName
 
 Outputs:
   ApiUrl:
     Description: AppSync API URL
-    Value: !GetAtt AppSyncStack.Outputs.ApiUrl
+    Value: !GetAtt AppSyncStack.Outputs.CWLAppsyncUrl
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-api-url
 
@@ -84,18 +90,18 @@ Outputs:
 
   CloudFrontDomainName:
     Description: CloudFront Distribution Domain Name
-    Value: !GetAtt CloudFrontStack.Outputs.DomainName
+    Value: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDomainName
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-cloudfront-domain
 
   CloudFrontDistributionId:
     Description: CloudFront Distribution ID
-    Value: !GetAtt CloudFrontStack.Outputs.DistributionId
+    Value: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDistributionId
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-cloudfront-id
 
   WebsiteBucket:
     Description: S3 bucket for website assets
-    Value: !GetAtt S3Stack.Outputs.WebsiteBucket
+    Value: !GetAtt S3Stack.Outputs.CWLBucketName
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-website-bucket

@@ -16,7 +16,7 @@ Resources:
           Statement:
             - Effect: Allow
               Principal:
-                AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-dev
+                AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-${Stage}
                 Service: cloudformation.amazonaws.com
               Action: sts:AssumeRole
         Policies:

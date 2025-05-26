@@ -14,7 +14,7 @@ Resources:
           Statement:
             - Effect: Allow
               Principal:
-                AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-dev
+                AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-${Stage}
                 Service: cloudformation.amazonaws.com
               Action: sts:AssumeRole
         Policies:
@@ -61,6 +61,14 @@ Resources:
           - COGNITO
         EnableTokenRevocation: true
 
+    cognitoIdentityPool:
+      Type: AWS::Cognito::IdentityPool
+      Properties:
+        IdentityPoolName: !Sub "nlmonorepo-shared-identitypool-${Stage}"
+        AllowUnauthenticatedIdentities: false
+        CognitoIdentityProviders:
+          - ClientId: !Ref cognitoUserPoolClient
+            ProviderName: !GetAtt cognitoUserPool.ProviderName
 
     superAdminGroup:
       Type: AWS::Cognito::UserPoolGroup
@@ -144,16 +152,25 @@ Resources:
         Precedence: 3
 
 Outputs:
-    cwlUserPoolId:
+    UserPoolId:
       Value: !Ref cognitoUserPool
+      Description: Cognito User Pool ID
       # This is not exported here because it's exported by the parent stack
     
-    cwlUserPoolClientId:
+    UserPoolClientId:
       Value: !Ref cognitoUserPoolClient
+      Description: Cognito User Pool Client ID
       Export:
         Name: !Sub cwlUserPoolClientId-${Stage}
     
-    cwlUserPoolArn:
+    UserPoolArn:
       Value: !GetAtt cognitoUserPool.Arn
+      Description: Cognito User Pool ARN
       Export:
         Name: !Sub cwlUserPoolArn-${Stage}
+
+    IdentityPoolId:
+      Value: !Ref cognitoIdentityPool
+      Description: Cognito Identity Pool ID
+      Export:
+        Name: !Sub cwlIdentityPoolId-${Stage}
