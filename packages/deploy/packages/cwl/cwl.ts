@@ -10,13 +10,13 @@ import {
   PutObjectCommand,
   _Object
 } from '@aws-sdk/client-s3';
-import { DeploymentOptions, TEMPLATE_PATHS, TEMPLATE_RESOURCES_PATHS, getStackName, getTemplateBucketName } from '../../types';
+import { DeploymentOptions, TEMPLATE_RESOURCES_PATHS, getStackName, getTemplateBucketName } from '../../types';
 import { logger } from '../../utils/logger';
 import { IamManager } from '../../utils/iam-manager';
 import { AwsUtils } from '../../utils/aws-utils';
-import { glob } from 'glob';
 import { createReadStream } from 'fs';
-import { promisify } from 'util';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
@@ -34,6 +34,22 @@ async function retryOperation<T>(operation: () => Promise<T>, maxRetries = MAX_R
     }
   }
   throw new Error('Unexpected: Should not reach here');
+}
+
+// Recursively find all .yaml files
+function findYamlFiles(dir: string): string[] {
+  const files: string[] = [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...findYamlFiles(fullPath));
+    } else if (entry.isFile() && entry.name.endsWith('.yaml')) {
+      files.push(fullPath);
+    }
+  }
+  return files;
 }
 
 export async function deployCwl(options: DeploymentOptions): Promise<void> {
@@ -73,6 +89,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       Prefix: 'resources/' 
     });
     const existingObjects = await retryOperation(() => s3.send(listCommand));
+    logger.info(`Found ${existingObjects.Contents?.length || 0} existing objects to delete`);
     
     if (existingObjects.Contents?.length) {
       const deleteCommand = new DeleteObjectsCommand({
@@ -82,16 +99,19 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         }
       });
       await retryOperation(() => s3.send(deleteCommand));
+      logger.info('Deleted existing templates');
     }
-
+    
     // Upload nested stack templates
-    const templateFiles = await promisify(glob)('**/*.yaml', {
-      cwd: TEMPLATE_RESOURCES_PATHS.cwl,
-      absolute: true
-    }) as string[];
+    logger.info(`Looking for templates in: ${TEMPLATE_RESOURCES_PATHS.cwl}`);
+    const templateFiles = findYamlFiles(TEMPLATE_RESOURCES_PATHS.cwl);
+    logger.info(`Found ${templateFiles.length} template files`);
 
     for (const file of templateFiles) {
-      const key = `resources/${file.replace(TEMPLATE_RESOURCES_PATHS.cwl + '/', '')}`;
+      const relativePath = path.relative(TEMPLATE_RESOURCES_PATHS.cwl, file);
+      const key = `resources/${relativePath}`;
+      logger.info(`Uploading ${file} to ${key}`);
+      
       const putCommand = new PutObjectCommand({
         Bucket: templateBucketName,
         Key: key,
@@ -122,6 +142,24 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       throw new Error('Failed to get KMS key information from shared stack');
     }
 
+    // Get WAF Web ACL ID and ARN from us-east-1 region
+    const wafCfn = new CloudFormation({ region: 'us-east-1' });
+    const wafStack = await wafCfn.describeStacks({
+      StackName: getStackName('waf', options.stage)
+    });
+    
+    const webAclId = wafStack.Stacks?.[0]?.Outputs?.find(
+      output => output.OutputKey === 'WebACLId'
+    )?.OutputValue;
+
+    const webAclArn = wafStack.Stacks?.[0]?.Outputs?.find(
+      output => output.OutputKey === 'WebACLArn'
+    )?.OutputValue;
+
+    if (!webAclId || !webAclArn) {
+      throw new Error('Failed to get WAF Web ACL ID and ARN from WAF stack in us-east-1');
+    }
+
     // Create or update the main stack
     const awsUtils = new AwsUtils(process.env.AWS_REGION || 'ap-southeast-2');
     const templateBody = await awsUtils.getTemplateBody('cwl');
@@ -145,6 +183,14 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         {
           ParameterKey: 'KMSKeyArn',
           ParameterValue: kmsKeyArn,
+        },
+        {
+          ParameterKey: 'WebAclId',
+          ParameterValue: webAclId,
+        },
+        {
+          ParameterKey: 'WebAclArn',
+          ParameterValue: webAclArn,
         }
       ] as Parameter[],
       Capabilities: ['CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'] as Capability[],
@@ -159,9 +205,63 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
 
     // Create or update the main stack
     try {
-      await cfn.describeStacks({ StackName: stackName });
-      logger.info(`Updating existing stack: ${stackName}`);
-      await cfn.updateStack(stackParams);
+      const existingStack = await cfn.describeStacks({ StackName: stackName });
+      const stackStatus = existingStack.Stacks?.[0]?.StackStatus;
+      
+      // Wait for rollback to complete if in progress
+      if (stackStatus === 'ROLLBACK_IN_PROGRESS' || 
+          stackStatus === 'UPDATE_ROLLBACK_IN_PROGRESS') {
+        logger.info(`Stack is in rollback state (${stackStatus}). Waiting for rollback to complete...`);
+        await awsUtils.waitForStack(stackName);
+        
+        // Get updated status after rollback
+        const updatedStack = await cfn.describeStacks({ StackName: stackName });
+        const updatedStatus = updatedStack.Stacks?.[0]?.StackStatus;
+        logger.info(`Rollback completed. New status: ${updatedStatus}`);
+      }
+      
+      // Check if stack is in a failed state that requires deletion
+      if (stackStatus === 'ROLLBACK_COMPLETE' || 
+          stackStatus === 'CREATE_FAILED' || 
+          stackStatus === 'DELETE_FAILED' ||
+          stackStatus === 'UPDATE_ROLLBACK_FAILED' ||
+          stackStatus === 'UPDATE_ROLLBACK_COMPLETE') {
+        logger.warning(`Stack is in failed state (${stackStatus}). Deleting and recreating...`);
+        
+        // Delete the failed stack
+        await cfn.deleteStack({ StackName: stackName });
+        logger.info('Waiting for stack deletion to complete...');
+        await awsUtils.waitForStackDeletion(stackName);
+        
+        // Create new stack
+        logger.info(`Creating new stack: ${stackName}`);
+        await cfn.createStack(stackParams);
+      } else if (stackStatus === 'ROLLBACK_IN_PROGRESS' || 
+                 stackStatus === 'UPDATE_ROLLBACK_IN_PROGRESS') {
+        // This case is already handled above, but let's get the final status
+        const finalStack = await cfn.describeStacks({ StackName: stackName });
+        const finalStatus = finalStack.Stacks?.[0]?.StackStatus;
+        
+        if (finalStatus === 'ROLLBACK_COMPLETE' || 
+            finalStatus === 'UPDATE_ROLLBACK_COMPLETE') {
+          logger.warning(`Stack rollback completed (${finalStatus}). Deleting and recreating...`);
+          
+          // Delete the failed stack
+          await cfn.deleteStack({ StackName: stackName });
+          logger.info('Waiting for stack deletion to complete...');
+          await awsUtils.waitForStackDeletion(stackName);
+          
+          // Create new stack
+          logger.info(`Creating new stack: ${stackName}`);
+          await cfn.createStack(stackParams);
+        } else {
+          logger.info(`Updating existing stack: ${stackName}`);
+          await cfn.updateStack(stackParams);
+        }
+      } else {
+        logger.info(`Updating existing stack: ${stackName}`);
+        await cfn.updateStack(stackParams);
+      }
     } catch (error: any) {
       if (error.message?.includes('does not exist')) {
         logger.info(`Creating new stack: ${stackName}`);
@@ -186,6 +286,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
 
   } catch (error: any) {
     logger.error(`CloudWatch Live deployment failed: ${error.message}`);
+    logger.error(`Error stack: ${error.stack}`);
     throw error;
   }
 }

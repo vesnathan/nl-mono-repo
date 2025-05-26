@@ -6,6 +6,12 @@ Parameters:
     Type: String
     Description: Deployment stage (e.g., dev, prod)
     AllowedPattern: ^[a-zA-Z0-9-]+$
+  WebACLId:
+    Type: String
+    Description: WAF Web ACL ID for CloudFront distribution
+  WebACLArn:
+    Type: String
+    Description: WAF Web ACL ARN for CloudFront distribution
   CWLBucketName:
     Type: String
     Description: Name of the S3 bucket for CloudFront origin
@@ -17,8 +23,41 @@ Parameters:
     Description: Regional domain name of the S3 bucket for CloudFront origin
 
 Resources:
+  CWLCloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties: 
+      OriginAccessControlConfig:
+        Name: CWLBucketOAC
+        Description: Origin Access Control for CWL bucket
+        SigningBehavior: always
+        SigningProtocol: sigv4
+        OriginAccessControlOriginType: s3
+
+  # CloudFront Distribution
+  CWLCloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Sub "CloudFront distribution for CloudWatchLive ${Stage}"
+        WebACLId: !Ref WebACLArn
+        Origins:
+          - DomainName: !Ref CWLBucketRegionalDomainName
+            Id: S3Origin
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt CWLCloudFrontOAC.Id
+        DefaultRootObject: index.html
+        Enabled: true
+        HttpVersion: http2
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # CORS-S3Origin
+
   CWLBucketPolicy:
     Type: "AWS::S3::BucketPolicy"
+    DependsOn: CWLCloudFrontDistribution
     Properties:
       Bucket: !Ref CWLBucketName
       PolicyDocument:
@@ -36,37 +75,6 @@ Resources:
             Condition:
               StringEquals:
                 AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CWLCloudFrontDistribution}"
-
-  CWLCloudFrontOAC:
-    Type: AWS::CloudFront::OriginAccessControl
-    Properties: 
-      OriginAccessControlConfig:
-        Name: CWLBucketOAC
-        Description: Origin Access Control for CWL bucket
-        SigningBehavior: always
-        SigningProtocol: sigv4
-        OriginAccessControlOriginType: s3
-
-  # CloudFront Distribution
-  CWLCloudFrontDistribution:
-    Type: AWS::CloudFront::Distribution
-    Properties:
-      DistributionConfig:
-        Comment: !Sub "CloudFront distribution for CloudWatchLive ${Stage}"
-        Origins:
-          - DomainName: !Ref CWLBucketRegionalDomainName
-            Id: S3Origin
-            S3OriginConfig:
-              OriginAccessIdentity: ''
-            OriginAccessControlId: !GetAtt CWLCloudFrontOAC.Id
-        DefaultRootObject: index.html
-        Enabled: true
-        HttpVersion: http2
-        DefaultCacheBehavior:
-          TargetOriginId: S3Origin
-          ViewerProtocolPolicy: redirect-to-https
-          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
-          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # CORS-S3Origin
 
 Outputs:
   CWLCloudFrontDistributionId:

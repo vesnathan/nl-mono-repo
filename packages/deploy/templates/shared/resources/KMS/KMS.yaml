@@ -13,7 +13,7 @@ Resources:
           Statement:
             - Effect: Allow
               Principal:
-                AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-dev
+                AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-${Stage}
                 Service: cloudformation.amazonaws.com
               Action: sts:AssumeRole
         Policies:
@@ -51,12 +51,12 @@ Resources:
               Resource: "*"
 
 Outputs:
-    cwlKMSKey:
+    KMSKeyId:
       Value: !Ref cwlKMSKey
       Export:
         Name: !Sub shared-assets-cwlKMSKey-${Stage}
     
-    cwlKMSKeyArn:
+    KMSKeyArn:
       Value: !GetAtt cwlKMSKey.Arn
       Export:
         Name: !Sub shared-assets-cwlKMSKeyArn-${Stage}

@@ -199,7 +199,51 @@ export class AwsUtils {
         // Unexpected status
         throw new Error(`Unexpected stack status: ${currentStatus}`);
       } catch (error: any) {
-        logger.error(`Error checking stack status: ${error?.message || 'Unknown error'}`);
+        if (error.message?.includes('does not exist')) {
+          throw new Error(`Stack ${stackName} not found during wait operation`);
+        }
+        throw error;
+      }
+    }
+  }
+
+  async waitForStackDeletion(stackName: string): Promise<boolean> {
+    logger.info(`Waiting for stack ${stackName} to be deleted...`);
+    
+    while (true) {
+      try {
+        const command = new DescribeStacksCommand({ StackName: stackName });
+        const response = await this.cfClient.send(command);
+        const stack = response.Stacks?.[0];
+        
+        if (!stack) {
+          // Stack doesn't exist, deletion is complete
+          logger.success(`Stack ${stackName} has been deleted successfully`);
+          return true;
+        }
+
+        const currentStatus = stack.StackStatus || '';
+        logger.info(`Stack deletion status: ${currentStatus}`);
+        
+        if (currentStatus === 'DELETE_COMPLETE') {
+          logger.success(`Stack ${stackName} has been deleted successfully`);
+          return true;
+        }
+        
+        if (currentStatus === 'DELETE_FAILED') {
+          logger.error(`Stack ${stackName} deletion failed`);
+          await this.getStackFailureDetails(stackName);
+          return false;
+        }
+
+        // Wait before checking again
+        await sleep(10000); // Poll every 10 seconds for deletion
+      } catch (error: any) {
+        if (error.message?.includes('does not exist')) {
+          // Stack doesn't exist, deletion is complete
+          logger.success(`Stack ${stackName} has been deleted successfully`);
+          return true;
+        }
         throw error;
       }
     }
