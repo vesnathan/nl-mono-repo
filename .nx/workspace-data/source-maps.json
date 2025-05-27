@@ -435,89 +435,89 @@
       "nx/core/package-json"
     ]
   },
-  "packages/cwl-waf": {
+  "packages/waf": {
     "root": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "name": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "tags": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "tags.npm:private": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.targetGroups": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.targetGroups.NPM Scripts": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.targetGroups.NPM Scripts.0": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.targetGroups.NPM Scripts.1": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.description": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.js": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageExports": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageMain": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.isInPackageManagerWorkspaces": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "targets": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "targets.deploy-waf": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "targets.deploy-waf.executor": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "targets.deploy-waf.options": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "targets.deploy-waf.metadata": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "targets.deploy-waf.options.script": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "targets.deploy-waf.metadata.scriptContent": [
-      "packages/cwl-waf/package.json",
+      "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "targets.deploy-waf.metadata.runCommand": [

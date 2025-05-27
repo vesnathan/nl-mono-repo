@@ -16,7 +16,12 @@
     "deploy:frontend": "ts-node -r dotenv/config index.ts frontend deploy",
     "frontend:build": "ts-node -r dotenv/config index.ts frontend build",
     "frontend:upload": "ts-node -r dotenv/config index.ts frontend upload",
-    "frontend:invalidate": "ts-node -r dotenv/config index.ts frontend invalidate"
+    "frontend:invalidate": "ts-node -r dotenv/config index.ts frontend invalidate",
+    "remove": "ts-node -r dotenv/config index.ts remove",
+    "remove:waf": "ts-node -r dotenv/config index.ts remove --package waf",
+    "remove:shared": "ts-node -r dotenv/config index.ts remove --package shared",
+    "remove:cwl": "ts-node -r dotenv/config index.ts remove --package cwl",
+    "remove:all": "ts-node -r dotenv/config index.ts remove --all"
   },
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.300.0",

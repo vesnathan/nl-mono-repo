@@ -5,7 +5,7 @@
     "packages/cloudwatchlive/frontend",
     "packages/cloudwatchlive/backend",
     "packages/shared",
-    "packages/cwl-waf",
+    "packages/waf",
     "packages/shared-aws-assets",
     "packages/deploy"
   ],
