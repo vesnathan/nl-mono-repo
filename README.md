@@ -47,7 +47,7 @@ nl-mono-repo/
 │   ├── cloudwatchlive/          # Main application
 │   │   ├── backend/             # AppSync API, Lambda functions
 │   │   └── frontend/            # Next.js React application
-│   ├── cwl-waf/                 # Web Application Firewall
+│   ├── waf/                     # Web Application Firewall
 │   ├── deploy/                  # Deployment orchestration
 │   ├── shared/                  # Shared utilities and types
 │   └── shared-aws-assets/       # Shared AWS infrastructure
@@ -60,7 +60,7 @@ nl-mono-repo/
 | Package | Description | Region |
 |---------|-------------|---------|
 | `cloudwatchlive` | Main application (frontend + backend) | ap-southeast-2 |
-| `cwl-waf` | Web Application Firewall rules | us-east-1 |
+| `waf` | Web Application Firewall rules | us-east-1 |
 | `shared-aws-assets` | VPC, KMS, shared infrastructure | ap-southeast-2 |
 | `deploy` | Deployment orchestration and CLI | - |
 | `shared` | Common utilities and types | - |
@@ -100,22 +100,25 @@ nl-mono-repo/
 
 ## 🚢 Deployment
 
-The project offers multiple deployment strategies to suit different use cases and security requirements.
-
-### Option 1: Modern TypeScript Deployment (Recommended)
-
-Use the comprehensive TypeScript deployment tool for the best experience:
+The project uses a comprehensive TypeScript deployment tool for the best deployment experience.
 
 ```bash
 # Interactive deployment - walks you through all options
 cd packages/deploy
-npm run deploy
+yarn deploy
+```
 
-# Deploy all stacks with admin user
-npm run deploy all --stage dev --admin-email admin@company.com
+The deployment process will:
+1. Prompt you to select the deployment stage (dev, staging, or prod)
+2. Ask for an admin email to create the initial admin user
+3. Walk you through the deployment process with guided prompts
 
-# Update specific stack and dependencies
-npm run update:shared --stage dev
+For updating specific stacks and their dependencies:
+
+```bash
+# Interactive updates with prompts for stage selection
+cd packages/deploy
+yarn update
 ```
 
 **Features:**
@@ -127,36 +130,6 @@ npm run update:shared --stage dev
 - ✅ Frontend build and deployment
 
 See [packages/deploy/README.md](packages/deploy/README.md) for complete documentation.
-
-### Option 2: Quick CloudFormation Script
-
-For rapid prototyping and simple deployments:
-
-```bash
-# One-command deployment with CloudFormation
-chmod +x ./scripts/cfn-one-deploy.sh
-./scripts/cfn-one-deploy.sh
-```
-
-**Best for:**
-- Quick testing and demos
-- Simple AWS setups
-- Getting started quickly
-
-### Option 3: Manual Stack Deployment
-
-For granular control over each deployment step:
-
-### Option 3: Manual Stack Deployment
-
-For granular control over each deployment step:
-
-```bash
-# Deploy in this specific order
-yarn deploy-waf    --stage dev  # WAF (us-east-1)
-yarn deploy-shared --stage dev  # Shared assets (ap-southeast-2)
-yarn deploy-cwl    --stage dev  # CloudWatch Live (ap-southeast-2)
-```
 
 ### Deployment Order & Dependencies
 
@@ -211,18 +184,24 @@ yarn test
 
 ### Updating Stacks
 
-The deployment tool provides smart update capabilities:
+The deployment tool provides smart update capabilities through interactive prompts:
 
 ```bash
-# Update shared stack and automatically redeploy dependent CWL stack
-npm run update:shared --stage dev
+cd packages/deploy
 
-# Update only WAF (no dependencies)
-npm run update:waf --stage dev
+# Launch the interactive update process
+yarn update
 
-# Update only CWL (no dependents)
-npm run update:cwl --stage dev
+# The tool will prompt you to:
+# 1. Select the stage (dev, staging, prod)
+# 2. Choose which stack to update (WAF, Shared, or CWL)
+# 3. Confirm dependencies to update
 ```
+
+The tool automatically handles dependency management:
+- When updating shared assets, it will prompt to redeploy the dependent CWL stack
+- When updating WAF, no dependencies need updating
+- When updating CWL, no dependent stacks need updating
 
 ### Frontend-Only Updates
 
@@ -231,14 +210,18 @@ For quick frontend updates without backend changes:
 ```bash
 cd packages/deploy
 
-# Build and deploy frontend
-npm run frontend:build --stage dev
-npm run frontend:upload --stage dev
-npm run frontend:invalidate --stage dev
+# Launch the interactive frontend deployment process
+yarn deploy:frontend
 
-# Or all at once
-npm run deploy:frontend --stage dev
+# The tool will prompt you to:
+# 1. Select the stage (dev, staging, prod)
+# 2. Confirm the frontend deployment steps
 ```
+
+The tool will automatically:
+1. Build the frontend application
+2. Upload the build to the S3 bucket
+3. Invalidate the CloudFront distribution cache
 
 ### Monitoring Deployments
 
@@ -249,17 +232,23 @@ Monitor deployment progress through:
 
 ## 🗑 Stack Removal
 
-Remove stacks in reverse dependency order:
+To remove stacks, use the interactive deployment tool:
 
 ```bash
-# Remove all stacks
-yarn remove-all --stage dev
+# Launch the interactive removal process
+cd packages/deploy
+yarn remove
 
-# Or remove individually (in this order)
-yarn remove-cwl --stage dev     # CloudWatch Live first
-yarn remove-shared --stage dev  # Shared assets second  
-yarn remove-waf --stage dev     # WAF last
+# The tool will prompt you to:
+# 1. Select the stage (dev, staging, prod)
+# 2. Choose which stacks to remove
+# 3. Confirm removal of selected stacks
 ```
+
+The tool handles removal in the correct dependency order:
+1. CloudWatch Live (removed first)
+2. Shared Assets (removed second)  
+3. WAF (removed last)
 
 ## 🔐 Security & Access Control
 
@@ -304,10 +293,10 @@ After deployment, admin users can:
 ### Development Workflow
 
 1. **Local Testing**: Test changes locally with `yarn dev-cwl`
-2. **Deploy to Dev**: Use `npm run deploy all --stage dev`
+2. **Deploy to Dev**: Use `cd packages/deploy && yarn deploy` (select dev stage when prompted)
 3. **Testing**: Verify functionality in dev environment
-4. **Staging**: Deploy to staging for final testing
-5. **Production**: Deploy to production after approval
+4. **Staging**: Deploy to staging for final testing (select staging stage when prompted)
+5. **Production**: Deploy to production after approval (select prod stage when prompted)
 
 ## 📄 License
 
@@ -325,36 +314,37 @@ For issues and questions:
 ### Most Common Commands
 
 ```bash
-# 🚀 Deploy everything (recommended for new projects)
-cd packages/deploy && npm run deploy all --stage dev --admin-email admin@company.com
+# 🚀 Deploy everything (interactive with prompts)
+cd packages/deploy && yarn deploy
 
-# 🔄 Update shared infrastructure and dependencies
-cd packages/deploy && npm run update:shared --stage dev
+# 🔄 Update infrastructure (interactive with prompts)
+cd packages/deploy && yarn update
 
-# 🌐 Deploy frontend only
-cd packages/deploy && npm run deploy:frontend --stage dev
+# 🌐 Deploy frontend only (interactive with prompts)
+cd packages/deploy && yarn deploy:frontend
 
 # 💻 Start local development
 yarn dev-cwl
 
-# 🧹 Remove everything
-yarn remove-all --stage dev
+# 🧹 Remove stacks (interactive with prompts)
+cd packages/deploy && yarn remove
 ```
 
 ### Stack Commands
 
 ```bash
-# Individual stack deployment
-yarn deploy:waf --stage dev     # Deploy WAF only
-yarn deploy:shared --stage dev  # Deploy shared assets only  
-yarn deploy:cwl --stage dev     # Deploy CloudWatch Live only
-
-# Smart updates (deploys dependencies automatically)
+# Interactive stack updates with prompts
 cd packages/deploy
-npm run update:waf --stage dev     # Update WAF (no dependencies)
-npm run update:shared --stage dev  # Update shared + CWL (dependent)
-npm run update:cwl --stage dev     # Update CWL only
+yarn update   # Launches interactive update process
+yarn deploy   # Launches interactive deployment process
+yarn remove   # Launches interactive removal process
 ```
+
+Each command will guide you through the process with clear prompts for:
+- Selecting the deployment stage
+- Choosing which stack(s) to update/deploy/remove
+- Confirming dependencies
+- Admin user setup (for initial deployments)
 
 ### Environment Stages
 
@@ -364,6 +354,6 @@ npm run update:cwl --stage dev     # Update CWL only
 
 ---
 
-**Made with ❤️ for real-time AWS CloudWatch log monitoring**
+**Made with ❤️ for collating and viewing YouTube Live Streams into specific event agendas**
 
 
