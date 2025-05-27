@@ -338,6 +338,35 @@ class DeploymentManager {
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
+
+  async removeStack(stackType: StackType, options: DeploymentOptions): Promise<void> {
+    const stackName = getStackName(stackType, options.stage);
+    
+    logger.info(`Removing stack: ${stackName}`);
+    
+    try {
+      const command = new DeleteStackCommand({ StackName: stackName });
+      await this.cfClient.send(command);
+      
+      // Wait for deletion to complete
+      await this.waitForStackDeletion(stackName);
+      logger.success(`Stack deleted successfully: ${stackName}`);
+    } catch (error: any) {
+      logger.error(`Failed to delete stack ${stackName}: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async removeAll(options: DeploymentOptions): Promise<void> {
+    // Remove stacks in reverse order of deployment
+    const stacks: StackType[] = ['cwl', 'shared', 'waf'];
+    
+    for (const stackType of stacks) {
+      await this.removeStack(stackType, options);
+    }
+    
+    logger.success('All stacks removed successfully!');
+  }
 }
 
 // CLI Command definitions
@@ -433,6 +462,41 @@ async function main() {
       }
     });
 
+  // Remove a specific package
+  program
+    .command('remove')
+    .description('Remove a specific package or all packages')
+    .option('--package <type>', 'Package to remove (waf, shared, cwl)')
+    .option('--stage <stage>', 'Deployment stage', 'dev')
+    .option('--all', 'Remove all stacks in the correct order')
+    .action(async (options) => {
+      try {
+        await deployment.initializeAws();
+        
+        if (options.all) {
+          const deploymentOptions: DeploymentOptions = {
+            stage: options.stage
+          };
+          await deployment.removeAll(deploymentOptions);
+        } else {
+          const packageName = options.package || await promptForPackageToRemove();
+          const deploymentOptions: DeploymentOptions = {
+            stage: options.stage,
+            packageName
+          };
+          
+          if (packageName === 'all') {
+            await deployment.removeAll(deploymentOptions);
+          } else {
+            await deployment.removeStack(packageName as StackType, deploymentOptions);
+          }
+        }
+      } catch (error: any) {
+        logger.error(error.message);
+        process.exit(1);
+      }
+    });
+
   // Frontend deployment commands
   const frontend = program
     .command('frontend')
@@ -522,6 +586,24 @@ async function promptForPackage(): Promise<string> {
   return packageName;
 }
 
+async function promptForPackageToRemove(): Promise<string> {
+  const { package: packageName } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'package',
+      message: 'Which package would you like to remove?',
+      choices: [
+        { name: 'CloudWatch Live Application', value: 'cwl' },
+        { name: 'Shared Resources', value: 'shared' },
+        { name: 'WAF (Web Application Firewall)', value: 'waf' },
+        { name: 'All packages (in correct order)', value: 'all' }
+      ]
+    }
+  ]);
+
+  return packageName;
+}
+
 async function runInteractiveMode(deployment: DeploymentManager): Promise<void> {
   try {
     logger.info('CloudWatch Live Deployment Tool');
@@ -535,6 +617,7 @@ async function runInteractiveMode(deployment: DeploymentManager): Promise<void> 
         choices: [
           { name: 'Deploy specific package', value: 'package' },
           { name: 'Deploy all packages', value: 'all' },
+          { name: 'Remove packages', value: 'remove' },
           { name: 'Frontend deployment', value: 'frontend' }
         ]
       },
@@ -564,6 +647,17 @@ async function runInteractiveMode(deployment: DeploymentManager): Promise<void> 
       ]);
 
       await deployment.deployFrontend(frontendAction.action, answers.stage);
+    } else if (answers.action === 'remove') {
+      const packageName = await promptForPackageToRemove();
+      const deploymentOptions: DeploymentOptions = {
+        stage: answers.stage
+      };
+      
+      if (packageName === 'all') {
+        await deployment.removeAll(deploymentOptions);
+      } else {
+        await deployment.removeStack(packageName as StackType, deploymentOptions);
+      }
     } else {
       const deploymentOptions: DeploymentOptions = {
         stage: answers.stage
