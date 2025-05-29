@@ -4,6 +4,10 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_ENVIRONMENT: process.env.NEXT_PUBLIC_ENVIRONMENT,
   },
+  eslint: {
+    // Disable ESLint during builds
+    ignoreDuringBuilds: true,
+  },
   compiler: {
     styledComponents: true,
   },

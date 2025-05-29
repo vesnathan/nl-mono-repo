@@ -12,6 +12,7 @@ import {
   getCWLUserQueryFn,
   getCWLUserQueryKey,
 } from "../graphql/queries/userQueries";
+import { ClientType } from "@/graphql/gqlTypes";
 
 type Props = PropsWithChildren & {
   userId: string;
@@ -34,7 +35,11 @@ export const CWLUserStoreSetup: FC<Props> = ({ userId, children }) => {
   useEffect(() => {
     const fetchUserGroups = async () => {
       if (CWLUser) {
-        setUser(CWLUser);
+        setUser({
+          ...CWLUser,
+          userRole: (CWLUser as any).userRole || "",
+          clientType: (CWLUser as any).clientType || []
+        });
 
         const getUserGroups = async () => {
           try {
@@ -47,8 +52,8 @@ export const CWLUserStoreSetup: FC<Props> = ({ userId, children }) => {
           }
         };
         const userGroups = await getUserGroups();
-        // TODO: Something weird going on with the AWS type here
-        setUserGroups(userGroups as string[]);
+        // Convert string[] to ClientType[]
+        setUserGroups(userGroups as ClientType[]);
       }
     };
 

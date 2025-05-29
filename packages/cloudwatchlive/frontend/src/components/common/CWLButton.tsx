@@ -8,7 +8,7 @@ type CWLButtonProps = {
   buttonText: React.ReactNode;
   size?: "sm" | "md";
   color?: CWLButtonColor;
-  onClick?: React.MouseEventHandler<HTMLButtonElement> | ((e: React.MouseEvent) => void);
+  onClick?: (e: React.MouseEvent) => void;
   additionalClassName?: string;
   frontIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
