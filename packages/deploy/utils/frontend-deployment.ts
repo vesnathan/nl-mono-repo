@@ -256,7 +256,9 @@ export class FrontendDeploymentManager {
 
       // Find S3 bucket name
       const bucketOutput = stack.Outputs.find(output => 
-        output.OutputKey?.includes('S3Bucket') || output.OutputKey?.includes('FrontendBucket')
+        output.OutputKey?.includes('S3Bucket') || 
+        output.OutputKey?.includes('FrontendBucket') || 
+        output.OutputKey?.includes('WebsiteBucket')
       );
       
       if (!bucketOutput?.OutputValue) {
@@ -265,7 +267,8 @@ export class FrontendDeploymentManager {
 
       // Find CloudFront distribution ID (optional)
       const distributionOutput = stack.Outputs.find(output => 
-        output.OutputKey?.includes('CloudFront') || output.OutputKey?.includes('Distribution')
+        output.OutputKey?.includes('CloudFront') || 
+        output.OutputKey?.includes('Distribution')
       );
 
       return {

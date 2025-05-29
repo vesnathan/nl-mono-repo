@@ -146,6 +146,11 @@ export const FormModal = forwardRef(
                           fieldPath={field.name}
                           label={field.label}
                           placeholder={field.placeholder}
+                          options={(field.options || []).map(option => ({
+                            id: option.value,
+                            value: option.label,
+                            textValue: option.label
+                          }))}
                         />
                       ) : (
                         <RHFTextField

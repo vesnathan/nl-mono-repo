@@ -13,10 +13,10 @@ Parameters:
 
 Resources:
   # S3 Bucket for storing nextjs/react app
-  CWLBucket:
+  CWLFrontendBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "nlmonorepo-cwl-userfiles-${Stage}-${AWS::AccountId}"
+      BucketName: !Sub "nlmonorepo-cwl-frontend-${Stage}"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -34,19 +34,19 @@ Conditions:
 
 Outputs:
   CWLBucketName:
-    Value: !Ref CWLBucket
-    Description: Name of the CloudWatchLive bucket
+    Value: !Ref CWLFrontendBucket
+    Description: Name of the CloudWatchLive frontend bucket
     Export:
-      Name: !Sub "cwlUserFilesBucketName-${Stage}"
+      Name: !Sub "cwlFrontendBucketName-${Stage}"
   
   CWLBucketArn:
-    Value: !GetAtt CWLBucket.Arn
-    Description: ARN of the CloudWatchLive bucket
+    Value: !GetAtt CWLFrontendBucket.Arn
+    Description: ARN of the CloudWatchLive frontend bucket
     Export:
-      Name: !Sub "cwlUserFilesBucketArn-${Stage}"
+      Name: !Sub "cwlFrontendBucketArn-${Stage}"
     
   CWLBucketRegionalDomainName:
-    Value: !GetAtt CWLBucket.RegionalDomainName
-    Description: Regional domain name of the CloudWatchLive bucket
+    Value: !GetAtt CWLFrontendBucket.RegionalDomainName
+    Description: Regional domain name of the CloudWatchLive frontend bucket
     Export:
-      Name: !Sub "cwlUserFilesBucketRegionalDomainName-${Stage}"
+      Name: !Sub "cwlFrontendBucketRegionalDomainName-${Stage}"

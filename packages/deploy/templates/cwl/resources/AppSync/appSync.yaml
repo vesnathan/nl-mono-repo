@@ -1,160 +1,211 @@
-name: cwl-appsync-api-${opt:stage}
-authentication:
-  type: AMAZON_COGNITO_USER_POOLS
-  config:
-    userPoolId: !ImportValue cwlUserPoolId-${opt:stage}
-    defaultEffect: ALLOW
-additionalAuthentications:
-  - type: AWS_IAM
-      
-schema:
-  - resources/AppSync/**/*.graphql
-  - ../../shared/types/**/*.graphql
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch Live AppSync API Resources'
 
-resolvers:
-  Query.getCWLUser:
-    dataSource: cwlUserTable
-    kind: UNIT
-    code: ./resources/AppSync/resolvers/users/Queries/Query.getCWLUser.ts
-    
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
 
-  Mutation.saveSuperAdminClient:
-    kind: PIPELINE
-    functions:
-      - dataSource:
-          type: AWS_LAMBDA
-          config:
-            function:
-              timeout: 900
-              name: cwl-${opt:stage}-mutation-createCognitoUser
-              handler: "resources/AppSync/resolvers/users/Mutations/Mutation_createCognitoUser.handler"          
-              iamRoleStatementsName: cwl-mutation-createCognitoUser-iam-role-${opt:stage}
-              iamRoleStatements:
-                - Effect: Allow
-                  Action: 
-                  - "cognito-idp:AdminCreateUser"
-                  - "cognito-idp:ListUsers"
-                  Resource: !ImportValue cwlUserPoolArn-${opt:stage}               
-              vpc:
-                securityGroupIds:
-                  - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
-                subnetIds:
-                  - !ImportValue privateSubnet1-${opt:stage}
-                  - !ImportValue privateSubnet2-${opt:stage}
-      - dataSource:
-          type: AWS_LAMBDA
-          config:
-            function:
-              timeout: 900
-              name: cwl-${opt:stage}-mutation-addUserToGroup
-              handler: "resources/AppSync/resolvers/users/Mutations/Mutation_addUserToGroup.handler"
-              iamRoleStatementsName: cwl-mutation-addUserToGroup-iam-role-${opt:stage}
-              iamRoleStatements:
-                - Effect: Allow
-                  Action: 
-                  - "cognito-idp:AdminAddUserToGroup"
-                  Resource: !ImportValue cwlUserPoolArn-${opt:stage}             
-              vpc:
-                securityGroupIds:
-                  - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
-                subnetIds:
-                  - !ImportValue privateSubnet1-${opt:stage}
-                  - !ImportValue privateSubnet2-${opt:stage}
-      - dataSource:
-          type: AWS_LAMBDA
-          config:
-            function:
-              timeout: 900
-              name: cwl-${opt:stage}-mutation-createCWLUser
-              handler: "resources/AppSync/resolvers/users/Mutations/Mutation_createCWLUser.handler"
-              iamRoleStatementsName: cwl-mutation-createCWLUser-iam-role-${opt:stage}
-              iamRoleStatements:
-                - Effect: Allow
-                  Action: 
-                  - "dynamodb:PutItem"
-                  Resource: !ImportValue cwlUserTableArn-${opt:stage}         
-              vpc:
-                securityGroupIds:
-                  - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
-                subnetIds:
-                  - !ImportValue privateSubnet1-${opt:stage}
-                  - !ImportValue privateSubnet2-${opt:stage}
+Resources:
+  # AppSync GraphQL API
+  CWLAppSyncApi:
+    Type: AWS::AppSync::GraphQLApi
+    Properties:
+      Name: !Sub "cwl-appsync-api-${Stage}"
+      AuthenticationType: AMAZON_COGNITO_USER_POOLS
+      UserPoolConfig:
+        UserPoolId:
+          Fn::ImportValue: !Sub "nlmonorepo-shared-${Stage}-user-pool-id"
+        DefaultAction: ALLOW
+        AwsRegion: !Ref AWS::Region
+      AdditionalAuthenticationProviders:
+        - AuthenticationType: AWS_IAM
 
-  Mutation.associateSoftwareToken:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          timeout: 900
-          name: cwl-${opt:stage}-mutation-Mutation_associateSoftwareToken
-          handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_associateSoftwareToken.handler"
-          vpc:
-            securityGroupIds:
-              - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
-            subnetIds:
-              - !ImportValue privateSubnet1-${opt:stage}
-              - !ImportValue privateSubnet2-${opt:stage}
-          iamRoleStatementsName: cwl-mutation-associateSoftwareToken-iam-role-${opt:stage}
-          iamRoleStatements:
-            - Effect: Allow
-              Action: 
-              - "cognito-idp:associateSoftwareToken"
-              Resource: !ImportValue cwlUserPoolArn-${opt:stage}
+  # GraphQL Schema
+  CWLAppSyncSchema:
+    Type: AWS::AppSync::GraphQLSchema
+    Properties:
+      ApiId: !GetAtt CWLAppSyncApi.ApiId
+      Definition: |
+        schema {
+          query: Query
+          mutation: Mutation
+        }
 
-  Mutation.verifySoftwareToken:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          name: cwl-${opt:stage}-mutation-Mutation_verifySoftwareToken
-          handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_verifySoftwareToken.handler"
-          timeout: 900
-          vpc:
-            securityGroupIds:
-              - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
-            subnetIds:
-              - !ImportValue privateSubnet1-${opt:stage}
-              - !ImportValue privateSubnet2-${opt:stage}
-          iamRoleStatementsName: cwl-mutation-verifySoftwareToken-iam-role-${opt:stage}
-          iamRoleStatements:
-            - Effect: Allow
-              Action: "cognito-idp:verifySoftwareToken"
-              Resource: !ImportValue cwlUserPoolArn-${opt:stage}
+        type Query {
+          getCWLUser(userId: String!): CWLUser
+            @aws_cognito_user_pools
+        }
 
-  Mutation.adminSetUserMFAPreference:
-    kind: UNIT
-    dataSource:
-      type: AWS_LAMBDA
-      config:
-        function:
-          name: cwl-${opt:stage}-mutation-adminSetUserMFAPreference
-          handler: "./resources/AppSync/resolvers/users/Mutations/Mutation_adminSetUserMFAPreference.handler"
-          vpc:
-            securityGroupIds:
-              - !ImportValue cwlSecurityGroupFromSharedVPCId-${opt:stage}
-            subnetIds:
-              - !ImportValue privateSubnet1-${opt:stage}
-              - !ImportValue privateSubnet2-${opt:stage}
-          iamRoleStatementsName: cwl-mutation-adminSetUserMFAPreference-iam-role-${opt:stage}
-          iamRoleStatements:
-            - Effect: Allow
-              Action: "cognito-idp:AdminSetUserMFAPreference"
-              Resource: !ImportValue cwlUserPoolArn-${opt:stage}
-  # endregion user
+        type Mutation {
+          # ----- User/cognito
+          adminSetUserMFAPreference(
+            input: AdminSetUserMFAPreferenceInput!
+          ): StandardResult! @aws_cognito_user_pools
+          
+          associateSoftwareToken(accessToken: String!): associateSoftwareTokenResult!
+            @aws_cognito_user_pools
+          
+          verifySoftwareToken(
+            input: VerifySoftwareTokenInput!
+          ): StandardResult! @aws_cognito_user_pools
 
+          # ----- Client
+          saveSuperAdminClient(input: CWLUserInput!): StandardResult! @aws_cognito_user_pools
+          saveEventCompanyAdminClient(input: CWLUserInput!): StandardResult! @aws_cognito_user_pools
+        }
 
-  
+        type StandardResult {
+          statusCode: String!
+          body: String!
+        }
 
-dataSources:
-  cwlDataTable:
-    type: AMAZON_DYNAMODB
-    config:
-      tableName: !Ref cwlDataTable
-  cwlUserTable:
-    type: AMAZON_DYNAMODB
-    config:
-      tableName: !ImportValue cwlUserTableName-${opt:stage}
+        input AdminSetUserMFAPreferenceInput {
+          userId: String!
+          userEmail: String!
+        }
+
+        type AdminSetUserMFAPreferenceResult {
+          userId: String!
+        }
+
+        type associateSoftwareTokenResult {
+          secretCode: String!
+        }
+
+        type VerifySoftwareTokenResult {
+          success: Boolean!
+          message: String!
+        }
+
+        input VerifySoftwareTokenInput {
+          AccessToken: String!
+          FriendlyDeviceName: String!
+          UserCode: String!
+        }
+
+        enum ClientType {
+          SuperAdmin
+          EventCompanyAdmin
+          EventCompanyStaff
+          TechCompanyAdmin
+          TechCompanyStaff
+          RegisteredAtendee
+          UnregisteredAttendee
+        }
+
+        type CWLUser @aws_cognito_user_pools {
+          userId: String!
+          organizationId: String!
+          privacyPolicy: Boolean!
+          termsAndConditions: Boolean!
+          userAddedById: String!
+          userCreated: String!
+          userEmail: String!
+          userTitle: String!
+          userFirstName: String!
+          userLastName: String!
+          userPhone: String!
+          userRole: String!
+          clientType: [ClientType!]!
+        }
+
+        input CWLUserInput {
+          userEmail: String!
+          userTitle: String!
+          userFirstName: String!
+          userLastName: String!
+          userPhone: String!
+          organizationId: String!
+          userRole: String!
+        }
+
+  # DynamoDb Data Sources
+  CWLUserTableDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt CWLAppSyncApi.ApiId
+      Name: cwlUserTable
+      Type: AMAZON_DYNAMODB
+      ServiceRoleArn: !GetAtt AppSyncServiceRole.Arn
+      DynamoDBConfig:
+        TableName:
+          Fn::ImportValue: !Sub "cwlUserTableName-${Stage}"
+        AwsRegion: !Ref AWS::Region
+
+  # IAM Role for AppSync to access DynamoDb
+  AppSyncServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "cwl-appsync-service-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSAppSyncPushToCloudWatchLogs
+      Policies:
+        - PolicyName: !Sub "cwl-appsync-dynamodb-policy-${Stage}"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource:
+                  - Fn::ImportValue: !Sub "cwlUserTableArn-${Stage}"
+
+  # Resolver for getCWLUser query
+  GetCWLUserResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt CWLAppSyncApi.ApiId
+      TypeName: Query
+      FieldName: getCWLUser
+      DataSourceName: !GetAtt CWLUserTableDataSource.Name
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      Code: |
+        import { util } from '@aws-appsync/utils';
+
+        export function request(ctx) {
+          return {
+            operation: 'GetItem',
+            key: util.dynamodb.toMapValues({ userId: ctx.arguments.userId }),
+          };
+        }
+
+        export function response(ctx) {
+          return ctx.result;
+        }
+
+Outputs:
+  CWLAppSyncApiUrl:
+    Description: GraphQL URL for the CloudWatch Live AppSync API
+    Value: !GetAtt CWLAppSyncApi.GraphQLUrl
+    Export:
+      Name: !Sub "CWLAppSyncApiUrl-${Stage}"
+
+  CWLAppSyncApiId:
+    Description: AppSync API ID for the CloudWatch Live API
+    Value: !GetAtt CWLAppSyncApi.ApiId
+    Export:
+      Name: !Sub "CWLAppSyncApiId-${Stage}"
+
+  CWLAppSyncRealtimeUrl:
+    Description: Realtime URL for the CloudWatch Live AppSync API
+    Value: !GetAtt CWLAppSyncApi.RealtimeUrl
+    Export:
+      Name: !Sub "CWLAppSyncRealtimeUrl-${Stage}"
 
 

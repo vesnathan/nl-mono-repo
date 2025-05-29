@@ -22,7 +22,7 @@ CloudWatch Live is a real-time log monitoring and management platform that provi
 - **User management** with role-based access control
 - **Multi-tenant architecture** with organization support
 - **Modern React frontend** with Next.js
-- **Serverless backend** using AWS AppSync, Lambda, and DynamoDB
+- **Serverless backend** using AWS AppSync, Lambda, and DynamoDb
 
 ## 🏗 Architecture
 
@@ -30,7 +30,7 @@ The application follows a multi-stack serverless architecture:
 
 - **Frontend**: Next.js React application hosted on CloudFront
 - **Backend**: AWS AppSync GraphQL API with Lambda resolvers
-- **Database**: DynamoDB for user data and configurations
+- **Database**: DynamoDb for user data and configurations
 - **Authentication**: Amazon Cognito for user management
 - **Security**: AWS WAF for application protection
 - **Infrastructure**: CloudFormation for IaC deployment
@@ -250,6 +250,8 @@ The tool handles removal in the correct dependency order:
 2. Shared Assets (removed second)  
 3. WAF (removed last)
 
+> **Important Note:** The WAF stack is deployed in the `us-east-1` region (required for CloudFront integration), while other stacks are deployed in `ap-southeast-2`. The deployment tool handles this regional difference automatically.
+
 ## 🔐 Security & Access Control
 
 ### AWS Permissions Required
@@ -261,7 +263,7 @@ The deployment requires these AWS permissions:
 - **Lambda**: Function deployment and execution
 - **AppSync**: GraphQL API management
 - **Cognito**: User pool and identity management
-- **DynamoDB**: Table creation and management
+- **DynamoDb**: Table creation and management
 - **CloudFront**: Distribution management
 - **WAF**: Web application firewall rules
 
@@ -309,48 +311,35 @@ For issues and questions:
 2. Review [troubleshooting guides](packages/deploy/README.md#troubleshooting)
 3. Create an issue with detailed information about your problem
 
-## ⚡ Quick Reference
+## 🔍 Troubleshooting
 
-### Most Common Commands
+### WAF Stack Removal Issues
 
-```bash
-# 🚀 Deploy everything (interactive with prompts)
-cd packages/deploy && yarn deploy
+If you encounter problems removing the WAF stack, try these steps:
 
-# 🔄 Update infrastructure (interactive with prompts)
-cd packages/deploy && yarn update
+1. **Use the force-remove command**: This bypasses the regular stack removal process and targets the WAF stack directly in the us-east-1 region:
+   ```bash
+   yarn force-remove:waf --stage <stage-name>
+   ```
 
-# 🌐 Deploy frontend only (interactive with prompts)
-cd packages/deploy && yarn deploy:frontend
+2. **Check CloudFormation in the us-east-1 region**: The WAF stack exists in us-east-1, not in the default ap-southeast-2 region:
+   ```bash
+   aws cloudformation describe-stacks --stack-name nlmonorepo-waf-<stage> --region us-east-1
+   ```
 
-# 💻 Start local development
-yarn dev-cwl
+3. **Manually delete from AWS Console**: If programmatic deletion fails, you can delete the stack from the AWS CloudFormation console in the us-east-1 region.
 
-# 🧹 Remove stacks (interactive with prompts)
-cd packages/deploy && yarn remove
-```
+4. **Check CloudFormation Service Role**: If the stack is stuck in DELETE_FAILED state, it might be due to permission issues with the CloudFormation service role. Make sure the role has the necessary permissions.
 
-### Stack Commands
+### Multi-Region Deployment Issues
 
-```bash
-# Interactive stack updates with prompts
-cd packages/deploy
-yarn update   # Launches interactive update process
-yarn deploy   # Launches interactive deployment process
-yarn remove   # Launches interactive removal process
-```
+When deploying or removing resources across multiple regions, keep in mind:
 
-Each command will guide you through the process with clear prompts for:
-- Selecting the deployment stage
-- Choosing which stack(s) to update/deploy/remove
-- Confirming dependencies
-- Admin user setup (for initial deployments)
+- WAF resources must be in us-east-1 for CloudFront integration
+- CloudFront distributions are global but managed through us-east-1
+- The application stack in ap-southeast-2 references resources from us-east-1
 
-### Environment Stages
-
-- **dev** - Development environment
-- **staging** - Staging/testing environment  
-- **prod** - Production environment
+This multi-region architecture is required for CloudFront and WAF integration, but it means deployments and removals must manage resources across different regions.
 
 ---
 
