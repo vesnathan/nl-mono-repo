@@ -14,21 +14,21 @@ Parameters:
     Description: WAF Web ACL ARN for CloudFront distribution
   CWLBucketName:
     Type: String
-    Description: Name of the S3 bucket for CloudFront origin
+    Description: Name of the S3 bucket for frontend assets
   CWLBucketArn:
     Type: String
-    Description: ARN of the S3 bucket for CloudFront origin
+    Description: ARN of the S3 bucket for frontend assets
   CWLBucketRegionalDomainName:
     Type: String
-    Description: Regional domain name of the S3 bucket for CloudFront origin
+    Description: Regional domain name of the S3 bucket for frontend assets
 
 Resources:
   CWLCloudFrontOAC:
     Type: AWS::CloudFront::OriginAccessControl
     Properties: 
       OriginAccessControlConfig:
-        Name: CWLBucketOAC
-        Description: Origin Access Control for CWL bucket
+        Name: CWLFrontendBucketOAC
+        Description: Origin Access Control for CWL frontend bucket
         SigningBehavior: always
         SigningProtocol: sigv4
         OriginAccessControlOriginType: s3

@@ -19,7 +19,8 @@ export const ForgotPasswordEmailForm: React.FC<Props> = ({
     return REGEX.EMAIL.test(forgetPWEmail);
   }, [forgetPWEmail]);
 
-  const isSubmitDisabled = !emailValid || loginController.sendResetPasswordRequestMutation.isPending;
+  const isSubmitDisabled =
+    !emailValid || loginController.sendResetPasswordRequestMutation.isPending;
 
   const backToLogin = () => {
     setActiveStep("login-enter-credentials");
@@ -38,7 +39,7 @@ export const ForgotPasswordEmailForm: React.FC<Props> = ({
 
   useEnterKeySubmit({
     onSubmit: submitHandler,
-    isDisabled: isSubmitDisabled
+    isDisabled: isSubmitDisabled,
   });
 
   return (

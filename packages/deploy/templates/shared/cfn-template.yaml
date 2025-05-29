@@ -38,8 +38,8 @@ Resources:
       Parameters:
         Stage: !Ref Stage
 
-  # DynamoDB Tables
-  DynamoDBStack:
+  # DynamoDb Tables
+  DynamoDbStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: KMSStack
     Properties:

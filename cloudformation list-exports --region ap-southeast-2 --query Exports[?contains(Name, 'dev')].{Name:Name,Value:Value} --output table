@@ -1,0 +1,47 @@
+----------------------------------------------------------------------------------------------------------------------------------------------
+|                                                                 ListExports                                                                |
++----------------------------------------------------+---------------------------------------------------------------------------------------+
+|                        Name                        |                                         Value                                         |
++----------------------------------------------------+---------------------------------------------------------------------------------------+
+|  [1m[34mcwlFrontendBucketArn-dev[0m                          |  [1m[34marn:aws:s3:::nlmonorepo-cwl-frontend-dev[0m                                             |
+|  [1m[34mcwlFrontendBucketName-dev[0m                         |  [1m[34mnlmonorepo-cwl-frontend-dev[0m                                                          |
+|  [1m[34mcwlFrontendBucketRegionalDomainName-dev[0m           |  [1m[34mnlmonorepo-cwl-frontend-dev.s3.ap-southeast-2.amazonaws.com[0m                          |
+|  [1m[34mcwlIdentityPoolId-dev[0m                             |  [1m[34map-southeast-2:a457e79f-abb0-41de-ace3-59ce32e44aab[0m                                  |
+|  [1m[34mcwlUserPoolArn-dev[0m                                |  [1m[34marn:aws:cognito-idp:ap-southeast-2:430118819356:userpool/ap-southeast-2_FjdSNjEwv[0m    |
+|  [1m[34mcwlUserPoolClientId-dev[0m                           |  [1m[34m7ttoese67c6fm6hisq9jq59b2v[0m                                                           |
+|  [1m[34mcwlUserTableArn-dev[0m                               |  [1m[34marn:aws:dynamodb:ap-southeast-2:430118819356:table/nlmonorepo-shared-usertable-dev[0m   |
+|  [1m[34mcwlUserTableName-dev[0m                              |  [1m[34mnlmonorepo-shared-usertable-dev[0m                                                      |
+|  [1m[34mnlmonorepo-cwl-dev-api-id[0m                         |  [1m[34mzerty2ntebfslcen5anzefic7u[0m                                                           |
+|  [1m[34mnlmonorepo-cwl-dev-api-url[0m                        |  [1m[34mhttps://snzir73porgcrda23gvwcwoqra.appsync-api.ap-southeast-2.amazonaws.com/graphql[0m  |
+|  [1m[34mnlmonorepo-cwl-dev-cloudfront-domain[0m              |  [1m[34mdgnq6efv1mdt4.cloudfront.net[0m                                                         |
+|  [1m[34mnlmonorepo-cwl-dev-cloudfront-id[0m                  |  [1m[34mE3VOM1XI7R9F2O[0m                                                                       |
+|  [1m[34mnlmonorepo-cwl-dev-website-bucket[0m                 |  [1m[34mnlmonorepo-cwl-frontend-dev[0m                                                          |
+|  [1m[34mnlmonorepo-shared-dev-identity-pool-id[0m            |  [1m[34map-southeast-2:a457e79f-abb0-41de-ace3-59ce32e44aab[0m                                  |
+|  [1m[34mnlmonorepo-shared-dev-kms-key-arn[0m                 |  [1m[34marn:aws:kms:ap-southeast-2:430118819356:key/c1054d16-b0f2-4787-b441-56744643a7d9[0m     |
+|  [1m[34mnlmonorepo-shared-dev-kms-key-id[0m                  |  [1m[34mc1054d16-b0f2-4787-b441-56744643a7d9[0m                                                 |
+|  [1m[34mnlmonorepo-shared-dev-user-pool-arn[0m               |  [1m[34marn:aws:cognito-idp:ap-southeast-2:430118819356:userpool/ap-southeast-2_FjdSNjEwv[0m    |
+|  [1m[34mnlmonorepo-shared-dev-user-pool-client-id[0m         |  [1m[34m7ttoese67c6fm6hisq9jq59b2v[0m                                                           |
+|  [1m[34mnlmonorepo-shared-dev-user-pool-id[0m                |  [1m[34map-southeast-2_FjdSNjEwv[0m                                                             |
+|  [1m[34mnlmonorepo-shared-dev-vpc-id[0m                      |  [1m[34mvpc-08a04506549e9d452[0m                                                                |
+|  [1m[34mshared-assets-cwlKMSKey-dev[0m                       |  [1m[34mc1054d16-b0f2-4787-b441-56744643a7d9[0m                                                 |
+|  [1m[34mshared-assets-cwlKMSKeyArn-dev[0m                    |  [1m[34marn:aws:kms:ap-southeast-2:430118819356:key/c1054d16-b0f2-4787-b441-56744643a7d9[0m     |
+|  [1m[34mshared-assets-cwlSecurityGroupFromSharedVPC-dev[0m   |  [1m[34msg-0730a582dc64c288e[0m                                                                 |
+|  [1m[34mshared-assets-cwlSecurityGroupFromSharedVPCId-dev[0m |  [1m[34msg-0730a582dc64c288e[0m                                                                 |
+|  [1m[34mshared-assets-privateSubnet1-dev[0m                  |  [1m[34msubnet-0dfdb0f1a55337810[0m                                                             |
+|  [1m[34mshared-assets-privateSubnet2-dev[0m                  |  [1m[34msubnet-0a29c452fcd442cd8[0m                                                             |
+|  [1m[34mshared-assets-sharedSubnet1-dev[0m                   |  [1m[34msubnet-00dd70d5a2b90ed3c[0m                                                             |
+|  [1m[34mshared-assets-sharedSubnet2-dev[0m                   |  [1m[34msubnet-0cf064c0e376993c6[0m                                                             |
+|  [1m[34mshared-assets-vpc-id-dev[0m                          |  [1m[34mvpc-08a04506549e9d452[0m                                                                |
++----------------------------------------------------+---------------------------------------------------------------------------------------+
+-----------------------------------------------------------------------------------
+|                                   ListStacks                                    |
++----------------------------------------------------+----------------------------+
+|                      StackName                     |        StackStatus         |
++----------------------------------------------------+----------------------------+
+|  [1m[34mnlmonorepo-shared-dev-S3Stack-C79ZW4M9CZBV[0m        |  [1m[34mCREATE_COMPLETE[0m           |
+|  [1m[34mnlmonorepo-shared-dev-DynamoDBStack-1LZC8XXR09FQ1[0m |  [1m[34mCREATE_COMPLETE[0m           |
+|  [1m[34mnlmonorepo-shared-dev-CognitoStack-1NHLMZF0K53G[0m   |  [1m[34mUPDATE_COMPLETE[0m           |
+|  [1m[34mnlmonorepo-shared-dev-VPCStack-9D9K6W2LQQX[0m        |  [1m[34mCREATE_COMPLETE[0m           |
+|  [1m[34mnlmonorepo-shared-dev-KMSStack-11YF9Q2TEE0G2[0m      |  [1m[34mCREATE_COMPLETE[0m           |
+|  [1m[34mnlmonorepo-shared-dev[0m                             |  [1m[34mUPDATE_ROLLBACK_COMPLETE[0m  |
++----------------------------------------------------+----------------------------+

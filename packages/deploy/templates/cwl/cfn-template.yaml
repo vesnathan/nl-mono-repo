@@ -23,11 +23,11 @@ Parameters:
     Description: WAF Web ACL ARN from us-east-1 region
 
 Resources:
-  # DynamoDB Tables
-  DynamoDBStack:
+  # DynamoDb Tables
+  DynamoDbStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/DynamoDB/dynamodb.yaml
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/DynamoDb/dynamodb.yaml
       Parameters:
         Stage: !Ref Stage
         KMSKeyArn: !Ref KMSKeyArn
@@ -58,16 +58,16 @@ Resources:
   # AppSync API
   AppSyncStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [DynamoDBStack, CloudFrontStack]
+    DependsOn: [DynamoDbStack, CloudFrontStack]
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/AppSync/appsync.yaml
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/AppSync/appSync.yaml
       Parameters:
         Stage: !Ref Stage
 
   # Lambda Functions
   LambdaStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [DynamoDBStack, AppSyncStack, CloudFrontStack]
+    DependsOn: [DynamoDbStack, AppSyncStack, CloudFrontStack]
     Properties:
       TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/Lambda/lambda.yaml
       Parameters:
@@ -78,13 +78,13 @@ Resources:
 Outputs:
   ApiUrl:
     Description: AppSync API URL
-    Value: !GetAtt AppSyncStack.Outputs.CWLAppsyncUrl
+    Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiUrl
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-api-url
 
   ApiId:
     Description: AppSync API ID
-    Value: !GetAtt AppSyncStack.Outputs.ApiId
+    Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiId
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-api-id
 
@@ -101,7 +101,7 @@ Outputs:
       Name: !Sub nlmonorepo-cwl-${Stage}-cloudfront-id
 
   WebsiteBucket:
-    Description: S3 bucket for website assets
+    Description: S3 bucket for frontend website assets
     Value: !GetAtt S3Stack.Outputs.CWLBucketName
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-website-bucket

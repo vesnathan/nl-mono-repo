@@ -29,6 +29,9 @@
 gqlTypes.ts
 .nx/cache
 
+# deployment outputs
+**/deployment-outputs.json
+
 .serverless
 lerna-debug.log
 WAF_output.json

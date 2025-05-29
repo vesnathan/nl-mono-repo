@@ -21,7 +21,8 @@
     "remove:waf": "ts-node -r dotenv/config index.ts remove --package waf",
     "remove:shared": "ts-node -r dotenv/config index.ts remove --package shared",
     "remove:cwl": "ts-node -r dotenv/config index.ts remove --package cwl",
-    "remove:all": "ts-node -r dotenv/config index.ts remove --all"
+    "remove:all": "ts-node -r dotenv/config index.ts remove --all",
+    "force-remove:waf": "ts-node -r dotenv/config remove-waf.ts"
   },
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.300.0",

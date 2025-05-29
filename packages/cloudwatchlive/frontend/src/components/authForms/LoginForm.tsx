@@ -24,7 +24,8 @@ export const LoginForm: React.FC<Props> = ({
     setActiveStep,
   } = loginController;
 
-  const isLoginDisabled = !userEmail || !userPassword || signInMutation.isPending;
+  const isLoginDisabled =
+    !userEmail || !userPassword || signInMutation.isPending;
 
   const handleLogin = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -36,7 +37,7 @@ export const LoginForm: React.FC<Props> = ({
 
   useEnterKeySubmit({
     onSubmit: handleLogin,
-    isDisabled: isLoginDisabled
+    isDisabled: isLoginDisabled,
   });
 
   const onForgetPassword = () => {

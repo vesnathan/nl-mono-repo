@@ -151,6 +151,70 @@ Resources:
         Description: "Unregistered Event attendees"
         Precedence: 3
 
+    # IAM Role for authenticated users
+    CognitoIdentityPoolAuthenticatedRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: !Sub "nlmonorepo-shared-cognito-auth-role-${Stage}"
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Federated: cognito-identity.amazonaws.com
+              Action: sts:AssumeRoleWithWebIdentity
+              Condition:
+                StringEquals:
+                  "cognito-identity.amazonaws.com:aud": !Ref cognitoIdentityPool
+                ForAnyValue:StringLike:
+                  "cognito-identity.amazonaws.com:amr": authenticated
+        Policies:
+          - PolicyName: CognitoIdentityPoolAuthenticatedPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - cognito-identity:GetCredentialsForIdentity
+                    - cognito-identity:GetId
+                  Resource: "*"
+
+    # IAM Role for unauthenticated users  
+    CognitoIdentityPoolUnauthenticatedRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: !Sub "nlmonorepo-shared-cognito-unauth-role-${Stage}"
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Federated: cognito-identity.amazonaws.com
+              Action: sts:AssumeRoleWithWebIdentity
+              Condition:
+                StringEquals:
+                  "cognito-identity.amazonaws.com:aud": !Ref cognitoIdentityPool
+                ForAnyValue:StringLike:
+                  "cognito-identity.amazonaws.com:amr": unauthenticated
+        Policies:
+          - PolicyName: CognitoIdentityPoolUnauthenticatedPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - cognito-identity:GetId
+                  Resource: "*"
+
+    # Attach roles to the Identity Pool
+    CognitoIdentityPoolRoleAttachment:
+      Type: AWS::Cognito::IdentityPoolRoleAttachment
+      Properties:
+        IdentityPoolId: !Ref cognitoIdentityPool
+        Roles:
+          authenticated: !GetAtt CognitoIdentityPoolAuthenticatedRole.Arn
+          unauthenticated: !GetAtt CognitoIdentityPoolUnauthenticatedRole.Arn
+
 Outputs:
     UserPoolId:
       Value: !Ref cognitoUserPool
