@@ -54,7 +54,7 @@ export class AwsUtils {
   private lastEventId: string | undefined;
 
   constructor(
-    region: string, 
+    private region: string, 
     credentials?: AwsCredentialIdentity
   ) {
     const s3Config: S3ClientConfig = { region };
@@ -68,10 +68,46 @@ export class AwsUtils {
     this.s3Client = new S3Client(s3Config);
     this.cfClient = new CloudFormationClient(cfConfig);
   }
+  
+  /**
+   * Gets a CloudFormation client for a specific region
+   * @param region The AWS region to use
+   * @returns A CloudFormation client for the specified region
+   */
+  getRegionalCfClient(region: string): CloudFormationClient {
+    if (region === this.region) {
+      return this.cfClient;
+    }
+    
+    return new CloudFormationClient({
+      region,
+      credentials: this.cfClient.config.credentials
+    });
+  }
+
+  /**
+   * Gets an S3 client for a specific region
+   * @param region The AWS region to use
+   * @returns An S3 client for the specified region
+   */
+  getRegionalS3Client(region: string): S3Client {
+    if (region === this.region) {
+      return this.s3Client;
+    }
+    
+    return new S3Client({
+      region,
+      credentials: this.s3Client.config.credentials
+    });
+  }
 
   async bucketExists(bucketName: string): Promise<boolean> {
+    return this.bucketExistsWithClient(bucketName, this.s3Client);
+  }
+
+  async bucketExistsWithClient(bucketName: string, s3Client: S3Client): Promise<boolean> {
     try {
-      await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
+      await s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
       return true;
     } catch (error) {
       return false;
@@ -80,7 +116,15 @@ export class AwsUtils {
 
   async createTemplatesBucket(bucketName: string, region: string, stackType: StackType): Promise<void> {
     try {
-      if (!await this.bucketExists(bucketName)) {
+      logger.info(`Setting up templates bucket: ${bucketName} in region ${region}`);
+      
+      // Use the correct regional S3 client
+      const regionalS3Client = this.getRegionalS3Client(region);
+      
+      // Check if bucket exists using the regional client
+      const bucketExists = await this.bucketExistsWithClient(bucketName, regionalS3Client);
+      
+      if (!bucketExists) {
         logger.info(`Creating templates bucket: ${bucketName}`);
         
         const createBucketParams: CreateBucketCommandInput = region === 'us-east-1'
@@ -92,10 +136,25 @@ export class AwsUtils {
               }
             };
 
-        await this.s3Client.send(new CreateBucketCommand(createBucketParams));
+        try {
+          await regionalS3Client.send(new CreateBucketCommand(createBucketParams));
+          logger.success(`Created templates bucket: ${bucketName}`);
+        } catch (bucketError: any) {
+          // If bucket already exists and we own it, that's fine
+          if (bucketError.name === 'BucketAlreadyOwnedByYou') {
+            logger.info(`Bucket ${bucketName} already exists and is owned by you. Continuing...`);
+          } else {
+            throw bucketError;
+          }
+        }
+      } else {
+        logger.info(`Bucket ${bucketName} already exists. Continuing...`);
       }
 
-      await this.uploadTemplates(bucketName, stackType);
+      // Always upload templates to ensure they're up to date
+      logger.info(`Uploading templates for ${stackType} stack...`);
+      await this.uploadTemplatesWithClient(bucketName, stackType, regionalS3Client);
+      
     } catch (error: any) {
       logger.error(`Failed to create or configure bucket: ${error?.message || 'Unknown error'}`);
       throw error;
@@ -113,33 +172,59 @@ export class AwsUtils {
   }
 
   private async uploadTemplates(bucketName: string, stackType: StackType): Promise<void> {
-    const basePath = TEMPLATE_RESOURCES_PATHS[stackType];
-    const files = await glob('**/*.yaml', { 
-      cwd: basePath,
-      absolute: true
-    }) as string[];
-
-    for (const file of files) {
-      const content = await fs.readFile(file);
-      const key = `resources/${path.relative(basePath, file)}`;
-
-      await this.s3Client.send(new PutObjectCommand({
-        Bucket: bucketName,
-        Key: key,
-        Body: content,
-        ContentType: 'application/x-yaml'
-      }));
-      
-      logger.info(`Uploaded template: ${key}`);
-    }
-
-    logger.success(`Templates bucket setup complete for ${stackType} stack`);
+    return this.uploadTemplatesWithClient(bucketName, stackType, this.s3Client);
   }
 
-  async getStackFailureDetails(stackName: string): Promise<void> {
+  private async uploadTemplatesWithClient(bucketName: string, stackType: StackType, s3Client: S3Client): Promise<void> {
+    const basePath = TEMPLATE_RESOURCES_PATHS[stackType];
+    logger.info(`Looking for template files in: ${basePath}`);
+    
+    try {
+      // Use fs.readdir instead of glob for better compatibility
+      let files: string[] = [];
+      try {
+        const entries = await fs.readdir(basePath, { withFileTypes: true, recursive: true });
+        files = entries
+          .filter(entry => entry.isFile() && entry.name.endsWith('.yaml'))
+          .map(entry => path.join(basePath, entry.name));
+      } catch (readdirError: any) {
+        // Directory might not exist or be accessible, that's fine
+        logger.info(`Could not read directory ${basePath}: ${readdirError.message}`);
+      }
+
+      logger.info(`Found ${files.length} template files`);
+
+      if (files.length === 0) {
+        logger.info(`No additional template files found in ${basePath} for ${stackType} stack`);
+      } else {
+        for (const file of files) {
+          const content = await fs.readFile(file);
+          const key = `resources/${path.relative(basePath, file)}`;
+
+          await s3Client.send(new PutObjectCommand({
+            Bucket: bucketName,
+            Key: key,
+            Body: content,
+            ContentType: 'application/x-yaml'
+          }));
+          
+          logger.info(`Uploaded template: ${key}`);
+        }
+      }
+
+      logger.success(`Templates bucket setup complete for ${stackType} stack`);
+    } catch (error: any) {
+      logger.error(`Error in uploadTemplates: ${error.message}`);
+      logger.success(`Templates bucket setup complete for ${stackType} stack (no additional files)`);
+    }
+  }
+
+  async getStackFailureDetails(stackName: string, regionOverride?: string): Promise<void> {
+    const cfClient = regionOverride ? this.getRegionalCfClient(regionOverride) : this.cfClient;
+    
     try {
       const command = new DescribeStackEventsCommand({ StackName: stackName });
-      const response = await this.cfClient.send(command);
+      const response = await cfClient.send(command);
 
       const failedEvents = response.StackEvents?.filter(event => 
         ['CREATE_FAILED', 'UPDATE_FAILED', 'DELETE_FAILED'].includes(event.ResourceStatus || '')
@@ -154,6 +239,24 @@ export class AwsUtils {
       }
     } catch (error: any) {
       logger.error(`Failed to get stack failure details: ${error?.message || 'Unknown error'}`);
+    }
+  }
+  
+  /**
+   * Helper method to handle WAF stack operations which must be in us-east-1
+   * @param operation The function to perform on the WAF stack
+   * @returns The result of the operation
+   */
+  async performWafStackOperation<T>(operation: (client: CloudFormationClient) => Promise<T>): Promise<T> {
+    // WAF resources must be created in us-east-1 for CloudFront integration
+    const wafRegion = 'us-east-1';
+    const wafCfClient = this.getRegionalCfClient(wafRegion);
+    
+    try {
+      return await operation(wafCfClient);
+    } catch (error: any) {
+      logger.error(`Failed to perform WAF stack operation in ${wafRegion}: ${error?.message || 'Unknown error'}`);
+      throw error;
     }
   }
 
@@ -207,13 +310,18 @@ export class AwsUtils {
     }
   }
 
-  async waitForStackDeletion(stackName: string): Promise<boolean> {
-    logger.info(`Waiting for stack ${stackName} to be deleted...`);
+  async waitForStackDeletion(stackName: string, regionOverride?: string): Promise<boolean> {
+    const region = regionOverride || this.region;
+    const cfClient = regionOverride 
+      ? new CloudFormationClient({ region: regionOverride, credentials: this.cfClient.config.credentials }) 
+      : this.cfClient;
+    
+    logger.info(`Waiting for stack ${stackName} to be deleted in region ${region}...`);
     
     while (true) {
       try {
         const command = new DescribeStacksCommand({ StackName: stackName });
-        const response = await this.cfClient.send(command);
+        const response = await cfClient.send(command);
         const stack = response.Stacks?.[0];
         
         if (!stack) {

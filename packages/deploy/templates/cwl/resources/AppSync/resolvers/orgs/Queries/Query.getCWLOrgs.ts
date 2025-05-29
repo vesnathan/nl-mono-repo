@@ -6,14 +6,17 @@ import {
 } from "@aws-appsync/utils";
 import {
   CWLOrg,
-  Query,
-  QueryToGetCWLOrgsArgs,
 } from "../../gqlTypes";
 import type { AttributeValue } from "@aws-sdk/client-dynamodb";
 
-type CTX = Context<QueryToGetCWLOrgsArgs>;
+// Note: getCWLOrgs query doesn't exist in the schema yet
+interface GetCWLOrgsArgs {
+  organizationIds: string;
+}
+
+type CTX = Context<GetCWLOrgsArgs>;
 type DBItem = CWLOrg[];
-type Output = Query["getCWLOrgs"];
+type Output = CWLOrg[];
 
 export function request(ctx: CTX) {
   const { organizationIds } = ctx.args;
@@ -26,12 +29,12 @@ export function request(ctx: CTX) {
     organizationId: util.dynamodb.toDynamoDB(id),
   }));
 
-  console.log("DynamoDB BatchGetItem Keys", keys);
+  console.log("DynamoDb BatchGetItem Keys", keys);
 
   return {
     operation: "BatchGetItem",
     tables: {
-      YourDynamoDBTableName: {
+      YourDynamoDbTableName: {
         keys,
       },
     },
@@ -42,9 +45,9 @@ export function response(ctx: CTX): Output {
   if (ctx.error) {
     util.error(ctx.error.message, ctx.error.type);
   }
-  if (!ctx.result.data || !ctx.result.data.YourDynamoDBTableName) {
+  if (!ctx.result.data || !ctx.result.data.YourDynamoDbTableName) {
     return [];
   }
 
-  return ctx.result.data.YourDynamoDBTableName as DBItem;
+  return ctx.result.data.YourDynamoDbTableName as DBItem;
 }
