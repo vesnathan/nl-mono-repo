@@ -13,8 +13,8 @@ export const RequireAuth: React.FC<Props> = ({ children }) => {
       renderNotLoggedIn={() => {
         return <NextRedirect path={LOGIN_PATH} />;
       }}
-      renderLoggedIn={({ userId }) => (
-        <CWLUserStoreSetup userId={userId}>{children}</CWLUserStoreSetup>
+      renderLoggedIn={(currentUser) => (
+        <CWLUserStoreSetup userId={currentUser.username}>{children}</CWLUserStoreSetup>
       )}
     />
   );

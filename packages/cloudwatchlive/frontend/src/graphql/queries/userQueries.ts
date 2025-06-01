@@ -21,7 +21,8 @@ const getCWLUserQueryStr = `
         userPhone
         userTitle
         userCreated
-        organizationId 
+        organizationId
+        userRole
       }
     }
 `;

@@ -1,22 +1,22 @@
 import type { ResourcesConfig } from "aws-amplify";
-import { getSlsOutput } from "./slsConfig";
+import { getDeploymentOutput } from "./deploymentOutputs";
 
-const SLS_OUTPUT = getSlsOutput("CWL");
+const DEPLOYMENT_OUTPUT = getDeploymentOutput("CWL");
 const AWS_REGION = "ap-southeast-2";
 export const AMPLIFY_CONFIG: ResourcesConfig = {
   Auth: {
     Cognito: {
-      userPoolId: SLS_OUTPUT.cwlUserPoolId,
-      userPoolClientId: SLS_OUTPUT.cwlUserPoolClientId,
+      userPoolId: DEPLOYMENT_OUTPUT.cwlUserPoolId,
+      userPoolClientId: DEPLOYMENT_OUTPUT.cwlUserPoolClientId,
       allowGuestAccess: true,
-      identityPoolId: SLS_OUTPUT.cwlIdentityPoolId,
+      identityPoolId: DEPLOYMENT_OUTPUT.cwlIdentityPoolId,
     },
   },
   API: {
     GraphQL: {
-      endpoint: SLS_OUTPUT.cwlGraphQLUrl,
+      endpoint: DEPLOYMENT_OUTPUT.cwlGraphQLUrl,
       region: AWS_REGION,
-      defaultAuthMode: "iam",
+      defaultAuthMode: "userPool",
     },
   },
 };

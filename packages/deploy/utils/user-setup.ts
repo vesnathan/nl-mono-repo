@@ -28,7 +28,6 @@ export interface UserDetails {
   firstName: string;
   lastName: string;
   password: string;
-  userGroups: string[];
   userTitle: string;
   userPhone: string;
 }
@@ -56,7 +55,7 @@ export class UserSetupManager {
     logger.info(`Found Cognito User Pool ID: ${userPoolId}`);
 
     // Ensure required user groups exist
-    await this.ensureUserGroups(userPoolId, stage);
+    await this.ensureCognitoGroups(userPoolId, stage);
 
     // Get user table name
     const tableName = `nlmonorepo-shared-usertable-${stage}`;
@@ -68,8 +67,8 @@ export class UserSetupManager {
     // Create or get existing user
     const cognitoUserId = await this.createOrGetCognitoUser(userPoolId, userEmail);
 
-    // Create user in DynamoDB
-    await this.createUserInDynamoDB(tableName, cognitoUserId, userEmail);
+    // Create user in DynamoDb
+    await this.createUserInDynamoDb(tableName, cognitoUserId, userEmail);
 
     // Validate user creation
     await this.validateUserCreation(userPoolId, tableName, cognitoUserId);
@@ -87,7 +86,7 @@ export class UserSetupManager {
 
       const stack = describeStacksResponse.Stacks?.[0];
       if (stack?.Outputs) {
-        const userPoolOutput = stack.Outputs.find(output => output.OutputKey === 'cwlUserPoolId');
+        const userPoolOutput = stack.Outputs.find(output => output.OutputKey === 'CWLUserPoolId');
         if (userPoolOutput?.OutputValue) {
           return userPoolOutput.OutputValue;
         }
@@ -96,7 +95,7 @@ export class UserSetupManager {
       // Fallback to CloudFormation exports
       const listExportsResponse = await this.cloudFormationClient.send(new ListExportsCommand({}));
       const userPoolExport = listExportsResponse.Exports?.find(
-        exp => exp.Name === `cwlUserPoolId-${stage}`
+        exp => exp.Name === `nlmonorepo-shared-${stage}-user-pool-id`
       );
 
       if (userPoolExport?.Value) {
@@ -110,7 +109,7 @@ export class UserSetupManager {
     }
   }
 
-  private async ensureUserGroups(userPoolId: string, stage: string): Promise<void> {
+  private async ensureCognitoGroups(userPoolId: string, stage: string): Promise<void> {
     logger.info('Checking Cognito user groups...');
     
     const requiredGroups = ['SuperAdmin', 'Admin', 'User'];
@@ -144,10 +143,10 @@ export class UserSetupManager {
   private async verifyTableExists(tableName: string): Promise<void> {
     try {
       await this.dynamoClient.send(new DescribeTableCommand({ TableName: tableName }));
-      logger.success(`Found DynamoDB table: ${tableName}`);
+      logger.success(`Found DynamoDb table: ${tableName}`);
     } catch (error) {
-      logger.error(`DynamoDB table ${tableName} does not exist`);
-      throw new Error(`DynamoDB table ${tableName} does not exist. Cannot proceed with user creation.`);
+      logger.error(`DynamoDb table ${tableName} does not exist`);
+      throw new Error(`DynamoDb table ${tableName} does not exist. Cannot proceed with user creation.`);
     }
   }
 
@@ -244,9 +243,9 @@ export class UserSetupManager {
     }
   }
 
-  private async createUserInDynamoDB(tableName: string, cognitoUserId: string, userEmail: string): Promise<void> {
+  private async createUserInDynamoDb(tableName: string, cognitoUserId: string, userEmail: string): Promise<void> {
     try {
-      // Check if user already exists in DynamoDB
+      // Check if user already exists in DynamoDb
       const getUserResponse = await this.dynamoClient.send(
         new GetItemCommand({
           TableName: tableName,
@@ -255,11 +254,11 @@ export class UserSetupManager {
       );
 
       if (getUserResponse.Item) {
-        logger.info('User already exists in DynamoDB table');
+        logger.info('User already exists in DynamoDb table');
         return;
       }
 
-      // Create user in DynamoDB with the same schema as deploy.sh
+      // Create user in DynamoDb with the same schema as deploy.sh
       const currentTimestamp = '1733530302'; // Fixed timestamp from deploy.sh
       
       const userItem = {
@@ -271,12 +270,6 @@ export class UserSetupManager {
         userCreated: { S: currentTimestamp },
         userEmail: { S: userEmail },
         userFirstName: { S: 'John' },
-        userGroups: {
-          L: [
-            { S: 'SuperAdmin' },
-            { SS: ['SuperAdmin'] }
-          ]
-        },
         userLastName: { S: 'Doe' },
         userPhone: { S: '0421 569 854' },
         userProfilePicture: {
@@ -285,10 +278,11 @@ export class UserSetupManager {
             Key: { S: '' }
           }
         },
-        userTitle: { S: 'Mr' }
+        userTitle: { S: 'Mr' },
+        userRole: { S: 'System Administrator' }
       };
 
-      logger.info(`Creating user entry in DynamoDB table ${tableName}...`);
+      logger.info(`Creating user entry in DynamoDb table ${tableName}...`);
       await this.dynamoClient.send(
         new PutItemCommand({
           TableName: tableName,
@@ -296,16 +290,16 @@ export class UserSetupManager {
         })
       );
 
-      logger.success(`Created user entry in DynamoDB table ${tableName}`);
+      logger.success(`Created user entry in DynamoDb table ${tableName}`);
     } catch (error) {
-      logger.error(`Error creating user in DynamoDB: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      logger.error(`Error creating user in DynamoDb: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
     }
   }
 
   private async validateUserCreation(userPoolId: string, tableName: string, cognitoUserId: string): Promise<void> {
     try {
-      // Validate user exists in DynamoDB
+      // Validate user exists in DynamoDb
       const getUserResponse = await this.dynamoClient.send(
         new GetItemCommand({
           TableName: tableName,

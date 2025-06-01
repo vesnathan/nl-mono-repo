@@ -6,7 +6,7 @@ Parameters:
     Type: String
     Description: Deployment stage (e.g., dev, prod)
     AllowedPattern: ^[a-zA-Z0-9-]+$
-  TemplatesBucketName:
+  TemplateBucketName:
     Type: String
     Description: Name of the S3 bucket containing nested stack templates
   KMSKeyId:
@@ -15,19 +15,19 @@ Parameters:
   KMSKeyArn:
     Type: String
     Description: KMS Key ARN for encryption
-  WebAclId:
+  WebACLId:
     Type: String
     Description: WAF Web ACL ID from us-east-1 region
-  WebAclArn:
+  WebACLArn:
     Type: String
     Description: WAF Web ACL ARN from us-east-1 region
 
 Resources:
-  # DynamoDB Tables
-  DynamoDBStack:
+  # DynamoDb Tables
+  DynamoDbStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/DynamoDB/dynamodb.yaml
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/DynamoDb/dynamodb.yaml
       Parameters:
         Stage: !Ref Stage
         KMSKeyArn: !Ref KMSKeyArn
@@ -36,7 +36,7 @@ Resources:
   S3Stack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/S3/s3.yaml
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/S3/s3.yaml
       Parameters:
         Stage: !Ref Stage
         KMSKeyId: !Ref KMSKeyId
@@ -46,11 +46,11 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: S3Stack
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/CloudFront/cloudfront.yaml
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/CloudFront/cloudfront.yaml
       Parameters:
         Stage: !Ref Stage
-        WebACLId: !Ref WebAclId
-        WebACLArn: !Ref WebAclArn
+        WebACLId: !Ref WebACLId
+        WebACLArn: !Ref WebACLArn
         CWLBucketName: !GetAtt S3Stack.Outputs.CWLBucketName
         CWLBucketArn: !GetAtt S3Stack.Outputs.CWLBucketArn
         CWLBucketRegionalDomainName: !GetAtt S3Stack.Outputs.CWLBucketRegionalDomainName
@@ -58,33 +58,35 @@ Resources:
   # AppSync API
   AppSyncStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [DynamoDBStack, CloudFrontStack]
+    DependsOn: [DynamoDbStack, CloudFrontStack]
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/AppSync/appsync.yaml
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appSync.yaml
       Parameters:
         Stage: !Ref Stage
+        TemplateBucketName: !Ref TemplateBucketName
 
   # Lambda Functions
   LambdaStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [DynamoDBStack, AppSyncStack, CloudFrontStack]
+    DependsOn: [DynamoDbStack, AppSyncStack, CloudFrontStack]
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/Lambda/lambda.yaml
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml
       Parameters:
         Stage: !Ref Stage
+        TemplateBucketName: !Ref TemplateBucketName
         CWLCloudFrontDistributionId: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDistributionId
         CWLCloudFrontDomainName: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDomainName
 
 Outputs:
   ApiUrl:
     Description: AppSync API URL
-    Value: !GetAtt AppSyncStack.Outputs.CWLAppsyncUrl
+    Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiUrl
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-api-url
 
   ApiId:
     Description: AppSync API ID
-    Value: !GetAtt AppSyncStack.Outputs.ApiId
+    Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiId
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-api-id
 
@@ -101,7 +103,7 @@ Outputs:
       Name: !Sub nlmonorepo-cwl-${Stage}-cloudfront-id
 
   WebsiteBucket:
-    Description: S3 bucket for website assets
+    Description: S3 bucket for frontend website assets
     Value: !GetAtt S3Stack.Outputs.CWLBucketName
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-website-bucket

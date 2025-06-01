@@ -25,10 +25,8 @@ export const AddUserForm = forwardRef(
   ({ onClose }: { onClose: () => void }, ref) => {
     const [step, setStep] = useState(1);
     const totalSteps = 2;
-    const userGroups = useUserStore(
-      (state) => state.userGroups as ClientType[],
-    );
-    const jobRolesForUserGroup = useGetUserJobRoles(userGroups);
+    const user = useUserStore((state) => state.user);
+    const jobRolesForUserGroup = useGetUserJobRoles(user.clientType);
 
     const form = useForm<CWLUser>({
       defaultValues: {
