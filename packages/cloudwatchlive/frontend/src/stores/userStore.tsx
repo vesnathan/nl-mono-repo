@@ -22,13 +22,9 @@ const createDefaultCWLUser = (): CWLUser => ({
 type UserStoreType = {
   user: CWLUser;
   setUser: (user: CWLUser) => void;
-  userGroups: string[];
-  setUserGroups: (userGroups: ClientType[]) => void;
 };
 
 export const useUserStore = create<UserStoreType>((set) => ({
   user: createDefaultCWLUser(),
   setUser: (user) => set({ user }),
-  userGroups: [],
-  setUserGroups: (userGroups) => set((state) => ({ ...state, userGroups })),
 }));

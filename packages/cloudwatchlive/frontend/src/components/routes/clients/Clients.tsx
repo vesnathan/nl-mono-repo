@@ -22,8 +22,8 @@ export const Clients = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [totalSteps, setTotalSteps] = useState(1);
 
-  const userGroups = useUserStore((state) => state.userGroups);
-  const isSuperAdminUser = userGroups.includes("SuperAdmin" as ClientType);
+  const user = useUserStore((state) => state.user);
+  const isSuperAdminUser = user.clientType.includes(ClientType.SuperAdmin);
 
   // Define separate refs for each form
   const addUserFormRef = useRef<{

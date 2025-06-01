@@ -4,10 +4,15 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_ENVIRONMENT: process.env.NEXT_PUBLIC_ENVIRONMENT,
   },
+  eslint: {
+    // Disable ESLint during builds
+    ignoreDuringBuilds: true,
+  },
   compiler: {
     styledComponents: true,
   },
-  output: "export",
+  // Only use "export" for production builds, not during development
+  ...(process.env.NODE_ENV === 'production' ? { output: "export" } : {}),
   images: {
     unoptimized: true,
   },

@@ -4,8 +4,8 @@ import {
 } from "@/constants/jobRoles";
 import { ClientType } from "@/graphql/gqlTypes";
 
-export const useGetUserJobRoles = (userGroups: ClientType[]) => {
-  return userGroups.includes(ClientType.SuperAdmin)
+export const useGetUserJobRoles = (clientType: ClientType[]) => {
+  return clientType.includes(ClientType.SuperAdmin)
     ? [...superAdminJobRoles, ...eventManagementCompanyJobRoles]
     : eventManagementCompanyJobRoles;
 };

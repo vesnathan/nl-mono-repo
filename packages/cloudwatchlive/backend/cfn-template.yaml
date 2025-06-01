@@ -57,6 +57,7 @@ Resources:
       TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appsync.yaml
       Parameters:
         Stage: !Ref Stage
+        TemplatesBucketName: !Ref TemplatesBucketName
 
   LambdaStack:
     Type: AWS::CloudFormation::Stack

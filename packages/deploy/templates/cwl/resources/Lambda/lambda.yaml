@@ -6,6 +6,9 @@ Parameters:
     Type: String
     Description: Deployment stage (e.g., dev, prod)
     AllowedPattern: ^[a-zA-Z0-9-]+$
+  TemplateBucketName:
+    Type: String
+    Description: Name of the S3 bucket containing nested stack templates
   CWLCloudFrontDistributionId:
     Type: String
     Description: ID of the CloudFront distribution

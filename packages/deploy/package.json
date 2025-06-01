@@ -21,9 +21,16 @@
     "remove:waf": "ts-node -r dotenv/config index.ts remove --package waf",
     "remove:shared": "ts-node -r dotenv/config index.ts remove --package shared",
     "remove:cwl": "ts-node -r dotenv/config index.ts remove --package cwl",
-    "remove:all": "ts-node -r dotenv/config index.ts remove --all"
+    "remove:all": "ts-node -r dotenv/config index.ts remove --all",
+    "force-remove:waf": "ts-node -r dotenv/config remove-waf.ts",
+    "force-delete": "ts-node -r dotenv/config force-delete-cli.ts",
+    "force-delete:stack": "ts-node -r dotenv/config force-delete-cli.ts stack",
+    "force-delete:all": "ts-node -r dotenv/config force-delete-cli.ts all",
+    "force-delete:s3": "ts-node -r dotenv/config force-delete-cli.ts s3-cleanup",
+    "force-delete:status": "ts-node -r dotenv/config force-delete-cli.ts status"
   },
   "dependencies": {
+    "@aws-sdk/client-appsync": "^3.821.0",
     "@aws-sdk/client-cloudformation": "^3.300.0",
     "@aws-sdk/client-cloudfront": "^3.817.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.817.0",
