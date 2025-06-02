@@ -1,0 +1,46 @@
+type Mutation {
+  # ----- User/cognito
+  adminSetUserMFAPreference(
+    input: AdminSetUserMFAPreferenceInput!
+  ): StandardResult! @aws_cognito_user_pools
+  
+  associateSoftwareToken(accessToken: String!): associateSoftwareTokenResult!
+    @aws_cognito_user_pools
+  
+  verifySoftwareToken(
+    input: VerifySoftwareTokenInput!
+  ): StandardResult! @aws_cognito_user_pools
+
+  # ----- Client
+  saveSuperAdminClient(input: CWLUserInput!): StandardResult! @aws_cognito_user_pools
+  saveEventCompanyAdminClient(input: CWLUserInput!): StandardResult! @aws_cognito_user_pools
+}
+
+type StandardResult {
+  statusCode: String!
+  body: String!
+}
+
+input AdminSetUserMFAPreferenceInput {
+  userId: String!
+  userEmail: String!
+}
+
+type AdminSetUserMFAPreferenceResult {
+  userId: String!
+}
+
+type associateSoftwareTokenResult {
+  secretCode: String!
+}
+
+type VerifySoftwareTokenResult {
+  success: Boolean!
+  message: String!
+}
+
+input VerifySoftwareTokenInput {
+  AccessToken: String!
+  FriendlyDeviceName: String!
+  UserCode: String!
+}
