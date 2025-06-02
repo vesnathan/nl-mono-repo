@@ -61,6 +61,18 @@ Resources:
             MetricName: AWSManagedCommonRuleSetMetric
 
 Outputs:
+  WebACLId:
+    Description: Web ACL ID
+    Value: !GetAtt CloudFrontWAF.Id
+    Export:
+      Name: !Sub nlmonorepo-waf-${Stage}-web-acl-id
+      
+  WebACLArn:
+    Description: Web ACL ARN
+    Value: !GetAtt CloudFrontWAF.Arn
+    Export:
+      Name: !Sub nlmonorepo-waf-${Stage}-web-acl-arn
+      
   CloudFrontWAFArn:
     Value: !GetAtt CloudFrontWAF.Arn
     Export:

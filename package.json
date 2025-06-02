@@ -65,6 +65,7 @@
     "force-remove:waf": "yarn workspace @cwl/deploy force-remove:waf",
     "knip": "knip",
     "dev-cwl": "cd packages/cloudwatchlive/frontend && yarn dev",
+    "dev-cwl:codespaces": "cd packages/cloudwatchlive/frontend && bash ./dev.sh",
     "build": "lerna run build --stream",
     "lint": "lerna run lint --stream",
     "tsc": "lerna run tsc --stream",

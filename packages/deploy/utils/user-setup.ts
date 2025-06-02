@@ -28,7 +28,6 @@ export interface UserDetails {
   firstName: string;
   lastName: string;
   password: string;
-  userGroups: string[];
   userTitle: string;
   userPhone: string;
 }
@@ -56,7 +55,7 @@ export class UserSetupManager {
     logger.info(`Found Cognito User Pool ID: ${userPoolId}`);
 
     // Ensure required user groups exist
-    await this.ensureUserGroups(userPoolId, stage);
+    await this.ensureCognitoGroups(userPoolId, stage);
 
     // Get user table name
     const tableName = `nlmonorepo-shared-usertable-${stage}`;
@@ -110,7 +109,7 @@ export class UserSetupManager {
     }
   }
 
-  private async ensureUserGroups(userPoolId: string, stage: string): Promise<void> {
+  private async ensureCognitoGroups(userPoolId: string, stage: string): Promise<void> {
     logger.info('Checking Cognito user groups...');
     
     const requiredGroups = ['SuperAdmin', 'Admin', 'User'];
@@ -271,12 +270,6 @@ export class UserSetupManager {
         userCreated: { S: currentTimestamp },
         userEmail: { S: userEmail },
         userFirstName: { S: 'John' },
-        userGroups: {
-          L: [
-            { S: 'SuperAdmin' },
-            { SS: ['SuperAdmin'] }
-          ]
-        },
         userLastName: { S: 'Doe' },
         userPhone: { S: '0421 569 854' },
         userProfilePicture: {
@@ -285,7 +278,8 @@ export class UserSetupManager {
             Key: { S: '' }
           }
         },
-        userTitle: { S: 'Mr' }
+        userTitle: { S: 'Mr' },
+        userRole: { S: 'System Administrator' }
       };
 
       logger.info(`Creating user entry in DynamoDb table ${tableName}...`);

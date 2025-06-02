@@ -11,7 +11,8 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
-  output: "export",
+  // Only use "export" for production builds, not during development
+  ...(process.env.NODE_ENV === 'production' ? { output: "export" } : {}),
   images: {
     unoptimized: true,
   },

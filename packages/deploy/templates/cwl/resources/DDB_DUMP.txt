@@ -23,18 +23,6 @@
   "userFirstName": {
     "S": "John"
   },
-  "userGroups": {
-    "L": [
-      {
-        "S": "SuperAdmin"
-      },
-      {
-        "SS": [
-          "SuperAdmin"
-        ]
-      }
-    ]
-  },
   "userLastName": {
     "S": "Doe"
   },

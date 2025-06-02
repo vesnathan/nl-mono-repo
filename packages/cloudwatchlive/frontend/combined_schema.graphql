@@ -1,6 +1,5 @@
 schema {
   query: Query
-  mutation: Mutation
 }
 
 type Query {
@@ -8,83 +7,11 @@ type Query {
     @aws_cognito_user_pools
 }
 
-type Mutation {
-
-  # ----- User/cognito
-
-  adminSetUserMFAPreference(
-    input: AdminSetUserMFAPreferenceInput!
-  ): StandardResult! @aws_cognito_user_pools
-  
-  associateSoftwareToken(accessToken: String!): associateSoftwareTokenResult!
-    @aws_cognito_user_pools
-  
-  verifySoftwareToken(
-    input: VerifySoftwareTokenInput!
-  ): StandardResult! @aws_cognito_user_pools
-
-
-  # ----- Client
-  saveSuperAdminClient(input: CWLUserInput!): StandardResult! @aws_cognito_user_pools
-  saveEventCompanyAdminClient(input: CWLUserInput!): StandardResult! @aws_cognito_user_pools
-}
-
-type StandardResult {
-  statusCode: String!
-  body: String!
-}
-
-input AdminSetUserMFAPreferenceInput {
-  userId: String!
-  userEmail: String!
-}
-
-type AdminSetUserMFAPreferenceResult {
-  userId: String!
-}
-
-type associateSoftwareTokenResult {
-  secretCode: String!
-}
-
-type VerifySoftwareTokenResult {
-  success: Boolean!
-  message: String!
-}
-
-input VerifySoftwareTokenInput {
-  AccessToken: String!
-  FriendlyDeviceName: String!
-  UserCode: String!
-}
 
 
 
 
 
-
-type CWLOrg @aws_cognito_user_pools {
-  organizationId: String!
-  organizationName: String!
-  addressLine1: String!
-  addressLine2: String!
-  city: String!
-  state: String!
-  country: String!
-  postalCode: String!
-  orgPhone: String!
-}
-
-input CWLOrgInput {
-  organizationName: String!
-  addressLine1: String!
-  addressLine2: String!
-  city: String!
-  state: String!
-  country: String!
-  postalCode: String!
-  orgPhone: String!
-}
 enum ClientType {
   SuperAdmin
   EventCompanyAdmin

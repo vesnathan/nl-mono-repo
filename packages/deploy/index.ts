@@ -17,6 +17,7 @@ import {
 } from './types';
 import { deployShared } from './packages/shared/shared';
 import { deployCwl } from './packages/cwl/cwl';
+import { ForceDeleteManager } from './utils/force-delete-utils';
 import { OutputsManager } from './outputs-manager';
 import { DependencyValidator } from './dependency-validator';
 import { 
@@ -40,7 +41,10 @@ class DeploymentManager {
   private userManager: UserSetupManager;
   private outputsManager: OutputsManager;
   private dependencyValidator: DependencyValidator;
+  private outputsManager: OutputsManager;
+  private dependencyValidator: DependencyValidator;
   private region: string;
+  private forceDeleteManager: ForceDeleteManager;
 
   constructor(region = 'ap-southeast-2') {
     this.region = region;
@@ -49,6 +53,7 @@ class DeploymentManager {
     this.userManager = new UserSetupManager(region);
     this.outputsManager = new OutputsManager();
     this.dependencyValidator = new DependencyValidator();
+    this.forceDeleteManager = new ForceDeleteManager(region);
   }
 
   async initializeAws(): Promise<void> {
@@ -74,6 +79,11 @@ class DeploymentManager {
         throw new Error(`Dependency validation failed for ${stackType} stack`);
       }
 
+      // Check for failed stacks and auto-cleanup if enabled
+      if (options.autoDeleteFailedStacks) {
+        await this.checkAndCleanupFailedStack(stackType, options);
+      }
+
       // Route to appropriate deployment function
       switch (stackType) {
         case 'waf':
@@ -96,6 +106,10 @@ class DeploymentManager {
       await this.outputsManager.saveStackOutputs(stackType, stage, this.region);
 
       logger.success(`Successfully deployed ${stackType} stack`);
+      // Save stack outputs after successful deployment
+      await this.outputsManager.saveStackOutputs(stackType, stage, this.region);
+
+      logger.success(`Successfully deployed ${stackType} stack`);
 
       // Post-deployment tasks
       await this.postDeploymentTasks(stackType, options);
@@ -104,6 +118,7 @@ class DeploymentManager {
       logger.error(`Failed to deploy ${stackType} stack: ${error.message}`);
       
       if (options.autoDeleteFailedStacks) {
+        const stackName = getStackName(stackType, options.stage);
         const stackName = getStackName(stackType, options.stage);
         await this.handleFailedStack(stackName);
       }
@@ -238,6 +253,7 @@ class DeploymentManager {
 
   private async postDeploymentTasks(stackType: StackType, options: DeploymentOptions): Promise<void> {
     if (stackType === 'cwl' && !options.skipUserCreation) {
+    if (stackType === 'cwl' && !options.skipUserCreation) {
       logger.info('Setting up admin user...');
       try {
         // Prompt for admin email if not provided
@@ -246,8 +262,15 @@ class DeploymentManager {
           adminEmail = await this.promptForAdminEmail();
         }
         
+        // Prompt for admin email if not provided
+        let adminEmail = options.adminEmail;
+        if (!adminEmail) {
+          adminEmail = await this.promptForAdminEmail();
+        }
+        
         await this.userManager.createAdminUser({
           stage: options.stage,
+          adminEmail: adminEmail,
           adminEmail: adminEmail,
           region: this.region
         });
@@ -281,20 +304,67 @@ class DeploymentManager {
     return adminEmail.trim();
   }
 
+  private async promptForAdminEmail(): Promise<string> {
+    const { adminEmail } = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'adminEmail',
+        message: 'Enter admin email address for user creation:',
+        default: 'admin@example.com',
+        validate: (input: string) => {
+          if (!input.trim()) {
+            return 'Email cannot be empty';
+          }
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(input.trim())) {
+            return 'Please enter a valid email address';
+          }
+          return true;
+        }
+      }
+    ]);
+
+    return adminEmail.trim();
+  }
+
   private async handleFailedStack(stackName: string): Promise<void> {
     try {
-      logger.info(`Attempting to delete failed stack: ${stackName}`);
-      const command = new DeleteStackCommand({ StackName: stackName });
-      await this.cfClient.send(command);
+      logger.info(`Attempting to force delete failed stack: ${stackName}`);
       
-      // Wait for deletion to complete
-      await this.waitForStackDeletion(stackName);
-      logger.success(`Failed stack deleted: ${stackName}`);
+      // Determine stack type from name
+      let stackType: StackType;
+      let region = this.region;
+      
+      if (stackName.includes('-waf-')) {
+        stackType = 'waf';
+        region = 'us-east-1';
+      } else if (stackName.includes('-shared-')) {
+        stackType = 'shared';
+      } else if (stackName.includes('-cwl-')) {
+        stackType = 'cwl';
+      } else {
+        throw new Error(`Cannot determine stack type from name: ${stackName}`);
+      }
+      
+      // Extract stage from stack name
+      const stagePart = stackName.split('-').pop();
+      if (!stagePart) {
+        throw new Error(`Cannot determine stage from stack name: ${stackName}`);
+      }
+      
+      const forceDeleteManager = new ForceDeleteManager(region);
+      await forceDeleteManager.forceDeleteStack(stackType, {
+        stage: stagePart,
+        maxWaitMinutes: 20
+      });
+      
+      logger.success(`Failed stack deleted with force deletion: ${stackName}`);
     } catch (error: any) {
-      logger.error(`Failed to delete failed stack: ${error.message}`);
+      logger.error(`Failed to force delete failed stack: ${error.message}`);
     }
   }
 
+  private async waitForStackDeletion(stackName: string, region?: string): Promise<void> {
   private async waitForStackDeletion(stackName: string, region?: string): Promise<void> {
     const maxWaitTime = 20 * 60 * 1000; // 20 minutes
     const pollInterval = 30 * 1000; // 30 seconds
@@ -302,10 +372,14 @@ class DeploymentManager {
     
     // Use the specified region or default to the instance's region
     const cfClient = region ? new CloudFormationClient({ region }) : this.cfClient;
+    
+    // Use the specified region or default to the instance's region
+    const cfClient = region ? new CloudFormationClient({ region }) : this.cfClient;
 
     while (Date.now() - startTime < maxWaitTime) {
       try {
         const command = new DescribeStacksCommand({ StackName: stackName });
+        const response = await cfClient.send(command);
         const response = await cfClient.send(command);
         const stack = response.Stacks?.[0];
 
@@ -334,6 +408,14 @@ class DeploymentManager {
   }
 
   async deployAll(options: DeploymentOptions): Promise<void> {
+    // Get the correct deployment order based on dependencies
+    const stacks = this.dependencyValidator.getDeploymentOrder();
+    
+    logger.info(`Deploying stacks in dependency order: ${stacks.join(' → ')}`);
+    
+    // For deployAll, we skip chain validation since we're deploying in the correct order
+    // and dependencies will be satisfied as we deploy each stack
+    logger.info('Skipping deployment chain validation for fresh deployment - will validate dependencies per stack');
     // Get the correct deployment order based on dependencies
     const stacks = this.dependencyValidator.getDeploymentOrder();
     
@@ -415,6 +497,24 @@ class DeploymentManager {
         await this.waitForStackDeletion(stackName);
         logger.success(`Stack deleted successfully: ${stackName}`);
       }
+    // Validate that the stack can be safely removed
+    const canRemove = await this.dependencyValidator.validateRemoval(stackType, options.stage);
+    if (!canRemove) {
+      throw new Error(`Cannot remove ${stackType} - dependent stacks are still deployed`);
+    }
+    
+    try {
+      // Use specialized method for WAF stack removal
+      if (stackType === 'waf') {
+        await this.removeWafStack(options);
+      } else {
+        const command = new DeleteStackCommand({ StackName: stackName });
+        await this.cfClient.send(command);
+        
+        // Wait for deletion to complete
+        await this.waitForStackDeletion(stackName);
+        logger.success(`Stack deleted successfully: ${stackName}`);
+      }
     } catch (error: any) {
       logger.error(`Failed to delete stack ${stackName}: ${error.message}`);
       throw error;
@@ -423,6 +523,10 @@ class DeploymentManager {
 
   async removeAll(options: DeploymentOptions): Promise<void> {
     // Remove stacks in reverse order of deployment
+    const stacks = this.dependencyValidator.getRemovalOrder();
+    const errors: string[] = [];
+    
+    logger.info(`Removing stacks in dependency order: ${stacks.join(' → ')}`);
     const stacks = this.dependencyValidator.getRemovalOrder();
     const errors: string[] = [];
     
@@ -649,6 +753,51 @@ class DeploymentManager {
     
     throw new Error(`WAF Stack deployment timeout after ${maxWaitTime / 1000 / 60} minutes`);
   }
+
+  private async checkAndCleanupFailedStack(stackType: StackType, options: DeploymentOptions): Promise<void> {
+    const stackName = getStackName(stackType, options.stage);
+    
+    try {
+      const command = new DescribeStacksCommand({ StackName: stackName });
+      const regionOverride = stackType === 'waf' ? 'us-east-1' : undefined;
+      const cfClient = regionOverride 
+        ? new CloudFormationClient({ region: regionOverride, credentials: this.cfClient.config.credentials })
+        : this.cfClient;
+      
+      const response = await cfClient.send(command);
+      const stack = response.Stacks?.[0];
+      const stackStatus = stack?.StackStatus;
+      
+      // Define failed states that require force deletion
+      const failedStates = [
+        'ROLLBACK_COMPLETE',
+        'CREATE_FAILED', 
+        'DELETE_FAILED',
+        'UPDATE_ROLLBACK_FAILED',
+        'UPDATE_ROLLBACK_COMPLETE'
+      ];
+      
+      if (stackStatus && failedStates.includes(stackStatus)) {
+        logger.warning(`Stack ${stackName} is in failed state: ${stackStatus}. Auto-cleaning with force deletion...`);
+        
+        const forceDeleteManager = new ForceDeleteManager(regionOverride || this.region);
+        await forceDeleteManager.forceDeleteStack(stackType, {
+          stage: options.stage,
+          maxWaitMinutes: 20
+        });
+        
+        logger.success(`Failed stack ${stackName} cleaned up successfully`);
+      }
+    } catch (error: any) {
+      if (error.name === 'ValidationError' && error.message.includes('does not exist')) {
+        // Stack doesn't exist, which is fine
+        logger.info(`Stack ${stackName} does not exist, proceeding with deployment`);
+      } else {
+        logger.warning(`Error checking stack status for cleanup: ${error.message}`);
+        // Continue with deployment despite check failure
+      }
+    }
+  }
 }
 
 // CLI Command definitions
@@ -666,6 +815,7 @@ async function main() {
     .description('Deploy a specific package')
     .option('--package <type>', 'Package to deploy (waf, shared, cwl)')
     .option('--stage <stage>', 'Deployment stage')
+    .option('--stage <stage>', 'Deployment stage')
     .option('--admin-email <email>', 'Admin user email')
     .option('--auto-delete-failed', 'Auto delete failed stacks')
     .option('--skip-user-creation', 'Skip user creation')
@@ -678,7 +828,12 @@ async function main() {
         // Prompt for stage if not provided
         const stage = options.stage || await promptForStage();
         
+        
+        // Prompt for stage if not provided
+        const stage = options.stage || await promptForStage();
+        
         const deploymentOptions: DeploymentOptions = {
+          stage: stage,
           stage: stage,
           packageName,
           adminEmail: options.adminEmail,
@@ -699,6 +854,7 @@ async function main() {
     .description('Update a stack and redeploy dependent stacks')
     .option('--package <type>', 'Package to update (waf, shared, cwl)', 'shared')
     .option('--stage <stage>', 'Deployment stage')
+    .option('--stage <stage>', 'Deployment stage')
     .option('--admin-email <email>', 'Admin user email')
     .option('--auto-delete-failed', 'Auto delete failed stacks')
     .option('--skip-user-creation', 'Skip user creation')
@@ -709,8 +865,12 @@ async function main() {
         // Prompt for stage if not provided
         const stage = options.stage || await promptForStage();
         
+        // Prompt for stage if not provided
+        const stage = options.stage || await promptForStage();
+        
         const packageName = options.package as StackType;
         const deploymentOptions: DeploymentOptions = {
+          stage: stage,
           stage: stage,
           packageName,
           adminEmail: options.adminEmail,
@@ -730,6 +890,7 @@ async function main() {
     .command('all')
     .description('Deploy all packages in order (waf -> shared -> cwl)')
     .option('--stage <stage>', 'Deployment stage')
+    .option('--stage <stage>', 'Deployment stage')
     .option('--admin-email <email>', 'Admin user email')
     .option('--auto-delete-failed', 'Auto delete failed stacks')
     .option('--skip-user-creation', 'Skip user creation')
@@ -740,7 +901,11 @@ async function main() {
         // Prompt for stage if not provided
         const stage = options.stage || await promptForStage();
         
+        // Prompt for stage if not provided
+        const stage = options.stage || await promptForStage();
+        
         const deploymentOptions: DeploymentOptions = {
+          stage: stage,
           stage: stage,
           adminEmail: options.adminEmail,
           autoDeleteFailedStacks: options.autoDeleteFailed,
@@ -760,6 +925,7 @@ async function main() {
     .description('Remove a specific package or all packages')
     .option('--package <type>', 'Package to remove (waf, shared, cwl)')
     .option('--stage <stage>', 'Deployment stage')
+    .option('--stage <stage>', 'Deployment stage')
     .option('--all', 'Remove all stacks in the correct order')
     .action(async (options) => {
       try {
@@ -768,14 +934,19 @@ async function main() {
         // Prompt for stage if not provided
         const stage = options.stage || await promptForStage();
         
+        // Prompt for stage if not provided
+        const stage = options.stage || await promptForStage();
+        
         if (options.all) {
           const deploymentOptions: DeploymentOptions = {
+            stage: stage
             stage: stage
           };
           await deployment.removeAll(deploymentOptions);
         } else {
           const packageName = options.package || await promptForPackageToRemove();
           const deploymentOptions: DeploymentOptions = {
+            stage: stage,
             stage: stage,
             packageName
           };
@@ -801,9 +972,15 @@ async function main() {
     .command('deploy')
     .description('Build, upload and invalidate frontend')
     .option('--stage <stage>', 'Deployment stage')
+    .option('--stage <stage>', 'Deployment stage')
     .action(async (options) => {
       try {
         await deployment.initializeAws();
+        
+        // Prompt for stage if not provided
+        const stage = options.stage || await promptForStage();
+        
+        await deployment.deployFrontend('deploy', stage);
         
         // Prompt for stage if not provided
         const stage = options.stage || await promptForStage();
@@ -819,9 +996,15 @@ async function main() {
     .command('build')
     .description('Build frontend only')
     .option('--stage <stage>', 'Deployment stage')
+    .option('--stage <stage>', 'Deployment stage')
     .action(async (options) => {
       try {
         await deployment.initializeAws();
+        
+        // Prompt for stage if not provided
+        const stage = options.stage || await promptForStage();
+        
+        await deployment.deployFrontend('build', stage);
         
         // Prompt for stage if not provided
         const stage = options.stage || await promptForStage();
@@ -837,9 +1020,15 @@ async function main() {
     .command('upload')
     .description('Upload frontend to S3')
     .option('--stage <stage>', 'Deployment stage')
+    .option('--stage <stage>', 'Deployment stage')
     .action(async (options) => {
       try {
         await deployment.initializeAws();
+        
+        // Prompt for stage if not provided
+        const stage = options.stage || await promptForStage();
+        
+        await deployment.deployFrontend('upload', stage);
         
         // Prompt for stage if not provided
         const stage = options.stage || await promptForStage();
@@ -855,9 +1044,15 @@ async function main() {
     .command('invalidate')
     .description('Invalidate CloudFront cache')
     .option('--stage <stage>', 'Deployment stage')
+    .option('--stage <stage>', 'Deployment stage')
     .action(async (options) => {
       try {
         await deployment.initializeAws();
+        
+        // Prompt for stage if not provided
+        const stage = options.stage || await promptForStage();
+        
+        await deployment.deployFrontend('invalidate', stage);
         
         // Prompt for stage if not provided
         const stage = options.stage || await promptForStage();
@@ -898,25 +1093,47 @@ async function promptForPackage(): Promise<string> {
 }
 
 async function promptForStage(): Promise<string> {
-  const { stage } = await inquirer.prompt([
+  // This will be our default value
+  const defaultStage = 'dev';
+  
+  let timeoutId: NodeJS.Timeout;
+  let isTimedOut = false;
+  
+  // Create a promise that resolves after the timeout
+  const timeoutPromise = new Promise<string>((resolve) => {
+    timeoutId = setTimeout(() => {
+      isTimedOut = true;
+      // Clear current line and move cursor up to remove the inquirer prompt
+      process.stdout.write('\r\x1B[K\x1B[1A\x1B[K');
+      logger.info(`\nNo input received after 10 seconds, using default: ${defaultStage}`);
+      resolve(defaultStage);
+    }, 10000); // 10 seconds
+  });
+  
+  // Create the inquirer prompt promise
+  const promptPromise = inquirer.prompt([
     {
-      type: 'input',
+      type: 'list',
       name: 'stage',
-      message: 'Enter deployment stage:',
-      default: 'dev',
-      validate: (input: string) => {
-        if (!input.trim()) {
-          return 'Stage cannot be empty';
-        }
-        if (!/^[a-zA-Z0-9-_]+$/.test(input.trim())) {
-          return 'Stage can only contain letters, numbers, hyphens, and underscores';
-        }
-        return true;
-      }
+      message: 'Select deployment stage:',
+      choices: [
+        { name: 'Development (dev)', value: 'dev' }
+        // Add more environments when needed
+        // { name: 'Production (prod)', value: 'prod' }
+      ],
+      default: 'dev'
     }
-  ]);
-
-  return stage.trim();
+  ]).then(answers => {
+    if (!isTimedOut) {
+      clearTimeout(timeoutId);
+      return answers.stage;
+    }
+    return defaultStage;
+  });
+  
+  // Race the timeout against the prompt
+  const stage = await Promise.race([timeoutPromise, promptPromise]);
+  return stage;
 }
 
 async function promptForPackageToRemove(): Promise<string> {
