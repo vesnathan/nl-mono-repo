@@ -6,6 +6,9 @@ Parameters:
     Type: String
     Description: Deployment stage (e.g., dev, prod)
     AllowedPattern: ^[a-zA-Z0-9-]+$
+  TemplateBucketName:
+    Type: String
+    Description: S3 bucket containing compiled resolver code
 
 Resources:
   # AppSync GraphQL API
@@ -30,59 +33,11 @@ Resources:
       Definition: |
         schema {
           query: Query
-          mutation: Mutation
         }
 
         type Query {
           getCWLUser(userId: String!): CWLUser
             @aws_cognito_user_pools
-        }
-
-        type Mutation {
-          # ----- User/cognito
-          adminSetUserMFAPreference(
-            input: AdminSetUserMFAPreferenceInput!
-          ): StandardResult! @aws_cognito_user_pools
-          
-          associateSoftwareToken(accessToken: String!): associateSoftwareTokenResult!
-            @aws_cognito_user_pools
-          
-          verifySoftwareToken(
-            input: VerifySoftwareTokenInput!
-          ): StandardResult! @aws_cognito_user_pools
-
-          # ----- Client
-          saveSuperAdminClient(input: CWLUserInput!): StandardResult! @aws_cognito_user_pools
-          saveEventCompanyAdminClient(input: CWLUserInput!): StandardResult! @aws_cognito_user_pools
-        }
-
-        type StandardResult {
-          statusCode: String!
-          body: String!
-        }
-
-        input AdminSetUserMFAPreferenceInput {
-          userId: String!
-          userEmail: String!
-        }
-
-        type AdminSetUserMFAPreferenceResult {
-          userId: String!
-        }
-
-        type associateSoftwareTokenResult {
-          secretCode: String!
-        }
-
-        type VerifySoftwareTokenResult {
-          success: Boolean!
-          message: String!
-        }
-
-        input VerifySoftwareTokenInput {
-          AccessToken: String!
-          FriendlyDeviceName: String!
-          UserCode: String!
         }
 
         enum ClientType {
@@ -163,6 +118,23 @@ Resources:
                   - dynamodb:Scan
                 Resource:
                   - Fn::ImportValue: !Sub "cwlUserTableArn-${Stage}"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:DescribeKey
+                Resource:
+                  - Fn::ImportValue: !Sub "nlmonorepo-shared-${Stage}-kms-key-arn"
+        - PolicyName: !Sub "cwl-appsync-s3-access-policy-${Stage}"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::${TemplateBucketName}"
+                  - !Sub "arn:aws:s3:::${TemplateBucketName}/*"
 
   # Resolver for getCWLUser query
   GetCWLUserResolver:
@@ -175,19 +147,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      Code: |
-        import { util } from '@aws-appsync/utils';
-
-        export function request(ctx) {
-          return {
-            operation: 'GetItem',
-            key: util.dynamodb.toMapValues({ userId: ctx.arguments.userId }),
-          };
-        }
-
-        export function response(ctx) {
-          return ctx.result;
-        }
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Queries/Query.getCWLUser.js"
 
 Outputs:
   CWLAppSyncApiUrl:
@@ -207,5 +167,3 @@ Outputs:
     Value: !GetAtt CWLAppSyncApi.RealtimeUrl
     Export:
       Name: !Sub "CWLAppSyncRealtimeUrl-${Stage}"
-
-

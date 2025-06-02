@@ -23,7 +23,6 @@ const getCWLUserQueryStr = `
         userCreated
         organizationId
         userRole
-        clientType
       }
     }
 `;

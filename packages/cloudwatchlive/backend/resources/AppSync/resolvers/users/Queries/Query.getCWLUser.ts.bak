@@ -28,9 +28,6 @@ export function request(ctx: CTX) {
     );
   }
 
-  console.log(`Getting user data for userId: ${userId}`);
-  console.log(`Identity username: ${identity.username}`);
-  
   // For JavaScript resolvers, we return the arguments to be processed in the response function
   return {
     operation: "GetItem",
@@ -39,10 +36,7 @@ export function request(ctx: CTX) {
 }
 
 export function response(ctx: CTX): Output {
-  console.log("Response result:", JSON.stringify(ctx.result));
-  
   if (ctx.error) {
-    console.error("Error in resolver:", ctx.error);
     util.error(ctx.error.message, ctx.error.type);
   }
   
@@ -68,8 +62,6 @@ export function response(ctx: CTX): Output {
 
   // Map Cognito groups to ClientType
   const cognitoGroups = identity.groups || [];
-  console.log(`Cognito groups for user ${userId}:`, JSON.stringify(cognitoGroups));
-  
   const clientType: ClientType[] = [];
 
   // Map Cognito group names to ClientType enum values
@@ -96,19 +88,14 @@ export function response(ctx: CTX): Output {
       case 'UnregisteredAttendee':
         clientType.push(ClientType.UnregisteredAttendee);
         break;
-      default:
-        console.log(`Unknown group: ${group}, not mapping to any ClientType`);
     }
   }
 
   // If no client types were mapped from groups, use a default type to prevent GraphQL error
   // Since the schema requires at least one value in the clientType array
   if (clientType.length === 0) {
-    console.log(`No groups mapped to ClientType, adding default UnregisteredAttendee`);
     clientType.push(ClientType.UnregisteredAttendee); // Default to UnregisteredAttendee if no groups found
   }
-
-  console.log(`Final clientType array:`, JSON.stringify(clientType));
 
   // Ensure all required non-nullable fields have values
   const userRole = user.userRole || "User";
@@ -138,3 +125,4 @@ export function response(ctx: CTX): Output {
     clientType: clientType,
   } as CWLUser;
 }
+
