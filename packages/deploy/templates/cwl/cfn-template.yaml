@@ -25,6 +25,8 @@ Parameters:
 Resources:
   # DynamoDb Tables
   DynamoDbStack:
+  # DynamoDb Tables
+  DynamoDbStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/DynamoDb/dynamodb.yaml
@@ -59,6 +61,7 @@ Resources:
   AppSyncStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [DynamoDbStack, CloudFrontStack]
+    DependsOn: [DynamoDbStack, CloudFrontStack]
     Properties:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appSync.yaml
       Parameters:
@@ -68,6 +71,7 @@ Resources:
   # Lambda Functions
   LambdaStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: [DynamoDbStack, AppSyncStack, CloudFrontStack]
     DependsOn: [DynamoDbStack, AppSyncStack, CloudFrontStack]
     Properties:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml
@@ -81,11 +85,13 @@ Outputs:
   ApiUrl:
     Description: AppSync API URL
     Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiUrl
+    Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiUrl
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-api-url
 
   ApiId:
     Description: AppSync API ID
+    Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiId
     Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiId
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-api-id
@@ -103,6 +109,7 @@ Outputs:
       Name: !Sub nlmonorepo-cwl-${Stage}-cloudfront-id
 
   WebsiteBucket:
+    Description: S3 bucket for frontend website assets
     Description: S3 bucket for frontend website assets
     Value: !GetAtt S3Stack.Outputs.CWLBucketName
     Export:
