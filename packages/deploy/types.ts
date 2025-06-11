@@ -14,6 +14,7 @@ export interface DeploymentOptions {
   packageName?: string; // For single package deployment
   adminEmail?: string; // Admin user email for user creation
   skipUserCreation?: boolean; // Skip user creation step
+  region?: string; // AWS region
 }
 
 export interface FrontendDeploymentOptions {

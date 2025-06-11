@@ -86,12 +86,14 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
   const templateBucketName = getTemplateBucketName('cwl', options.stage);
   logger.info('Starting CloudWatch Live deployment...');
 
+  const region = options.region || process.env.AWS_REGION || 'ap-southeast-2';
+
   // Initialize clients
-  const cfn = new CloudFormation({ region: process.env.AWS_REGION });
-  const s3 = new S3({ region: process.env.AWS_REGION });
+  const cfn = new CloudFormation({ region });
+  const s3 = new S3({ region });
   
   // Set up IAM role
-  const iamManager = new IamManager();
+  const iamManager = new IamManager(region); // Pass region string to IamManager
   const roleArn = await iamManager.setupRole('cwl', options.stage);
   if (!roleArn) {
     throw new Error('Failed to setup role for CloudWatch Live');
@@ -99,7 +101,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
 
   try {
     // Create S3 bucket for templates if it doesn't exist
-    const s3BucketManager = new S3BucketManager(process.env.AWS_REGION || 'ap-southeast-2');
+    const s3BucketManager = new S3BucketManager(region);
     
     // Make multiple attempts to ensure the bucket exists
     let bucketExists = false;
@@ -235,25 +237,32 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       throw new Error(`Template bucket ${templateBucketName} not accessible before resolver compilation`);
     }
     
-    const resolverCompiler = new ResolverCompiler(process.env.AWS_REGION || 'ap-southeast-2');
-    // Use the actual source directory where gqlTypes.ts is generated, not the templates directory
     const resolverDir = path.join(__dirname, '../../../cloudwatchlive/backend/resources/AppSync/resolvers');
     
     if (fs.existsSync(resolverDir)) {
-      // Before compilation, ensure the resolvers directory exists and has content
-      const resolverFiles = findTypeScriptFiles(resolverDir);
+      const resolverFiles = findTypeScriptFiles(resolverDir).map(filePath => path.relative(resolverDir, filePath));
       logger.info(`Found ${resolverFiles.length} TypeScript resolver files in ${resolverDir}`);
       
       if (resolverFiles.length === 0) {
         logger.warning(`No TypeScript resolver files found in ${resolverDir}. This could cause deployment issues.`);
       } else {
+        const resolverCompiler = new ResolverCompiler({
+          logger: logger,
+          baseResolverDir: resolverDir,
+          s3KeyPrefix: 'resolvers', // Or a more dynamic prefix if needed
+          stage: options.stage,
+          localSavePathBase: path.join(process.cwd(), 'packages/deploy/cwl'), // Example local save path
+          localSaveEnabled: true, // <--- ENABLE LOCAL SAVING
+          s3BucketName: templateBucketName,
+          region: region,
+          resolverFiles: resolverFiles,
+          sharedFileName: 'gqlTypes.ts', // Specify the shared file name
+          sharedFileS3Key: 'gqlTypes.js' // Corrected: S3 key for shared file (prefix and stage are added by compiler)
+        });
+
         try {
           // Compile and upload resolvers
-          await resolverCompiler.compileAndUploadResolvers(
-            resolverDir,
-            templateBucketName,
-            options.stage
-          );
+          await resolverCompiler.compileAndUploadResolvers();
           
           // Verify that the resolvers were uploaded successfully
           logger.info('Verifying resolver uploads...');
@@ -343,7 +352,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     }
 
     // Get WAF Web ACL ID and ARN from us-east-1 region
-    const wafCfn = new CloudFormation({ region: 'us-east-1' });
+    const wafCfn = new CloudFormation({ region: 'us-east-1' }); // WAF is always us-east-1
     const wafStack = await wafCfn.describeStacks({
       StackName: getStackName('waf', options.stage)
     });
@@ -361,7 +370,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     }
 
     // Create or update the main stack
-    const awsUtils = new AwsUtils(process.env.AWS_REGION || 'ap-southeast-2');
+    const awsUtils = new AwsUtils(region); // Pass region to AwsUtils
     const templateBody = await awsUtils.getTemplateBody('cwl');
     
     // Final verification of S3 bucket and resolvers before launching CloudFormation
@@ -398,14 +407,14 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     // Add AppSync bucket policy to allow AppSync service to access resolvers
     logger.info('Adding S3 bucket policy to allow AppSync service to access resolvers...');
     try {
-      await addAppSyncBucketPolicy(templateBucketName, process.env.AWS_REGION || 'ap-southeast-2');
+      await addAppSyncBucketPolicy(templateBucketName, region); // Pass region to addAppSyncBucketPolicy
       logger.success('Successfully added S3 bucket policy for AppSync access');
       
       // Verify resolvers are accessible with the updated policy
       const resolversAccessible = await verifyResolversAccessible(
         templateBucketName, 
         options.stage, 
-        process.env.AWS_REGION || 'ap-southeast-2'
+        region // Pass region to verifyResolversAccessible
       );
       
       if (resolversAccessible) {
@@ -484,7 +493,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         logger.warning(`Stack is in failed state (${stackStatus}). Using force deletion to clean up...`);
         
         // Use ForceDeleteManager for robust cleanup
-        const forceDeleteManager = new ForceDeleteManager(process.env.AWS_REGION || 'ap-southeast-2');
+        const forceDeleteManager = new ForceDeleteManager(region); // Pass region to ForceDeleteManager
         await forceDeleteManager.forceDeleteStack('cwl', {
           stage: options.stage,
           maxWaitMinutes: 20
@@ -504,7 +513,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           logger.warning(`Stack rollback completed (${finalStatus}). Using force deletion to clean up...`);
           
           // Use ForceDeleteManager for robust cleanup
-          const forceDeleteManager = new ForceDeleteManager(process.env.AWS_REGION || 'ap-southeast-2');
+          const forceDeleteManager = new ForceDeleteManager(region); // Pass region to ForceDeleteManager
           await forceDeleteManager.forceDeleteStack('cwl', {
             stage: options.stage,
             maxWaitMinutes: 20
@@ -532,7 +541,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         logger.warning(`Stack ${stackName} already exists but in unexpected state. Using force deletion to clean up...`);
         
         // Use ForceDeleteManager for robust cleanup
-        const forceDeleteManager = new ForceDeleteManager(process.env.AWS_REGION || 'ap-southeast-2');
+        const forceDeleteManager = new ForceDeleteManager(region); // Pass region to ForceDeleteManager
         await forceDeleteManager.forceDeleteStack('cwl', {
           stage: options.stage,
           maxWaitMinutes: 20

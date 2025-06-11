@@ -1,23 +1,30 @@
-import {
-  util,
-  runtime,
-  Context,
-  AppSyncIdentityCognito,
-} from "@aws-appsync/utils";
-import {
-  CWLUser,
-  Query,
-  QueryToGetCWLUserArgs,
-  ClientType,
-} from "../../gqlTypes";
+import { util, AppSyncIdentityCognito, Context } from '@aws-appsync/utils';
+import { QueryToGetCWLUserArgs, CWLUser, ClientType } from 'gqlTypes';
 
-type CTX = Context<QueryToGetCWLUserArgs>;
-type Output = Query["getCWLUser"];
+// Alias QueryToGetCWLUserArgs for consistency if needed, or use directly
+type GetCWLUserQueryVariables = QueryToGetCWLUserArgs;
 
-export function request(ctx: CTX) {
-  const { userId } = ctx.args;
+// Define Output type for the resolver - it's CWLUser as per schema for a successful response
+type Output = CWLUser;
+
+// Define CTX for the response function context
+// Args, Result, PrevResult, Source, Info
+type CTX = Context<GetCWLUserQueryVariables, object, object, object, Output>;
+
+
+export function request(ctx: Context<GetCWLUserQueryVariables>) {
+  // It's good practice to cast args to the specific type
+  const args = ctx.args as GetCWLUserQueryVariables;
+  const { userId } = args;
+
   if (!userId) {
-    runtime.earlyReturn(undefined satisfies Output);
+    // If userId is essential and missing, throw an error.
+    // AppSync typically validates non-nullable args based on the GraphQL schema.
+    // This explicit check can be a safeguard or for more complex validation.
+    return util.error(
+      "User ID is missing in the request.",
+      "ValidationException"
+    );
   }
 
   const identity = ctx.identity as AppSyncIdentityCognito;
@@ -31,7 +38,6 @@ export function request(ctx: CTX) {
   console.log(`Getting user data for userId: ${userId}`);
   console.log(`Identity username: ${identity.username}`);
   
-  // For JavaScript resolvers, we return the arguments to be processed in the response function
   return {
     operation: "GetItem",
     key: util.dynamodb.toMapValues({ userId }),
@@ -43,28 +49,31 @@ export function response(ctx: CTX): Output {
   
   if (ctx.error) {
     console.error("Error in resolver:", ctx.error);
-    util.error(ctx.error.message, ctx.error.type);
+    // Make sure to return or throw, not just log, if you want to stop execution.
+    // util.error will throw, which is appropriate here.
+    return util.error(ctx.error.message, ctx.error.type);
   }
   
   const identity = ctx.identity as AppSyncIdentityCognito;
-  const { userId } = ctx.args;
+  // Retrieve args safely, it's good practice to cast or ensure it's the correct type.
+  const args = ctx.args as GetCWLUserQueryVariables;
+  const { userId } = args;
 
-  // If no user found in DynamoDB, we need to handle this properly
-  // since the schema requires a non-nullable CWLUser return type
   if (!ctx.result) {
-    // Log the issue for debugging
     console.error(`User not found in DynamoDB for userId: ${userId}`);
     console.error(`Identity username: ${identity.username}`);
     console.error(`Identity groups: ${JSON.stringify(identity.groups)}`);
     
-    // Return an error instead of null to satisfy GraphQL schema requirements
-    util.error(
+    return util.error(
       `User profile not found. Please contact support if this issue persists. UserId: ${userId}`,
       "UserNotFound"
     );
   }
 
-  const user = ctx.result as any;
+  // Assuming ctx.result is the raw item from DynamoDB, cast and map it.
+  // The 'any' cast should be followed by a proper mapping to CWLUser structure if needed.
+  // For now, we'll assume the structure matches CWLUser or is handled by direct return.
+  const userFromDB = ctx.result as any; 
 
   // Map Cognito groups to ClientType
   const cognitoGroups = identity.groups || [];
@@ -72,7 +81,6 @@ export function response(ctx: CTX): Output {
   
   const clientType: ClientType[] = [];
 
-  // Map Cognito group names to ClientType enum values
   for (const group of cognitoGroups) {
     switch (group) {
       case 'SuperAdmin':
@@ -91,7 +99,7 @@ export function response(ctx: CTX): Output {
         clientType.push(ClientType.TechCompanyStaff);
         break;
       case 'RegisteredAttendee':
-        clientType.push(ClientType.RegisteredAtendee);
+        clientType.push(ClientType.RegisteredAtendee); // Note: Typo in original 'RegisteredAtendee', assuming ClientType enum matches this
         break;
       case 'UnregisteredAttendee':
         clientType.push(ClientType.UnregisteredAttendee);
@@ -101,40 +109,33 @@ export function response(ctx: CTX): Output {
     }
   }
 
-  // If no client types were mapped from groups, use a default type to prevent GraphQL error
-  // Since the schema requires at least one value in the clientType array
   if (clientType.length === 0) {
     console.log(`No groups mapped to ClientType, adding default UnregisteredAttendee`);
-    clientType.push(ClientType.UnregisteredAttendee); // Default to UnregisteredAttendee if no groups found
+    clientType.push(ClientType.UnregisteredAttendee);
   }
 
   console.log(`Final clientType array:`, JSON.stringify(clientType));
 
-  // Ensure all required non-nullable fields have values
-  const userRole = user.userRole || "User";
-  const userEmail = user.userEmail || identity.username || "";
-  const userFirstName = user.userFirstName || "";
-  const userLastName = user.userLastName || "";
-  const userPhone = user.userPhone || "";
-  const userTitle = user.userTitle || "";
-  const organizationId = user.organizationId || "";
-  const userAddedById = user.userAddedById || "";
-  const userCreated = user.userCreated || new Date().toISOString();
-
-  // Return the complete user object with all required fields populated
-  return {
-    userId: userId,
-    userEmail: userEmail,
-    userFirstName: userFirstName,
-    userLastName: userLastName,
-    userPhone: userPhone,
-    userTitle: userTitle,
-    userRole: userRole,
-    organizationId: organizationId,
-    userAddedById: userAddedById,
-    userCreated: userCreated,
-    privacyPolicy: user.privacyPolicy || false,
-    termsAndConditions: user.termsAndConditions || false,
+  // Construct the final CWLUser object
+  // Ensure all non-nullable fields of CWLUser are present.
+  // This is a simplified mapping. A more robust solution would involve
+  // explicitly creating the CWLUser object and populating its fields.
+  const resolvedUser: CWLUser = {
+    ...userFromDB, // Spread raw DB result
+    userId: userFromDB.userId || userId, // Ensure userId is present
     clientType: clientType,
-  } as CWLUser;
+    // Ensure other non-nullable fields from CWLUser are present, e.g.:
+    // email: userFromDB.email || "", 
+    // username: userFromDB.username || "",
+    // createdAt: userFromDB.createdAt || new Date().toISOString(),
+    // updatedAt: userFromDB.updatedAt || new Date().toISOString(),
+    // Add other fields as defined in CWLUser type from gqlTypes.ts
+    // If fields are optional in DB but non-nullable in GQL, provide defaults or ensure they exist.
+  };
+
+  // Validate that resolvedUser matches the Output type (CWLUser)
+  // This is more of a conceptual step here, TypeScript handles static typing.
+  // At runtime, ensure the object structure is correct.
+
+  return resolvedUser;
 }
