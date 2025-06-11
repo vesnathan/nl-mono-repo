@@ -42,15 +42,16 @@ async function retryOperation<T>(operation: () => Promise<T>, maxRetries = MAX_R
 export async function deployShared(options: DeploymentOptions): Promise<void> {
   const stackName = getStackName('shared', options.stage);
   const templateBucketName = getTemplateBucketName('shared', options.stage);
+  const region = options.region || process.env.AWS_REGION || 'ap-southeast-2'; // Ensure region is available
   logger.info('Starting Shared Resources deployment...');
 
   // Initialize clients
-  const cfn = new CloudFormation({ region: process.env.AWS_REGION });
-  const s3 = new S3({ region: process.env.AWS_REGION });
-  const iam = new IAM({ region: process.env.AWS_REGION });
+  const cfn = new CloudFormation({ region });
+  const s3 = new S3({ region });
+  const iam = new IAM({ region });
   
   // Set up IAM role
-  const iamManager = new IamManager();
+  const iamManager = new IamManager(region); // Pass region to IamManager
   const roleArn = await iamManager.setupRole('shared', options.stage);
   if (!roleArn) {
     throw new Error('Failed to setup role for shared resources');
@@ -59,14 +60,14 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
   try {
     // Create S3 bucket for templates if it doesn't exist
     try {
-      logger.info(`Checking if templates bucket exists: ${templateBucketName} in region ${process.env.AWS_REGION}`);
+      logger.info(`Checking if templates bucket exists: ${templateBucketName} in region ${region}`);
       await s3.headBucket({ Bucket: templateBucketName });
       logger.info(`Templates bucket ${templateBucketName} exists`);
     } catch (error: any) {
-      logger.info(`Creating templates bucket: ${templateBucketName} in region ${process.env.AWS_REGION}`);
+      logger.info(`Creating templates bucket: ${templateBucketName} in region ${region}`);
       logger.info(`Error details: ${error.message}`);
       
-      if (process.env.AWS_REGION === 'us-east-1') {
+      if (region === 'us-east-1') {
         // us-east-1 doesn't need LocationConstraint
         await s3.createBucket({
           Bucket: templateBucketName
@@ -75,7 +76,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
         await s3.createBucket({
           Bucket: templateBucketName,
           CreateBucketConfiguration: {
-            LocationConstraint: (process.env.AWS_REGION || 'ap-southeast-2') as 'ap-southeast-2'
+            LocationConstraint: region as any // Cast to any to satisfy BucketLocationConstraint
           }
         });
       }
@@ -210,7 +211,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
     }
 
     // Create or update the main stack
-    const awsUtils = new AwsUtils(process.env.AWS_REGION || 'ap-southeast-2');
+    const awsUtils = new AwsUtils(region); // Pass region to AwsUtils
     const templateBody = await awsUtils.getTemplateBody('shared');
     
     const stackParams = {
