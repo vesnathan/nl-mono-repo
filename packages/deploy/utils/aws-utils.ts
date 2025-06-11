@@ -116,10 +116,16 @@ export class AwsUtils {
 
   async createTemplatesBucket(bucketName: string, region: string, stackType: StackType): Promise<void> {
     try {
-      logger.info(`Setting up templates bucket: ${bucketName} in region ${region}`);
+      // Ensure region is defined, default to this.region if not explicitly passed for non-WAF stacks
+      const effectiveRegion = stackType === 'waf' ? region : (region || this.region);
+      if (!effectiveRegion) {
+        throw new Error("Region must be defined to create a templates bucket.");
+      }
+
+      logger.info(`Setting up templates bucket: ${bucketName} in region ${effectiveRegion}`);
       
       // Use the correct regional S3 client
-      const regionalS3Client = this.getRegionalS3Client(region);
+      const regionalS3Client = this.getRegionalS3Client(effectiveRegion);
       
       // Check if bucket exists using the regional client
       const bucketExists = await this.bucketExistsWithClient(bucketName, regionalS3Client);
@@ -127,12 +133,12 @@ export class AwsUtils {
       if (!bucketExists) {
         logger.info(`Creating templates bucket: ${bucketName}`);
         
-        const createBucketParams: CreateBucketCommandInput = region === 'us-east-1'
+        const createBucketParams: CreateBucketCommandInput = effectiveRegion === 'us-east-1'
           ? { Bucket: bucketName }
           : {
               Bucket: bucketName,
               CreateBucketConfiguration: {
-                LocationConstraint: region as BucketLocationConstraint
+                LocationConstraint: effectiveRegion as BucketLocationConstraint
               }
             };
 

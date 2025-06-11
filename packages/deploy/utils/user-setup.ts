@@ -49,6 +49,7 @@ export class UserSetupManager {
     const { stage, adminEmail } = options;
     
     logger.info(`Setting up admin user for stage: ${stage}`);
+    logger.info(`Admin email received in createAdminUser: '${adminEmail}'`); // Added log
 
     // Get user pool ID
     const userPoolId = await this.getCognitoUserPoolId(stage);
@@ -63,6 +64,7 @@ export class UserSetupManager {
 
     // Get admin email if not provided
     const userEmail = adminEmail || await this.promptForEmail();
+    logger.info(`User email to be used for Cognito/DDB: '${userEmail}'`); // Added log
 
     // Create or get existing user
     const cognitoUserId = await this.createOrGetCognitoUser(userPoolId, userEmail);
@@ -151,11 +153,23 @@ export class UserSetupManager {
   }
 
   private async promptForEmail(): Promise<string> {
-    // For now, return a default email - in a real implementation, you could use inquirer
-    const defaultEmail = 'admin@example.com';
-    logger.info(`Using default admin email: ${defaultEmail}`);
-    logger.warning('To specify a custom email, use the ADMIN_EMAIL environment variable');
-    return defaultEmail;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation
+    const adminEmailEnv = process.env.ADMIN_EMAIL;
+
+    if (adminEmailEnv && emailRegex.test(adminEmailEnv)) {
+      logger.info(`Using admin email from ADMIN_EMAIL environment variable: ${adminEmailEnv}`);
+      return adminEmailEnv;
+    } else if (adminEmailEnv) {
+      logger.warning(`ADMIN_EMAIL environment variable ('${adminEmailEnv}') is set but contains an invalid email format.`);
+      // Fall through to error or a different default handling if necessary
+    }
+
+    // If not provided by DeploymentManager and not valid in ENV, this is an issue.
+    // For now, let's throw an error, as the primary prompt is in DeploymentManager.
+    // Alternatively, could return a hardcoded default, but that hides the problem.
+    const errorMessage = 'Admin email was not provided by the deployment script and is not available or valid in ADMIN_EMAIL environment variable.';
+    logger.error(errorMessage);
+    throw new Error(errorMessage);
   }
 
   private async createOrGetCognitoUser(userPoolId: string, userEmail: string): Promise<string> {
@@ -245,6 +259,7 @@ export class UserSetupManager {
 
   private async createUserInDynamoDb(tableName: string, cognitoUserId: string, userEmail: string): Promise<void> {
     try {
+      logger.info(`Attempting to create user in DynamoDB. Table: ${tableName}, cognitoUserId: ${cognitoUserId}, userEmail: '${userEmail}'`); // Added log
       // Check if user already exists in DynamoDb
       const getUserResponse = await this.dynamoClient.send(
         new GetItemCommand({
@@ -283,6 +298,7 @@ export class UserSetupManager {
       };
 
       logger.info(`Creating user entry in DynamoDb table ${tableName}...`);
+      logger.info(`User item for DDB: ${JSON.stringify(userItem, null, 2)}`); // Added log
       await this.dynamoClient.send(
         new PutItemCommand({
           TableName: tableName,
