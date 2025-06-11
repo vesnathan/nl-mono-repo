@@ -1,5 +1,11 @@
 {
   "extends": "../../../tsconfig.node.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "gqlTypes": ["resources/AppSync/resolvers/gqlTypes.ts"]
+    }
+  },
   "include": ["scripts", "resources", "handlers"],
   "exclude": ["node_modules"]
 }
