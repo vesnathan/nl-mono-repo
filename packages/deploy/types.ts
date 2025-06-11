@@ -24,6 +24,11 @@ export interface FrontendDeploymentOptions {
   skipInvalidation?: boolean;
 }
 
+export interface ForceDeleteOptions {
+  stage: string;
+  skipS3Cleanup?: boolean;
+}
+
 export type StackType = 'waf' | 'shared' | 'cwl';
 
 export interface AwsCredentials {
