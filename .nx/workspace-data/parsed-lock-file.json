@@ -639,18 +639,18 @@
         "hash": "sha512-0EWVnSc+JQn5HLnF5Xv405M8n4zfdx9gyGdpnCmAmFqEDHA8LmBdxJdpUk1Ovp/I5oPANhjojxabIW5f1uU0RA=="
       }
     },
-    "npm:@aws-sdk/credential-provider-ini": {
+    "npm:@aws-sdk/credential-provider-ini@3.669.0": {
       "type": "npm",
-      "name": "npm:@aws-sdk/credential-provider-ini",
+      "name": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "data": {
         "version": "3.669.0",
         "packageName": "@aws-sdk/credential-provider-ini",
         "hash": "sha512-YHhfH7w29BmMPnOK0BrBhEy2IRFRSRGSCyz3jtqpG883CZ2Lxan/AzaJDfKRdz350KPgbMMBwbPkIrqNIsg8iw=="
       }
     },
-    "npm:@aws-sdk/credential-provider-ini@3.806.0": {
+    "npm:@aws-sdk/credential-provider-ini": {
       "type": "npm",
-      "name": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "name": "npm:@aws-sdk/credential-provider-ini",
       "data": {
         "version": "3.806.0",
         "packageName": "@aws-sdk/credential-provider-ini",
@@ -684,18 +684,18 @@
         "hash": "sha512-4JqpccUgz5Snanpt2+53hbOBbJQrSFq7E1sAAbgY6BKVQUsW5qyXqnjvSF32kDeKa5JpBl3bBWLZl04IadcPHw=="
       }
     },
-    "npm:@aws-sdk/credential-provider-node": {
+    "npm:@aws-sdk/credential-provider-node@3.669.0": {
       "type": "npm",
-      "name": "npm:@aws-sdk/credential-provider-node",
+      "name": "npm:@aws-sdk/credential-provider-node@3.669.0",
       "data": {
         "version": "3.669.0",
         "packageName": "@aws-sdk/credential-provider-node",
         "hash": "sha512-O506azQcq6N1gnDX870MXXL9LHlhX0k6BlLMM6IDClxVDnlNkK3+n2cAEKSy8HwZJcRlekcsKz/AS2CxjPY+fg=="
       }
     },
-    "npm:@aws-sdk/credential-provider-node@3.806.0": {
+    "npm:@aws-sdk/credential-provider-node": {
       "type": "npm",
-      "name": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "name": "npm:@aws-sdk/credential-provider-node",
       "data": {
         "version": "3.806.0",
         "packageName": "@aws-sdk/credential-provider-node",
@@ -2095,6 +2095,213 @@
         "version": "1.0.2",
         "packageName": "@emnapi/wasi-threads",
         "hash": "sha512-5n3nTJblwRi8LlXkJ9eBzu+kZR8Yxcc7ubakyQTFzPMtIhFpUBRbsnc2Dv88IZDIbCDlBiWrknhB4Lsz7mg6BA=="
+      }
+    },
+    "npm:@esbuild/aix-ppc64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/aix-ppc64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/aix-ppc64",
+        "hash": "sha512-D+EBOJHXdNZcLJRBkhENNG8Wji2kgc9AZ9KiPr1JuZjsNtyHzrsfLRrY0tk2H2aoFu6RANO1y1iPPUCDYWkb5g=="
+      }
+    },
+    "npm:@esbuild/android-arm64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/android-arm64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/android-arm64",
+        "hash": "sha512-mRzjLacRtl/tWU0SvD8lUEwb61yP9cqQo6noDZP/O8VkwafSYwZ4yWy24kan8jE/IMERpYncRt2dw438LP3Xmg=="
+      }
+    },
+    "npm:@esbuild/android-arm@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/android-arm@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/android-arm",
+        "hash": "sha512-t98Ra6pw2VaDhqNWO2Oph2LXbz/EJcnLmKLGBJwEwXX/JAN83Fym1rU8l0JUWK6HkIbWONCSSatf4sf2NBRx/w=="
+      }
+    },
+    "npm:@esbuild/android-x64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/android-x64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/android-x64",
+        "hash": "sha512-btzExgV+/lMGDDa194CcUQm53ncxzeBrWJcncOBxuC6ndBkKxnHdFJn86mCIgTELsooUmwUm9FkhSp5HYu00Rg=="
+      }
+    },
+    "npm:@esbuild/darwin-arm64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/darwin-arm64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/darwin-arm64",
+        "hash": "sha512-4J6IRT+10J3aJH3l1yzEg9y3wkTDgDk7TSDFX+wKFiWjqWp/iCfLIYzGyasx9l0SAFPT1HwSCR+0w/h1ES/MjA=="
+      }
+    },
+    "npm:@esbuild/darwin-x64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/darwin-x64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/darwin-x64",
+        "hash": "sha512-tBcXp9KNphnNH0dfhv8KYkZhjc+H3XBkF5DKtswJblV7KlT9EI2+jeA8DgBjp908WEuYll6pF+UStUCfEpdysA=="
+      }
+    },
+    "npm:@esbuild/freebsd-arm64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/freebsd-arm64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/freebsd-arm64",
+        "hash": "sha512-d3qI41G4SuLiCGCFGUrKsSeTXyWG6yem1KcGZVS+3FYlYhtNoNgYrWcvkOoaqMhwXSMrZRl69ArHsGJ9mYdbbw=="
+      }
+    },
+    "npm:@esbuild/freebsd-x64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/freebsd-x64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/freebsd-x64",
+        "hash": "sha512-d+DipyvHRuqEeM5zDivKV1KuXn9WeRX6vqSqIDgwIfPQtwMP4jaDsQsDncjTDDsExT4lR/91OLjRo8bmC1e+Cw=="
+      }
+    },
+    "npm:@esbuild/linux-arm64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/linux-arm64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/linux-arm64",
+        "hash": "sha512-9pb6rBjGvTFNira2FLIWqDk/uaf42sSyLE8j1rnUpuzsODBq7FvpwHYZxQ/It/8b+QOS1RYfqgGFNLRI+qlq2A=="
+      }
+    },
+    "npm:@esbuild/linux-arm@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/linux-arm@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/linux-arm",
+        "hash": "sha512-VhLPeR8HTMPccbuWWcEUD1Az68TqaTYyj6nfE4QByZIQEQVWBB8vup8PpR7y1QHL3CpcF6xd5WVBU/+SBEvGTg=="
+      }
+    },
+    "npm:@esbuild/linux-ia32@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/linux-ia32@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/linux-ia32",
+        "hash": "sha512-o10utieEkNPFDZFQm9CoP7Tvb33UutoJqg3qKf1PWVeeJhJw0Q347PxMvBgVVFgouYLGIhFYG0UGdBumROyiig=="
+      }
+    },
+    "npm:@esbuild/linux-loong64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/linux-loong64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/linux-loong64",
+        "hash": "sha512-PR7sp6R/UC4CFVomVINKJ80pMFlfDfMQMYynX7t1tNTeivQ6XdX5r2XovMmha/VjR1YN/HgHWsVcTRIMkymrgQ=="
+      }
+    },
+    "npm:@esbuild/linux-mips64el@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/linux-mips64el@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/linux-mips64el",
+        "hash": "sha512-4BlTqeutE/KnOiTG5Y6Sb/Hw6hsBOZapOVF6njAESHInhlQAghVVZL1ZpIctBOoTFbQyGW+LsVYZ8lSSB3wkjA=="
+      }
+    },
+    "npm:@esbuild/linux-ppc64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/linux-ppc64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/linux-ppc64",
+        "hash": "sha512-rD3KsaDprDcfajSKdn25ooz5J5/fWBylaaXkuotBDGnMnDP1Uv5DLAN/45qfnf3JDYyJv/ytGHQaziHUdyzaAg=="
+      }
+    },
+    "npm:@esbuild/linux-riscv64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/linux-riscv64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/linux-riscv64",
+        "hash": "sha512-snwmBKacKmwTMmhLlz/3aH1Q9T8v45bKYGE3j26TsaOVtjIag4wLfWSiZykXzXuE1kbCE+zJRmwp+ZbIHinnVg=="
+      }
+    },
+    "npm:@esbuild/linux-s390x@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/linux-s390x@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/linux-s390x",
+        "hash": "sha512-wcWISOobRWNm3cezm5HOZcYz1sKoHLd8VL1dl309DiixxVFoFe/o8HnwuIwn6sXre88Nwj+VwZUvJf4AFxkyrQ=="
+      }
+    },
+    "npm:@esbuild/linux-x64": {
+      "type": "npm",
+      "name": "npm:@esbuild/linux-x64",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/linux-x64",
+        "hash": "sha512-1MdwI6OOTsfQfek8sLwgyjOXAu+wKhLEoaOLTjbijk6E2WONYpH9ZU2mNtR+lZ2B4uwr+usqGuVfFT9tMtGvGw=="
+      }
+    },
+    "npm:@esbuild/netbsd-x64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/netbsd-x64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/netbsd-x64",
+        "hash": "sha512-K8/DhBxcVQkzYc43yJXDSyjlFeHQJBiowJ0uVL6Tor3jGQfSGHNNJcWxNbOI8v5k82prYqzPuwkzHt3J1T1iZQ=="
+      }
+    },
+    "npm:@esbuild/openbsd-x64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/openbsd-x64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/openbsd-x64",
+        "hash": "sha512-eMpKlV0SThJmmJgiVyN9jTPJ2VBPquf6Kt/nAoo6DgHAoN57K15ZghiHaMvqjCye/uU4X5u3YSMgVBI1h3vKrQ=="
+      }
+    },
+    "npm:@esbuild/sunos-x64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/sunos-x64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/sunos-x64",
+        "hash": "sha512-2UyFtRC6cXLyejf/YEld4Hajo7UHILetzE1vsRcGL3earZEW77JxrFjH4Ez2qaTiEfMgAXxfAZCm1fvM/G/o8w=="
+      }
+    },
+    "npm:@esbuild/win32-arm64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/win32-arm64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/win32-arm64",
+        "hash": "sha512-GRibxoawM9ZCnDxnP3usoUDO9vUkpAxIIZ6GQI+IlVmr5kP3zUq+l17xELTHMWTWzjxa2guPNyrpq1GWmPvcGQ=="
+      }
+    },
+    "npm:@esbuild/win32-ia32@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/win32-ia32@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/win32-ia32",
+        "hash": "sha512-HfLOfn9YWmkSKRQqovpnITazdtquEW8/SoHW7pWpuEeguaZI4QnCRW6b+oZTztdBnZOS2hqJ6im/D5cPzBTTlQ=="
+      }
+    },
+    "npm:@esbuild/win32-x64@0.20.2": {
+      "type": "npm",
+      "name": "npm:@esbuild/win32-x64@0.20.2",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "@esbuild/win32-x64",
+        "hash": "sha512-N49X4lJX27+l9jbLKSqZ6bKNjzQvHaT8IIFUy+YIqmXQdjYCToGWwOItDrfby14c78aDd5NHQl29xingXfCdLQ=="
       }
     },
     "npm:@eslint-community/eslint-utils": {
@@ -6948,18 +7155,18 @@
         "hash": "sha512-lfU4b34HOri+kAY5UheuFMWPDOI+OPceBSHZKp69gEyTL/mmJ4cnU6Y/rlme3UL3GyOn6Y42hyIEw0/q8sWx5w=="
       }
     },
-    "npm:@types/minimatch@3.0.5": {
+    "npm:@types/minimatch": {
       "type": "npm",
-      "name": "npm:@types/minimatch@3.0.5",
+      "name": "npm:@types/minimatch",
       "data": {
         "version": "3.0.5",
         "packageName": "@types/minimatch",
         "hash": "sha512-Klz949h02Gz2uZCMGwDUSDS1YBlTdDDgbWHi+81l29tQALUtvz4rAYi5uoVhE5Lagoq6DeqAUlbrHvW/mXDgdQ=="
       }
     },
-    "npm:@types/minimatch": {
+    "npm:@types/minimatch@5.1.2": {
       "type": "npm",
-      "name": "npm:@types/minimatch",
+      "name": "npm:@types/minimatch@5.1.2",
       "data": {
         "version": "5.1.2",
         "packageName": "@types/minimatch",
@@ -7128,18 +7335,18 @@
         "hash": "sha512-WpxBCKWPLr4xSsHgz511rFJAM+wS28w2zEO1QDNY5zM/S8ok70NNfztH0xwhqKyaK0OHCbN98LDAZuy1ctxDkA=="
       }
     },
-    "npm:@typescript-eslint/eslint-plugin": {
+    "npm:@typescript-eslint/eslint-plugin@8.32.0": {
       "type": "npm",
-      "name": "npm:@typescript-eslint/eslint-plugin",
+      "name": "npm:@typescript-eslint/eslint-plugin@8.32.0",
       "data": {
         "version": "8.32.0",
         "packageName": "@typescript-eslint/eslint-plugin",
         "hash": "sha512-/jU9ettcntkBFmWUzzGgsClEi2ZFiikMX5eEQsmxIAWMOn4H3D4rvHssstmAHGVvrYnaMqdWWWg0b5M6IN/MTQ=="
       }
     },
-    "npm:@typescript-eslint/eslint-plugin@6.21.0": {
+    "npm:@typescript-eslint/eslint-plugin": {
       "type": "npm",
-      "name": "npm:@typescript-eslint/eslint-plugin@6.21.0",
+      "name": "npm:@typescript-eslint/eslint-plugin",
       "data": {
         "version": "6.21.0",
         "packageName": "@typescript-eslint/eslint-plugin",
@@ -7173,18 +7380,18 @@
         "hash": "sha512-jc/4IxGNedXkmG4mx4nJTILb6TMjL66D41vyeaPWvDUmeYQzF3lKtN15WsAeTr65ce4mPxwopPSo1yUUAWw0hQ=="
       }
     },
-    "npm:@typescript-eslint/type-utils@6.21.0": {
+    "npm:@typescript-eslint/type-utils": {
       "type": "npm",
-      "name": "npm:@typescript-eslint/type-utils@6.21.0",
+      "name": "npm:@typescript-eslint/type-utils",
       "data": {
         "version": "6.21.0",
         "packageName": "@typescript-eslint/type-utils",
         "hash": "sha512-rZQI7wHfao8qMX3Rd3xqeYSMCL3SoiSQLBATSiVKARdFGCYSRvmViieZjqc58jKgs8Y8i9YvVVhRbHSTA4VBag=="
       }
     },
-    "npm:@typescript-eslint/type-utils": {
+    "npm:@typescript-eslint/type-utils@8.32.0": {
       "type": "npm",
-      "name": "npm:@typescript-eslint/type-utils",
+      "name": "npm:@typescript-eslint/type-utils@8.32.0",
       "data": {
         "version": "8.32.0",
         "packageName": "@typescript-eslint/type-utils",
@@ -9846,6 +10053,15 @@
         "hash": "sha512-p5um32HOTO1kP+w7PRnB+5lQ43Z6muuMuIMffvDN8ZB4GcnjLBV6zGStpbASIMk4DCAvEaamhe2zhyCb/QXXsA=="
       }
     },
+    "npm:esbuild": {
+      "type": "npm",
+      "name": "npm:esbuild",
+      "data": {
+        "version": "0.20.2",
+        "packageName": "esbuild",
+        "hash": "sha512-WdOOppmUNU+IbZ0PaDiTst80zjnrOkyJNHoKupIcVyU8Lvla3Ugx94VzkQ32Ijqd7UhHJy75gNWDMUekcrSJ6g=="
+      }
+    },
     "npm:escalade": {
       "type": "npm",
       "name": "npm:escalade",
@@ -11844,18 +12060,18 @@
         "hash": "sha512-yvkRyxmFKEOQ4pNXCmJG5AEQNlXJS5LaONXo5/cLdTZdWvsZ1ioJEonLGAosKlMWE8lwUy/bJzMjcw8az73+Fg=="
       }
     },
-    "npm:is-plain-object@2.0.4": {
+    "npm:is-plain-object": {
       "type": "npm",
-      "name": "npm:is-plain-object@2.0.4",
+      "name": "npm:is-plain-object",
       "data": {
         "version": "2.0.4",
         "packageName": "is-plain-object",
         "hash": "sha512-h5PpgXkWitc38BBMYawTYMWJHFZJVnBquFE57xFpjB8pJFiF6gZ+bU+WyI/yqXiFR5mdLsgYNaPe8uao6Uv9Og=="
       }
     },
-    "npm:is-plain-object": {
+    "npm:is-plain-object@5.0.0": {
       "type": "npm",
-      "name": "npm:is-plain-object",
+      "name": "npm:is-plain-object@5.0.0",
       "data": {
         "version": "5.0.0",
         "packageName": "is-plain-object",
@@ -14040,18 +14256,18 @@
         "hash": "sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g=="
       }
     },
-    "npm:ora@5.3.0": {
+    "npm:ora": {
       "type": "npm",
-      "name": "npm:ora@5.3.0",
+      "name": "npm:ora",
       "data": {
         "version": "5.3.0",
         "packageName": "ora",
         "hash": "sha512-zAKMgGXUim0Jyd6CXK9lraBnD3H5yPGBPPOkC23a2BG6hsm4Zu6OQSjQuEtV0BHDf4aKHcUFvJiGRrFuW3MG8g=="
       }
     },
-    "npm:ora": {
+    "npm:ora@5.4.1": {
       "type": "npm",
-      "name": "npm:ora",
+      "name": "npm:ora@5.4.1",
       "data": {
         "version": "5.4.1",
         "packageName": "ora",
@@ -14895,18 +15111,18 @@
         "hash": "sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A=="
       }
     },
-    "npm:quick-lru@4.0.1": {
+    "npm:quick-lru": {
       "type": "npm",
-      "name": "npm:quick-lru@4.0.1",
+      "name": "npm:quick-lru",
       "data": {
         "version": "4.0.1",
         "packageName": "quick-lru",
         "hash": "sha512-ARhCpm70fzdcvNQfPoy49IaanKkTlRWF2JMzqhcJbhSFRZv7nPTvZJdcY7301IPmvW+/p0RgIWnQDLJxifsQ7g=="
       }
     },
-    "npm:quick-lru": {
+    "npm:quick-lru@5.1.1": {
       "type": "npm",
-      "name": "npm:quick-lru",
+      "name": "npm:quick-lru@5.1.1",
       "data": {
         "version": "5.1.1",
         "packageName": "quick-lru",
@@ -18017,7 +18233,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-api-gateway",
-      "target": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "target": "npm:@aws-sdk/credential-provider-node",
       "type": "static"
     },
     {
@@ -18432,7 +18648,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-cloudformation",
-      "target": "npm:@aws-sdk/credential-provider-node",
+      "target": "npm:@aws-sdk/credential-provider-node@3.669.0",
       "type": "static"
     },
     {
@@ -18847,7 +19063,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-cloudformation@3.806.0",
-      "target": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "target": "npm:@aws-sdk/credential-provider-node",
       "type": "static"
     },
     {
@@ -19067,7 +19283,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-cloudfront",
-      "target": "npm:@aws-sdk/credential-provider-node",
+      "target": "npm:@aws-sdk/credential-provider-node@3.669.0",
       "type": "static"
     },
     {
@@ -19497,7 +19713,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-cognito-identity-provider",
-      "target": "npm:@aws-sdk/credential-provider-node",
+      "target": "npm:@aws-sdk/credential-provider-node@3.669.0",
       "type": "static"
     },
     {
@@ -19692,7 +19908,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-cognito-identity-provider@3.806.0",
-      "target": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "target": "npm:@aws-sdk/credential-provider-node",
       "type": "static"
     },
     {
@@ -20092,7 +20308,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-dynamodb",
-      "target": "npm:@aws-sdk/credential-provider-node",
+      "target": "npm:@aws-sdk/credential-provider-node@3.669.0",
       "type": "static"
     },
     {
@@ -20517,7 +20733,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-eventbridge",
-      "target": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "target": "npm:@aws-sdk/credential-provider-node",
       "type": "static"
     },
     {
@@ -20922,7 +21138,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-iam",
-      "target": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "target": "npm:@aws-sdk/credential-provider-node",
       "type": "static"
     },
     {
@@ -21347,7 +21563,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-lambda",
-      "target": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "target": "npm:@aws-sdk/credential-provider-node",
       "type": "static"
     },
     {
@@ -21787,7 +22003,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-s3",
-      "target": "npm:@aws-sdk/credential-provider-node",
+      "target": "npm:@aws-sdk/credential-provider-node@3.669.0",
       "type": "static"
     },
     {
@@ -22347,7 +22563,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-s3@3.806.0",
-      "target": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "target": "npm:@aws-sdk/credential-provider-node",
       "type": "static"
     },
     {
@@ -22632,7 +22848,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-ses",
-      "target": "npm:@aws-sdk/credential-provider-node",
+      "target": "npm:@aws-sdk/credential-provider-node@3.669.0",
       "type": "static"
     },
     {
@@ -23027,7 +23243,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-sso-oidc",
-      "target": "npm:@aws-sdk/credential-provider-node",
+      "target": "npm:@aws-sdk/credential-provider-node@3.669.0",
       "type": "static"
     },
     {
@@ -24377,7 +24593,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-sts",
-      "target": "npm:@aws-sdk/credential-provider-node",
+      "target": "npm:@aws-sdk/credential-provider-node@3.669.0",
       "type": "static"
     },
     {
@@ -24572,7 +24788,7 @@
     },
     {
       "source": "npm:@aws-sdk/client-sts@3.806.0",
-      "target": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "target": "npm:@aws-sdk/credential-provider-node",
       "type": "static"
     },
     {
@@ -25436,127 +25652,127 @@
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini",
+      "source": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "target": "npm:@aws-sdk/core@3.667.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini",
+      "source": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "target": "npm:@aws-sdk/credential-provider-env@3.667.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini",
+      "source": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "target": "npm:@aws-sdk/credential-provider-http@3.667.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini",
+      "source": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "target": "npm:@aws-sdk/credential-provider-process@3.667.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini",
+      "source": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "target": "npm:@aws-sdk/credential-provider-sso@3.669.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini",
+      "source": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "target": "npm:@aws-sdk/credential-provider-web-identity@3.667.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini",
+      "source": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "target": "npm:@aws-sdk/types@3.667.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini",
+      "source": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "target": "npm:@smithy/credential-provider-imds",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini",
+      "source": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "target": "npm:@smithy/property-provider@3.1.11",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini",
+      "source": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "target": "npm:@smithy/shared-ini-file-loader",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini",
+      "source": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "target": "npm:@smithy/types",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini",
+      "source": "npm:@aws-sdk/credential-provider-ini@3.669.0",
       "target": "npm:tslib",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:@aws-sdk/core",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:@aws-sdk/credential-provider-env@3.806.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:@aws-sdk/credential-provider-http@3.806.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:@aws-sdk/credential-provider-process@3.806.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:@aws-sdk/credential-provider-sso@3.806.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:@aws-sdk/credential-provider-web-identity@3.806.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:@aws-sdk/nested-clients",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:@aws-sdk/types",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:@smithy/credential-provider-imds@4.0.4",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:@smithy/property-provider",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:@smithy/shared-ini-file-loader@4.0.2",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:@smithy/types@4.2.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-ini@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-ini",
       "target": "npm:tslib",
       "type": "static"
     },
@@ -25751,13 +25967,73 @@
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-node",
+      "source": "npm:@aws-sdk/credential-provider-node@3.669.0",
       "target": "npm:@aws-sdk/credential-provider-env@3.667.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-node",
+      "source": "npm:@aws-sdk/credential-provider-node@3.669.0",
       "target": "npm:@aws-sdk/credential-provider-http@3.667.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:@aws-sdk/credential-provider-node@3.669.0",
+      "target": "npm:@aws-sdk/credential-provider-ini@3.669.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:@aws-sdk/credential-provider-node@3.669.0",
+      "target": "npm:@aws-sdk/credential-provider-process@3.667.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:@aws-sdk/credential-provider-node@3.669.0",
+      "target": "npm:@aws-sdk/credential-provider-sso@3.669.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:@aws-sdk/credential-provider-node@3.669.0",
+      "target": "npm:@aws-sdk/credential-provider-web-identity@3.667.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:@aws-sdk/credential-provider-node@3.669.0",
+      "target": "npm:@aws-sdk/types@3.667.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:@aws-sdk/credential-provider-node@3.669.0",
+      "target": "npm:@smithy/credential-provider-imds",
+      "type": "static"
+    },
+    {
+      "source": "npm:@aws-sdk/credential-provider-node@3.669.0",
+      "target": "npm:@smithy/property-provider@3.1.11",
+      "type": "static"
+    },
+    {
+      "source": "npm:@aws-sdk/credential-provider-node@3.669.0",
+      "target": "npm:@smithy/shared-ini-file-loader",
+      "type": "static"
+    },
+    {
+      "source": "npm:@aws-sdk/credential-provider-node@3.669.0",
+      "target": "npm:@smithy/types",
+      "type": "static"
+    },
+    {
+      "source": "npm:@aws-sdk/credential-provider-node@3.669.0",
+      "target": "npm:tslib",
+      "type": "static"
+    },
+    {
+      "source": "npm:@aws-sdk/credential-provider-node",
+      "target": "npm:@aws-sdk/credential-provider-env@3.806.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:@aws-sdk/credential-provider-node",
+      "target": "npm:@aws-sdk/credential-provider-http@3.806.0",
       "type": "static"
     },
     {
@@ -25767,106 +26043,46 @@
     },
     {
       "source": "npm:@aws-sdk/credential-provider-node",
-      "target": "npm:@aws-sdk/credential-provider-process@3.667.0",
-      "type": "static"
-    },
-    {
-      "source": "npm:@aws-sdk/credential-provider-node",
-      "target": "npm:@aws-sdk/credential-provider-sso@3.669.0",
-      "type": "static"
-    },
-    {
-      "source": "npm:@aws-sdk/credential-provider-node",
-      "target": "npm:@aws-sdk/credential-provider-web-identity@3.667.0",
-      "type": "static"
-    },
-    {
-      "source": "npm:@aws-sdk/credential-provider-node",
-      "target": "npm:@aws-sdk/types@3.667.0",
-      "type": "static"
-    },
-    {
-      "source": "npm:@aws-sdk/credential-provider-node",
-      "target": "npm:@smithy/credential-provider-imds",
-      "type": "static"
-    },
-    {
-      "source": "npm:@aws-sdk/credential-provider-node",
-      "target": "npm:@smithy/property-provider@3.1.11",
-      "type": "static"
-    },
-    {
-      "source": "npm:@aws-sdk/credential-provider-node",
-      "target": "npm:@smithy/shared-ini-file-loader",
-      "type": "static"
-    },
-    {
-      "source": "npm:@aws-sdk/credential-provider-node",
-      "target": "npm:@smithy/types",
-      "type": "static"
-    },
-    {
-      "source": "npm:@aws-sdk/credential-provider-node",
-      "target": "npm:tslib",
-      "type": "static"
-    },
-    {
-      "source": "npm:@aws-sdk/credential-provider-node@3.806.0",
-      "target": "npm:@aws-sdk/credential-provider-env@3.806.0",
-      "type": "static"
-    },
-    {
-      "source": "npm:@aws-sdk/credential-provider-node@3.806.0",
-      "target": "npm:@aws-sdk/credential-provider-http@3.806.0",
-      "type": "static"
-    },
-    {
-      "source": "npm:@aws-sdk/credential-provider-node@3.806.0",
-      "target": "npm:@aws-sdk/credential-provider-ini@3.806.0",
-      "type": "static"
-    },
-    {
-      "source": "npm:@aws-sdk/credential-provider-node@3.806.0",
       "target": "npm:@aws-sdk/credential-provider-process@3.806.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-node",
       "target": "npm:@aws-sdk/credential-provider-sso@3.806.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-node",
       "target": "npm:@aws-sdk/credential-provider-web-identity@3.806.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-node",
       "target": "npm:@aws-sdk/types",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-node",
       "target": "npm:@smithy/credential-provider-imds@4.0.4",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-node",
       "target": "npm:@smithy/property-provider",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-node",
       "target": "npm:@smithy/shared-ini-file-loader@4.0.2",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-node",
       "target": "npm:@smithy/types@4.2.0",
       "type": "static"
     },
     {
-      "source": "npm:@aws-sdk/credential-provider-node@3.806.0",
+      "source": "npm:@aws-sdk/credential-provider-node",
       "target": "npm:tslib",
       "type": "static"
     },
@@ -43042,7 +43258,7 @@
     },
     {
       "source": "npm:@types/glob",
-      "target": "npm:@types/minimatch",
+      "target": "npm:@types/minimatch@5.1.2",
       "type": "static"
     },
     {
@@ -43166,13 +43382,58 @@
       "type": "static"
     },
     {
+      "source": "npm:@typescript-eslint/eslint-plugin@8.32.0",
+      "target": "npm:@eslint-community/regexpp",
+      "type": "static"
+    },
+    {
+      "source": "npm:@typescript-eslint/eslint-plugin@8.32.0",
+      "target": "npm:@typescript-eslint/scope-manager",
+      "type": "static"
+    },
+    {
+      "source": "npm:@typescript-eslint/eslint-plugin@8.32.0",
+      "target": "npm:@typescript-eslint/type-utils@8.32.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:@typescript-eslint/eslint-plugin@8.32.0",
+      "target": "npm:@typescript-eslint/utils@8.32.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:@typescript-eslint/eslint-plugin@8.32.0",
+      "target": "npm:@typescript-eslint/visitor-keys",
+      "type": "static"
+    },
+    {
+      "source": "npm:@typescript-eslint/eslint-plugin@8.32.0",
+      "target": "npm:graphemer",
+      "type": "static"
+    },
+    {
+      "source": "npm:@typescript-eslint/eslint-plugin@8.32.0",
+      "target": "npm:ignore",
+      "type": "static"
+    },
+    {
+      "source": "npm:@typescript-eslint/eslint-plugin@8.32.0",
+      "target": "npm:natural-compare",
+      "type": "static"
+    },
+    {
+      "source": "npm:@typescript-eslint/eslint-plugin@8.32.0",
+      "target": "npm:ts-api-utils@2.1.0",
+      "type": "static"
+    },
+    {
       "source": "npm:@typescript-eslint/eslint-plugin",
       "target": "npm:@eslint-community/regexpp",
       "type": "static"
     },
     {
       "source": "npm:@typescript-eslint/eslint-plugin",
-      "target": "npm:@typescript-eslint/scope-manager",
+      "target": "npm:@typescript-eslint/scope-manager@6.21.0",
       "type": "static"
     },
     {
@@ -43182,86 +43443,41 @@
     },
     {
       "source": "npm:@typescript-eslint/eslint-plugin",
-      "target": "npm:@typescript-eslint/utils@8.32.0",
-      "type": "static"
-    },
-    {
-      "source": "npm:@typescript-eslint/eslint-plugin",
-      "target": "npm:@typescript-eslint/visitor-keys",
-      "type": "static"
-    },
-    {
-      "source": "npm:@typescript-eslint/eslint-plugin",
-      "target": "npm:graphemer",
-      "type": "static"
-    },
-    {
-      "source": "npm:@typescript-eslint/eslint-plugin",
-      "target": "npm:ignore",
-      "type": "static"
-    },
-    {
-      "source": "npm:@typescript-eslint/eslint-plugin",
-      "target": "npm:natural-compare",
-      "type": "static"
-    },
-    {
-      "source": "npm:@typescript-eslint/eslint-plugin",
-      "target": "npm:ts-api-utils@2.1.0",
-      "type": "static"
-    },
-    {
-      "source": "npm:@typescript-eslint/eslint-plugin@6.21.0",
-      "target": "npm:@eslint-community/regexpp",
-      "type": "static"
-    },
-    {
-      "source": "npm:@typescript-eslint/eslint-plugin@6.21.0",
-      "target": "npm:@typescript-eslint/scope-manager@6.21.0",
-      "type": "static"
-    },
-    {
-      "source": "npm:@typescript-eslint/eslint-plugin@6.21.0",
-      "target": "npm:@typescript-eslint/type-utils@6.21.0",
-      "type": "static"
-    },
-    {
-      "source": "npm:@typescript-eslint/eslint-plugin@6.21.0",
       "target": "npm:@typescript-eslint/utils",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/eslint-plugin@6.21.0",
+      "source": "npm:@typescript-eslint/eslint-plugin",
       "target": "npm:@typescript-eslint/visitor-keys@6.21.0",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/eslint-plugin@6.21.0",
+      "source": "npm:@typescript-eslint/eslint-plugin",
       "target": "npm:debug",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/eslint-plugin@6.21.0",
+      "source": "npm:@typescript-eslint/eslint-plugin",
       "target": "npm:graphemer",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/eslint-plugin@6.21.0",
+      "source": "npm:@typescript-eslint/eslint-plugin",
       "target": "npm:ignore",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/eslint-plugin@6.21.0",
+      "source": "npm:@typescript-eslint/eslint-plugin",
       "target": "npm:natural-compare",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/eslint-plugin@6.21.0",
+      "source": "npm:@typescript-eslint/eslint-plugin",
       "target": "npm:semver",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/eslint-plugin@6.21.0",
+      "source": "npm:@typescript-eslint/eslint-plugin",
       "target": "npm:ts-api-utils",
       "type": "static"
     },
@@ -43311,42 +43527,42 @@
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/type-utils@6.21.0",
+      "source": "npm:@typescript-eslint/type-utils",
       "target": "npm:@typescript-eslint/typescript-estree@6.21.0",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/type-utils@6.21.0",
+      "source": "npm:@typescript-eslint/type-utils",
       "target": "npm:@typescript-eslint/utils",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/type-utils@6.21.0",
+      "source": "npm:@typescript-eslint/type-utils",
       "target": "npm:debug",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/type-utils@6.21.0",
+      "source": "npm:@typescript-eslint/type-utils",
       "target": "npm:ts-api-utils",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/type-utils",
+      "source": "npm:@typescript-eslint/type-utils@8.32.0",
       "target": "npm:@typescript-eslint/typescript-estree",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/type-utils",
+      "source": "npm:@typescript-eslint/type-utils@8.32.0",
       "target": "npm:@typescript-eslint/utils@8.32.0",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/type-utils",
+      "source": "npm:@typescript-eslint/type-utils@8.32.0",
       "target": "npm:debug",
       "type": "static"
     },
     {
-      "source": "npm:@typescript-eslint/type-utils",
+      "source": "npm:@typescript-eslint/type-utils@8.32.0",
       "target": "npm:ts-api-utils@2.1.0",
       "type": "static"
     },
@@ -44957,7 +45173,7 @@
     },
     {
       "source": "npm:camelcase-keys",
-      "target": "npm:quick-lru@4.0.1",
+      "target": "npm:quick-lru",
       "type": "static"
     },
     {
@@ -45327,7 +45543,7 @@
     },
     {
       "source": "npm:clone-deep",
-      "target": "npm:is-plain-object@2.0.4",
+      "target": "npm:is-plain-object",
       "type": "static"
     },
     {
@@ -48276,6 +48492,121 @@
       "type": "static"
     },
     {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/aix-ppc64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/android-arm@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/android-arm64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/android-x64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/darwin-arm64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/darwin-x64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/freebsd-arm64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/freebsd-x64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/linux-arm@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/linux-arm64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/linux-ia32@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/linux-loong64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/linux-mips64el@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/linux-ppc64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/linux-riscv64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/linux-s390x@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/linux-x64",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/netbsd-x64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/openbsd-x64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/sunos-x64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/win32-arm64@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/win32-ia32@0.20.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:esbuild",
+      "target": "npm:@esbuild/win32-x64@0.20.2",
+      "type": "static"
+    },
+    {
       "source": "npm:eslint-config-airbnb-base",
       "target": "npm:confusing-browser-globals",
       "type": "static"
@@ -48322,7 +48653,7 @@
     },
     {
       "source": "npm:eslint-config-next@15.0.2",
-      "target": "npm:@typescript-eslint/eslint-plugin",
+      "target": "npm:@typescript-eslint/eslint-plugin@8.32.0",
       "type": "static"
     },
     {
@@ -48372,7 +48703,7 @@
     },
     {
       "source": "npm:eslint-config-next",
-      "target": "npm:@typescript-eslint/eslint-plugin",
+      "target": "npm:@typescript-eslint/eslint-plugin@8.32.0",
       "type": "static"
     },
     {
@@ -51192,7 +51523,7 @@
     },
     {
       "source": "npm:http2-wrapper",
-      "target": "npm:quick-lru",
+      "target": "npm:quick-lru@5.1.1",
       "type": "static"
     },
     {
@@ -51372,7 +51703,7 @@
     },
     {
       "source": "npm:inquirer",
-      "target": "npm:ora",
+      "target": "npm:ora@5.4.1",
       "type": "static"
     },
     {
@@ -51447,7 +51778,7 @@
     },
     {
       "source": "npm:inquirer",
-      "target": "npm:ora",
+      "target": "npm:ora@5.4.1",
       "type": "static"
     },
     {
@@ -51766,7 +52097,7 @@
       "type": "static"
     },
     {
-      "source": "npm:is-plain-object@2.0.4",
+      "source": "npm:is-plain-object",
       "target": "npm:isobject",
       "type": "static"
     },
@@ -54617,7 +54948,7 @@
     },
     {
       "source": "npm:multimatch",
-      "target": "npm:@types/minimatch@3.0.5",
+      "target": "npm:@types/minimatch",
       "type": "static"
     },
     {
@@ -55372,7 +55703,7 @@
     },
     {
       "source": "npm:nx",
-      "target": "npm:ora@5.3.0",
+      "target": "npm:ora",
       "type": "static"
     },
     {
@@ -55796,87 +56127,87 @@
       "type": "static"
     },
     {
-      "source": "npm:ora@5.3.0",
+      "source": "npm:ora",
       "target": "npm:bl",
       "type": "static"
     },
     {
-      "source": "npm:ora@5.3.0",
+      "source": "npm:ora",
       "target": "npm:chalk",
       "type": "static"
     },
     {
-      "source": "npm:ora@5.3.0",
+      "source": "npm:ora",
       "target": "npm:cli-cursor",
       "type": "static"
     },
     {
-      "source": "npm:ora@5.3.0",
+      "source": "npm:ora",
       "target": "npm:cli-spinners",
       "type": "static"
     },
     {
-      "source": "npm:ora@5.3.0",
+      "source": "npm:ora",
       "target": "npm:is-interactive",
       "type": "static"
     },
     {
-      "source": "npm:ora@5.3.0",
+      "source": "npm:ora",
       "target": "npm:log-symbols",
       "type": "static"
     },
     {
-      "source": "npm:ora@5.3.0",
+      "source": "npm:ora",
       "target": "npm:strip-ansi",
       "type": "static"
     },
     {
-      "source": "npm:ora@5.3.0",
+      "source": "npm:ora",
       "target": "npm:wcwidth",
       "type": "static"
     },
     {
-      "source": "npm:ora",
+      "source": "npm:ora@5.4.1",
       "target": "npm:bl",
       "type": "static"
     },
     {
-      "source": "npm:ora",
+      "source": "npm:ora@5.4.1",
       "target": "npm:chalk",
       "type": "static"
     },
     {
-      "source": "npm:ora",
+      "source": "npm:ora@5.4.1",
       "target": "npm:cli-cursor",
       "type": "static"
     },
     {
-      "source": "npm:ora",
+      "source": "npm:ora@5.4.1",
       "target": "npm:cli-spinners",
       "type": "static"
     },
     {
-      "source": "npm:ora",
+      "source": "npm:ora@5.4.1",
       "target": "npm:is-interactive",
       "type": "static"
     },
     {
-      "source": "npm:ora",
+      "source": "npm:ora@5.4.1",
       "target": "npm:is-unicode-supported",
       "type": "static"
     },
     {
-      "source": "npm:ora",
+      "source": "npm:ora@5.4.1",
       "target": "npm:log-symbols",
       "type": "static"
     },
     {
-      "source": "npm:ora",
+      "source": "npm:ora@5.4.1",
       "target": "npm:strip-ansi",
       "type": "static"
     },
     {
-      "source": "npm:ora",
+      "source": "npm:ora@5.4.1",
       "target": "npm:wcwidth",
       "type": "static"
     },
@@ -57337,7 +57668,7 @@
     },
     {
       "source": "npm:sanitize-html",
-      "target": "npm:is-plain-object",
+      "target": "npm:is-plain-object@5.0.0",
       "type": "static"
     },
     {

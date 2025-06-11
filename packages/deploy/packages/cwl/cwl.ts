@@ -494,10 +494,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         
         // Use ForceDeleteManager for robust cleanup
         const forceDeleteManager = new ForceDeleteManager(region); // Pass region to ForceDeleteManager
-        await forceDeleteManager.forceDeleteStack('cwl', {
-          stage: options.stage,
-          maxWaitMinutes: 20
-        });
+        // Corrected call to forceDeleteStack:
+        await forceDeleteManager.forceDeleteStack('nlmonorepo-cwl', 'cwl', options.stage);
         
         // Create new stack
         logger.info(`Creating new stack: ${stackName}`);
@@ -514,10 +512,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           
           // Use ForceDeleteManager for robust cleanup
           const forceDeleteManager = new ForceDeleteManager(region); // Pass region to ForceDeleteManager
-          await forceDeleteManager.forceDeleteStack('cwl', {
-            stage: options.stage,
-            maxWaitMinutes: 20
-          });
+          // Corrected call to forceDeleteStack:
+          await forceDeleteManager.forceDeleteStack('nlmonorepo-cwl', 'cwl', options.stage);
           
           // Create new stack
           logger.info(`Creating new stack: ${stackName}`);
@@ -542,10 +538,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         
         // Use ForceDeleteManager for robust cleanup
         const forceDeleteManager = new ForceDeleteManager(region); // Pass region to ForceDeleteManager
-        await forceDeleteManager.forceDeleteStack('cwl', {
-          stage: options.stage,
-          maxWaitMinutes: 20
-        });
+        // Corrected call to forceDeleteStack:
+        await forceDeleteManager.forceDeleteStack('nlmonorepo-cwl', 'cwl', options.stage);
         
         // Create new stack after cleanup
         logger.info(`Creating new stack after cleanup: ${stackName}`);
