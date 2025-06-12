@@ -49,5 +49,9 @@ type Query {
 # enum ClientType {
 #   SuperAdmin
 #   EventCompanyAdmin
-#   # ... other roles
+#   EventCompanyStaff
+#   TechCompanyAdmin
+#   TechCompanyStaff
+#   RegisteredAttendee # Corrected typo
+#   UnregisteredAttendee
 # }

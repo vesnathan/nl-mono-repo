@@ -62,7 +62,7 @@ export function response(ctx) {
                 clientType.push(ClientType.TechCompanyStaff);
                 break;
             case 'RegisteredAttendee':
-                clientType.push(ClientType.RegisteredAtendee);
+                clientType.push(ClientType.RegisteredAttendee);
                 break;
             case 'UnregisteredAttendee':
                 clientType.push(ClientType.UnregisteredAttendee);

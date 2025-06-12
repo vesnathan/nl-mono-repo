@@ -3,7 +3,9 @@ projects:
     schemaPath: combined_schema.graphql
     includes:
       - src/graphql/**/*.ts
-      - src/graphql/**/*.tsx
+      - src/graphql/**/*.tsx # Restore this line
+      - src/graphql/**/mutations.ts # Restore this line
+      # - ../../shared/types/**/*.graphql # Keep this commented out
     excludes:
       - ./amplify/**
       - src/graphql/gqlTypes.ts

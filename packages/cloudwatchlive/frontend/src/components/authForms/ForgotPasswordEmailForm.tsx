@@ -2,7 +2,7 @@ import { LoginController } from "@/hooks/useLoginController";
 import { useEnterKeySubmit } from "@/hooks/useEnterKeySubmit";
 import { Divider } from "@nextui-org/react";
 import React from "react";
-import { REGEX } from "@/constants/layout/navigation/RegEx";
+import { REGEX } from "@shared/constants/RegEx";
 import { CWLButton } from "../common/CWLButton";
 import { CWLTextField } from "../common/CWLTextField";
 

@@ -25,6 +25,11 @@ export const Clients = () => {
   const user = useUserStore((state) => state.user);
   const isSuperAdminUser = user.clientType.includes(ClientType.SuperAdmin);
 
+  // useEffect(() => {
+  //   console.log('Is SuperAdmin User (useEffect):', isSuperAdminUser);
+  //   console.log('User clientType (useEffect):', user.clientType);
+  // }, [user.clientType, isSuperAdminUser]);
+
   // Define separate refs for each form
   const addUserFormRef = useRef<{
     submit: () => void;
