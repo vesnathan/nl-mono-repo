@@ -46,7 +46,7 @@ Resources:
           EventCompanyStaff
           TechCompanyAdmin
           TechCompanyStaff
-          RegisteredAtendee
+          RegisteredAttendee
           UnregisteredAttendee
         }
 

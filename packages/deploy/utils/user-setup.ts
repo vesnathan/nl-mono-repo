@@ -16,6 +16,7 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { CloudFormationClient, DescribeStacksCommand, ListExportsCommand } from '@aws-sdk/client-cloudformation';
 import { logger } from './logger';
+import { REGEX } from '../../shared/constants/RegEx'; // Corrected import
 
 export interface UserSetupOptions {
   stage: string;
@@ -153,10 +154,9 @@ export class UserSetupManager {
   }
 
   private async promptForEmail(): Promise<string> {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation
     const adminEmailEnv = process.env.ADMIN_EMAIL;
 
-    if (adminEmailEnv && emailRegex.test(adminEmailEnv)) {
+    if (adminEmailEnv && REGEX.EMAIL.test(adminEmailEnv)) { // Use REGEX.EMAIL
       logger.info(`Using admin email from ADMIN_EMAIL environment variable: ${adminEmailEnv}`);
       return adminEmailEnv;
     } else if (adminEmailEnv) {
