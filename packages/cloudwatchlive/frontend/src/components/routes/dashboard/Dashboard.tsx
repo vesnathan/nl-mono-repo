@@ -41,7 +41,7 @@ export const Dashboard = () => {
                 Create New User
               </ModalHeader>
               <ModalBody>
-                <CreateUserForm onClose={modalClose} />
+                <CreateUserForm onClose={modalClose} onSubmitSuccess={() => { console.log('Submit success!'); modalClose(); }} />
               </ModalBody>
             </>
           )}

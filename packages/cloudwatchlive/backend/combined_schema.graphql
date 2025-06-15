@@ -49,7 +49,11 @@ type Query {
 # enum ClientType {
 #   SuperAdmin
 #   EventCompanyAdmin
-#   # ... other roles
+#   EventCompanyStaff
+#   TechCompanyAdmin
+#   TechCompanyStaff
+#   RegisteredAttendee # Corrected typo
+#   UnregisteredAttendee
 # }
 
 schema {
@@ -106,7 +110,7 @@ enum ClientType {
   EventCompanyStaff
   TechCompanyAdmin
   TechCompanyStaff
-  RegisteredAtendee
+  RegisteredAttendee # Corrected typo
   UnregisteredAttendee
 }
 

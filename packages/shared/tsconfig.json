@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "baseUrl": "./", // Added to help resolve paths within the shared package
+    "paths": {
+      "@shared/*": ["./*"] // Example path mapping for shared utilities
+    }
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
