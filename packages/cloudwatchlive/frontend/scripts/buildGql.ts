@@ -15,7 +15,7 @@ const buildGql = async () => {
     // the output file is then used by amplify codegen defined in `.graphqlconfig.yml`
     OUTPUT_FILE_PATH: path.resolve("combined_schema.graphql"),
   });
-  const command = `npx amplify codegen types`;
+  const command = `npx amplify codegen types --schema combined_schema.graphql --debug`; // Explicitly pass schema
   await execCommandAsPromise(command);
 };
 

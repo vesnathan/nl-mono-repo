@@ -4,7 +4,7 @@ enum ClientType {
   EventCompanyStaff
   TechCompanyAdmin
   TechCompanyStaff
-  RegisteredAtendee
+  RegisteredAttendee # Corrected typo
   UnregisteredAttendee
 }
 

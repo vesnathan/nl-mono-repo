@@ -99,7 +99,7 @@ export function response(ctx: CTX): Output {
         clientType.push(ClientType.TechCompanyStaff);
         break;
       case 'RegisteredAttendee':
-        clientType.push(ClientType.RegisteredAtendee); // Note: Typo in original 'RegisteredAtendee', assuming ClientType enum matches this
+        clientType.push(ClientType.RegisteredAttendee); // Note: Typo in original 'RegisteredAtendee', assuming ClientType enum matches this
         break;
       case 'UnregisteredAttendee':
         clientType.push(ClientType.UnregisteredAttendee);

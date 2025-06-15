@@ -9,12 +9,14 @@ export interface StackConfig {
 }
 
 export interface DeploymentOptions {
-  autoDeleteFailedStacks?: boolean;
   stage: string;
-  packageName?: string; // For single package deployment
-  adminEmail?: string; // Admin user email for user creation
-  skipUserCreation?: boolean; // Skip user creation step
-  region?: string; // AWS region
+  region?: string;
+  autoDeleteFailedStacks?: boolean;
+  skipFrontendBuild?: boolean;
+  skipUserSetup?: boolean;
+  debugMode?: boolean; // Added for general debug logging
+  adminEmail?: string; // Added for CWL stack deployment
+  skipUserCreation?: boolean; // Added for CWL stack deployment (alternative to skipUserSetup)
 }
 
 export interface FrontendDeploymentOptions {
