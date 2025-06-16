@@ -37,6 +37,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <title>{metadata.title}</title>
         <meta name="description" content={metadata.description} />
+        <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+        <script>eruda.init();</script>
       </head>
       <body>
         <QueryClientProvider
