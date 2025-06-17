@@ -114,9 +114,9 @@ async function deployAll() {
     logger.success('CloudWatch Live resources deployed successfully');
 
     logger.success('All deployments completed successfully');
-  } catch (error: any) {
-    logger.error(`Deployment failed: ${error.message}`);
-    logger.error(`Error stack: ${error.stack}`);
+  } catch (error: unknown) {
+    logger.error(`Deployment failed: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(`Error stack: ${error instanceof Error ? error.stack : 'No stack available'}`);
     process.exit(1);
   }
 }

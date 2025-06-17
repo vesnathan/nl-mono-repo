@@ -27,7 +27,8 @@ import {
   UpdateStackCommand,
   DeleteStackCommand,
   DescribeStacksCommand,
-  StackStatus
+  StackStatus,
+  Parameter // Added import for Parameter
 } from '@aws-sdk/client-cloudformation';
 import { S3Client } from '@aws-sdk/client-s3';
 import { REGEX } from '../shared/constants/RegEx'; // Corrected import
@@ -69,8 +70,8 @@ class DeploymentManager {
       const credentials = await getAwsCredentials();
       this.awsUtils = new AwsUtils(this.region, credentials);
       logger.success('AWS credentials initialized');
-    } catch (error: any) {
-      logger.error(`Failed to initialize AWS credentials: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`Failed to initialize AWS credentials: ${(error as Error).message}`);
       throw error;
     }
   }
@@ -88,11 +89,13 @@ class DeploymentManager {
             logger.warning(`Stack ${stackName} is in a failed state (${stack.StackStatus}). Attempting to delete it.`);
             await this.removeStack(stackType, options);
         }
-    } catch (error: any) {
-        if (error.name === 'ValidationError' && error.message.includes('does not exist')) {
-            // Stack doesn't exist, nothing to clean up
+    } catch (error: unknown) {
+        // Type guard for error name and message (assuming error is an object with name and message properties)
+        if (typeof error === 'object' && error !== null && 'name' in error && 'message' in error && 
+            (error as {name: string}).name === 'ValidationError' && (error as {message: string}).message.includes('does not exist')) {
+            // Stack doesn\'t exist, nothing to clean up
         } else {
-            logger.error(`Error checking status of stack ${stackName} for cleanup: ${error.message}`);
+            logger.error(`Error checking status of stack ${stackName} for cleanup: ${(error as Error).message}`);
         }
     }
   }
@@ -139,8 +142,8 @@ class DeploymentManager {
       logger.success(`Successfully deployed ${stackType} stack in ${effectiveRegion}`);
       await this.postDeploymentTasks(stackType, deploymentOptionsWithRegion);
 
-    } catch (error: any) {
-      logger.error(`Failed to deploy ${stackType} stack: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`Failed to deploy ${stackType} stack: ${(error as Error).message}`);
       if (options.autoDeleteFailedStacks) {
         const stackName = getStackName(stackType, options.stage);
         await this.handleFailedStack(stackName, effectiveRegion);
@@ -176,8 +179,8 @@ class DeploymentManager {
       const effectiveRegion = region || (await this.cfClient.config.region()) as string;
       await this.awsUtils.getStackFailureDetails(stackName, effectiveRegion);
       logger.info(`Further cleanup or deletion for ${stackName} might be required.`);
-    } catch (error: any) {
-      logger.error(`Error while handling failed stack ${stackName}: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`Error while handling failed stack ${stackName}: ${(error as Error).message}`);
     }
   }
 
@@ -187,17 +190,19 @@ class DeploymentManager {
       const command = new DescribeStacksCommand({ StackName: stackName });
       await cfClient.send(command);
       return true;
-    } catch (error: any) {
-      if (error.name === 'ValidationError' && error.message.includes('does not exist')) {
+    } catch (error: unknown) {
+      // Type guard for error name and message (assuming error is an object with name and message properties)
+      if (typeof error === 'object' && error !== null && 'name' in error && 'message' in error && 
+          (error as {name: string}).name === 'ValidationError' && (error as {message: string}).message.includes('does not exist')) {
         return false;
       }
       // Corrected: logger.warn to logger.warning
-      logger.warning(`Error checking if stack ${stackName} exists: ${error.message}`);
+      logger.warning(`Error checking if stack ${stackName} exists: ${(error as Error).message}`);
       return false; // Assume not exists or inaccessible on other errors
     }
   }
 
-  public async createStack(stackName: string, templateBody: string, parameters: any[], client?: CloudFormationClient): Promise<void> {
+  public async createStack(stackName: string, templateBody: string, parameters: Parameter[], client?: CloudFormationClient): Promise<void> { // Changed Parameters[] to Parameter[]
     const cfClient = client || this.cfClient;
     const command = new CreateStackCommand({
       StackName: stackName,
@@ -209,7 +214,7 @@ class DeploymentManager {
     await cfClient.send(command);
   }
 
-  public async updateStack(stackName: string, templateBody: string, parameters: any[], client?: CloudFormationClient): Promise<void> {
+  public async updateStack(stackName: string, templateBody: string, parameters: Parameter[], client?: CloudFormationClient): Promise<void> { // Changed Parameters[] to Parameter[]
     const cfClient = client || this.cfClient;
     try {
       const command = new UpdateStackCommand({
@@ -219,8 +224,8 @@ class DeploymentManager {
         Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM']
       });
       await cfClient.send(command);
-    } catch (error: any) {
-      if (error.message?.includes('No updates are to be performed')) {
+    } catch (error: unknown) {
+      if ((error as Error).message?.includes('No updates are to be performed')) {
         logger.info(`Stack ${stackName} is already up to date`);
         return;
       }
@@ -248,26 +253,23 @@ class DeploymentManager {
         logger.info(`Stack ${stackName} status: ${status}`);
 
         if (this.isFinalStatus(status)) {
-          if (this.isSuccessStatus(status)) {
+          if (status.endsWith('_COMPLETE')) {
+            logger.success(`Stack ${stackName} operation completed with status: ${status}`);
             return;
-          } else {
-            // Corrected: awsUtils.getStackFailureDetails expects stackName and region string
-            const stackRegion = (await cfClient.config.region()) as string;
-            await this.awsUtils.getStackFailureDetails(stackName, stackRegion);
-            throw new Error(`Stack ${stackName} operation failed with status: ${status}. Reason: ${stack.StackStatusReason}`);
+          } else if (status.endsWith('_FAILED') || status.includes('ROLLBACK')) {
+            logger.error(`Stack ${stackName} operation failed with status: ${status}`);
+            await this.handleFailedStack(stackName, (await cfClient.config.region()) as string);
+            throw new Error(`Stack ${stackName} failed with status ${status}`);
           }
         }
-        await this.sleep(pollInterval);
-      } catch (error: any) {
-        // If stack does not exist, it might have been deleted by another process or failed very early
-        if (error.name === 'ValidationError' && error.message.includes('does not exist')) {
-             // Corrected: logger.warn to logger.warning
-             logger.warning(`Stack ${stackName} not found while waiting for completion. It might have been deleted or failed to create.`);
-             throw new Error(`Stack ${stackName} not found while waiting for completion.`);
+      } catch (error: unknown) {
+        logger.warning(`Error describing stack ${stackName} during wait: ${(error as Error).message}`);
+        // Consider specific error handling here, e.g., if stack is deleted during wait
+        if ((error as Error).message?.includes('does not exist')) {
+          throw new Error(`Stack ${stackName} was deleted during wait.`);
         }
-        logger.error(`Error checking stack ${stackName} status: ${error.message}`);
-        throw error;
       }
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
     }
     throw new Error(`Stack ${stackName} operation timeout after ${maxWaitTime / 1000 / 60} minutes`);
   }
@@ -325,8 +327,8 @@ class DeploymentManager {
           region: options.region || this.region // Use effective region
         });
         logger.success('Admin user setup completed');
-      } catch (error: any) {
-        logger.warning(`Admin user setup failed: ${error.message}`);
+      } catch (error: unknown) {
+        logger.warning(`Admin user setup failed: ${(error as Error).message}`);
       }
     }
   }
@@ -394,17 +396,17 @@ class DeploymentManager {
       if (stackActuallyExists) {
         const deleteCommand = new DeleteStackCommand({ StackName: stackName });
         await client.send(deleteCommand);
-        logger.info(`Stack ${stackName} removal initiated. Waiting for completion...`);
+        logger.success(`Successfully initiated deletion of ${stackType} stack: ${stackName}`);
         await this.waitForStackDeletion(stackName, client);
-        logger.success(`Stack ${stackName} removed successfully`);
+        logger.success(`Stack ${stackName} deleted successfully.`);
       } else {
          // Message about stack deletion already logged or handled by the new block above for bucket deletion
          logger.info(`Stack ${stackName} did not exist, so no CloudFormation stack deletion was performed.`);
       }
 
-    } catch (error: any) {
-      logger.error(`Failed to remove stack ${stackName}: ${error.message}`);
-      if (stackType === 'waf' && error.message?.includes('WAFV2 WebACL')) {
+    } catch (error: unknown) {
+      logger.error(`Failed to remove stack ${stackName}: ${(error as Error).message}`);
+      if (stackType === 'waf' && (error as Error).message?.includes('WAFV2 WebACL')) {
         logger.warning(`Hint: WAF ACLs might need to be disassociated from resources before the WAF stack can be deleted.`);
       }
       // Do not re-throw if the main goal is to continue with other stacks in removeAllStacks
@@ -424,39 +426,29 @@ class DeploymentManager {
         const response = await client.send(new DescribeStacksCommand({ StackName: stackName }));
         const stack = response.Stacks?.[0];
 
-        if (!stack) { 
-          logger.success(`Stack ${stackName} has been successfully deleted (no stack data returned).`);
+        if (!stack) {
+          logger.success(`Stack ${stackName} deleted successfully.`);
           return;
         }
 
         const status = stack.StackStatus as StackStatus;
         logger.info(`Stack ${stackName} status: ${status}`);
 
-        if (status === StackStatus.DELETE_COMPLETE) {
-          logger.success(`Stack ${stackName} has been successfully deleted.`);
-          return;
-        } else if (status === StackStatus.DELETE_FAILED) {
-          logger.error(`Stack ${stackName} deletion failed. Status: ${status}, Reason: ${stack.StackStatusReason}`);
-          // Corrected: Pass region string to getStackFailureDetails
-          const stackRegion = (await client.config.region()) as string;
-          await this.awsUtils.getStackFailureDetails(stackName, stackRegion);
-          throw new Error(`Stack ${stackName} deletion failed. Status: ${status}. Reason: ${stack.StackStatusReason}`);
+        if (status === StackStatus.DELETE_FAILED) {
+          logger.error(`Stack ${stackName} deletion failed.`);
+          throw new Error(`Stack ${stackName} deletion failed.`);
         }
-        
-        const terminalFailureStatuses: StackStatus[] = [StackStatus.ROLLBACK_COMPLETE, StackStatus.ROLLBACK_FAILED, StackStatus.UPDATE_ROLLBACK_FAILED];
-        if (terminalFailureStatuses.includes(status)) {
-            logger.error(`Stack ${stackName} is in a non-deletable terminal state: ${status}. Manual intervention may be required.`);
-            throw new Error(`Stack ${stackName} is in a non-deletable terminal state: ${status}`);
-        }
-        await this.sleep(pollInterval);
-      } catch (error: any) {
-        if (error.name === 'ValidationError' && error.message.includes('does not exist')) {
-          logger.success(`Stack ${stackName} has been successfully deleted (confirmed by describeStacks error).`);
+
+      } catch (error: unknown) {
+        // Type guard for error name and message (assuming error is an object with name and message properties)
+        if (typeof error === 'object' && error !== null && 'name' in error && 'message' in error && 
+            (error as {name: string}).name === 'ValidationError' && (error as {message: string}).message.includes('does not exist')) {
+          logger.success(`Stack ${stackName} deleted successfully.`);
           return;
         }
-        logger.error(`Error waiting for stack ${stackName} deletion: ${error.message}. Retrying...`);
-        await this.sleep(pollInterval); // Wait before retrying on other errors
+        logger.warning(`Error describing stack ${stackName} during deletion wait: ${(error as Error).message}`);
       }
+      await new Promise(resolve => setTimeout(resolve, pollInterval));
     }
     throw new Error(`Timeout waiting for stack ${stackName} to delete after ${maxWaitMinutes} minutes.`);
   }
@@ -467,8 +459,8 @@ class DeploymentManager {
     for (const stackType of stacksToRemove) {
         try {
             await this.removeStack(stackType, options);
-        } catch (error: any) {
-            logger.error(`Failed to remove stack ${stackType} during removeAll: ${error.message}. Continuing with others.`);
+        } catch (error: unknown) {
+            logger.error(`Failed to remove stack ${stackType} during removeAll: ${(error as Error).message}. Continuing with others.`);
         }
     }
     logger.success('Finished removing all stacks.');
@@ -516,8 +508,8 @@ async function main() {
         for (const stackType of stacksToDeploy) {
           try {
             await manager.deployStack(stackType, deploymentOptions);
-          } catch (error: any) {
-            logger.error(`Failed to deploy stack ${stackType} during 'all' deployment: ${error.message}. Continuing with others if possible, but this may indicate a larger issue.`);
+          } catch (error: unknown) {
+            logger.error(`Failed to deploy stack ${stackType} during 'all' deployment: ${(error as Error).message}. Continuing with others if possible, but this may indicate a larger issue.`);
             // Decide if you want to stop or continue on error for 'all'
           }
         }
@@ -528,7 +520,7 @@ async function main() {
     });
 
   program
-    .command('remove <stack>')
+    .command('remove') // Changed from 'remove <stack>'
     .description('Remove deployed stacks')
     .option('-s, --stage <stage>', 'Deployment stage')
     .option('--all', 'Remove all stacks for the specified stage')
@@ -688,8 +680,8 @@ async function main() {
         logger.info(`Force removing stack: ${fullStackName} (type: ${currentStackType}) for stage: ${stage} in region ${stackRegion}`);
         try {
           await fdmForStackRegion.forceDeleteStack(baseIdentifier, currentStackType, stage, forceDeleteOpts.skipS3Cleanup);
-        } catch (error: any) {
-          logger.error(`Failed to force remove stack ${fullStackName}: ${error.message}. Continuing if --all was specified.`);
+        } catch (error: unknown) {
+          logger.error(`Failed to force remove stack ${fullStackName}: ${(error as Error).message}. Continuing if --all was specified.`);
           if (!all) {
             // If not --all, rethrow to stop execution for a single failed stack
             throw error; 
@@ -764,11 +756,11 @@ async function main() {
       } else if (action === 'remove') {
           const { stack } = await inquirer.prompt([{ type: 'list', name: 'stack', message: 'Which stack to remove?', choices: ['all', 'waf', 'shared', 'cwl'] }]);
           if (stack === 'all') program.parse(['remove', '--all', '--stage', stage], { from: 'user' });
-          else program.parse(['remove', stack, '--stage', stage], { from: 'user' });
+          else program.parse(['remove', '--stack-type', stack, '--stage', stage], { from: 'user' }); // Changed to use --stack-type
       } else if (action === 'force-remove') {
           const { stack } = await inquirer.prompt([{ type: 'list', name: 'stack', message: 'Which stack to force-remove?', choices: ['all', 'waf', 'shared', 'cwl'] }]);
           if (stack === 'all') program.parse(['force-remove', '--all', '--stage', stage], { from: 'user' });
-          else program.parse(['force-remove', stack, '--stage', stage], { from: 'user' });
+          else program.parse(['force-remove', '--stack-type', stack, '--stage', stage], { from: 'user' }); // Changed to use --stack-type
       }
     });
 
