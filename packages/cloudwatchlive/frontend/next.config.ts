@@ -21,4 +21,8 @@ const nextConfig = {
   // needed to make the url works on cloudfront
   trailingSlash: true,
 };
+
+// Remove or comment out this debug log in production
+// console.log(`next.config.js: NODE_ENV is ${process.env.NODE_ENV}`);
+
 export default nextConfig;
