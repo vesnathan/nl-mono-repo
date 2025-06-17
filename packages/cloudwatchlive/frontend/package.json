@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "next dev",
-    "dev:local": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=nldev next dev",
-    "dev:codespaces": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=nldev next dev -H 0.0.0.0",
+    "dev:local": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev next dev",
+    "dev:codespaces": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "@aws-amplify/auth": "^6.6.0",
+    "@hookform/resolvers": "^3.3.4",
     "@iconify/react": "^5.0.2",
     "@nextui-org/react": "2.4.6",
+    "@sentry/nextjs": "^9.29.0",
     "@tanstack/react-query": "^5.61.3",
     "await-to-js": "^3.0.0",
     "aws-amplify": "^6.10.0",
@@ -24,12 +26,11 @@
     "react": "19.0.0-rc-02c0e824-20241028",
     "react-dom": "19.0.0-rc-02c0e824-20241028",
     "react-error-boundary": "^4.1.2",
+    "react-hook-form": "^7.51.0",
     "shared": "*",
     "tailwindcss": "^3.4.14",
     "zod": "^3.23.8",
-    "zustand": "^4.5.1",
-    "react-hook-form": "^7.51.0",
-    "@hookform/resolvers": "^3.3.4"
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@types/node": "^20",

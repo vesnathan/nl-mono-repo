@@ -4,8 +4,8 @@ import { ForceDeleteManager } from './utils/force-delete-utils';
 import { promises as fsPromises } from 'fs';
 import * as fs from 'fs';
 import path from 'path';
-import { CloudFormation, Capability } from '@aws-sdk/client-cloudformation';
-import { S3 } from '@aws-sdk/client-s3';
+import { CloudFormation, Capability, Parameter } from '@aws-sdk/client-cloudformation';
+import { S3, BucketLocationConstraint } from '@aws-sdk/client-s3';
 import { createReadStream } from 'fs';
 
 // Find YAML template files
@@ -45,13 +45,14 @@ async function deployCwlStack() {
       await s3.createBucket({
         Bucket: templateBucketName,
         CreateBucketConfiguration: {
-          LocationConstraint: region === 'us-east-1' ? undefined : region as any
+          LocationConstraint: region === 'us-east-1' ? undefined : region as BucketLocationConstraint
         }
       });
       logger.info(`Created template bucket: ${templateBucketName}`);
-    } catch (error: any) {
-      if (error.name !== 'BucketAlreadyOwnedByYou') {
-        logger.warning(`Bucket creation error: ${error.message}`);
+    } catch (error: unknown) {
+      // Type guard for error name (assuming error is an object with a name property)
+      if (typeof error === 'object' && error !== null && 'name' in error && (error as { name: string }).name !== 'BucketAlreadyOwnedByYou') {
+        logger.warning(`Bucket creation error: ${(error as { message?: string }).message}`);
       } else {
         logger.info(`Template bucket already exists: ${templateBucketName}`);
       }
@@ -76,8 +77,8 @@ async function deployCwlStack() {
           ContentType: 'application/x-yaml'
         });
         logger.info(`Uploaded template: ${key}`);
-      } catch (error: any) {
-        logger.error(`Failed to upload ${file}: ${error.message}`);
+      } catch (error: unknown) {
+        logger.error(`Failed to upload ${file}: ${(error as Error).message}`);
         throw error;
       }
     }
@@ -109,8 +110,8 @@ async function deployCwlStack() {
       
       logger.info(`Found WAF WebACLId: ${webAclId}`);
       logger.info(`Found WAF WebACLArn: ${webAclArn}`);
-    } catch (error: any) {
-      logger.warning(`Could not get WAF stack outputs: ${error.message}`);
+    } catch (error: unknown) {
+      logger.warning(`Could not get WAF stack outputs: ${(error as Error).message}`);
       logger.warning('Continuing without WAF integration');
     }
     
@@ -133,8 +134,8 @@ async function deployCwlStack() {
       
       logger.info(`Found KMS KeyId: ${kmsKeyId}`);
       logger.info(`Found KMS KeyArn: ${kmsKeyArn}`);
-    } catch (error: any) {
-      logger.warning(`Could not get shared stack outputs: ${error.message}`);
+    } catch (error: unknown) {
+      logger.warning(`Could not get shared stack outputs: ${(error as Error).message}`);
       logger.warning('Continuing without KMS encryption');
     }
     
@@ -151,7 +152,7 @@ async function deployCwlStack() {
           ParameterKey: 'TemplateBucketName',
           ParameterValue: templateBucketName,
         }
-      ] as any[],
+      ] as Parameter[],
       Capabilities: ['CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'] as Capability[]
     };
     
@@ -215,15 +216,16 @@ async function deployCwlStack() {
         logger.info(`Updating stack: ${stackName}`);
         await cfn.updateStack(stackParams);
       }
-    } catch (error: any) {
-      if (error.message?.includes('does not exist')) {
+    } catch (error: unknown) {
+      const errorMessage = (error as Error).message;
+      if (errorMessage?.includes('does not exist')) {
         // Create new stack
         logger.info(`Creating new stack: ${stackName}`);
         await cfn.createStack(stackParams);
-      } else if (error.message?.includes('No updates are to be performed')) {
+      } else if (errorMessage?.includes('No updates are to be performed')) {
         logger.info('No updates required for stack');
         return;
-      } else if (error.message?.includes('AlreadyExistsException') || error.message?.includes('already exists')) {
+      } else if (errorMessage?.includes('AlreadyExistsException') || errorMessage?.includes('already exists')) {
         logger.warning(`Stack ${stackName} already exists but in unexpected state. Using force deletion to clean up...`);
         
         const forceDeleteManager = new ForceDeleteManager(region);
@@ -264,8 +266,8 @@ async function deployCwlStack() {
           // Wait before checking again
           await new Promise(resolve => setTimeout(resolve, 30000));
         }
-      } catch (error: any) {
-        logger.warning(`Error checking stack status: ${error.message}`);
+      } catch (error: unknown) {
+        logger.warning(`Error checking stack status: ${(error as Error).message}`);
         await new Promise(resolve => setTimeout(resolve, 30000));
       }
     }
@@ -309,10 +311,10 @@ async function deployCwlStack() {
         });
         
         logger.info('Failed stack cleaned up. You can retry deployment.');
-      } catch (cleanupError: any) {
-        logger.error(`Cleanup failed: ${cleanupError.message}`);
+      } catch (cleanupError: unknown) {
+        logger.error(`Cleanup failed: ${(cleanupError as Error).message}`);
       }
-      
+
       throw new Error('Stack deployment failed');
     } else {
       logger.warning(`Stack operation timed out after ${attempts} attempts`);
@@ -345,7 +347,7 @@ deployCwlStack()
     logger.success('Deployment completed successfully');
     process.exit(0);
   })
-  .catch(error => {
-    logger.error(`Deployment failed: ${error.message}`);
+  .catch(error => { // This error is from the promise chain, can be Error
+    logger.error(`Deployment failed: ${(error as Error).message}`);
     process.exit(1);
   });

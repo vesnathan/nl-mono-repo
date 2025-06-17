@@ -40,7 +40,6 @@ export const CWLButton: React.FC<CWLButtonProps> = ({
     const primaryColor = cn(
       "bg-primary-400",
       "border-primary-400",
-      "text-white",
       "hover:bg-primary-500",
       "hover:border-primary-500",
       "active:bg-primary-300",

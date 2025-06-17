@@ -38,11 +38,14 @@ async function removeWafStack() {
     try {
       const describeCommand = new DescribeStacksCommand({ StackName: stackName });
       await cfClient.send(describeCommand);
-    } catch (error: any) {
-      if (error.name === 'ValidationError' && error.message.includes('does not exist')) {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'ValidationError' && error.message.includes('does not exist')) {
         console.log(`WAF stack ${stackName} does not exist`);
         return;
       }
+      // If it's a different error, or not an Error instance, rethrow or handle as appropriate
+      // For now, let the outer catch handle it or rethrow if necessary.
+      throw error; 
     }
     
     // Delete the stack
@@ -52,8 +55,8 @@ async function removeWafStack() {
     console.log(`Delete command sent successfully for ${stackName}`);
     console.log('Wait for the stack to be deleted in the AWS CloudFormation console');
     console.log(`Region: ${WAF_REGION}`);
-  } catch (error: any) {
-    console.error(`Failed to delete WAF stack ${stackName}: ${error.message}`);
+  } catch (error: unknown) {
+    console.error(`Failed to delete WAF stack ${stackName}: ${error instanceof Error ? error.message : String(error)}`);
     process.exit(1);
   }
 }

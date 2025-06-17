@@ -30,9 +30,9 @@ async function retryOperation<T>(operation: () => Promise<T>, maxRetries = MAX_R
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (attempt === maxRetries) throw error;
-      logger.warning(`Operation failed (attempt ${attempt}/${maxRetries}): ${error.message}`);
+      logger.warning(`Operation failed (attempt ${attempt}/${maxRetries}): ${error instanceof Error ? error.message : String(error)}`);
       await sleep(RETRY_DELAY * attempt);
     }
   }
@@ -63,9 +63,9 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
       logger.info(`Checking if templates bucket exists: ${templateBucketName} in region ${region}`);
       await s3.headBucket({ Bucket: templateBucketName });
       logger.info(`Templates bucket ${templateBucketName} exists`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.info(`Creating templates bucket: ${templateBucketName} in region ${region}`);
-      logger.info(`Error details: ${error.message}`);
+      logger.info(`Error details: ${error instanceof Error ? error.message : String(error)}`);
       
       if (region === 'us-east-1') {
         // us-east-1 doesn't need LocationConstraint
@@ -122,12 +122,12 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
           PolicyDocument: JSON.stringify(s3PolicyDocument)
         });
         logger.success(`Added S3 templates access policy to role ${roleName}`);
-      } catch (roleError: any) {
-        logger.info(`Could not update role policy (role may not exist yet): ${roleError.message}`);
+      } catch (roleError: unknown) {
+        logger.info(`Could not update role policy (role may not exist yet): ${roleError instanceof Error ? roleError.message : String(roleError)}`);
       }
       
-    } catch (error: any) {
-      logger.warning(`Failed to configure IAM role S3 access: ${error.message}`);
+    } catch (error: unknown) {
+      logger.warning(`Failed to configure IAM role S3 access: ${error instanceof Error ? error.message : String(error)}`);
     }
 
     // Clear existing templates

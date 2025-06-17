@@ -41,8 +41,8 @@ program
       });
       
       logger.success(`Stack force deleted successfully: ${getStackName(stackType, stage)}`);
-    } catch (error: any) {
-      logger.error(`Force delete failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`Force delete failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });
@@ -75,15 +75,15 @@ program
           });
           
           logger.success(`${stackType} stack force deleted successfully`);
-        } catch (error: any) {
-          logger.error(`Failed to force delete ${stackType} stack: ${error.message}`);
+        } catch (error: unknown) {
+          logger.error(`Failed to force delete ${stackType} stack: ${error instanceof Error ? error.message : String(error)}`);
           // Continue with other stacks
         }
       }
       
       logger.success('All stacks force delete process completed');
-    } catch (error: any) {
-      logger.error(`Force delete all failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`Force delete all failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });
@@ -112,15 +112,15 @@ program
           await forceDeleteManager.cleanupS3Buckets(stackType, stage);
           
           logger.success(`S3 cleanup completed for ${stackType}`);
-        } catch (error: any) {
-          logger.error(`Failed to cleanup S3 for ${stackType}: ${error.message}`);
+        } catch (error: unknown) {
+          logger.error(`Failed to cleanup S3 for ${stackType}: ${error instanceof Error ? error.message : String(error)}`);
           // Continue with other stack types
         }
       }
       
       logger.success('S3 cleanup process completed');
-    } catch (error: any) {
-      logger.error(`S3 cleanup failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`S3 cleanup failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });
@@ -153,12 +153,12 @@ program
           } else {
             logger.info(`${stackType} (${stackName}): DOES_NOT_EXIST`);
           }
-        } catch (error: any) {
-          logger.error(`Failed to check status for ${stackType}: ${error.message}`);
+        } catch (error: unknown) {
+          logger.error(`Failed to check status for ${stackType}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
-    } catch (error: any) {
-      logger.error(`Status check failed: ${error.message}`);
+    } catch (error: unknown) {
+      logger.error(`Status check failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });

@@ -96,9 +96,9 @@ export class OutputsManager {
       
       logger.success(`Saved outputs for ${stackType} stack to ${this.outputsFilePath}`);
       logger.info(`Found ${outputs.length} outputs for ${stackType} stack`);
-      
-    } catch (error: any) {
-      logger.error(`Failed to save outputs for ${stackType} stack: ${error.message}`);
+
+    } catch (error: unknown) {
+      logger.error(`Failed to save outputs for ${stackType} stack: ${(error as Error).message}`);
       throw error;
     }
   }
@@ -114,8 +114,8 @@ export class OutputsManager {
       }
       
       return deploymentOutputs.stacks[stackType]?.outputs || null;
-    } catch (error: any) {
-      logger.warning(`Could not read outputs for ${stackType}: ${error.message}`);
+    } catch (error: unknown) {
+      logger.warning(`Could not read outputs for ${stackType}: ${(error as Error).message}`);
       return null;
     }
   }
@@ -139,8 +139,8 @@ export class OutputsManager {
       }
       
       return deploymentOutputs;
-    } catch (error: any) {
-      logger.warning(`Could not read deployment outputs: ${error.message}`);
+    } catch (error: unknown) {
+      logger.warning(`Could not read deployment outputs: ${(error as Error).message}`);
       return null;
     }
   }
@@ -165,11 +165,13 @@ export class OutputsManager {
       ];
       
       return healthyStates.includes(status || '');
-    } catch (error: any) {
-      if (error.name === 'ValidationError' && error.message.includes('does not exist')) {
+    } catch (error: unknown) {
+      // Type guard for error name and message (assuming error is an object with name and message properties)
+      if (typeof error === 'object' && error !== null && 'name' in error && 'message' in error && 
+          (error as {name: string}).name === 'ValidationError' && (error as {message: string}).message.includes('does not exist')) {
         return false;
       }
-      logger.warning(`Error checking stack ${stackType}: ${error.message}`);
+      logger.warning(`Error checking stack ${stackType}: ${(error as Error).message}`);
       return false;
     }
   }
