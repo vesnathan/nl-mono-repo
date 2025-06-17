@@ -6,13 +6,14 @@ import { CWLUserInput, ClientType } from '@/graphql/gqlTypes'; // Assuming gqlTy
 import { Button, Input, ModalBody, ModalFooter, Select, SelectItem } from '@nextui-org/react';
 import { createCWLUserMutationFn } from '@/graphql/mutations'; // Import the mutation function
 import { useMutation } from '@tanstack/react-query'; // Assuming TanStack Query is used
+import { SALUTATIONS, SalutationValue } from '@/../shared/constants/salutations';
 
 // Define the Zod schema for form validation
 const createUserSchema = z.object({
   userEmail: z.string().email({ message: 'Invalid email address' }),
   userFirstName: z.string().min(1, { message: 'First name is required' }),
   userLastName: z.string().min(1, { message: 'Last name is required' }),
-  userTitle: z.string().optional(),
+  userTitle: z.custom<SalutationValue>().optional(),
   userPhone: z.string().optional(),
   organizationId: z.string().min(1, { message: 'Organization ID is required' }),
   userRole: z.string().min(1, { message: 'User role is required' }),
@@ -57,12 +58,14 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onClose, onSubmi
       return createCWLUserMutationFn(input);
     },
     onSuccess: () => {
-      console.log('User created successfully');
+      // console.log('User created successfully');
       onSubmitSuccess();
     },
-    onError: (error: any) => {
-      console.error('Error creating user:', error);
+    onError: (error: Error) => {
+      // console.error('Error creating user:', error);
       // Handle error display to user, e.g., using a toast notification
+      // For now, we can re-throw or log to a more persistent store if needed
+      alert(`Error creating user: ${error.message}`); // Simple alert for now
     },
   });
 
@@ -88,38 +91,39 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onClose, onSubmi
       <ModalBody>
         <Input
           {...register('userEmail')}
-          label="Email"
-          placeholder="Enter user\'s email"
+          placeholder="Email"
           errorMessage={errors.userEmail?.message}
           isInvalid={!!errors.userEmail}
         />
         <Input
           {...register('userFirstName')}
-          label="First Name"
-          placeholder="Enter first name"
+          placeholder="First Name"
           errorMessage={errors.userFirstName?.message}
           isInvalid={!!errors.userFirstName}
         />
         <Input
           {...register('userLastName')}
-          label="Last Name"
-          placeholder="Enter last name"
+          placeholder="Last Name"
           errorMessage={errors.userLastName?.message}
           isInvalid={!!errors.userLastName}
         />
-        <Input
+        <Select
           {...register('userTitle')}
-          label="Title (Optional)"
-          placeholder="e.g., Mr, Ms, Dr"
-        />
+          placeholder="Title (Optional)"
+          aria-label="Select Title"
+        >
+          {SALUTATIONS.map((salutation) => (
+            <SelectItem key={salutation.id} value={salutation.value}>
+              {salutation.value}
+            </SelectItem>
+          ))}
+        </Select>
         <Input
           {...register('userPhone')}
-          label="Phone (Optional)"
-          placeholder="Enter phone number"
+          placeholder="Phone (Optional)"
         />
         <Select
-          label="Organization"
-          placeholder="Select organization"
+          placeholder="Organization"
           {...register('organizationId')}
           errorMessage={errors.organizationId?.message}
           isInvalid={!!errors.organizationId}
@@ -132,8 +136,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onClose, onSubmi
         </Select>
         <Input
           {...register('userRole')}
-          label="User Role"
-          placeholder="Enter user role"
+          placeholder="User Role"
           errorMessage={errors.userRole?.message}
           isInvalid={!!errors.userRole}
         />
@@ -142,7 +145,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onClose, onSubmi
         <Button color="danger" variant="light" onPress={onClose}>
           Cancel
         </Button>
-        <Button color="primary" type="submit" isLoading={createUserMutation.isPending}>
+        <Button color="primary" type="submit" isLoading={createUserMutation.isPending} className="font-bold">
           Create User
         </Button>
       </ModalFooter>

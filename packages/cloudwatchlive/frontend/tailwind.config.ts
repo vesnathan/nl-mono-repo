@@ -15,14 +15,14 @@ const tailwindConfig = {
         dark: {
           colors: {
             primary: {
-              foreground: "#000000",
+              foreground: "#FFFFFF", // Changed from #000000
             },
           },
         },
         light: {
           colors: {
             primary: {
-              foreground: "#000000",
+              foreground: "#FFFFFF", // Changed from #000000
             },
           },
         },

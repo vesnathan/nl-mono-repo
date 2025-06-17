@@ -44,8 +44,8 @@ export async function deployWaf(options: DeploymentOptions): Promise<void> {
       await cfn.describeStacks({ StackName: stackName });
       logger.info(`Updating existing stack: ${stackName}`);
       await cfn.updateStack(params);
-    } catch (error: any) {
-      if (error.message?.includes('does not exist')) {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message?.includes('does not exist')) {
         logger.info(`Creating new stack: ${stackName}`);
         await cfn.createStack(params);
       } else {
@@ -60,12 +60,12 @@ export async function deployWaf(options: DeploymentOptions): Promise<void> {
     
     logger.success('WAF deployment completed successfully');
 
-  } catch (error: any) {
-    if (error.message?.includes('No updates are to be performed')) {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message?.includes('No updates are to be performed')) {
       logger.info('No updates required for WAF stack');
       return;
     }
-    logger.error(`WAF deployment failed: ${error.message}`);
+    logger.error(`WAF deployment failed: ${error instanceof Error ? error.message : String(error)}`);
     throw error;
   }
 }

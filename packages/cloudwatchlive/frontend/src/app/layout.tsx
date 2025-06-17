@@ -13,11 +13,6 @@ import { GlobalMessage } from "@/components/common/GlobalMessage";
 import { AMPLIFY_CONFIG } from "../config/amplifyConfig";
 import "./globals.css";
 
-const metadata = {
-  title: "Cloud Watch Live",
-  description: "Live Conference Streaming Software",
-};
-
 Amplify.configure(AMPLIFY_CONFIG);
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -35,10 +30,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" data-theme="lemonade">
       <head>
-        <title>{metadata.title}</title>
-        <meta name="description" content={metadata.description} />
-        <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-        <script>eruda.init();</script>
+        <title>Cloud Watch Live</title>
+        <meta name="description" content="Live Conference Streaming Software" />
+        {process.env.NODE_ENV === "development" && (
+          <>
+            <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+            <script dangerouslySetInnerHTML={{ __html: "eruda.init();" }} />
+          </>
+        )}
       </head>
       <body>
         <QueryClientProvider
