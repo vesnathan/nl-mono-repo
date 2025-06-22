@@ -1,18 +1,22 @@
-import { Button, cn } from "@nextui-org/react";
+import { Button, cn, Spinner } from "@nextui-org/react";
 import React from "react";
 
-type CWLButtonColor = "primary" | "secondary" | "error" | "transparent";
+type CWLButtonColor = "primary" | "secondary" | "error" | "transparent" | "danger" | "cancel";
+type CWLButtonVariant = "solid" | "light";
 
 type CWLButtonProps = {
   id?: string;
   buttonText: React.ReactNode;
   size?: "sm" | "md";
   color?: CWLButtonColor;
+  variant?: CWLButtonVariant;
+  type?: "button" | "submit" | "reset";
   onClick?: (e: React.MouseEvent) => void;
   additionalClassName?: string;
   frontIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
   isDisabled?: boolean;
+  isLoading?: boolean;
 };
 
 export const CWLButton: React.FC<CWLButtonProps> = ({
@@ -20,14 +24,17 @@ export const CWLButton: React.FC<CWLButtonProps> = ({
   buttonText,
   size,
   color,
+  variant = "solid",
+  type = "button",
   onClick,
   additionalClassName,
   frontIcon,
   endIcon,
   isDisabled,
+  isLoading,
 }) => {
   const buttonClassName = React.useMemo<string>(() => {
-    if (isDisabled) {
+    if (isDisabled && !isLoading) {
       return cn(
         "bg-neutral-50",
         "border-neutral-100",
@@ -38,13 +45,11 @@ export const CWLButton: React.FC<CWLButtonProps> = ({
     }
 
     const primaryColor = cn(
-      "bg-primary-400",
-      "border-primary-400",
-      "hover:bg-primary-500",
-      "hover:border-primary-500",
-      "active:bg-primary-300",
-      "active:border-primary-300",
-      "active:text-primary-500",
+      "bg-primary-400 border-primary-400 text-white",
+      "[&[data-hover=true]]:bg-primary-300 [&[data-hover=true]]:border-primary-300 [&[data-hover=true]]:text-white",
+      "[&[data-pressed=true]]:bg-primary-500 [&[data-pressed=true]]:border-primary-500 [&[data-pressed=true]]:text-white",
+      "data-[hover=true]:bg-primary-300 data-[hover=true]:border-primary-300 data-[hover=true]:text-white",
+      "data-[pressed=true]:bg-primary-500 data-[pressed=true]:border-primary-500 data-[pressed=true]:text-white"
     );
     if (color === "primary") {
       return primaryColor;
@@ -71,20 +76,56 @@ export const CWLButton: React.FC<CWLButtonProps> = ({
         "active:text-primary-500",
       );
     }
+    if (color === "danger") {
+      if (variant === "light") {
+        return cn(
+          "bg-transparent",
+          "border-transparent",
+          "text-danger-500",
+          "hover:bg-danger-50",
+          "hover:text-danger-600",
+          "active:bg-danger-100",
+          "active:text-danger-700",
+        );
+      }
+      return cn(
+        "bg-danger-500",
+        "border-danger-500",
+        "text-white",
+        "hover:bg-danger-600",
+        "hover:border-danger-600",
+        "active:bg-danger-400",
+        "active:border-danger-400",
+      );
+    }
+    if (color === "cancel") {
+      return cn(
+        "bg-red-50",
+        "border-red-200",
+        "text-red-700",
+        "hover:bg-red-100",
+        "hover:border-red-300",
+        "hover:text-red-800",
+        "active:bg-red-200",
+        "active:border-red-400",
+        "active:text-red-900",
+      );
+    }
     // default
     return primaryColor;
-  }, [color, isDisabled]);
+  }, [color, variant, isDisabled, isLoading]);
 
   return (
     <Button
       id={id}
       size={size || "sm"}
-      variant="ghost"
+      variant="flat"
       radius="sm"
-      className={cn("rounded-[6px]", buttonClassName, additionalClassName)}
-      onClick={onClick}
+      type={type}
+      className={cn("rounded-[6px] transition-all duration-200", buttonClassName, additionalClassName)}
+      onClick={isLoading ? undefined : onClick}
       disabled={isDisabled}
-      startContent={frontIcon}
+      startContent={isLoading ? <Spinner size="sm" color="current" /> : frontIcon}
       endContent={endIcon}
     >
       {buttonText}

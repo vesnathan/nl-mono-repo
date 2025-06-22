@@ -83,25 +83,37 @@ class DeploymentManager {
     const stackName = getStackName(stackType, stage);
     const region = stackType === StackType.WAF ? 'us-east-1' : options.region || this.region;
 
-    logger.info(`Attempting to remove stack ${stackName} in region ${region}...`);
+    logger.info(`🗑️  Removing ${stackType} stack: ${stackName}`);
+    logger.info(`📍 Region: ${region}`);
 
     try {
-      if (await this.stackExists(stackName)) {
+      // Create region-specific CloudFormation client
+      const regionClient = region === this.region ? this.cfClient : new CloudFormationClient({ region });
+      
+      logger.info(`Checking if stack exists...`);
+      const exists = await this.stackExists(stackName, regionClient);
+      
+      if (exists) {
+        logger.info(`Stack found. Starting deletion process...`);
+        
         // Use ForceDeleteManager to properly handle S3 bucket cleanup
         const forceDeleteManager = new ForceDeleteManager(region, stage);
         const stackIdentifier = stackType; // The stack type serves as the identifier
         
-        logger.info(`Using force delete to properly clean up S3 buckets for ${stackName}...`);
+        logger.info(`Cleaning up S3 buckets and other resources...`);
         await forceDeleteManager.forceDeleteStack(stackIdentifier, stackType, stage);
         
-        logger.success(`Stack ${stackName} deleted successfully.`);
-        // Also remove from outputs
+        logger.success(`✓ Stack ${stackName} deleted successfully.`);
+        
+        logger.info(`Removing stack outputs from deployment-outputs.json...`);
         await this.outputsManager.removeStackOutputs(stackType, stage);
+        logger.info(`✓ Stack outputs removed from deployment-outputs.json`);
+        
       } else {
-        logger.warning(`Stack ${stackName} does not exist. Nothing to remove.`);
+        logger.warning(`Stack ${stackName} does not exist in ${region}. Nothing to remove.`);
       }
     } catch (error: unknown) {
-      logger.error(`Failed to remove stack ${stackName}: ${(error as Error).message}`);
+      logger.error(`✗ Failed to remove stack ${stackName}: ${(error as Error).message}`);
       throw error;
     }
   }
@@ -454,17 +466,44 @@ class DeploymentManager {
   }
 
   async removeAllStacks(options: DeploymentOptions): Promise<void> {
-    logger.info(`Removing all stacks for stage: ${options.stage}`);
+    logger.info(`========================================`);
+    logger.info(`Starting removal of ALL stacks for stage: ${options.stage}`);
+    logger.info(`========================================`);
+    logger.info(`Stacks will be removed in dependency order: CWL → Shared → WAF`);
+    logger.info(`This process may take several minutes...`);
+    
     // Corrected: Use StackType enum and correct order for deletion (reverse of creation)
-    const stacksToRemove: StackType[] = [StackType.CWL, StackType.Shared, StackType.WAF]; 
-    for (const stackType of stacksToRemove) {
+    const stacksToRemove: StackType[] = [StackType.CWL, StackType.Shared, StackType.WAF];
+    let successCount = 0;
+    let failureCount = 0;
+    
+    for (let i = 0; i < stacksToRemove.length; i++) {
+        const stackType = stacksToRemove[i];
         try {
+            logger.info(`\n[${i + 1}/${stacksToRemove.length}] Processing ${stackType} stack...`);
             await this.removeStack(stackType, options);
+            successCount++;
+            logger.success(`✓ [${i + 1}/${stacksToRemove.length}] ${stackType} stack removal completed`);
         } catch (error: unknown) {
-            logger.error(`Failed to remove stack ${stackType} during removeAll: ${(error as Error).message}. Continuing with others.`);
+            failureCount++;
+            logger.error(`✗ [${i + 1}/${stacksToRemove.length}] Failed to remove ${stackType} stack: ${(error as Error).message}`);
+            logger.warning(`Continuing with remaining stacks...`);
         }
     }
-    logger.success('Finished removing all stacks.');
+    
+    logger.info(`\n========================================`);
+    logger.info(`Stack removal process completed:`);
+    logger.info(`✓ Successfully removed: ${successCount} stacks`);
+    if (failureCount > 0) {
+        logger.warning(`✗ Failed to remove: ${failureCount} stacks`);
+    }
+    logger.info(`========================================`);
+    
+    if (failureCount === 0) {
+        logger.success('🎉 All stacks removed successfully!');
+    } else {
+        logger.warning(`⚠️  Some stacks failed to remove. Check the logs above for details.`);
+    }
   }
 }
 
@@ -642,11 +681,29 @@ async function main() {
               return;
           }
 
+          // Add confirmation prompt for destructive operations
+          const stackName = stack === 'all' ? 'ALL stacks' : `${stack} stack`;
+          const { confirmed } = await inquirer.prompt([
+            {
+              type: 'confirm',
+              name: 'confirmed',
+              message: `⚠️  Are you sure you want to remove ${stackName} for stage '${stage}'? This action cannot be undone.`,
+              default: false,
+            },
+          ]);
+
+          if (!confirmed) {
+            logger.warning('Stack removal cancelled by user.');
+            return;
+          }
+
           const options: DeploymentOptions = { stage };
 
           if (stack === 'all') {
+              logger.info(`Starting removal of all stacks. This may take several minutes...`);
               await deploymentManager.removeAllStacks(options);
           } else {
+              logger.info(`Starting removal of ${stack} stack...`);
               await deploymentManager.removeStack(stack, options);
           }
         };

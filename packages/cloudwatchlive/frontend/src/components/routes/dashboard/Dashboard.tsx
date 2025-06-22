@@ -8,9 +8,9 @@ import {
   ModalContent,
   ModalHeader,
   ModalBody,
-  Button,
   useDisclosure,
 } from "@nextui-org/react";
+import { CWLButton } from "@/components/common/CWLButton";
 import { CreateUserForm } from "./CreateUserForm";
 
 export const Dashboard = () => {
@@ -22,9 +22,11 @@ export const Dashboard = () => {
   return (
     <div>
       {isSuperAdmin && (
-        <Button onPress={onOpen} color="primary">
-          Create User
-        </Button>
+        <CWLButton 
+          buttonText="Create User"
+          onClick={onOpen} 
+          color="primary"
+        />
       )}
       <Modal isOpen={isOpen} onClose={onClose} placement="top-center">
         <ModalContent className="h-[80vh]">
