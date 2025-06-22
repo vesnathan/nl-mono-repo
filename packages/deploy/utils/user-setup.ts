@@ -17,6 +17,7 @@ import {
 import { CloudFormationClient, DescribeStacksCommand, ListExportsCommand } from '@aws-sdk/client-cloudformation';
 import { logger } from './logger';
 import { REGEX } from '../../shared/constants/RegEx'; // Corrected import
+import { CWL_COGNITO_GROUPS } from '../../cloudwatchlive/backend/constants/ClientTypes';
 
 export interface UserSetupOptions {
   stage: string;
@@ -60,7 +61,7 @@ export class UserSetupManager {
     await this.ensureCognitoGroups(userPoolId, stage);
 
     // Get user table name
-    const tableName = `nlmonorepo-shared-usertable-${stage}`;
+    const tableName = `nlmonorepo-cwl-usertable-${stage}`;
     await this.verifyTableExists(tableName);
 
     // Get admin email if not provided
@@ -82,7 +83,7 @@ export class UserSetupManager {
   private async getCognitoUserPoolId(stage: string): Promise<string> {
     try {
       // Try to get from CloudFormation stack outputs first
-      const stackName = `nlmonorepo-shared-${stage}`;
+      const stackName = `nlmonorepo-cwl-${stage}`;
       const describeStacksResponse = await this.cloudFormationClient.send(
         new DescribeStacksCommand({ StackName: stackName })
       );
@@ -115,7 +116,8 @@ export class UserSetupManager {
   private async ensureCognitoGroups(userPoolId: string, stage: string): Promise<void> {
     logger.info('Checking Cognito user groups...');
     
-    const requiredGroups = ['SuperAdmin', 'Admin', 'User'];
+    // Use the single source of truth for client types
+    const requiredGroups = CWL_COGNITO_GROUPS;
     
     try {
       const listGroupsResponse = await this.cognitoClient.send(

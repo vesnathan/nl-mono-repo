@@ -15,7 +15,7 @@ import { readFileSync, readdirSync, statSync } from 'fs';
 import { join, relative, extname } from 'path';
 import { glob } from 'glob';
 import { logger } from './logger';
-import { FrontendDeploymentOptions } from '../types';
+import { DeploymentOptions } from '../types';
 
 export class FrontendDeploymentManager {
   private s3Client: S3Client;
@@ -34,16 +34,16 @@ export class FrontendDeploymentManager {
     this.buildPath = join(this.frontendPath, '.next');
   }
 
-  async deployFrontend(options: FrontendDeploymentOptions): Promise<void> {
-    const { stage, skipBuild, skipUpload, skipInvalidation } = options;
+  async deployFrontend(options: DeploymentOptions): Promise<void> {
+    const { stage, skipFrontendBuild, skipUpload, skipInvalidation } = options;
     
     logger.info(`Starting frontend deployment for stage: ${stage}`);
 
     // Get S3 bucket and CloudFront distribution from CloudFormation
     const { bucketName, distributionId } = await this.getDeploymentResources(stage);
 
-    if (!skipBuild) {
-      await this.buildFrontend();
+    if (!skipFrontendBuild) {
+      await this.buildFrontend(stage);
     }
 
     if (!skipUpload) {
@@ -57,12 +57,21 @@ export class FrontendDeploymentManager {
     logger.success('Frontend deployment completed successfully!');
   }
 
-  private async buildFrontend(): Promise<void> {
+  private async buildFrontend(stage?: string): Promise<void> {
     logger.info('Building frontend application...');
     
     try {
-      // Change to frontend directory and run build
-      const buildCommand = `cd ${this.frontendPath} && npm run build`;
+      // Set environment variable to match deployment stage
+      const envStage = stage || 'dev';
+      
+      // First, generate environment variables from deployment outputs
+      const rootPath = join(this.frontendPath, '../../..');
+      const generateEnvCommand = `cd ${rootPath} && node generate-env.js`;
+      logger.info('Generating environment variables from deployment outputs...');
+      execSync(generateEnvCommand, { stdio: 'inherit' });
+      
+      // Then build the frontend
+      const buildCommand = `cd ${this.frontendPath} && NEXT_PUBLIC_ENVIRONMENT=${envStage} yarn build`;
       execSync(buildCommand, { stdio: 'inherit' });
       logger.success('Frontend build completed successfully');
     } catch (error) {
@@ -287,28 +296,22 @@ export class FrontendDeploymentManager {
     logger.success('Frontend build completed!');
   }
 
-  async uploadOnly(options: FrontendDeploymentOptions): Promise<void> {
+  async uploadOnly(options: DeploymentOptions): Promise<void> {
     const { stage } = options;
-    logger.info('Uploading frontend files only...');
-    
+    logger.info(`Starting frontend upload for stage: ${stage}`);
     const { bucketName } = await this.getDeploymentResources(stage);
     await this.uploadToS3(bucketName, stage);
-    
-    logger.success('Frontend upload completed!');
   }
 
-  async invalidateOnly(options: FrontendDeploymentOptions): Promise<void> {
+  async invalidateOnly(options: DeploymentOptions): Promise<void> {
     const { stage } = options;
-    logger.info('Creating CloudFront invalidation only...');
-    
+    logger.info(`Starting CloudFront invalidation for stage: ${stage}`);
     const { distributionId } = await this.getDeploymentResources(stage);
-    
-    if (!distributionId) {
+    if (distributionId) {
+      await this.invalidateCloudFront(distributionId);
+      logger.success('CloudFront invalidation completed!');
+    } else {
       logger.warning('No CloudFront distribution found - skipping invalidation');
-      return;
     }
-    
-    await this.invalidateCloudFront(distributionId);
-    logger.success('CloudFront invalidation completed!');
   }
 }

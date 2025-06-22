@@ -1,7 +1,12 @@
 import { 
-  CloudFormation, 
+  CloudFormationClient,
   Parameter,
-  Capability
+  Capability,
+  CreateStackCommand,
+  UpdateStackCommand,
+  DescribeStacksCommand,
+  DescribeStackResourcesCommand,
+  DeleteStackCommand,
 } from '@aws-sdk/client-cloudformation';
 import { 
   S3,
@@ -12,9 +17,10 @@ import {
   HeadBucketCommand,
   CreateBucketCommand,
   PutPublicAccessBlockCommand,
-  PutBucketVersioningCommand
+  PutBucketVersioningCommand,
+  Tag
 } from '@aws-sdk/client-s3';
-import { DeploymentOptions, TEMPLATE_RESOURCES_PATHS, getStackName, getTemplateBucketName } from '../../types';
+import { DeploymentOptions, StackType, TEMPLATE_RESOURCES_PATHS, getStackName, getTemplateBucketName, TEMPLATE_PATHS } from '../../types';
 import { logger } from '../../utils/logger';
 import { IamManager } from '../../utils/iam-manager';
 import { AwsUtils } from '../../utils/aws-utils';
@@ -23,9 +29,27 @@ import { ResolverCompiler } from '../../utils/resolver-compiler';
 import { S3BucketManager } from '../../utils/s3-bucket-manager';
 import { addAppSyncBucketPolicy, verifyResolversAccessible } from '../../utils/s3-resolver-validator';
 import { ForceDeleteManager } from '../../utils/force-delete-utils';
-import { createReadStream } from 'fs';
-import * as fs from 'fs';
+import { OutputsManager } from '../../outputs-manager';
+import { createReadStream, readdirSync, statSync, existsSync } from 'fs';
 import * as path from 'path';
+
+const findYamlFiles = (dir: string): string[] => {
+  const files = readdirSync(dir);
+  let yamlFiles: string[] = [];
+
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    const stat = statSync(filePath);
+
+    if (stat.isDirectory()) {
+      yamlFiles = yamlFiles.concat(findYamlFiles(filePath));
+    } else if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
+      yamlFiles.push(filePath);
+    }
+  }
+
+  return yamlFiles;
+}
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
@@ -45,27 +69,11 @@ async function retryOperation<T>(operation: () => Promise<T>, maxRetries = MAX_R
   throw new Error('Unexpected: Should not reach here');
 }
 
-// Recursively find all .yaml files
-function findYamlFiles(dir: string): string[] {
-  const files: string[] = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...findYamlFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.yaml')) {
-      files.push(fullPath);
-    }
-  }
-  return files;
-}
-
 // Recursively find all .ts files
 function findTypeScriptFiles(dir: string): string[] {
   const files: string[] = [];
   try {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const entries = readdirSync(dir, { withFileTypes: true });
     
     for (const entry of entries) {
       const fullPath = path.join(dir, entry.name);
@@ -81,20 +89,185 @@ function findTypeScriptFiles(dir: string): string[] {
   return files;
 }
 
+// Helper function to handle stuck stack resources
+async function handleStuckStackResources(stackName: string): Promise<void> {
+  logger.info(`Attempting manual cleanup of stuck resources in stack: ${stackName}`);
+  
+  try {
+    const cfn = new CloudFormationClient({ region: 'ap-southeast-2' });
+    
+    // List all stack resources to find stuck ones
+    const response = await cfn.send(new DescribeStackResourcesCommand({ StackName: stackName }));
+    const StackResources = response.StackResources;
+    
+    if (StackResources) {
+      for (const resource of StackResources) {
+        if (resource.ResourceStatus === 'DELETE_FAILED' && resource.ResourceType === 'AWS::IAM::Role') {
+          logger.info(`Found stuck IAM role: ${resource.LogicalResourceId} (${resource.PhysicalResourceId})`);
+          
+          // Try to manually delete the IAM role
+          if (resource.PhysicalResourceId) {
+            await cleanupIAMRole(resource.PhysicalResourceId);
+          }
+        }
+        
+        if (resource.ResourceStatus === 'DELETE_FAILED' && resource.ResourceType === 'AWS::CloudFormation::Stack') {
+          logger.info(`Found stuck nested stack: ${resource.LogicalResourceId} (${resource.PhysicalResourceId})`);
+          
+          // Try to force delete the nested stack
+          if (resource.PhysicalResourceId) {
+            await cleanupNestedStack(resource.PhysicalResourceId);
+          }
+        }
+      }
+    }
+    
+    // Wait a bit for AWS to process the manual cleanup
+    await new Promise(resolve => setTimeout(resolve, 15000));
+    
+  } catch (error: any) {
+    logger.warning(`Manual resource cleanup failed: ${error.message}`);
+  }
+}
+
+// Helper function to cleanup IAM roles
+async function cleanupIAMRole(roleArn: string): Promise<void> {
+  try {
+    const { IAMClient, DetachRolePolicyCommand, ListAttachedRolePoliciesCommand, DeleteRoleCommand } = await import('@aws-sdk/client-iam');
+    const iam = new IAMClient({ region: 'ap-southeast-2' });
+    
+    // Extract role name from ARN
+    const roleName = roleArn.split('/').pop();
+    if (!roleName) {
+      logger.warning(`Could not extract role name from ARN: ${roleArn}`);
+      return;
+    }
+    
+    logger.info(`Attempting to cleanup IAM role: ${roleName}`);
+    
+    // First, detach all policies
+    const { AttachedPolicies } = await iam.send(new ListAttachedRolePoliciesCommand({ RoleName: roleName }));
+    
+    if (AttachedPolicies) {
+      for (const policy of AttachedPolicies) {
+        if (policy.PolicyArn) {
+          logger.info(`Detaching policy ${policy.PolicyArn} from role ${roleName}`);
+          await iam.send(new DetachRolePolicyCommand({
+            RoleName: roleName,
+            PolicyArn: policy.PolicyArn
+          }));
+        }
+      }
+    }
+    
+    // Then delete the role
+    logger.info(`Deleting IAM role: ${roleName}`);
+    await iam.send(new DeleteRoleCommand({ RoleName: roleName }));
+    logger.success(`Successfully deleted IAM role: ${roleName}`);
+    
+  } catch (error: any) {
+    logger.warning(`Failed to cleanup IAM role ${roleArn}: ${error.message}`);
+  }
+}
+
+// Helper function to cleanup nested stacks
+async function cleanupNestedStack(stackArn: string): Promise<void> {
+  try {
+    const cfn = new CloudFormationClient({ region: 'ap-southeast-2' });
+    
+    // Extract the actual stack name from the ARN
+    // ARN format: arn:aws:cloudformation:region:account:stack/stack-name/uuid
+    const arnParts = stackArn.split('/');
+    if (arnParts.length < 2) {
+      logger.warning(`Invalid stack ARN format: ${stackArn}`);
+      return;
+    }
+    
+    const fullStackName = arnParts[1]; // This is the complete stack name
+    logger.info(`Attempting to force delete nested stack: ${fullStackName}`);
+    
+    // Try direct deletion first
+    try {
+      await cfn.send(new DeleteStackCommand({ StackName: fullStackName }));
+      logger.info(`Initiated deletion of nested stack: ${fullStackName}`);
+      
+      // Wait for deletion to complete
+      await waitForStackDeletion(cfn, fullStackName);
+      logger.success(`Successfully cleaned up nested stack: ${fullStackName}`);
+    } catch (deleteError: any) {
+      logger.warning(`Direct deletion failed for ${fullStackName}: ${deleteError.message}`);
+      
+      // Try force deletion as fallback
+      const forceDeleteManager = new ForceDeleteManager('ap-southeast-2');
+      await forceDeleteManager.forceDeleteStack(fullStackName, StackType.CWL, 'dev');
+      logger.success(`Force deleted nested stack: ${fullStackName}`);
+    }
+    
+  } catch (error: any) {
+    logger.warning(`Failed to cleanup nested stack ${stackArn}: ${error.message}`);
+  }
+}
+
+// Helper function to wait for stack deletion
+async function waitForStackDeletion(cfn: CloudFormationClient, stackName: string): Promise<void> {
+  const maxAttempts = 120; // Increased from 30 to 120 (20 minutes)
+  const delay = 10000; // 10 seconds
+  
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      const response = await cfn.send(new DescribeStacksCommand({ StackName: stackName }));
+      const stack = response.Stacks?.[0];
+      
+      if (!stack) {
+        logger.info(`Stack ${stackName} no longer exists - deletion complete`);
+        return;
+      }
+      
+      const status = stack.StackStatus;
+      if (status === 'DELETE_COMPLETE') {
+        logger.info(`Stack ${stackName} deletion completed successfully`);
+        return;
+      }
+      
+      if (status === 'DELETE_FAILED') {
+        throw new Error(`Stack ${stackName} deletion failed with status: ${status}`);
+      }
+      
+      logger.info(`Waiting for ${stackName} deletion... Status: ${status} (${i + 1}/${maxAttempts}) - ${Math.round((i + 1) / maxAttempts * 100)}% complete`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      
+    } catch (error: any) {
+      if (error.name === 'ValidationError' && error.message.includes('does not exist')) {
+        logger.info(`Stack ${stackName} no longer exists - deletion complete`);
+        return;
+      }
+      
+      if (i === maxAttempts - 1) {
+        throw error;
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw new Error(`Timeout waiting for stack ${stackName} deletion after ${maxAttempts * delay / 1000} seconds`);
+}
+
 export async function deployCwl(options: DeploymentOptions): Promise<void> {
-  const stackName = getStackName('cwl', options.stage);
-  const templateBucketName = getTemplateBucketName('cwl', options.stage);
+  const stackName = getStackName(StackType.CWL, options.stage);
+  const templateBucketName = getTemplateBucketName(StackType.CWL, options.stage);
   logger.info('Starting CloudWatch Live deployment...');
 
   const region = options.region || process.env.AWS_REGION || 'ap-southeast-2';
 
   // Initialize clients
-  const cfn = new CloudFormation({ region });
+  const cfn = new CloudFormationClient({ region });
   const s3 = new S3({ region });
+  const awsUtils = new AwsUtils(region);
   
   // Set up IAM role
   const iamManager = new IamManager(region); // Pass region string to IamManager
-  const roleArn = await iamManager.setupRole('cwl', options.stage);
+  const roleArn = await iamManager.setupRole(StackType.CWL, options.stage, templateBucketName);
   if (!roleArn) {
     throw new Error('Failed to setup role for CloudWatch Live');
   }
@@ -153,6 +326,23 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     
     logger.info(`Template bucket ${templateBucketName} is ready for use`);
 
+    // Upload main CloudFormation template
+    const mainTemplateS3Key = 'cfn-template.yaml';
+    const templateUrl = `https://s3.${region}.amazonaws.com/${templateBucketName}/${mainTemplateS3Key}`;
+
+    logger.info(`Uploading main template to s3://${templateBucketName}/${mainTemplateS3Key}`);
+    try {
+        await s3.send(new PutObjectCommand({
+            Bucket: templateBucketName,
+            Key: mainTemplateS3Key,
+            Body: createReadStream(TEMPLATE_PATHS[StackType.CWL]),
+            ContentType: 'application/x-yaml',
+        }));
+        logger.success('Main template uploaded successfully.');
+    } catch (error: any) {
+        throw new Error(`Failed to upload main template: ${error.message}`);
+    }
+
     // Clear existing templates and verify bucket is writable
     logger.info('Clearing existing templates...');
     try {
@@ -179,12 +369,12 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     }
     
     // Upload nested stack templates
-    logger.info(`Looking for templates in: ${TEMPLATE_RESOURCES_PATHS.cwl}`);
-    const templateFiles = findYamlFiles(TEMPLATE_RESOURCES_PATHS.cwl);
+    logger.info(`Looking for templates in: ${TEMPLATE_RESOURCES_PATHS[StackType.CWL]}`);
+    const templateFiles = findYamlFiles(TEMPLATE_RESOURCES_PATHS[StackType.CWL]);
     logger.info(`Found ${templateFiles.length} template files`);
 
     if (templateFiles.length === 0) {
-      throw new Error(`No template files found in ${TEMPLATE_RESOURCES_PATHS.cwl}`);
+      throw new Error(`No template files found in ${TEMPLATE_RESOURCES_PATHS[StackType.CWL]}`);
     }
 
     // Track successful uploads
@@ -192,8 +382,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     const failedUploads: string[] = [];
 
     for (const file of templateFiles) {
-      const relativePath = path.relative(TEMPLATE_RESOURCES_PATHS.cwl, file);
-      const key = `resources/${relativePath}`;
+      const relativePath = path.relative(TEMPLATE_RESOURCES_PATHS[StackType.CWL], file);
+      const key = relativePath.replace(/\\/g, '/'); // Ensure forward slashes for S3
       logger.info(`Uploading ${file} to ${key}`);
       
       const putCommand = new PutObjectCommand({
@@ -239,25 +429,27 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     
     const resolverDir = path.join(__dirname, '../../../cloudwatchlive/backend/resources/AppSync/resolvers');
     
-    if (fs.existsSync(resolverDir)) {
-      const resolverFiles = findTypeScriptFiles(resolverDir).map(filePath => path.relative(resolverDir, filePath));
-      logger.info(`Found ${resolverFiles.length} TypeScript resolver files in ${resolverDir}`);
+    if (existsSync(resolverDir)) {
+      const resolverFiles = findTypeScriptFiles(resolverDir)
+        .map(filePath => path.relative(resolverDir, filePath))
+        .filter(file => 
+            !file.endsWith('.bak') && // Exclude backup files
+            path.basename(file) !== 'gqlTypes.ts' && // Exclude the main types file
+            file.includes(path.sep) // IMPORTANT: Only include files in subdirectories
+        );
+      logger.info(`Found ${resolverFiles.length} TypeScript resolver files in subdirectories of ${resolverDir}`);
       
       if (resolverFiles.length === 0) {
         logger.warning(`No TypeScript resolver files found in ${resolverDir}. This could cause deployment issues.`);
       } else {
         const resolverCompiler = new ResolverCompiler({
-          logger: logger,
           baseResolverDir: resolverDir,
           s3KeyPrefix: 'resolvers', // Or a more dynamic prefix if needed
           stage: options.stage,
-          localSavePathBase: path.join(process.cwd(), 'packages/deploy/cwl'), // Example local save path
-          localSaveEnabled: true, // <--- ENABLE LOCAL SAVING
           s3BucketName: templateBucketName,
           region: region,
           resolverFiles: resolverFiles,
-          sharedFileName: 'gqlTypes.ts', // Specify the shared file name
-          sharedFileS3Key: 'gqlTypes.js' // Corrected: S3 key for shared file (prefix and stage are added by compiler)
+          sharedFileName: 'gqlTypes.ts' // Specify the shared file name
         });
 
         try {
@@ -335,15 +527,15 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     }
 
     // Get KMS Key info from shared stack outputs
-    const sharedStack = await cfn.describeStacks({
-      StackName: getStackName('shared', options.stage)
-    });
+    const sharedStackData = await cfn.send(new DescribeStacksCommand({
+      StackName: getStackName(StackType.Shared, options.stage)
+    }));
     
-    const kmsKeyId = sharedStack.Stacks?.[0]?.Outputs?.find(
+    const kmsKeyId = sharedStackData.Stacks?.[0]?.Outputs?.find(
       output => output.OutputKey === 'KMSKeyId'
     )?.OutputValue;
 
-    const kmsKeyArn = sharedStack.Stacks?.[0]?.Outputs?.find(
+    const kmsKeyArn = sharedStackData.Stacks?.[0]?.Outputs?.find(
       output => output.OutputKey === 'KMSKeyArn'
     )?.OutputValue;
 
@@ -352,16 +544,16 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     }
 
     // Get WAF Web ACL ID and ARN from us-east-1 region
-    const wafCfn = new CloudFormation({ region: 'us-east-1' }); // WAF is always us-east-1
-    const wafStack = await wafCfn.describeStacks({
-      StackName: getStackName('waf', options.stage)
-    });
+    const wafCfn = new CloudFormationClient({ region: 'us-east-1' }); // WAF is always us-east-1
+    const wafStackData = await wafCfn.send(new DescribeStacksCommand({
+      StackName: getStackName(StackType.WAF, options.stage)
+    }));
     
-    const webACLId = wafStack.Stacks?.[0]?.Outputs?.find(
+    const webACLId = wafStackData.Stacks?.[0]?.Outputs?.find(
       output => output.OutputKey === 'WebACLId'
     )?.OutputValue;
 
-    const webACLArn = wafStack.Stacks?.[0]?.Outputs?.find(
+    const webACLArn = wafStackData.Stacks?.[0]?.Outputs?.find(
       output => output.OutputKey === 'WebACLArn'
     )?.OutputValue;
 
@@ -369,108 +561,30 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       throw new Error('Failed to get WAF Web ACL ID and ARN from WAF stack in us-east-1');
     }
 
-    // Create or update the main stack
-    const awsUtils = new AwsUtils(region); // Pass region to AwsUtils
-    const templateBody = await awsUtils.getTemplateBody('cwl');
-    
-    // Final verification of S3 bucket and resolvers before launching CloudFormation
-    logger.info('Performing final verification of S3 bucket and resolvers...');
-    
-    // Verify bucket exists one last time
-    const finalBucketCheck = await s3BucketManager.ensureBucketExists(templateBucketName);
-    if (!finalBucketCheck) {
-      throw new Error(`CRITICAL: Template bucket ${templateBucketName} not accessible before CloudFormation deployment`);
-    }
-    
-    // Check resolver count one more time
-    const resolverCheckCommand = new ListObjectsV2Command({
-      Bucket: templateBucketName,
-      Prefix: `resolvers/${options.stage}/`
-    });
-    
-    try {
-      const resolverCheckResult = await s3.send(resolverCheckCommand);
-      // Properly type the response from ListObjectsV2Command
-      const listObjectsResult = resolverCheckResult as { Contents?: Array<{ Key: string }> };
-      const finalResolverCount = listObjectsResult.Contents?.length || 0;
-      logger.info(`Final verification found ${finalResolverCount} resolvers in S3 bucket`);
-      
-      if (finalResolverCount === 0) {
-        logger.warning('⚠️ WARNING: No resolvers found in S3 bucket before CloudFormation deployment!');
-        logger.warning('This may cause AppSync resolver creation to fail.');
-        // We'll continue despite this warning, as the user might want to proceed anyway
-      }
-    } catch (error: any) {
-      logger.warning(`Error during final resolver verification: ${error.message}`);
-    }
-    
-    // Add AppSync bucket policy to allow AppSync service to access resolvers
-    logger.info('Adding S3 bucket policy to allow AppSync service to access resolvers...');
-    try {
-      await addAppSyncBucketPolicy(templateBucketName, region); // Pass region to addAppSyncBucketPolicy
-      logger.success('Successfully added S3 bucket policy for AppSync access');
-      
-      // Verify resolvers are accessible with the updated policy
-      const resolversAccessible = await verifyResolversAccessible(
-        templateBucketName, 
-        options.stage, 
-        region // Pass region to verifyResolversAccessible
-      );
-      
-      if (resolversAccessible) {
-        logger.success('Successfully verified that resolvers are accessible by AppSync service');
-      } else {
-        logger.warning('⚠️ WARNING: Resolvers may not be accessible by AppSync service. Deployment may fail.');
-        // Continue despite warning, as the user might want to proceed anyway
-      }
-    } catch (error: any) {
-      logger.warning(`Error adding S3 bucket policy for AppSync access: ${error.message}`);
-      logger.warning('Continuing with deployment, but AppSync resolvers may fail to create');
-    }
-    
+    const tags: Tag[] | undefined = options.tags
+      ? Object.entries(options.tags).map(([Key, Value]) => ({ Key, Value }))
+      : undefined;
+
     const stackParams = {
       StackName: stackName,
-      TemplateBody: templateBody,
+      TemplateURL: `https://s3.${region}.amazonaws.com/${templateBucketName}/cfn-template.yaml`,
       Parameters: [
-        {
-          ParameterKey: 'Stage',
-          ParameterValue: options.stage,
-        },
-        {
-          ParameterKey: 'TemplateBucketName',
-          ParameterValue: templateBucketName,
-        },
-        {
-          ParameterKey: 'KMSKeyId',
-          ParameterValue: kmsKeyId,
-        },
-        {
-          ParameterKey: 'KMSKeyArn',
-          ParameterValue: kmsKeyArn,
-        },
-        {
-          ParameterKey: 'WebACLId',
-          ParameterValue: webACLId,
-        },
-        {
-          ParameterKey: 'WebACLArn',
-          ParameterValue: webACLArn,
-        }
-      ] as Parameter[],
-      Capabilities: ['CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'] as Capability[],
+        { ParameterKey: 'Stage', ParameterValue: options.stage },
+        { ParameterKey: 'KMSKeyId', ParameterValue: kmsKeyId },
+        { ParameterKey: 'KMSKeyArn', ParameterValue: kmsKeyArn },
+        { ParameterKey: 'WebACLId', ParameterValue: webACLId },
+        { ParameterKey: 'WebACLArn', ParameterValue: webACLArn },
+        { ParameterKey: 'TemplateBucketName', ParameterValue: templateBucketName },
+      ],
+      Capabilities: [Capability.CAPABILITY_IAM, Capability.CAPABILITY_NAMED_IAM, Capability.CAPABILITY_AUTO_EXPAND],
       RoleARN: roleArn,
-      Tags: [
-        {
-          Key: 'Stage',
-          Value: options.stage
-        }
-      ]
+      Tags: tags,
     };
 
     // Create or update the main stack
     try {
-      const existingStack = await cfn.describeStacks({ StackName: stackName });
-      const stackStatus = existingStack.Stacks?.[0]?.StackStatus;
+      const existingStackData = await cfn.send(new DescribeStacksCommand({ StackName: stackName }));
+      const stackStatus = existingStackData.Stacks?.[0]?.StackStatus;
       
       // Wait for rollback to complete if in progress
       if (stackStatus === 'ROLLBACK_IN_PROGRESS' || 
@@ -479,8 +593,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         await awsUtils.waitForStack(stackName);
         
         // Get updated status after rollback
-        const updatedStack = await cfn.describeStacks({ StackName: stackName });
-        const updatedStatus = updatedStack.Stacks?.[0]?.StackStatus;
+        const updatedStackData = await cfn.send(new DescribeStacksCommand({ StackName: stackName }));
+        const updatedStatus = updatedStackData.Stacks?.[0]?.StackStatus;
         logger.info(`Rollback completed. New status: ${updatedStatus}`);
       }
       
@@ -495,16 +609,16 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         // Use ForceDeleteManager for robust cleanup
         const forceDeleteManager = new ForceDeleteManager(region); // Pass region to ForceDeleteManager
         // Corrected call to forceDeleteStack:
-        await forceDeleteManager.forceDeleteStack('nlmonorepo-cwl', 'cwl', options.stage);
+        await forceDeleteManager.forceDeleteStack(stackName, StackType.CWL, options.stage);
         
         // Create new stack
         logger.info(`Creating new stack: ${stackName}`);
-        await cfn.createStack(stackParams);
+        await cfn.send(new CreateStackCommand(stackParams));
       } else if (stackStatus === 'ROLLBACK_IN_PROGRESS' || 
                  stackStatus === 'UPDATE_ROLLBACK_IN_PROGRESS') {
         // This case is already handled above, but let's get the final status
-        const finalStack = await cfn.describeStacks({ StackName: stackName });
-        const finalStatus = finalStack.Stacks?.[0]?.StackStatus;
+        const finalStackData = await cfn.send(new DescribeStacksCommand({ StackName: stackName }));
+        const finalStatus = finalStackData.Stacks?.[0]?.StackStatus;
         
         if (finalStatus === 'ROLLBACK_COMPLETE' || 
             finalStatus === 'UPDATE_ROLLBACK_COMPLETE') {
@@ -513,37 +627,81 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           // Use ForceDeleteManager for robust cleanup
           const forceDeleteManager = new ForceDeleteManager(region); // Pass region to ForceDeleteManager
           // Corrected call to forceDeleteStack:
-          await forceDeleteManager.forceDeleteStack('nlmonorepo-cwl', 'cwl', options.stage);
+          await forceDeleteManager.forceDeleteStack(stackName, StackType.CWL, options.stage);
           
           // Create new stack
           logger.info(`Creating new stack: ${stackName}`);
-          await cfn.createStack(stackParams);
+          await cfn.send(new CreateStackCommand(stackParams));
         } else {
           logger.info(`Updating existing stack: ${stackName}`);
-          await cfn.updateStack(stackParams);
+          await cfn.send(new UpdateStackCommand(stackParams));
         }
       } else {
         logger.info(`Updating existing stack: ${stackName}`);
-        await cfn.updateStack(stackParams);
+        await cfn.send(new UpdateStackCommand(stackParams));
       }
     } catch (error: any) {
       if (error.message?.includes('does not exist')) {
         logger.info(`Creating new stack: ${stackName}`);
-        await cfn.createStack(stackParams);
+        await cfn.send(new CreateStackCommand(stackParams));
       } else if (error.message?.includes('No updates are to be performed')) {
         logger.info('No updates required for CloudWatch Live stack');
         return;
       } else if (error.message?.includes('AlreadyExistsException') || error.message?.includes('already exists')) {
-        logger.warning(`Stack ${stackName} already exists but in unexpected state. Using force deletion to clean up...`);
+        logger.warning(`Stack ${stackName} already exists but in unexpected state. Attempting to update instead of create...`);
         
-        // Use ForceDeleteManager for robust cleanup
-        const forceDeleteManager = new ForceDeleteManager(region); // Pass region to ForceDeleteManager
-        // Corrected call to forceDeleteStack:
-        await forceDeleteManager.forceDeleteStack('nlmonorepo-cwl', 'cwl', options.stage);
-        
-        // Create new stack after cleanup
-        logger.info(`Creating new stack after cleanup: ${stackName}`);
-        await cfn.createStack(stackParams);
+        try {
+          // First, try to update the existing stack
+          logger.info(`Attempting to update existing stack: ${stackName}`);
+          await cfn.send(new UpdateStackCommand(stackParams));
+        } catch (updateError: any) {
+          if (updateError.message?.includes('No updates are to be performed')) {
+            logger.info('No updates required for existing CloudWatch Live stack');
+            return;
+          } else {
+            logger.warning(`Stack update failed: ${updateError.message}. Attempting force deletion and recreation...`);
+            
+            // Use ForceDeleteManager for robust cleanup
+            const forceDeleteManager = new ForceDeleteManager(region);
+            try {
+              await forceDeleteManager.forceDeleteStack(stackName, StackType.CWL, options.stage);
+              
+              // Wait a bit before creating new stack
+              logger.info('Waiting 30 seconds before creating new stack...');
+              await new Promise(resolve => setTimeout(resolve, 30000));
+              
+              // Create new stack after cleanup
+              logger.info(`Creating new stack after cleanup: ${stackName}`);
+              await cfn.send(new CreateStackCommand(stackParams));
+            } catch (forceDeleteError: any) {
+              logger.error(`Force deletion failed: ${forceDeleteError.message}`);
+              logger.info('Attempting manual stack resource cleanup and retry...');
+              
+              // Try to manually clean up problematic resources
+              await handleStuckStackResources(stackName);
+              
+              // After manual cleanup, try to force delete the main stack one more time
+              logger.info('Attempting final force deletion of main stack after resource cleanup...');
+              try {
+                await cfn.send(new DeleteStackCommand({ StackName: stackName }));
+                await waitForStackDeletion(cfn, stackName);
+                logger.success(`Successfully deleted stack ${stackName} after manual cleanup`);
+                
+                // Wait before creating new stack
+                logger.info('Waiting 30 seconds before creating new stack...');
+                await new Promise(resolve => setTimeout(resolve, 30000));
+                
+                // Final attempt to create the stack
+                logger.info(`Final attempt to create stack: ${stackName}`);
+                await cfn.send(new CreateStackCommand(stackParams));
+              } catch (finalError: any) {
+                logger.error(`All cleanup attempts failed: ${finalError.message}`);
+                logger.error('Manual intervention may be required. Please check the AWS Console and delete the stack manually.');
+                throw new Error(`Stack ${stackName} is in an irrecoverable state and requires manual cleanup in AWS Console`);
+              }
+            }
+          }
+        }
       } else {
         // For any other deployment failures, try to get more details
         logger.error(`CloudWatch Live deployment failed: ${error.message}`);
@@ -566,6 +724,17 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     if (success) {
       logger.success('CloudWatch Live infrastructure deployment completed successfully');
       
+      // Save deployment outputs BEFORE frontend deployment
+      logger.info('Saving deployment outputs...');
+      try {
+        const outputsManager = new OutputsManager();
+        await outputsManager.saveStackOutputs(StackType.CWL, options.stage, 'ap-southeast-2');
+        logger.success('Deployment outputs saved successfully');
+      } catch (outputError: any) {
+        logger.warning(`Failed to save deployment outputs: ${outputError.message}`);
+        logger.warning('Frontend deployment may fail due to missing environment variables');
+      }
+      
       // Verify that AppSync resolvers were created successfully
       logger.info('Verifying AppSync resolvers were created successfully...');
       
@@ -574,13 +743,18 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         const { CloudFormation } = await import('@aws-sdk/client-cloudformation');
         
         // Get the AppSync API ID from stack outputs
-        const stack = await cfn.describeStacks({ StackName: stackName });
+        const stack = await cfn.send(new DescribeStacksCommand({ StackName: stackName }));
         const apiIdOutput = stack.Stacks?.[0]?.Outputs?.find(
           output => output.OutputKey === 'CWLAppSyncApiId'
         );
         
         if (!apiIdOutput?.OutputValue) {
           logger.warning('Could not find AppSync API ID in stack outputs');
+          logger.info('Available outputs:');
+          stack.Stacks?.[0]?.Outputs?.forEach(output => {
+            logger.info(`  - ${output.OutputKey}: ${output.OutputValue}`);
+          });
+          logger.info('This may be a timing issue. The AppSync API might still be initializing.');
         } else {
           const apiId = apiIdOutput.OutputValue;
           logger.info(`AppSync API ID: ${apiId}`);
@@ -601,7 +775,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         const frontendDeployment = new FrontendDeploymentManager();
         await frontendDeployment.deployFrontend({
           stage: options.stage,
-          skipBuild: false,
+          skipFrontendBuild: false,
           skipUpload: false,
           skipInvalidation: false
         });

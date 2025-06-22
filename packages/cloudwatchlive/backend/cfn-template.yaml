@@ -9,113 +9,159 @@ Parameters:
   TemplatesBucketName:
     Type: String
     Description: Name of the S3 bucket containing nested stack templates
+  
+  # Parameters for shared resources
+  SharedKMSKeyId:
+    Type: String
+    Description: KMS Key ID from shared stack
+    Default: ""
+  SharedKMSKeyArn:
+    Type: String
+    Description: KMS Key ARN from shared stack
+    Default: ""
+  SharedSecurityGroupId:
+    Type: String
+    Description: Security Group ID from shared VPC stack
+    Default: ""
 
-  KMSKeyId:
-    Type: String
-    Description: KMS Key ID for bucket encryption (from shared stack)
-    Default: ""
-  KMSKeyArn:
-    Type: String
-    Description: KMS Key ARN for DynamoDB encryption (from shared stack)
-    Default: ""
 
 Resources:
-  DynamoDBStack:
+  CognitoStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/DynamoDB/dynamodb.yaml
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Cognito/cognito.yaml 
       Parameters:
         Stage: !Ref Stage
-        KMSKeyArn: !Ref KMSKeyArn
+        AppName: cwl
+
+  DynamoDBStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: CognitoStack 
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/DynamoDb/dynamoDb.yaml 
+      Parameters:
+        Stage: !Ref Stage
+        KMSKeyArn: !Ref SharedKMSKeyArn 
+        AppName: cwl
 
   S3Stack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: CognitoStack 
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/S3/s3.yaml
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/S3/s3.yaml 
       Parameters:
         Stage: !Ref Stage
-        KMSKeyId: !Ref KMSKeyId
+        KMSKeyId: !Ref SharedKMSKeyId
+        AppName: cwl
 
   CloudFrontStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: S3Stack
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/CloudFront/cloudfront.yaml
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/CloudFront/cloudfront.yaml 
       Parameters:
         Stage: !Ref Stage
-        CWLBucketName: 
-          Fn::GetAtt: [S3Stack, Outputs.CWLBucketName]
-        CWLBucketArn:
-          Fn::GetAtt: [S3Stack, Outputs.CWLBucketArn]
-        CWLBucketRegionalDomainName:
-          Fn::GetAtt: [S3Stack, Outputs.CWLBucketRegionalDomainName]
+        AppName: cwl # Added AppName parameter
+        AppBucketName: !GetAtt S3Stack.Outputs.CWLBucketName # Parameter name changed
+        AppBucketArn: !GetAtt S3Stack.Outputs.CWLBucketArn # Parameter name changed
+        AppBucketRegionalDomainName: !GetAtt S3Stack.Outputs.CWLBucketRegionalDomainName # Parameter name changed
 
   AppSyncStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: DynamoDBStack
+    DependsOn: [DynamoDBStack, CognitoStack] 
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appsync.yaml
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appsync.yaml 
       Parameters:
         Stage: !Ref Stage
+        AppName: cwl # Added AppName parameter
         TemplatesBucketName: !Ref TemplatesBucketName
+        # CWLUserPoolId is an output from CognitoStack, and appsync.yaml expects an import called ${AppName}-UserPoolId-${Stage}
+        # The Cognito stack's output `cwlUserPoolId` is exported as `!Sub ${AppName}-UserPoolId-${Stage}` which matches.
+        # No direct parameter needed here if AppSync template uses Fn::ImportValue correctly.
+        # However, if direct passing is preferred for clarity or if AppSync needs the UserPoolId for non-import reasons:
+        # AppUserPoolId: !GetAtt CognitoStack.Outputs.cwlUserPoolId # (and add AppUserPoolId to appsync.yaml parameters)
 
   LambdaStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [CloudFrontStack, AppSyncStack]
+    DependsOn: [CloudFrontStack, AppSyncStack, CognitoStack] 
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml 
       Parameters:
         Stage: !Ref Stage
-        CWLCloudFrontDistributionId: 
-          Fn::GetAtt: [CloudFrontStack, Outputs.CWLCloudFrontDistributionId]
-        CWLCloudFrontDomainName:
-          Fn::GetAtt: [CloudFrontStack, Outputs.CWLCloudFrontDomainName]
+        AppName: cwl # Added AppName parameter
+        # Pass the outputs from the CloudFrontStack (which are now generic)
+        AppCloudFrontDistributionId: !GetAtt CloudFrontStack.Outputs.CloudFrontDistributionId # Parameter name changed, and got from new child output name
+        AppCloudFrontDomainName: !GetAtt CloudFrontStack.Outputs.CloudFrontDomainName # Parameter name changed, and got from new child output name
+        # CWLUserPoolId is an output from CognitoStack. Lambda template doesn't currently take it as input.
+        # If it were needed: AppUserPoolId: !GetAtt CognitoStack.Outputs.cwlUserPoolId
 
 Outputs:
-  CWLAppsyncUrl:
-    Value: 
-      Fn::GetAtt: [AppSyncStack, Outputs.CWLAppsyncUrl]
+  # Cognito Outputs
+  CWLUserPoolId:
+    Value: !GetAtt CognitoStack.Outputs.cwlUserPoolId # Ensure this output name matches what's in your cognito.yaml
     Export:
-      Name: !Sub CWLAppsyncUrl-${Stage}
-  
-  CWLAppsyncRealtimeUrl:
-    Value: 
-      Fn::GetAtt: [AppSyncStack, Outputs.CWLAppsyncRealtimeUrl]
-    Export:
-      Name: !Sub CWLAppsyncRealtimeUrl-${Stage}
-  
-  CWLDataTableName:
-    Value: 
-      Fn::GetAtt: [DynamoDBStack, Outputs.CWLDataTableName]
-    Export:
-      Name: !Sub CWLDataTableName-${Stage}
-  
-  CWLDataTableArn:
-    Value: 
-      Fn::GetAtt: [DynamoDBStack, Outputs.CWLDataTableArn]
-    Export:
-      Name: !Sub CWLDataTableArn-${Stage}
-  
+      Name: !Sub CWLUserPoolId-${Stage}
+
+  # S3 Outputs
   CWLBucketName:
     Value: 
-      Fn::GetAtt: [S3Stack, Outputs.CWLBucketName]
+      Fn::GetAtt: [S3Stack, Outputs.CWLBucketName] # Ensure this output name matches what's in your s3.yaml
     Export:
       Name: !Sub CWLBucketName-${Stage}
   
   CWLBucketArn:
     Value: 
-      Fn::GetAtt: [S3Stack, Outputs.CWLBucketArn]
+      Fn::GetAtt: [S3Stack, Outputs.CWLBucketArn] # Ensure this output name matches what's in your s3.yaml
     Export:
       Name: !Sub CWLBucketArn-${Stage}
+
+  # DynamoDB Outputs  
+  CWLDataTableName:
+    Value: 
+      Fn::GetAtt: [DynamoDBStack, Outputs.CWLDataTableName] # Ensure this output name matches what's in your dynamoDb.yaml
+    Export:
+      Name: !Sub CWLDataTableName-${Stage}
   
+  CWLDataTableArn:
+    Value: 
+      Fn::GetAtt: [DynamoDBStack, Outputs.CWLDataTableArn] # Ensure this output name matches what's in your dynamoDb.yaml
+    Export:
+      Name: !Sub CWLDataTableArn-${Stage}
+
+  # AppSync Outputs
+  CWLAppsyncUrl:
+    Value: 
+      Fn::GetAtt: [AppSyncStack, Outputs.AppsyncUrl] # Get from new child output name
+    Export:
+      Name: !Sub CWLAppsyncUrl-${Stage}
+  
+  CWLAppsyncRealtimeUrl:
+    Value: 
+      Fn::GetAtt: [AppSyncStack, Outputs.AppsyncRealtimeUrl] # Get from new child output name
+    Export:
+      Name: !Sub CWLAppsyncRealtimeUrl-${Stage}
+
+  CWLAppSyncApiId: # Added AppSync API ID Output
+    Value: !GetAtt AppSyncStack.Outputs.AppSyncApiId
+    Description: "CWL AppSync API ID"
+    Export:
+      Name: !Sub CWLAppSyncApiId-${Stage}
+  
+  # CloudFront Outputs
   CWLCloudFrontDistributionId:
     Value: 
-      Fn::GetAtt: [CloudFrontStack, Outputs.CWLCloudFrontDistributionId]
+      Fn::GetAtt: [CloudFrontStack, Outputs.CloudFrontDistributionId] # Get from new child output name
     Export:
       Name: !Sub CWLCloudFrontDistributionId-${Stage}
   
   CWLCloudFrontDomainName:
     Value: 
-      Fn::GetAtt: [CloudFrontStack, Outputs.CWLCloudFrontDomainName]
+      Fn::GetAtt: [CloudFrontStack, Outputs.CloudFrontDomainName] # Get from new child output name
     Export:
       Name: !Sub CWLCloudFrontDomainName-${Stage}
+
+  # Lambda outputs if needed, e.g.:
+  # CWLPostDeployFunctionArn:
+  #   Value: !GetAtt LambdaStack.Outputs.PostDeployFunctionArn
+  #   Export:
+  #     Name: !Sub CWLPostDeployFunctionArn-${Stage}

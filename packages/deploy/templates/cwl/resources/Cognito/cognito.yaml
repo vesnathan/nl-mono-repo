@@ -1,86 +1,123 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch Live Cognito Resources'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+
 Resources:
+  # User Pool
+  CWLUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "cwl-userpool-${Stage}"
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+      MfaConfiguration: 'OFF'
+      UserPoolTags:
+        Stack: !Sub "nlmonorepo-cwl-${Stage}"
+
+  # User Pool Client
+  CWLUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "cwl-userpool-client-${Stage}"
+      UserPoolId: !Ref CWLUserPool
+      GenerateSecret: false
+
+  # Identity Pool
   CWLIdentityPool:
     Type: AWS::Cognito::IdentityPool
-    Properties: 
+    Properties:
+      IdentityPoolName: !Sub "cwl-identitypool-${Stage}"
       AllowUnauthenticatedIdentities: true
-      CognitoIdentityProviders: 
-        - ClientId: !ImportValue cwlUserPoolClientId-${opt:stage}
-          ProviderName: !ImportValue cwlUserPoolProviderName-${opt:stage}
-      IdentityPoolName: "cwl-cwl-user-${opt:stage}"
+      CognitoIdentityProviders:
+        - ClientId: !Ref CWLUserPoolClient
+          ProviderName: !GetAtt CWLUserPool.ProviderName
 
-  CWLIdentityPoolAttachment:   
-      Type: AWS::Cognito::IdentityPoolRoleAttachment
-      Properties:
-        IdentityPoolId: !Ref CWLIdentityPool
-        Roles:
-          unauthenticated: !GetAtt CWLIdentityUnauthUserIAMRole.Arn
-          authenticated: !GetAtt CWLIdentityAuthUserIAMRole.Arn
+  # Identity Pool Role Attachment
+  CWLIdentityPoolRoleAttachment:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId: !Ref CWLIdentityPool
+      Roles:
+        authenticated: !GetAtt CWLAuthenticatedRole.Arn
+        unauthenticated: !GetAtt CWLUnauthenticatedRole.Arn
 
-  # unauth iam role
-  CWLIdentityUnauthUserIAMRole: 
+  # Authenticated IAM Role
+  CWLAuthenticatedRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: "cwl-unauth-role-${opt:stage}"
-      AssumeRolePolicyDocument: 
-        Version: "2012-10-17"
+      RoleName: !Sub "cwl-auth-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
-              Federated:
-                - "cognito-identity.amazonaws.com"
-            Action:
-              - "sts:AssumeRoleWithWebIdentity"
-            Condition: {
-              StringEquals: {
-                "cognito-identity.amazonaws.com:aud": !Ref CWLIdentityPool
-              },
-              ForAnyValue:StringLike: {
-                "cognito-identity.amazonaws.com:amr": "unauthenticated"
-              }
-            }
-      Description: "Unauth IAM role for CWL users"
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                'cognito-identity.amazonaws.com:aud': !Ref CWLIdentityPool
+              'ForAnyValue:StringLike':
+                'cognito-identity.amazonaws.com:amr': authenticated
       Policies:
-        - PolicyName: "cwl-unauth-user-policy-${opt:stage}"
-          PolicyDocument: 
-            Version: "2012-10-17"
+        - PolicyName: !Sub "cwl-auth-policy-${Stage}"
+          PolicyDocument:
+            Version: '2012-10-17'
             Statement:
               - Effect: Allow
                 Action:
-                  - "appSync:GraphQL"
-                Resource:
-                  - !Join ["", [!GetAtt GraphQlApi.Arn, "/types/Mutation/fields/registerClientUserUnauth"]]
+                  - appsync:GraphQL
+                Resource: '*'
 
-  # auth iam role
-  CWLIdentityAuthUserIAMRole: 
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: "cwl-auth-role-${opt:stage}"
-        AssumeRolePolicyDocument: 
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Principal:
-                Federated:
-                  - "cognito-identity.amazonaws.com"
-              Action:
-                - "sts:AssumeRoleWithWebIdentity"
-              Condition: {
-                StringEquals: {
-                  "cognito-identity.amazonaws.com:aud": !Ref CWLIdentityPool
-                },
-                ForAnyValue:StringLike: {
-                  "cognito-identity.amazonaws.com:amr": "authenticated"
-                }
-              }
-        Description: "Authenticated IAM role for CWL users"
-        Policies:
-          - PolicyName: "cwl-auth-user-policy-${opt:stage}"
-            PolicyDocument: 
-              Version: "2012-10-17"
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - "appSync:GraphQL"
-                  Resource: 
-                    # Allow access to all queries and mutations
-                    - !Join ["", [!GetAtt GraphQlApi.Arn, "/*"]]
+  # Unauthenticated IAM Role
+  CWLUnauthenticatedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "cwl-unauth-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                'cognito-identity.amazonaws.com:aud': !Ref CWLIdentityPool
+              'ForAnyValue:StringLike':
+                'cognito-identity.amazonaws.com:amr': unauthenticated
+      Policies:
+        - PolicyName: !Sub "cwl-unauth-policy-${Stage}"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - appsync:GraphQL
+                Resource: '*'
+
+Outputs:
+  UserPoolId:
+    Description: ID of the Cognito User Pool
+    Value: !Ref CWLUserPool
+  UserPoolClientId:
+    Description: ID of the Cognito User Pool Client
+    Value: !Ref CWLUserPoolClient
+  IdentityPoolId:
+    Description: ID of the Cognito Identity Pool
+    Value: !Ref CWLIdentityPool
+  AuthenticatedRoleArn:
+    Description: ARN of the authenticated IAM role
+    Value: !GetAtt CWLAuthenticatedRole.Arn
+  UnauthenticatedRoleArn:
+    Description: ARN of the unauthenticated IAM role
+    Value: !GetAtt CWLUnauthenticatedRole.Arn

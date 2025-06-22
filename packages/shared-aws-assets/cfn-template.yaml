@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Shared AWS resources for CloudWatch Live application'
+Description: 'Shared AWS resources for NL applications'
 
 Parameters:
   Stage:
@@ -25,53 +25,23 @@ Resources:
       Parameters:
         Stage: !Ref Stage
 
-  CognitoStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Cognito/cognito.yaml
-      Parameters:
-        Stage: !Ref Stage
-
-  S3Stack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: KMSStack
-    Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/S3/s3.yaml
-      Parameters:
-        Stage: !Ref Stage
-        KMSKeyId: !GetAtt KMSStack.Outputs.cwlKMSKey
-
-  DynamoDBStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: KMSStack
-    Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/DynamoDb/dynamoDb.yaml
-      Parameters:
-        Stage: !Ref Stage
-        KMSKeyArn: !GetAtt KMSStack.Outputs.cwlKMSKeyArn
-
 Outputs:
-  cwlSecurityGroupFromSharedVPCId:
+  SharedSecurityGroupFromVPCId:
     Value: !GetAtt VPCStack.Outputs.cwlSecurityGroupFromSharedVPCId
     Export:
-      Name: !Sub cwlSecurityGroupFromSharedVPCId-${Stage}
+      Name: !Sub SharedSecurityGroupFromVPCId-${Stage}
 
-  cwlSecurityGroupFromSharedVPC:
+  SharedSecurityGroupFromVPC:
     Value: !GetAtt VPCStack.Outputs.cwlSecurityGroupFromSharedVPC
     Export:
-      Name: !Sub cwlSecurityGroupFromSharedVPC-${Stage}
+      Name: !Sub SharedSecurityGroupFromVPC-${Stage}
           
-  cwlKMSKey:
+  SharedKMSKey:
     Value: !GetAtt KMSStack.Outputs.cwlKMSKey
     Export:
-      Name: !Sub cwlKMSKey-${Stage}
+      Name: !Sub SharedKMSKey-${Stage}
 
-  cwlKMSKeyArn:
+  SharedKMSKeyArn:
     Value: !GetAtt KMSStack.Outputs.cwlKMSKeyArn
     Export:
-      Name: !Sub cwlKMSKeyArn-${Stage}
-      
-  cwlUserPoolId:
-    Value: !GetAtt CognitoStack.Outputs.cwlUserPoolId
-    Export:
-      Name: !Sub cwlUserPoolId-${Stage}
+      Name: !Sub SharedKMSKeyArn-${Stage}
