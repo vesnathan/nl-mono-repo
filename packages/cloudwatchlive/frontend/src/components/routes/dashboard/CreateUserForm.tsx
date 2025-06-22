@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { CWLUserInput, ClientType } from '@/types/gqlTypes'; // Assuming gqlTypes is correctly aliased
 import { Button, Input, ModalBody, ModalFooter, Select, SelectItem } from '@nextui-org/react';
-import { createCWLUserMutationFn } from '@/graphql/mutations'; // Import the mutation function
+import { createCWLUserMutationFn } from '@/graphql/mutations/userMutations'; // Import the mutation function
 import { useMutation } from '@tanstack/react-query'; // Assuming TanStack Query is used
 import { SALUTATIONS, SalutationValue } from '@/../shared/constants/salutations';
 

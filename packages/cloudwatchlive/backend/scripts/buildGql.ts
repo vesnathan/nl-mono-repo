@@ -9,7 +9,7 @@ const buildGql = async () => {
   mergeGraphqlFiles({
     INPUT_DIRS: [
       path.resolve("resources/AppSync"),
-      path.resolve("../../shared/types"),
+      path.resolve("../shared/types"),
       path.resolve("scripts"),
     ],
     OUTPUT_FILE_PATH: path.resolve("combined_schema.graphql"),

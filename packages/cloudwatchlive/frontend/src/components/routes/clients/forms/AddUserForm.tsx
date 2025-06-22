@@ -12,7 +12,7 @@ import { RHFTextField } from "@/components/common/RHFTextfield";
 import {
   createEmptyCWLUser,
   CWLUserFormValidationSchema,
-} from "shared/types/CWLUserSchemas";
+} from "@/types/CWLUserSchemas";
 import { CWLUser } from "@/types/gqlTypes";
 import { useUserStore } from "@/stores/userStore";
 import { useGetUserJobRoles } from "@/hooks/useGetUserJobRoles";

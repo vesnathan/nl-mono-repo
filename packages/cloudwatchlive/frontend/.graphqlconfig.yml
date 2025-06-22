@@ -9,6 +9,7 @@ projects:
     excludes:
       - ./amplify/**
       - src/types/gqlTypes.ts
+      - src/graphql/gqlTypes.ts
     extensions:
       amplify:
         codeGenTarget: typescript
