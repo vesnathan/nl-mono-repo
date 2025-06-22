@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { CWLButton } from "@/components/common/CWLButton";
 
 export default function GlobalError({
   error,
@@ -13,9 +14,11 @@ export default function GlobalError({
     <div>
       <h2>Something went wrong!</h2>
       <p>{error.message}</p>
-      <button onClick={() => reset()} type="button">
-        Try again
-      </button>
+      <CWLButton 
+        buttonText="Try again"
+        onClick={() => reset()}
+        type="button"
+      />
     </div>
   );
 }

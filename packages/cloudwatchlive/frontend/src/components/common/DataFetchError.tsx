@@ -1,4 +1,5 @@
 import React from "react";
+import { CWLButton } from "./CWLButton";
 
 interface Props {
   error: unknown;
@@ -19,9 +20,13 @@ export const DataFetchError: React.FC<Props> = ({
         {errorMessage || "An unexpected error occurred while fetching data"}
       </span>
       {retry && (
-        <button type="button" onClick={retry}>
-          Retry
-        </button>
+        <CWLButton 
+          buttonText="Retry"
+          onClick={retry}
+          type="button"
+          variant="light"
+          additionalClassName="ml-2"
+        />
       )}
     </div>
   );
