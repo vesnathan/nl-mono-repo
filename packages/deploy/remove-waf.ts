@@ -11,6 +11,7 @@
 import { Command } from 'commander';
 import { CloudFormationClient, DeleteStackCommand, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
 import { config } from 'dotenv';
+import { logger } from './utils/logger';
 
 // Load environment variables
 config();

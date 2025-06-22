@@ -13,16 +13,16 @@ export class DependencyValidator {
   
   // Define the dependency graph
   private readonly dependencies: Record<StackType, StackType[]> = {
-    'waf': [], // WAF has no dependencies
-    'shared': ['waf'], // Shared depends on WAF
-    'cwl': ['waf', 'shared'] // CWL depends on both WAF and Shared
+    [StackType.WAF]: [], // WAF has no dependencies
+    [StackType.Shared]: [StackType.WAF], // Shared depends on WAF
+    [StackType.CWL]: [StackType.WAF, StackType.Shared], // CWL depends on both WAF and Shared
   };
 
   // Define which stacks are dependent on each stack
   private readonly dependents: Record<StackType, StackType[]> = {
-    'waf': ['shared', 'cwl'], // WAF is required by Shared and CWL
-    'shared': ['cwl'], // Shared is required by CWL
-    'cwl': [] // CWL has no dependents
+    [StackType.WAF]: [StackType.Shared, StackType.CWL], // WAF is required by Shared and CWL
+    [StackType.Shared]: [StackType.CWL], // Shared is required by CWL
+    [StackType.CWL]: [], // CWL has no dependents
   };
 
   constructor() {
@@ -88,7 +88,7 @@ export class DependencyValidator {
     };
     
     // Visit all stacks to ensure we get the complete order
-    for (const stack of ['waf', 'shared', 'cwl'] as StackType[]) {
+    for (const stack of [StackType.WAF, StackType.Shared, StackType.CWL]) {
       visit(stack);
     }
     
@@ -103,48 +103,41 @@ export class DependencyValidator {
   }
 
   /**
-   * Gets stacks that depend on the given stack
-   */
-  getDependentStacks(stackType: StackType): StackType[] {
-    return this.dependents[stackType] || [];
-  }
-
-  /**
-   * Gets stacks that the given stack depends on
-   */
-  getDependencyStacks(stackType: StackType): StackType[] {
-    return this.dependencies[stackType] || [];
-  }
-
-  /**
-   * Validates that a stack can be safely removed (no dependents are deployed)
+   * Validates that a stack can be removed (i.e., no other stacks depend on it)
    */
   async validateRemoval(stackType: StackType, stage: string): Promise<boolean> {
-    const dependents = this.getDependentStacks(stackType);
+    const dependents = this.dependents[stackType];
     
     if (dependents.length === 0) {
-      logger.info(`Stack ${stackType} has no dependents - safe to remove`);
+      logger.info(`Stack ${stackType} has no dependents and can be removed safely`);
       return true;
     }
 
-    logger.info(`Checking if dependents of ${stackType} are deployed: ${dependents.join(', ')}`);
+    logger.info(`Validating removal for ${stackType}. Checking dependents: ${dependents.join(', ')}`);
     
-    const deployedDependents: StackType[] = [];
+    const validationResults: { stack: StackType; exists: boolean }[] = [];
     
     for (const dependent of dependents) {
       const exists = await this.outputsManager.validateStackExists(dependent, stage);
+      validationResults.push({ stack: dependent, exists });
+      
       if (exists) {
-        deployedDependents.push(dependent);
+        logger.error(`✗ Cannot remove ${stackType} - dependent stack ${dependent} is still deployed`);
+      } else {
+        logger.success(`✓ Dependent ${dependent} is not deployed`);
       }
     }
     
+    const deployedDependents = validationResults.filter(r => r.exists);
+    
     if (deployedDependents.length > 0) {
-      logger.error(`Cannot remove ${stackType} - dependent stacks are still deployed: ${deployedDependents.join(', ')}`);
-      logger.info(`Please remove dependent stacks first: ${deployedDependents.join(', ')}`);
+      const deployedStacks = deployedDependents.map(r => r.stack).join(', ');
+      logger.error(`Cannot remove ${stackType} - the following dependent stacks are still deployed: ${deployedStacks}`);
+      logger.info(`Please remove the dependent stacks first: ${deployedStacks}`);
       return false;
     }
     
-    logger.success(`No dependent stacks found - ${stackType} can be safely removed`);
+    logger.success(`All dependents for ${stackType} are removed. It is safe to remove.`);
     return true;
   }
 

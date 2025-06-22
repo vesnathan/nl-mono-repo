@@ -14,12 +14,30 @@ import {
   IAM,
   PutRolePolicyCommand
 } from '@aws-sdk/client-iam';
-import { DeploymentOptions, TEMPLATE_PATHS, TEMPLATE_RESOURCES_PATHS, getStackName, getTemplateBucketName } from '../../types';
+import { DeploymentOptions, StackType, TEMPLATE_RESOURCES_PATHS, getStackName, getTemplateBucketName } from '../../types';
 import { logger } from '../../utils/logger';
 import { IamManager } from '../../utils/iam-manager';
 import { AwsUtils } from '../../utils/aws-utils';
 import { createReadStream, readdirSync, statSync } from 'fs';
-import { join } from 'path';
+import { join, relative } from 'path';
+
+const findYamlFiles = (dir: string): string[] => {
+  const files = readdirSync(dir);
+  let yamlFiles: string[] = [];
+
+  for (const file of files) {
+    const filePath = join(dir, file);
+    const stat = statSync(filePath);
+
+    if (stat.isDirectory()) {
+      yamlFiles = yamlFiles.concat(findYamlFiles(filePath));
+    } else if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
+      yamlFiles.push(filePath);
+    }
+  }
+
+  return yamlFiles;
+}
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
@@ -40,8 +58,8 @@ async function retryOperation<T>(operation: () => Promise<T>, maxRetries = MAX_R
 }
 
 export async function deployShared(options: DeploymentOptions): Promise<void> {
-  const stackName = getStackName('shared', options.stage);
-  const templateBucketName = getTemplateBucketName('shared', options.stage);
+  const stackName = getStackName(StackType.Shared, options.stage);
+  const templateBucketName = getTemplateBucketName(StackType.Shared, options.stage);
   const region = options.region || process.env.AWS_REGION || 'ap-southeast-2'; // Ensure region is available
   logger.info('Starting Shared Resources deployment...');
 
@@ -52,7 +70,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
   
   // Set up IAM role
   const iamManager = new IamManager(region); // Pass region to IamManager
-  const roleArn = await iamManager.setupRole('shared', options.stage);
+  const roleArn = await iamManager.setupRole(StackType.Shared, options.stage);
   if (!roleArn) {
     throw new Error('Failed to setup role for shared resources');
   }
@@ -132,7 +150,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
 
     // Clear existing templates
     logger.info('Clearing existing templates...');
-    logger.info(`Looking for templates in: ${TEMPLATE_RESOURCES_PATHS.shared}`);
+    logger.info(`Looking for templates in: ${TEMPLATE_RESOURCES_PATHS[StackType.Shared]}`);
     logger.info(`Current working directory: ${process.cwd()}`);
     logger.info(`__dirname resolved to: ${__dirname}`);
     
@@ -153,7 +171,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
     }
 
     // Upload nested stack templates
-    logger.info(`Searching for templates with pattern: **/*.yaml in ${TEMPLATE_RESOURCES_PATHS.shared}`);
+    logger.info(`Searching for templates with pattern: **/*.yaml in ${TEMPLATE_RESOURCES_PATHS[StackType.Shared]}`);
     
     try {
       // Use a simpler approach to find YAML files
@@ -180,9 +198,9 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
         return files;
       }
       
-      const templateFiles = await findYamlFiles(TEMPLATE_RESOURCES_PATHS.shared);
+      const templateFiles = await findYamlFiles(TEMPLATE_RESOURCES_PATHS[StackType.Shared]);
 
-      logger.info(`Found ${templateFiles.length} template files in ${TEMPLATE_RESOURCES_PATHS.shared}`);
+      logger.info(`Found ${templateFiles.length} template files in ${TEMPLATE_RESOURCES_PATHS[StackType.Shared]}`);
       logger.info(`Template files: ${JSON.stringify(templateFiles, null, 2)}`);
       
       if (templateFiles.length === 0) {
@@ -191,19 +209,16 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
       }
 
       for (const file of templateFiles) {
-        const relativePath = file.replace(TEMPLATE_RESOURCES_PATHS.shared + '/', '');
-        const key = `resources/${relativePath}`;
-        logger.info(`Uploading template file: ${file} to S3 key: ${key}`);
-        const putCommand = new PutObjectCommand({
+        const s3Key = relative(TEMPLATE_RESOURCES_PATHS[StackType.Shared], file).replace(/\\/g, '/');
+        
+        logger.info(`Uploading ${file} to s3://${templateBucketName}/${s3Key}`);
+        
+        await s3.send(new PutObjectCommand({
           Bucket: templateBucketName,
-          Key: key,
+          Key: s3Key,
           Body: createReadStream(file),
-          ContentType: 'application/x-yaml'
-        });
-        await retryOperation(async () => {
-          await s3.send(putCommand);
-          logger.info(`Uploaded template: ${key}`);
-        });
+          ContentType: 'application/x-yaml',
+        }));
       }
     } catch (error: any) {
       logger.error(`Template upload operation failed: ${error.message}`);
@@ -212,7 +227,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
 
     // Create or update the main stack
     const awsUtils = new AwsUtils(region); // Pass region to AwsUtils
-    const templateBody = await awsUtils.getTemplateBody('shared');
+    const templateBody = await awsUtils.getTemplateBody(StackType.Shared);
     
     const stackParams = {
       StackName: stackName,

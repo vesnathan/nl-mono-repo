@@ -16,7 +16,7 @@ Resources:
   cwlDataTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub "nlmonorepo-cwl-userdatatable-${Stage}"
+      TableName: !Sub "nlmonorepo-cwl-usertable-${Stage}"
       AttributeDefinitions:
         - AttributeName: "userId"
           AttributeType: "S"
@@ -41,7 +41,11 @@ Outputs:
   CWLDataTableName:
     Value: !Ref cwlDataTable
     Description: Name of the CloudWatchLive data table
+    Export:
+      Name: !Sub "cwlUserTableName-${Stage}"
   
   CWLDataTableArn:
     Value: !GetAtt cwlDataTable.Arn
     Description: ARN of the CloudWatchLive data table
+    Export:
+      Name: !Sub "cwlUserTableArn-${Stage}"

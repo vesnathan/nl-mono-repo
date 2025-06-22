@@ -1,5 +1,5 @@
 import { GraphQLResult, generateClient } from "aws-amplify/api";
-import { GetCWLUserQuery, GetCWLUserQueryVariables } from "../gqlTypes";
+import { GetCWLUserQuery, GetCWLUserQueryVariables } from "../../types/gqlTypes";
 
 const amplifyGraphqlClient = generateClient();
 
@@ -7,7 +7,7 @@ export const userQueryKeys = {
   getCWLUser: "getCWLUser",
 };
 
-// getCWLUser Wuery
+// getCWLUser Query
 const getCWLUserQueryStr = `
     query GetCWLUser($userId: String!) {
       getCWLUser(userId: $userId) {
@@ -23,6 +23,7 @@ const getCWLUserQueryStr = `
         userCreated
         organizationId
         userRole
+        clientType
       }
     }
 `;

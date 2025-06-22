@@ -19,7 +19,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { IAMClient } from "@aws-sdk/client-iam"; 
 import { logger } from "./logger";
-import { StackType } from "../types"; 
+import { StackType, getStackName } from "../types"; 
 
 export class ForceDeleteManager {
   private cfnClient: CloudFormationClient;
@@ -43,7 +43,7 @@ export class ForceDeleteManager {
       `Attempting to empty S3 buckets related to stack identifier ${stackIdentifier} (type: ${stackType}) in stage ${stage}...`,
     );
     let bucketsToEmpty: string[] = [];
-    const fullStackName = `${stackIdentifier}-${stage}`;
+    const fullStackName = getStackName(stackType, stage);
 
     try {
       const stack = await this.getStack(fullStackName);
@@ -74,13 +74,13 @@ export class ForceDeleteManager {
     );
     const conventionalBuckets: string[] = [];
     
-    if (stackType === 'waf') {
+    if (stackType === StackType.WAF) {
       conventionalBuckets.push(`nlmonorepo-waf-logs-${stage}`);
       conventionalBuckets.push(`nlmonorepo-waf-templates-${stage}`); // Added for WAF templates bucket
-    } else if (stackType === 'cwl') {
+    } else if (stackType === StackType.CWL) {
       conventionalBuckets.push(`nlmonorepo-cwl-frontend-${stage}`);
       conventionalBuckets.push(`nlmonorepo-cwl-templates-${stage}`);
-    } else if (stackType === 'shared') {
+    } else if (stackType === StackType.Shared) {
         conventionalBuckets.push(`nlmonorepo-shared-templates-${stage}`);
     }
 
@@ -209,16 +209,16 @@ export class ForceDeleteManager {
 
     const conventionalBucketsToDelete: string[] = [];
     // Logic to identify conventional buckets, similar to emptyStackS3Buckets
-    if (stackType === 'waf') {
+    if (stackType === StackType.WAF) {
       conventionalBucketsToDelete.push(`nlmonorepo-waf-logs-${stage}`);
       conventionalBucketsToDelete.push(`nlmonorepo-waf-templates-${stage}`);
-    } else if (stackType === 'cwl') {
+    } else if (stackType === StackType.CWL) {
       // For 'cwl', we might have frontend and templates buckets
       // Example: nlmonorepo-cwl-frontend-dev, nlmonorepo-cwl-templates-dev
       // The baseIdentifier 'nlmonorepo-cwl' is consistent with this.
       conventionalBucketsToDelete.push(`${baseIdentifier}-frontend-${stage}`); // e.g., nlmonorepo-cwl-frontend-dev
       conventionalBucketsToDelete.push(`${baseIdentifier}-templates-${stage}`); // e.g., nlmonorepo-cwl-templates-dev
-    } else if (stackType === 'shared') {
+    } else if (stackType === StackType.Shared) {
       // Example: nlmonorepo-shared-templates-dev
       conventionalBucketsToDelete.push(`${baseIdentifier}-templates-${stage}`); // e.g., nlmonorepo-shared-templates-dev
     }
@@ -257,8 +257,8 @@ export class ForceDeleteManager {
     stage: string,
     skipS3Cleanup: boolean = false,
   ): Promise<void> {
-    const stackName = `${stackIdentifier}-${stage}`;
-    logger.info(`Starting force delete for stack: ${stackName} (type: ${stackType})`);
+    const stackName = getStackName(stackType, stage);
+    logger.info(`Starting force delete for stack: ${stackName} (type: ${stackType}) in region: ${this.region}`);
 
     if (!skipS3Cleanup) {
       await this.emptyStackS3Buckets(stackIdentifier, stackType, stage);
@@ -266,49 +266,145 @@ export class ForceDeleteManager {
       logger.info(`Skipping S3 bucket cleanup for ${stackName} as requested.`);
     }
     
-    const stack = await this.getStack(stackName);
-
-    if (!stack) {
-      logger.info(`Stack ${stackName} does not exist, no CloudFormation stack to delete.`);
-      return;
-    }
-    
-    logger.info(`Stack ${stackName} exists with status ${stack.StackStatus || 'UNKNOWN'}. Proceeding with deletion attempt.`);
-
     try {
-      await this.cfnClient.send(new DeleteStackCommand({ StackName: stackName }));
+      const stack = await this.getStack(stackName);
+
+      if (!stack) {
+        logger.info(`Stack ${stackName} does not exist or is not accessible. Skipping deletion.`);
+        return;
+      }
+      
+      logger.info(`Stack ${stackName} exists with status ${stack.StackStatus || 'UNKNOWN'}. Proceeding with deletion attempt.`);
+
+      // Check if stack is already in a delete state
+      if (stack.StackStatus === 'DELETE_IN_PROGRESS') {
+        logger.info(`Stack ${stackName} is already being deleted. Waiting for completion...`);
+        await this.waitForStackDeletion(stackName);
+        return;
+      }
+      
+      if (stack.StackStatus === 'DELETE_COMPLETE') {
+        logger.info(`Stack ${stackName} is already deleted.`);
+        return;
+      }
+
+      // If stack is in failed state, try to continue deletion
+      if (stack.StackStatus === 'DELETE_FAILED') {
+        logger.info(`Stack ${stackName} is in DELETE_FAILED state. Attempting to continue deletion...`);
+      } else {
+        logger.info(`Initiating deletion of stack ${stackName}...`);
+      }
+
+      try {
+        const deleteCommand = new DeleteStackCommand({ StackName: stackName });
+        logger.debug(`CloudFormation DeleteStack command: ${JSON.stringify(deleteCommand.input)}`);
+        
+        const deleteResponse = await this.cfnClient.send(deleteCommand);
+        logger.debug(`CloudFormation DeleteStack response metadata: ${JSON.stringify(deleteResponse.$metadata)}`);
+        logger.info(`Delete command sent successfully for stack ${stackName}`);
+      } catch (deleteError: any) {
+        logger.error(`Error sending delete command for stack ${stackName}:`);
+        logger.error(`  Error name: ${deleteError.name}`);
+        logger.error(`  Error message: ${deleteError.message}`);
+        logger.error(`  Error code: ${deleteError.code || 'N/A'}`);
+        logger.error(`  HTTP status: ${deleteError.$metadata?.httpStatusCode || 'N/A'}`);
+        logger.error(`  Request ID: ${deleteError.$metadata?.requestId || 'N/A'}`);
+        
+        // Check if it's a "no updates" error (stack already being deleted)
+        if (deleteError.message && deleteError.message.includes('No updates are to be performed')) {
+          logger.info(`Stack ${stackName} is already in the process of being deleted.`);
+        } else {
+          throw deleteError;
+        }
+      }
+
       logger.info(`DeleteStack command issued for ${stackName}. Waiting for deletion...`);
       await this.waitForStackDeletion(stackName);
-    } catch (error) {
-      logger.error(`Failed to delete stack ${stackName}: ${(error as Error).message}`);
+      logger.info(`Successfully deleted stack ${stackName}`);
+      
+    } catch (error: any) {
+      logger.error(`Failed to delete stack ${stackName}:`);
+      logger.error(`  Error name: ${error.name}`);
+      logger.error(`  Error message: ${error.message}`);
+      logger.error(`  Error code: ${error.code || 'N/A'}`);
+      logger.error(`  HTTP status: ${error.$metadata?.httpStatusCode || 'N/A'}`);
+      logger.error(`  Request ID: ${error.$metadata?.requestId || 'N/A'}`);
+      
+      // Provide specific guidance based on error type
+      if (error.name === 'UnauthorizedOperation' || error.name === 'AccessDenied') {
+        logger.error(`This appears to be a permissions issue. Please check your AWS credentials and IAM policies.`);
+      } else if (error.name === 'ValidationError') {
+        logger.error(`This appears to be a validation error. The stack name or parameters may be invalid.`);
+      } else if (error.message && error.message.includes('DELETE_FAILED')) {
+        logger.error(`Stack deletion failed. You may need to manually clean up resources before retrying.`);
+      }
+      
       throw error;
     }
   }
 
   private async getStack(stackName: string): Promise<Stack | undefined> {
+    logger.info(`Attempting to describe stack: ${stackName} in region: ${this.region}`);
     try {
-      const { Stacks } = await this.cfnClient.send(
-        new DescribeStacksCommand({ StackName: stackName }),
-      );
-      if (Stacks && Stacks.length > 0 && Stacks[0]) {
-        return Stacks[0];
+      const command = new DescribeStacksCommand({ StackName: stackName });
+      logger.debug(`CloudFormation DescribeStacks command: ${JSON.stringify(command.input)}`);
+      
+      const response = await this.cfnClient.send(command);
+      logger.debug(`CloudFormation DescribeStacks response metadata: ${JSON.stringify(response.$metadata)}`);
+      
+      if (response.Stacks && response.Stacks.length > 0 && response.Stacks[0]) {
+        const stack = response.Stacks[0];
+        logger.info(`Stack ${stackName} found with status: ${stack.StackStatus}`);
+        return stack;
       }
+      logger.info(`Stack ${stackName} not found in response (empty Stacks array)`);
       return undefined;
     } catch (error: any) {
+      logger.error(`Error describing stack ${stackName} in region ${this.region}:`);
+      logger.error(`  Error name: ${error.name}`);
+      logger.error(`  Error message: ${error.message}`);
+      logger.error(`  Error code: ${error.code || 'N/A'}`);
+      logger.error(`  HTTP status: ${error.$metadata?.httpStatusCode || 'N/A'}`);
+      logger.error(`  Request ID: ${error.$metadata?.requestId || 'N/A'}`);
+      
+      // Only treat as "does not exist" for very specific error conditions
       if (error.name === 'ValidationError' && error.message && error.message.toLowerCase().includes("does not exist")) {
+        logger.info(`Stack ${stackName} confirmed does not exist (ValidationError)`);
         return undefined;
       }
       if (error.$metadata && error.$metadata.httpStatusCode === 400 && error.message && error.message.toLowerCase().includes("does not exist")) {
-         return undefined;
+        logger.info(`Stack ${stackName} confirmed does not exist (400 status)`);
+        return undefined;
       }
-      logger.warning(`Error describing stack ${stackName}: ${error.message}. Assuming it does not exist or is inaccessible for safety in delete flows.`);
-      return undefined; 
+      
+      // For any other error, throw it so the caller can handle it properly
+      logger.error(`Unexpected error describing stack ${stackName}. This could be a permissions issue, credential issue, or other AWS problem.`);
+      throw error;
+    }
+  }
+
+  /**
+   * Get the status of a stack
+   */
+  public async getStackStatus(stackName: string): Promise<string | null> {
+    try {
+      const stack = await this.getStack(stackName);
+      return stack?.StackStatus || null;
+    } catch (error: any) {
+      // If stack doesn't exist, return null
+      if (error.name === 'ValidationError' || 
+          (error.message && error.message.toLowerCase().includes('does not exist'))) {
+        return null;
+      }
+      throw error;
     }
   }
 
   public async waitForStackDeletion(stackName: string): Promise<void> {
     const maxAttempts = 60; 
     const delay = 30000; 
+
+    logger.info(`Waiting for stack ${stackName} deletion in region ${this.region} (max ${maxAttempts * delay / 1000 / 60} minutes)`);
 
     for (let i = 0; i < maxAttempts; i++) {
       if (i > 0) { 
@@ -324,6 +420,8 @@ export class ForceDeleteManager {
         if (status === StackStatus.DELETE_FAILED) {
           const reason = stack.StackStatusReason || 'No reason provided';
           logger.error(`Stack ${stackName} deletion failed. Status: ${status}. Reason: ${reason}`);
+          logger.error(`You may need to manually resolve resource dependencies or permissions issues and retry deletion.`);
+          
           throw new Error(
             `Stack ${stackName} deletion failed. Status: ${status}. Reason: ${reason}`,
           );
@@ -336,6 +434,18 @@ export class ForceDeleteManager {
           `Waiting for stack ${stackName} to delete... Current status: ${status || 'UNKNOWN'} (Attempt ${i + 1}/${maxAttempts})`,
         );
       } catch (error: any) {
+        // If it's a getStack error and the stack doesn't exist, that's success
+        if (error.name === 'ValidationError' && error.message && error.message.toLowerCase().includes("does not exist")) {
+          logger.info(`Stack ${stackName} successfully deleted (confirmed by ValidationError).`);
+          return;
+        }
+        
+        logger.error(`Error while waiting for stack ${stackName} deletion (attempt ${i + 1}/${maxAttempts}):`);
+        logger.error(`  Error name: ${error.name}`);
+        logger.error(`  Error message: ${error.message}`);
+        logger.error(`  Error code: ${error.code || 'N/A'}`);
+        
+        // For other errors, re-throw immediately
         throw error; 
       }
     }

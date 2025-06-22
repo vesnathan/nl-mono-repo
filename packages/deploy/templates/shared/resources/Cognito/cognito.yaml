@@ -1,240 +1,52 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Shared Cognito User Pool Resources'
+
 Parameters:
-    Stage:
-      Type: String
-      Description: Deployment stage
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
 
 Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "nlmonorepo-shared-userpool-${Stage}"
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+      MfaConfiguration: 'OFF'
+      UserPoolTags:
+        Stack: !Sub "nlmonorepo-shared-${Stage}"
 
-    CognitoRole:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: !Sub nlmonorepo-cognito-${Stage}
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Principal:
-                AWS: !Sub arn:aws:iam::${AWS::AccountId}:user/nlmonorepo-shared-${Stage}
-                Service: cloudformation.amazonaws.com
-              Action: sts:AssumeRole
-        Policies:
-          - PolicyName: CognitoManagement
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - cognito-idp:*
-                  Resource: "*"
-
-    cognitoUserPool:
-      Type: AWS::Cognito::UserPool
-      Properties:
-        UsernameAttributes:
-          - email
-        UserPoolName: !Sub "nlmonorepo-shared-cwluserpool-${Stage}"
-        UserPoolAddOns:
-          AdvancedSecurityMode: ENFORCED
-        MfaConfiguration: "OPTIONAL"
-        EnabledMfas:
-          - "SOFTWARE_TOKEN_MFA"
-
-    cognitoUserPoolClient:
-      Type: AWS::Cognito::UserPoolClient
-      Properties:
-        ClientName: !Sub "Web-${Stage}"
-        UserPoolId: !Ref cognitoUserPool
-        PreventUserExistenceErrors: "ENABLED"
-        AccessTokenValidity: 30
-        IdTokenValidity: 30
-        RefreshTokenValidity: 1
-        TokenValidityUnits:
-          AccessToken: minutes
-          IdToken: minutes
-          RefreshToken: days
-        WriteAttributes: []
-        ExplicitAuthFlows:
-          - "ALLOW_REFRESH_TOKEN_AUTH"
-          - "ALLOW_USER_PASSWORD_AUTH"
-          - "ALLOW_USER_SRP_AUTH"
-        SupportedIdentityProviders:
-          - COGNITO
-        EnableTokenRevocation: true
-
-    cognitoIdentityPool:
-      Type: AWS::Cognito::IdentityPool
-      Properties:
-        IdentityPoolName: !Sub "nlmonorepo-shared-identitypool-${Stage}"
-        AllowUnauthenticatedIdentities: false
-        CognitoIdentityProviders:
-          - ClientId: !Ref cognitoUserPoolClient
-            ProviderName: !GetAtt cognitoUserPool.ProviderName
-
-    superAdminGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: "SuperAdmin"
-        UserPoolId: !Ref cognitoUserPool
-        Description: "Administrators of the entire application"
-        Precedence: 1
-
-
-    techCompanyAdminGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: "TechCompanyAdmin"
-        UserPoolId: !Ref cognitoUserPool
-        Description: "Admins for tech companies"
-        Precedence: 2
-
-    techCompanyStaffGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: "TechCompanyStaff"
-        UserPoolId: !Ref cognitoUserPool
-        Description: "Employees of tech companies"
-        Precedence: 2
-
-    eventCompanyAdminGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: "EventCompanyAdmin"
-        UserPoolId: !Ref cognitoUserPool
-        Description: "Adminis for event companies"
-        Precedence: 2
-
-    eventCompanyStaffGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: "EventCompanyStaff"
-        UserPoolId: !Ref cognitoUserPool
-        Description: "Employees of event companies"
-        Precedence: 2
-
-    eventClientAdminGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: "EventClientAdmin"
-        UserPoolId: !Ref cognitoUserPool
-        Description: "Admins for event clients"
-        Precedence: 2
-
-    eventClientStaffGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: "EventClientStaff"
-        UserPoolId: !Ref cognitoUserPool
-        Description: "Employees of event clients"
-        Precedence: 2
-
-    eventSpeakerGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: "EventSpeaker"
-        UserPoolId: !Ref cognitoUserPool
-        Description: "Event speakers"
-        Precedence: 3
-
-    RegisteredAttendeeGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: "RegisteredAttendee"
-        UserPoolId: !Ref cognitoUserPool
-        Description: "Registered Event attendees"
-        Precedence: 3
-
-    UnregisteredAttendeeGroup:
-      Type: AWS::Cognito::UserPoolGroup
-      Properties:
-        GroupName: "UnregisteredAttendee"
-        UserPoolId: !Ref cognitoUserPool
-        Description: "Unregistered Event attendees"
-        Precedence: 3
-
-    # IAM Role for authenticated users
-    CognitoIdentityPoolAuthenticatedRole:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: !Sub "nlmonorepo-shared-cognito-auth-role-${Stage}"
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Principal:
-                Federated: cognito-identity.amazonaws.com
-              Action: sts:AssumeRoleWithWebIdentity
-              Condition:
-                StringEquals:
-                  "cognito-identity.amazonaws.com:aud": !Ref cognitoIdentityPool
-                ForAnyValue:StringLike:
-                  "cognito-identity.amazonaws.com:amr": authenticated
-        Policies:
-          - PolicyName: CognitoIdentityPoolAuthenticatedPolicy
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - cognito-identity:GetCredentialsForIdentity
-                    - cognito-identity:GetId
-                  Resource: "*"
-
-    # IAM Role for unauthenticated users  
-    CognitoIdentityPoolUnauthenticatedRole:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: !Sub "nlmonorepo-shared-cognito-unauth-role-${Stage}"
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Principal:
-                Federated: cognito-identity.amazonaws.com
-              Action: sts:AssumeRoleWithWebIdentity
-              Condition:
-                StringEquals:
-                  "cognito-identity.amazonaws.com:aud": !Ref cognitoIdentityPool
-                ForAnyValue:StringLike:
-                  "cognito-identity.amazonaws.com:amr": unauthenticated
-        Policies:
-          - PolicyName: CognitoIdentityPoolUnauthenticatedPolicy
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - cognito-identity:GetId
-                  Resource: "*"
-
-    # Attach roles to the Identity Pool
-    CognitoIdentityPoolRoleAttachment:
-      Type: AWS::Cognito::IdentityPoolRoleAttachment
-      Properties:
-        IdentityPoolId: !Ref cognitoIdentityPool
-        Roles:
-          authenticated: !GetAtt CognitoIdentityPoolAuthenticatedRole.Arn
-          unauthenticated: !GetAtt CognitoIdentityPoolUnauthenticatedRole.Arn
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "nlmonorepo-shared-client-${Stage}"
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      SupportedIdentityProviders:
+        - COGNITO
 
 Outputs:
-    UserPoolId:
-      Value: !Ref cognitoUserPool
-      Description: Cognito User Pool ID
-      # This is not exported here because it's exported by the parent stack
-    
-    UserPoolClientId:
-      Value: !Ref cognitoUserPoolClient
-      Description: Cognito User Pool Client ID
-      Export:
-        Name: !Sub cwlUserPoolClientId-${Stage}
-    
-    UserPoolArn:
-      Value: !GetAtt cognitoUserPool.Arn
-      Description: Cognito User Pool ARN
-      Export:
-        Name: !Sub cwlUserPoolArn-${Stage}
+  UserPoolId:
+    Description: ID of the Cognito User Pool
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub "nlmonorepo-shared-${Stage}-user-pool-id"
 
-    IdentityPoolId:
-      Value: !Ref cognitoIdentityPool
-      Description: Cognito Identity Pool ID
-      Export:
-        Name: !Sub cwlIdentityPoolId-${Stage}
+  UserPoolClientId:
+    Description: ID of the Cognito User Pool Client
+    Value: !Ref UserPoolClient
+    Export:
+      Name: !Sub "nlmonorepo-shared-${Stage}-user-pool-client-id"
+
+  UserPoolProviderName:
+    Description: Provider name of the Cognito User Pool
+    Value: !GetAtt UserPool.ProviderName
+    Export:
+      Name: !Sub "nlmonorepo-shared-${Stage}-user-pool-provider-name"

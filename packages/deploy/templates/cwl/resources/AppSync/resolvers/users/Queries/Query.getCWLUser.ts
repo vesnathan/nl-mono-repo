@@ -9,7 +9,7 @@ import {
   Query,
   QueryToGetCWLUserArgs,
   ClientType,
-} from "../../gqlTypes";
+} from "../../../../../../../../cloudwatchlive/backend/types/gqlTypes";
 
 type CTX = Context<QueryToGetCWLUserArgs>;
 type Output = Query["getCWLUser"];

@@ -1,4 +1,4 @@
-import { CWLUser } from "@/graphql/gqlTypes";
+import { CWLUser } from "@/types/gqlTypes";
 
 type MutationInput = Omit<
   CWLUser,
