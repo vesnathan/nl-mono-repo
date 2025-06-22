@@ -1,5 +1,5 @@
 import { GraphQLResult, generateClient } from "aws-amplify/api";
-import { CWLUserInput, CreateCWLUserMutation, CreateCWLUserMutationVariables } from "./gqlTypes";
+import { CWLUserInput, CreateCWLUserMutation, CreateCWLUserMutationVariables } from "../types/gqlTypes";
 
 const amplifyGraphqlClient = generateClient();
 

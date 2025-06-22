@@ -1,5 +1,6 @@
 import { join } from 'path';
 import { readFile } from 'fs/promises';
+import { Tag } from '@aws-sdk/client-cloudformation';
 
 export interface StackConfig {
   stackName: string;
@@ -13,49 +14,50 @@ export interface DeploymentOptions {
   region?: string;
   autoDeleteFailedStacks?: boolean;
   skipFrontendBuild?: boolean;
+  skipUpload?: boolean; // Added for frontend deployment
+  skipInvalidation?: boolean; // Added for frontend deployment
   skipUserSetup?: boolean;
   debugMode?: boolean; // Added for general debug logging
   adminEmail?: string; // Added for CWL stack deployment
   skipUserCreation?: boolean; // Added for CWL stack deployment (alternative to skipUserSetup)
-}
-
-export interface FrontendDeploymentOptions {
-  stage: string;
-  skipBuild?: boolean;
-  skipUpload?: boolean;
-  skipInvalidation?: boolean;
+  roleArn?: string;
+  tags?: { [key: string]: string };
 }
 
 export interface ForceDeleteOptions {
+  stackType: StackType;
   stage: string;
-  skipS3Cleanup?: boolean;
+  region?: string;
 }
 
-export type StackType = 'waf' | 'shared' | 'cwl';
-
-export interface AwsCredentials {
-  accessKeyId: string;
-  secretAccessKey: string;
+export enum StackType {
+  WAF = 'WAF',
+  Shared = 'Shared',
+  CWL = 'CWL',
 }
 
-export const TEMPLATE_PATHS = {
-  waf: join(__dirname, 'templates/waf/cfn-template.yaml'),
-  shared: join(__dirname, 'templates/shared/cfn-template.yaml'),
-  cwl: join(__dirname, 'templates/cwl/cfn-template.yaml'),
-} as const;
+export const STACK_ORDER = [
+  StackType.WAF,
+  StackType.Shared,
+  StackType.CWL,
+];
 
-export const TEMPLATE_RESOURCES_PATHS = {
-  waf: join(__dirname, 'templates/waf/resources'),
-  shared: join(__dirname, 'templates/shared/resources'),
-  cwl: join(__dirname, 'templates/cwl/resources'),
-} as const;
+export const TEMPLATE_PATHS: Record<StackType, string> = {
+  [StackType.WAF]: join(__dirname, 'templates/waf/cfn-template.yaml'),
+  [StackType.Shared]: join(__dirname, 'templates/shared/cfn-template.yaml'),
+  [StackType.CWL]: join(__dirname, 'templates/cwl/cfn-template.yaml'),
+};
 
-export async function getTemplateBody(stackType: StackType): Promise<string> {
+export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
+  [StackType.WAF]: join(__dirname, 'templates/waf/'),
+  [StackType.Shared]: join(__dirname, 'templates/shared/'),
+  [StackType.CWL]: join(__dirname, 'templates/cwl/'),
+};
+
+export const getStackName = (stackType: StackType, stage: string) => `nlmonorepo-${stackType.toLowerCase()}-${stage}`;
+
+export const getTemplateBucketName = (stackType: StackType, stage: string) => `nlmonorepo-${stackType.toLowerCase()}-templates-${stage}`;
+
+export const getTemplateBody = async (stackType: StackType): Promise<string> => {
   return await readFile(TEMPLATE_PATHS[stackType], 'utf8');
 }
-
-// Stack names
-export const getStackName = (stackType: StackType, stage: string) => `nlmonorepo-${stackType}-${stage}`;
-
-// S3 bucket names for templates
-export const getTemplateBucketName = (stackType: StackType, stage: string) => `nlmonorepo-${stackType}-templates-${stage}`;

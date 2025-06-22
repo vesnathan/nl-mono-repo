@@ -1,9 +1,8 @@
 import { z } from "zod";
-import { ClientType, CWLUser } from "@/graphql/gqlTypes";
+import { ClientType, CWLUser } from "../../cloudwatchlive/backend/types/gqlTypes";
 import { v4 as uuidv4 } from "uuid";
 
 export const createEmptyCWLUser = (): CWLUser => ({
-  __typename: "CWLUser", 
   userId: uuidv4(),
   organizationId: "",
   userEmail: "",

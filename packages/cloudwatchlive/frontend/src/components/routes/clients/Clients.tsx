@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { useUserStore } from "@/stores/userStore";
-import { ClientType } from "@/graphql/gqlTypes";
+import { ClientType } from "@/types/gqlTypes";
 import {
   Modal,
   ModalBody,

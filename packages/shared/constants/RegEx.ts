@@ -8,9 +8,11 @@ const PASSWORD_LOWER = /^(?=.*[a-z])/;
 const NUMBER = /^[0-9]*$/;
 const IS_IMAGE = /\.(jpe?g|png)$/i;
 const EMAIL = /^(?!\.)(?!.*\.\.)([A-Z0-9_\'.+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i;
+const ALPHA_NUMERIC = /^[a-zA-Z0-9\-]+$/;
 
 export const REGEX = {
   ACCEPTED_STRING,
+  ALPHA_NUMERIC, // Added for stage validation
   EMAIL,
   IS_IMAGE,
   NOT_EMPTY,

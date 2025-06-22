@@ -8,11 +8,11 @@ projects:
       # - ../../shared/types/**/*.graphql # Keep this commented out
     excludes:
       - ./amplify/**
-      - src/graphql/gqlTypes.ts
+      - src/types/gqlTypes.ts
     extensions:
       amplify:
         codeGenTarget: typescript
-        generatedFileName: src/graphql/gqlTypes.ts
+        generatedFileName: src/types/gqlTypes.ts
         frontend: javascript
         framework: react
 extensions:

@@ -5,6 +5,6 @@
     ClientType["EventCompanyStaff"] = "EventCompanyStaff";
     ClientType["TechCompanyAdmin"] = "TechCompanyAdmin";
     ClientType["TechCompanyStaff"] = "TechCompanyStaff";
-    ClientType["RegisteredAtendee"] = "RegisteredAtendee";
+    ClientType["RegisteredAttendee"] = "RegisteredAttendee";
     ClientType["UnregisteredAttendee"] = "UnregisteredAttendee";
 })(ClientType || (ClientType = {}));

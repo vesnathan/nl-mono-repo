@@ -1,5 +1,6 @@
 import { util, AppSyncIdentityCognito, Context } from '@aws-appsync/utils';
-import { QueryToGetCWLUserArgs, CWLUser, ClientType } from 'gqlTypes';
+import { QueryToGetCWLUserArgs, CWLUser, ClientType } from '../../../../../types/gqlTypes';
+import { CWL_CLIENT_TYPES, isValidCWLClientType } from '../../../../../constants/ClientTypes';
 
 // Alias QueryToGetCWLUserArgs for consistency if needed, or use directly
 type GetCWLUserQueryVariables = QueryToGetCWLUserArgs;
@@ -75,37 +76,19 @@ export function response(ctx: CTX): Output {
   // For now, we'll assume the structure matches CWLUser or is handled by direct return.
   const userFromDB = ctx.result as any; 
 
-  // Map Cognito groups to ClientType
+  // Map Cognito groups to ClientType using single source of truth
   const cognitoGroups = identity.groups || [];
   console.log(`Cognito groups for user ${userId}:`, JSON.stringify(cognitoGroups));
   
   const clientType: ClientType[] = [];
 
   for (const group of cognitoGroups) {
-    switch (group) {
-      case 'SuperAdmin':
-        clientType.push(ClientType.SuperAdmin);
-        break;
-      case 'EventCompanyAdmin':
-        clientType.push(ClientType.EventCompanyAdmin);
-        break;
-      case 'EventCompanyStaff':
-        clientType.push(ClientType.EventCompanyStaff);
-        break;
-      case 'TechCompanyAdmin':
-        clientType.push(ClientType.TechCompanyAdmin);
-        break;
-      case 'TechCompanyStaff':
-        clientType.push(ClientType.TechCompanyStaff);
-        break;
-      case 'RegisteredAttendee':
-        clientType.push(ClientType.RegisteredAttendee); // Note: Typo in original 'RegisteredAtendee', assuming ClientType enum matches this
-        break;
-      case 'UnregisteredAttendee':
-        clientType.push(ClientType.UnregisteredAttendee);
-        break;
-      default:
-        console.log(`Unknown group: ${group}, not mapping to any ClientType`);
+    if (isValidCWLClientType(group)) {
+      // Map the valid group name to the corresponding ClientType enum value
+      clientType.push(ClientType[group as keyof typeof ClientType]);
+      console.log(`Mapped group "${group}" to ClientType.${group}`);
+    } else {
+      console.log(`Unknown group: ${group}, not mapping to any ClientType`);
     }
   }
 

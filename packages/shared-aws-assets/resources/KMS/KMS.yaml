@@ -25,10 +25,10 @@ Resources:
                   Action: kms:*
                   Resource: "*"
 
-    cwlKMSKey:
+    SharedKMSKeyResource: # Renamed from cwlKMSKey for clarity within this template
       Type: AWS::KMS::Key
       Properties:
-        Description: "KMS key for S3 and DynamoDB encryption"
+        Description: "Shared KMS key for S3 and DynamoDB encryption"
         EnableKeyRotation: true
         KeyPolicy:
           Version: "2012-10-17"
@@ -51,12 +51,12 @@ Resources:
               Resource: "*"
 
 Outputs:
-    cwlKMSKey:
-      Value: !Ref cwlKMSKey
+    SharedKMSKey: # Renamed from cwlKMSKey
+      Value: !Ref SharedKMSKeyResource
       Export:
-        Name: !Sub shared-assets-cwlKMSKey-${Stage}
+        Name: !Sub shared-assets-SharedKMSKey-${Stage} # Export name updated
     
-    cwlKMSKeyArn:
-      Value: !GetAtt cwlKMSKey.Arn
+    SharedKMSKeyArn: # Renamed from cwlKMSKeyArn
+      Value: !GetAtt SharedKMSKeyResource.Arn
       Export:
-        Name: !Sub shared-assets-cwlKMSKeyArn-${Stage}
+        Name: !Sub shared-assets-SharedKMSKeyArn-${Stage} # Export name updated

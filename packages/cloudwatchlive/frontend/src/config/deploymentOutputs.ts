@@ -1,8 +1,7 @@
 import { isValidEnv } from "./validEnvs";
 import environment from "./masterConfig";
 
-// Use require for JSON import to avoid TypeScript issues
-const deploymentOutputs = require("../../../../deploy/deployment-outputs.json");
+// Removed the JSON import as it's no longer needed
 
 type StackOutput = {
   OutputKey: string;
@@ -32,25 +31,17 @@ type DeploymentOutputMap = {
   CWL: CWLOutput;
 };
 
-function getOutputValue(outputKey: string, stackType: 'shared' | 'cwl'): string {
-  const typedOutputs = deploymentOutputs as DeploymentOutputs;
-  const stack = typedOutputs.stacks[stackType];
-  if (!stack) {
-    throw new Error(`Stack ${stackType} not found in deployment outputs`);
-  }
-  
-  const output = stack.outputs.find((o: StackOutput) => o.OutputKey === outputKey);
-  if (!output) {
-    throw new Error(`Output ${outputKey} not found in ${stackType} stack`);
-  }
-  
-  return output.OutputValue;
-}
+// Removed the getOutputValue function as it's no longer needed
 
 export function getDeploymentOutput<T extends keyof DeploymentOutputMap>(
   outputType: T,
 ): DeploymentOutputMap[T] {
+  console.log('getDeploymentOutput called with:', outputType);
+  console.log('Current environment:', environment);
+  console.log('Is valid env:', isValidEnv(environment));
+  
   if (!isValidEnv(environment)) {
+    console.error(`Invalid environment: ${environment}`);
     throw Error(`Invalid environment: ${environment}`);
   }
 
@@ -58,12 +49,26 @@ export function getDeploymentOutput<T extends keyof DeploymentOutputMap>(
   // eslint-disable-next-line sonarjs/no-small-switch
   switch (outputType) {
     case "CWL": {
+      console.log('Processing CWL case');
+      console.log('Environment variables:');
+      console.log('  NEXT_PUBLIC_USER_POOL_ID:', process.env.NEXT_PUBLIC_USER_POOL_ID);
+      console.log('  NEXT_PUBLIC_USER_POOL_CLIENT_ID:', process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID);
+      console.log('  NEXT_PUBLIC_IDENTITY_POOL_ID:', process.env.NEXT_PUBLIC_IDENTITY_POOL_ID);
+      console.log('  NEXT_PUBLIC_GRAPHQL_URL:', process.env.NEXT_PUBLIC_GRAPHQL_URL);
+      
       const deploymentOutput: CWLOutput = {
-        cwlUserPoolId: getOutputValue('CWLUserPoolId', 'shared'),
-        cwlUserPoolClientId: getOutputValue('CWLUserPoolClientId', 'shared'),
-        cwlIdentityPoolId: getOutputValue('CWLIdentityPoolId', 'shared'),
-        cwlGraphQLUrl: getOutputValue('ApiUrl', 'cwl')
+        cwlUserPoolId: process.env.NEXT_PUBLIC_USER_POOL_ID || '',
+        cwlUserPoolClientId: process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID || '',
+        cwlIdentityPoolId: process.env.NEXT_PUBLIC_IDENTITY_POOL_ID || '',
+        cwlGraphQLUrl: process.env.NEXT_PUBLIC_GRAPHQL_URL || '',
       };
+      
+      if (!deploymentOutput.cwlUserPoolId || !deploymentOutput.cwlUserPoolClientId || !deploymentOutput.cwlIdentityPoolId || !deploymentOutput.cwlGraphQLUrl) {
+        console.error('Missing required environment variables for CWL configuration.');
+        // Depending on the desired behavior, you might want to throw an error
+        // throw new Error('Missing required environment variables for CWL configuration.');
+      }
+
       return deploymentOutput as DeploymentOutput;
     }
     default: {

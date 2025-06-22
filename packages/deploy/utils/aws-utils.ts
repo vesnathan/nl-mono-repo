@@ -20,7 +20,7 @@ import { promisify } from 'util';
 import { glob as globCb } from 'glob';
 import path from 'path';
 import { logger } from './logger';
-import { StackType, TEMPLATE_RESOURCES_PATHS, TEMPLATE_PATHS } from '../types';
+import { StackType, TEMPLATE_PATHS } from '../types';
 
 const glob = promisify(globCb);
 
@@ -101,6 +101,19 @@ export class AwsUtils {
     });
   }
 
+  async stackExists(stackName: string, regionOverride?: string): Promise<boolean> {
+    const client = regionOverride ? this.getRegionalCfClient(regionOverride) : this.cfClient;
+    try {
+      await client.send(new DescribeStacksCommand({ StackName: stackName }));
+      return true;
+    } catch (error: any) {
+      if (error.message && error.message.includes('does not exist')) {
+        return false;
+      }
+      throw error;
+    }
+  }
+
   async bucketExists(bucketName: string): Promise<boolean> {
     return this.bucketExistsWithClient(bucketName, this.s3Client);
   }
@@ -117,12 +130,12 @@ export class AwsUtils {
   async createTemplatesBucket(bucketName: string, region: string, stackType: StackType): Promise<void> {
     try {
       // Ensure region is defined, default to this.region if not explicitly passed for non-WAF stacks
-      const effectiveRegion = stackType === 'waf' ? region : (region || this.region);
+      const effectiveRegion = stackType === StackType.WAF ? region : (region || this.region);
       if (!effectiveRegion) {
         throw new Error("Region must be defined to create a templates bucket.");
       }
 
-      logger.info(`Setting up templates bucket: ${bucketName} in region ${effectiveRegion}`);
+      logger.debug(`Setting up templates bucket: ${bucketName} in region ${effectiveRegion}`);
       
       // Use the correct regional S3 client
       const regionalS3Client = this.getRegionalS3Client(effectiveRegion);
@@ -131,7 +144,7 @@ export class AwsUtils {
       const bucketExists = await this.bucketExistsWithClient(bucketName, regionalS3Client);
       
       if (!bucketExists) {
-        logger.info(`Creating templates bucket: ${bucketName}`);
+        logger.debug(`Creating templates bucket: ${bucketName}`);
         
         const createBucketParams: CreateBucketCommandInput = effectiveRegion === 'us-east-1'
           ? { Bucket: bucketName }
@@ -148,17 +161,17 @@ export class AwsUtils {
         } catch (bucketError: any) {
           // If bucket already exists and we own it, that's fine
           if (bucketError.name === 'BucketAlreadyOwnedByYou') {
-            logger.info(`Bucket ${bucketName} already exists and is owned by you. Continuing...`);
+            logger.debug(`Bucket ${bucketName} already exists and is owned by you. Continuing...`);
           } else {
             throw bucketError;
           }
         }
       } else {
-        logger.info(`Bucket ${bucketName} already exists. Continuing...`);
+        logger.debug(`Bucket ${bucketName} already exists. Continuing...`);
       }
 
       // Always upload templates to ensure they're up to date
-      logger.info(`Uploading templates for ${stackType} stack...`);
+      logger.debug(`Uploading templates for ${stackType} stack...`);
       await this.uploadTemplatesWithClient(bucketName, stackType, regionalS3Client);
       
     } catch (error: any) {
@@ -182,8 +195,8 @@ export class AwsUtils {
   }
 
   private async uploadTemplatesWithClient(bucketName: string, stackType: StackType, s3Client: S3Client): Promise<void> {
-    const basePath = TEMPLATE_RESOURCES_PATHS[stackType];
-    logger.info(`Looking for template files in: ${basePath}`);
+    const basePath = TEMPLATE_PATHS[stackType].replace('cfn-template.yaml', '');
+    logger.debug(`Looking for template files in: ${basePath}`);
     
     try {
       // Use fs.readdir instead of glob for better compatibility
@@ -195,13 +208,13 @@ export class AwsUtils {
           .map(entry => path.join(basePath, entry.name));
       } catch (readdirError: any) {
         // Directory might not exist or be accessible, that's fine
-        logger.info(`Could not read directory ${basePath}: ${readdirError.message}`);
+        logger.debug(`Could not read directory ${basePath}: ${readdirError.message}`);
       }
 
-      logger.info(`Found ${files.length} template files`);
+      logger.debug(`Found ${files.length} template files`);
 
       if (files.length === 0) {
-        logger.info(`No additional template files found in ${basePath} for ${stackType} stack`);
+        logger.debug(`No additional template files found in ${basePath} for ${stackType} stack`);
       } else {
         for (const file of files) {
           const content = await fs.readFile(file);
@@ -214,7 +227,7 @@ export class AwsUtils {
             ContentType: 'application/x-yaml'
           }));
           
-          logger.info(`Uploaded template: ${key}`);
+          logger.debug(`Uploaded template: ${key}`);
         }
       }
 
@@ -283,7 +296,7 @@ export class AwsUtils {
         
         // Log status changes and new events
         if (currentStatus !== lastStatus) {
-          logger.info(`Stack status: ${currentStatus}`);
+          logger.debug(`Stack status: ${currentStatus}`);
           lastStatus = currentStatus;
         }
         
@@ -322,7 +335,7 @@ export class AwsUtils {
       ? new CloudFormationClient({ region: regionOverride, credentials: this.cfClient.config.credentials }) 
       : this.cfClient;
     
-    logger.info(`Waiting for stack ${stackName} to be deleted in region ${region}...`);
+    logger.debug(`Waiting for stack ${stackName} to be deleted in region ${region}...`);
     
     while (true) {
       try {

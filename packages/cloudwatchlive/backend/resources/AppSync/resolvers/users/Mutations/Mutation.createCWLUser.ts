@@ -1,10 +1,10 @@
 import { util, Context, AppSyncIdentityCognito } from '@aws-appsync/utils';
-import { CreateCWLUserInput, CWLUser } from 'gqlTypes'; // Assuming gqlTypes will be generated and include this
+import { CWLUserInput, CWLUser } from '../../../../../types/gqlTypes'; // Using CWLUserInput instead of CreateCWLUserInput
 import { v4 as uuidv4 } from 'uuid';
 
 // Define Input type for the resolver
 type CreateCWLUserMutationVariables = {
-  input: CreateCWLUserInput;
+  input: CWLUserInput;
 };
 
 // Define Output type for the resolver - it's CWLUser as per schema

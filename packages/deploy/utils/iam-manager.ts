@@ -30,7 +30,7 @@ export class IamManager {
     }
   }
 
-  async setupRole(stackType: StackType, stage: string): Promise<string> {
+  async setupRole(stackType: StackType, stage: string, templateBucketName?: string): Promise<string> {
     const roleName = `${getStackName(stackType, stage)}-role`;
     
     try {
@@ -110,6 +110,36 @@ export class IamManager {
       });
 
       logger.success(`Created role ${roleName} with policy`);
+
+      if (templateBucketName) {
+        const bucketName = templateBucketName;
+
+        const s3PolicyDocument = {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": "s3:GetObject",
+              "Resource": `arn:aws:s3:::${bucketName}/*`
+            }
+          ]
+        };
+
+        const s3PolicyName = `${roleName}-s3-read-policy`;
+        
+        try {
+          await this.iam.putRolePolicy({
+            RoleName: roleName,
+            PolicyName: s3PolicyName,
+            PolicyDocument: JSON.stringify(s3PolicyDocument),
+          });
+          logger.info(`Attached S3 read inline policy to role ${roleName}`);
+        } catch (error: any) {
+            logger.error(`Error attaching S3 read inline policy to role: ${error.message}`);
+            throw error;
+        }
+      }
+
       return createRoleResponse.Role.Arn;
     } catch (error: any) {
       logger.error(`Failed to setup role ${roleName}: ${error?.message}`);

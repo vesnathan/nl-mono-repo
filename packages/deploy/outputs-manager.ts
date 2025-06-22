@@ -14,23 +14,11 @@ export interface StackOutput {
 export interface DeploymentOutputs {
   stage: string;
   lastUpdated: string;
-  stacks: {
-    waf?: {
-      region: string;
-      stackName: string;
-      outputs: StackOutput[];
-    };
-    shared?: {
-      region: string;
-      stackName: string;
-      outputs: StackOutput[];
-    };
-    cwl?: {
-      region: string;
-      stackName: string;
-      outputs: StackOutput[];
-    };
-  };
+  stacks: Partial<Record<StackType, {
+    region: string;
+    stackName: string;
+    outputs: StackOutput[];
+  }>>;
 }
 
 export class OutputsManager {
@@ -45,7 +33,7 @@ export class OutputsManager {
       const stackName = getStackName(stackType, stage);
       
       // Use the correct region for each stack type
-      const stackRegion = stackType === 'waf' ? 'us-east-1' : region;
+      const stackRegion = stackType === StackType.WAF ? 'us-east-1' : region;
       const cfClient = new CloudFormationClient({ region: stackRegion });
       
       logger.info(`Fetching outputs for ${stackType} stack: ${stackName} in region ${stackRegion}`);
@@ -103,6 +91,33 @@ export class OutputsManager {
     }
   }
 
+  async removeStackOutputs(stackType: StackType, stage: string): Promise<void> {
+    try {
+      let deploymentOutputs: DeploymentOutputs;
+      try {
+        const existingContent = await readFile(this.outputsFilePath, 'utf8');
+        deploymentOutputs = JSON.parse(existingContent);
+      } catch {
+        // File doesn't exist, nothing to remove
+        logger.warning(`Outputs file not found at ${this.outputsFilePath}. Nothing to remove.`);
+        return;
+      }
+
+      if (deploymentOutputs.stacks[stackType]) {
+        delete deploymentOutputs.stacks[stackType];
+        deploymentOutputs.lastUpdated = new Date().toISOString();
+
+        await writeFile(this.outputsFilePath, JSON.stringify(deploymentOutputs, null, 2));
+        logger.success(`Removed outputs for ${stackType} stack from ${this.outputsFilePath}`);
+      } else {
+        logger.info(`No outputs found for ${stackType} in stage ${stage} to remove.`);
+      }
+    } catch (error: unknown) {
+      logger.error(`Failed to remove outputs for ${stackType} stack: ${(error as Error).message}`);
+      throw error;
+    }
+  }
+
   async getStackOutputs(stackType: StackType, stage: string): Promise<StackOutput[] | null> {
     try {
       const content = await readFile(this.outputsFilePath, 'utf8');
@@ -148,7 +163,7 @@ export class OutputsManager {
   async validateStackExists(stackType: StackType, stage: string): Promise<boolean> {
     try {
       const stackName = getStackName(stackType, stage);
-      const stackRegion = stackType === 'waf' ? 'us-east-1' : 'ap-southeast-2';
+      const stackRegion = stackType === StackType.WAF ? 'us-east-1' : 'ap-southeast-2';
       const cfClient = new CloudFormationClient({ region: stackRegion });
       
       const command = new DescribeStacksCommand({ StackName: stackName });
