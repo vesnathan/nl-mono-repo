@@ -140,6 +140,7 @@ input CWLUserInput {
   organizationId: String!
   userRole: String!
 }
+
 # These types are added by AppSync. We redefined them here so that it works with "graphql-schema-typescript" package
 # These shouldn't be included in schema file otherwise it'll complain about duplicate type definition
 
