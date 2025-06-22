@@ -1,6 +1,7 @@
 // Minimal script to deploy CWL without depending on the existing cwl.ts file
 import { logger } from './utils/logger';
 import { ForceDeleteManager } from './utils/force-delete-utils';
+import { StackType } from './types';
 import { promises as fsPromises } from 'fs';
 import * as fs from 'fs';
 import path from 'path';
@@ -203,10 +204,7 @@ async function deployCwlStack() {
         logger.warning(`Stack ${stackName} is in failed state: ${stackStatus}. Using force deletion to clean up...`);
         
         const forceDeleteManager = new ForceDeleteManager(region);
-        await forceDeleteManager.forceDeleteStack('cwl', {
-          stage: stage,
-          maxWaitMinutes: 20
-        });
+        await forceDeleteManager.forceDeleteStack('cwl', StackType.CWL, stage);
         
         // Create new stack after cleanup
         logger.info(`Creating new stack after cleanup: ${stackName}`);
@@ -229,10 +227,7 @@ async function deployCwlStack() {
         logger.warning(`Stack ${stackName} already exists but in unexpected state. Using force deletion to clean up...`);
         
         const forceDeleteManager = new ForceDeleteManager(region);
-        await forceDeleteManager.forceDeleteStack('cwl', {
-          stage: stage,
-          maxWaitMinutes: 20
-        });
+        await forceDeleteManager.forceDeleteStack('cwl', StackType.CWL, stage);
         
         // Create new stack after cleanup
         logger.info(`Creating new stack after cleanup: ${stackName}`);
@@ -305,10 +300,7 @@ async function deployCwlStack() {
       logger.warning('Attempting automatic cleanup with force deletion...');
       try {
         const forceDeleteManager = new ForceDeleteManager(region);
-        await forceDeleteManager.forceDeleteStack('cwl', {
-          stage: stage,
-          maxWaitMinutes: 20
-        });
+        await forceDeleteManager.forceDeleteStack('cwl', StackType.CWL, stage);
         
         logger.info('Failed stack cleaned up. You can retry deployment.');
       } catch (cleanupError: unknown) {

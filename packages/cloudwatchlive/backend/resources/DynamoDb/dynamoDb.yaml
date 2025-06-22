@@ -1,0 +1,79 @@
+Parameters:
+    Stage:
+      Type: String
+      Description: Deployment stage
+    AppName:
+      Type: String
+      Description: Application Name
+      Default: cwl
+    # KMSKeyArn will be passed from the main CWL stack, which gets it from SharedKMSKeyArn output
+    KMSKeyArn:
+      Type: String
+      Description: ARN of the KMS key for encryption
+
+Resources:
+    DynamoDBRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: !Sub nlmonorepo-${AppName}-dynamodb-${Stage}
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: cloudformation.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: DynamoDBTableManagement
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:*
+                  Resource: "*" # Scope down if possible
+                - Effect: Allow # Allow access to the specific KMS key
+                  Action:
+                    - kms:Decrypt
+                    - kms:GenerateDataKey*
+                  Resource: !Ref KMSKeyArn
+
+    CWLDataTable: # Renamed from cwlUserTable to CWLDataTable
+      Type: AWS::DynamoDB::Table
+      DependsOn: DynamoDBRole
+      Properties:
+        TableName: !Sub "nlmonorepo-${AppName}-datatable-${Stage}"
+        AttributeDefinitions:
+          - AttributeName: "id" # Assuming a generic primary key 'id', adjust as per actual schema
+            AttributeType: "S"
+          # Add other GSI/LSI attribute definitions here if needed
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: "id"
+            KeyType: "HASH"
+        Tags:
+          - Key: Name
+            Value: !Sub "${AppName} DataTable"
+        SSESpecification:
+          SSEEnabled: true
+          SSEType: KMS
+          KMSMasterKeyId: !Ref KMSKeyArn
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES # Adjust as needed
+
+Outputs:
+    CWLDataTableName: # Output name expected by parent CWL stack
+      Value: !Ref CWLDataTable
+      Export:
+        Name: !Sub ${AppName}-DataTableName-${Stage}
+
+    CWLDataTableArn: # Output name expected by parent CWL stack
+      Value: !GetAtt CWLDataTable.Arn
+      Export:
+        Name: !Sub ${AppName}-DataTableArn-${Stage}
+
+    AppSyncDynamoDBRoleArn: # Added for AppSync DataSource ServiceRoleArn
+      Description: ARN of the IAM role for AppSync to access DynamoDB
+      Value: !GetAtt DynamoDBRole.Arn
+      Export:
+        Name: !Sub ${AppName}-AppSyncDynamoDBRoleArn-${Stage}

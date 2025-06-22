@@ -5,7 +5,8 @@
   "main": "index.ts",
   "license": "MIT",
   "scripts": {
-    "deploy": "ts-node -r dotenv/config index.ts",
+    "development": "ts-node -r dotenv/config index.ts deploy",
+    "deploy": "ts-node -r dotenv/config index.ts deploy",
     "deploy:waf": "ts-node -r dotenv/config index.ts package --package waf",
     "deploy:shared": "ts-node -r dotenv/config index.ts package --package shared",
     "deploy:cwl": "ts-node -r dotenv/config index.ts package --package cwl",
@@ -21,7 +22,7 @@
     "remove:waf": "ts-node -r dotenv/config index.ts remove --package waf",
     "remove:shared": "ts-node -r dotenv/config index.ts remove --package shared",
     "remove:cwl": "ts-node -r dotenv/config index.ts remove --package cwl",
-    "remove:all": "ts-node -r dotenv/config index.ts remove --all",
+    "remove:all": "ts-node -r dotenv/config index.ts remove-all",
     "force-remove:waf": "ts-node -r dotenv/config remove-waf.ts",
     "force-delete": "ts-node -r dotenv/config force-delete-cli.ts",
     "force-delete:stack": "ts-node -r dotenv/config force-delete-cli.ts stack",

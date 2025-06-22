@@ -25,8 +25,6 @@ Parameters:
 Resources:
   # DynamoDb Tables
   DynamoDbStack:
-  # DynamoDb Tables
-  DynamoDbStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/DynamoDb/dynamodb.yaml
@@ -42,6 +40,14 @@ Resources:
       Parameters:
         Stage: !Ref Stage
         KMSKeyId: !Ref KMSKeyId
+
+  # Cognito Resources
+  CognitoStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Cognito/cognito.yaml
+      Parameters:
+        Stage: !Ref Stage
 
   # CloudFront Distribution
   CloudFrontStack:
@@ -60,18 +66,17 @@ Resources:
   # AppSync API
   AppSyncStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [DynamoDbStack, CloudFrontStack]
-    DependsOn: [DynamoDbStack, CloudFrontStack]
+    DependsOn: [DynamoDbStack, CloudFrontStack, CognitoStack]
     Properties:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appSync.yaml
       Parameters:
         Stage: !Ref Stage
         TemplateBucketName: !Ref TemplateBucketName
+        UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
 
   # Lambda Functions
   LambdaStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [DynamoDbStack, AppSyncStack, CloudFrontStack]
     DependsOn: [DynamoDbStack, AppSyncStack, CloudFrontStack]
     Properties:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml
@@ -85,32 +90,47 @@ Outputs:
   ApiUrl:
     Description: AppSync API URL
     Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiUrl
-    Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiUrl
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-api-url
 
   ApiId:
     Description: AppSync API ID
     Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiId
-    Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiId
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-api-id
-
-  CloudFrontDomainName:
-    Description: CloudFront Distribution Domain Name
-    Value: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDomainName
+      
+  CWLUserPoolId:
+    Description: "Cognito User Pool ID for CWL"
+    Value: !GetAtt CognitoStack.Outputs.UserPoolId
     Export:
-      Name: !Sub nlmonorepo-cwl-${Stage}-cloudfront-domain
+      Name: !Sub "nlmonorepo-cwl-${Stage}-user-pool-id"
 
-  CloudFrontDistributionId:
-    Description: CloudFront Distribution ID
-    Value: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDistributionId
+  CWLUserPoolClientId:
+    Description: "Cognito User Pool Client ID for CWL"
+    Value: !GetAtt CognitoStack.Outputs.UserPoolClientId
     Export:
-      Name: !Sub nlmonorepo-cwl-${Stage}-cloudfront-id
+      Name: !Sub "nlmonorepo-cwl-${Stage}-user-pool-client-id"
+
+  CWLIdentityPoolId:
+    Description: "Cognito Identity Pool ID for CWL"
+    Value: !GetAtt CognitoStack.Outputs.IdentityPoolId
+    Export:
+      Name: !Sub "nlmonorepo-cwl-${Stage}-identity-pool-id"
 
   WebsiteBucket:
-    Description: S3 bucket for frontend website assets
-    Description: S3 bucket for frontend website assets
+    Description: "S3 bucket for frontend website assets"
     Value: !GetAtt S3Stack.Outputs.CWLBucketName
     Export:
-      Name: !Sub nlmonorepo-cwl-${Stage}-website-bucket
+      Name: !Sub "nlmonorepo-cwl-${Stage}-website-bucket"
+
+  CloudFrontDistributionId:
+    Description: "CloudFront Distribution ID"
+    Value: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDistributionId
+    Export:
+      Name: !Sub "nlmonorepo-cwl-${Stage}-cloudfront-id"
+
+  CloudFrontDomainName:
+    Description: "CloudFront Distribution Domain Name"
+    Value: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDomainName
+    Export:
+      Name: !Sub "nlmonorepo-cwl-${Stage}-cloudfront-domain"

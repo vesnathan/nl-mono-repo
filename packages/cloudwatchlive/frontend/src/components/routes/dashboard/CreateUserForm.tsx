@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CWLUserInput, ClientType } from '@/graphql/gqlTypes'; // Assuming gqlTypes is correctly aliased
+import { CWLUserInput, ClientType } from '@/types/gqlTypes'; // Assuming gqlTypes is correctly aliased
 import { Button, Input, ModalBody, ModalFooter, Select, SelectItem } from '@nextui-org/react';
 import { createCWLUserMutationFn } from '@/graphql/mutations'; // Import the mutation function
 import { useMutation } from '@tanstack/react-query'; // Assuming TanStack Query is used

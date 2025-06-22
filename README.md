@@ -67,15 +67,13 @@ nl-mono-repo/
 
 ## 🚀 Getting Started
 
-## 🚀 Getting Started
-
 ### Prerequisites
 
 - **Node.js 18+** and **Yarn**
 - **AWS CLI** configured with appropriate permissions
 - **AWS Account** with CloudFormation, IAM, and service permissions
 
-### Installation
+### Quick Start
 
 1. **Clone the repository**
    ```bash
@@ -87,31 +85,71 @@ nl-mono-repo/
    ```bash
    yarn install
    ```
-   Lerna will automatically install dependencies for all workspace packages.
 
 3. **Set up environment variables**
    ```bash
-   # Copy example environment file
    cp packages/deploy/.env.example packages/deploy/.env
-   
    # Edit with your AWS credentials
-   vim packages/deploy/.env
    ```
+
+4. **Start development**
+   ```bash
+   # Interactive development menu with arrow key navigation
+   yarn dev-menu
+   
+   # Or run specific commands:
+   yarn development     # Deploy/update AWS infrastructure  
+   yarn dev:local       # Start dev server (local)
+   yarn dev:codespaces  # Start dev server (Codespaces)
+   ```
+
+## �️ Development
+
+### Development Commands
+
+| Command | Description |
+|---------|-------------|
+| `yarn dev-menu` | Interactive development menu (use ↑/↓ arrows, Enter to select) |
+| `yarn development` | Deploy/update AWS infrastructure |
+| `yarn dev:local` | Run frontend dev server locally |
+| `yarn dev:codespaces` | Run frontend dev server in Codespaces |
+| `yarn build-gql` | Generate GraphQL types |
+
+### Environment-Specific Development
+
+**For Local Development:**
+```bash
+yarn dev:local
+# Frontend available at: http://localhost:3000
+```
+
+**For GitHub Codespaces:**
+```bash
+yarn dev:codespaces  
+# Frontend available at forwarded port (Codespaces will show the URL)
+```
 
 ## 🚢 Deployment
 
-The project uses a comprehensive TypeScript deployment tool for the best deployment experience.
+The project uses a comprehensive TypeScript deployment tool.
 
 ```bash
-# Interactive deployment - walks you through all options
-cd packages/deploy
-yarn deploy
+# Interactive deployment with guided prompts
+yarn development
 ```
 
 The deployment process will:
 1. Prompt you to select the deployment stage (dev, staging, or prod)
 2. Ask for an admin email to create the initial admin user
 3. Walk you through the deployment process with guided prompts
+4. Handle stuck stacks and resource cleanup automatically
+
+### Legacy Command Support
+```bash
+# Legacy deployment command (still works)
+cd packages/deploy
+yarn deploy
+```
 
 For updating specific stacks and their dependencies:
 

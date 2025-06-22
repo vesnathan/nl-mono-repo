@@ -13,7 +13,7 @@ import {
   createEmptyCWLUser,
   CWLUserFormValidationSchema,
 } from "shared/types/CWLUserSchemas";
-import { CWLUser } from "@/graphql/gqlTypes";
+import { CWLUser } from "@/types/gqlTypes";
 import { useUserStore } from "@/stores/userStore";
 import { useGetUserJobRoles } from "@/hooks/useGetUserJobRoles";
 import { useSaveSuperAdminClientMutation } from "../clientHooks";

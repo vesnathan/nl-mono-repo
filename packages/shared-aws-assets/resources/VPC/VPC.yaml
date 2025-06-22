@@ -102,7 +102,7 @@ Resources:
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId: !GetAtt NatGatewayEIP.AllocationId
-      SubnetId: !Ref SharedSubnet1 # Ensure this is a public subnet
+      SubnetId: !Ref SharedSubnet1 
       Tags:
         - Key: Name
           Value: nat-gateway
@@ -161,25 +161,25 @@ Resources:
       SubnetId: !Ref SharedSubnet2
       RouteTableId: !Ref SharedRouteTable
 
-  cwlSecurityGroupFromSharedVPC:
+  SharedSecurityGroup: # Renamed from cwlSecurityGroupFromSharedVPC
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref SharedVPC
-      GroupDescription: "Security group for shared cwlVPC"
+      GroupDescription: "Security group for shared VPC" # Description updated
       SecurityGroupEgress:
         - IpProtocol: -1
           CidrIp: 0.0.0.0/0
 
 Outputs:
-  cwlSecurityGroupFromSharedVPCId:
-    Value: !GetAtt cwlSecurityGroupFromSharedVPC.GroupId
+  SharedSecurityGroupFromVPCId: # Renamed from cwlSecurityGroupFromSharedVPCId
+    Value: !GetAtt SharedSecurityGroup.GroupId
     Export:
-      Name: !Sub shared-assets-cwlSecurityGroupFromSharedVPCId-${Stage}
+      Name: !Sub shared-assets-SharedSecurityGroupFromVPCId-${Stage} # Export name updated
 
-  cwlSecurityGroupFromSharedVPC:
-    Value: !Ref cwlSecurityGroupFromSharedVPC
+  SharedSecurityGroupFromVPC: # Renamed from cwlSecurityGroupFromSharedVPC
+    Value: !Ref SharedSecurityGroup 
     Export:
-      Name: !Sub shared-assets-cwlSecurityGroupFromSharedVPC-${Stage}
+      Name: !Sub shared-assets-SharedSecurityGroupFromVPC-${Stage} # Export name updated
 
   SharedSubnet1Id:
     Value: !Ref SharedSubnet1

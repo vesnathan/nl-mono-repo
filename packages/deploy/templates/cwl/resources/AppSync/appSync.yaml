@@ -9,6 +9,9 @@ Parameters:
   TemplateBucketName:
     Type: String
     Description: S3 bucket containing compiled resolver code
+  UserPoolId:
+    Type: String
+    Description: The ID of the Cognito User Pool from the CognitoStack
 
 Resources:
   # AppSync GraphQL API
@@ -18,8 +21,7 @@ Resources:
       Name: !Sub "cwl-appsync-api-${Stage}"
       AuthenticationType: AMAZON_COGNITO_USER_POOLS
       UserPoolConfig:
-        UserPoolId:
-          Fn::ImportValue: !Sub "nlmonorepo-shared-${Stage}-user-pool-id"
+        UserPoolId: !Ref UserPoolId
         DefaultAction: ALLOW
         AwsRegion: !Ref AWS::Region
       AdditionalAuthenticationProviders:

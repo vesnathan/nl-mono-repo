@@ -5,6 +5,25 @@ import { ForceDeleteManager } from './utils/force-delete-utils';
 import { logger } from './utils/logger';
 import { getStackName, StackType } from './types';
 
+// Helper function to convert string to StackType
+function parseStackType(stackTypeStr: string): StackType {
+  switch (stackTypeStr.toLowerCase()) {
+    case 'waf':
+      return StackType.WAF;
+    case 'shared':
+      return StackType.Shared;
+    case 'cwl':
+      return StackType.CWL;
+    default:
+      throw new Error(`Invalid stack type: ${stackTypeStr}. Must be one of: waf, shared, cwl`);
+  }
+}
+
+// Helper function to get stack status
+async function getStackStatus(forceDeleteManager: ForceDeleteManager, stackName: string): Promise<string | null> {
+  return await forceDeleteManager.getStackStatus(stackName);
+}
+
 const program = new Command();
 
 program
@@ -22,25 +41,27 @@ program
   .option('--max-wait <minutes>', 'Maximum wait time in minutes', '20')
   .action(async (options) => {
     try {
-      const stackType = options.type as StackType;
+      const stackType = parseStackType(options.type);
       const stage = options.stage;
       const maxWaitMinutes = parseInt(options.maxWait);
       
       // Determine region
       let region = options.region;
       if (!region) {
-        region = stackType === 'waf' ? 'us-east-1' : process.env.AWS_REGION || 'ap-southeast-2';
+        region = stackType === StackType.WAF ? 'us-east-1' : process.env.AWS_REGION || 'ap-southeast-2';
       }
       
-      logger.info(`Force deleting ${stackType} stack for stage ${stage} in region ${region}`);
+      const stackName = getStackName(stackType, stage);
+      logger.info(`🚀 Starting force delete operation...`);
+      logger.info(`📍 Target: ${stackName} (${stackType}) in ${region}`);
       
       const forceDeleteManager = new ForceDeleteManager(region);
-      await forceDeleteManager.forceDeleteStack(stackType, {
-        stage,
-        maxWaitMinutes
-      });
       
-      logger.success(`Stack force deleted successfully: ${getStackName(stackType, stage)}`);
+      // Use a proper stack identifier - for this workspace it's typically 'nlmonorepo'
+      const stackIdentifier = 'nlmonorepo';
+      await forceDeleteManager.forceDeleteStack(stackIdentifier, stackType, stage);
+      
+      logger.success(`🎉 Force delete completed successfully for: ${stackName}`);
     } catch (error: unknown) {
       logger.error(`Force delete failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
@@ -59,31 +80,44 @@ program
       const maxWaitMinutes = parseInt(options.maxWait);
       
       // Delete in reverse dependency order: cwl -> shared -> waf
-      const stackTypes: StackType[] = ['cwl', 'shared', 'waf'];
+      const stackTypes: StackType[] = [StackType.CWL, StackType.Shared, StackType.WAF];
       
-      logger.info(`Force deleting all stacks for stage ${stage} in order: ${stackTypes.join(' → ')}`);
+      logger.info(`🚀 Starting bulk force delete operation for stage: ${stage}`);
+      logger.info(`📋 Deletion order: ${stackTypes.join(' → ')}`);
       
-      for (const stackType of stackTypes) {
+      for (let i = 0; i < stackTypes.length; i++) {
+        const stackType = stackTypes[i];
         try {
-          const region = stackType === 'waf' ? 'us-east-1' : process.env.AWS_REGION || 'ap-southeast-2';
+          const region = stackType === StackType.WAF ? 'us-east-1' : process.env.AWS_REGION || 'ap-southeast-2';
+          const stackName = getStackName(stackType, stage);
           
-          logger.info(`Force deleting ${stackType} stack...`);
+          logger.info(`\n--- Step ${i + 1}/${stackTypes.length}: Processing ${stackType} ---`);
+          logger.info(`📍 Target: ${stackName} in ${region}`);
+          
           const forceDeleteManager = new ForceDeleteManager(region);
-          await forceDeleteManager.forceDeleteStack(stackType, {
-            stage,
-            maxWaitMinutes
-          });
           
-          logger.success(`${stackType} stack force deleted successfully`);
+          // Use a proper stack identifier - for this workspace it's typically 'nlmonorepo'
+          const stackIdentifier = 'nlmonorepo';
+          await forceDeleteManager.forceDeleteStack(stackIdentifier, stackType, stage, false);
+          
+          logger.success(`✅ Step ${i + 1}/${stackTypes.length} completed: ${stackName}`);
         } catch (error: unknown) {
-          logger.error(`Failed to force delete ${stackType} stack: ${error instanceof Error ? error.message : String(error)}`);
+          const errorMsg = error instanceof Error ? error.message : String(error);
+          
+          // Check if this is a "stack doesn't exist" case vs an actual error
+          if (errorMsg.includes('does not exist') || errorMsg.includes('ValidationError')) {
+            logger.warning(`⚠️  Stack ${getStackName(stackType, stage)} does not exist. Nothing to remove.`);
+          } else {
+            logger.error(`❌ Failed to delete ${stackType} stack: ${errorMsg}`);
+            logger.warning(`🔄 Continuing with remaining stacks...`);
+          }
           // Continue with other stacks
         }
       }
       
-      logger.success('All stacks force delete process completed');
+      logger.success(`🎉 Bulk force delete completed for stage: ${stage}`);
     } catch (error: unknown) {
-      logger.error(`Force delete all failed: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(`❌ Force delete all failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });
@@ -97,19 +131,20 @@ program
   .action(async (options) => {
     try {
       const stage = options.stage;
-      const specificType = options.type as StackType | undefined;
+      const specificType = options.type ? parseStackType(options.type) : undefined;
       
-      const stackTypes = specificType ? [specificType] : ['waf', 'shared', 'cwl'] as StackType[];
+      const stackTypes = specificType ? [specificType] : [StackType.WAF, StackType.Shared, StackType.CWL];
       
       logger.info(`Cleaning up S3 buckets for stage ${stage}`);
       
       for (const stackType of stackTypes) {
         try {
-          const region = stackType === 'waf' ? 'us-east-1' : process.env.AWS_REGION || 'ap-southeast-2';
+          const region = stackType === StackType.WAF ? 'us-east-1' : process.env.AWS_REGION || 'ap-southeast-2';
           
           logger.info(`Cleaning up S3 buckets for ${stackType}...`);
           const forceDeleteManager = new ForceDeleteManager(region);
-          await forceDeleteManager.cleanupS3Buckets(stackType, stage);
+          // Use emptyStackS3Buckets instead of cleanupS3Buckets
+          await forceDeleteManager.emptyStackS3Buckets(stackType.toLowerCase(), stackType, stage);
           
           logger.success(`S3 cleanup completed for ${stackType}`);
         } catch (error: unknown) {
@@ -133,20 +168,30 @@ program
   .option('--type <type>', 'Specific stack type (waf, shared, cwl), or all types if not specified')
   .action(async (options) => {
     try {
+      console.log('Status command starting...'); // Debug log
       const stage = options.stage;
-      const specificType = options.type as StackType | undefined;
+      const specificType = options.type ? parseStackType(options.type) : undefined;
       
-      const stackTypes = specificType ? [specificType] : ['waf', 'shared', 'cwl'] as StackType[];
+      console.log(`Stage: ${stage}, Type: ${specificType}`); // Debug log
+      const stackTypes = specificType ? [specificType] : [StackType.WAF, StackType.Shared, StackType.CWL];
       
       logger.info(`Checking stack status for stage ${stage}`);
       
       for (const stackType of stackTypes) {
         try {
-          const region = stackType === 'waf' ? 'us-east-1' : process.env.AWS_REGION || 'ap-southeast-2';
+          console.log(`Processing stack type: ${stackType}`); // Debug log
+          const region = stackType === StackType.WAF ? 'us-east-1' : process.env.AWS_REGION || 'ap-southeast-2';
+          console.log(`Using region: ${region}`); // Debug log
           const stackName = getStackName(stackType, stage);
+          console.log(`Stack name: ${stackName}`); // Debug log
           
           const forceDeleteManager = new ForceDeleteManager(region);
-          const status = await forceDeleteManager.getStackStatus(stackName);
+          console.log('ForceDeleteManager created'); // Debug log
+          
+          // Create a helper method to get stack status
+          console.log('About to call getStackStatus...'); // Debug log
+          const status = await getStackStatus(forceDeleteManager, stackName);
+          console.log(`Status result: ${status}`); // Debug log
           
           if (status) {
             logger.info(`${stackType} (${stackName}): ${status}`);

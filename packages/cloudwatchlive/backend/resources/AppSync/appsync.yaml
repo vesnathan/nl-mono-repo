@@ -1,17 +1,20 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'CloudWatch Live AppSync Resources'
+Description: 'AppSync Resources for the application'
 
 Parameters:
   Stage:
     Type: String
     Description: Deployment stage (e.g., dev, prod)
     AllowedPattern: ^[a-zA-Z0-9-]+$
+  AppName:
+    Type: String
+    Description: Application Name (e.g., cwl, wbc)
 
 Resources:
   AppSyncLoggingServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "cwl-appsync-logging-role-${Stage}"
+      RoleName: !Sub "${AppName}-appsync-logging-role-${Stage}"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -20,7 +23,7 @@ Resources:
               Service: appsync.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub "cwl-appsync-logging-policy-${Stage}"
+        - PolicyName: !Sub "${AppName}-appsync-logging-policy-${Stage}"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -29,82 +32,84 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: "*" # You can restrict this to specific log groups if needed
+                Resource: "*" 
 
-  # AppSync API
   GraphQlApi:
     Type: AWS::AppSync::GraphQLApi
     Properties:
-      Name: !Sub "cwl-appsync-api-${Stage}"
+      Name: !Sub "${AppName}-appsync-api-${Stage}"
       AuthenticationType: AMAZON_COGNITO_USER_POOLS
       UserPoolConfig:
         UserPoolId:
           Fn::ImportValue:
-            Fn::Sub: "cwlUserPoolId-${Stage}"
+            Fn::Sub: "${AppName}-UserPoolId-${Stage}" # Parameterized import
         DefaultAction: ALLOW
-        AwsRegion: ap-southeast-2 # Make sure this is your intended region
+        AwsRegion: ap-southeast-2 
       AdditionalAuthenticationProviders:
         - AuthenticationType: AWS_IAM
       LogConfig:
         CloudWatchLogsRoleArn: !GetAtt AppSyncLoggingServiceRole.Arn
-        FieldLogLevel: ALL # Other options: ERROR, NONE
+        FieldLogLevel: ALL 
         ExcludeVerboseContent: false
 
-  # GraphQL Schema
   GraphQlSchema:
     Type: AWS::AppSync::GraphQLSchema
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
-      DefinitionS3Location: ./schema.graphql # Path to your combined schema file
+      DefinitionS3Location: ./schema.graphql 
 
-  # Data Sources
-  CWLUsersTableDataSource:
+  MainTableDataSource: # Renamed from CWLUsersTableDataSource for generality
     Type: AWS::AppSync::DataSource
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
-      Name: CWLUsersTableDynamoDBDataSource
+      Name: !Sub "${AppName}MainTableDynamoDBDataSource" # Parameterized name
       Type: AMAZON_DYNAMODB
       DynamoDBConfig:
         TableName:
           Fn::ImportValue:
-            !Sub "cwlUserTableName-${Stage}" # Ensure this export exists from your shared stack
+            !Sub "${AppName}-DataTableName-${Stage}" # Parameterized import
         AwsRegion: !Ref AWS::Region
       ServiceRoleArn:
         Fn::ImportValue:
-          !Sub "cwlAppSyncDynamoDBRoleArn-${Stage}" # Ensure this export exists (IAM role for AppSync to access DynamoDB)
+          !Sub "${AppName}-AppSyncDynamoDBRoleArn-${Stage}" # Parameterized import
 
-  # Resolvers
+  # Resolvers - Assuming resolver field names (e.g., getCWLUser) remain fixed in the schema for now
+  # If these also need to change based on AppName, the schema and resolver configs would need more significant updates.
   GetCWLUserResolver:
     Type: AWS::AppSync::Resolver
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       TypeName: Query
-      FieldName: getCWLUser
-      DataSourceName: !GetAtt CWLUsersTableDataSource.Name
+      FieldName: getCWLUser # This might need to be generic if schema changes
+      DataSourceName: !GetAtt MainTableDataSource.Name # Updated to MainTableDataSource
       Kind: UNIT
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      CodeS3Location: ./resolvers/users/Queries/Query.getCWLUser.js # Path to your resolver VTL/JS file
+      CodeS3Location: ./resolvers/users/Queries/Query.getCWLUser.js 
 
   CreateCWLUserResolver:
     Type: AWS::AppSync::Resolver
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       TypeName: Mutation
-      FieldName: createCWLUser
-      DataSourceName: !GetAtt CWLUsersTableDataSource.Name
+      FieldName: createCWLUser # This might need to be generic if schema changes
+      DataSourceName: !GetAtt MainTableDataSource.Name # Updated to MainTableDataSource
       Kind: UNIT
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      CodeS3Location: ./resolvers/users/Mutations/Mutation.createCWLUser.js # Path to your resolver VTL/JS file
+      CodeS3Location: ./resolvers/users/Mutations/Mutation.createCWLUser.js 
 
 Outputs:
-  CWLAppsyncUrl:
+  AppsyncUrl: # Renamed from CWLAppsyncUrl
     Value: !GetAtt GraphQlApi.GraphQLUrl
-    Description: GraphQL URL for the CloudWatchLive AppSync API
+    Description: !Sub "GraphQL URL for the ${AppName} AppSync API"
   
-  CWLAppsyncRealtimeUrl:
+  AppsyncRealtimeUrl: # Renamed from CWLAppsyncRealtimeUrl
     Value: !GetAtt GraphQlApi.RealtimeUrl
-    Description: Realtime URL for the CloudWatchLive AppSync API
+    Description: !Sub "Realtime URL for the ${AppName} AppSync API"
+
+  AppSyncApiId: # Added AppSync API ID Output
+    Value: !GetAtt GraphQlApi.ApiId
+    Description: !Sub "API ID for the ${AppName} AppSync API"

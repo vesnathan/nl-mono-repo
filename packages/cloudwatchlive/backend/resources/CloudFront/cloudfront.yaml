@@ -1,26 +1,29 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'CloudWatch Live CloudFront Resources'
+Description: !Sub 'CloudFront Resources for ${AppName}'
 
 Parameters:
   Stage:
     Type: String
     Description: Deployment stage (e.g., dev, prod)
     AllowedPattern: ^[a-zA-Z0-9-]+$
-  CWLBucketName:
+  AppName:
+    Type: String
+    Description: Application Name (e.g., cwl, wbc)
+  AppBucketName: # Renamed from CWLBucketName
     Type: String
     Description: Name of the S3 bucket for CloudFront origin
-  CWLBucketArn:
+  AppBucketArn: # Renamed from CWLBucketArn
     Type: String
     Description: ARN of the S3 bucket for CloudFront origin
-  CWLBucketRegionalDomainName:
+  AppBucketRegionalDomainName: # Renamed from CWLBucketRegionalDomainName
     Type: String
     Description: Regional domain name of the S3 bucket for CloudFront origin
 
 Resources:
-  CWLBucketPolicy:
+  AppBucketPolicy: # Renamed from CWLBucketPolicy
     Type: "AWS::S3::BucketPolicy"
     Properties:
-      Bucket: !Ref CWLBucketName
+      Bucket: !Ref AppBucketName
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -31,34 +34,33 @@ Resources:
               - s3:GetObject
               - s3:ListBucket
             Resource: 
-              - !Ref CWLBucketArn
-              - !Sub "${CWLBucketArn}/*"
+              - !Ref AppBucketArn
+              - !Sub "${AppBucketArn}/*"
             Condition:
               StringEquals:
-                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CWLCloudFrontDistribution}"
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${AppCloudFrontDistribution}"
 
-  CWLCloudFrontOAC:
+  AppCloudFrontOAC: # Renamed from CWLCloudFrontOAC
     Type: AWS::CloudFront::OriginAccessControl
     Properties: 
       OriginAccessControlConfig:
-        Name: CWLBucketOAC
-        Description: Origin Access Control for CWL bucket
+        Name: !Sub "${AppName}BucketOAC"
+        Description: !Sub "Origin Access Control for ${AppName} bucket"
         SigningBehavior: always
         SigningProtocol: sigv4
         OriginAccessControlOriginType: s3
 
-  # CloudFront Distribution
-  CWLCloudFrontDistribution:
+  AppCloudFrontDistribution: # Renamed from CWLCloudFrontDistribution
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
-        Comment: !Sub "CloudFront distribution for CloudWatchLive ${Stage}"
+        Comment: !Sub "CloudFront distribution for ${AppName} ${Stage}"
         Origins:
-          - DomainName: !Ref CWLBucketRegionalDomainName
+          - DomainName: !Ref AppBucketRegionalDomainName
             Id: S3Origin
             S3OriginConfig:
-              OriginAccessIdentity: ''
-            OriginAccessControlId: !GetAtt CWLCloudFrontOAC.Id
+              OriginAccessIdentity: '' # Required to be empty when using OAC
+            OriginAccessControlId: !GetAtt AppCloudFrontOAC.Id
         DefaultRootObject: index.html
         Enabled: true
         HttpVersion: http2
@@ -69,10 +71,10 @@ Resources:
           OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # CORS-S3Origin
 
 Outputs:
-  CWLCloudFrontDistributionId:
-    Value: !Ref CWLCloudFrontDistribution
-    Description: ID of the CloudFront distribution
+  CloudFrontDistributionId: # Renamed from CWLCloudFrontDistributionId
+    Value: !Ref AppCloudFrontDistribution
+    Description: !Sub "ID of the ${AppName} CloudFront distribution"
   
-  CWLCloudFrontDomainName:
-    Value: !GetAtt CWLCloudFrontDistribution.DomainName
-    Description: Domain name of the CloudFront distribution
+  CloudFrontDomainName: # Renamed from CWLCloudFrontDomainName
+    Value: !GetAtt AppCloudFrontDistribution.DomainName
+    Description: !Sub "Domain name of the ${AppName} CloudFront distribution"
