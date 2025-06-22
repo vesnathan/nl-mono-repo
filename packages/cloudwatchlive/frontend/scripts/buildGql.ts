@@ -10,7 +10,7 @@ const buildGql = async () => {
   mergeGraphqlFiles({
     INPUT_DIRS: [
       path.resolve("../backend/resources/AppSync"),
-      path.resolve("../../shared/types"),
+      path.resolve("../shared/types"),
     ],
     // the output file is then used by amplify codegen defined in `.graphqlconfig.yml`
     OUTPUT_FILE_PATH: path.resolve("combined_schema.graphql"),
