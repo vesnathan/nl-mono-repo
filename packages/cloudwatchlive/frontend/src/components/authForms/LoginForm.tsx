@@ -24,8 +24,7 @@ export const LoginForm: React.FC<Props> = ({
     setActiveStep,
   } = loginController;
 
-  const isLoginDisabled =
-    !userEmail || !userPassword || signInMutation.isPending;
+  const isLoginDisabled = !userEmail || !userPassword;
 
   const handleLogin = (e?: React.MouseEvent) => {
     e?.preventDefault();
@@ -69,6 +68,7 @@ export const LoginForm: React.FC<Props> = ({
           buttonText="Log in"
           additionalClassName="h-[40px] w-full mt-4"
           isDisabled={isLoginDisabled}
+          isLoading={signInMutation.isPending}
           onClick={handleLogin}
           color="primary"
         />

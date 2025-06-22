@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { CWLUserInput, ClientType } from '@/types/gqlTypes'; // Assuming gqlTypes is correctly aliased
-import { Button, Input, ModalBody, ModalFooter, Select, SelectItem } from '@nextui-org/react';
+import { Input, ModalBody, ModalFooter, Select, SelectItem } from '@nextui-org/react';
+import { CWLButton } from '@/components/common/CWLButton';
 import { createCWLUserMutationFn } from '@/graphql/mutations/userMutations'; // Import the mutation function
 import { useMutation } from '@tanstack/react-query'; // Assuming TanStack Query is used
 import { SALUTATIONS, SalutationValue } from '@/../shared/constants/salutations';
@@ -61,11 +62,27 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onClose, onSubmi
       // console.log('User created successfully');
       onSubmitSuccess();
     },
-    onError: (error: Error) => {
-      // console.error('Error creating user:', error);
-      // Handle error display to user, e.g., using a toast notification
-      // For now, we can re-throw or log to a more persistent store if needed
-      alert(`Error creating user: ${error.message}`); // Simple alert for now
+    onError: (error: any) => {
+      console.error('Full error object:', error);
+      console.error('Error type:', typeof error);
+      console.error('Error keys:', Object.keys(error || {}));
+      
+      // Handle different types of errors
+      let errorMessage = 'Unknown error occurred';
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+        errorMessage = error.errors[0].message || 'GraphQL error occurred';
+      } else if (error?.data?.errors && Array.isArray(error.data.errors) && error.data.errors.length > 0) {
+        errorMessage = error.data.errors[0].message || 'GraphQL data error occurred';
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.toString) {
+        errorMessage = error.toString();
+      }
+      
+      alert(`Error creating user: ${errorMessage}`);
     },
   });
 
@@ -142,12 +159,19 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onClose, onSubmi
         />
       </ModalBody>
       <ModalFooter>
-        <Button color="danger" variant="light" onPress={onClose}>
-          Cancel
-        </Button>
-        <Button color="primary" type="submit" isLoading={createUserMutation.isPending} className="font-bold">
-          Create User
-        </Button>
+        <CWLButton 
+          buttonText="Cancel"
+          color="danger" 
+          variant="light" 
+          onClick={onClose}
+        />
+        <CWLButton 
+          buttonText="Create User"
+          color="primary" 
+          type="submit" 
+          isLoading={createUserMutation.isPending} 
+          additionalClassName="font-bold"
+        />
       </ModalFooter>
     </form>
   );
