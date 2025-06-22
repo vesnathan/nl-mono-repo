@@ -343,43 +343,20 @@ export class ForceDeleteManager {
     }
   }
 
-  private async getStack(stackName: string): Promise<Stack | undefined> {
-    logger.info(`Attempting to describe stack: ${stackName} in region: ${this.region}`);
+  private async getStack(stackName: string): Promise<Stack | null> {
     try {
       const command = new DescribeStacksCommand({ StackName: stackName });
-      logger.debug(`CloudFormation DescribeStacks command: ${JSON.stringify(command.input)}`);
-      
       const response = await this.cfnClient.send(command);
-      logger.debug(`CloudFormation DescribeStacks response metadata: ${JSON.stringify(response.$metadata)}`);
-      
-      if (response.Stacks && response.Stacks.length > 0 && response.Stacks[0]) {
-        const stack = response.Stacks[0];
-        logger.info(`Stack ${stackName} found with status: ${stack.StackStatus}`);
-        return stack;
+      return response.Stacks?.[0] || null;
+    } catch (error: unknown) {
+      const err = error as Error;
+      if (err.name === 'ValidationError' && err.message.includes('does not exist')) {
+        // Stack doesn't exist - this is expected during deletion, so don't log as error
+        return null;
       }
-      logger.info(`Stack ${stackName} not found in response (empty Stacks array)`);
-      return undefined;
-    } catch (error: any) {
-      logger.error(`Error describing stack ${stackName} in region ${this.region}:`);
-      logger.error(`  Error name: ${error.name}`);
-      logger.error(`  Error message: ${error.message}`);
-      logger.error(`  Error code: ${error.code || 'N/A'}`);
-      logger.error(`  HTTP status: ${error.$metadata?.httpStatusCode || 'N/A'}`);
-      logger.error(`  Request ID: ${error.$metadata?.requestId || 'N/A'}`);
-      
-      // Only treat as "does not exist" for very specific error conditions
-      if (error.name === 'ValidationError' && error.message && error.message.toLowerCase().includes("does not exist")) {
-        logger.info(`Stack ${stackName} confirmed does not exist (ValidationError)`);
-        return undefined;
-      }
-      if (error.$metadata && error.$metadata.httpStatusCode === 400 && error.message && error.message.toLowerCase().includes("does not exist")) {
-        logger.info(`Stack ${stackName} confirmed does not exist (400 status)`);
-        return undefined;
-      }
-      
-      // For any other error, throw it so the caller can handle it properly
-      logger.error(`Unexpected error describing stack ${stackName}. This could be a permissions issue, credential issue, or other AWS problem.`);
-      throw error;
+      // Only log unexpected errors
+      logger.warning(`Unexpected error checking stack ${stackName}: ${err.message}`);
+      return null;
     }
   }
 
