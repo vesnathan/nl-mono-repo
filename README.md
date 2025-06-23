@@ -92,7 +92,19 @@ nl-mono-repo/
    # Edit with your AWS credentials
    ```
 
-4. **Start development**
+4. **Deploy to AWS**
+   ```bash
+   # Interactive deployment with guided prompts
+   cd packages/deploy
+   yarn deploy
+   
+   # The interactive tool will guide you through:
+   # - Stage selection (dev, staging, prod)
+   # - Admin email setup
+   # - Stack deployment in correct order
+   ```
+
+5. **Start development**
    ```bash
    # Interactive development menu with arrow key navigation
    yarn dev-menu
@@ -131,24 +143,66 @@ yarn dev:codespaces
 
 ## 🚢 Deployment
 
-The project uses a comprehensive TypeScript deployment tool.
+The project uses a comprehensive TypeScript-based deployment tool with an interactive CLI that guides you through the entire deployment process.
+
+### Quick Deployment
 
 ```bash
 # Interactive deployment with guided prompts
-yarn development
+cd packages/deploy
+yarn deploy
+
+# The tool will:
+# 1. Prompt you to select the deployment stage (dev, staging, prod)
+# 2. Ask for an admin email to create the initial admin user
+# 3. Deploy all stacks in the correct dependency order
+# 4. Handle stuck stacks and resource cleanup automatically
+# 5. Create admin user and validate deployment
 ```
 
-The deployment process will:
-1. Prompt you to select the deployment stage (dev, staging, or prod)
-2. Ask for an admin email to create the initial admin user
-3. Walk you through the deployment process with guided prompts
-4. Handle stuck stacks and resource cleanup automatically
+### Deployment Output
 
-### Legacy Command Support
+During deployment, you'll see progress updates for each step:
+
+```bash
+? Enter admin email address for user creation: admin@example.com
+[SUCCESS] AWS credentials initialized
+[SUCCESS] Successfully deployed WAF stack in us-east-1
+[SUCCESS] Successfully deployed Shared stack in ap-southeast-2
+[SUCCESS] CloudWatch Live infrastructure deployment completed successfully
+[SUCCESS] Frontend build completed successfully
+[SUCCESS] Frontend deployment completed successfully!
+[SUCCESS] Admin user setup completed successfully!
+[SUCCESS] All stacks deployed successfully.
+```
+
+The deployment process includes:
+1. **Infrastructure deployment** - All AWS stacks in correct dependency order
+2. **Frontend build and deployment** - Next.js application built and uploaded to S3/CloudFront
+3. **Admin user creation** - Cognito user and DynamoDB record creation
+4. **Validation** - Ensuring all components are working correctly
+
+### Deployment Features
+
+- ✅ **Interactive CLI** with guided prompts for all deployment options
+- ✅ **Smart dependency management** - automatically handles stack dependencies
+- ✅ **Multi-region support** - manages WAF (us-east-1) and application stacks (ap-southeast-2)
+- ✅ **Automatic admin user creation** in Cognito and DynamoDB
+- ✅ **Real-time deployment progress** with detailed logging
+- ✅ **Comprehensive error handling** with automatic retry and cleanup
+- ✅ **Frontend build and deployment** with CloudFront cache invalidation
+- ✅ **Stack update capabilities** with dependency detection
+
+### Alternative Commands
+
 ```bash
 # Legacy deployment command (still works)
 cd packages/deploy
-yarn deploy
+yarn development
+
+# Direct CLI deployment (skips interactive prompts)
+cd packages/deploy
+yarn deploy all --stage dev --admin-email admin@example.com
 ```
 
 For updating specific stacks and their dependencies:
@@ -158,14 +212,6 @@ For updating specific stacks and their dependencies:
 cd packages/deploy
 yarn update
 ```
-
-**Features:**
-- ✅ Interactive CLI with guided prompts
-- ✅ Smart dependency management
-- ✅ Automatic admin user creation
-- ✅ Real-time deployment progress
-- ✅ Comprehensive error handling
-- ✅ Frontend build and deployment
 
 See [packages/deploy/README.md](packages/deploy/README.md) for complete documentation.
 
@@ -185,15 +231,28 @@ graph TB
 
 ## 💻 Development
 
+### Development Commands
+
+| Command | Description |
+|---------|-------------|
+| `yarn dev-menu` | Interactive development menu (use ↑/↓ arrows, Enter to select) |
+| `yarn development` | Deploy/update AWS infrastructure |
+| `yarn dev:local` | Run frontend dev server locally |
+| `yarn dev:codespaces` | Run frontend dev server in Codespaces |
+| `yarn build-gql` | Generate GraphQL types |
+
 ### Local Development
 
-Start the development environment:
-
+**For Local Development:**
 ```bash
-# Start frontend development server
-yarn dev-cwl
+yarn dev:local
+# Frontend available at: http://localhost:3000
+```
 
-# This will start the Next.js dev server on http://localhost:3000
+**For GitHub Codespaces:**
+```bash
+yarn dev:codespaces  
+# Frontend available at forwarded port (Codespaces will show the URL)
 ```
 
 ### Building for Production
@@ -222,7 +281,7 @@ yarn test
 
 ### Updating Stacks
 
-The deployment tool provides smart update capabilities through interactive prompts:
+The deployment tool provides smart update capabilities through an interactive CLI:
 
 ```bash
 cd packages/deploy
@@ -230,16 +289,17 @@ cd packages/deploy
 # Launch the interactive update process
 yarn update
 
-# The tool will prompt you to:
-# 1. Select the stage (dev, staging, prod)
-# 2. Choose which stack to update (WAF, Shared, or CWL)
-# 3. Confirm dependencies to update
+# The tool will:
+# 1. Prompt you to select the stage (dev, staging, prod)
+# 2. Let you choose which stack to update (WAF, Shared, or CWL)  
+# 3. Automatically identify and update dependent stacks
+# 4. Handle the update process with real-time progress
 ```
 
-The tool automatically handles dependency management:
-- When updating shared assets, it will prompt to redeploy the dependent CWL stack
-- When updating WAF, no dependencies need updating
-- When updating CWL, no dependent stacks need updating
+**Smart Dependency Management:**
+- **Updating WAF**: No dependent stacks need updating
+- **Updating Shared Assets**: Automatically prompts to redeploy the dependent CWL stack
+- **Updating CWL**: No dependent stacks need updating
 
 ### Frontend-Only Updates
 
@@ -248,18 +308,15 @@ For quick frontend updates without backend changes:
 ```bash
 cd packages/deploy
 
-# Launch the interactive frontend deployment process
+# Launch the interactive frontend deployment
 yarn deploy:frontend
 
-# The tool will prompt you to:
-# 1. Select the stage (dev, staging, prod)
-# 2. Confirm the frontend deployment steps
+# The tool will:
+# 1. Prompt you to select the stage (dev, staging, prod)
+# 2. Build the frontend application
+# 3. Upload the build to the S3 bucket
+# 4. Invalidate the CloudFront distribution cache
 ```
-
-The tool will automatically:
-1. Build the frontend application
-2. Upload the build to the S3 bucket
-3. Invalidate the CloudFront distribution cache
 
 ### Monitoring Deployments
 
@@ -270,25 +327,51 @@ Monitor deployment progress through:
 
 ## 🗑 Stack Removal
 
-To remove stacks, use the interactive deployment tool:
+The deployment tool provides a comprehensive stack removal process with enhanced user feedback and progress tracking:
 
 ```bash
-# Launch the interactive removal process
+# Interactive removal with guided prompts
 cd packages/deploy
 yarn remove
 
-# The tool will prompt you to:
-# 1. Select the stage (dev, staging, prod)
-# 2. Choose which stacks to remove
-# 3. Confirm removal of selected stacks
+# The tool will:
+# 1. Prompt you to select the stage (dev, staging, prod)
+# 2. Show you which stacks exist for the selected stage
+# 3. Let you choose which stacks to remove
+# 4. Confirm removal with a single confirmation prompt
+# 5. Remove stacks in the correct dependency order with real-time progress
 ```
 
-The tool handles removal in the correct dependency order:
-1. CloudWatch Live (removed first)
-2. Shared Assets (removed second)  
-3. WAF (removed last)
+### Removal Features
 
-> **Important Note:** The WAF stack is deployed in the `us-east-1` region (required for CloudFront integration), while other stacks are deployed in `ap-southeast-2`. The deployment tool handles this regional difference automatically.
+- ✅ **Enhanced user feedback** with real-time progress updates
+- ✅ **Single confirmation prompt** - no repeated confirmations during removal
+- ✅ **Multi-region support** - handles WAF stack in us-east-1 automatically
+- ✅ **Proper dependency order** - removes stacks in reverse dependency order
+- ✅ **Error suppression** - hides confusing "stack does not exist" messages after successful deletion
+- ✅ **Comprehensive logging** - detailed progress information throughout the process
+
+### Removal Order
+
+The tool handles removal in the correct dependency order:
+1. **CloudWatch Live Stack** (removed first)
+2. **Shared Assets Stack** (removed second)  
+3. **WAF Stack** (removed last)
+
+### Alternative Removal Commands
+
+```bash
+# Direct CLI removal (skips interactive prompts)
+cd packages/deploy
+yarn remove all --stage dev
+
+# Remove specific stacks
+yarn remove:cwl --stage dev
+yarn remove:shared --stage dev  
+yarn remove:waf --stage dev
+```
+
+> **Important:** The WAF stack is deployed in `us-east-1` (required for CloudFront integration), while other stacks are in `ap-southeast-2`. The deployment tool handles this regional difference automatically.
 
 ## 🔐 Security & Access Control
 
@@ -307,11 +390,21 @@ The deployment requires these AWS permissions:
 
 ### User Management
 
-After deployment, admin users can:
+After deployment, the system automatically creates the following user groups in Cognito:
+- **SuperAdmin**: Full system access and administration
+- **EventCompanyAdmin**: Event company administration access
+- **EventCompanyStaff**: Event company staff access
+- **TechCompanyAdmin**: Technical company administration access  
+- **TechCompanyStaff**: Technical company staff access
+- **RegisteredAttendee**: Registered event attendee access
+- **UnregisteredAttendee**: Basic attendee access
+
+The admin user created during deployment is assigned to the **SuperAdmin** group with full access to:
 - Create and manage organizations
 - Set up user access controls
 - Configure CloudWatch log access
 - Manage API permissions
+- Administer all user groups and permissions
 
 ## 📚 Additional Documentation
 
@@ -332,7 +425,7 @@ After deployment, admin users can:
 
 ### Development Workflow
 
-1. **Local Testing**: Test changes locally with `yarn dev-cwl`
+1. **Local Testing**: Test changes locally with `yarn dev:local` or `yarn dev:codespaces`
 2. **Deploy to Dev**: Use `cd packages/deploy && yarn deploy` (select dev stage when prompted)
 3. **Testing**: Verify functionality in dev environment
 4. **Staging**: Deploy to staging for final testing (select staging stage when prompted)
@@ -351,33 +444,35 @@ For issues and questions:
 
 ## 🔍 Troubleshooting
 
-### WAF Stack Removal Issues
+### Common Issues
 
-If you encounter problems removing the WAF stack, try these steps:
+#### Stack Deployment Failures
+- **Failed stacks are automatically cleaned up** - The deployment tool detects failed stacks and removes them before retrying
+- **Check AWS permissions** - Ensure your AWS credentials have the necessary permissions for all services
+- **Verify stack outputs** - The tool validates that all required CloudFormation exports are present
 
-1. **Use the force-remove command**: This bypasses the regular stack removal process and targets the WAF stack directly in the us-east-1 region:
-   ```bash
-   yarn force-remove:waf --stage <stage-name>
-   ```
+#### Stack Removal Issues
+- **Use the interactive removal tool** - `cd packages/deploy && yarn remove` provides enhanced feedback and handles multi-region complexity
+- **WAF stack region** - The WAF stack is in `us-east-1`, not `ap-southeast-2`. The tool handles this automatically
+- **Dependency order** - Stacks are removed in reverse dependency order to prevent deletion failures
 
-2. **Check CloudFormation in the us-east-1 region**: The WAF stack exists in us-east-1, not in the default ap-southeast-2 region:
-   ```bash
-   aws cloudformation describe-stacks --stack-name nlmonorepo-waf-<stage> --region us-east-1
-   ```
+#### Frontend Issues
+- **Environment variables** - The frontend automatically reads deployment outputs from CloudFormation
+- **CloudFront caching** - Frontend deployments automatically invalidate the CloudFront cache
+- **Build failures** - Check that all required environment variables are set in the deployment outputs
 
-3. **Manually delete from AWS Console**: If programmatic deletion fails, you can delete the stack from the AWS CloudFormation console in the us-east-1 region.
+#### Multi-Region Complexity
+- **WAF resources** - Must be in `us-east-1` for CloudFront integration
+- **Application stacks** - Deployed in `ap-southeast-2` but reference WAF resources from `us-east-1`
+- **Automatic handling** - The deployment tool manages cross-region dependencies automatically
 
-4. **Check CloudFormation Service Role**: If the stack is stuck in DELETE_FAILED state, it might be due to permission issues with the CloudFormation service role. Make sure the role has the necessary permissions.
+### Getting Help
 
-### Multi-Region Deployment Issues
-
-When deploying or removing resources across multiple regions, keep in mind:
-
-- WAF resources must be in us-east-1 for CloudFront integration
-- CloudFront distributions are global but managed through us-east-1
-- The application stack in ap-southeast-2 references resources from us-east-1
-
-This multi-region architecture is required for CloudFront and WAF integration, but it means deployments and removals must manage resources across different regions.
+For issues and questions:
+1. Check the [deployment documentation](packages/deploy/README.md) for detailed troubleshooting
+2. Review CloudFormation stack events in the AWS Console
+3. Check CloudWatch logs for Lambda function errors
+4. Create an issue with detailed error messages and deployment logs
 
 ---
 
