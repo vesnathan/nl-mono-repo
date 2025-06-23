@@ -29,7 +29,7 @@ const stage = options.stage;
 const stackName = `nlmonorepo-waf-${stage}`;
 
 async function removeWafStack() {
-  console.log(`Removing WAF stack: ${stackName} from region ${WAF_REGION}`);
+  logger.info(`Removing WAF stack: ${stackName} from region ${WAF_REGION}`);
   
   try {
     // Create a CloudFormation client specific to us-east-1
@@ -41,7 +41,7 @@ async function removeWafStack() {
       await cfClient.send(describeCommand);
     } catch (error: unknown) {
       if (error instanceof Error && error.name === 'ValidationError' && error.message.includes('does not exist')) {
-        console.log(`WAF stack ${stackName} does not exist`);
+        logger.info(`WAF stack ${stackName} does not exist`);
         return;
       }
       // If it's a different error, or not an Error instance, rethrow or handle as appropriate
@@ -53,11 +53,11 @@ async function removeWafStack() {
     const command = new DeleteStackCommand({ StackName: stackName });
     await cfClient.send(command);
     
-    console.log(`Delete command sent successfully for ${stackName}`);
-    console.log('Wait for the stack to be deleted in the AWS CloudFormation console');
-    console.log(`Region: ${WAF_REGION}`);
+    logger.success(`Delete command sent successfully for ${stackName}`);
+    logger.info('Wait for the stack to be deleted in the AWS CloudFormation console');
+    logger.info(`Region: ${WAF_REGION}`);
   } catch (error: unknown) {
-    console.error(`Failed to delete WAF stack ${stackName}: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(`Failed to delete WAF stack ${stackName}: ${error instanceof Error ? error.message : String(error)}`);
     process.exit(1);
   }
 }

@@ -61,7 +61,8 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
   const stackName = getStackName(StackType.Shared, options.stage);
   const templateBucketName = getTemplateBucketName(StackType.Shared, options.stage);
   const region = options.region || process.env.AWS_REGION || 'ap-southeast-2'; // Ensure region is available
-  logger.info('Starting Shared Resources deployment...');
+  
+  logger.info(`Starting Shared stack deployment in ${region}`);
 
   // Initialize clients
   const cfn = new CloudFormation({ region });
@@ -139,7 +140,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
           PolicyName: `${roleName}-s3-templates-policy`,
           PolicyDocument: JSON.stringify(s3PolicyDocument)
         });
-        logger.success(`Added S3 templates access policy to role ${roleName}`);
+        logger.debug(`Added S3 templates access policy to role ${roleName}`);
       } catch (roleError: unknown) {
         logger.info(`Could not update role policy (role may not exist yet): ${roleError instanceof Error ? roleError.message : String(roleError)}`);
       }
@@ -289,7 +290,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
     const success = await awsUtils.waitForStack(stackName);
     
     if (success) {
-      logger.success('Shared Resources deployment completed successfully');
+      logger.debug('Shared Resources deployment completed successfully');
     } else {
       throw new Error('Shared Resources deployment failed');
     }

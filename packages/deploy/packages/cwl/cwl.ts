@@ -256,7 +256,8 @@ async function waitForStackDeletion(cfn: CloudFormationClient, stackName: string
 export async function deployCwl(options: DeploymentOptions): Promise<void> {
   const stackName = getStackName(StackType.CWL, options.stage);
   const templateBucketName = getTemplateBucketName(StackType.CWL, options.stage);
-  logger.info('Starting CloudWatch Live deployment...');
+
+  logger.info('Starting CloudWatch Live stack deployment in ap-southeast-2');
 
   const region = options.region || process.env.AWS_REGION || 'ap-southeast-2';
 
@@ -279,11 +280,13 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     // Make multiple attempts to ensure the bucket exists
     let bucketExists = false;
     for (let attempt = 1; attempt <= 3; attempt++) {
-      logger.info(`Attempt ${attempt}/3 to ensure bucket ${templateBucketName} exists...`);
+      if (options.debugMode) {
+        logger.debug(`Attempt ${attempt}/3 to ensure bucket ${templateBucketName} exists...`);
+      }
       bucketExists = await s3BucketManager.ensureBucketExists(templateBucketName);
       
       if (bucketExists) {
-        logger.success(`Bucket ${templateBucketName} exists and is accessible (attempt ${attempt})`);
+        logger.debug(`Bucket ${templateBucketName} exists and is accessible (attempt ${attempt})`);
         break;
       }
       
@@ -308,7 +311,9 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       });
       
       await s3.send(putBucketPublicAccessBlockCommand);
-      logger.info(`Set public access block on bucket ${templateBucketName}`);
+      if (options.debugMode) {
+        logger.debug(`Set public access block on bucket ${templateBucketName}`);
+      }
       
       const putBucketVersioningCommand = new PutBucketVersioningCommand({
         Bucket: templateBucketName,
@@ -318,19 +323,25 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       });
       
       await s3.send(putBucketVersioningCommand);
-      logger.info(`Enabled versioning on bucket ${templateBucketName}`);
+      if (options.debugMode) {
+        logger.debug(`Enabled versioning on bucket ${templateBucketName}`);
+      }
     } catch (configError: any) {
       logger.warning(`Error configuring bucket: ${configError.message}`);
       // Continue despite configuration errors
     }
     
-    logger.info(`Template bucket ${templateBucketName} is ready for use`);
+    if (options.debugMode) {
+      logger.debug(`Template bucket ${templateBucketName} is ready for use`);
+    }
 
     // Upload main CloudFormation template
     const mainTemplateS3Key = 'cfn-template.yaml';
     const templateUrl = `https://s3.${region}.amazonaws.com/${templateBucketName}/${mainTemplateS3Key}`;
 
-    logger.info(`Uploading main template to s3://${templateBucketName}/${mainTemplateS3Key}`);
+    if (options.debugMode) {
+      logger.debug(`Uploading main template to s3://${templateBucketName}/${mainTemplateS3Key}`);
+    }
     try {
         await s3.send(new PutObjectCommand({
             Bucket: templateBucketName,
@@ -338,20 +349,24 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
             Body: createReadStream(TEMPLATE_PATHS[StackType.CWL]),
             ContentType: 'application/x-yaml',
         }));
-        logger.success('Main template uploaded successfully.');
+        logger.debug('Main template uploaded successfully.');
     } catch (error: any) {
         throw new Error(`Failed to upload main template: ${error.message}`);
     }
 
     // Clear existing templates and verify bucket is writable
-    logger.info('Clearing existing templates...');
+    if (options.debugMode) {
+      logger.debug('Clearing existing templates...');
+    }
     try {
       const listCommand = new ListObjectsV2Command({ 
         Bucket: templateBucketName, 
         Prefix: 'resources/' 
       });
       const existingObjects = await retryOperation(() => s3.send(listCommand));
-      logger.info(`Found ${existingObjects.Contents?.length || 0} existing objects to delete`);
+      if (options.debugMode) {
+        logger.debug(`Found ${existingObjects.Contents?.length || 0} existing objects to delete`);
+      }
       
       if (existingObjects.Contents?.length) {
         const deleteCommand = new DeleteObjectsCommand({
@@ -361,17 +376,25 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           }
         });
         await retryOperation(() => s3.send(deleteCommand));
-        logger.info('Deleted existing templates');
+        if (options.debugMode) {
+          logger.debug('Deleted existing templates');
+        }
       }
     } catch (error: any) {
       logger.warning(`Error clearing templates: ${error.message}`);
-      logger.info('Continuing with deployment despite template clearing error');
+      if (options.debugMode) {
+        logger.debug('Continuing with deployment despite template clearing error');
+      }
     }
     
     // Upload nested stack templates
-    logger.info(`Looking for templates in: ${TEMPLATE_RESOURCES_PATHS[StackType.CWL]}`);
+    if (options.debugMode) {
+      logger.debug(`Looking for templates in: ${TEMPLATE_RESOURCES_PATHS[StackType.CWL]}`);
+    }
     const templateFiles = findYamlFiles(TEMPLATE_RESOURCES_PATHS[StackType.CWL]);
-    logger.info(`Found ${templateFiles.length} template files`);
+    if (options.debugMode) {
+      logger.debug(`Found ${templateFiles.length} template files`);
+    }
 
     if (templateFiles.length === 0) {
       throw new Error(`No template files found in ${TEMPLATE_RESOURCES_PATHS[StackType.CWL]}`);
@@ -384,7 +407,9 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     for (const file of templateFiles) {
       const relativePath = path.relative(TEMPLATE_RESOURCES_PATHS[StackType.CWL], file);
       const key = relativePath.replace(/\\/g, '/'); // Ensure forward slashes for S3
-      logger.info(`Uploading ${file} to ${key}`);
+      if (options.debugMode) {
+        logger.debug(`Uploading ${file} to ${key}`);
+      }
       
       const putCommand = new PutObjectCommand({
         Bucket: templateBucketName,
@@ -396,7 +421,9 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       try {
         await retryOperation(async () => {
           await s3.send(putCommand);
-          logger.info(`Uploaded template: ${key}`);
+          if (options.debugMode) {
+            logger.debug(`Uploaded template: ${key}`);
+          }
           successfulUploads.push(key);
         });
       } catch (error: any) {
@@ -416,10 +443,12 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       }
     }
 
-    logger.success(`Successfully uploaded ${successfulUploads.length} template files`);
+    logger.debug(`Successfully uploaded ${successfulUploads.length} template files`);
 
     // Compile and upload TypeScript resolvers
-    logger.info('Compiling and uploading AppSync resolvers...');
+    if (options.debugMode) {
+      logger.debug('Compiling and uploading AppSync resolvers...');
+    }
     
     // Double-check that the bucket exists before compiling and uploading resolvers
     const bucketExistsBeforeResolvers = await s3BucketManager.ensureBucketExists(templateBucketName);
@@ -437,7 +466,9 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
             path.basename(file) !== 'gqlTypes.ts' && // Exclude the main types file
             file.includes(path.sep) // IMPORTANT: Only include files in subdirectories
         );
-      logger.info(`Found ${resolverFiles.length} TypeScript resolver files in subdirectories of ${resolverDir}`);
+      if (options.debugMode) {
+        logger.debug(`Found ${resolverFiles.length} TypeScript resolver files in subdirectories of ${resolverDir}`);
+      }
       
       if (resolverFiles.length === 0) {
         logger.warning(`No TypeScript resolver files found in ${resolverDir}. This could cause deployment issues.`);
@@ -457,7 +488,9 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           await resolverCompiler.compileAndUploadResolvers();
           
           // Verify that the resolvers were uploaded successfully
-          logger.info('Verifying resolver uploads...');
+          if (options.debugMode) {
+            logger.debug('Verifying resolver uploads...');
+          }
           
           // First verification: Check using ListObjectsV2
           const listCommand = new ListObjectsV2Command({
@@ -477,7 +510,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
               resolverCount = listObjectsResult.Contents?.length || 0;
               
               if (resolverCount > 0) {
-                logger.success(`Verified ${resolverCount} resolvers were uploaded to S3`);
+                logger.debug(`Verified ${resolverCount} resolvers were uploaded to S3`);
                 break;
               } else {
                 logger.warning(`No resolvers found in S3 (attempt ${retryCount + 1}/${maxRetries}). Waiting and retrying...`);
@@ -505,7 +538,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
               missingResolvers.push(resolverKey);
               logger.warning(`Critical resolver missing: ${resolverKey}`);
             } else {
-              logger.success(`Verified critical resolver exists: ${resolverKey}`);
+              logger.debug(`Verified critical resolver exists: ${resolverKey}`);
             }
           }
           
@@ -722,21 +755,25 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     const success = await awsUtils.waitForStack(stackName);
     
     if (success) {
-      logger.success('CloudWatch Live infrastructure deployment completed successfully');
+      logger.success('Successfully deployed CloudWatch Live infrastructure stack');
       
       // Save deployment outputs BEFORE frontend deployment
-      logger.info('Saving deployment outputs...');
+      if (options.debugMode) {
+        logger.debug('Saving deployment outputs...');
+      }
       try {
         const outputsManager = new OutputsManager();
         await outputsManager.saveStackOutputs(StackType.CWL, options.stage, 'ap-southeast-2');
-        logger.success('Deployment outputs saved successfully');
+        logger.debug('Deployment outputs saved successfully');
       } catch (outputError: any) {
         logger.warning(`Failed to save deployment outputs: ${outputError.message}`);
         logger.warning('Frontend deployment may fail due to missing environment variables');
       }
       
       // Verify that AppSync resolvers were created successfully
-      logger.info('Verifying AppSync resolvers were created successfully...');
+      if (options.debugMode) {
+        logger.debug('Verifying AppSync resolvers were created successfully...');
+      }
       
       try {
         // Use AWS SDK v3 command-based approach
@@ -749,16 +786,20 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         );
         
         if (!apiIdOutput?.OutputValue) {
-          logger.warning('Could not find AppSync API ID in stack outputs');
-          logger.info('Available outputs:');
-          stack.Stacks?.[0]?.Outputs?.forEach(output => {
-            logger.info(`  - ${output.OutputKey}: ${output.OutputValue}`);
-          });
-          logger.info('This may be a timing issue. The AppSync API might still be initializing.');
+          logger.debug('Could not find AppSync API ID in stack outputs');
+          if (options.debugMode) {
+            logger.debug('Available outputs:');
+            stack.Stacks?.[0]?.Outputs?.forEach(output => {
+              logger.debug(`  - ${output.OutputKey}: ${output.OutputValue}`);
+            });
+            logger.debug('This may be a timing issue. The AppSync API might still be initializing.');
+          }
         } else {
           const apiId = apiIdOutput.OutputValue;
-          logger.info(`AppSync API ID: ${apiId}`);
-          logger.info(`AppSync GraphQL URL: ${stack.Stacks?.[0]?.Outputs?.find(o => o.OutputKey === 'CWLAppSyncApiUrl')?.OutputValue}`);
+          if (options.debugMode) {
+            logger.debug(`AppSync API ID: ${apiId}`);
+            logger.debug(`AppSync GraphQL URL: ${stack.Stacks?.[0]?.Outputs?.find(o => o.OutputKey === 'CWLAppSyncApiUrl')?.OutputValue}`);
+          }
           logger.success('AppSync API was created successfully, should be operational');
           
           // Since we've verified the AppSync API was created, we can assume the resolvers were also created
@@ -779,14 +820,12 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           skipUpload: false,
           skipInvalidation: false
         });
-        logger.success('Frontend deployment completed successfully');
+        logger.success('Successfully deployed CloudWatch Live Frontend');
       } catch (frontendError: any) {
         logger.error(`Frontend deployment failed: ${frontendError.message}`);
         logger.warning('Infrastructure was deployed successfully, but frontend deployment failed');
         // Don't throw here - infrastructure is deployed successfully
       }
-      
-      logger.success('CloudWatch Live deployment completed successfully');
     } else {
       throw new Error('CloudWatch Live infrastructure deployment failed');
     }

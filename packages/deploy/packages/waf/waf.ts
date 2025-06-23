@@ -62,7 +62,7 @@ export async function deployWaf(options: DeploymentOptions): Promise<void> {
   const s3Client = new S3Client({ region: WAF_REGION });
   const awsUtils = new AwsUtils(WAF_REGION);
 
-  logger.info(`Starting WAF deployment for stage ${stage} in ${WAF_REGION}`);
+  logger.info(`Starting WAF stack deployment in ${WAF_REGION}`);
 
   // 1. Ensure the S3 bucket for templates exists
   try {
