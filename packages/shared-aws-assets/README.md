@@ -1,102 +1,201 @@
 # Shared AWS Assets
 
-This package contains the AWS CloudFormation templates and deployment scripts for shared AWS resources used across multiple applications in the mono-repo.
+This package contains the AWS CloudFormation templates and infrastructure definitions for shared resources used across the CloudWatch Live application. These resources provide the foundational infrastructure that other application stacks depend on.
 
-## Overview
+## 🎯 Overview
 
-Shared AWS Assets provides a set of common AWS resources including:
+Shared AWS Assets provides foundational infrastructure including:
 
-- Cognito User Pools for Authentication
-- DynamoDB tables for common data
-- KMS for encryption keys
-- S3 buckets for shared storage
-- VPC networking resources
+- **VPC and Networking**: Virtual Private Cloud setup with subnets and security groups
+- **KMS Keys**: Encryption keys for securing data at rest and in transit
+- **IAM Roles**: Service roles and policies for stack deployments
+- **S3 Buckets**: Shared storage buckets for templates and assets
+- **CloudFormation Exports**: Shared outputs for other stacks to reference
 
-## Deployment Prerequisites
+## 🏗️ Architecture
 
-Before deploying Shared AWS Assets, make sure you have:
+The shared assets serve as the foundation layer for the entire application:
 
-1. AWS CLI configured with appropriate credentials
-2. Required IAM permissions (defined in `initial-deployment-policy.json`)
-3. Node.js and Yarn installed
-4. The WAF stack deployed (see deployment flow below)
-
-## Deployment Options
-
-You can deploy the shared AWS assets in multiple ways:
-
-### Option 1: Deploy All Stacks from Root (Recommended)
-
-The recommended approach is to use the root-level script that deploys all stacks in the correct order:
-
-```bash
-# Navigate to the root of the mono-repo
-cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo 
-
-# Deploy all stacks
-STAGE=dev yarn deploy-all
+```
+Shared Assets Stack (ap-southeast-2)
+├── VPC & Networking
+│   ├── Public/Private Subnets
+│   ├── Internet Gateway
+│   └── Security Groups
+├── KMS Keys
+│   ├── Application Data Encryption
+│   └── S3 Bucket Encryption
+├── IAM Resources
+│   ├── CloudFormation Service Roles
+│   └── Cross-Stack Access Policies
+└── S3 Buckets
+    ├── Template Storage
+    └── Asset Storage
 ```
 
-This script handles the correct deployment order and dependencies.
+## 📋 Prerequisites
 
-### Option 2: Deploy Individual Services
+Before deploying Shared AWS Assets, ensure you have:
 
-If you need to deploy components individually:
+1. **AWS CLI** configured with appropriate credentials
+2. **Required IAM permissions** for CloudFormation, VPC, KMS, S3, and IAM services
+3. **Node.js 18+** and **Yarn** installed
+4. **WAF stack deployed** (dependency requirement)
 
-#### 1. Deploy Web Application Firewall first
-```bash
-cd ../cwl-waf && STAGE=dev AWS_PROFILE=nlmonorepo-waf-dev yarn deploy-waf
-```
+## 🚀 Deployment
 
-#### 2. Deploy Shared Assets
-```bash
-cd ../shared-aws-assets && STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn deploy-shared
-```
+The shared assets are deployed as part of the comprehensive deployment process. **Use the main deployment tool rather than deploying shared assets individually.**
 
-## Deployment Process Details
-
-The Shared AWS Assets deployment process:
-
-1. Validates CloudFormation templates
-2. Deploys the main CloudFormation stack
-3. Creates resources using nested stacks for:
-   - Cognito
-   - DynamoDB
-   - KMS
-   - S3
-   - VPC
-
-## Resource Removal
-
-You have two options to remove the deployed resources:
-
-### Option 1: Remove All Stacks from Root (Recommended)
+### Recommended: Use Main Deployment Tool
 
 ```bash
-# Navigate to the root of the mono-repo
-cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo 
+# Deploy entire application (recommended)
+cd packages/deploy
+yarn deploy
 
-# Remove all stacks
-STAGE=dev yarn remove-all
+# The deployment tool automatically:
+# 1. Deploys WAF stack first (us-east-1)
+# 2. Deploys Shared Assets stack (ap-southeast-2)
+# 3. Deploys CloudWatch Live stack (ap-southeast-2)
+# 4. Handles all dependencies and exports/imports
 ```
 
-### Option 2: Remove Individual Services
+### Alternative: Individual Shared Assets Deployment
 
-Execute these commands in proper order (after removing any dependent services):
+If you need to deploy or update just the shared assets:
 
-#### 1. Remove Shared Assets
 ```bash
-STAGE=dev AWS_PROFILE=nlmonorepo-shared-dev yarn remove-shared
+# Update shared assets and dependent stacks
+cd packages/deploy
+yarn update:shared --stage dev
+
+# This will:
+# 1. Update the Shared Assets stack
+# 2. Prompt to update the dependent CloudWatch Live stack
+# 3. Handle all CloudFormation exports/imports
 ```
 
-## Available Scripts
+**Note**: The shared assets stack depends on the WAF stack being deployed first, as it references WAF outputs.
 
-- `yarn build-gql`: Build GraphQL schema
-- `yarn deploy-shared`: Deploy shared AWS assets
-- `yarn remove-shared`: Remove shared AWS assets
+## 🔧 Development
 
-## Important Notes
+### Infrastructure Updates
 
-- Before removing shared resources, ensure that no other services depend on them
-- Removing shared resources can cause data loss for applications using these resources
-- For production environments, ensure you have appropriate backups in place
+To update the shared infrastructure:
+
+```bash
+# Update shared assets with dependency management
+cd packages/deploy
+yarn update:shared --stage dev
+
+# The tool will:
+# 1. Update the Shared Assets CloudFormation stack
+# 2. Detect dependent stacks (CloudWatch Live)
+# 3. Prompt to update dependent stacks if needed
+# 4. Handle all exports/imports automatically
+```
+
+### CloudFormation Templates
+
+The shared assets are defined in CloudFormation templates:
+
+| Template | Description | Location |
+|----------|-------------|----------|
+| `cfn-template.yaml` | Main stack template | `/cfn-template.yaml` |
+| `resources/` | Nested stack templates | `/resources/` |
+
+### Stack Exports
+
+The Shared Assets stack provides these exports for other stacks:
+
+- **VPC Configuration**: VPC ID, subnet IDs, security group IDs
+- **KMS Keys**: Encryption key ARNs for application use
+- **S3 Buckets**: Shared bucket names and ARNs
+- **IAM Roles**: Service role ARNs for cross-stack access
+
+## 📊 Infrastructure Details
+
+### Dependencies
+
+- **Depends on**: WAF Stack (for WAF ACL references)
+- **Depended on by**: CloudWatch Live Stack (for VPC, KMS, etc.)
+
+### Regional Configuration
+
+- **Deployment Region**: `ap-southeast-2` (Sydney)
+- **Cross-Region References**: References WAF resources from `us-east-1`
+
+### Resource Management
+
+The shared assets include:
+
+1. **Networking Layer**: VPC, subnets, security groups, and routing
+2. **Security Layer**: KMS keys for encryption, IAM roles for access
+3. **Storage Layer**: S3 buckets for templates and shared assets
+4. **Integration Layer**: CloudFormation exports for cross-stack references
+
+## 🗑️ Resource Removal
+
+Shared assets should be removed as part of the complete stack removal process:
+
+```bash
+# Remove all stacks (recommended)
+cd packages/deploy
+yarn remove
+
+# The tool will:
+# 1. Remove CloudWatch Live stack first (dependent)
+# 2. Remove Shared Assets stack second
+# 3. Remove WAF stack last
+# 4. Handle dependency order automatically
+```
+
+### Individual Removal (Advanced)
+
+Only remove shared assets individually if you're certain no other stacks depend on them:
+
+```bash
+# Remove shared assets only (advanced users)
+cd packages/deploy
+yarn remove:shared --stage dev
+
+# WARNING: This will fail if CloudWatch Live stack still exists
+```
+
+## 🛠️ Available Commands
+
+When working directly with this package (advanced usage):
+
+```bash
+# Build GraphQL schema (if applicable)
+yarn build-gql
+
+# Validate CloudFormation templates
+aws cloudformation validate-template --template-body file://cfn-template.yaml
+```
+
+## ⚠️ Important Notes
+
+- **Dependency Management**: Always use the main deployment tool to handle dependencies
+- **Data Persistence**: Removing shared resources can cause data loss for dependent applications
+- **Production Safety**: Ensure proper backups exist before removing production shared assets
+- **Regional Consistency**: Shared assets are deployed in `ap-southeast-2` and reference WAF resources from `us-east-1`
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+#### Deployment Failures
+- **Missing WAF dependency**: Ensure WAF stack is deployed first
+- **Permission errors**: Verify AWS credentials have all required permissions
+- **Export conflicts**: Check for naming conflicts with existing CloudFormation exports
+
+#### Update Issues
+- **Dependent stack failures**: If updating shared assets breaks dependent stacks, use the main deployment tool's update functionality
+- **Resource constraints**: Some resources (like VPC configurations) have limitations on updates
+
+### Getting Help
+
+1. Check the [main deployment documentation](../deploy/README.md) for comprehensive troubleshooting
+2. Review CloudFormation stack events in the AWS Console for detailed error information
+3. Verify all dependencies are properly deployed before updating shared assets
