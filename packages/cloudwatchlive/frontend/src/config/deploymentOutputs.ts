@@ -36,9 +36,12 @@ type DeploymentOutputMap = {
 export function getDeploymentOutput<T extends keyof DeploymentOutputMap>(
   outputType: T,
 ): DeploymentOutputMap[T] {
-  console.log('getDeploymentOutput called with:', outputType);
-  console.log('Current environment:', environment);
-  console.log('Is valid env:', isValidEnv(environment));
+  // Only log in development mode
+  if (process.env.NODE_ENV === 'development') {
+    console.log('getDeploymentOutput called with:', outputType);
+    console.log('Current environment:', environment);
+    console.log('Is valid env:', isValidEnv(environment));
+  }
   
   if (!isValidEnv(environment)) {
     console.error(`Invalid environment: ${environment}`);
@@ -49,12 +52,15 @@ export function getDeploymentOutput<T extends keyof DeploymentOutputMap>(
   // eslint-disable-next-line sonarjs/no-small-switch
   switch (outputType) {
     case "CWL": {
-      console.log('Processing CWL case');
-      console.log('Environment variables:');
-      console.log('  NEXT_PUBLIC_USER_POOL_ID:', process.env.NEXT_PUBLIC_USER_POOL_ID);
-      console.log('  NEXT_PUBLIC_USER_POOL_CLIENT_ID:', process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID);
-      console.log('  NEXT_PUBLIC_IDENTITY_POOL_ID:', process.env.NEXT_PUBLIC_IDENTITY_POOL_ID);
-      console.log('  NEXT_PUBLIC_GRAPHQL_URL:', process.env.NEXT_PUBLIC_GRAPHQL_URL);
+      // Only log in development mode
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Processing CWL case');
+        console.log('Environment variables:');
+        console.log('  NEXT_PUBLIC_USER_POOL_ID:', process.env.NEXT_PUBLIC_USER_POOL_ID);
+        console.log('  NEXT_PUBLIC_USER_POOL_CLIENT_ID:', process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID);
+        console.log('  NEXT_PUBLIC_IDENTITY_POOL_ID:', process.env.NEXT_PUBLIC_IDENTITY_POOL_ID);
+        console.log('  NEXT_PUBLIC_GRAPHQL_URL:', process.env.NEXT_PUBLIC_GRAPHQL_URL);
+      }
       
       const deploymentOutput: CWLOutput = {
         cwlUserPoolId: process.env.NEXT_PUBLIC_USER_POOL_ID || '',

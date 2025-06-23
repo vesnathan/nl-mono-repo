@@ -1,6 +1,6 @@
-# CloudWatch Live - Mono Repository
+# Nathan Loudon's AWS Monorepo
 
-A comprehensive AWS-based application for real-time CloudWatch log monitoring and management, built with a modern serverless architecture.
+A comprehensive monorepo containing AWS-based applications and shared infrastructure, built with modern serverless architecture and TypeScript.
 
 ## 📋 Table of Contents
 
@@ -15,25 +15,41 @@ A comprehensive AWS-based application for real-time CloudWatch log monitoring an
 
 ## 🎯 Overview
 
-CloudWatch Live is a real-time log monitoring and management platform that provides:
+This monorepo contains multiple AWS applications and shared infrastructure components developed by Nathan Loudon:
 
-- **Real-time log streaming** from AWS CloudWatch
-- **Advanced filtering and search** capabilities
-- **User management** with role-based access control
-- **Multi-tenant architecture** with organization support
+### Current Applications
+
+**CloudWatch Live (CWL)** - An event management platform that provides:
+- **Event scheduling and management** for conferences, meetings, and live events
+- **YouTube Live streaming integration** for each event session
+- **User management** with role-based access control for different event roles
+- **Multi-tenant architecture** with organization and company support
 - **Modern React frontend** with Next.js
-- **Serverless backend** using AWS AppSync, Lambda, and DynamoDb
+- **Serverless backend** using AWS AppSync, Lambda, and DynamoDB
+
+### Shared Infrastructure
+- **Deployment orchestration** - Comprehensive TypeScript-based deployment tools
+- **AWS shared assets** - VPC, KMS, IAM, and other foundational infrastructure
+- **Common utilities** - Shared types, functions, and development tools
 
 ## 🏗 Architecture
 
-The application follows a multi-stack serverless architecture:
+The monorepo follows a multi-stack serverless architecture with shared infrastructure:
 
+### Application Architecture (CWL)
 - **Frontend**: Next.js React application hosted on CloudFront
 - **Backend**: AWS AppSync GraphQL API with Lambda resolvers
-- **Database**: DynamoDb for user data and configurations
-- **Authentication**: Amazon Cognito for user management
+- **Database**: DynamoDB for user data, events, and session management
+- **Authentication**: Amazon Cognito for user management with role-based access
+- **Streaming**: YouTube Live API integration for event sessions
 - **Security**: AWS WAF for application protection
-- **Infrastructure**: CloudFormation for IaC deployment
+- **Infrastructure**: CloudFormation for Infrastructure as Code deployment
+
+### Shared Infrastructure
+- **VPC & Networking**: Shared networking resources across applications
+- **KMS**: Centralized encryption key management
+- **IAM**: Shared roles and policies for cross-stack access
+- **S3**: Template storage and shared asset buckets
 
 ### Multi-Region Deployment
 - **WAF Stack**: `us-east-1` (required for CloudFront integration)
@@ -44,7 +60,7 @@ The application follows a multi-stack serverless architecture:
 ```
 nl-mono-repo/
 ├── packages/
-│   ├── cloudwatchlive/          # Main application
+│   ├── cloudwatchlive/          # Event management platform
 │   │   ├── backend/             # AppSync API, Lambda functions
 │   │   └── frontend/            # Next.js React application
 │   ├── waf/                     # Web Application Firewall
@@ -59,7 +75,7 @@ nl-mono-repo/
 
 | Package | Description | Region |
 |---------|-------------|---------|
-| `cloudwatchlive` | Main application (frontend + backend) | ap-southeast-2 |
+| `cloudwatchlive` | Event management and YouTube Live streaming platform | ap-southeast-2 |
 | `waf` | Web Application Firewall rules | us-east-1 |
 | `shared-aws-assets` | VPC, KMS, shared infrastructure | ap-southeast-2 |
 | `deploy` | Deployment orchestration and CLI | - |
@@ -169,7 +185,7 @@ During deployment, you'll see progress updates for each step:
 [SUCCESS] AWS credentials initialized
 [SUCCESS] Successfully deployed WAF stack in us-east-1
 [SUCCESS] Successfully deployed Shared stack in ap-southeast-2
-[SUCCESS] CloudWatch Live infrastructure deployment completed successfully
+[SUCCESS] CWL infrastructure deployment completed successfully
 [SUCCESS] Frontend build completed successfully
 [SUCCESS] Frontend deployment completed successfully!
 [SUCCESS] Admin user setup completed successfully!
@@ -220,14 +236,14 @@ See [packages/deploy/README.md](packages/deploy/README.md) for complete document
 ```mermaid
 graph TB
     A[WAF Stack] --> B[Shared Assets Stack]
-    B --> C[CloudWatch Live Stack]
+    B --> C[CWL Stack]
     C --> D[Frontend Deployment]
 ```
 
 **Stack Dependencies:**
 - **WAF**: Independent, deployed first
 - **Shared Assets**: Depends on WAF, provides shared infrastructure
-- **CloudWatch Live**: Depends on Shared Assets for VPC, KMS, etc.
+- **CWL (CloudWatch Live)**: Depends on Shared Assets for VPC, KMS, etc.
 
 ## 💻 Development
 
@@ -354,7 +370,7 @@ yarn remove
 ### Removal Order
 
 The tool handles removal in the correct dependency order:
-1. **CloudWatch Live Stack** (removed first)
+1. **CWL Stack** (removed first)
 2. **Shared Assets Stack** (removed second)  
 3. **WAF Stack** (removed last)
 
@@ -400,10 +416,10 @@ After deployment, the system automatically creates the following user groups in 
 - **UnregisteredAttendee**: Basic attendee access
 
 The admin user created during deployment is assigned to the **SuperAdmin** group with full access to:
-- Create and manage organizations
-- Set up user access controls
-- Configure CloudWatch log access
-- Manage API permissions
+- Create and manage events and sessions
+- Set up user access controls for different event roles
+- Configure YouTube Live streaming for event sessions
+- Manage API permissions and organization settings
 - Administer all user groups and permissions
 
 ## 📚 Additional Documentation
@@ -476,6 +492,6 @@ For issues and questions:
 
 ---
 
-**Made with ❤️ for collating and viewing YouTube Live Streams into specific event agendas**
+**Made with ❤️ for creating seamless event management and YouTube Live streaming experiences**
 
 

@@ -42,7 +42,7 @@ export async function addAppSyncBucketPolicy(bucketName: string, region: string)
   };
   
   try {
-    logger.info(`Checking if bucket ${bucketName} exists...`);
+    logger.debug(`Checking if bucket ${bucketName} exists...`);
     
     // Verify bucket exists
     await retryOperation(async () => {

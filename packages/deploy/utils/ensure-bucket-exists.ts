@@ -8,9 +8,9 @@ export async function ensureBucketExists(bucketName: string, region: string): Pr
   const s3 = new S3({ region });
   
   try {
-    logger.info(`Checking if bucket exists: ${bucketName}`);
+    logger.debug(`Checking if bucket exists: ${bucketName}`);
     await s3.headBucket({ Bucket: bucketName });
-    logger.info(`Bucket ${bucketName} already exists`);
+    logger.debug(`Bucket ${bucketName} already exists`);
     return true;
   } catch (error: any) {
     if (error.name !== 'NotFound' && error.name !== 'NoSuchBucket') {
