@@ -82,7 +82,7 @@ export class OutputsManager {
       // Save updated outputs
       await writeFile(this.outputsFilePath, JSON.stringify(deploymentOutputs, null, 2));
       
-      logger.success(`Saved outputs for ${stackType} stack to ${this.outputsFilePath}`);
+      logger.debug(`Saved outputs for ${stackType} stack to ${this.outputsFilePath}`);
       logger.info(`Found ${outputs.length} outputs for ${stackType} stack`);
 
     } catch (error: unknown) {

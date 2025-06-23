@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import inquirer from 'inquirer';
 import { config } from 'dotenv';
-import { logger, setDebugMode as setLoggerDebugMode } from './utils/logger'; // Import setDebugMode
+import { logger, setDebugMode as setLoggerDebugMode, resetDebugMode } from './utils/logger'; // Import resetDebugMode
 import { AwsUtils } from './utils/aws-utils';
 import { FrontendDeploymentManager } from './utils/frontend-deployment';
 import { UserSetupManager } from './utils/user-setup';
@@ -55,6 +55,9 @@ class DeploymentManager {
   public forceDeleteManager: ForceDeleteManager; // Made public
 
   constructor(region = 'ap-southeast-2') {
+    // Ensure debug mode is disabled by default
+    setLoggerDebugMode(false);
+    
     this.region = region;
     this.cfClient = new CloudFormationClient({ region });
     this.frontendManager = new FrontendDeploymentManager(region);
@@ -143,6 +146,9 @@ class DeploymentManager {
   }
 
   async deploySequentially(options: DeploymentOptions): Promise<void> {
+    // Ensure debug mode is properly set
+    setLoggerDebugMode(options.debugMode || false);
+    
     logger.info('Deploying all stacks in order: WAF -> Shared -> CWL');
     
     await this.deployStack(StackType.WAF, options);
@@ -164,7 +170,7 @@ class DeploymentManager {
     try {
       const credentials = await getAwsCredentials();
       this.awsUtils = new AwsUtils(this.region, credentials);
-      logger.success('AWS credentials initialized');
+      logger.debug('AWS credentials initialized');
     } catch (error: unknown) {
       logger.error(`Failed to initialize AWS credentials: ${(error as Error).message}`);
       throw error;
@@ -206,8 +212,6 @@ class DeploymentManager {
     };
 
     try {
-      logger.info(`Starting deployment of ${stackType} stack for stage: ${stage} in region ${effectiveRegion}`);
-
       const dependenciesValid = await this.dependencyValidator.validateDependencies(stackType, stage);
       if (!dependenciesValid) {
         throw new Error(`Dependency validation failed for ${stackType} stack`);
@@ -234,7 +238,7 @@ class DeploymentManager {
       }
 
       await this.outputsManager.saveStackOutputs(stackType, stage, effectiveRegion);
-      logger.success(`Successfully deployed ${stackType} stack in ${effectiveRegion}`);
+      logger.success(`Successfully deployed ${stackType} stack`);
       await this.postDeploymentTasks(stackType, deploymentOptionsWithRegion);
 
     } catch (error: unknown) {
@@ -260,6 +264,9 @@ class DeploymentManager {
 
     const client = region === this.region ? this.cfClient : new CloudFormationClient({ region, credentials: this.cfClient.config.credentials });
 
+    if (stackType === StackType.WAF) {
+      logger.info('🚀 WAF deployment started...');
+    }
     logger.info(`Deploying stack ${stackName} in region ${region}`);
 
     if (await this.stackExists(stackName, client)) {
@@ -360,7 +367,7 @@ class DeploymentManager {
 
         if (this.isFinalStatus(status)) {
           if (status.endsWith('_COMPLETE')) {
-            logger.success(`Stack ${stackName} operation completed with status: ${status}`);
+            logger.debug(`Stack ${stackName} operation completed with status: ${status}`);
             return;
           } else if (status.endsWith('_FAILED') || status.includes('ROLLBACK')) {
             logger.error(`Stack ${stackName} operation failed with status: ${status}`);
@@ -509,6 +516,9 @@ class DeploymentManager {
 
 // --- Commander Program Setup ---
 async function main() {
+  // Ensure debug mode is completely reset at startup
+  resetDebugMode();
+  
   const deploymentManager = new DeploymentManager();
   await deploymentManager.initializeAws();
 
@@ -521,6 +531,9 @@ async function main() {
     .description('Deploy, manage, or remove stacks interactively')
     .action(async () => {
       try {
+        // Reset debug mode at the start
+        setLoggerDebugMode(false);
+        
         const { stage } = await inquirer.prompt([
           {
             type: 'input',

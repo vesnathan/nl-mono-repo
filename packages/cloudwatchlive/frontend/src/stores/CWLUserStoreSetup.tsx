@@ -35,7 +35,10 @@ export const CWLUserStoreSetup: FC<Props> = ({ userId, children }) => {
   // The resolver already handles Cognito group to clientType mapping
   useEffect(() => {
     if (CWLUser) {
-      console.log("CWLUserStoreSetup: Setting user with clientType from GraphQL response:", CWLUser.clientType);
+      // Only log in development mode
+      if (process.env.NODE_ENV === 'development') {
+        console.log("CWLUserStoreSetup: Setting user with clientType from GraphQL response:", CWLUser.clientType);
+      }
       setUser(CWLUser);
     }
   }, [CWLUser, setUser]);

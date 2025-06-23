@@ -15,7 +15,10 @@ export const useSaveSuperAdminClientMutation = (options?: {
   // For now, return a stub to avoid build errors
   return {
     mutate: (input: MutationInput) => {
-      console.log("useSaveSuperAdminClientMutation called with:", input);
+      // Only log in development mode
+      if (process.env.NODE_ENV === 'development') {
+        console.log("useSaveSuperAdminClientMutation called with:", input);
+      }
       // Simulate success callback if provided
       if (options?.onSuccess) {
         setTimeout(options.onSuccess, 100);

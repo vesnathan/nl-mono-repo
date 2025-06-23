@@ -14,7 +14,7 @@ import { execSync } from 'child_process';
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { join, relative, extname } from 'path';
 import { glob } from 'glob';
-import { logger } from './logger';
+import { logger, getDebugMode } from './logger';
 import { DeploymentOptions } from '../types';
 
 export class FrontendDeploymentManager {
@@ -53,8 +53,6 @@ export class FrontendDeploymentManager {
     if (!skipInvalidation && distributionId) {
       await this.invalidateCloudFront(distributionId);
     }
-
-    logger.success('Frontend deployment completed successfully!');
   }
 
   private async buildFrontend(stage?: string): Promise<void> {
@@ -67,12 +65,24 @@ export class FrontendDeploymentManager {
       // First, generate environment variables from deployment outputs
       const rootPath = join(this.frontendPath, '../../..');
       const generateEnvCommand = `cd ${rootPath} && node generate-env.js`;
-      logger.info('Generating environment variables from deployment outputs...');
-      execSync(generateEnvCommand, { stdio: 'inherit' });
+      logger.debug('Generating environment variables from deployment outputs...');
       
-      // Then build the frontend
-      const buildCommand = `cd ${this.frontendPath} && NEXT_PUBLIC_ENVIRONMENT=${envStage} yarn build`;
-      execSync(buildCommand, { stdio: 'inherit' });
+      // Only show output in debug mode
+      if (getDebugMode()) {
+        execSync(generateEnvCommand, { stdio: 'inherit' });
+        
+        // Then build the frontend
+        const buildCommand = `cd ${this.frontendPath} && NODE_ENV=production NEXT_PUBLIC_ENVIRONMENT=${envStage} yarn build`;
+        execSync(buildCommand, { stdio: 'inherit' });
+      } else {
+        // Suppress all output in non-debug mode by redirecting to /dev/null
+        execSync(generateEnvCommand + ' > /dev/null 2>&1', { stdio: 'ignore' });
+        
+        // Then build the frontend with output suppressed
+        const buildCommand = `cd ${this.frontendPath} && NODE_ENV=production NEXT_PUBLIC_ENVIRONMENT=${envStage} yarn build > /dev/null 2>&1`;
+        execSync(buildCommand, { stdio: 'ignore' });
+      }
+      
       logger.success('Frontend build completed successfully');
     } catch (error) {
       logger.error(`Frontend build failed: ${error instanceof Error ? error.message : 'Unknown error'}`);

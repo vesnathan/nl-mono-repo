@@ -49,7 +49,7 @@ export class DependencyValidator {
       validationResults.push({ stack: dependency, exists });
       
       if (exists) {
-        logger.success(`✓ Dependency ${dependency} is deployed and healthy`);
+        logger.debug(`✓ Dependency ${dependency} is deployed and healthy`);
       } else {
         logger.error(`✗ Dependency ${dependency} is not deployed or unhealthy`);
       }
@@ -64,7 +64,7 @@ export class DependencyValidator {
       return false;
     }
     
-    logger.success(`All dependencies for ${stackType} are satisfied`);
+    logger.debug(`All dependencies for ${stackType} are satisfied`);
     return true;
   }
 
