@@ -403,9 +403,9 @@ export class AwsUtils {
         if (resourceStatus.includes('FAILED')) {
           logger.error(`${logMessage} - ${event.ResourceStatusReason || 'No reason provided'}`);
         } else if (resourceStatus.includes('IN_PROGRESS')) {
-          logger.info(logMessage);
+          logger.debug(logMessage);
         } else if (resourceStatus.includes('COMPLETE')) {
-          logger.success(logMessage);
+          logger.debug(logMessage);
         }
       }
 

@@ -282,7 +282,7 @@ class ResolverCompiler {
   }
 
   public async compileAndUploadResolvers(): Promise<void> {
-    logger.success('Starting resolver compilation and upload...'); // Essential log
+    logger.debug('Starting resolver compilation and upload...'); // Essential log
     await this.setupBuildDirectory();
     await this.compileAndUploadSharedFile();
 
@@ -322,14 +322,14 @@ class ResolverCompiler {
 
         // Now, upload the same content to S3, ensuring consistency
         await this.uploadToS3(s3Key, compiledJsContent, 'application/javascript');
-        logger.success(`Uploaded ${resolverFileRelativePath} to S3: s3://${this.s3BucketName}/${s3Key}`); // Essential log
+        logger.debug(`Uploaded ${resolverFileRelativePath} to S3: s3://${this.s3BucketName}/${s3Key}`); // Essential log
 
       } catch (error: any) {
         logger.error(`Failed to compile or upload resolver ${resolverFileRelativePath}: ${error.message}`);
         // Optionally re-throw or collect errors to report at the end
       }
     }
-    logger.success('Finished all resolver processing.');
+    logger.debug('Finished all resolver processing.');
     // await this.cleanupBuildDirectory(); // Cleanup buildDir after all operations
   }
 
@@ -366,7 +366,7 @@ class ResolverCompiler {
             stdio: 'pipe', // Always pipe stdio to catch errors
             encoding: 'utf8' 
         });
-        logger.success(`Yarn install completed for shared build directory.`);
+        logger.debug(`Yarn install completed for shared build directory.`);
         if (yarnOutput) {
             logger.debug(`Yarn install output for shared build directory:\n${yarnOutput}`);
         }
@@ -576,7 +576,7 @@ class ResolverCompiler {
     try {
       logger.debug(`Running esbuild for ${resolverFileName}...`); // Essential log
       await esbuild.build(esbuildConfig);
-      logger.success(`esbuild completed for ${resolverFileName}.`); // Essential log
+      logger.debug(`esbuild completed for ${resolverFileName}.`); // Essential log
 
       const compiledJsPath = esbuildConfig.outfile;
       if (!compiledJsPath) { // Add this check

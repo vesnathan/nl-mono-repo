@@ -134,7 +134,7 @@ export class UserSetupManager {
             GroupName: groupName,
             Description: `Auto-created ${groupName} group for nlmonorepo-${stage}`
           }));
-          logger.success(`Created group: ${groupName}`);
+          logger.debug(`Created group: ${groupName}`);
         } else {
           logger.info(`Group '${groupName}' already exists`);
         }
@@ -148,7 +148,7 @@ export class UserSetupManager {
   private async verifyTableExists(tableName: string): Promise<void> {
     try {
       await this.dynamoClient.send(new DescribeTableCommand({ TableName: tableName }));
-      logger.success(`Found DynamoDb table: ${tableName}`);
+      logger.debug(`Found DynamoDb table: ${tableName}`);
     } catch (error) {
       logger.error(`DynamoDb table ${tableName} does not exist`);
       throw new Error(`DynamoDb table ${tableName} does not exist. Cannot proceed with user creation.`);
@@ -308,7 +308,7 @@ export class UserSetupManager {
         })
       );
 
-      logger.success(`Created user entry in DynamoDb table ${tableName}`);
+      logger.debug(`Created user entry in DynamoDb table ${tableName}`);
     } catch (error) {
       logger.error(`Error creating user in DynamoDb: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;
@@ -329,7 +329,7 @@ export class UserSetupManager {
         throw new Error(`User validation failed: User not found in table ${tableName}`);
       }
 
-      logger.success(`User validated successfully in table ${tableName}`);
+      logger.debug(`User validated successfully in table ${tableName}`);
     } catch (error) {
       logger.error(`User validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;

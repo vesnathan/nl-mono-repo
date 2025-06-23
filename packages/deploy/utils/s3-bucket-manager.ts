@@ -8,14 +8,7 @@ import {
   PutPublicAccessBlockCommand,
   BucketVersioningStatus
 } from '@aws-sdk/client-s3';
-
-// Simple logger since the external one might have dependency issues
-const logger = {
-  info: (message: string) => console.log('[INFO]', message),
-  success: (message: string) => console.log('[SUCCESS]', message),
-  warning: (message: string) => console.log('[WARNING]', message),
-  error: (message: string) => console.log('[ERROR]', message)
-};
+import { logger } from './logger';
 
 export class S3BucketManager {
   private s3Client: S3;
@@ -33,12 +26,12 @@ export class S3BucketManager {
    */
   async ensureBucketExists(bucketName: string): Promise<boolean> {
     try {
-      logger.info(`Checking if bucket ${bucketName} exists...`);
+      logger.debug(`Checking if bucket ${bucketName} exists...`);
       
       // First, try to check if the bucket exists
       try {
         await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
-        logger.success(`Bucket ${bucketName} already exists`);
+        logger.debug(`Bucket ${bucketName} already exists`);
         
         // Verify the bucket is in the correct region
         const locationResponse = await this.s3Client.send(

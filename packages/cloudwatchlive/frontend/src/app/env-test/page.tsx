@@ -1,21 +1,25 @@
 // Test if environment variables are loaded
-console.log('=== ENVIRONMENT VARIABLES TEST ===');
-console.log('NEXT_PUBLIC_USER_POOL_ID:', process.env.NEXT_PUBLIC_USER_POOL_ID);
-console.log('NEXT_PUBLIC_USER_POOL_CLIENT_ID:', process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID);
-console.log('NEXT_PUBLIC_IDENTITY_POOL_ID:', process.env.NEXT_PUBLIC_IDENTITY_POOL_ID);
-console.log('NEXT_PUBLIC_GRAPHQL_URL:', process.env.NEXT_PUBLIC_GRAPHQL_URL);
-console.log('NEXT_PUBLIC_ENVIRONMENT:', process.env.NEXT_PUBLIC_ENVIRONMENT);
-console.log('===================================');
+if (process.env.NODE_ENV === 'development') {
+  console.log('=== ENVIRONMENT VARIABLES TEST ===');
+  console.log('NEXT_PUBLIC_USER_POOL_ID:', process.env.NEXT_PUBLIC_USER_POOL_ID);
+  console.log('NEXT_PUBLIC_USER_POOL_CLIENT_ID:', process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID);
+  console.log('NEXT_PUBLIC_IDENTITY_POOL_ID:', process.env.NEXT_PUBLIC_IDENTITY_POOL_ID);
+  console.log('NEXT_PUBLIC_GRAPHQL_URL:', process.env.NEXT_PUBLIC_GRAPHQL_URL);
+  console.log('NEXT_PUBLIC_ENVIRONMENT:', process.env.NEXT_PUBLIC_ENVIRONMENT);
+  console.log('===================================');
+}
 
 // Test the Amplify configuration
 import { AMPLIFY_CONFIG } from '@/config/amplifyConfig';
 
-console.log('=== AMPLIFY CONFIG TEST ===');
-console.log('Auth.Cognito.userPoolId:', AMPLIFY_CONFIG.Auth?.Cognito?.userPoolId);
-console.log('Auth.Cognito.userPoolClientId:', AMPLIFY_CONFIG.Auth?.Cognito?.userPoolClientId);
-console.log('Auth.Cognito.identityPoolId:', AMPLIFY_CONFIG.Auth?.Cognito?.identityPoolId);
-console.log('API.GraphQL.endpoint:', AMPLIFY_CONFIG.API?.GraphQL?.endpoint);
-console.log('===========================');
+if (process.env.NODE_ENV === 'development') {
+  console.log('=== AMPLIFY CONFIG TEST ===');
+  console.log('Auth.Cognito.userPoolId:', AMPLIFY_CONFIG.Auth?.Cognito?.userPoolId);
+  console.log('Auth.Cognito.userPoolClientId:', AMPLIFY_CONFIG.Auth?.Cognito?.userPoolClientId);
+  console.log('Auth.Cognito.identityPoolId:', AMPLIFY_CONFIG.Auth?.Cognito?.identityPoolId);
+  console.log('API.GraphQL.endpoint:', AMPLIFY_CONFIG.API?.GraphQL?.endpoint);
+  console.log('===========================');
+}
 
 export default function EnvTest() {
   return (

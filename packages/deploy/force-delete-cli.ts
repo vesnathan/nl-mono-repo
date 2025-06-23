@@ -168,30 +168,30 @@ program
   .option('--type <type>', 'Specific stack type (waf, shared, cwl), or all types if not specified')
   .action(async (options) => {
     try {
-      console.log('Status command starting...'); // Debug log
+      logger.debug('Status command starting...');
       const stage = options.stage;
       const specificType = options.type ? parseStackType(options.type) : undefined;
       
-      console.log(`Stage: ${stage}, Type: ${specificType}`); // Debug log
+      logger.debug(`Stage: ${stage}, Type: ${specificType}`);
       const stackTypes = specificType ? [specificType] : [StackType.WAF, StackType.Shared, StackType.CWL];
       
       logger.info(`Checking stack status for stage ${stage}`);
       
       for (const stackType of stackTypes) {
         try {
-          console.log(`Processing stack type: ${stackType}`); // Debug log
+          logger.debug(`Processing stack type: ${stackType}`);
           const region = stackType === StackType.WAF ? 'us-east-1' : process.env.AWS_REGION || 'ap-southeast-2';
-          console.log(`Using region: ${region}`); // Debug log
+          logger.debug(`Using region: ${region}`);
           const stackName = getStackName(stackType, stage);
-          console.log(`Stack name: ${stackName}`); // Debug log
+          logger.debug(`Stack name: ${stackName}`);
           
           const forceDeleteManager = new ForceDeleteManager(region);
-          console.log('ForceDeleteManager created'); // Debug log
+          logger.debug('ForceDeleteManager created');
           
           // Create a helper method to get stack status
-          console.log('About to call getStackStatus...'); // Debug log
+          logger.debug('Calling getStackStatus...');
           const status = await getStackStatus(forceDeleteManager, stackName);
-          console.log(`Status result: ${status}`); // Debug log
+          logger.debug(`Status result: ${status}`);
           
           if (status) {
             logger.info(`${stackType} (${stackName}): ${status}`);
