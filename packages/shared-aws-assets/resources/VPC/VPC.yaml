@@ -171,6 +171,11 @@ Resources:
           CidrIp: 0.0.0.0/0
 
 Outputs:
+  SharedVPCId:
+    Value: !Ref SharedVPC
+    Export:
+      Name: !Sub shared-assets-SharedVPCId-${Stage}
+
   SharedSecurityGroupFromVPCId: # Renamed from cwlSecurityGroupFromSharedVPCId
     Value: !GetAtt SharedSecurityGroup.GroupId
     Export:

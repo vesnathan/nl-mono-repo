@@ -73,13 +73,8 @@ Resources:
       TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appsync.yaml 
       Parameters:
         Stage: !Ref Stage
-        AppName: cwl # Added AppName parameter
-        TemplatesBucketName: !Ref TemplatesBucketName
-        # CWLUserPoolId is an output from CognitoStack, and appsync.yaml expects an import called ${AppName}-UserPoolId-${Stage}
-        # The Cognito stack's output `cwlUserPoolId` is exported as `!Sub ${AppName}-UserPoolId-${Stage}` which matches.
-        # No direct parameter needed here if AppSync template uses Fn::ImportValue correctly.
-        # However, if direct passing is preferred for clarity or if AppSync needs the UserPoolId for non-import reasons:
-        # AppUserPoolId: !GetAtt CognitoStack.Outputs.cwlUserPoolId # (and add AppUserPoolId to appsync.yaml parameters)
+        TemplateBucketName: !Ref TemplatesBucketName
+        UserPoolId: !GetAtt CognitoStack.Outputs.cwlUserPoolId
 
   LambdaStack:
     Type: AWS::CloudFormation::Stack

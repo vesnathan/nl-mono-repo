@@ -37,7 +37,7 @@ export class FrontendDeploymentManager {
   async deployFrontend(options: DeploymentOptions): Promise<void> {
     const { stage, skipFrontendBuild, skipUpload, skipInvalidation } = options;
     
-    logger.info(`Starting frontend deployment for stage: ${stage}`);
+    logger.debug(`Starting frontend deployment for stage: ${stage}`);
 
     // Get S3 bucket and CloudFront distribution from CloudFormation
     const { bucketName, distributionId } = await this.getDeploymentResources(stage);
@@ -56,7 +56,7 @@ export class FrontendDeploymentManager {
   }
 
   private async buildFrontend(stage?: string): Promise<void> {
-    logger.info('Building frontend application...');
+    logger.debug('Building frontend application...');
     
     try {
       // Set environment variable to match deployment stage
@@ -91,7 +91,7 @@ export class FrontendDeploymentManager {
   }
 
   private async uploadToS3(bucketName: string, stage: string): Promise<void> {
-    logger.info(`Uploading frontend files to S3 bucket: ${bucketName}`);
+    logger.debug(`Uploading frontend files to S3 bucket: ${bucketName}`);
 
     try {
       // Clear existing files in the bucket (optional - you might want to make this configurable)
@@ -111,7 +111,7 @@ export class FrontendDeploymentManager {
   }
 
   private async clearS3Bucket(bucketName: string): Promise<void> {
-    logger.info('Clearing existing files from S3 bucket...');
+    logger.debug('Clearing existing files from S3 bucket...');
     
     try {
       const listResponse = await this.s3Client.send(
@@ -130,7 +130,7 @@ export class FrontendDeploymentManager {
             );
           }
         }
-        logger.info(`Cleared ${listResponse.Contents.length} existing files`);
+        logger.debug(`Cleared ${listResponse.Contents.length} existing files`);
       }
     } catch (error) {
       logger.warning(`Could not clear S3 bucket: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -155,7 +155,7 @@ export class FrontendDeploymentManager {
       await this.uploadFile(bucketName, filePath, s3Key);
     }
     
-    logger.info(`Uploaded ${files.length} static files`);
+    logger.debug(`Uploaded ${files.length} static files`);
   }
 
   private async uploadNextJSFiles(bucketName: string): Promise<void> {
@@ -172,7 +172,7 @@ export class FrontendDeploymentManager {
         await this.uploadFile(bucketName, filePath, s3Key);
       }
       
-      logger.info(`Uploaded ${files.length} server files`);
+      logger.debug(`Uploaded ${files.length} server files`);
     }
 
     // Upload other Next.js files
@@ -236,7 +236,7 @@ export class FrontendDeploymentManager {
   }
 
   private async invalidateCloudFront(distributionId: string): Promise<void> {
-    logger.info(`Creating CloudFront invalidation for distribution: ${distributionId}`);
+    logger.debug(`Creating CloudFront invalidation for distribution: ${distributionId}`);
     
     try {
       const invalidationResponse = await this.cloudFrontClient.send(
