@@ -100,15 +100,12 @@ export const CWLButton: React.FC<CWLButtonProps> = ({
     }
     if (color === "cancel") {
       return cn(
-        "bg-red-50",
-        "border-red-200",
+        "bg-red-100",
+        "border-red-300",
         "text-red-700",
-        "hover:bg-red-100",
-        "hover:border-red-300",
+        "hover:bg-red-200",
+        "hover:border-red-400",
         "hover:text-red-800",
-        "active:bg-red-200",
-        "active:border-red-400",
-        "active:text-red-900",
       );
     }
     // default

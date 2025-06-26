@@ -40,7 +40,7 @@ export class DependencyValidator {
       return true;
     }
 
-    logger.info(`Validating dependencies for ${stackType}: ${dependencies.join(', ')}`);
+    logger.debug(`Validating dependencies for ${stackType}: ${dependencies.join(', ')}`);
     
     const validationResults: { stack: StackType; exists: boolean }[] = [];
     

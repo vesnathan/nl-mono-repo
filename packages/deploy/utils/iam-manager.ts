@@ -16,13 +16,13 @@ export class IamManager {
     }
 
     try {
-      logger.info('Getting current IAM user...');
+      logger.debug('Getting current IAM user...');
       const response = await this.iam.getUser();
       if (!response.User?.Arn) {
         throw new Error('Failed to get current user ARN');
       }
       this.currentUserArn = response.User.Arn;
-      logger.info(`Current user ARN: ${this.currentUserArn}`);
+      logger.debug(`Current user ARN: ${this.currentUserArn}`);
       return this.currentUserArn;
     } catch (error: any) {
       logger.error(`Failed to get current user: ${error?.message}`);
@@ -34,14 +34,14 @@ export class IamManager {
     const roleName = `${getStackName(stackType, stage)}-role`;
     
     try {
-      logger.info(`Getting current user ARN for role ${roleName}...`);
+      logger.debug(`Getting current user ARN for role ${roleName}...`);
       const currentUserArn = await this.getCurrentUserArn();
       
       // Check if role exists
-      logger.info(`Checking if role ${roleName} exists...`);
+      logger.debug(`Checking if role ${roleName} exists...`);
       try {
         const role = await this.iam.getRole({ RoleName: roleName });
-        logger.info(`Role ${roleName} already exists`);
+        logger.debug(`Role ${roleName} already exists`);
         if (!role.Role?.Arn) {
           throw new Error(`Role ${roleName} exists but has no ARN`);
         }
@@ -52,7 +52,7 @@ export class IamManager {
           logger.error(`Unexpected error checking role: ${roleError?.message}`);
           throw roleError;
         }
-        logger.info(`Role ${roleName} does not exist, creating...`);
+        logger.debug(`Role ${roleName} does not exist, creating...`);
       }
 
       // Create role with assume role policy
