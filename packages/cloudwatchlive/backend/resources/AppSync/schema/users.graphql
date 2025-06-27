@@ -1,12 +1,9 @@
-# This file should only extend Query and Mutation types or define types specific to this AppSync API's user handling
-# if they are NOT already defined in shared/types.
-
-# Assuming CWLUser, ClientType, and CreateCWLUserInput are defined in shared/types
-# and will be merged by the buildGql.ts script.
+# This file defines the Query and Mutation operations for the CWL AppSync API
+# Type definitions (CWLUser, ClientType, CWLUserInput) come from shared types
 
 type Mutation {
   # Creates a new CWL User
-  createCWLUser(input: CWLUserInput!): CWLUser # Changed CreateCWLUserInput to CWLUserInput
+  createCWLUser(input: CWLUserInput!): CWLUser
 }
 
 type Query {
@@ -14,44 +11,3 @@ type Query {
   getCWLUser(userId: String!): CWLUser
     @aws_cognito_user_pools # Directive for AppSync authorization
 }
-
-# The actual definitions for CWLUser, CreateCWLUserInput, and ClientType
-# should come from the .graphql files in packages/shared/types/
-# and be merged by your build scripts.
-# Example (these would be in a file like packages/shared/types/userTypes.graphql):
-#
-# input CreateCWLUserInput {
-#   organizationId: String!
-#   userEmail: String!
-#   userTitle: String
-#   userFirstName: String!
-#   userLastName: String!
-#   userPhone: String!
-#   userRole: String!
-# }
-#
-# type CWLUser {
-#   userId: String!
-#   organizationId: String!
-#   userEmail: String!
-#   userTitle: String
-#   userFirstName: String!
-#   userLastName: String!
-#   userPhone: String!
-#   userRole: String!
-#   privacyPolicy: Boolean
-#   termsAndConditions: Boolean
-#   userAddedById: String
-#   userCreated: String!
-#   clientType: [ClientType!]!
-# }
-#
-# enum ClientType {
-#   SuperAdmin
-#   EventCompanyAdmin
-#   EventCompanyStaff
-#   TechCompanyAdmin
-#   TechCompanyStaff
-#   RegisteredAttendee # Corrected typo
-#   UnregisteredAttendee
-# }

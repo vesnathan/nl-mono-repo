@@ -22,6 +22,7 @@ interface ResolverInfo {
 }
 
 export interface ResolverCompilerOptions {
+  logger: typeof logger;
   baseResolverDir: string;
   s3KeyPrefix: string;
   stage: string;
@@ -34,6 +35,7 @@ export interface ResolverCompilerOptions {
 }
 
 class ResolverCompiler {
+  private logger: typeof logger;
   private baseResolverDir: string;
   private buildDir: string;
   private s3KeyPrefix: string;
@@ -49,6 +51,7 @@ class ResolverCompiler {
   private readonly gqlTypesSourceFileName = 'gqlTypes.ts';
 
   constructor(options: ResolverCompilerOptions) {
+    this.logger = options.logger;
     this.baseResolverDir = options.baseResolverDir;
     this.s3KeyPrefix = options.s3KeyPrefix;
     this.stage = options.stage;
@@ -282,7 +285,7 @@ class ResolverCompiler {
   }
 
   public async compileAndUploadResolvers(): Promise<void> {
-    logger.debug('Starting resolver compilation and upload...'); // Essential log
+    logger.success('Starting resolver compilation and upload...'); // Essential log
     await this.setupBuildDirectory();
     await this.compileAndUploadSharedFile();
 
@@ -322,14 +325,14 @@ class ResolverCompiler {
 
         // Now, upload the same content to S3, ensuring consistency
         await this.uploadToS3(s3Key, compiledJsContent, 'application/javascript');
-        logger.debug(`Uploaded ${resolverFileRelativePath} to S3: s3://${this.s3BucketName}/${s3Key}`); // Essential log
+        logger.success(`Uploaded ${resolverFileRelativePath} to S3: s3://${this.s3BucketName}/${s3Key}`); // Essential log
 
       } catch (error: any) {
         logger.error(`Failed to compile or upload resolver ${resolverFileRelativePath}: ${error.message}`);
         // Optionally re-throw or collect errors to report at the end
       }
     }
-    logger.debug('Finished all resolver processing.');
+    logger.success('Finished all resolver processing.');
     // await this.cleanupBuildDirectory(); // Cleanup buildDir after all operations
   }
 
@@ -366,7 +369,7 @@ class ResolverCompiler {
             stdio: 'pipe', // Always pipe stdio to catch errors
             encoding: 'utf8' 
         });
-        logger.debug(`Yarn install completed for shared build directory.`);
+        logger.success(`Yarn install completed for shared build directory.`);
         if (yarnOutput) {
             logger.debug(`Yarn install output for shared build directory:\n${yarnOutput}`);
         }
@@ -576,7 +579,7 @@ class ResolverCompiler {
     try {
       logger.debug(`Running esbuild for ${resolverFileName}...`); // Essential log
       await esbuild.build(esbuildConfig);
-      logger.debug(`esbuild completed for ${resolverFileName}.`); // Essential log
+      logger.success(`esbuild completed for ${resolverFileName}.`); // Essential log
 
       const compiledJsPath = esbuildConfig.outfile;
       if (!compiledJsPath) { // Add this check
@@ -638,13 +641,13 @@ class ResolverCompiler {
 
   private async cleanupBuildDirectory(): Promise<void> {
     if (this.debugMode) {
-      logger.debug(`Debug mode: Preserving main build directory: ${this.buildDir}`);
+      this.logger.debug(`Debug mode: Preserving main build directory: ${this.buildDir}`);
       return;
     }
     try {
       await fsPromises.rm(this.buildDir, { recursive: true, force: true });
     } catch (error: any) {
-      logger.error(`Failed to remove main build directory ${this.buildDir}: ${error.message}`);
+      this.logger.error(`Failed to remove main build directory ${this.buildDir}: ${error.message}`);
     }
   }
   
@@ -671,7 +674,7 @@ export const isSuperAdminUserGroup = (identity: AppSyncIdentityCognito): boolean
 };
 `;
     await fsPromises.writeFile(path.join(sharedFunctionsDir, 'userGroup.ts'), userGroupContent);
-    logger.info('Created simplified shared functions in build directory.');
+    this.logger.info('Created simplified shared functions in build directory.');
     // ... other simplified files ...
   }
 }

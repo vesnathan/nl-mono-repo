@@ -111,23 +111,35 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onClose, onSubmi
           placeholder="Email"
           errorMessage={errors.userEmail?.message}
           isInvalid={!!errors.userEmail}
+          classNames={{
+            inputWrapper: "border border-gray-300 hover:border-gray-400 focus-within:border-blue-500"
+          }}
         />
         <Input
           {...register('userFirstName')}
           placeholder="First Name"
           errorMessage={errors.userFirstName?.message}
           isInvalid={!!errors.userFirstName}
+          classNames={{
+            inputWrapper: "border border-gray-300 hover:border-gray-400 focus-within:border-blue-500"
+          }}
         />
         <Input
           {...register('userLastName')}
           placeholder="Last Name"
           errorMessage={errors.userLastName?.message}
           isInvalid={!!errors.userLastName}
+          classNames={{
+            inputWrapper: "border border-gray-300 hover:border-gray-400 focus-within:border-blue-500"
+          }}
         />
         <Select
           {...register('userTitle')}
           placeholder="Title (Optional)"
           aria-label="Select Title"
+          classNames={{
+            trigger: "border border-gray-300 hover:border-gray-400 focus-within:border-blue-500"
+          }}
         >
           {SALUTATIONS.map((salutation) => (
             <SelectItem key={salutation.id} value={salutation.value}>
@@ -138,12 +150,18 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onClose, onSubmi
         <Input
           {...register('userPhone')}
           placeholder="Phone (Optional)"
+          classNames={{
+            inputWrapper: "border border-gray-300 hover:border-gray-400 focus-within:border-blue-500"
+          }}
         />
         <Select
           placeholder="Organization"
           {...register('organizationId')}
           errorMessage={errors.organizationId?.message}
           isInvalid={!!errors.organizationId}
+          classNames={{
+            trigger: "border border-gray-300 hover:border-gray-400 focus-within:border-blue-500"
+          }}
         >
           {organizations.map((org) => (
             <SelectItem key={org.id} value={org.id}>
@@ -156,21 +174,22 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({ onClose, onSubmi
           placeholder="User Role"
           errorMessage={errors.userRole?.message}
           isInvalid={!!errors.userRole}
+          classNames={{
+            inputWrapper: "border border-gray-300 hover:border-gray-400 focus-within:border-blue-500"
+          }}
         />
       </ModalBody>
       <ModalFooter>
         <CWLButton 
           buttonText="Cancel"
-          color="danger" 
-          variant="light" 
+          color="cancel" 
           onClick={onClose}
         />
         <CWLButton 
           buttonText="Create User"
           color="primary" 
           type="submit" 
-          isLoading={createUserMutation.isPending} 
-          additionalClassName="font-bold"
+          isLoading={createUserMutation.isPending}
         />
       </ModalFooter>
     </form>

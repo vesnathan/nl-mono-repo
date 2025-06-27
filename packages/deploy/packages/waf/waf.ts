@@ -26,7 +26,7 @@ const WAF_REGION = 'us-east-1';
 
 async function uploadWafTemplates(s3Client: S3Client, bucketName: string): Promise<void> {
   const templatesPath = TEMPLATE_RESOURCES_PATHS[StackType.WAF];
-  logger.info(`Uploading WAF templates from ${templatesPath} to bucket ${bucketName}...`);
+  logger.debug(`Uploading WAF templates from ${templatesPath} to bucket ${bucketName}...`);
 
   try {
     const files = await glob(path.join(templatesPath, '**/*.yaml').replace(/\\/g, '/'));
@@ -39,7 +39,7 @@ async function uploadWafTemplates(s3Client: S3Client, bucketName: string): Promi
       const relativePath = path.relative(templatesPath, file);
       const s3Key = relativePath.replace(/\\/g, '/');
       
-      logger.info(`Uploading ${file} to s3://${bucketName}/${s3Key}`);
+      logger.debug(`Uploading ${file} to s3://${bucketName}/${s3Key}`);
       
       await s3Client.send(new PutObjectCommand({
         Bucket: bucketName,
@@ -62,15 +62,16 @@ export async function deployWaf(options: DeploymentOptions): Promise<void> {
   const s3Client = new S3Client({ region: WAF_REGION });
   const awsUtils = new AwsUtils(WAF_REGION);
 
-  logger.info(`Starting WAF stack deployment in ${WAF_REGION}`);
+  const stopSpinner = logger.infoWithSpinner(`Starting WAF stack deployment in ${WAF_REGION}`);
 
-  // 1. Ensure the S3 bucket for templates exists
+  try {
+    // 1. Ensure the S3 bucket for templates exists
   try {
     await s3Client.send(new CreateBucketCommand({ Bucket: templateBucketName }));
     logger.success(`Successfully created or verified bucket: ${templateBucketName}`);
   } catch (error) {
     if ((error as Error).name === 'BucketAlreadyOwnedByYou' || (error as Error).name === 'BucketAlreadyExists') {
-      logger.info(`Bucket ${templateBucketName} already exists.`);
+      logger.debug(`Bucket ${templateBucketName} already exists.`);
     } else {
       logger.error(`Failed to create bucket ${templateBucketName}: ${(error as Error).message}`);
       throw error;
@@ -104,23 +105,29 @@ export async function deployWaf(options: DeploymentOptions): Promise<void> {
   const cfClient = awsUtils.getRegionalCfClient(WAF_REGION);
 
   if (stackExists) {
-    logger.info(`Stack ${stackName} exists, updating...`);
+    logger.debug(`Stack ${stackName} exists, updating...`);
     try {
       await cfClient.send(new UpdateStackCommand(commandOptions));
       await waitUntilStackUpdateComplete({ client: cfClient, maxWaitTime: 3600 }, { StackName: stackName });
       logger.success(`Stack ${stackName} updated successfully.`);
     } catch (error: any) {
       if (error.message.includes('No updates are to be performed')) {
-        logger.info(`Stack ${stackName} is already up to date.`);
+        logger.debug(`Stack ${stackName} is already up to date.`);
       } else {
         logger.error(`Failed to update stack ${stackName}: ${error.message}`);
         throw error;
       }
     }
   } else {
-    logger.info(`Stack ${stackName} does not exist, creating...`);
+    logger.debug(`Stack ${stackName} does not exist, creating...`);
     await cfClient.send(new CreateStackCommand(commandOptions));
     await waitUntilStackCreateComplete({ client: cfClient, maxWaitTime: 3600 }, { StackName: stackName });
     logger.success(`Stack ${stackName} created successfully.`);
+  }
+  
+  stopSpinner();
+  } catch (error) {
+    stopSpinner();
+    throw error;
   }
 }
