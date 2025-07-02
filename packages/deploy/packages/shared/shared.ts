@@ -62,7 +62,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
   const templateBucketName = getTemplateBucketName(StackType.Shared, options.stage);
   const region = options.region || process.env.AWS_REGION || 'ap-southeast-2'; // Ensure region is available
   
-  logger.info(`Starting Shared stack deployment in ${region}`);
+  const stopSpinner = logger.infoWithSpinner(`Starting Shared stack deployment in ${region}`);
 
   // Initialize clients
   const cfn = new CloudFormation({ region });
@@ -79,12 +79,12 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
   try {
     // Create S3 bucket for templates if it doesn't exist
     try {
-      logger.info(`Checking if templates bucket exists: ${templateBucketName} in region ${region}`);
+      logger.debug(`Checking if templates bucket exists: ${templateBucketName} in region ${region}`);
       await s3.headBucket({ Bucket: templateBucketName });
-      logger.info(`Templates bucket ${templateBucketName} exists`);
+      logger.debug(`Templates bucket ${templateBucketName} exists`);
     } catch (error: unknown) {
-      logger.info(`Creating templates bucket: ${templateBucketName} in region ${region}`);
-      logger.info(`Error details: ${error instanceof Error ? error.message : String(error)}`);
+      logger.debug(`Creating templates bucket: ${templateBucketName} in region ${region}`);
+      logger.debug(`Error details: ${error instanceof Error ? error.message : String(error)}`);
       
       if (region === 'us-east-1') {
         // us-east-1 doesn't need LocationConstraint
@@ -99,12 +99,12 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
           }
         });
       }
-      logger.info(`Created templates bucket: ${templateBucketName}`);
+      logger.debug(`Created templates bucket: ${templateBucketName}`);
     }
 
     // Instead of setting bucket policy, ensure IAM role has proper permissions
     try {
-      logger.info(`Ensuring CloudFormation role has S3 access to templates bucket...`);
+      logger.debug(`Ensuring CloudFormation role has S3 access to templates bucket...`);
       
       // Add specific S3 permissions to the CloudFormation role instead of bucket policy
       const roleName = `nlmonorepo-shared-${options.stage}-role`;
@@ -150,10 +150,10 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
     }
 
     // Clear existing templates
-    logger.info('Clearing existing templates...');
-    logger.info(`Looking for templates in: ${TEMPLATE_RESOURCES_PATHS[StackType.Shared]}`);
-    logger.info(`Current working directory: ${process.cwd()}`);
-    logger.info(`__dirname resolved to: ${__dirname}`);
+    logger.debug('Clearing existing templates...');
+    logger.debug(`Looking for templates in: ${TEMPLATE_RESOURCES_PATHS[StackType.Shared]}`);
+    logger.debug(`Current working directory: ${process.cwd()}`);
+    logger.debug(`__dirname resolved to: ${__dirname}`);
     
     const listCommand = new ListObjectsV2Command({ 
       Bucket: templateBucketName, 
@@ -172,7 +172,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
     }
 
     // Upload nested stack templates
-    logger.info(`Searching for templates with pattern: **/*.yaml in ${TEMPLATE_RESOURCES_PATHS[StackType.Shared]}`);
+    logger.debug(`Searching for templates with pattern: **/*.yaml in ${TEMPLATE_RESOURCES_PATHS[StackType.Shared]}`);
     
     try {
       // Use a simpler approach to find YAML files
@@ -201,8 +201,8 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
       
       const templateFiles = await findYamlFiles(TEMPLATE_RESOURCES_PATHS[StackType.Shared]);
 
-      logger.info(`Found ${templateFiles.length} template files in ${TEMPLATE_RESOURCES_PATHS[StackType.Shared]}`);
-      logger.info(`Template files: ${JSON.stringify(templateFiles, null, 2)}`);
+      logger.debug(`Found ${templateFiles.length} template files in ${TEMPLATE_RESOURCES_PATHS[StackType.Shared]}`);
+      logger.debug(`Template files: ${JSON.stringify(templateFiles, null, 2)}`);
       
       if (templateFiles.length === 0) {
         logger.error('No template files found for shared resources. Check TEMPLATE_RESOURCES_PATHS.shared and file permissions.');
@@ -212,7 +212,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
       for (const file of templateFiles) {
         const s3Key = relative(TEMPLATE_RESOURCES_PATHS[StackType.Shared], file).replace(/\\/g, '/');
         
-        logger.info(`Uploading ${file} to s3://${templateBucketName}/${s3Key}`);
+        logger.debug(`Uploading ${file} to s3://${templateBucketName}/${s3Key}`);
         
         await s3.send(new PutObjectCommand({
           Bucket: templateBucketName,
@@ -263,22 +263,22 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
         await cfn.deleteStack({ StackName: stackName });
         
         // Wait for deletion to complete
-        logger.info('Waiting for stack deletion to complete...');
+        logger.debug('Waiting for stack deletion to complete...');
         await awsUtils.waitForStackDeletion(stackName);
         
         // Now create new stack
-        logger.info(`Creating new stack: ${stackName}`);
+        logger.debug(`Creating new stack: ${stackName}`);
         await cfn.createStack(stackParams);
       } else {
-        logger.info(`Updating existing stack: ${stackName}`);
+        logger.debug(`Updating existing stack: ${stackName}`);
         await cfn.updateStack(stackParams);
       }
     } catch (error: any) {
       if (error.message?.includes('does not exist')) {
-        logger.info(`Creating new stack: ${stackName}`);
+        logger.debug(`Creating new stack: ${stackName}`);
         await cfn.createStack(stackParams);
       } else if (error.message?.includes('No updates are to be performed')) {
-        logger.info('No updates required for Shared Resources stack');
+        logger.debug('No updates required for Shared Resources stack');
         return;
       } else {
         throw error;
@@ -286,16 +286,19 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
     }
 
     // Wait for stack completion using polling
-    logger.info('Waiting for stack operation to complete...');
+    logger.debug('Waiting for stack operation to complete...');
     const success = await awsUtils.waitForStack(stackName);
     
     if (success) {
       logger.debug('Shared Resources deployment completed successfully');
+      stopSpinner();
     } else {
+      stopSpinner();
       throw new Error('Shared Resources deployment failed');
     }
 
   } catch (error: any) {
+    stopSpinner();
     logger.error(`Shared Resources deployment failed: ${error.message}`);
     throw error;
   }

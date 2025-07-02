@@ -27,21 +27,44 @@ Resources:
 
 Outputs:
   SharedSecurityGroupFromVPCId:
-    Value: !GetAtt VPCStack.Outputs.cwlSecurityGroupFromSharedVPCId
+    Value: !GetAtt VPCStack.Outputs.SharedSecurityGroupFromVPCId
     Export:
       Name: !Sub SharedSecurityGroupFromVPCId-${Stage}
 
   SharedSecurityGroupFromVPC:
-    Value: !GetAtt VPCStack.Outputs.cwlSecurityGroupFromSharedVPC
+    Value: !GetAtt VPCStack.Outputs.SharedSecurityGroupFromVPC
     Export:
       Name: !Sub SharedSecurityGroupFromVPC-${Stage}
           
   SharedKMSKey:
-    Value: !GetAtt KMSStack.Outputs.cwlKMSKey
+    Value: !GetAtt KMSStack.Outputs.SharedKMSKey
     Export:
       Name: !Sub SharedKMSKey-${Stage}
 
   SharedKMSKeyArn:
-    Value: !GetAtt KMSStack.Outputs.cwlKMSKeyArn
+    Value: !GetAtt KMSStack.Outputs.SharedKMSKeyArn
     Export:
       Name: !Sub SharedKMSKeyArn-${Stage}
+
+  KMSKeyId:
+    Value: !GetAtt KMSStack.Outputs.SharedKMSKey
+    Description: KMS Key ID for encryption
+    Export:
+      Name: !Sub KMSKeyId-${Stage}
+
+  KMSKeyArn:
+    Value: !GetAtt KMSStack.Outputs.SharedKMSKeyArn
+    Description: KMS Key ARN
+    Export:
+      Name: !Sub KMSKeyArn-${Stage}
+
+  VPCID:
+    Value: !GetAtt VPCStack.Outputs.SharedVPCId
+    Description: VPC ID
+    Export:
+      Name: !Sub VPCID-${Stage}
+
+  TemplateBucketName:
+    Value: !Ref TemplatesBucketName
+    Export:
+      Name: !Sub TemplateBucketName-${Stage}

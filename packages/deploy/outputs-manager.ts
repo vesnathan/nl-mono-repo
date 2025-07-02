@@ -36,7 +36,7 @@ export class OutputsManager {
       const stackRegion = stackType === StackType.WAF ? 'us-east-1' : region;
       const cfClient = new CloudFormationClient({ region: stackRegion });
       
-      logger.info(`Fetching outputs for ${stackType} stack: ${stackName} in region ${stackRegion}`);
+      logger.debug(`Fetching outputs for ${stackType} stack: ${stackName} in region ${stackRegion}`);
       
       const command = new DescribeStacksCommand({ StackName: stackName });
       const response = await cfClient.send(command);
@@ -83,7 +83,7 @@ export class OutputsManager {
       await writeFile(this.outputsFilePath, JSON.stringify(deploymentOutputs, null, 2));
       
       logger.debug(`Saved outputs for ${stackType} stack to ${this.outputsFilePath}`);
-      logger.info(`Found ${outputs.length} outputs for ${stackType} stack`);
+      logger.debug(`Found ${outputs.length} outputs for ${stackType} stack`);
 
     } catch (error: unknown) {
       logger.error(`Failed to save outputs for ${stackType} stack: ${(error as Error).message}`);

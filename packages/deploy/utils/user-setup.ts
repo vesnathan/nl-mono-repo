@@ -50,12 +50,12 @@ export class UserSetupManager {
   async createAdminUser(options: UserSetupOptions): Promise<void> {
     const { stage, adminEmail } = options;
     
-    logger.info(`Setting up admin user for stage: ${stage}`);
-    logger.info(`Admin email received in createAdminUser: '${adminEmail}'`); // Added log
+    logger.debug(`Setting up admin user for stage: ${stage}`);
+    logger.debug(`Admin email received in createAdminUser: '${adminEmail}'`); // Added log
 
     // Get user pool ID
     const userPoolId = await this.getCognitoUserPoolId(stage);
-    logger.info(`Found Cognito User Pool ID: ${userPoolId}`);
+    logger.debug(`Found Cognito User Pool ID: ${userPoolId}`);
 
     // Ensure required user groups exist
     await this.ensureCognitoGroups(userPoolId, stage);
@@ -66,7 +66,7 @@ export class UserSetupManager {
 
     // Get admin email if not provided
     const userEmail = adminEmail || await this.promptForEmail();
-    logger.info(`User email to be used for Cognito/DDB: '${userEmail}'`); // Added log
+    logger.debug(`User email to be used for Cognito/DDB: '${userEmail}'`); // Added log
 
     // Create or get existing user
     const cognitoUserId = await this.createOrGetCognitoUser(userPoolId, userEmail);
@@ -114,7 +114,7 @@ export class UserSetupManager {
   }
 
   private async ensureCognitoGroups(userPoolId: string, stage: string): Promise<void> {
-    logger.info('Checking Cognito user groups...');
+    logger.debug('Checking Cognito user groups...');
     
     // Use the single source of truth for client types
     const requiredGroups = CWL_COGNITO_GROUPS;
@@ -128,7 +128,7 @@ export class UserSetupManager {
       
       for (const groupName of requiredGroups) {
         if (!existingGroups.includes(groupName)) {
-          logger.info(`Creating group: ${groupName}`);
+          logger.debug(`Creating group: ${groupName}`);
           await this.cognitoClient.send(new CreateGroupCommand({
             UserPoolId: userPoolId,
             GroupName: groupName,
@@ -136,7 +136,7 @@ export class UserSetupManager {
           }));
           logger.debug(`Created group: ${groupName}`);
         } else {
-          logger.info(`Group '${groupName}' already exists`);
+          logger.debug(`Group '${groupName}' already exists`);
         }
       }
     } catch (error) {
@@ -199,7 +199,7 @@ export class UserSetupManager {
     const tempPassword = 'Temp1234!';
     
     try {
-      logger.info('Creating user in Cognito User Pool...');
+      logger.debug('Creating user in Cognito User Pool...');
       const createUserResponse = await this.cognitoClient.send(
         new AdminCreateUserCommand({
           UserPoolId: userPoolId,
@@ -221,7 +221,7 @@ export class UserSetupManager {
       logger.success(`Created user in Cognito with ID: ${cognitoUserId}`);
 
       // Set permanent password
-      logger.info('Setting permanent password...');
+      logger.debug('Setting permanent password...');
       await this.cognitoClient.send(
         new AdminSetUserPasswordCommand({
           UserPoolId: userPoolId,
@@ -234,7 +234,7 @@ export class UserSetupManager {
       logger.success('Set permanent password for user');
 
       // Add user to SuperAdmin group
-      logger.info('Adding user to SuperAdmin group...');
+      logger.debug('Adding user to SuperAdmin group...');
       await this.cognitoClient.send(
         new AdminAddUserToGroupCommand({
           UserPoolId: userPoolId,
@@ -261,7 +261,7 @@ export class UserSetupManager {
 
   private async createUserInDynamoDb(tableName: string, cognitoUserId: string, userEmail: string): Promise<void> {
     try {
-      logger.info(`Attempting to create user in DynamoDB. Table: ${tableName}, cognitoUserId: ${cognitoUserId}, userEmail: '${userEmail}'`); // Added log
+      logger.debug(`Attempting to create user in DynamoDB. Table: ${tableName}, cognitoUserId: ${cognitoUserId}, userEmail: '${userEmail}'`); // Added log
       // Check if user already exists in DynamoDb
       const getUserResponse = await this.dynamoClient.send(
         new GetItemCommand({
@@ -299,8 +299,8 @@ export class UserSetupManager {
         userRole: { S: 'System Administrator' }
       };
 
-      logger.info(`Creating user entry in DynamoDb table ${tableName}...`);
-      logger.info(`User item for DDB: ${JSON.stringify(userItem, null, 2)}`); // Added log
+      logger.debug(`Creating user entry in DynamoDb table ${tableName}...`);
+      logger.debug(`User item for DDB: ${JSON.stringify(userItem, null, 2)}`); // Added log
       await this.dynamoClient.send(
         new PutItemCommand({
           TableName: tableName,

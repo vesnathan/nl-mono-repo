@@ -149,7 +149,7 @@ class DeploymentManager {
     // Ensure debug mode is properly set
     setLoggerDebugMode(options.debugMode || false);
     
-    logger.info('Deploying all stacks in order: WAF -> Shared -> CWL');
+    logger.debug('Deploying all stacks in order: WAF -> Shared -> CWL');
     
     await this.deployStack(StackType.WAF, options);
     this.outputsManager = new OutputsManager(); // Reload outputs to get WAF outputs
@@ -265,16 +265,16 @@ class DeploymentManager {
     const client = region === this.region ? this.cfClient : new CloudFormationClient({ region, credentials: this.cfClient.config.credentials });
 
     if (stackType === StackType.WAF) {
-      logger.info('🚀 WAF deployment started...');
+      logger.debug('🚀 WAF deployment started...');
     }
-    logger.info(`Deploying stack ${stackName} in region ${region}`);
+    logger.debug(`Deploying stack ${stackName} in region ${region}`);
 
     if (await this.stackExists(stackName, client)) {
-      logger.info(`Stack ${stackName} already exists, updating...`);
+      logger.debug(`Stack ${stackName} already exists, updating...`);
       // Correctly pass undefined for roleArn and tags if they are not provided
       await this.updateStack(stackName, templateBody, parameters, roleArn, tags, client);
     } else {
-      logger.info(`Stack ${stackName} does not exist, creating...`);
+      logger.debug(`Stack ${stackName} does not exist, creating...`);
       // Correctly pass undefined for roleArn and tags if they are not provided
       await this.createStack(stackName, templateBody, parameters, roleArn, tags, client);
     }
@@ -339,7 +339,7 @@ class DeploymentManager {
       await cfClient.send(command);
     } catch (error: unknown) {
       if ((error as Error).message?.includes('No updates are to be performed')) {
-        logger.info(`Stack ${stackName} is already up to date`);
+        logger.debug(`Stack ${stackName} is already up to date`);
         return;
       }
       throw error;
@@ -363,7 +363,7 @@ class DeploymentManager {
         }
 
         const status = stack.StackStatus as StackStatus;
-        logger.info(`Stack ${stackName} status: ${status}`);
+        logger.debug(`Stack ${stackName} status: ${status}`);
 
         if (this.isFinalStatus(status)) {
           if (status.endsWith('_COMPLETE')) {
