@@ -1,0 +1,121 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Minimal EC2 Instance - No networking, no security group, just a basic instance.'
+
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3.xlarge
+      - c5.2xlarge
+    Description: EC2 instance type
+  KeyPairName:
+    Type: String
+    Description: Name of existing EC2 KeyPair to enable SSH access
+    Default: "ec2-vsc-key"
+
+  VSCodePort:
+    Type: Number
+    Default: 8080
+    Description: Port for VSCode server (code-server)
+
+Resources:
+  VSCServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH and VSCode server access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+          Description: SSH access
+        - IpProtocol: tcp
+          FromPort: !Ref VSCodePort
+          ToPort: !Ref VSCodePort
+          CidrIp: 0.0.0.0/0
+          Description: VSCode server access
+
+  BasicInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Sub "{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64}}"
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPairName
+      SecurityGroupIds:
+        - !Ref VSCServerSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          exec > /var/log/code-server-install.log 2>&1
+          
+          # Wait for cloud-init and other startup processes to complete
+          sleep 30
+          
+          # Update system packages
+          dnf update -y || yum update -y
+          
+          # Install curl if not present
+          dnf install -y curl || yum install -y curl
+          
+          # Install code-server with proper error handling
+          echo "Installing code-server..."
+          curl -fsSL https://code-server.dev/install.sh | sh
+          
+          if [ $? -ne 0 ]; then
+            echo "Failed to install code-server, trying manual installation..."
+            exit 1
+          fi
+          
+          # Verify code-server was installed
+          if ! command -v code-server &> /dev/null; then
+            echo "code-server command not found after installation"
+            exit 1
+          fi
+          
+          # Create configuration directory
+          mkdir -p /home/ec2-user/.config/code-server
+          
+          # Create configuration file
+          cat > /home/ec2-user/.config/code-server/config.yaml << EOF
+          bind-addr: 0.0.0.0:${VSCodePort}
+          auth: password
+          password: vscodepassword
+          cert: false
+          EOF
+          
+          # Set proper ownership
+          chown -R ec2-user:ec2-user /home/ec2-user/.config
+          
+          # Start and enable the service
+          systemctl enable --now code-server@ec2-user
+          
+          # Wait a moment and check if service started successfully
+          sleep 5
+          if systemctl is-active --quiet code-server@ec2-user; then
+            echo "code-server service started successfully"
+          else
+            echo "code-server service failed to start"
+            systemctl status code-server@ec2-user
+          fi
+          
+          echo "Installation completed"
+
+Outputs:
+  InstanceId:
+    Description: EC2 Instance ID
+    Value: !Ref BasicInstance
+  PublicIP:
+    Description: Public IP address of the instance
+    Value: !GetAtt BasicInstance.PublicIp
+  VSCodeURL:
+    Description: VSCode server URL
+    Value: !Sub "http://${BasicInstance.PublicIp}:${VSCodePort}"
+  SSHCommand:
+    Description: SSH command to connect to the instance
+    Value: !Sub "ssh -i ${KeyPairName}.pem ec2-user@${BasicInstance.PublicIp}"
