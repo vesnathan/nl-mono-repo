@@ -39,8 +39,8 @@ import { REGEX } from '../shared/constants/RegEx'; // Corrected import
 import { execSync } from 'child_process'; // Import execSync
 import path from 'path'; // Import path
 
-// Load environment variables
-config();
+// Load environment variables from mono-repo root
+config({ path: path.resolve(__dirname, '../../.env') });
 
 const program = new Command();
 

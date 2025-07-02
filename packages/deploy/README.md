@@ -31,7 +31,7 @@ yarn install
 
 ### Environment Setup
 
-Create a `.env` file in the deploy package directory with your AWS credentials:
+Create a `.env` file in the **mono-repo root directory** with your AWS credentials:
 
 ```bash
 AWS_ACCESS_KEY_ID=your_access_key

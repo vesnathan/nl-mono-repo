@@ -11,10 +11,11 @@
 import { Command } from 'commander';
 import { CloudFormationClient, DeleteStackCommand, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
 import { config } from 'dotenv';
+import path from 'path';
 import { logger } from './utils/logger';
 
-// Load environment variables
-config();
+// Load environment variables from mono-repo root
+config({ path: path.resolve(__dirname, '../../.env') });
 
 const program = new Command();
 const WAF_REGION = 'us-east-1';

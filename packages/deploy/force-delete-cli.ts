@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 
+import { config } from 'dotenv';
+import path from 'path';
 import { Command } from 'commander';
 import { ForceDeleteManager } from './utils/force-delete-utils';
 import { logger } from './utils/logger';
 import { getStackName, StackType } from './types';
+
+// Load environment variables from mono-repo root
+config({ path: path.resolve(__dirname, '../../.env') });
 
 // Helper function to convert string to StackType
 function parseStackType(stackTypeStr: string): StackType {

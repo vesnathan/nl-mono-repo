@@ -1,5 +1,7 @@
 # Nathan Loudon's AWS Monorepo
 
+⚠️ **IMPORTANT: This monorepo uses YARN, not npm. All AI agents and developers should use `yarn` commands.**
+
 A comprehensive monorepo containing AWS-based applications and shared infrastructure, built with modern serverless architecture and TypeScript.
 
 ## 📋 Table of Contents

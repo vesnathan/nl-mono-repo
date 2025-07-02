@@ -1,13 +1,17 @@
 // Minimal script to deploy CWL without depending on the existing cwl.ts file
+import { config } from 'dotenv';
+import path from 'path';
 import { logger } from './utils/logger';
 import { ForceDeleteManager } from './utils/force-delete-utils';
 import { StackType } from './types';
 import { promises as fsPromises } from 'fs';
 import * as fs from 'fs';
-import path from 'path';
 import { CloudFormation, Capability, Parameter } from '@aws-sdk/client-cloudformation';
 import { S3, BucketLocationConstraint } from '@aws-sdk/client-s3';
 import { createReadStream } from 'fs';
+
+// Load environment variables from mono-repo root
+config({ path: path.resolve(__dirname, '../../.env') });
 
 // Find YAML template files
 function findYamlFiles(dir: string): string[] {

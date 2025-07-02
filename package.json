@@ -7,7 +7,8 @@
     "packages/shared",
     "packages/waf",
     "packages/shared-aws-assets",
-    "packages/deploy"
+    "packages/deploy",
+    "packages/ec2-vsc"
   ],
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "3.669.0",
