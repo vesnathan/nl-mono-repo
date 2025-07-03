@@ -21,6 +21,9 @@ export interface DeploymentOptions {
   allowedIps: string;
   volumeSize: string;
   stackName: string;
+  useSpot?: string;
+  autoStop?: string;
+  spotMaxPrice?: string;
 }
 
 export class DeploymentManager {
@@ -90,6 +93,9 @@ export class DeploymentManager {
     // Prepare parameters
     const parameters: Parameter[] = [
       { ParameterKey: 'InstanceType', ParameterValue: options.instanceType },
+      { ParameterKey: 'UseSpotInstance', ParameterValue: process.env.COST_OPT_USE_SPOT || 'true' },
+      { ParameterKey: 'AutoStopEnabled', ParameterValue: process.env.COST_OPT_AUTO_STOP || 'true' },
+      { ParameterKey: 'SpotMaxPrice', ParameterValue: process.env.COST_OPT_SPOT_MAX_PRICE || '0.0052' },
     ];
 
     if (options.keyPair) {
