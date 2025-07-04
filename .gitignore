@@ -39,3 +39,5 @@ WAF_output.json
 temp-aws-config
 access-key.json
 .env
+# Environment variables (contains secrets)
+.env

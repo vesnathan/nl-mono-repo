@@ -73,15 +73,16 @@ export async function configureAwsCredentials(): Promise<void> {
     process.env.AWS_SECRET_ACCESS_KEY = answers.secretAccessKey;
     process.env.AWS_ACCOUNT_ID = answers.accountId;
 
-    // Save credentials to a local .env file
+    // Save credentials to the mono-repo root .env file
     try {
       const envContent = `AWS_ACCESS_KEY_ID=${answers.accessKeyId}
 AWS_SECRET_ACCESS_KEY=${answers.secretAccessKey}
 AWS_ACCOUNT_ID=${answers.accountId}`;
-      writeFileSync(join(process.cwd(), '.env'), envContent);
-      logger.success('AWS credentials saved to .env file');
+      const rootEnvPath = join(process.cwd(), '../../.env');
+      writeFileSync(rootEnvPath, envContent);
+      logger.success('AWS credentials saved to mono-repo root .env file');
     } catch (error) {
-      logger.warning('Could not save credentials to .env file. They will only persist for this session.');
+      logger.warning('Could not save credentials to root .env file. They will only persist for this session.');
     }
     
     // Validate the new credentials

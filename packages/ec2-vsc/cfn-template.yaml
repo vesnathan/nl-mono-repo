@@ -1,0 +1,282 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Minimal EC2 Instance - No networking, no security group, just a basic instance.'
+
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t3.micro      # $0.0104/hour (~$7.50/month)
+      - t3.small      # $0.0208/hour (~$15/month)
+      - t3.medium     # $0.0416/hour (~$30/month)
+      - t3.large      # $0.0832/hour (~$60/month)
+      - t3.xlarge
+      - c5.2xlarge
+    Description: EC2 instance type (t3.micro recommended for cost optimization)
+  
+  UseSpotInstance:
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Use Spot instances for up to 90% cost savings (recommended)
+  
+  SpotMaxPrice:
+    Type: String
+    Default: "0.0052"  # 50% of t3.micro on-demand price
+    Description: Maximum price for Spot instances (USD/hour)
+  
+  AutoStopEnabled:
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Enable automatic stop after 2 hours of inactivity
+  
+  KeyPairName:
+    Type: String
+    Description: Name of existing EC2 KeyPair to enable SSH access
+    Default: "ec2-vsc-key"
+
+  VSCodePort:
+    Type: Number
+    Default: 8080
+    Description: Port for VSCode server (code-server)
+
+Conditions:
+  UseSpot: !Equals [!Ref UseSpotInstance, "true"]
+  EnableAutoStop: !Equals [!Ref AutoStopEnabled, "true"]
+
+Resources:
+  VSCServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH and VSCode server access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+          Description: SSH access
+        - IpProtocol: tcp
+          FromPort: !Ref VSCodePort
+          ToPort: !Ref VSCodePort
+          CidrIp: 0.0.0.0/0
+          Description: VSCode server access
+
+  # Launch Template for Spot Instance support
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    DependsOn: VSCServerSecurityGroup
+    Properties:
+      LaunchTemplateName: !Sub "${AWS::StackName}-launch-template"
+      LaunchTemplateData:
+        ImageId: !Sub "{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64}}"
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyPairName
+        SecurityGroupIds:
+          - !GetAtt VSCServerSecurityGroup.GroupId
+        EbsOptimized: true
+        InstanceMarketOptions: !If
+          - UseSpot
+          - MarketType: spot
+            SpotOptions:
+              MaxPrice: !Ref SpotMaxPrice
+              SpotInstanceType: one-time
+          - !Ref "AWS::NoValue"
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              VolumeSize: 8  # Minimum size for cost optimization
+              VolumeType: gp3  # More cost-effective than gp2
+              DeleteOnTermination: true
+              Encrypted: true
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: !Sub "${AWS::StackName}-vscode-server"
+              - Key: CostOptimized
+                Value: "true"
+              - Key: AutoStop
+                Value: !Ref AutoStopEnabled
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            exec > /var/log/code-server-install.log 2>&1
+            
+            # Set proper environment variables
+            export HOME=/root
+            export USER=root
+            
+            # Wait for cloud-init and other startup processes to complete
+            sleep 30
+            
+            echo "Starting cost-optimized code-server installation..."
+            echo "Instance Type: $(curl -s http://169.254.169.254/latest/meta-data/instance-type)"
+            echo "Instance Lifecycle: $(curl -s http://169.254.169.254/latest/meta-data/instance-life-cycle)"
+            echo "System: $(cat /etc/os-release | grep PRETTY_NAME)"
+            
+            # Update system packages
+            echo "Updating system packages..."
+            dnf update -y || yum update -y
+            
+            # Install curl with conflict resolution
+            echo "Installing curl (resolving package conflicts)..."
+            dnf install -y curl --allowerasing || yum install -y curl
+            
+            # Verify curl installation
+            if ! command -v curl &> /dev/null; then
+              echo "ERROR: curl installation failed"
+              exit 1
+            fi
+            echo "curl installed successfully"
+            
+            # Install code-server with proper error handling and environment
+            echo "Installing code-server..."
+            export HOME=/home/ec2-user
+            curl -fsSL https://code-server.dev/install.sh | sh
+            
+            if [ $? -ne 0 ]; then
+              echo "Failed to install code-server with script, trying manual RPM installation..."
+              
+              # Try manual installation as fallback with fixed version
+              mkdir -p ~/.cache/code-server
+              VERSION="4.101.2"
+              DOWNLOAD_URL="https://github.com/coder/code-server/releases/download/v$VERSION/code-server-$VERSION-amd64.rpm"
+              
+              echo "Downloading code-server v$VERSION from: $DOWNLOAD_URL"
+              curl -fL -o ~/.cache/code-server/code-server.rpm "$DOWNLOAD_URL"
+              
+              if [ $? -eq 0 ]; then
+                echo "Installing RPM package..."
+                rpm -U ~/.cache/code-server/code-server.rpm
+              else
+                echo "ERROR: Failed to download code-server RPM"
+                exit 1
+              fi
+            fi
+            
+            # Verify code-server was installed
+            if ! command -v code-server &> /dev/null; then
+              echo "ERROR: code-server command not found after installation"
+              exit 1
+            fi
+            
+            echo "code-server installed successfully: $(code-server --version)"
+            
+            # Create configuration directory for ec2-user
+            echo "Setting up configuration..."
+            mkdir -p /home/ec2-user/.config/code-server
+            
+            # Create configuration file
+            cat > /home/ec2-user/.config/code-server/config.yaml << EOF
+            bind-addr: 0.0.0.0:${VSCodePort}
+            auth: password
+            password: vscodepassword
+            cert: false
+            EOF
+            
+            # Set proper ownership
+            chown -R ec2-user:ec2-user /home/ec2-user/.config
+            
+            echo "Starting code-server service..."
+            # Start and enable the service
+            systemctl enable --now code-server@ec2-user
+            
+            # Wait a moment and check if service started successfully
+            sleep 10
+            if systemctl is-active --quiet code-server@ec2-user; then
+              echo "SUCCESS: code-server service started successfully"
+              echo "Service status:"
+              systemctl status code-server@ec2-user --no-pager
+              echo "code-server is accessible at: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):${VSCodePort}"
+              echo "Password: vscodepassword"
+            else
+              echo "ERROR: code-server service failed to start"
+              echo "Service status:"
+              systemctl status code-server@ec2-user --no-pager
+              echo "Service logs:"
+              journalctl -u code-server@ec2-user --no-pager -n 20
+              exit 1
+            fi
+            
+            # Add auto-stop functionality if enabled
+            if [ "${AutoStopEnabled}" = "true" ]; then
+              echo "Setting up auto-stop after 2 hours of inactivity..."
+              
+              # Create auto-stop script
+              cat > /home/ec2-user/auto-stop.sh << 'EOFSTOP'
+            #!/bin/bash
+            # Auto-stop instance after 2 hours of no VSCode connections
+            
+            LOG_FILE="/var/log/auto-stop.log"
+            INACTIVE_TIME=7200  # 2 hours in seconds
+            
+            echo "$(date): Checking for VSCode activity..." >> $LOG_FILE
+            
+            # Check if anyone is connected to VSCode
+            if netstat -tn | grep -q ":8080.*ESTABLISHED"; then
+              echo "$(date): Active connections found, resetting timer" >> $LOG_FILE
+              exit 0
+            fi
+            
+            # Check system load
+            LOAD=$(uptime | awk '{print $10}' | cut -d',' -f1)
+            if (( $(echo "$LOAD > 0.1" | bc -l) )); then
+              echo "$(date): System load $LOAD > 0.1, keeping instance running" >> $LOG_FILE
+              exit 0
+            fi
+            
+            # If no activity for 2 hours, stop instance
+            LAST_ACTIVITY=$(stat -c %Y /var/log/code-server-install.log 2>/dev/null || echo 0)
+            CURRENT_TIME=$(date +%s)
+            INACTIVE_DURATION=$((CURRENT_TIME - LAST_ACTIVITY))
+            
+            if [ $INACTIVE_DURATION -gt $INACTIVE_TIME ]; then
+              echo "$(date): No activity for $INACTIVE_DURATION seconds, stopping instance" >> $LOG_FILE
+              /usr/bin/aws ec2 stop-instances --instance-ids $(curl -s http://169.254.169.254/latest/meta-data/instance-id) --region $(curl -s http://169.254.169.254/latest/meta-data/placement/region) || true
+            else
+              echo "$(date): Last activity $INACTIVE_DURATION seconds ago, continuing" >> $LOG_FILE
+            fi
+            EOFSTOP
+              
+              chmod +x /home/ec2-user/auto-stop.sh
+              chown ec2-user:ec2-user /home/ec2-user/auto-stop.sh
+              
+              # Add cron job to run every 30 minutes
+              echo "*/30 * * * * /home/ec2-user/auto-stop.sh" | crontab -u ec2-user -
+              echo "Auto-stop configured: instance will stop after 2 hours of inactivity"
+            fi
+            
+            echo "Installation completed successfully"
+
+  # Actual EC2 Instance using Launch Template
+  BasicInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+
+Outputs:
+  InstanceId:
+    Description: EC2 Instance ID
+    Value: !Ref BasicInstance
+  PublicIP:
+    Description: Public IP address of the instance
+    Value: !GetAtt BasicInstance.PublicIp
+  VSCodeURL:
+    Description: VSCode server URL
+    Value: !Sub "http://${BasicInstance.PublicIp}:${VSCodePort}"
+  SSHCommand:
+    Description: SSH command to connect to the instance
+    Value: !Sub "ssh -i ${KeyPairName}.pem ec2-user@${BasicInstance.PublicIp}"
+  CostOptimizations:
+    Description: Cost optimization features enabled
+    Value: !Sub 
+      - "Instance: ${InstanceType} | Spot: ${SpotEnabled} | Auto-Stop: ${AutoStopEnabled}"
+      - SpotEnabled: !If [UseSpot, "✅ Enabled (~90% savings)", "❌ Disabled"]

@@ -1,8 +1,13 @@
+import { config } from 'dotenv';
+import path from 'path';
 import { deployShared } from './packages/shared/shared';
 import { deployWaf } from './packages/waf/waf';
 import { deployCwl } from './packages/cwl/cwl';
 import { logger } from './utils/logger';
 import inquirer from 'inquirer';
+
+// Load environment variables from mono-repo root
+config({ path: path.resolve(__dirname, '../../.env') });
 
 // Function to prompt for stage selection with a timeout
 async function promptStageSelection(timeout: number, defaultValue: string): Promise<string> {

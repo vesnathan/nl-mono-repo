@@ -28,19 +28,11 @@
       "packages/cloudwatchlive/backend/package.json",
       "nx/core/package-json"
     ],
-    "metadata.description": [
-      "packages/cloudwatchlive/backend/package.json",
-      "nx/core/package-json"
-    ],
     "metadata.js": [
       "packages/cloudwatchlive/backend/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
-      "packages/cloudwatchlive/backend/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageExports": [
       "packages/cloudwatchlive/backend/package.json",
       "nx/core/package-json"
     ],
@@ -154,23 +146,11 @@
       "packages/cloudwatchlive/frontend/package.json",
       "nx/core/package-json"
     ],
-    "metadata.description": [
-      "packages/cloudwatchlive/frontend/package.json",
-      "nx/core/package-json"
-    ],
     "metadata.js": [
       "packages/cloudwatchlive/frontend/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
-      "packages/cloudwatchlive/frontend/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageExports": [
-      "packages/cloudwatchlive/frontend/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageMain": [
       "packages/cloudwatchlive/frontend/package.json",
       "nx/core/package-json"
     ],
@@ -512,6 +492,10 @@
       "packages/deploy/package.json",
       "nx/core/package-json"
     ],
+    "metadata.targetGroups.NPM Scripts.23": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
     "metadata.description": [
       "packages/deploy/package.json",
       "nx/core/package-json"
@@ -524,10 +508,6 @@
       "packages/deploy/package.json",
       "nx/core/package-json"
     ],
-    "metadata.js.packageExports": [
-      "packages/deploy/package.json",
-      "nx/core/package-json"
-    ],
     "metadata.js.packageMain": [
       "packages/deploy/package.json",
       "nx/core/package-json"
@@ -537,6 +517,34 @@
       "nx/core/package-json"
     ],
     "targets": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.development": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.development.executor": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.development.options": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.development.metadata": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.development.options.script": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.development.metadata.scriptContent": [
+      "packages/deploy/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.development.metadata.runCommand": [
       "packages/deploy/package.json",
       "nx/core/package-json"
     ],
@@ -1209,6 +1217,400 @@
       "nx/target-defaults"
     ]
   },
+  "packages/ec2-vsc": {
+    "root": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "name": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "tags": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "tags.npm:public": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.0": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.1": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.2": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.4": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.5": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.6": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.7": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.8": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.9": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.description": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageName": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.packageMain": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.js.isInPackageManagerWorkspaces": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.executor": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.options.script": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.scriptContent": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build.metadata.runCommand": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.executor": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.options": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.metadata": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.options.script": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.metadata.scriptContent": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.metadata.runCommand": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.executor": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.options.script": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.scriptContent": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.start.metadata.runCommand": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.stop": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.stop.executor": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.stop.options": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.stop.metadata": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.stop.options.script": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.stop.metadata.scriptContent": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.stop.metadata.runCommand": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.status": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.status.executor": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.status.options": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.status.metadata": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.status.options.script": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.status.metadata.scriptContent": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.status.metadata.runCommand": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove.executor": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove.options": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove.metadata": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove.options.script": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove.metadata.scriptContent": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.remove.metadata.runCommand": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.connect": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.connect.executor": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.connect.options": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.connect.metadata": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.connect.options.script": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.connect.metadata.scriptContent": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.connect.metadata.runCommand": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.executor": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.options": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.options.script": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata.scriptContent": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.dev.metadata.runCommand": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.executor": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.options.script": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.scriptContent": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.lint.metadata.runCommand": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.tsc": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.tsc.executor": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.tsc.options": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.tsc.metadata": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.tsc.options.script": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.tsc.metadata.scriptContent": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.tsc.metadata.runCommand": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.executor": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.dependsOn": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.nx-release-publish.options": [
+      "packages/ec2-vsc/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.deploy.dependsOn": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.deploy.parallelism": [
+      "nx.json",
+      "nx/target-defaults"
+    ]
+  },
   "packages/shared": {
     "root": [
       "packages/shared/package.json",
@@ -1230,19 +1632,11 @@
       "packages/shared/package.json",
       "nx/core/package-json"
     ],
-    "metadata.description": [
-      "packages/shared/package.json",
-      "nx/core/package-json"
-    ],
     "metadata.js": [
       "packages/shared/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
-      "packages/shared/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageExports": [
       "packages/shared/package.json",
       "nx/core/package-json"
     ],
@@ -1304,19 +1698,11 @@
       "packages/shared-aws-assets/package.json",
       "nx/core/package-json"
     ],
-    "metadata.description": [
-      "packages/shared-aws-assets/package.json",
-      "nx/core/package-json"
-    ],
     "metadata.js": [
       "packages/shared-aws-assets/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
-      "packages/shared-aws-assets/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageExports": [
       "packages/shared-aws-assets/package.json",
       "nx/core/package-json"
     ],
@@ -1382,23 +1768,11 @@
       "packages/waf/package.json",
       "nx/core/package-json"
     ],
-    "metadata.description": [
-      "packages/waf/package.json",
-      "nx/core/package-json"
-    ],
     "metadata.js": [
       "packages/waf/package.json",
       "nx/core/package-json"
     ],
     "metadata.js.packageName": [
-      "packages/waf/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageExports": [
-      "packages/waf/package.json",
-      "nx/core/package-json"
-    ],
-    "metadata.js.packageMain": [
       "packages/waf/package.json",
       "nx/core/package-json"
     ],
