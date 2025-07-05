@@ -51,6 +51,41 @@ Conditions:
   EnableAutoStop: !Equals [!Ref AutoStopEnabled, "true"]
 
 Resources:
+  # IAM Role for EC2 instance
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-ec2-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      Policies:
+        - PolicyName: EC2AutoStopPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:StopInstances
+                  - ec2:DescribeInstances
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    'ec2:ResourceTag/aws:cloudformation:stack-name': !Ref 'AWS::StackName'
+      
+  # Instance Profile for the EC2 role
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2Role
+
   VSCServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -70,13 +105,17 @@ Resources:
   # Launch Template for Spot Instance support
   LaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
-    DependsOn: VSCServerSecurityGroup
+    DependsOn: 
+      - VSCServerSecurityGroup
+      - EC2InstanceProfile
     Properties:
       LaunchTemplateName: !Sub "${AWS::StackName}-launch-template"
       LaunchTemplateData:
         ImageId: !Sub "{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64}}"
         InstanceType: !Ref InstanceType
         KeyName: !Ref KeyPairName
+        IamInstanceProfile:
+          Arn: !GetAtt EC2InstanceProfile.Arn
         SecurityGroupIds:
           - !GetAtt VSCServerSecurityGroup.GroupId
         EbsOptimized: true
@@ -309,7 +348,10 @@ Resources:
             
             if [ $INACTIVE_DURATION -gt $INACTIVE_TIME ]; then
               echo "$(date): No activity for $INACTIVE_DURATION seconds, stopping instance" >> $LOG_FILE
-              /usr/bin/aws ec2 stop-instances --instance-ids $(curl -s http://169.254.169.254/latest/meta-data/instance-id) --region $(curl -s http://169.254.169.254/latest/meta-data/placement/region) || true
+              INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+              REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)
+              echo "$(date): Stopping instance $INSTANCE_ID in region $REGION" >> $LOG_FILE
+              aws ec2 stop-instances --instance-ids $INSTANCE_ID --region $REGION >> $LOG_FILE 2>&1 || echo "$(date): Failed to stop instance" >> $LOG_FILE
             else
               echo "$(date): Last activity $INACTIVE_DURATION seconds ago, continuing" >> $LOG_FILE
             fi
@@ -346,6 +388,9 @@ Outputs:
   SSHCommand:
     Description: SSH command to connect to the instance
     Value: !Sub "ssh -i ${KeyPairName}.pem ec2-user@${BasicInstance.PublicIp}"
+  IAMRole:
+    Description: IAM role assigned to the instance
+    Value: !Ref EC2Role
   CostOptimizations:
     Description: Cost optimization features enabled
     Value: !Sub 
