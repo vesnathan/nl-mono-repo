@@ -485,8 +485,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         logger.warning(`No TypeScript resolver files found in ${resolverDir}. This could cause deployment issues.`);
       } else {
         const resolverCompiler = new ResolverCompiler({
+          logger: logger,
           baseResolverDir: resolverDir,
-          localSaveDir: path.join(__dirname, '../../../deploy/packages/cwl/resolvers', options.stage),
           s3KeyPrefix: 'resolvers',
           stage: options.stage,
           s3BucketName: templateBucketName,
