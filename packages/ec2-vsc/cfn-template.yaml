@@ -135,6 +135,77 @@ Resources:
             fi
             echo "curl installed successfully"
             
+            # Install NVM (Node Version Manager)
+            echo "Installing NVM..."
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+            
+            # Source NVM to make it available in current session
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+            
+            # Install latest Node.js via NVM
+            echo "Installing Node.js latest via NVM..."
+            nvm install node
+            nvm use node
+            nvm alias default node
+            
+            # Verify Node.js installation
+            if ! command -v node &> /dev/null; then
+              echo "ERROR: Node.js installation failed"
+              exit 1
+            fi
+            echo "Node.js installed successfully: $(node --version)"
+            echo "npm installed successfully: $(npm --version)"
+            
+            # Install Claude CLI
+            echo "Installing Claude CLI..."
+            npm install -g @anthropic-ai/claude-cli
+            
+            # Install yarn globally
+            echo "Installing yarn..."
+            npm install -g yarn
+            
+            # Verify yarn installation
+            if ! command -v yarn &> /dev/null; then
+              echo "ERROR: yarn installation failed"
+              exit 1
+            fi
+            echo "yarn installed successfully: $(yarn --version)"
+            
+            # Verify Claude CLI installation
+            if ! command -v claude &> /dev/null; then
+              echo "ERROR: Claude CLI installation failed"
+              exit 1
+            fi
+            echo "Claude CLI installed successfully: $(claude --version)"
+            
+            # Set up environment for ec2-user
+            echo "Setting up environment for ec2-user..."
+            su - ec2-user << 'EOF'
+            # Install NVM for ec2-user
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+            
+            # Install Node.js for ec2-user
+            nvm install node
+            nvm use node
+            nvm alias default node
+            
+            # Install Claude CLI for ec2-user
+            npm install -g @anthropic-ai/claude-cli
+            
+            # Install yarn globally
+            npm install -g yarn
+            
+            # Add NVM to bashrc
+            echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
+            echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
+            echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> ~/.bashrc
+            EOF
+            
             # Install code-server with proper error handling and environment
             echo "Installing code-server..."
             export HOME=/home/ec2-user
