@@ -226,6 +226,12 @@ Resources:
             if ! command -v yarn &>/dev/null; then echo "❌ yarn failed"; exit 1; fi
             echo "✅ yarn installed: $(yarn --version)"
             
+            # Create yarn cache directory with proper ownership
+            echo "→ Setting up yarn cache directory..."
+            sudo -u ec2-user mkdir -p /home/ec2-user/.cache/yarn
+            sudo -u ec2-user mkdir -p /home/ec2-user/.config/yarn
+            echo "✓ Yarn cache directories ready"
+            
             # 7/8: Setup ec2-user environment
             echo "📦 Step 7/8: Setting up ec2-user environment..."
             echo "→ Installing NVM for ec2-user..."
@@ -237,12 +243,16 @@ Resources:
             nvm install node && nvm use node && nvm alias default node
             echo "→ Installing yarn for ec2-user..."
             npm install -g yarn
-            echo "→ Installing Claude CLI for ec2-user..."
-            npm install -g claude-cli 2>/dev/null || npm install -g @anthropic-ai/cli 2>/dev/null || echo "⚠ Claude CLI install failed"
             echo "→ Configuring shell environment..."
             echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
             EOF
+            
+            # Ensure cache directories exist with correct ownership
+            echo "→ Setting up cache directories..."
+            mkdir -p ~/.cache/yarn ~/.config/yarn ~/.npm ~/.local
+            echo "✓ Cache directories ready"
+            
             echo "✅ ec2-user environment ready"
             
             # 8/8: Install code-server
@@ -336,6 +346,45 @@ Resources:
             
             chown -R ec2-user:ec2-user /home/ec2-user/.config
             
+            # Install pip3 and Claude extension for VS Code
+            echo "🔌 Installing Python tools and VS Code extensions..."
+            echo "→ Installing python3-pip..."
+            dnf install python3-pip -y || echo "⚠ pip3 install failed"
+            
+            echo "→ Installing Claude Code CLI..."
+            # Switch to ec2-user context for CLI installation
+            sudo -u ec2-user bash -c "
+              export HOME=/home/ec2-user
+              cd /home/ec2-user
+              
+              # Ensure .local directory has correct ownership
+              mkdir -p ~/.local/bin ~/.local/lib
+              chown -R ec2-user:ec2-user ~/.local
+              
+              # Set up NVM environment
+              export NVM_DIR=\"\$HOME/.nvm\"
+              [ -s \"\$NVM_DIR/nvm.sh\" ] && \. \"\$NVM_DIR/nvm.sh\"
+              
+              # Install Claude Code CLI with timeout protection
+              echo '→ Installing @anthropic-ai/claude-code...'
+              timeout 300 yarn global add @anthropic-ai/claude-code || echo '⚠ Claude Code install failed or timed out'
+              
+              # Add direct path to yarn bin (more reliable than using yarn global bin)
+              echo 'export PATH=\"\$PATH:/home/ec2-user/.yarn/bin\"' >> ~/.bashrc
+              
+              # Also add to current session for verification
+              export PATH=\"\$PATH:/home/ec2-user/.yarn/bin\"
+              
+              # Verify installation
+              if [ -f /home/ec2-user/.yarn/bin/claude ]; then
+                echo '✅ Claude Code CLI installed successfully'
+                /home/ec2-user/.yarn/bin/claude --version || echo '⚠ Claude version check failed'
+              else
+                echo '❌ Claude Code CLI installation failed'
+              fi
+            "
+            echo "✅ Claude Code CLI installation complete"
+            
             # Reload systemd to pick up override configuration
             systemctl daemon-reload
             
@@ -403,6 +452,13 @@ Resources:
               echo "*/30 * * * * /home/ec2-user/auto-stop.sh" | crontab -u ec2-user -
               echo "✓ Auto-stop configured"
             fi
+            
+            # Fix ownership issues that can occur during installation
+            echo "🔧 Fixing file ownership for ec2-user..."
+            chown -R ec2-user:ec2-user /home/ec2-user/.cache /home/ec2-user/.config /home/ec2-user/.local /home/ec2-user/.npm 2>/dev/null || true
+            chown -R ec2-user:ec2-user /home/ec2-user/.nvm /home/ec2-user/.yarn 2>/dev/null || true
+            chown ec2-user:ec2-user /home/ec2-user/.bashrc /home/ec2-user/.profile 2>/dev/null || true
+            echo "✓ File ownership fixed"
             
             echo "✅ Installation completed successfully"
 
