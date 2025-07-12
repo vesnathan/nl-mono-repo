@@ -147,7 +147,7 @@ async function loadCredentialsFromDeployPackage(): Promise<void> {
     }
     
     // Try to load from workspace root .env file
-    const rootEnvPath = join(__dirname, '../../../../../.env');
+    const rootEnvPath = join(__dirname, '../../../../.env');
     if (existsSync(rootEnvPath)) {
       logger.info('Loading AWS credentials from workspace root...');
       

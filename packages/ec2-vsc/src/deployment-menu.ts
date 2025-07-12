@@ -5,6 +5,7 @@ import path from 'path';
 import { existsSync } from 'fs';
 import { ALLOWED_STAGES } from '../../shared/constants/stages';
 import { logger } from './utils/logger';
+import { configureAwsCredentials } from './utils/aws-credentials';
 
 // Load environment variables from mono-repo root
 config({ path: path.resolve(__dirname, '../../../.env') });
@@ -32,51 +33,12 @@ function runCommand(command: string): Promise<void> {
   });
 }
 
-async function checkAndLoadAwsCredentials(): Promise<void> {
-  // Check if AWS credentials are already set
-  if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
-    logger.info('✅ AWS credentials already loaded');
-    return;
-  }
-
-  logger.info('🔑 AWS credentials not found, attempting to load from .env file...');
-  
-  // Check if .env file exists
-  const envPath = path.resolve(__dirname, '../../../.env');
-  if (!existsSync(envPath)) {
-    throw new Error(`❌ .env file not found at ${envPath}. Please create a .env file in the mono-repo root with AWS credentials or run 'cd ../deploy && yarn deploy' to set up credentials.`);
-  }
-
-  // Re-load environment variables to ensure we have the latest
-  config({ path: envPath, override: true });
-
-  // Verify credentials are now loaded
-  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-    throw new Error(`❌ AWS credentials not found in .env file. The .env file should contain AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY`);
-  }
-
-  // Set default region if not specified
-  if (!process.env.AWS_REGION) {
-    process.env.AWS_REGION = 'ap-southeast-2';
-  }
-
-  // Handle SSL verification issues in development environments
-  if (!process.env.NODE_TLS_REJECT_UNAUTHORIZED) {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    logger.info('🔧 SSL verification disabled for development environment');
-  }
-
-  logger.info('✅ AWS credentials loaded successfully');
-  logger.info(`🌍 Region: ${process.env.AWS_REGION}`);
-  logger.info(`🔑 Access Key: ${process.env.AWS_ACCESS_KEY_ID.substring(0, 8)}...`);
-}
-
 async function deploymentMenu() {
   try {
-    // Check and load AWS credentials first
-    await checkAndLoadAwsCredentials();
+    // Use the interactive credential configuration instead of just checking
+    await configureAwsCredentials();
   } catch (error: any) {
-    logger.error(error.message);
+    logger.error(`Failed to configure AWS credentials: ${error.message}`);
     process.exit(1);
   }
 

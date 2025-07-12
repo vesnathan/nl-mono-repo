@@ -57,6 +57,7 @@
     "development": "yarn workspace @cwl/deploy development",
     "generate-env": "node generate-env.js",
     "dev-menu": "./dev.sh",
+    "ec2-deployment": "yarn workspace @cwl/ec2-vsc deployment-menu",
     "dev": "cd packages/cloudwatchlive/frontend && yarn dev",
     "dev:codespaces": "cd packages/cloudwatchlive/frontend && yarn dev:codespaces",
     "dev:local": "cd packages/cloudwatchlive/frontend && yarn dev:local",
