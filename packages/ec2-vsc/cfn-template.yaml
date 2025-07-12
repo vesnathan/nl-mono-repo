@@ -226,6 +226,12 @@ Resources:
             if ! command -v yarn &>/dev/null; then echo "❌ yarn failed"; exit 1; fi
             echo "✅ yarn installed: $(yarn --version)"
             
+            # Create yarn cache directory with proper ownership
+            echo "→ Setting up yarn cache directory..."
+            sudo -u ec2-user mkdir -p /home/ec2-user/.cache/yarn
+            sudo -u ec2-user mkdir -p /home/ec2-user/.config/yarn
+            echo "✓ Yarn cache directories ready"
+            
             # 7/8: Setup ec2-user environment
             echo "📦 Step 7/8: Setting up ec2-user environment..."
             echo "→ Installing NVM for ec2-user..."
@@ -243,6 +249,12 @@ Resources:
             echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
             EOF
+            
+            # Ensure cache directories exist with correct ownership
+            echo "→ Setting up cache directories..."
+            mkdir -p ~/.cache/yarn ~/.config/yarn ~/.npm ~/.local
+            echo "✓ Cache directories ready"
+            
             echo "✅ ec2-user environment ready"
             
             # 8/8: Install code-server
@@ -403,6 +415,13 @@ Resources:
               echo "*/30 * * * * /home/ec2-user/auto-stop.sh" | crontab -u ec2-user -
               echo "✓ Auto-stop configured"
             fi
+            
+            # Fix ownership issues that can occur during installation
+            echo "🔧 Fixing file ownership for ec2-user..."
+            chown -R ec2-user:ec2-user /home/ec2-user/.cache /home/ec2-user/.config /home/ec2-user/.local /home/ec2-user/.npm 2>/dev/null || true
+            chown -R ec2-user:ec2-user /home/ec2-user/.nvm /home/ec2-user/.yarn 2>/dev/null || true
+            chown ec2-user:ec2-user /home/ec2-user/.bashrc /home/ec2-user/.profile 2>/dev/null || true
+            echo "✓ File ownership fixed"
             
             echo "✅ Installation completed successfully"
 
