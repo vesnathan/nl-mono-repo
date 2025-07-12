@@ -125,400 +125,272 @@ Resources:
           Fn::Base64: !Sub |
             #!/bin/bash
             exec > /var/log/code-server-install.log 2>&1
-            
-            # Set proper environment variables
-            export HOME=/root
-            export USER=root
-            
-            # Wait for cloud-init and other startup processes to complete
+            export HOME=/root USER=root
             sleep 30
             
-            echo "Starting cost-optimized code-server installation..."
-            echo "Instance Type: $(curl -s http://169.254.169.254/latest/meta-data/instance-type)"
-            echo "Instance Lifecycle: $(curl -s http://169.254.169.254/latest/meta-data/instance-life-cycle)"
-            echo "System: $(cat /etc/os-release | grep PRETTY_NAME)"
+            echo "Starting code-server installation..."
+            echo "Instance: $(curl -s http://169.254.169.254/latest/meta-data/instance-type)"
             
-            # Update system packages
-            echo "Updating system packages..."
+            # 1/8: Update system
+            echo "📦 Step 1/8: Updating system packages..."
             dnf update -y || yum update -y
+            echo "✓ System updated"
             
-            # Install curl with conflict resolution and verification
-            echo "Installing curl (resolving package conflicts)..."
-            dnf install -y curl --allowerasing || yum install -y curl
-            
-            # Verify curl installation
-            if ! command -v curl &> /dev/null; then
-              echo "ERROR: curl installation failed"
-              exit 1
-            fi
-            echo "✓ curl installed successfully: $(curl --version | head -1)"
-            
-            # Install NVM (Node Version Manager) with verification
-            echo "Installing NVM..."
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-            
-            # Source NVM to make it available in current session
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-            
-            # Verify NVM installation
-            if ! command -v nvm &> /dev/null; then
-              echo "ERROR: NVM installation failed"
-              exit 1
-            fi
-            echo "✓ NVM installed successfully: $(nvm --version)"
-            
-            # Verify NVM installation
-            if ! command -v nvm &> /dev/null; then
-              echo "ERROR: NVM installation failed"
-              exit 1
-            fi
-            echo "NVM installed successfully: $(nvm --version)"
-            
-            # Install latest Node.js via NVM with verification
-            echo "Installing Node.js latest via NVM..."
-            nvm install node
-            nvm use node
-            nvm alias default node
-            
-            # Verify Node.js installation
-            if ! command -v node &> /dev/null; then
-              echo "ERROR: Node.js installation failed"
-              exit 1
-            fi
-            echo "✓ Node.js installed successfully: $(node --version)"
-            
-            # Verify npm installation
-            if ! command -v npm &> /dev/null; then
-              echo "ERROR: npm not available"
-              exit 1
-            fi
-            echo "✓ npm available: $(npm --version)"
-            
-            # Verify Node.js installation
-            if ! command -v node &> /dev/null; then
-              echo "ERROR: Node.js installation failed"
-              exit 1
-            fi
-            echo "Node.js installed successfully: $(node --version)"
-            
-            # Verify npm installation
-            if ! command -v npm &> /dev/null; then
-              echo "ERROR: npm not available after Node.js installation"
-              exit 1
-            fi
-            echo "npm installed successfully: $(npm --version)"
-            
-            # Install yarn globally with verification
-            echo "Installing yarn..."
-            npm install -g yarn
-            
-            # Verify yarn installation
-            if ! command -v yarn &> /dev/null; then
-              echo "ERROR: yarn installation failed"
-              exit 1
-            fi
-            echo "✓ yarn installed successfully: $(yarn --version)"
-            
-            # Set up environment for ec2-user
-            echo "Setting up environment for ec2-user..."
-            su - ec2-user << 'EOF'
-            # Install NVM for ec2-user
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-            
-            # Install Node.js for ec2-user
-            nvm install node
-            nvm use node
-            nvm alias default node
-            
-            # Install Claude CLI for ec2-user (with proper verification)
-            echo "Installing Claude CLI..."
-            if npm install -g claude-cli 2>/dev/null; then
-              echo "✓ Claude CLI installed successfully"
-            elif npm install -g @anthropic-ai/cli 2>/dev/null; then
-              echo "✓ Anthropic CLI installed successfully"
+            # 2/8: Install essential packages
+            echo "📦 Step 2/8: Installing essential packages..."
+            echo "→ Installing curl..."
+            if dnf install -y curl --allowerasing 2>/dev/null || yum install -y curl 2>/dev/null; then
+              echo "✅ curl installed"
             else
-              echo "⚠ WARNING: Could not install Claude CLI - continuing with deployment"
+              echo "❌ curl installation failed"; exit 1
             fi
             
-            # Install yarn globally
-            npm install -g yarn
+            echo "→ Installing git..."
+            if dnf install -y git 2>/dev/null || yum install -y git 2>/dev/null; then
+              echo "✅ git installed"
+            else
+              echo "❌ git installation failed"; exit 1
+            fi
             
-            # Add NVM to bashrc
+            echo "→ Installing tar and gzip..."
+            if dnf install -y tar gzip 2>/dev/null || yum install -y tar gzip 2>/dev/null; then
+              echo "✅ tar and gzip installed"
+            else
+              echo "❌ tar/gzip installation failed"; exit 1
+            fi
+            
+            echo "→ Installing which and findutils..."
+            if dnf install -y which findutils 2>/dev/null || yum install -y which findutils 2>/dev/null; then
+              echo "✅ which and findutils installed"
+            else
+              echo "❌ which/findutils installation failed"; exit 1
+            fi
+            
+            echo "→ Installing unzip..."
+            if dnf install -y unzip 2>/dev/null || yum install -y unzip 2>/dev/null; then
+              echo "✅ unzip installed"
+            else
+              echo "⚠️ unzip installation failed - continuing"
+            fi
+            
+            echo "→ Installing openssl..."
+            if dnf install -y openssl 2>/dev/null || yum install -y openssl 2>/dev/null; then
+              echo "✅ openssl installed"
+            else
+              echo "⚠️ openssl installation failed - continuing"
+            fi
+            
+            # Verify critical packages
+            for cmd in curl git tar gzip which; do
+              if ! command -v $cmd &>/dev/null; then echo "❌ $cmd missing"; exit 1; fi
+            done
+            echo "✓ Essential packages verified"
+            
+            # 3/8: Install AWS CLI
+            echo "📦 Step 3/8: Installing AWS CLI v2..."
+            echo "→ Downloading AWS CLI installer..."
+            curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+            echo "→ Extracting AWS CLI installer..."
+            cd /tmp && unzip -q awscliv2.zip
+            echo "→ Installing AWS CLI..."
+            ./aws/install
+            echo "→ Cleaning up installer files..."
+            rm -rf /tmp/awscliv2.zip /tmp/aws
+            if ! command -v aws &>/dev/null; then echo "❌ AWS CLI failed"; exit 1; fi
+            echo "✅ AWS CLI installed: $(aws --version)"
+            
+            # 4/8: Install NVM
+            echo "📦 Step 4/8: Installing NVM..."
+            echo "→ Downloading NVM v0.39.0..."
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+            echo "→ Setting up NVM environment..."
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            if ! command -v nvm &>/dev/null; then echo "❌ NVM failed"; exit 1; fi
+            echo "✅ NVM installed: $(nvm --version)"
+            
+            # 5/8: Install Node.js
+            echo "📦 Step 5/8: Installing Node.js..."
+            echo "→ Installing latest stable Node.js..."
+            nvm install node
+            echo "→ Setting Node.js as default..."
+            nvm use node && nvm alias default node
+            if ! command -v node &>/dev/null; then echo "❌ Node.js failed"; exit 1; fi
+            echo "✅ Node.js installed: $(node --version)"
+            echo "✅ npm available: $(npm --version)"
+            
+            # 6/8: Install Yarn
+            echo "📦 Step 6/8: Installing Yarn..."
+            echo "→ Installing yarn globally via npm..."
+            npm install -g yarn
+            if ! command -v yarn &>/dev/null; then echo "❌ yarn failed"; exit 1; fi
+            echo "✅ yarn installed: $(yarn --version)"
+            
+            # 7/8: Setup ec2-user environment
+            echo "📦 Step 7/8: Setting up ec2-user environment..."
+            echo "→ Installing NVM for ec2-user..."
+            su - ec2-user << 'EOF'
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            echo "→ Installing Node.js for ec2-user..."
+            nvm install node && nvm use node && nvm alias default node
+            echo "→ Installing yarn for ec2-user..."
+            npm install -g yarn
+            echo "→ Installing Claude CLI for ec2-user..."
+            npm install -g claude-cli 2>/dev/null || npm install -g @anthropic-ai/cli 2>/dev/null || echo "⚠ Claude CLI install failed"
+            echo "→ Configuring shell environment..."
             echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
             echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
-            echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> ~/.bashrc
             EOF
+            echo "✅ ec2-user environment ready"
             
-            # Install code-server with proper error handling and verification
-            echo "Installing code-server..."
+            # 8/8: Install code-server
+            echo "📦 Step 8/8: Installing code-server..."
+            echo "→ Setting up installation environment..."
             export HOME=/home/ec2-user
-            
-            # Try official installation script first
+            echo "→ Attempting official code-server installation..."
             if curl -fsSL https://code-server.dev/install.sh | sh; then
-              echo "✓ code-server installed via official script"
+              echo "✅ code-server installed via official script"
             else
-              echo "Official script failed, trying manual RPM installation..."
-              
-              # Try manual installation as fallback with fixed version
-              mkdir -p ~/.cache/code-server
+              echo "⚠ Official script failed, trying manual installation..."
+              echo "→ Downloading code-server v4.101.2..."
               VERSION="4.101.2"
-              DOWNLOAD_URL="https://github.com/coder/code-server/releases/download/v$VERSION/code-server-$VERSION-amd64.rpm"
-              
-              echo "Downloading code-server v$VERSION from: $DOWNLOAD_URL"
-              if curl -fL -o ~/.cache/code-server/code-server.rpm "$DOWNLOAD_URL"; then
-                echo "✓ Downloaded code-server RPM"
-                if rpm -U ~/.cache/code-server/code-server.rpm; then
-                  echo "✓ code-server installed via RPM"
-                else
-                  echo "ERROR: Failed to install code-server RPM - continuing anyway"
-                fi
-              else
-                echo "ERROR: Failed to download code-server RPM - continuing anyway"
-              fi
+              curl -fL -o /tmp/code-server.rpm "https://github.com/coder/code-server/releases/download/v$VERSION/code-server-$VERSION-amd64.rpm"
+              echo "→ Installing from RPM package..."
+              rpm -U /tmp/code-server.rpm || echo "⚠ RPM install failed"
             fi
             
-            # Verify code-server was installed
-            if command -v code-server &> /dev/null; then
-              echo "✓ code-server installed successfully: $(code-server --version | head -1)"
+            echo "→ Verifying code-server installation..."
+            if command -v code-server &>/dev/null; then
+              echo "✅ code-server verified: $(code-server --version | head -1)"
             else
-              echo "⚠ WARNING: code-server command not found - installation may have failed"
-              echo "Will attempt to continue with configuration anyway..."
+              echo "⚠ code-server command not found"
             fi
             
-            # Create configuration directory for ec2-user
-            echo "Setting up configuration..."
-            mkdir -p /home/ec2-user/.config/code-server
+            echo "🎉 Package installations complete!"
+            echo "📋 Summary: curl, git, tar, gzip, AWS CLI, NVM, Node.js, npm, yarn, code-server"
             
-            # Generate SSL certificate specifically for VS Code server web access
-            echo "Generating self-signed SSL certificate for VS Code server..."
+            # Configure code-server
+            echo "🔧 Configuring code-server..."
+            echo "→ Creating configuration directories..."
             mkdir -p /home/ec2-user/.config/code-server/certs
             
-            # Get the public IP for the certificate with retries
-            echo "Fetching public IP for SSL certificate..."
+            # Get public IP
+            echo "→ Fetching public IP address..."
             PUBLIC_IP=""
-            for i in {1..10}; do
+            for i in {1..5}; do
               PUBLIC_IP=$(curl -s --max-time 3 http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null)
-              if [ -n "$PUBLIC_IP" ] && [ "$PUBLIC_IP" != "" ]; then
-                break
-              fi
-              echo "Retry $i: Waiting for public IP..."
+              [ -n "$PUBLIC_IP" ] && break
               sleep 2
             done
+            [ -z "$PUBLIC_IP" ] && PUBLIC_IP="localhost"
+            echo "✅ Using IP: $PUBLIC_IP"
             
-            # Fallback to localhost if public IP is still not available
-            if [ -z "$PUBLIC_IP" ] || [ "$PUBLIC_IP" = "" ]; then
-              PUBLIC_IP="localhost"
-              echo "Using fallback: localhost for SSL certificate"
-            else
-              echo "Using IP: $PUBLIC_IP for SSL certificate"
-            fi
-            
-            # Generate SSL certificates for VS Code server (non-blocking with fallbacks)
-            echo "Setting up SSL certificates for VS Code server..."
-            
-            # Generate private key for VS Code server
-            echo "Generating SSL private key for VS Code server..."
+            # Generate SSL certificates
+            echo "→ Generating SSL certificates..."
             if openssl genrsa -out /home/ec2-user/.config/code-server/certs/server.key 2048 2>/dev/null; then
-              echo "✓ SSL private key generated successfully"
-              
-              # Generate self-signed certificate for VS Code server
-              echo "Generating SSL certificate for VS Code server..."
-              if [ "$PUBLIC_IP" = "localhost" ]; then
-                # Simple certificate for localhost only
-                if openssl req -new -x509 -key /home/ec2-user/.config/code-server/certs/server.key \
-                  -out /home/ec2-user/.config/code-server/certs/server.crt \
-                  -days 365 -subj "/C=US/ST=AWS/L=Cloud/O=VSCode/CN=localhost" 2>/dev/null; then
-                  echo "✓ SSL certificate generated successfully for VS Code server (localhost only)"
-                  SSL_ENABLED=true
-                else
-                  echo "⚠ Failed to generate SSL certificate for localhost"
-                  SSL_ENABLED=false
-                fi
-              else
-                # Certificate with both IP and DNS names
-                if openssl req -new -x509 -key /home/ec2-user/.config/code-server/certs/server.key \
-                  -out /home/ec2-user/.config/code-server/certs/server.crt \
-                  -days 365 -subj "/C=US/ST=AWS/L=Cloud/O=VSCode/CN=$PUBLIC_IP" \
-                  -addext "subjectAltName=IP:$PUBLIC_IP,DNS:localhost" 2>/dev/null; then
-                  echo "✓ SSL certificate generated successfully for VS Code server (IP: $PUBLIC_IP)"
-                  SSL_ENABLED=true
-                else
-                  echo "⚠ Failed to generate SSL certificate with IP, trying localhost fallback..."
-                  if openssl req -new -x509 -key /home/ec2-user/.config/code-server/certs/server.key \
-                    -out /home/ec2-user/.config/code-server/certs/server.crt \
-                    -days 365 -subj "/C=US/ST=AWS/L=Cloud/O=VSCode/CN=localhost" 2>/dev/null; then
-                    echo "✓ SSL certificate generated successfully for VS Code server (localhost fallback)"
-                    SSL_ENABLED=true
-                  else
-                    echo "⚠ Failed to generate SSL certificate, will use HTTP fallback"
-                    SSL_ENABLED=false
-                  fi
-                fi
-              fi
-              
-              if [ "$SSL_ENABLED" = true ]; then
-                # Set proper permissions
+              if openssl req -new -x509 -key /home/ec2-user/.config/code-server/certs/server.key \
+                -out /home/ec2-user/.config/code-server/certs/server.crt \
+                -days 365 -subj "/C=US/ST=AWS/L=Cloud/O=VSCode/CN=$PUBLIC_IP" 2>/dev/null; then
+                SSL_ENABLED=true
                 chmod 600 /home/ec2-user/.config/code-server/certs/server.key
                 chmod 644 /home/ec2-user/.config/code-server/certs/server.crt
-                echo "✓ SSL certificates ready"
+                echo "✅ SSL certificates generated successfully"
+              else
+                SSL_ENABLED=false
+                echo "⚠ SSL certificate generation failed"
               fi
             else
-              echo "⚠ Failed to generate SSL private key, will use HTTP fallback"
               SSL_ENABLED=false
+              echo "⚠ SSL key generation failed"
             fi
             
-            # Create configuration file with dynamic SSL/HTTP based on certificate availability
-            echo "Creating code-server configuration..."
+            # Create config
             if [ "$SSL_ENABLED" = true ]; then
-              echo "Configuring code-server with HTTPS on port ${VSCodePort}"
-              cat > /home/ec2-user/.config/code-server/config.yaml << 'CONFIG_EOF'
+              cat > /home/ec2-user/.config/code-server/config.yaml << 'EOF'
             bind-addr: 0.0.0.0:${VSCodePort}
             auth: password
             password: vscodepassword
             cert: /home/ec2-user/.config/code-server/certs/server.crt
             cert-key: /home/ec2-user/.config/code-server/certs/server.key
-            CONFIG_EOF
+            EOF
             else
-              echo "Configuring code-server with HTTP on port 8080 (SSL fallback)"
-              cat > /home/ec2-user/.config/code-server/config.yaml << 'CONFIG_EOF'
+              cat > /home/ec2-user/.config/code-server/config.yaml << 'EOF'
             bind-addr: 0.0.0.0:8080
             auth: password
             password: vscodepassword
-            CONFIG_EOF
+            EOF
             fi
             
-            # Set proper ownership
             chown -R ec2-user:ec2-user /home/ec2-user/.config
             
-            # Network optimizations for poor internet connections
-            echo "Applying network optimizations for connection stability..."
-            
-            # Increase TCP keepalive settings for better connection stability
-            echo 'net.ipv4.tcp_keepalive_time = 600' >> /etc/sysctl.conf
-            echo 'net.ipv4.tcp_keepalive_intvl = 60' >> /etc/sysctl.conf
-            echo 'net.ipv4.tcp_keepalive_probes = 6' >> /etc/sysctl.conf
-            
-            # Apply sysctl changes
-            sysctl -p
-            
+            # Start service
             echo "Starting code-server service..."
-            # Start and enable the service
             systemctl enable --now code-server@ec2-user
-            
-            # Wait a moment and check if service started successfully
-            echo "Waiting for code-server service to start..."
             sleep 10
             
-            # Check service status multiple times
+            # Verify service
             for i in {1..5}; do
               if systemctl is-active --quiet code-server@ec2-user; then
-                echo "SUCCESS: code-server service started successfully on attempt $i"
+                echo "✓ code-server service started on attempt $i"
                 break
               else
-                echo "Attempt $i: code-server service not yet active, waiting..."
+                echo "Attempt $i: waiting for service..."
                 sleep 5
               fi
-              
               if [ $i -eq 5 ]; then
-                echo "ERROR: code-server service failed to start after 5 attempts"
-                echo "Service status:"
+                echo "❌ Service failed to start"
                 systemctl status code-server@ec2-user --no-pager
-                echo "Service logs:"
-                journalctl -u code-server@ec2-user --no-pager -n 20
                 exit 1
               fi
             done
             
-            # Display service status
-            echo "Service status:"
-            systemctl status code-server@ec2-user --no-pager
-            
             # Test connectivity
             PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
-            echo "Testing local connectivity to code-server..."
             for i in {1..3}; do
               if curl -k -s -o /dev/null -w "%{http_code}" https://localhost:${VSCodePort} | grep -q "200\|302\|401"; then
-                echo "SUCCESS: code-server is responding locally on port ${VSCodePort}"
+                echo "✓ code-server responding locally"
                 break
               else
-                echo "Attempt $i: code-server not responding locally, waiting..."
+                echo "Testing connectivity attempt $i..."
                 sleep 5
-              fi
-              
-              if [ $i -eq 3 ]; then
-                echo "WARNING: code-server may not be fully ready yet"
               fi
             done
             
-            echo "code-server is accessible at: https://$PUBLIC_IP:${VSCodePort}"
-            echo "⚠️  HTTPS uses a self-signed certificate - you'll need to accept the browser security warning"
-              echo "Password: vscodepassword"
-            else
-              echo "ERROR: code-server service failed to start"
-              echo "Service status:"
-              systemctl status code-server@ec2-user --no-pager
-              echo "Service logs:"
-              journalctl -u code-server@ec2-user --no-pager -n 20
-              exit 1
-            fi
+            echo "✅ code-server accessible at: https://$PUBLIC_IP:${VSCodePort}"
+            echo "⚠️ Accept browser security warning for self-signed certificate"
+            echo "Password: vscodepassword"
             
-            # Add auto-stop functionality if enabled
+            # Auto-stop setup
             if [ "${AutoStopEnabled}" = "true" ]; then
-              echo "Setting up auto-stop after 2 hours of inactivity..."
-              
-              # Create auto-stop script
+              echo "Setting up auto-stop after 2 hours..."
               cat > /home/ec2-user/auto-stop.sh << 'EOFSTOP'
             #!/bin/bash
-            # Auto-stop instance after 2 hours of no VSCode connections
-            
             LOG_FILE="/var/log/auto-stop.log"
-            INACTIVE_TIME=7200  # 2 hours in seconds
-            
-            echo "$(date): Checking for VSCode activity..." >> $LOG_FILE
-            
-            # Check if anyone is connected to VSCode (HTTPS on port 8443)
+            INACTIVE_TIME=7200
+            echo "$(date): Checking activity..." >> $LOG_FILE
             if netstat -tn | grep -E ":8443.*ESTABLISHED"; then
-              echo "$(date): Active connections found, resetting timer" >> $LOG_FILE
+              echo "$(date): Active connections, continuing" >> $LOG_FILE
               exit 0
             fi
-            
-            # Check system load
-            LOAD=$(uptime | awk '{print $10}' | cut -d',' -f1)
-            if (( $(echo "$LOAD > 0.1" | bc -l) )); then
-              echo "$(date): System load $LOAD > 0.1, keeping instance running" >> $LOG_FILE
-              exit 0
-            fi
-            
-            # If no activity for 2 hours, stop instance
             LAST_ACTIVITY=$(stat -c %Y /var/log/code-server-install.log 2>/dev/null || echo 0)
             CURRENT_TIME=$(date +%s)
             INACTIVE_DURATION=$((CURRENT_TIME - LAST_ACTIVITY))
-            
             if [ $INACTIVE_DURATION -gt $INACTIVE_TIME ]; then
-              echo "$(date): No activity for $INACTIVE_DURATION seconds, stopping instance" >> $LOG_FILE
+              echo "$(date): Stopping due to inactivity" >> $LOG_FILE
               INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
               REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)
-              echo "$(date): Stopping instance $INSTANCE_ID in region $REGION" >> $LOG_FILE
-              aws ec2 stop-instances --instance-ids $INSTANCE_ID --region $REGION >> $LOG_FILE 2>&1 || echo "$(date): Failed to stop instance" >> $LOG_FILE
-            else
-              echo "$(date): Last activity $INACTIVE_DURATION seconds ago, continuing" >> $LOG_FILE
+              aws ec2 stop-instances --instance-ids $INSTANCE_ID --region $REGION >> $LOG_FILE 2>&1
             fi
             EOFSTOP
-              
               chmod +x /home/ec2-user/auto-stop.sh
               chown ec2-user:ec2-user /home/ec2-user/auto-stop.sh
-              
-              # Add cron job to run every 30 minutes
               echo "*/30 * * * * /home/ec2-user/auto-stop.sh" | crontab -u ec2-user -
-              echo "Auto-stop configured: instance will stop after 2 hours of inactivity"
+              echo "✓ Auto-stop configured"
             fi
             
-            echo "Installation completed successfully"
+            echo "✅ Installation completed successfully"
 
   # Actual EC2 Instance using Launch Template
   BasicInstance:

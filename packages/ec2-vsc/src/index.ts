@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import open from 'open';
-import { existsSync } from 'fs';
+import { existsSync, writeFileSync, unlinkSync, chmodSync } from 'fs';
 
 import { program } from 'commander';
 import { logger } from './utils/logger';
@@ -10,6 +10,12 @@ import { configureAwsCredentials } from './utils/aws-credentials';
 import { execSync, spawn } from 'child_process';
 import * as dotenv from 'dotenv';
 import path from 'path';
+import { 
+  EC2Client, 
+  CreateKeyPairCommand, 
+  DeleteKeyPairCommand,
+  DescribeKeyPairsCommand 
+} from '@aws-sdk/client-ec2';
 
 // Load environment variables from mono-repo root
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
@@ -18,29 +24,49 @@ async function main() {
   async function ensureKeyPair(keyName: string) {
     const keyFile = `${keyName}.pem`;
     const region = process.env.AWS_REGION || 'ap-southeast-2';
+    const ec2Client = new EC2Client({ region });
     
-    if (!existsSync(keyFile)) {
-      logger.info(`Key file ${keyFile} not found. Creating key pair in region ${region}...`);
-      try {
-        execSync(`aws ec2 create-key-pair --key-name ${keyName} --region ${region} --query 'KeyMaterial' --output text > ${keyFile} && chmod 400 ${keyFile}`, { stdio: 'inherit' });
-        logger.success(`Key pair ${keyName} created and saved to ${keyFile}`);
-      } catch (e) {
-        logger.error('Failed to create key pair. Please check your AWS credentials and permissions.');
-        process.exit(1);
+    // Always delete existing key pair from AWS first (whether local file exists or not)
+    logger.info(`Checking for existing key pair ${keyName} in AWS...`);
+    try {
+      const describeCommand = new DescribeKeyPairsCommand({ KeyNames: [keyName] });
+      await ec2Client.send(describeCommand);
+      
+      logger.info(`Key pair ${keyName} exists in AWS, deleting it...`);
+      const deleteCommand = new DeleteKeyPairCommand({ KeyName: keyName });
+      await ec2Client.send(deleteCommand);
+      logger.info(`Old key pair ${keyName} deleted from AWS.`);
+    } catch (e: any) {
+      if (e.name === 'InvalidKeyPair.NotFound') {
+        logger.debug(`Key pair ${keyName} does not exist in AWS - ready to create new one.`);
+      } else {
+        logger.warning(`Could not check/delete existing key pair: ${e.message}`);
       }
-    } else {
-      // Always delete and recreate the key for a new deploy
-      try {
-        logger.info(`Deleting existing key file ${keyFile}...`);
-        require('fs').unlinkSync(keyFile);
-        execSync(`aws ec2 delete-key-pair --key-name ${keyName} --region ${region}`, { stdio: 'inherit' });
-        logger.info(`Old key pair ${keyName} deleted.`);
-        execSync(`aws ec2 create-key-pair --key-name ${keyName} --region ${region} --query 'KeyMaterial' --output text > ${keyFile} && chmod 400 ${keyFile}`, { stdio: 'inherit' });
+    }
+    
+    // Delete local key file if it exists
+    if (existsSync(keyFile)) {
+      logger.info(`Deleting existing local key file ${keyFile}...`);
+      unlinkSync(keyFile);
+    }
+    
+    // Create new key pair
+    logger.info(`Creating new key pair ${keyName} in region ${region}...`);
+    try {
+      const createCommand = new CreateKeyPairCommand({ KeyName: keyName });
+      const response = await ec2Client.send(createCommand);
+      
+      if (response.KeyMaterial) {
+        writeFileSync(keyFile, response.KeyMaterial);
+        chmodSync(keyFile, 0o400);
         logger.success(`Key pair ${keyName} created and saved to ${keyFile}`);
-      } catch (e) {
-        logger.error('Failed to recreate key pair. Please check your AWS credentials and permissions.');
-        process.exit(1);
+      } else {
+        throw new Error('No key material returned from AWS');
       }
+    } catch (e: any) {
+      logger.error(`Failed to create key pair: ${e.message}`);
+      logger.error('Please check your AWS credentials and permissions.');
+      process.exit(1);
     }
   }
   program
@@ -181,9 +207,6 @@ async function main() {
         const deploymentManager = new DeploymentManager();
         await deploymentManager.deploy(options);
         logger.success('Deployment completed successfully! ✨');
-        // Automatically launch menu after deploy
-        logger.info('Launching interactive menu...');
-        await program.parseAsync(['node', 'ec2-vsc', 'menu', '-n', options.stackName]);
       } catch (error: any) {
         logger.error(`Deployment failed: ${error.message}`);
         process.exit(1);
