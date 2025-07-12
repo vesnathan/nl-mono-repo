@@ -314,16 +314,30 @@ Resources:
             password: vscodepassword
             cert: /home/ec2-user/.config/code-server/certs/server.crt
             cert-key: /home/ec2-user/.config/code-server/certs/server.key
+            session-socket: /tmp/code-server-ipc.sock
             EOF
             else
               cat > /home/ec2-user/.config/code-server/config.yaml << 'EOF'
             bind-addr: 0.0.0.0:8080
             auth: password
             password: vscodepassword
+            session-socket: /tmp/code-server-ipc.sock
             EOF
             fi
             
+            # Create systemd override for code-server environment variables
+            mkdir -p /etc/systemd/system/code-server@.service.d
+            cat > /etc/systemd/system/code-server@.service.d/override.conf << 'EOF'
+            [Service]
+            Environment="CS_DISABLE_GETTING_STARTED_TAB=1"
+            Environment="CS_DISABLE_UPDATE_CHECK=1"
+            Environment="VSCODE_PROXY_PROCESS_EXIT_TIMEOUT=300000"
+            EOF
+            
             chown -R ec2-user:ec2-user /home/ec2-user/.config
+            
+            # Reload systemd to pick up override configuration
+            systemctl daemon-reload
             
             # Start service
             echo "Starting code-server service..."
