@@ -351,21 +351,39 @@ Resources:
             echo "→ Installing python3-pip..."
             dnf install python3-pip -y || echo "⚠ pip3 install failed"
             
-            echo "→ Installing Claude Dev extension..."
-            # Switch to ec2-user context for extension installation
+            echo "→ Installing Claude Code CLI..."
+            # Switch to ec2-user context for CLI installation
             sudo -u ec2-user bash -c "
               export HOME=/home/ec2-user
+              cd /home/ec2-user
+              
               # Ensure .local directory has correct ownership
               mkdir -p ~/.local/bin ~/.local/lib
               chown -R ec2-user:ec2-user ~/.local
-              # Install Claude Dev extension
-              code-server --install-extension saoudrizwan.claude-dev || echo '⚠ Claude extension install failed'
-              # Install Claude Code CLI
-              yarn global add @anthropic-ai/claude-code
-              # Add yarn global bin to PATH
-              echo 'export PATH=\"\$PATH:\$(yarn global bin)\"' >> ~/.bashrc
+              
+              # Set up NVM environment
+              export NVM_DIR=\"\$HOME/.nvm\"
+              [ -s \"\$NVM_DIR/nvm.sh\" ] && \. \"\$NVM_DIR/nvm.sh\"
+              
+              # Install Claude Code CLI with timeout protection
+              echo '→ Installing @anthropic-ai/claude-code...'
+              timeout 300 yarn global add @anthropic-ai/claude-code || echo '⚠ Claude Code install failed or timed out'
+              
+              # Add direct path to yarn bin (more reliable than using yarn global bin)
+              echo 'export PATH=\"\$PATH:/home/ec2-user/.yarn/bin\"' >> ~/.bashrc
+              
+              # Also add to current session for verification
+              export PATH=\"\$PATH:/home/ec2-user/.yarn/bin\"
+              
+              # Verify installation
+              if [ -f /home/ec2-user/.yarn/bin/claude ]; then
+                echo '✅ Claude Code CLI installed successfully'
+                /home/ec2-user/.yarn/bin/claude --version || echo '⚠ Claude version check failed'
+              else
+                echo '❌ Claude Code CLI installation failed'
+              fi
             "
-            echo "✅ Claude Code and extensions configured"
+            echo "✅ Claude Code CLI installation complete"
             
             # Reload systemd to pick up override configuration
             systemctl daemon-reload
