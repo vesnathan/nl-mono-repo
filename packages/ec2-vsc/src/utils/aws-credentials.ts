@@ -32,26 +32,38 @@ export async function configureAwsCredentials(): Promise<void> {
   // Only ask for credentials if they're not already set or fail validation
   const validateExistingCredentials = async (): Promise<boolean> => {
     if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_ACCOUNT_ID) {
+      logger.debug('Missing required AWS credentials in environment');
       return false;
+    }
+
+    // Skip validation if explicitly disabled for development
+    if (process.env.SKIP_AWS_VALIDATION === 'true') {
+      logger.info('AWS credential validation skipped (SKIP_AWS_VALIDATION=true)');
+      return true;
     }
 
     try {
       const { STSClient, GetCallerIdentityCommand } = require('@aws-sdk/client-sts');
       const stsClient = new STSClient({ 
-        region: process.env.AWS_REGION || 'ap-southeast-2'
+        region: process.env.AWS_REGION || 'ap-southeast-2',
+        credentials: {
+          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+        }
       });
-      await stsClient.send(new GetCallerIdentityCommand({}));
-      logger.success('Existing AWS credentials validated successfully');
+      
+      const result = await stsClient.send(new GetCallerIdentityCommand({}));
+      logger.success(`AWS credentials validated successfully for account: ${result.Account}`);
       return true;
     } catch (error: any) {
-      logger.warning(`Existing credentials failed validation: ${error.message}`);
+      logger.warning(`AWS credential validation failed: ${error.message}`);
       return false;
     }
   };
 
   const isValid = await validateExistingCredentials();
   if (!isValid) {
-    logger.info('Please enter your AWS credentials:');
+    logger.error('Current AWS credentials are invalid or expired. Please enter new credentials:');
     
     const answers = await inquirer.prompt([
       {
@@ -89,9 +101,20 @@ export async function configureAwsCredentials(): Promise<void> {
     // Save credentials to the deploy package .env file (shared across packages)
     try {
       const deployPackageEnvPath = join(__dirname, '../../../../deploy/.env');
+      const rootEnvPath = join(__dirname, '../../../../.env');
       const envContent = `AWS_ACCESS_KEY_ID=${answers.accessKeyId}
 AWS_SECRET_ACCESS_KEY=${answers.secretAccessKey}
 AWS_ACCOUNT_ID=${answers.accountId}`;
+      
+      // First try to save to workspace root .env (where we load from)
+      try {
+        writeFileSync(rootEnvPath, envContent);
+        logger.success('AWS credentials saved to workspace root .env file');
+      } catch (rootErr: any) {
+        logger.warning(`Could not save credentials to root .env: ${rootErr.message}`);
+      }
+      
+      // Also try deploy package if it exists
       try {
         writeFileSync(deployPackageEnvPath, envContent);
         logger.success('AWS credentials saved to deploy package .env file');
@@ -100,14 +123,6 @@ AWS_ACCOUNT_ID=${answers.accountId}`;
         if (deployErr.code === 'ENOENT') {
           logger.warning('The directory for deploy/.env does not exist. Please create the deploy package or its .env file manually.');
         }
-      }
-      // Also save to local .env file for this package
-      try {
-        const localEnvPath = join(process.cwd(), '.env');
-        writeFileSync(localEnvPath, envContent);
-        logger.success('AWS credentials saved locally');
-      } catch (localErr: any) {
-        logger.warning(`Could not save credentials to local .env: ${localErr.message}`);
       }
     } catch (error) {
       logger.warning('Could not save credentials to any .env file. They will only persist for this session.');
