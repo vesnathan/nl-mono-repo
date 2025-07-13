@@ -460,6 +460,42 @@ Resources:
             chown ec2-user:ec2-user /home/ec2-user/.bashrc /home/ec2-user/.profile 2>/dev/null || true
             echo "✓ File ownership fixed"
             
+            # Disk cleanup to free up space
+            echo "🧹 Performing disk cleanup..."
+            echo "→ Current disk usage before cleanup:"
+            df -h /
+            
+            # Clean package manager caches
+            echo "→ Cleaning package manager caches..."
+            dnf clean all || yum clean all || true
+            npm cache clean --force 2>/dev/null || true
+            sudo -u ec2-user bash -c "cd /home/ec2-user && yarn cache clean" 2>/dev/null || true
+            
+            # Clean temporary files
+            echo "→ Cleaning temporary files..."
+            rm -rf /tmp/* 2>/dev/null || true
+            rm -rf /var/tmp/* 2>/dev/null || true
+            
+            # Clean log files
+            echo "→ Cleaning old log files..."
+            find /var/log -name "*.log" -type f -mtime +7 -delete 2>/dev/null || true
+            journalctl --vacuum-time=1d 2>/dev/null || true
+            
+            # Clean installation artifacts
+            echo "→ Cleaning installation artifacts..."
+            rm -rf /tmp/awscliv2.zip /tmp/aws 2>/dev/null || true
+            rm -rf /tmp/code-server.rpm 2>/dev/null || true
+            
+            # Clean npm/yarn build artifacts and caches
+            echo "→ Cleaning build artifacts..."
+            find /home/ec2-user -name "node_modules" -type d -exec rm -rf {} + 2>/dev/null || true
+            rm -rf /home/ec2-user/.npm/_cacache 2>/dev/null || true
+            rm -rf /home/ec2-user/.yarn/cache 2>/dev/null || true
+            
+            echo "→ Final disk usage after cleanup:"
+            df -h /
+            echo "✓ Disk cleanup completed"
+            
             echo "✅ Installation completed successfully"
 
   # Actual EC2 Instance using Launch Template
