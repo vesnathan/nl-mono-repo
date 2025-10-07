@@ -6,6 +6,6 @@
       "gqlTypes": ["../../frontend/src/types/gqlTypes.ts"]
     }
   },
-  "include": ["scripts", "resources", "handlers"],
+  "include": ["constants"],
   "exclude": ["node_modules"]
 }
