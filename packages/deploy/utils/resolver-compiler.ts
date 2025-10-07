@@ -422,7 +422,7 @@ class ResolverCompiler {
     };
     
     // Add source dependencies, but filter out local workspace packages
-    const localPackages = new Set(['shared', 'shared-aws-assets', 'cwlfrontend', 'cwlbackend']); // Add any other local packages here
+    const localPackages = new Set(['shared', 'cwlfrontend', 'cwlbackend']); // Add any other local packages here
     if (sourceDependencies) {
       for (const [pkg, version] of Object.entries(sourceDependencies)) {
         if (!localPackages.has(pkg)) {

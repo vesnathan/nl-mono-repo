@@ -6,7 +6,6 @@
     "packages/cloudwatchlive/backend",
     "packages/shared",
     "packages/waf",
-    "packages/shared-aws-assets",
     "packages/deploy",
     "packages/ec2-vsc"
   ],
