@@ -1,9 +1,8 @@
 import { util, AppSyncIdentityCognito, Context } from '@aws-appsync/utils';
-import { QueryToGetCWLUserArgs, CWLUser, ClientType } from '../../../../../types/gqlTypes';
+import { CWLUser, ClientType, GetCWLUserQueryVariables } from '../../../../../../frontend/src/types/gqlTypes'; // Use shared frontend-generated types
 import { CWL_CLIENT_TYPES, isValidCWLClientType } from '../../../../../constants/ClientTypes';
 
-// Alias QueryToGetCWLUserArgs for consistency if needed, or use directly
-type GetCWLUserQueryVariables = QueryToGetCWLUserArgs;
+// Use GetCWLUserQueryVariables from shared frontend-generated types
 
 // Define Output type for the resolver - it's CWLUser as per schema for a successful response
 type Output = CWLUser;

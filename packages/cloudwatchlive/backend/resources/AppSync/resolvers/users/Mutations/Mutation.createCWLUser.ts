@@ -1,5 +1,5 @@
 import { util, Context, AppSyncIdentityCognito } from '@aws-appsync/utils';
-import { CWLUserInput, CWLUser } from '../../../../../types/gqlTypes'; // Using CWLUserInput instead of CreateCWLUserInput
+import { CWLUserInput, CWLUser } from '../../../../../../frontend/src/types/gqlTypes'; // Use shared frontend-generated types
 import { v4 as uuidv4 } from 'uuid';
 
 // Define Input type for the resolver
@@ -68,6 +68,7 @@ export function response(ctx: CTX): Output {
   // when the user data is fetched. For the mutation response, we can return an empty array
   // or a default, as it's not part of the direct creation storage.
   return {
+    __typename: "CWLUser",
     userId: createdUser.userId,
     organizationId: createdUser.organizationId,
     userEmail: createdUser.userEmail,
@@ -81,5 +82,5 @@ export function response(ctx: CTX): Output {
     userAddedById: createdUser.userAddedById,
     userCreated: createdUser.userCreated,
     clientType: [], // Will be populated by getCWLUser based on Cognito groups
-  } as CWLUser;
+  };
 }

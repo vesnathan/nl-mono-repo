@@ -15,11 +15,20 @@ const buildGql = async () => {
     OUTPUT_FILE_PATH: path.resolve("combined_schema.graphql"),
   });
 
-  // Use Amplify codegen instead of custom buildGqlTypesOnBackend
+  // Use Amplify codegen to generate types locally, then move to shared package
   const command = `npx amplify codegen types --schema combined_schema.graphql --debug`;
   await execCommandAsPromise(command);
-  
-  console.log("GraphQL types generated successfully!");
+
+  // Move generated file to shared package
+  const fs = require('fs');
+  const src = path.resolve('types/gqlTypes.ts');
+  const dest = path.resolve('../../shared/types/gqlTypes.ts');
+  if (fs.existsSync(src)) {
+    fs.copyFileSync(src, dest);
+    console.log('GraphQL types copied to shared/types/gqlTypes.ts!');
+  } else {
+    console.error('GraphQL types were not generated!');
+  }
 };
 
 buildGql().catch((err: unknown) => {

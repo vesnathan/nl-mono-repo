@@ -513,7 +513,8 @@ class ResolverCompiler {
       );
       
       // Read gqlTypes.ts directly from its actual location in the types directory
-      const gqlTypesSourcePath = path.join(this.baseResolverDir, '../../../types', this.gqlTypesSourceFileName);
+      // Use the frontend-generated gqlTypes.ts (corrected path with packages/)
+      const gqlTypesSourcePath = path.resolve(__dirname, '../../../packages/cloudwatchlive/frontend/src/types/gqlTypes.ts');
       const targetGqlTypesPath = path.join(this.buildDir, 'gqlTypes.ts');
       
       if (fs.existsSync(gqlTypesSourcePath)) {

@@ -1,3 +1,13 @@
+# The `types/` directory in backend has been checked and is empty. It can be safely deleted.
+# The following files are now obsolete and will be removed as part of cleanup:
+# - GetCWLUser.graphql
+# - scripts/buildGql.ts
+# Cleanup (October 2025)
+
+* `.graphqlconfig.yml` and `scripts/buildGql.ts` are no longer needed for type generation.
+* Backend resolvers import types from the frontend (`frontend/src/types/gqlTypes.ts`).
+* The `types/` directory in backend can be removed if empty.
+* Remove `GetCWLUser.graphql` if it was only used for backend codegen.
 # CloudWatch Live Backend
 
 This directory contains the AWS CloudFormation templates and infrastructure definitions for the CloudWatch Live backend. The backend provides a serverless GraphQL API using AWS AppSync with Lambda resolvers, DynamoDB for data storage, and Cognito for authentication.

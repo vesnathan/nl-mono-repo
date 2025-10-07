@@ -4,7 +4,7 @@ projects:
     includes:
       - src/graphql/**/*.ts
       - src/graphql/**/*.tsx # Restore this line
-      - src/graphql/**/mutations.ts # Restore this line
+      # - src/graphql/**/mutations.ts # Excluded: not a GraphQL file
       # - ../../shared/types/**/*.graphql # Keep this commented out
     excludes:
       - ./amplify/**

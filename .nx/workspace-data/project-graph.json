@@ -134,11 +134,7 @@
           "npm:public"
         ],
         "metadata": {
-          "targetGroups": {
-            "NPM Scripts": [
-              "build-gql"
-            ]
-          },
+          "targetGroups": {},
           "js": {
             "packageName": "cwlbackend",
             "packageMain": "index.js",
@@ -146,18 +142,6 @@
           }
         },
         "targets": {
-          "build-gql": {
-            "executor": "nx:run-script",
-            "options": {
-              "script": "build-gql"
-            },
-            "metadata": {
-              "scriptContent": "ts-node ./scripts/buildGql.ts",
-              "runCommand": "yarn build-gql"
-            },
-            "configurations": {},
-            "parallelism": true
-          },
           "nx-release-publish": {
             "executor": "@nx/js:release-publish",
             "dependsOn": [
@@ -230,7 +214,9 @@
               "connect",
               "dev",
               "lint",
-              "tsc"
+              "tsc",
+              "delete",
+              "deployment-menu"
             ]
           },
           "description": "EC2 VSCode Server deployment and management",
@@ -259,7 +245,7 @@
               "script": "deploy"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config src/index.ts deploy",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config src/index.ts deploy",
               "runCommand": "yarn deploy"
             },
             "configurations": {},
@@ -278,7 +264,7 @@
               "script": "start"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config src/index.ts start",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config src/index.ts start",
               "runCommand": "yarn start"
             },
             "configurations": {},
@@ -290,7 +276,7 @@
               "script": "stop"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config src/index.ts stop",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config src/index.ts stop",
               "runCommand": "yarn stop"
             },
             "configurations": {},
@@ -302,7 +288,7 @@
               "script": "status"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config src/index.ts status",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config src/index.ts status",
               "runCommand": "yarn status"
             },
             "configurations": {},
@@ -314,7 +300,7 @@
               "script": "remove"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config src/index.ts remove",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config src/index.ts remove",
               "runCommand": "yarn remove"
             },
             "configurations": {},
@@ -326,7 +312,7 @@
               "script": "connect"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config src/index.ts connect",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config src/index.ts connect",
               "runCommand": "yarn connect"
             },
             "configurations": {},
@@ -338,7 +324,7 @@
               "script": "dev"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config src/index.ts",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config src/index.ts",
               "runCommand": "yarn dev"
             },
             "configurations": {},
@@ -364,6 +350,30 @@
             "metadata": {
               "scriptContent": "tsc --noEmit",
               "runCommand": "yarn tsc"
+            },
+            "configurations": {},
+            "parallelism": true
+          },
+          "delete": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "delete"
+            },
+            "metadata": {
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config src/index.ts delete",
+              "runCommand": "yarn delete"
+            },
+            "configurations": {},
+            "parallelism": true
+          },
+          "deployment-menu": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "deployment-menu"
+            },
+            "metadata": {
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config src/deployment-menu.ts",
+              "runCommand": "yarn deployment-menu"
             },
             "configurations": {},
             "parallelism": true
@@ -433,7 +443,7 @@
               "script": "development"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts deploy",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts deploy",
               "runCommand": "yarn development"
             },
             "configurations": {},
@@ -445,7 +455,7 @@
               "script": "deploy"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts deploy",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts deploy",
               "runCommand": "yarn deploy"
             },
             "configurations": {},
@@ -464,7 +474,7 @@
               "script": "deploy:waf"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts package --package waf",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts package --package waf",
               "runCommand": "yarn deploy:waf"
             },
             "configurations": {},
@@ -476,7 +486,7 @@
               "script": "deploy:shared"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts package --package shared",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts package --package shared",
               "runCommand": "yarn deploy:shared"
             },
             "configurations": {},
@@ -488,7 +498,7 @@
               "script": "deploy:cwl"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts package --package cwl",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts package --package cwl",
               "runCommand": "yarn deploy:cwl"
             },
             "configurations": {},
@@ -500,7 +510,7 @@
               "script": "deploy:all"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts all",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts all",
               "runCommand": "yarn deploy:all"
             },
             "configurations": {},
@@ -512,7 +522,7 @@
               "script": "update:waf"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts update --package waf",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts update --package waf",
               "runCommand": "yarn update:waf"
             },
             "configurations": {},
@@ -524,7 +534,7 @@
               "script": "update:shared"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts update --package shared",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts update --package shared",
               "runCommand": "yarn update:shared"
             },
             "configurations": {},
@@ -536,7 +546,7 @@
               "script": "update:cwl"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts update --package cwl",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts update --package cwl",
               "runCommand": "yarn update:cwl"
             },
             "configurations": {},
@@ -548,7 +558,7 @@
               "script": "deploy:frontend"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts frontend deploy",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts frontend deploy",
               "runCommand": "yarn deploy:frontend"
             },
             "configurations": {},
@@ -560,7 +570,7 @@
               "script": "frontend:build"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts frontend build",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts frontend build",
               "runCommand": "yarn frontend:build"
             },
             "configurations": {},
@@ -572,7 +582,7 @@
               "script": "frontend:upload"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts frontend upload",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts frontend upload",
               "runCommand": "yarn frontend:upload"
             },
             "configurations": {},
@@ -584,7 +594,7 @@
               "script": "frontend:invalidate"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts frontend invalidate",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts frontend invalidate",
               "runCommand": "yarn frontend:invalidate"
             },
             "configurations": {},
@@ -596,7 +606,7 @@
               "script": "remove"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts remove",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts remove",
               "runCommand": "yarn remove"
             },
             "configurations": {},
@@ -608,7 +618,7 @@
               "script": "remove:waf"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts remove --package waf",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts remove --package waf",
               "runCommand": "yarn remove:waf"
             },
             "configurations": {},
@@ -620,7 +630,7 @@
               "script": "remove:shared"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts remove --package shared",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts remove --package shared",
               "runCommand": "yarn remove:shared"
             },
             "configurations": {},
@@ -632,7 +642,7 @@
               "script": "remove:cwl"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts remove --package cwl",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts remove --package cwl",
               "runCommand": "yarn remove:cwl"
             },
             "configurations": {},
@@ -644,7 +654,7 @@
               "script": "remove:all"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config index.ts remove-all",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts remove-all",
               "runCommand": "yarn remove:all"
             },
             "configurations": {},
@@ -656,7 +666,7 @@
               "script": "force-remove:waf"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config remove-waf.ts",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config remove-waf.ts",
               "runCommand": "yarn force-remove:waf"
             },
             "configurations": {},
@@ -668,7 +678,7 @@
               "script": "force-delete"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config force-delete-cli.ts",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config force-delete-cli.ts",
               "runCommand": "yarn force-delete"
             },
             "configurations": {},
@@ -680,7 +690,7 @@
               "script": "force-delete:stack"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config force-delete-cli.ts stack",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config force-delete-cli.ts stack",
               "runCommand": "yarn force-delete:stack"
             },
             "configurations": {},
@@ -692,7 +702,7 @@
               "script": "force-delete:all"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config force-delete-cli.ts all",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config force-delete-cli.ts all",
               "runCommand": "yarn force-delete:all"
             },
             "configurations": {},
@@ -704,7 +714,7 @@
               "script": "force-delete:s3"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config force-delete-cli.ts s3-cleanup",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config force-delete-cli.ts s3-cleanup",
               "runCommand": "yarn force-delete:s3"
             },
             "configurations": {},
@@ -716,7 +726,7 @@
               "script": "force-delete:status"
             },
             "metadata": {
-              "scriptContent": "ts-node -r dotenv/config force-delete-cli.ts status",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config force-delete-cli.ts status",
               "runCommand": "yarn force-delete:status"
             },
             "configurations": {},
@@ -813,6 +823,15 @@
         "version": "2.3.0",
         "packageName": "@ampproject/remapping",
         "hash": "sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw=="
+      }
+    },
+    "npm:@anthropic-ai/claude-code": {
+      "type": "npm",
+      "name": "npm:@anthropic-ai/claude-code",
+      "data": {
+        "version": "2.0.9",
+        "packageName": "@anthropic-ai/claude-code",
+        "hash": "sha512-2IAXb7OogfoTVv7fa4vnMxhUSnQ5yx7ije0xmjvLKrw7CGEiE2cvxKeFGg7nHjL0EE64CrVWYscS3SwD/7/HhQ=="
       }
     },
     "npm:@aws-amplify/analytics": {
@@ -3479,6 +3498,15 @@
         "hash": "sha512-pn44xgBtgpEbZsu+lWf2KNb6OAf70X68k+yk69Ic2Xz11zHR/w24/U49XT7AeRwJ0Px+mhALhU5LPci1Aymk7A=="
       }
     },
+    "npm:@img/sharp-darwin-arm64@0.33.5": {
+      "type": "npm",
+      "name": "npm:@img/sharp-darwin-arm64@0.33.5",
+      "data": {
+        "version": "0.33.5",
+        "packageName": "@img/sharp-darwin-arm64",
+        "hash": "sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ=="
+      }
+    },
     "npm:@img/sharp-darwin-x64@0.34.1": {
       "type": "npm",
       "name": "npm:@img/sharp-darwin-x64@0.34.1",
@@ -3486,6 +3514,24 @@
         "version": "0.34.1",
         "packageName": "@img/sharp-darwin-x64",
         "hash": "sha512-VfuYgG2r8BpYiOUN+BfYeFo69nP/MIwAtSJ7/Zpxc5QF3KS22z8Pvg3FkrSFJBPNQ7mmcUcYQFBmEQp7eu1F8Q=="
+      }
+    },
+    "npm:@img/sharp-darwin-x64@0.33.5": {
+      "type": "npm",
+      "name": "npm:@img/sharp-darwin-x64@0.33.5",
+      "data": {
+        "version": "0.33.5",
+        "packageName": "@img/sharp-darwin-x64",
+        "hash": "sha512-fyHac4jIc1ANYGRDxtiqelIbdWkIuQaI84Mv45KvGRRxSAa7o7d1ZKAOBaYbnepLC1WqxfpimdeWfvqqSGwR2Q=="
+      }
+    },
+    "npm:@img/sharp-libvips-darwin-arm64@1.0.4": {
+      "type": "npm",
+      "name": "npm:@img/sharp-libvips-darwin-arm64@1.0.4",
+      "data": {
+        "version": "1.0.4",
+        "packageName": "@img/sharp-libvips-darwin-arm64",
+        "hash": "sha512-XblONe153h0O2zuFfTAbQYAX2JhYmDHeWikp1LM9Hul9gVPjFY427k6dFEcOL72O01QxQsWi761svJ/ev9xEDg=="
       }
     },
     "npm:@img/sharp-libvips-darwin-arm64@1.1.0": {
@@ -3497,6 +3543,15 @@
         "hash": "sha512-HZ/JUmPwrJSoM4DIQPv/BfNh9yrOA8tlBbqbLz4JZ5uew2+o22Ik+tHQJcih7QJuSa0zo5coHTfD5J8inqj9DA=="
       }
     },
+    "npm:@img/sharp-libvips-darwin-x64@1.0.4": {
+      "type": "npm",
+      "name": "npm:@img/sharp-libvips-darwin-x64@1.0.4",
+      "data": {
+        "version": "1.0.4",
+        "packageName": "@img/sharp-libvips-darwin-x64",
+        "hash": "sha512-xnGR8YuZYfJGmWPvmlunFaWJsb9T/AO2ykoP3Fz/0X5XV2aoYBPkX6xqCQvUTKKiLddarLaxpzNe+b1hjeWHAQ=="
+      }
+    },
     "npm:@img/sharp-libvips-darwin-x64@1.1.0": {
       "type": "npm",
       "name": "npm:@img/sharp-libvips-darwin-x64@1.1.0",
@@ -3506,6 +3561,15 @@
         "hash": "sha512-Xzc2ToEmHN+hfvsl9wja0RlnXEgpKNmftriQp6XzY/RaSfwD9th+MSh0WQKzUreLKKINb3afirxW7A0fz2YWuQ=="
       }
     },
+    "npm:@img/sharp-libvips-linux-arm64@1.0.4": {
+      "type": "npm",
+      "name": "npm:@img/sharp-libvips-linux-arm64@1.0.4",
+      "data": {
+        "version": "1.0.4",
+        "packageName": "@img/sharp-libvips-linux-arm64",
+        "hash": "sha512-9B+taZ8DlyyqzZQnoeIvDVR/2F4EbMepXMc/NdVbkzsJbzkUjhXv/70GQJ7tdLA4YJgNP25zukcxpX2/SueNrA=="
+      }
+    },
     "npm:@img/sharp-libvips-linux-arm64@1.1.0": {
       "type": "npm",
       "name": "npm:@img/sharp-libvips-linux-arm64@1.1.0",
@@ -3513,6 +3577,15 @@
         "version": "1.1.0",
         "packageName": "@img/sharp-libvips-linux-arm64",
         "hash": "sha512-IVfGJa7gjChDET1dK9SekxFFdflarnUB8PwW8aGwEoF3oAsSDuNUTYS+SKDOyOJxQyDC1aPFMuRYLoDInyV9Ew=="
+      }
+    },
+    "npm:@img/sharp-libvips-linux-arm@1.0.5": {
+      "type": "npm",
+      "name": "npm:@img/sharp-libvips-linux-arm@1.0.5",
+      "data": {
+        "version": "1.0.5",
+        "packageName": "@img/sharp-libvips-linux-arm",
+        "hash": "sha512-gvcC4ACAOPRNATg/ov8/MnbxFDJqf/pDePbBnuBDcjsI8PssmjoKMAz4LtLaVi+OnSb5FK/yIOamqDwGmXW32g=="
       }
     },
     "npm:@img/sharp-libvips-linux-arm@1.1.0": {
@@ -3540,6 +3613,15 @@
         "version": "1.1.0",
         "packageName": "@img/sharp-libvips-linux-s390x",
         "hash": "sha512-xukSwvhguw7COyzvmjydRb3x/09+21HykyapcZchiCUkTThEQEOMtBj9UhkaBRLuBrgLFzQ2wbxdeCCJW/jgJA=="
+      }
+    },
+    "npm:@img/sharp-libvips-linux-x64@1.0.4": {
+      "type": "npm",
+      "name": "npm:@img/sharp-libvips-linux-x64@1.0.4",
+      "data": {
+        "version": "1.0.4",
+        "packageName": "@img/sharp-libvips-linux-x64",
+        "hash": "sha512-MmWmQ3iPFZr0Iev+BAgVMb3ZyC4KeFc3jFxnNbEPas60e1cIfevbtuyf9nDGIzOaW9PdnDciJm+wFFaTlj5xYw=="
       }
     },
     "npm:@img/sharp-libvips-linux-x64": {
@@ -3578,6 +3660,15 @@
         "hash": "sha512-kX2c+vbvaXC6vly1RDf/IWNXxrlxLNpBVWkdpRq5Ka7OOKj6nr66etKy2IENf6FtOgklkg9ZdGpEu9kwdlcwOQ=="
       }
     },
+    "npm:@img/sharp-linux-arm64@0.33.5": {
+      "type": "npm",
+      "name": "npm:@img/sharp-linux-arm64@0.33.5",
+      "data": {
+        "version": "0.33.5",
+        "packageName": "@img/sharp-linux-arm64",
+        "hash": "sha512-JMVv+AMRyGOHtO1RFBiJy/MBsgz0x4AWrT6QoEVVTyh1E39TrCUpTRI7mx9VksGX4awWASxqCYLCV4wBZHAYxA=="
+      }
+    },
     "npm:@img/sharp-linux-arm@0.34.1": {
       "type": "npm",
       "name": "npm:@img/sharp-linux-arm@0.34.1",
@@ -3585,6 +3676,15 @@
         "version": "0.34.1",
         "packageName": "@img/sharp-linux-arm",
         "hash": "sha512-anKiszvACti2sGy9CirTlNyk7BjjZPiML1jt2ZkTdcvpLU1YH6CXwRAZCA2UmRXnhiIftXQ7+Oh62Ji25W72jA=="
+      }
+    },
+    "npm:@img/sharp-linux-arm@0.33.5": {
+      "type": "npm",
+      "name": "npm:@img/sharp-linux-arm@0.33.5",
+      "data": {
+        "version": "0.33.5",
+        "packageName": "@img/sharp-linux-arm",
+        "hash": "sha512-JTS1eldqZbJxjvKaAkxhZmBqPRGmxgu+qFKSInv8moZ2AmT5Yib3EQ1c6gp493HvrvV8QgdOXdyaIBrhvFhBMQ=="
       }
     },
     "npm:@img/sharp-linux-s390x@0.34.1": {
@@ -3596,13 +3696,22 @@
         "hash": "sha512-7s0KX2tI9mZI2buRipKIw2X1ufdTeaRgwmRabt5bi9chYfhur+/C1OXg3TKg/eag1W+6CCWLVmSauV1owmRPxA=="
       }
     },
-    "npm:@img/sharp-linux-x64": {
+    "npm:@img/sharp-linux-x64@0.34.1": {
       "type": "npm",
-      "name": "npm:@img/sharp-linux-x64",
+      "name": "npm:@img/sharp-linux-x64@0.34.1",
       "data": {
         "version": "0.34.1",
         "packageName": "@img/sharp-linux-x64",
         "hash": "sha512-wExv7SH9nmoBW3Wr2gvQopX1k8q2g5V5Iag8Zk6AVENsjwd+3adjwxtp3Dcu2QhOXr8W9NusBU6XcQUohBZ5MA=="
+      }
+    },
+    "npm:@img/sharp-linux-x64": {
+      "type": "npm",
+      "name": "npm:@img/sharp-linux-x64",
+      "data": {
+        "version": "0.33.5",
+        "packageName": "@img/sharp-linux-x64",
+        "hash": "sha512-opC+Ok5pRNAzuvq1AG0ar+1owsu842/Ab+4qvU879ippJBHvyY5n2mxF1izXqkPYlGuP/M556uh53jRLJmzTWA=="
       }
     },
     "npm:@img/sharp-linuxmusl-arm64@0.34.1": {
@@ -3650,130 +3759,22 @@
         "hash": "sha512-hw1iIAHpNE8q3uMIRCgGOeDoz9KtFNarFLQclLxr/LK1VBkj8nby18RjFvr6aP7USRYAjTZW6yisnBWMX571Tw=="
       }
     },
-    "npm:@inquirer/checkbox@4.1.8": {
+    "npm:@img/sharp-win32-x64@0.33.5": {
       "type": "npm",
-      "name": "npm:@inquirer/checkbox@4.1.8",
+      "name": "npm:@img/sharp-win32-x64@0.33.5",
       "data": {
-        "version": "4.1.8",
-        "packageName": "@inquirer/checkbox",
-        "hash": "sha512-d/QAsnwuHX2OPolxvYcgSj7A9DO9H6gVOy2DvBTx+P2LH2iRTo/RSGV3iwCzW024nP9hw98KIuDmdyhZQj1UQg=="
+        "version": "0.33.5",
+        "packageName": "@img/sharp-win32-x64",
+        "hash": "sha512-MpY/o8/8kj+EcnxwvrP4aTJSWw/aZ7JIGR4aBeZkZw5B7/Jn+tY9/VNwtcoGmdT7GfggGIU4kygOMSbYnOrAbg=="
       }
     },
-    "npm:@inquirer/confirm@5.1.12": {
+    "npm:@inquirer/external-editor@1.0.2": {
       "type": "npm",
-      "name": "npm:@inquirer/confirm@5.1.12",
+      "name": "npm:@inquirer/external-editor@1.0.2",
       "data": {
-        "version": "5.1.12",
-        "packageName": "@inquirer/confirm",
-        "hash": "sha512-dpq+ielV9/bqgXRUbNH//KsY6WEw9DrGPmipkpmgC1Y46cwuBTNx7PXFWTjc3MQ+urcc0QxoVHcMI0FW4Ok0hg=="
-      }
-    },
-    "npm:@inquirer/core@10.1.13": {
-      "type": "npm",
-      "name": "npm:@inquirer/core@10.1.13",
-      "data": {
-        "version": "10.1.13",
-        "packageName": "@inquirer/core",
-        "hash": "sha512-1viSxebkYN2nJULlzCxES6G9/stgHSepZ9LqqfdIGPHj5OHhiBUXVS0a6R0bEC2A+VL4D9w6QB66ebCr6HGllA=="
-      }
-    },
-    "npm:@inquirer/editor@4.2.13": {
-      "type": "npm",
-      "name": "npm:@inquirer/editor@4.2.13",
-      "data": {
-        "version": "4.2.13",
-        "packageName": "@inquirer/editor",
-        "hash": "sha512-WbicD9SUQt/K8O5Vyk9iC2ojq5RHoCLK6itpp2fHsWe44VxxcA9z3GTWlvjSTGmMQpZr+lbVmrxdHcumJoLbMA=="
-      }
-    },
-    "npm:@inquirer/expand@4.0.15": {
-      "type": "npm",
-      "name": "npm:@inquirer/expand@4.0.15",
-      "data": {
-        "version": "4.0.15",
-        "packageName": "@inquirer/expand",
-        "hash": "sha512-4Y+pbr/U9Qcvf+N/goHzPEXiHH8680lM3Dr3Y9h9FFw4gHS+zVpbj8LfbKWIb/jayIB4aSO4pWiBTrBYWkvi5A=="
-      }
-    },
-    "npm:@inquirer/figures": {
-      "type": "npm",
-      "name": "npm:@inquirer/figures",
-      "data": {
-        "version": "1.0.12",
-        "packageName": "@inquirer/figures",
-        "hash": "sha512-MJttijd8rMFcKJC8NYmprWr6hD3r9Gd9qUC0XwPNwoEPWSMVJwA2MlXxF+nhZZNMY+HXsWa+o7KY2emWYIn0jQ=="
-      }
-    },
-    "npm:@inquirer/input@4.1.12": {
-      "type": "npm",
-      "name": "npm:@inquirer/input@4.1.12",
-      "data": {
-        "version": "4.1.12",
-        "packageName": "@inquirer/input",
-        "hash": "sha512-xJ6PFZpDjC+tC1P8ImGprgcsrzQRsUh9aH3IZixm1lAZFK49UGHxM3ltFfuInN2kPYNfyoPRh+tU4ftsjPLKqQ=="
-      }
-    },
-    "npm:@inquirer/number@3.0.15": {
-      "type": "npm",
-      "name": "npm:@inquirer/number@3.0.15",
-      "data": {
-        "version": "3.0.15",
-        "packageName": "@inquirer/number",
-        "hash": "sha512-xWg+iYfqdhRiM55MvqiTCleHzszpoigUpN5+t1OMcRkJrUrw7va3AzXaxvS+Ak7Gny0j2mFSTv2JJj8sMtbV2g=="
-      }
-    },
-    "npm:@inquirer/password@4.0.15": {
-      "type": "npm",
-      "name": "npm:@inquirer/password@4.0.15",
-      "data": {
-        "version": "4.0.15",
-        "packageName": "@inquirer/password",
-        "hash": "sha512-75CT2p43DGEnfGTaqFpbDC2p2EEMrq0S+IRrf9iJvYreMy5mAWj087+mdKyLHapUEPLjN10mNvABpGbk8Wdraw=="
-      }
-    },
-    "npm:@inquirer/prompts@7.5.3": {
-      "type": "npm",
-      "name": "npm:@inquirer/prompts@7.5.3",
-      "data": {
-        "version": "7.5.3",
-        "packageName": "@inquirer/prompts",
-        "hash": "sha512-8YL0WiV7J86hVAxrh3fE5mDCzcTDe1670unmJRz6ArDgN+DBK1a0+rbnNWp4DUB5rPMwqD5ZP6YHl9KK1mbZRg=="
-      }
-    },
-    "npm:@inquirer/rawlist@4.1.3": {
-      "type": "npm",
-      "name": "npm:@inquirer/rawlist@4.1.3",
-      "data": {
-        "version": "4.1.3",
-        "packageName": "@inquirer/rawlist",
-        "hash": "sha512-7XrV//6kwYumNDSsvJIPeAqa8+p7GJh7H5kRuxirct2cgOcSWwwNGoXDRgpNFbY/MG2vQ4ccIWCi8+IXXyFMZA=="
-      }
-    },
-    "npm:@inquirer/search@3.0.15": {
-      "type": "npm",
-      "name": "npm:@inquirer/search@3.0.15",
-      "data": {
-        "version": "3.0.15",
-        "packageName": "@inquirer/search",
-        "hash": "sha512-YBMwPxYBrADqyvP4nNItpwkBnGGglAvCLVW8u4pRmmvOsHUtCAUIMbUrLX5B3tFL1/WsLGdQ2HNzkqswMs5Uaw=="
-      }
-    },
-    "npm:@inquirer/select@4.2.3": {
-      "type": "npm",
-      "name": "npm:@inquirer/select@4.2.3",
-      "data": {
-        "version": "4.2.3",
-        "packageName": "@inquirer/select",
-        "hash": "sha512-OAGhXU0Cvh0PhLz9xTF/kx6g6x+sP+PcyTiLvCrewI99P3BBeexD+VbuwkNDvqGkk3y2h5ZiWLeRP7BFlhkUDg=="
-      }
-    },
-    "npm:@inquirer/type@3.0.7": {
-      "type": "npm",
-      "name": "npm:@inquirer/type@3.0.7",
-      "data": {
-        "version": "3.0.7",
-        "packageName": "@inquirer/type",
-        "hash": "sha512-PfunHQcjwnju84L+ycmcMKB/pTPIngjUJvfnRhKY6FKPuYXlM4aQCb/nIdTFR6BEhMjFvngzvng/vBAJMZpLSA=="
+        "version": "1.0.2",
+        "packageName": "@inquirer/external-editor",
+        "hash": "sha512-yy9cOoBnx58TlsPrIxauKIFQTiyH+0MK4e97y4sV9ERbI+zDxw7i2hxHLCIEGIE/8PPvDxGhgzIOTSOWcs6/MQ=="
       }
     },
     "npm:@internationalized/date": {
@@ -10697,6 +10698,15 @@
         "hash": "sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA=="
       }
     },
+    "npm:chardet@2.1.0": {
+      "type": "npm",
+      "name": "npm:chardet@2.1.0",
+      "data": {
+        "version": "2.1.0",
+        "packageName": "chardet",
+        "hash": "sha512-bNFETTG/pM5ryzQ9Ad0lJOTa6HWD/YsScAR3EnCPZRPlQh77JocYktSHOUHelyhm8IARL+o4c4F1bP5KVOjiRA=="
+      }
+    },
     "npm:child-process-ext": {
       "type": "npm",
       "name": "npm:child-process-ext",
@@ -10830,15 +10840,6 @@
         "version": "3.0.0",
         "packageName": "cli-width",
         "hash": "sha512-FxqpkPPwu1HjuN93Omfm4h8uIanXofW0RxVEW3k5RKx+mJJYSthzNhp32Kzxxy3YAEZ/Dc/EWN1vZRY0+kOhbw=="
-      }
-    },
-    "npm:cli-width@4.1.0": {
-      "type": "npm",
-      "name": "npm:cli-width@4.1.0",
-      "data": {
-        "version": "4.1.0",
-        "packageName": "cli-width",
-        "hash": "sha512-ouuZd4/dm2Sw5Gmqy6bGyNNNe1qt9RpmxveLSO7KcgsTnU7RXfsw+/bukWGo1abgBiMAic068rclZsO4IWmmxQ=="
       }
     },
     "npm:client-only": {
@@ -13685,6 +13686,15 @@
         "hash": "sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw=="
       }
     },
+    "npm:iconv-lite@0.7.0": {
+      "type": "npm",
+      "name": "npm:iconv-lite@0.7.0",
+      "data": {
+        "version": "0.7.0",
+        "packageName": "iconv-lite",
+        "hash": "sha512-cf6L2Ds3h57VVmkZe+Pn+5APsT7FpqJtEhhieDCvrE2MK5Qk9MyffgQyuxQTm6BChfeZNtcOLHp9IcWRVcIcBQ=="
+      }
+    },
     "npm:idb": {
       "type": "npm",
       "name": "npm:idb",
@@ -13847,15 +13857,6 @@
         "hash": "sha512-Zfeb5ol+H+eqJWHTaGca9BovufyGeIfr4zaaBorPmJBMrJ+KBnN+kQx2ZtXdsotUTgldHmHQV44xvUWOUA7E2w=="
       }
     },
-    "npm:inquirer@12.6.3": {
-      "type": "npm",
-      "name": "npm:inquirer@12.6.3",
-      "data": {
-        "version": "12.6.3",
-        "packageName": "inquirer",
-        "hash": "sha512-eX9beYAjr1MqYsIjx1vAheXsRk1jbZRvHLcBu5nA9wX0rXR1IfCZLnVLp4Ym4mrhqmh7AuANwcdtgQ291fZDfQ=="
-      }
-    },
     "npm:inquirer": {
       "type": "npm",
       "name": "npm:inquirer",
@@ -13863,6 +13864,15 @@
         "version": "8.2.6",
         "packageName": "inquirer",
         "hash": "sha512-M1WuAmb7pn9zdFRtQYk26ZBoY043Sse0wVDdk4Bppr+JOXyQYybdtvK+l9wUibhtjdjvtoiNy8tk+EgsYIUqKg=="
+      }
+    },
+    "npm:inquirer@8.2.7": {
+      "type": "npm",
+      "name": "npm:inquirer@8.2.7",
+      "data": {
+        "version": "8.2.7",
+        "packageName": "inquirer",
+        "hash": "sha512-UjOaSel/iddGZJ5xP/Eixh6dY1XghiBw4XK13rCCIJcJfyhhoul/7KhLLUGtebEj6GDYM6Vnx/mVsjx2L/mFIA=="
       }
     },
     "npm:internal-slot": {
@@ -15935,15 +15945,6 @@
         "hash": "sha512-avsJQhyd+680gKXyG/sQc0nXaC6rBkPOfyHYcFb9+hdkqQkR9bdnkJ0AMZhke0oesPqIO+mFFJ+IdBc7mst4IA=="
       }
     },
-    "npm:mute-stream@2.0.0": {
-      "type": "npm",
-      "name": "npm:mute-stream@2.0.0",
-      "data": {
-        "version": "2.0.0",
-        "packageName": "mute-stream",
-        "hash": "sha512-WWdIxpyjEn+FhQJQQv9aQAYlHoNVdzIzUySNV1gHUPDSdZJ3yZn7pAAbQcV7B56Mvu881q9FZV+0Vx2xC44VWA=="
-      }
-    },
     "npm:mz": {
       "type": "npm",
       "name": "npm:mz",
@@ -17787,15 +17788,6 @@
         "version": "2.4.1",
         "packageName": "run-async",
         "hash": "sha512-tvVnVv01b8c1RrA6Ep7JkStj85Guv/YrMcwqYQnwjsAS2cTmmPGBBjAjpCW7RrSodNSoE2/qg9O4bceNvUuDgQ=="
-      }
-    },
-    "npm:run-async@3.0.0": {
-      "type": "npm",
-      "name": "npm:run-async@3.0.0",
-      "data": {
-        "version": "3.0.0",
-        "packageName": "run-async",
-        "hash": "sha512-540WwVDOMxA6dN6We19EcT9sc3hkXPw5mzRNGM3FkdN/vtE9NFvj5lFAPNwUDmJjXidm3v7TC1cTE7t17Ulm1Q=="
       }
     },
     "npm:run-parallel-limit": {
@@ -20021,15 +20013,6 @@
         "hash": "sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q=="
       }
     },
-    "npm:yoctocolors-cjs": {
-      "type": "npm",
-      "name": "npm:yoctocolors-cjs",
-      "data": {
-        "version": "2.1.2",
-        "packageName": "yoctocolors-cjs",
-        "hash": "sha512-cYVsTjKl8b+FrnidjibDWskAv7UKOfcwaVZdp/it9n1s9fU3IkgDbhdIRKCW4JDsAlECJY0ytoVPT3sK6kideA=="
-      }
-    },
     "npm:zip-stream": {
       "type": "npm",
       "name": "npm:zip-stream",
@@ -20224,6 +20207,11 @@
       {
         "source": "cwlbackend",
         "target": "npm:@aws-sdk/client-cloudformation",
+        "type": "static"
+      },
+      {
+        "source": "cwlbackend",
+        "target": "npm:@aws-sdk/client-cloudfront",
         "type": "static"
       },
       {
@@ -20432,7 +20420,7 @@
       },
       {
         "source": "@cwl/ec2-vsc",
-        "target": "npm:inquirer@12.6.3",
+        "target": "npm:inquirer@8.2.7",
         "type": "static"
       },
       {
@@ -20484,7 +20472,7 @@
       },
       {
         "source": "@cwl/deploy",
-        "target": "npm:@aws-sdk/client-cloudfront",
+        "target": "npm:@aws-sdk/client-cloudfront@3.817.0",
         "type": "static"
       },
       {
@@ -20613,6 +20601,38 @@
       {
         "source": "npm:@ampproject/remapping",
         "target": "npm:@jridgewell/trace-mapping",
+        "type": "static"
+      }
+    ],
+    "npm:@anthropic-ai/claude-code": [
+      {
+        "source": "npm:@anthropic-ai/claude-code",
+        "target": "npm:@img/sharp-darwin-arm64@0.33.5",
+        "type": "static"
+      },
+      {
+        "source": "npm:@anthropic-ai/claude-code",
+        "target": "npm:@img/sharp-darwin-x64@0.33.5",
+        "type": "static"
+      },
+      {
+        "source": "npm:@anthropic-ai/claude-code",
+        "target": "npm:@img/sharp-linux-arm@0.33.5",
+        "type": "static"
+      },
+      {
+        "source": "npm:@anthropic-ai/claude-code",
+        "target": "npm:@img/sharp-linux-arm64@0.33.5",
+        "type": "static"
+      },
+      {
+        "source": "npm:@anthropic-ai/claude-code",
+        "target": "npm:@img/sharp-linux-x64",
+        "type": "static"
+      },
+      {
+        "source": "npm:@anthropic-ai/claude-code",
+        "target": "npm:@img/sharp-win32-x64@0.33.5",
         "type": "static"
       }
     ],
@@ -34837,10 +34857,24 @@
         "type": "static"
       }
     ],
+    "npm:@img/sharp-darwin-arm64@0.33.5": [
+      {
+        "source": "npm:@img/sharp-darwin-arm64@0.33.5",
+        "target": "npm:@img/sharp-libvips-darwin-arm64@1.0.4",
+        "type": "static"
+      }
+    ],
     "npm:@img/sharp-darwin-x64@0.34.1": [
       {
         "source": "npm:@img/sharp-darwin-x64@0.34.1",
         "target": "npm:@img/sharp-libvips-darwin-x64@1.1.0",
+        "type": "static"
+      }
+    ],
+    "npm:@img/sharp-darwin-x64@0.33.5": [
+      {
+        "source": "npm:@img/sharp-darwin-x64@0.33.5",
+        "target": "npm:@img/sharp-libvips-darwin-x64@1.0.4",
         "type": "static"
       }
     ],
@@ -34851,10 +34885,24 @@
         "type": "static"
       }
     ],
+    "npm:@img/sharp-linux-arm64@0.33.5": [
+      {
+        "source": "npm:@img/sharp-linux-arm64@0.33.5",
+        "target": "npm:@img/sharp-libvips-linux-arm64@1.0.4",
+        "type": "static"
+      }
+    ],
     "npm:@img/sharp-linux-arm@0.34.1": [
       {
         "source": "npm:@img/sharp-linux-arm@0.34.1",
         "target": "npm:@img/sharp-libvips-linux-arm@1.1.0",
+        "type": "static"
+      }
+    ],
+    "npm:@img/sharp-linux-arm@0.33.5": [
+      {
+        "source": "npm:@img/sharp-linux-arm@0.33.5",
+        "target": "npm:@img/sharp-libvips-linux-arm@1.0.5",
         "type": "static"
       }
     ],
@@ -34865,10 +34913,17 @@
         "type": "static"
       }
     ],
+    "npm:@img/sharp-linux-x64@0.34.1": [
+      {
+        "source": "npm:@img/sharp-linux-x64@0.34.1",
+        "target": "npm:@img/sharp-libvips-linux-x64",
+        "type": "static"
+      }
+    ],
     "npm:@img/sharp-linux-x64": [
       {
         "source": "npm:@img/sharp-linux-x64",
-        "target": "npm:@img/sharp-libvips-linux-x64",
+        "target": "npm:@img/sharp-libvips-linux-x64@1.0.4",
         "type": "static"
       }
     ],
@@ -34893,277 +34948,15 @@
         "type": "static"
       }
     ],
-    "npm:@inquirer/checkbox@4.1.8": [
+    "npm:@inquirer/external-editor@1.0.2": [
       {
-        "source": "npm:@inquirer/checkbox@4.1.8",
-        "target": "npm:@inquirer/core@10.1.13",
+        "source": "npm:@inquirer/external-editor@1.0.2",
+        "target": "npm:chardet@2.1.0",
         "type": "static"
       },
       {
-        "source": "npm:@inquirer/checkbox@4.1.8",
-        "target": "npm:@inquirer/figures",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/checkbox@4.1.8",
-        "target": "npm:@inquirer/type@3.0.7",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/checkbox@4.1.8",
-        "target": "npm:ansi-escapes",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/checkbox@4.1.8",
-        "target": "npm:yoctocolors-cjs",
-        "type": "static"
-      }
-    ],
-    "npm:@inquirer/confirm@5.1.12": [
-      {
-        "source": "npm:@inquirer/confirm@5.1.12",
-        "target": "npm:@inquirer/core@10.1.13",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/confirm@5.1.12",
-        "target": "npm:@inquirer/type@3.0.7",
-        "type": "static"
-      }
-    ],
-    "npm:@inquirer/core@10.1.13": [
-      {
-        "source": "npm:@inquirer/core@10.1.13",
-        "target": "npm:@inquirer/figures",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/core@10.1.13",
-        "target": "npm:@inquirer/type@3.0.7",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/core@10.1.13",
-        "target": "npm:ansi-escapes",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/core@10.1.13",
-        "target": "npm:cli-width@4.1.0",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/core@10.1.13",
-        "target": "npm:mute-stream@2.0.0",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/core@10.1.13",
-        "target": "npm:signal-exit@4.1.0",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/core@10.1.13",
-        "target": "npm:wrap-ansi",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/core@10.1.13",
-        "target": "npm:yoctocolors-cjs",
-        "type": "static"
-      }
-    ],
-    "npm:@inquirer/editor@4.2.13": [
-      {
-        "source": "npm:@inquirer/editor@4.2.13",
-        "target": "npm:@inquirer/core@10.1.13",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/editor@4.2.13",
-        "target": "npm:@inquirer/type@3.0.7",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/editor@4.2.13",
-        "target": "npm:external-editor",
-        "type": "static"
-      }
-    ],
-    "npm:@inquirer/expand@4.0.15": [
-      {
-        "source": "npm:@inquirer/expand@4.0.15",
-        "target": "npm:@inquirer/core@10.1.13",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/expand@4.0.15",
-        "target": "npm:@inquirer/type@3.0.7",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/expand@4.0.15",
-        "target": "npm:yoctocolors-cjs",
-        "type": "static"
-      }
-    ],
-    "npm:@inquirer/input@4.1.12": [
-      {
-        "source": "npm:@inquirer/input@4.1.12",
-        "target": "npm:@inquirer/core@10.1.13",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/input@4.1.12",
-        "target": "npm:@inquirer/type@3.0.7",
-        "type": "static"
-      }
-    ],
-    "npm:@inquirer/number@3.0.15": [
-      {
-        "source": "npm:@inquirer/number@3.0.15",
-        "target": "npm:@inquirer/core@10.1.13",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/number@3.0.15",
-        "target": "npm:@inquirer/type@3.0.7",
-        "type": "static"
-      }
-    ],
-    "npm:@inquirer/password@4.0.15": [
-      {
-        "source": "npm:@inquirer/password@4.0.15",
-        "target": "npm:@inquirer/core@10.1.13",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/password@4.0.15",
-        "target": "npm:@inquirer/type@3.0.7",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/password@4.0.15",
-        "target": "npm:ansi-escapes",
-        "type": "static"
-      }
-    ],
-    "npm:@inquirer/prompts@7.5.3": [
-      {
-        "source": "npm:@inquirer/prompts@7.5.3",
-        "target": "npm:@inquirer/checkbox@4.1.8",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/prompts@7.5.3",
-        "target": "npm:@inquirer/confirm@5.1.12",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/prompts@7.5.3",
-        "target": "npm:@inquirer/editor@4.2.13",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/prompts@7.5.3",
-        "target": "npm:@inquirer/expand@4.0.15",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/prompts@7.5.3",
-        "target": "npm:@inquirer/input@4.1.12",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/prompts@7.5.3",
-        "target": "npm:@inquirer/number@3.0.15",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/prompts@7.5.3",
-        "target": "npm:@inquirer/password@4.0.15",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/prompts@7.5.3",
-        "target": "npm:@inquirer/rawlist@4.1.3",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/prompts@7.5.3",
-        "target": "npm:@inquirer/search@3.0.15",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/prompts@7.5.3",
-        "target": "npm:@inquirer/select@4.2.3",
-        "type": "static"
-      }
-    ],
-    "npm:@inquirer/rawlist@4.1.3": [
-      {
-        "source": "npm:@inquirer/rawlist@4.1.3",
-        "target": "npm:@inquirer/core@10.1.13",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/rawlist@4.1.3",
-        "target": "npm:@inquirer/type@3.0.7",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/rawlist@4.1.3",
-        "target": "npm:yoctocolors-cjs",
-        "type": "static"
-      }
-    ],
-    "npm:@inquirer/search@3.0.15": [
-      {
-        "source": "npm:@inquirer/search@3.0.15",
-        "target": "npm:@inquirer/core@10.1.13",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/search@3.0.15",
-        "target": "npm:@inquirer/figures",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/search@3.0.15",
-        "target": "npm:@inquirer/type@3.0.7",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/search@3.0.15",
-        "target": "npm:yoctocolors-cjs",
-        "type": "static"
-      }
-    ],
-    "npm:@inquirer/select@4.2.3": [
-      {
-        "source": "npm:@inquirer/select@4.2.3",
-        "target": "npm:@inquirer/core@10.1.13",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/select@4.2.3",
-        "target": "npm:@inquirer/figures",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/select@4.2.3",
-        "target": "npm:@inquirer/type@3.0.7",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/select@4.2.3",
-        "target": "npm:ansi-escapes",
-        "type": "static"
-      },
-      {
-        "source": "npm:@inquirer/select@4.2.3",
-        "target": "npm:yoctocolors-cjs",
+        "source": "npm:@inquirer/external-editor@1.0.2",
+        "target": "npm:iconv-lite@0.7.0",
         "type": "static"
       }
     ],
@@ -53415,6 +53208,13 @@
         "type": "static"
       }
     ],
+    "npm:iconv-lite@0.7.0": [
+      {
+        "source": "npm:iconv-lite@0.7.0",
+        "target": "npm:safer-buffer",
+        "type": "static"
+      }
+    ],
     "npm:ignore-walk": [
       {
         "source": "npm:ignore-walk",
@@ -53529,43 +53329,6 @@
         "type": "static"
       }
     ],
-    "npm:inquirer@12.6.3": [
-      {
-        "source": "npm:inquirer@12.6.3",
-        "target": "npm:@inquirer/core@10.1.13",
-        "type": "static"
-      },
-      {
-        "source": "npm:inquirer@12.6.3",
-        "target": "npm:@inquirer/prompts@7.5.3",
-        "type": "static"
-      },
-      {
-        "source": "npm:inquirer@12.6.3",
-        "target": "npm:@inquirer/type@3.0.7",
-        "type": "static"
-      },
-      {
-        "source": "npm:inquirer@12.6.3",
-        "target": "npm:ansi-escapes",
-        "type": "static"
-      },
-      {
-        "source": "npm:inquirer@12.6.3",
-        "target": "npm:mute-stream@2.0.0",
-        "type": "static"
-      },
-      {
-        "source": "npm:inquirer@12.6.3",
-        "target": "npm:run-async@3.0.0",
-        "type": "static"
-      },
-      {
-        "source": "npm:inquirer@12.6.3",
-        "target": "npm:rxjs",
-        "type": "static"
-      }
-    ],
     "npm:inquirer": [
       {
         "source": "npm:inquirer",
@@ -53639,6 +53402,83 @@
       },
       {
         "source": "npm:inquirer",
+        "target": "npm:wrap-ansi",
+        "type": "static"
+      }
+    ],
+    "npm:inquirer@8.2.7": [
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:@inquirer/external-editor@1.0.2",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:ansi-escapes",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:chalk",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:cli-cursor",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:cli-width",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:figures",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:lodash",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:mute-stream",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:ora",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:run-async",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:rxjs",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:string-width",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:strip-ansi",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
+        "target": "npm:through",
+        "type": "static"
+      },
+      {
+        "source": "npm:inquirer@8.2.7",
         "target": "npm:wrap-ansi",
         "type": "static"
       }
@@ -59260,7 +59100,7 @@
       },
       {
         "source": "npm:sharp",
-        "target": "npm:@img/sharp-linux-x64",
+        "target": "npm:@img/sharp-linux-x64@0.34.1",
         "type": "static"
       },
       {
@@ -61572,5 +61412,5 @@
   },
   "version": "6.0",
   "errors": [],
-  "computedAt": 1751172310427
+  "computedAt": 1759837164916
 }
