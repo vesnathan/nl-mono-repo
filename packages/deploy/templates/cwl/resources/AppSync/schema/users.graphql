@@ -1,0 +1,13 @@
+# This file defines the Query and Mutation operations for the CWL AppSync API
+# Type definitions (CWLUser, ClientType, CWLUserInput) come from shared types
+
+type Mutation {
+  # Creates a new CWL User
+  createCWLUser(input: CWLUserInput!): CWLUser
+}
+
+type Query {
+  # Retrieves a CWLUser by their ID (Cognito Sub)
+  getCWLUser(userId: String!): CWLUser
+    @aws_cognito_user_pools # Directive for AppSync authorization
+}

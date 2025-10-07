@@ -239,7 +239,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
           ParameterValue: options.stage,
         },
         {
-          ParameterKey: 'TemplatesBucketName',
+          ParameterKey: 'TemplateBucketName',
           ParameterValue: templateBucketName,
         }
       ] as Parameter[],

@@ -7,9 +7,9 @@
   "scripts": {
     "development": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts deploy",
     "deploy": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts deploy",
-    "deploy:waf": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts package --package waf",
-    "deploy:shared": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts package --package shared",
-    "deploy:cwl": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts package --package cwl",
+    "deploy:waf": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts deploy --stack waf",
+    "deploy:shared": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts deploy --stack shared",
+    "deploy:cwl": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts deploy --stack cwl",
     "deploy:all": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts all",
     "update:waf": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts update --package waf",
     "update:shared": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts update --package shared",

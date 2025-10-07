@@ -101,7 +101,8 @@ class DeploymentManager {
         
         // Use ForceDeleteManager to properly handle S3 bucket cleanup
         const forceDeleteManager = new ForceDeleteManager(region, stage);
-        const stackIdentifier = stackType; // The stack type serves as the identifier
+        // Use the base identifier format: nlmonorepo-{stacktype}
+        const stackIdentifier = `nlmonorepo-${stackType.toLowerCase()}`;
         
         logger.info(`Cleaning up S3 buckets and other resources...`);
         await forceDeleteManager.forceDeleteStack(stackIdentifier, stackType, stage);
@@ -114,6 +115,12 @@ class DeploymentManager {
         
       } else {
         logger.warning(`Stack ${stackName} does not exist in ${region}. Nothing to remove.`);
+        
+        // Even if stack doesn't exist, try to clean up any orphaned buckets
+        logger.info(`Checking for orphaned S3 buckets...`);
+        const forceDeleteManager = new ForceDeleteManager(region, stage);
+        const stackIdentifier = `nlmonorepo-${stackType.toLowerCase()}`;
+        await forceDeleteManager.deleteConventionalBuckets(stackIdentifier, stackType, stage);
       }
     } catch (error: unknown) {
       logger.error(`✗ Failed to remove stack ${stackName}: ${(error as Error).message}`);

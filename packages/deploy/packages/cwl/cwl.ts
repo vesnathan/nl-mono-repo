@@ -253,6 +253,65 @@ async function waitForStackDeletion(cfn: CloudFormationClient, stackName: string
   throw new Error(`Timeout waiting for stack ${stackName} deletion after ${maxAttempts * delay / 1000} seconds`);
 }
 
+// Helper function to wait for stack creation or update to complete
+async function waitForStackCompletion(cfn: CloudFormationClient, stackName: string, operation: 'CREATE' | 'UPDATE'): Promise<void> {
+  const maxAttempts = 120; // 20 minutes
+  const delay = 10000; // 10 seconds
+  
+  const inProgressStatuses = operation === 'CREATE' 
+    ? ['CREATE_IN_PROGRESS', 'REVIEW_IN_PROGRESS']
+    : ['UPDATE_IN_PROGRESS', 'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS'];
+  
+  const successStatus = operation === 'CREATE' ? 'CREATE_COMPLETE' : 'UPDATE_COMPLETE';
+  const failureStatuses = operation === 'CREATE'
+    ? ['CREATE_FAILED', 'ROLLBACK_COMPLETE', 'ROLLBACK_FAILED', 'ROLLBACK_IN_PROGRESS']
+    : ['UPDATE_FAILED', 'UPDATE_ROLLBACK_COMPLETE', 'UPDATE_ROLLBACK_FAILED', 'UPDATE_ROLLBACK_IN_PROGRESS'];
+  
+  for (let i = 0; i < maxAttempts; i++) {
+    try {
+      const response = await cfn.send(new DescribeStacksCommand({ StackName: stackName }));
+      const stack = response.Stacks?.[0];
+      
+      if (!stack) {
+        throw new Error(`Stack ${stackName} not found during ${operation.toLowerCase()} operation`);
+      }
+      
+      const status = stack.StackStatus;
+      
+      if (!status) {
+        throw new Error(`Stack ${stackName} status is undefined`);
+      }
+      
+      if (status === successStatus) {
+        logger.success(`Stack ${stackName} ${operation.toLowerCase()} completed successfully`);
+        return;
+      }
+      
+      if (failureStatuses.includes(status)) {
+        throw new Error(`Stack ${stackName} ${operation.toLowerCase()} failed with status: ${status}`);
+      }
+      
+      if (inProgressStatuses.includes(status)) {
+        logger.debug(`Waiting for ${stackName} ${operation.toLowerCase()}... Status: ${status} (${i + 1}/${maxAttempts}) - ${Math.round((i + 1) / maxAttempts * 100)}% complete`);
+      } else {
+        logger.debug(`Stack ${stackName} status: ${status} (${i + 1}/${maxAttempts})`);
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      
+    } catch (error: any) {
+      if (i === maxAttempts - 1) {
+        throw error;
+      }
+      
+      logger.warning(`Error checking stack status (attempt ${i + 1}/${maxAttempts}): ${error.message}`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw new Error(`Timeout waiting for stack ${stackName} ${operation.toLowerCase()} after ${maxAttempts * delay / 1000} seconds`);
+}
+
 export async function deployCwl(options: DeploymentOptions): Promise<void> {
   const stackName = getStackName(StackType.CWL, options.stage);
   const templateBucketName = getTemplateBucketName(StackType.CWL, options.stage);
@@ -600,27 +659,31 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       throw new Error('Failed to get WAF Web ACL information from WAF stack outputs');
     }
 
-    // Get shared template bucket name from shared stack
-    const sharedTemplateBucketName = await outputsManager.getOutputValue(StackType.Shared, options.stage, 'TemplateBucketName');
-    
-    if (!sharedTemplateBucketName) {
-      throw new Error('Failed to get shared template bucket name from Shared stack outputs');
-    }
-
     // Create or update the CloudFormation stack
     const stackTemplateUrl = `https://s3.${region}.amazonaws.com/${templateBucketName}/${mainTemplateS3Key}`;
     const stackParams: Parameter[] = [
       { ParameterKey: 'Stage', ParameterValue: options.stage },
-      { ParameterKey: 'TemplatesBucketName', ParameterValue: templateBucketName },
+      { ParameterKey: 'TemplateBucketName', ParameterValue: templateBucketName },
+      { ParameterKey: 'KMSKeyId', ParameterValue: kmsKeyId },
+      { ParameterKey: 'KMSKeyArn', ParameterValue: kmsKeyArn },
       { ParameterKey: 'WebACLId', ParameterValue: webAclId },
       { ParameterKey: 'WebACLArn', ParameterValue: webAclArn },
-      { ParameterKey: 'SharedTemplateBucketName', ParameterValue: sharedTemplateBucketName },
     ];
 
     try {
       // Check if the stack exists
-      const describeResponse = await cfn.send(new DescribeStacksCommand({ StackName: stackName }));
-      const stackExists = describeResponse.Stacks && describeResponse.Stacks.length > 0;
+      let stackExists = false;
+      try {
+        const describeResponse = await cfn.send(new DescribeStacksCommand({ StackName: stackName }));
+        stackExists = !!(describeResponse.Stacks && describeResponse.Stacks.length > 0);
+      } catch (describeError: any) {
+        // Stack doesn't exist if we get an error
+        if (describeError.name === 'ValidationError' || describeError.message?.includes('does not exist')) {
+          stackExists = false;
+        } else {
+          throw describeError;
+        }
+      }
 
       if (stackExists) {
         logger.info('Updating existing CloudFormation stack...');
@@ -629,8 +692,12 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           TemplateURL: stackTemplateUrl,
           Parameters: stackParams,
           Capabilities: [Capability.CAPABILITY_NAMED_IAM],
-          // Add other update options as needed
+          RoleARN: roleArn,
         }));
+        
+        // Wait for update to complete
+        logger.info('Waiting for stack update to complete...');
+        await waitForStackCompletion(cfn, stackName, 'UPDATE');
       } else {
         logger.info('Creating new CloudFormation stack...');
         await cfn.send(new CreateStackCommand({
@@ -638,8 +705,12 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           TemplateURL: stackTemplateUrl,
           Parameters: stackParams,
           Capabilities: [Capability.CAPABILITY_NAMED_IAM],
-          // Add other create options as needed
+          RoleARN: roleArn,
         }));
+        
+        // Wait for creation to complete
+        logger.info('Waiting for stack creation to complete...');
+        await waitForStackCompletion(cfn, stackName, 'CREATE');
       }
 
       logger.success(`CloudFormation stack ${stackName} deployed/updated successfully`);

@@ -6,7 +6,7 @@ Parameters:
     Type: String
     Description: Deployment stage (e.g., dev, prod)
     AllowedPattern: ^[a-zA-Z0-9-]+$
-  TemplatesBucketName:
+  TemplateBucketName:
     Type: String
     Description: Name of the S3 bucket containing nested stack templates
 
@@ -15,7 +15,7 @@ Resources:
   KMSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/KMS/KMS.yaml
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.amazonaws.com/resources/KMS/KMS.yaml
       Parameters:
         Stage: !Ref Stage
 
@@ -23,11 +23,23 @@ Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.amazonaws.com/resources/VPC/VPC.yaml
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.amazonaws.com/resources/VPC/VPC.yaml
       Parameters:
         Stage: !Ref Stage
 
 Outputs:
+  cwlSecurityGroupFromSharedVPCId:
+    Description: Security Group ID from VPC
+    Value: !GetAtt VPCStack.Outputs.cwlSecurityGroupFromSharedVPCId
+    Export:
+      Name: !Sub nlmonorepo-shared-${Stage}-security-group-id
+
+  cwlSecurityGroupFromSharedVPC:
+    Description: Security Group from VPC
+    Value: !GetAtt VPCStack.Outputs.cwlSecurityGroupFromSharedVPC
+    Export:
+      Name: !Sub nlmonorepo-shared-${Stage}-security-group
+
   KMSKeyId:
     Description: KMS Key ID for encryption
     Value: !GetAtt KMSStack.Outputs.KMSKeyId
@@ -45,3 +57,9 @@ Outputs:
     Value: !GetAtt VPCStack.Outputs.VPCID
     Export:
       Name: !Sub nlmonorepo-shared-${Stage}-vpc-id
+
+  TemplateBucketName:
+    Description: S3 bucket containing nested stack templates
+    Value: !Ref TemplateBucketName
+    Export:
+      Name: !Sub nlmonorepo-shared-${Stage}-template-bucket-name

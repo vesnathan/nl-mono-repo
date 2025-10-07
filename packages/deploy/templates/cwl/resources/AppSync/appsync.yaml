@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AppSync Resources for the application'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  AppName:
+    Type: String
+    Description: Application Name (e.g., cwl, wbc)
+
+Resources:
+  AppSyncLoggingServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AppName}-appsync-logging-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub "${AppName}-appsync-logging-policy-${Stage}"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*" 
+
+  GraphQlApi:
+    Type: AWS::AppSync::GraphQLApi
+    Properties:
+      Name: !Sub "${AppName}-appsync-api-${Stage}"
+      AuthenticationType: AMAZON_COGNITO_USER_POOLS
+      UserPoolConfig:
+        UserPoolId:
+          Fn::ImportValue:
+            Fn::Sub: "${AppName}-UserPoolId-${Stage}" # Parameterized import
+        DefaultAction: ALLOW
+        AwsRegion: ap-southeast-2 
+      AdditionalAuthenticationProviders:
+        - AuthenticationType: AWS_IAM
+      LogConfig:
+        CloudWatchLogsRoleArn: !GetAtt AppSyncLoggingServiceRole.Arn
+        FieldLogLevel: ALL 
+        ExcludeVerboseContent: false
+
+  GraphQlSchema:
+    Type: AWS::AppSync::GraphQLSchema
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      DefinitionS3Location: ./schema.graphql 
+
+  MainTableDataSource: # Renamed from CWLUsersTableDataSource for generality
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}MainTableDynamoDBDataSource" # Parameterized name
+      Type: AMAZON_DYNAMODB
+      DynamoDBConfig:
+        TableName:
+          Fn::ImportValue:
+            !Sub "${AppName}-DataTableName-${Stage}" # Parameterized import
+        AwsRegion: !Ref AWS::Region
+      ServiceRoleArn:
+        Fn::ImportValue:
+          !Sub "${AppName}-AppSyncDynamoDBRoleArn-${Stage}" # Parameterized import
+
+  # Resolvers - Assuming resolver field names (e.g., getCWLUser) remain fixed in the schema for now
+  # If these also need to change based on AppName, the schema and resolver configs would need more significant updates.
+  GetCWLUserResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      TypeName: Query
+      FieldName: getCWLUser # This might need to be generic if schema changes
+      DataSourceName: !GetAtt MainTableDataSource.Name # Updated to MainTableDataSource
+      Kind: UNIT
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: ./resolvers/users/Queries/Query.getCWLUser.js 
+
+  CreateCWLUserResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      TypeName: Mutation
+      FieldName: createCWLUser # This might need to be generic if schema changes
+      DataSourceName: !GetAtt MainTableDataSource.Name # Updated to MainTableDataSource
+      Kind: UNIT
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: ./resolvers/users/Mutations/Mutation.createCWLUser.js 
+
+Outputs:
+  AppsyncUrl: # Renamed from CWLAppsyncUrl
+    Value: !GetAtt GraphQlApi.GraphQLUrl
+    Description: !Sub "GraphQL URL for the ${AppName} AppSync API"
+  
+  AppsyncRealtimeUrl: # Renamed from CWLAppsyncRealtimeUrl
+    Value: !GetAtt GraphQlApi.RealtimeUrl
+    Description: !Sub "Realtime URL for the ${AppName} AppSync API"
+
+  AppSyncApiId: # Added AppSync API ID Output
+    Value: !GetAtt GraphQlApi.ApiId
+    Description: !Sub "API ID for the ${AppName} AppSync API"

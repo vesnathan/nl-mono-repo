@@ -474,7 +474,7 @@
               "script": "deploy:waf"
             },
             "metadata": {
-              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts package --package waf",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts deploy --stack waf",
               "runCommand": "yarn deploy:waf"
             },
             "configurations": {},
@@ -486,7 +486,7 @@
               "script": "deploy:shared"
             },
             "metadata": {
-              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts package --package shared",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts deploy --stack shared",
               "runCommand": "yarn deploy:shared"
             },
             "configurations": {},
@@ -498,7 +498,7 @@
               "script": "deploy:cwl"
             },
             "metadata": {
-              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts package --package cwl",
+              "scriptContent": "DOTENV_CONFIG_PATH=../../.env ts-node -r dotenv/config index.ts deploy --stack cwl",
               "runCommand": "yarn deploy:cwl"
             },
             "configurations": {},
@@ -61412,5 +61412,5 @@
   },
   "version": "6.0",
   "errors": [],
-  "computedAt": 1759837164916
+  "computedAt": 1759846567255
 }

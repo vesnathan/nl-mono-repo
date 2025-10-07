@@ -140,6 +140,10 @@ export class IamManager {
         }
       }
 
+      // Wait for IAM role and policies to propagate
+      logger.debug('Waiting 10 seconds for IAM role and policies to propagate...');
+      await new Promise(resolve => setTimeout(resolve, 10000));
+
       return createRoleResponse.Role.Arn;
     } catch (error: any) {
       logger.error(`Failed to setup role ${roleName}: ${error?.message}`);

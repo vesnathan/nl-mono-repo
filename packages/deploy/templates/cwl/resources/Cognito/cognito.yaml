@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudWatch Live Cognito User Pool Resources'
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "nlmonorepo-cwl-userpool-${Stage}"
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+      MfaConfiguration: 'OFF'
+      UserPoolTags:
+        Stack: !Sub "nlmonorepo-cwl-${Stage}"
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "nlmonorepo-cwl-client-${Stage}"
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      SupportedIdentityProviders:
+        - COGNITO
+
+Outputs:
+  UserPoolId:
+    Description: ID of the Cognito User Pool
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub "nlmonorepo-cwl-${Stage}-user-pool-id"
+
+  UserPoolArn:
+    Description: ARN of the Cognito User Pool
+    Value: !GetAtt UserPool.Arn
+
+  UserPoolClientId:
+    Description: ID of the Cognito User Pool Client
+    Value: !Ref UserPoolClient
+    Export:
+      Name: !Sub "nlmonorepo-cwl-${Stage}-user-pool-client-id"
+
+  UserPoolProviderName:
+    Description: Provider name of the Cognito User Pool
+    Value: !GetAtt UserPool.ProviderName
+    Export:
+      Name: !Sub "nlmonorepo-cwl-${Stage}-user-pool-provider-name"
