@@ -42,7 +42,6 @@
     "src/functions/v",
     "../../shared/scripts/buildGqlTypesOnBackend.ts",
     "../../shared/scripts/execCommandAsPromise.ts",
-    "../backend/scripts/deployCWL.ts",
     "../../shared/scripts/mergeGraphqlFiles.ts",
     "../../shared/**/*.ts"
   ],
