@@ -332,6 +332,10 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     throw new Error('Failed to setup role for CloudWatch Live');
   }
 
+  // Wait for IAM role to propagate
+  logger.debug('Waiting 10 seconds for IAM role to propagate...');
+  await sleep(10000);
+
   try {
     // Create S3 bucket for templates if it doesn't exist
     const s3BucketManager = new S3BucketManager(region);

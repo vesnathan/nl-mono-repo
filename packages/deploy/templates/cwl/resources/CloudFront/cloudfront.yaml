@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: !Sub 'CloudFront Resources for ${AppName}'
+Description: 'CloudFront Resources for Application'
 
 Parameters:
   Stage:
@@ -45,7 +45,7 @@ Resources:
     Properties: 
       OriginAccessControlConfig:
         Name: !Sub "${AppName}BucketOAC"
-        Description: !Sub "Origin Access Control for ${AppName} bucket"
+        Description: "Origin Access Control for application bucket"
         SigningBehavior: always
         SigningProtocol: sigv4
         OriginAccessControlOriginType: s3
@@ -71,10 +71,10 @@ Resources:
           OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # CORS-S3Origin
 
 Outputs:
-  CloudFrontDistributionId: # Renamed from CWLCloudFrontDistributionId
+  CWLCloudFrontDistributionId:
     Value: !Ref AppCloudFrontDistribution
-    Description: !Sub "ID of the ${AppName} CloudFront distribution"
+    Description: "ID of the CloudFront distribution"
   
-  CloudFrontDomainName: # Renamed from CWLCloudFrontDomainName
+  CWLCloudFrontDomainName:
     Value: !GetAtt AppCloudFrontDistribution.DomainName
-    Description: !Sub "Domain name of the ${AppName} CloudFront distribution"
+    Description: "Domain name of the CloudFront distribution"

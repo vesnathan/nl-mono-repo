@@ -36,8 +36,6 @@ Outputs:
   UserPoolId:
     Description: ID of the Cognito User Pool
     Value: !Ref UserPool
-    Export:
-      Name: !Sub "nlmonorepo-cwl-${Stage}-user-pool-id"
 
   UserPoolArn:
     Description: ARN of the Cognito User Pool
@@ -46,8 +44,6 @@ Outputs:
   UserPoolClientId:
     Description: ID of the Cognito User Pool Client
     Value: !Ref UserPoolClient
-    Export:
-      Name: !Sub "nlmonorepo-cwl-${Stage}-user-pool-client-id"
 
   UserPoolProviderName:
     Description: Provider name of the Cognito User Pool

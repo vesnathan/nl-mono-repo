@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: !Sub 'Lambda Resources for ${AppName}'
+Description: 'Lambda Resources for Application'
 
 Parameters:
   Stage:

@@ -38,10 +38,42 @@ const createSpinner = (message: string): (() => void) => {
 export const logger = {
   // Always shown - for essential information, warnings, errors, and UI elements
   menu: (message: string) => console.log(message), // Plain output for menu/UI elements
-  success: (message: string) => console.log(chalk.green('[SUCCESS]'), message),
-  warning: (message: string) => console.log(chalk.yellow('[WARNING]'), message),
-  error: (message: string) => console.log(chalk.red('[ERROR]'), message),
-  info: (message: string) => console.log(chalk.blue('[INFO]'), message), // Always shown for deployment progress
+  success: (message: string) => {
+    // If spinner is running, clear it first
+    if (spinnerInterval) {
+      clearInterval(spinnerInterval);
+      spinnerInterval = null;
+      process.stdout.write('\r' + ' '.repeat(150) + '\r');
+    }
+    console.log(chalk.green('[SUCCESS]'), message);
+  },
+  warning: (message: string) => {
+    // If spinner is running, clear it first
+    if (spinnerInterval) {
+      clearInterval(spinnerInterval);
+      spinnerInterval = null;
+      process.stdout.write('\r' + ' '.repeat(150) + '\r');
+    }
+    console.log(chalk.yellow('[WARNING]'), message);
+  },
+  error: (message: string) => {
+    // If spinner is running, clear it first
+    if (spinnerInterval) {
+      clearInterval(spinnerInterval);
+      spinnerInterval = null;
+      process.stdout.write('\r' + ' '.repeat(150) + '\r');
+    }
+    console.log(chalk.red('[ERROR]'), message);
+  },
+  info: (message: string) => {
+    // If spinner is running, clear it first
+    if (spinnerInterval) {
+      clearInterval(spinnerInterval);
+      spinnerInterval = null;
+      process.stdout.write('\r' + ' '.repeat(150) + '\r');
+    }
+    console.log(chalk.blue('[INFO]'), message);
+  }, // Always shown for deployment progress
   
   // Animated info message with spinner
   infoWithSpinner: (message: string): (() => void) => {
