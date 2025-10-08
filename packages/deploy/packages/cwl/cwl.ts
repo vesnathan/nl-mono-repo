@@ -324,13 +324,26 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
   // Initialize clients early to check if stack exists
   const cfn = new CloudFormationClient({ region });
   
-  // Check if stack already exists
+  // Check if stack already exists and is in a healthy state
   let stackExists = false;
+  let stackIsHealthy = false;
   try {
     const describeCommand = new DescribeStacksCommand({ StackName: stackName });
-    await cfn.send(describeCommand);
-    stackExists = true;
-    logger.debug(`Stack ${stackName} exists - will perform update`);
+    const response = await cfn.send(describeCommand);
+    const stack = response.Stacks?.[0];
+    
+    if (stack) {
+      stackExists = true;
+      const status = stack.StackStatus;
+      
+      // Only consider stack healthy if it's in a complete/operational state
+      stackIsHealthy = status === 'CREATE_COMPLETE' || 
+                       status === 'UPDATE_COMPLETE' || 
+                       status === 'UPDATE_ROLLBACK_COMPLETE';
+      
+      logger.debug(`Stack ${stackName} exists with status: ${status}`);
+      logger.debug(`Stack is healthy for frontend build: ${stackIsHealthy}`);
+    }
   } catch (error: any) {
     if (error.name === 'ValidationError' || error.message?.includes('does not exist')) {
       logger.debug(`Stack ${stackName} does not exist - will perform initial deployment`);
@@ -353,8 +366,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     });
     logger.success('✓ GraphQL schema and types generated successfully');
     
-    // Only build frontend if stack exists (needs API endpoint and Cognito outputs)
-    if (stackExists) {
+    // Only build frontend if stack exists AND is healthy (has API endpoint and Cognito outputs)
+    if (stackIsHealthy) {
       logger.info('🏗️  Building frontend application...');
       logger.debug(`Running: yarn build in ${frontendPath}`);
       execSync('yarn build', { 
@@ -363,6 +376,9 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         encoding: 'utf8' 
       });
       logger.success('✓ Frontend built successfully');
+    } else if (stackExists) {
+      logger.info('⏭️  Skipping frontend build (stack exists but is not in healthy state)');
+      logger.info('   Stack must be successfully deployed before frontend can be built');
     } else {
       logger.info('⏭️  Skipping frontend build (first deployment - backend must be deployed first)');
       logger.info('   Frontend will be built and deployed after backend is ready');
