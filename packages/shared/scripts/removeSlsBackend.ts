@@ -9,7 +9,9 @@ const addWAFOutputToEnvVariables = async (options: {
 }) => {
   // should matched with serverless.yaml of cwl-waf
   const WAF_OUTPUT_NAMES = ["CloudFrontWAFArn"];
-  const WAFOutputPath = path.resolve("/home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cwl-waf/WAF_output.json");
+  const WAFOutputPath = path.resolve(
+    "/home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/cwl-waf/WAF_output.json",
+  );
   if (!fs.existsSync(WAFOutputPath)) {
     throw new Error(
       "WAF output file not found. Make sure to deploy WAF from cwl-waf package first.",
@@ -53,7 +55,7 @@ export const removeSlsBackend = async () => {
   addWAFOutputToEnvVariables({
     stage: argv.stage,
   });
-  
+
   return new Promise<void>((resolve, reject) => {
     exec(`serverless remove --stage ${STAGE}`, (error, stdout, stderr) => {
       if (error) {

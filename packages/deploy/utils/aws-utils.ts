@@ -1,51 +1,52 @@
-import { 
-  S3Client, 
-  HeadBucketCommand, 
-  CreateBucketCommand, 
-  PutObjectCommand, 
+import {
+  S3Client,
+  HeadBucketCommand,
+  CreateBucketCommand,
+  PutObjectCommand,
   BucketLocationConstraint,
   CreateBucketCommandInput,
-  S3ClientConfig
-} from '@aws-sdk/client-s3';
-import { 
-  CloudFormationClient, 
+  S3ClientConfig,
+} from "@aws-sdk/client-s3";
+import {
+  CloudFormationClient,
   DescribeStacksCommand,
   DescribeStackEventsCommand,
   CloudFormationClientConfig,
-  StackStatus
-} from '@aws-sdk/client-cloudformation';
-import { AwsCredentialIdentity } from '@aws-sdk/types';
-import { promises as fs } from 'fs';
-import { promisify } from 'util';
-import { glob as globCb } from 'glob';
-import path from 'path';
-import { logger } from './logger';
-import { StackType, TEMPLATE_PATHS } from '../types';
+  StackStatus,
+} from "@aws-sdk/client-cloudformation";
+import { AwsCredentialIdentity } from "@aws-sdk/types";
+import { promises as fs } from "fs";
+import { promisify } from "util";
+import { glob as globCb } from "glob";
+import path from "path";
+import { logger } from "./logger";
+import { StackType, TEMPLATE_PATHS } from "../types";
 
 const glob = promisify(globCb);
 
-export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+export const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 const FINAL_STATUSES = new Set([
-  'CREATE_COMPLETE',
-  'CREATE_FAILED',
-  'ROLLBACK_COMPLETE',
-  'ROLLBACK_FAILED',
-  'UPDATE_COMPLETE',
-  'UPDATE_ROLLBACK_COMPLETE',
-  'UPDATE_ROLLBACK_FAILED',
-  'DELETE_COMPLETE',
-  'DELETE_FAILED'
+  "CREATE_COMPLETE",
+  "CREATE_FAILED",
+  "ROLLBACK_COMPLETE",
+  "ROLLBACK_FAILED",
+  "UPDATE_COMPLETE",
+  "UPDATE_ROLLBACK_COMPLETE",
+  "UPDATE_ROLLBACK_FAILED",
+  "DELETE_COMPLETE",
+  "DELETE_FAILED",
 ]);
 
 const IN_PROGRESS_STATUSES = new Set([
-  'CREATE_IN_PROGRESS',
-  'DELETE_IN_PROGRESS',
-  'ROLLBACK_IN_PROGRESS',
-  'UPDATE_IN_PROGRESS',
-  'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
-  'UPDATE_ROLLBACK_IN_PROGRESS',
-  'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS'
+  "CREATE_IN_PROGRESS",
+  "DELETE_IN_PROGRESS",
+  "ROLLBACK_IN_PROGRESS",
+  "UPDATE_IN_PROGRESS",
+  "UPDATE_COMPLETE_CLEANUP_IN_PROGRESS",
+  "UPDATE_ROLLBACK_IN_PROGRESS",
+  "UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS",
 ]);
 
 export class AwsUtils {
@@ -54,8 +55,8 @@ export class AwsUtils {
   private lastEventId: string | undefined;
 
   constructor(
-    private region: string, 
-    credentials?: AwsCredentialIdentity
+    private region: string,
+    credentials?: AwsCredentialIdentity,
   ) {
     const s3Config: S3ClientConfig = { region };
     const cfConfig: CloudFormationClientConfig = { region };
@@ -68,7 +69,7 @@ export class AwsUtils {
     this.s3Client = new S3Client(s3Config);
     this.cfClient = new CloudFormationClient(cfConfig);
   }
-  
+
   /**
    * Gets a CloudFormation client for a specific region
    * @param region The AWS region to use
@@ -78,10 +79,10 @@ export class AwsUtils {
     if (region === this.region) {
       return this.cfClient;
     }
-    
+
     return new CloudFormationClient({
       region,
-      credentials: this.cfClient.config.credentials
+      credentials: this.cfClient.config.credentials,
     });
   }
 
@@ -94,20 +95,25 @@ export class AwsUtils {
     if (region === this.region) {
       return this.s3Client;
     }
-    
+
     return new S3Client({
       region,
-      credentials: this.s3Client.config.credentials
+      credentials: this.s3Client.config.credentials,
     });
   }
 
-  async stackExists(stackName: string, regionOverride?: string): Promise<boolean> {
-    const client = regionOverride ? this.getRegionalCfClient(regionOverride) : this.cfClient;
+  async stackExists(
+    stackName: string,
+    regionOverride?: string,
+  ): Promise<boolean> {
+    const client = regionOverride
+      ? this.getRegionalCfClient(regionOverride)
+      : this.cfClient;
     try {
       await client.send(new DescribeStacksCommand({ StackName: stackName }));
       return true;
     } catch (error: any) {
-      if (error.message && error.message.includes('does not exist')) {
+      if (error.message && error.message.includes("does not exist")) {
         return false;
       }
       throw error;
@@ -118,7 +124,10 @@ export class AwsUtils {
     return this.bucketExistsWithClient(bucketName, this.s3Client);
   }
 
-  async bucketExistsWithClient(bucketName: string, s3Client: S3Client): Promise<boolean> {
+  async bucketExistsWithClient(
+    bucketName: string,
+    s3Client: S3Client,
+  ): Promise<boolean> {
     try {
       await s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
       return true;
@@ -127,41 +136,57 @@ export class AwsUtils {
     }
   }
 
-  async createTemplatesBucket(bucketName: string, region: string, stackType: StackType): Promise<void> {
+  async createTemplatesBucket(
+    bucketName: string,
+    region: string,
+    stackType: StackType,
+  ): Promise<void> {
     try {
       // Ensure region is defined, default to this.region if not explicitly passed for non-WAF stacks
-      const effectiveRegion = stackType === StackType.WAF ? region : (region || this.region);
+      const effectiveRegion =
+        stackType === StackType.WAF ? region : region || this.region;
       if (!effectiveRegion) {
         throw new Error("Region must be defined to create a templates bucket.");
       }
 
-      logger.debug(`Setting up templates bucket: ${bucketName} in region ${effectiveRegion}`);
-      
+      logger.debug(
+        `Setting up templates bucket: ${bucketName} in region ${effectiveRegion}`,
+      );
+
       // Use the correct regional S3 client
       const regionalS3Client = this.getRegionalS3Client(effectiveRegion);
-      
+
       // Check if bucket exists using the regional client
-      const bucketExists = await this.bucketExistsWithClient(bucketName, regionalS3Client);
-      
+      const bucketExists = await this.bucketExistsWithClient(
+        bucketName,
+        regionalS3Client,
+      );
+
       if (!bucketExists) {
         logger.debug(`Creating templates bucket: ${bucketName}`);
-        
-        const createBucketParams: CreateBucketCommandInput = effectiveRegion === 'us-east-1'
-          ? { Bucket: bucketName }
-          : {
-              Bucket: bucketName,
-              CreateBucketConfiguration: {
-                LocationConstraint: effectiveRegion as BucketLocationConstraint
-              }
-            };
+
+        const createBucketParams: CreateBucketCommandInput =
+          effectiveRegion === "us-east-1"
+            ? { Bucket: bucketName }
+            : {
+                Bucket: bucketName,
+                CreateBucketConfiguration: {
+                  LocationConstraint:
+                    effectiveRegion as BucketLocationConstraint,
+                },
+              };
 
         try {
-          await regionalS3Client.send(new CreateBucketCommand(createBucketParams));
+          await regionalS3Client.send(
+            new CreateBucketCommand(createBucketParams),
+          );
           logger.success(`Created templates bucket: ${bucketName}`);
         } catch (bucketError: any) {
           // If bucket already exists and we own it, that's fine
-          if (bucketError.name === 'BucketAlreadyOwnedByYou') {
-            logger.debug(`Bucket ${bucketName} already exists and is owned by you. Continuing...`);
+          if (bucketError.name === "BucketAlreadyOwnedByYou") {
+            logger.debug(
+              `Bucket ${bucketName} already exists and is owned by you. Continuing...`,
+            );
           } else {
             throw bucketError;
           }
@@ -172,10 +197,15 @@ export class AwsUtils {
 
       // Always upload templates to ensure they're up to date
       logger.debug(`Uploading templates for ${stackType} stack...`);
-      await this.uploadTemplatesWithClient(bucketName, stackType, regionalS3Client);
-      
+      await this.uploadTemplatesWithClient(
+        bucketName,
+        stackType,
+        regionalS3Client,
+      );
     } catch (error: any) {
-      logger.error(`Failed to create or configure bucket: ${error?.message || 'Unknown error'}`);
+      logger.error(
+        `Failed to create or configure bucket: ${error?.message || "Unknown error"}`,
+      );
       throw error;
     }
   }
@@ -183,50 +213,68 @@ export class AwsUtils {
   async getTemplateBody(stackType: StackType): Promise<string> {
     try {
       const templatePath = TEMPLATE_PATHS[stackType];
-      return await fs.readFile(templatePath, 'utf-8');
+      return await fs.readFile(templatePath, "utf-8");
     } catch (error: any) {
-      logger.error(`Failed to read template for ${stackType}: ${error?.message || 'Unknown error'}`);
+      logger.error(
+        `Failed to read template for ${stackType}: ${error?.message || "Unknown error"}`,
+      );
       throw error;
     }
   }
 
-  private async uploadTemplates(bucketName: string, stackType: StackType): Promise<void> {
+  private async uploadTemplates(
+    bucketName: string,
+    stackType: StackType,
+  ): Promise<void> {
     return this.uploadTemplatesWithClient(bucketName, stackType, this.s3Client);
   }
 
-  private async uploadTemplatesWithClient(bucketName: string, stackType: StackType, s3Client: S3Client): Promise<void> {
-    const basePath = TEMPLATE_PATHS[stackType].replace('cfn-template.yaml', '');
+  private async uploadTemplatesWithClient(
+    bucketName: string,
+    stackType: StackType,
+    s3Client: S3Client,
+  ): Promise<void> {
+    const basePath = TEMPLATE_PATHS[stackType].replace("cfn-template.yaml", "");
     logger.debug(`Looking for template files in: ${basePath}`);
-    
+
     try {
       // Use fs.readdir instead of glob for better compatibility
       let files: string[] = [];
       try {
-        const entries = await fs.readdir(basePath, { withFileTypes: true, recursive: true });
+        const entries = await fs.readdir(basePath, {
+          withFileTypes: true,
+          recursive: true,
+        });
         files = entries
-          .filter(entry => entry.isFile() && entry.name.endsWith('.yaml'))
-          .map(entry => path.join(basePath, entry.name));
+          .filter((entry) => entry.isFile() && entry.name.endsWith(".yaml"))
+          .map((entry) => path.join(basePath, entry.name));
       } catch (readdirError: any) {
         // Directory might not exist or be accessible, that's fine
-        logger.debug(`Could not read directory ${basePath}: ${readdirError.message}`);
+        logger.debug(
+          `Could not read directory ${basePath}: ${readdirError.message}`,
+        );
       }
 
       logger.debug(`Found ${files.length} template files`);
 
       if (files.length === 0) {
-        logger.debug(`No additional template files found in ${basePath} for ${stackType} stack`);
+        logger.debug(
+          `No additional template files found in ${basePath} for ${stackType} stack`,
+        );
       } else {
         for (const file of files) {
           const content = await fs.readFile(file);
           const key = `resources/${path.relative(basePath, file)}`;
 
-          await s3Client.send(new PutObjectCommand({
-            Bucket: bucketName,
-            Key: key,
-            Body: content,
-            ContentType: 'application/x-yaml'
-          }));
-          
+          await s3Client.send(
+            new PutObjectCommand({
+              Bucket: bucketName,
+              Key: key,
+              Body: content,
+              ContentType: "application/x-yaml",
+            }),
+          );
+
           logger.debug(`Uploaded template: ${key}`);
         }
       }
@@ -234,77 +282,96 @@ export class AwsUtils {
       logger.success(`Templates bucket setup complete for ${stackType} stack`);
     } catch (error: any) {
       logger.error(`Error in uploadTemplates: ${error.message}`);
-      logger.success(`Templates bucket setup complete for ${stackType} stack (no additional files)`);
+      logger.success(
+        `Templates bucket setup complete for ${stackType} stack (no additional files)`,
+      );
     }
   }
 
-  async getStackFailureDetails(stackName: string, regionOverride?: string): Promise<void> {
-    const cfClient = regionOverride ? this.getRegionalCfClient(regionOverride) : this.cfClient;
-    
+  async getStackFailureDetails(
+    stackName: string,
+    regionOverride?: string,
+  ): Promise<void> {
+    const cfClient = regionOverride
+      ? this.getRegionalCfClient(regionOverride)
+      : this.cfClient;
+
     try {
       const command = new DescribeStackEventsCommand({ StackName: stackName });
       const response = await cfClient.send(command);
 
-      const failedEvents = response.StackEvents?.filter(event => 
-        ['CREATE_FAILED', 'UPDATE_FAILED', 'DELETE_FAILED'].includes(event.ResourceStatus || '')
+      const failedEvents = response.StackEvents?.filter((event) =>
+        ["CREATE_FAILED", "UPDATE_FAILED", "DELETE_FAILED"].includes(
+          event.ResourceStatus || "",
+        ),
       );
 
       if (failedEvents && failedEvents.length > 0) {
         logger.error(`Stack failure details for ${stackName}:`);
-        failedEvents.forEach(event => {
-          logger.error(`Resource: ${event.LogicalResourceId} (${event.ResourceType})`);
+        failedEvents.forEach((event) => {
+          logger.error(
+            `Resource: ${event.LogicalResourceId} (${event.ResourceType})`,
+          );
           logger.error(`Reason: ${event.ResourceStatusReason}`);
         });
       }
     } catch (error: any) {
-      logger.error(`Failed to get stack failure details: ${error?.message || 'Unknown error'}`);
+      logger.error(
+        `Failed to get stack failure details: ${error?.message || "Unknown error"}`,
+      );
     }
   }
-  
+
   /**
    * Helper method to handle WAF stack operations which must be in us-east-1
    * @param operation The function to perform on the WAF stack
    * @returns The result of the operation
    */
-  async performWafStackOperation<T>(operation: (client: CloudFormationClient) => Promise<T>): Promise<T> {
+  async performWafStackOperation<T>(
+    operation: (client: CloudFormationClient) => Promise<T>,
+  ): Promise<T> {
     // WAF resources must be created in us-east-1 for CloudFront integration
-    const wafRegion = 'us-east-1';
+    const wafRegion = "us-east-1";
     const wafCfClient = this.getRegionalCfClient(wafRegion);
-    
+
     try {
       return await operation(wafCfClient);
     } catch (error: any) {
-      logger.error(`Failed to perform WAF stack operation in ${wafRegion}: ${error?.message || 'Unknown error'}`);
+      logger.error(
+        `Failed to perform WAF stack operation in ${wafRegion}: ${error?.message || "Unknown error"}`,
+      );
       throw error;
     }
   }
 
   async waitForStack(stackName: string): Promise<boolean> {
     let lastStatus: string | undefined;
-    
+
     while (true) {
       try {
         const command = new DescribeStacksCommand({ StackName: stackName });
         const response = await this.cfClient.send(command);
         const stack = response.Stacks?.[0];
-        
+
         if (!stack) {
           throw new Error(`Stack ${stackName} not found`);
         }
 
-        const currentStatus = stack.StackStatus || '';
-        
+        const currentStatus = stack.StackStatus || "";
+
         // Log status changes and new events
         if (currentStatus !== lastStatus) {
           logger.debug(`Stack status: ${currentStatus}`);
           lastStatus = currentStatus;
         }
-        
+
         await this.logNewStackEvents(stackName);
 
         // Check if we've reached a final state
         if (FINAL_STATUSES.has(currentStatus)) {
-          const success = currentStatus.includes('COMPLETE') && !currentStatus.includes('ROLLBACK');
+          const success =
+            currentStatus.includes("COMPLETE") &&
+            !currentStatus.includes("ROLLBACK");
           if (!success) {
             logger.error(`Stack ${stackName} failed: ${currentStatus}`);
             await this.getStackFailureDetails(stackName);
@@ -321,7 +388,7 @@ export class AwsUtils {
         // Unexpected status
         throw new Error(`Unexpected stack status: ${currentStatus}`);
       } catch (error: any) {
-        if (error.message?.includes('does not exist')) {
+        if (error.message?.includes("does not exist")) {
           throw new Error(`Stack ${stackName} not found during wait operation`);
         }
         throw error;
@@ -329,35 +396,43 @@ export class AwsUtils {
     }
   }
 
-  async waitForStackDeletion(stackName: string, regionOverride?: string): Promise<boolean> {
+  async waitForStackDeletion(
+    stackName: string,
+    regionOverride?: string,
+  ): Promise<boolean> {
     const region = regionOverride || this.region;
-    const cfClient = regionOverride 
-      ? new CloudFormationClient({ region: regionOverride, credentials: this.cfClient.config.credentials }) 
+    const cfClient = regionOverride
+      ? new CloudFormationClient({
+          region: regionOverride,
+          credentials: this.cfClient.config.credentials,
+        })
       : this.cfClient;
-    
-    logger.debug(`Waiting for stack ${stackName} to be deleted in region ${region}...`);
-    
+
+    logger.debug(
+      `Waiting for stack ${stackName} to be deleted in region ${region}...`,
+    );
+
     while (true) {
       try {
         const command = new DescribeStacksCommand({ StackName: stackName });
         const response = await cfClient.send(command);
         const stack = response.Stacks?.[0];
-        
+
         if (!stack) {
           // Stack doesn't exist, deletion is complete
           logger.success(`Stack ${stackName} has been deleted successfully`);
           return true;
         }
 
-        const currentStatus = stack.StackStatus || '';
+        const currentStatus = stack.StackStatus || "";
         logger.info(`Stack deletion status: ${currentStatus}`);
-        
-        if (currentStatus === 'DELETE_COMPLETE') {
+
+        if (currentStatus === "DELETE_COMPLETE") {
           logger.success(`Stack ${stackName} has been deleted successfully`);
           return true;
         }
-        
-        if (currentStatus === 'DELETE_FAILED') {
+
+        if (currentStatus === "DELETE_FAILED") {
           logger.error(`Stack ${stackName} deletion failed`);
           await this.getStackFailureDetails(stackName);
           return false;
@@ -366,7 +441,7 @@ export class AwsUtils {
         // Wait before checking again
         await sleep(10000); // Poll every 10 seconds for deletion
       } catch (error: any) {
-        if (error.message?.includes('does not exist')) {
+        if (error.message?.includes("does not exist")) {
           // Stack doesn't exist, deletion is complete
           logger.success(`Stack ${stackName} has been deleted successfully`);
           return true;
@@ -380,16 +455,16 @@ export class AwsUtils {
     try {
       const command = new DescribeStackEventsCommand({ StackName: stackName });
       const response = await this.cfClient.send(command);
-      
+
       if (!response.StackEvents?.length) return;
 
       // Process events in chronological order
       const events = [...response.StackEvents].reverse();
-      
+
       for (const event of events) {
         // Skip if we've seen this event before
         if (this.lastEventId === event.EventId) break;
-        
+
         // Skip if this is our first check (only show new events)
         if (!this.lastEventId) {
           this.lastEventId = event.EventId;
@@ -397,14 +472,16 @@ export class AwsUtils {
         }
 
         // Log the event
-        const resourceStatus = event.ResourceStatus || 'UNKNOWN';
+        const resourceStatus = event.ResourceStatus || "UNKNOWN";
         const logMessage = `${event.LogicalResourceId}: ${resourceStatus}`;
-        
-        if (resourceStatus.includes('FAILED')) {
-          logger.error(`${logMessage} - ${event.ResourceStatusReason || 'No reason provided'}`);
-        } else if (resourceStatus.includes('IN_PROGRESS')) {
+
+        if (resourceStatus.includes("FAILED")) {
+          logger.error(
+            `${logMessage} - ${event.ResourceStatusReason || "No reason provided"}`,
+          );
+        } else if (resourceStatus.includes("IN_PROGRESS")) {
           logger.debug(logMessage);
-        } else if (resourceStatus.includes('COMPLETE')) {
+        } else if (resourceStatus.includes("COMPLETE")) {
           logger.debug(logMessage);
         }
       }
@@ -414,7 +491,9 @@ export class AwsUtils {
         this.lastEventId = events[0].EventId;
       }
     } catch (error: any) {
-      logger.error(`Failed to get stack events: ${error?.message || 'Unknown error'}`);
+      logger.error(
+        `Failed to get stack events: ${error?.message || "Unknown error"}`,
+      );
     }
   }
 }

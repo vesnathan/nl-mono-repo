@@ -1,8 +1,10 @@
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
-const ses = new SESClient({ region: process.env.AWS_REGION || 'ap-southeast-2' });
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@cloudwatchlive.com';
-const APP_URL = process.env.APP_URL || 'https://cloudwatchlive.com';
+const ses = new SESClient({
+  region: process.env.AWS_REGION || "ap-southeast-2",
+});
+const FROM_EMAIL = process.env.FROM_EMAIL || "noreply@cloudwatchlive.com";
+const APP_URL = process.env.APP_URL || "https://cloudwatchlive.com";
 
 interface WelcomeEmailEvent {
   userEmail: string;
@@ -12,7 +14,7 @@ interface WelcomeEmailEvent {
 }
 
 export const handler = async (event: WelcomeEmailEvent) => {
-  console.log('Sending welcome email to:', event.userEmail);
+  console.log("Sending welcome email to:", event.userEmail);
 
   const { userEmail, userFirstName, userLastName, userId } = event;
 
@@ -111,17 +113,17 @@ export const handler = async (event: WelcomeEmailEvent) => {
     },
     Message: {
       Subject: {
-        Data: 'Welcome to CloudWatch Live - Your Account is Ready!',
-        Charset: 'UTF-8',
+        Data: "Welcome to CloudWatch Live - Your Account is Ready!",
+        Charset: "UTF-8",
       },
       Body: {
         Html: {
           Data: htmlBody,
-          Charset: 'UTF-8',
+          Charset: "UTF-8",
         },
         Text: {
           Data: textBody,
-          Charset: 'UTF-8',
+          Charset: "UTF-8",
         },
       },
     },
@@ -129,16 +131,16 @@ export const handler = async (event: WelcomeEmailEvent) => {
 
   try {
     const response = await ses.send(command);
-    console.log('Email sent successfully:', response.MessageId);
+    console.log("Email sent successfully:", response.MessageId);
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: 'Email sent successfully',
+        message: "Email sent successfully",
         messageId: response.MessageId,
       }),
     };
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error("Error sending email:", error);
     throw error;
   }
 };

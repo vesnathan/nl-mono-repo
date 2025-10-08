@@ -1,9 +1,12 @@
-import { util, AppSyncIdentityCognito, Context } from '@aws-appsync/utils';
+import { util, AppSyncIdentityCognito, Context } from "@aws-appsync/utils";
 // 'gqlTypes' is a module alias mapped in tsconfig.json to ../frontend/src/types/gqlTypes.ts
 // This allows the resolver compiler to resolve GraphQL generated types during build
-import { CWLUser, ClientType, GetCWLUserQueryVariables } from 'gqlTypes';
+import { CWLUser, ClientType, GetCWLUserQueryVariables } from "gqlTypes";
 // Import ClientTypes constants from the single source of truth
-import { CWL_CLIENT_TYPES, isValidCWLClientType } from '../../../constants/ClientTypes';
+import {
+  CWL_CLIENT_TYPES,
+  isValidCWLClientType,
+} from "../../../constants/ClientTypes";
 
 // Use GetCWLUserQueryVariables from shared frontend-generated types
 
@@ -13,7 +16,6 @@ type Output = CWLUser;
 // Define CTX for the response function context
 // Args, Result, PrevResult, Source, Info
 type CTX = Context<GetCWLUserQueryVariables, object, object, object, Output>;
-
 
 export function request(ctx: Context<GetCWLUserQueryVariables>) {
   // It's good practice to cast args to the specific type
@@ -26,7 +28,7 @@ export function request(ctx: Context<GetCWLUserQueryVariables>) {
     // This explicit check can be a safeguard or for more complex validation.
     return util.error(
       "User ID is missing in the request.",
-      "ValidationException"
+      "ValidationException",
     );
   }
 
@@ -40,7 +42,7 @@ export function request(ctx: Context<GetCWLUserQueryVariables>) {
 
   console.log(`Getting user data for userId: ${userId}`);
   console.log(`Identity username: ${identity.username}`);
-  
+
   // DynamoDB table uses 'id' as primary key, not 'userId'
   return {
     operation: "GetItem",
@@ -50,14 +52,14 @@ export function request(ctx: Context<GetCWLUserQueryVariables>) {
 
 export function response(ctx: CTX): Output {
   console.log("Response result:", JSON.stringify(ctx.result));
-  
+
   if (ctx.error) {
     console.error("Error in resolver:", ctx.error);
     // Make sure to return or throw, not just log, if you want to stop execution.
     // util.error will throw, which is appropriate here.
     return util.error(ctx.error.message, ctx.error.type);
   }
-  
+
   const identity = ctx.identity as AppSyncIdentityCognito;
   // Retrieve args safely, it's good practice to cast or ensure it's the correct type.
   const args = ctx.args as GetCWLUserQueryVariables;
@@ -67,22 +69,25 @@ export function response(ctx: CTX): Output {
     console.error(`User not found in DynamoDB for userId: ${userId}`);
     console.error(`Identity username: ${identity.username}`);
     console.error(`Identity groups: ${JSON.stringify(identity.groups)}`);
-    
+
     return util.error(
       `User profile not found. Please contact support if this issue persists. UserId: ${userId}`,
-      "UserNotFound"
+      "UserNotFound",
     );
   }
 
   // Assuming ctx.result is the raw item from DynamoDB, cast and map it.
   // The 'any' cast should be followed by a proper mapping to CWLUser structure if needed.
   // For now, we'll assume the structure matches CWLUser or is handled by direct return.
-  const userFromDB = ctx.result as any; 
+  const userFromDB = ctx.result as any;
 
   // Map Cognito groups to ClientType using single source of truth
   const cognitoGroups = identity.groups || [];
-  console.log(`Cognito groups for user ${userId}:`, JSON.stringify(cognitoGroups));
-  
+  console.log(
+    `Cognito groups for user ${userId}:`,
+    JSON.stringify(cognitoGroups),
+  );
+
   const clientType: ClientType[] = [];
 
   for (const group of cognitoGroups) {
@@ -96,7 +101,9 @@ export function response(ctx: CTX): Output {
   }
 
   if (clientType.length === 0) {
-    console.log(`No groups mapped to ClientType, adding default UnregisteredAttendee`);
+    console.log(
+      `No groups mapped to ClientType, adding default UnregisteredAttendee`,
+    );
     clientType.push(ClientType.UnregisteredAttendee);
   }
 
@@ -111,7 +118,7 @@ export function response(ctx: CTX): Output {
     userId: userFromDB.userId || userId, // Ensure userId is present
     clientType: clientType,
     // Ensure other non-nullable fields from CWLUser are present, e.g.:
-    // email: userFromDB.email || "", 
+    // email: userFromDB.email || "",
     // username: userFromDB.username || "",
     // createdAt: userFromDB.createdAt || new Date().toISOString(),
     // updatedAt: userFromDB.updatedAt || new Date().toISOString(),

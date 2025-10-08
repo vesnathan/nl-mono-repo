@@ -132,8 +132,9 @@ Resources:
         RuntimeVersion: 1.0.0
       CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Queries/Query.getCWLUser.js" 
 
-  CreateCWLUserResolver:
+  CreateCWLUserResolverWithEmail:
     Type: AWS::AppSync::Resolver
+    Condition: HasSendWelcomeEmailFunction
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       TypeName: Mutation
@@ -153,6 +154,20 @@ Resources:
         export function response(ctx) {
           return ctx.prev.result;
         }
+
+  CreateCWLUserResolverWithoutEmail:
+    Type: AWS::AppSync::Resolver
+    Condition: !Not [!Condition HasSendWelcomeEmailFunction]
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      TypeName: Mutation
+      FieldName: createCWLUser # This might need to be generic if schema changes
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Kind: UNIT
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Mutations/Mutation.createCWLUser.js"
 
   CreateUserDynamoDBFunction:
     Type: AWS::AppSync::FunctionConfiguration
