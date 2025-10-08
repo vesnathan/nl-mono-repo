@@ -34,8 +34,8 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
   ctx.stash.input = input;
 
   const newUserItem = {
-    id: userId, // Primary key for DynamoDB
-    userId,
+    id: userId, // DynamoDB table uses 'id' as primary key
+    userId, // Keep userId field for backward compatibility/application logic
     ...userInputWithoutEmail,
     userAddedById: identity.username, // The SuperAdmin creating this user
     userCreated: now,
@@ -50,7 +50,7 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
 
   return {
     operation: 'PutItem',
-    key: util.dynamodb.toMapValues({ id: userId }),
+    key: util.dynamodb.toMapValues({ id: userId }), // Use 'id' as primary key
     attributeValues: util.dynamodb.toMapValues(newUserItem),
     // condition: {
     //   expression: 'attribute_not_exists(id)', // Ensure user doesn't already exist
