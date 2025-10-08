@@ -168,37 +168,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      Code: |
-        export function request(ctx) {
-          // Check if sendWelcomeEmail flag is set in stash
-          const sendWelcomeEmail = ctx.stash.sendWelcomeEmail;
-          
-          // Only invoke if sendWelcomeEmail is true
-          if (sendWelcomeEmail !== true) {
-            return {
-              operation: 'no-op'
-            };
-          }
-          
-          const user = ctx.prev.result;
-          return {
-            operation: 'Invoke',
-            payload: {
-              userEmail: user.userEmail,
-              userFirstName: user.userFirstName,
-              userLastName: user.userLastName,
-              userId: user.userId
-            }
-          };
-        }
-        
-        export function response(ctx) {
-          if (ctx.error) {
-            console.error('Error sending welcome email:', ctx.error);
-            // Don't fail the whole mutation if email fails
-          }
-          return ctx.prev.result;
-        } 
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Functions/Function.sendWelcomeEmail.js"
 
 Outputs:
   CWLAppSyncApiUrl:

@@ -18,7 +18,7 @@ Parameters:
   FromEmail:
     Type: String
     Description: Email address to send from (must be verified in SES)
-    Default: noreply@cloudwatchlive.com
+    Default: vesnathan+admin@gmail.com
   AppURL:
     Type: String
     Description: Application URL for generating links

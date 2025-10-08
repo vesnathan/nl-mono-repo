@@ -34,6 +34,7 @@ import { AwsUtils } from "../../utils/aws-utils";
 import { FrontendDeploymentManager } from "../../utils/frontend-deployment";
 import { ResolverCompiler } from "../../utils/resolver-compiler";
 import { LambdaCompiler } from "../../utils/lambda-compiler";
+import { SESEmailVerifier } from "../../utils/ses-email-verifier";
 import { S3BucketManager } from "../../utils/s3-bucket-manager";
 import {
   addAppSyncBucketPolicy,
@@ -764,6 +765,23 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       }
     } else {
       throw new Error(`GraphQL schema file not found at ${schemaPath}`);
+    }
+
+    // Verify SES email address before deploying Lambda function
+    logger.info("Checking SES email verification...");
+    const fromEmail = "vesnathan+admin@gmail.com"; // Default from email address
+    const sesVerifier = new SESEmailVerifier({
+      region: region,
+      emailAddress: fromEmail,
+    });
+
+    const isEmailVerified = await sesVerifier.ensureEmailVerified();
+    if (!isEmailVerified) {
+      logger.warning(
+        "\n⚠️  Email verification required. Continuing with deployment, but emails will fail until verified.\n",
+      );
+      // Don't throw error - allow deployment to continue
+      // The Lambda will fail when trying to send emails, but the stack will deploy
     }
 
     // Compile Lambda functions
