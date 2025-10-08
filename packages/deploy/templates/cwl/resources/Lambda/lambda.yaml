@@ -11,10 +11,10 @@ Parameters:
     Description: Application Name (e.g., cwl, wbc)
   AppCloudFrontDistributionId: # Renamed from CWLCloudFrontDistributionId
     Type: String
-    Description: !Sub "ID of the ${AppName} CloudFront distribution"
+    Description: ID of the CloudFront distribution
   AppCloudFrontDomainName: # Renamed from CWLCloudFrontDomainName
     Type: String
-    Description: !Sub "Domain name of the ${AppName} CloudFront distribution"
+    Description: Domain name of the CloudFront distribution
 
 Resources:
   PostDeployFunction: # Renamed from PostFrontEndDeployFunction
@@ -95,8 +95,8 @@ Resources:
 Outputs:
   PostDeployFunctionArn: # Renamed from PostFrontEndDeployFunctionArn
     Value: !GetAtt PostDeployFunction.Arn
-    Description: !Sub "ARN of the ${AppName} post-deploy Lambda function"
+    Description: ARN of the post-deploy Lambda function
   
   PostDeployFunctionName: # Renamed from PostFrontEndDeployFunctionName
     Value: !Ref PostDeployFunction
-    Description: !Sub "Name of the ${AppName} post-deploy Lambda function"
+    Description: Name of the post-deploy Lambda function

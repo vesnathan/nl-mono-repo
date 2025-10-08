@@ -396,10 +396,16 @@ class ResolverCompiler {
   }
 
   private async setupBuildConfiguration(): Promise<void> { // This configures this.buildDir
-    // Determine path to the source package.json
-    // this.baseResolverDir is like /workspaces/nl-mono-repo/packages/cloudwatchlive/backend/resources/AppSync/resolvers
-    // The actual package.json is two levels up from baseResolverDir, in the backend package root.
-    const sourcePackageJsonPath = path.join(this.baseResolverDir, '..', '..', '..', 'package.json');
+    // Try to find the source package.json to extract dependencies
+    // Since resolvers are now in templates, we need to look for the actual backend package
+    // For CWL: templates are in packages/deploy/templates/cwl/resources/AppSync/resolvers
+    // Backend is in packages/cloudwatchlive/backend/package.json
+    
+    // Extract app name from baseResolverDir to locate the correct backend package
+    const appName = this.getAppName();
+    const monorepoRoot = path.join(__dirname, '..', '..', '..');
+    const sourcePackageJsonPath = path.join(monorepoRoot, 'packages', appName, 'backend', 'package.json');
+    
     let sourceDependencies: Record<string, string> = {};
     let sourceDevDependencies: Record<string, string> = {};
 
@@ -548,10 +554,12 @@ class ResolverCompiler {
       );
       
       // Copy the constants file to the build directory
-      // Use provided constantsDir or fall back to a default relative path
-      const constantsSourcePath = this.constantsDir 
-        ? path.join(this.constantsDir, `${constantsFile}.ts`)
-        : path.join(this.baseResolverDir, '../../../../../../cloudwatchlive/backend/constants', `${constantsFile}.ts`);
+      if (!this.constantsDir) {
+        logger.error(`Constants directory not provided for ${resolverFileName}. Please specify constantsDir in ResolverCompilerOptions.`);
+        throw new Error(`constantsDir must be specified in ResolverCompilerOptions to locate constants file: ${constantsFile}`);
+      }
+      
+      const constantsSourcePath = path.join(this.constantsDir, `${constantsFile}.ts`);
       const targetConstantsPath = path.join(this.buildDir, `${constantsFile}.ts`);
       
       if (fs.existsSync(constantsSourcePath)) {

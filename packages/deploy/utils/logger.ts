@@ -83,6 +83,12 @@ export const logger = {
   // Only shown in debug mode - for detailed debug messages
   debug: (message: string) => {
     if (isDebugModeEnabled) {
+      // If spinner is running, clear it first
+      if (spinnerInterval) {
+        clearInterval(spinnerInterval);
+        spinnerInterval = null;
+        process.stdout.write('\r' + ' '.repeat(150) + '\r');
+      }
       console.log(chalk.magenta('[DEBUG]'), message);
     }
   }

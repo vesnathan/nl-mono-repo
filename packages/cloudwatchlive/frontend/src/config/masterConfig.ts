@@ -1,6 +1,6 @@
 const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
 // Only log in development mode
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   // eslint-disable-next-line no-console
   console.log(environment, "environment");
 }
