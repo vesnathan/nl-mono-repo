@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "gqlTypes": ["../../frontend/src/types/gqlTypes.ts"]
+      "gqlTypes": ["../frontend/src/types/gqlTypes.ts"]
     }
   },
   "include": ["constants", "resolvers"],

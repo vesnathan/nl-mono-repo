@@ -15,6 +15,9 @@ Parameters:
   UserPoolId:
     Type: String
     Description: Cognito User Pool ID
+  SendWelcomeEmailFunctionArn:
+    Type: String
+    Description: ARN of the Lambda function to send welcome emails
 
 Resources:
   AppSyncLoggingServiceRole:
@@ -77,6 +80,37 @@ Resources:
         Fn::ImportValue:
           !Sub "${AppName}-AppSyncDynamoDBRoleArn-${Stage}" # Parameterized import
 
+  LambdaDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}SendWelcomeEmailLambdaDataSource"
+      Type: AWS_LAMBDA
+      LambdaConfig:
+        LambdaFunctionArn: !Ref SendWelcomeEmailFunctionArn
+      ServiceRoleArn: !GetAtt AppSyncLambdaInvokeRole.Arn
+
+  AppSyncLambdaInvokeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AppName}-appsync-lambda-invoke-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub "${AppName}-appsync-lambda-invoke-policy-${Stage}"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !Ref SendWelcomeEmailFunctionArn
+
   # Resolvers - Assuming resolver field names (e.g., getCWLUser) remain fixed in the schema for now
   # If these also need to change based on AppName, the schema and resolver configs would need more significant updates.
   GetCWLUserResolver:
@@ -98,12 +132,73 @@ Resources:
       ApiId: !GetAtt GraphQlApi.ApiId
       TypeName: Mutation
       FieldName: createCWLUser # This might need to be generic if schema changes
-      DataSourceName: !GetAtt MainTableDataSource.Name # Updated to MainTableDataSource
-      Kind: UNIT
+      Kind: PIPELINE
+      PipelineConfig:
+        Functions:
+          - !GetAtt CreateUserDynamoDBFunction.FunctionId
+          - !GetAtt SendWelcomeEmailFunction.FunctionId
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Mutations/Mutation.createCWLUser.js" 
+      Code: |
+        export function request(ctx) {
+          return {};
+        }
+        export function response(ctx) {
+          return ctx.prev.result;
+        }
+
+  CreateUserDynamoDBFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}CreateUserDynamoDBFunction"
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Mutations/Mutation.createCWLUser.js"
+
+  SendWelcomeEmailFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}SendWelcomeEmailFunction"
+      DataSourceName: !GetAtt LambdaDataSource.Name
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      Code: |
+        export function request(ctx) {
+          // Check if sendWelcomeEmail flag is set in stash
+          const sendWelcomeEmail = ctx.stash.sendWelcomeEmail;
+          
+          // Only invoke if sendWelcomeEmail is true
+          if (sendWelcomeEmail !== true) {
+            return {
+              operation: 'no-op'
+            };
+          }
+          
+          const user = ctx.prev.result;
+          return {
+            operation: 'Invoke',
+            payload: {
+              userEmail: user.userEmail,
+              userFirstName: user.userFirstName,
+              userLastName: user.userLastName,
+              userId: user.userId
+            }
+          };
+        }
+        
+        export function response(ctx) {
+          if (ctx.error) {
+            console.error('Error sending welcome email:', ctx.error);
+            // Don't fail the whole mutation if email fails
+          }
+          return ctx.prev.result;
+        } 
 
 Outputs:
   CWLAppSyncApiUrl:

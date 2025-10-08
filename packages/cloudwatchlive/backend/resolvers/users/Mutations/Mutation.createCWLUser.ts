@@ -1,5 +1,7 @@
 import { util, Context, AppSyncIdentityCognito } from '@aws-appsync/utils';
-import { CWLUserInput, CWLUser } from '../../../../frontend/src/types/gqlTypes';
+// 'gqlTypes' is a module alias mapped in tsconfig.json to ../frontend/src/types/gqlTypes.ts
+// This allows the resolver compiler to resolve GraphQL generated types during build
+import { CWLUserInput, CWLUser } from 'gqlTypes';
 
 // Define Input type for the resolver
 type CreateCWLUserMutationVariables = {
@@ -24,14 +26,25 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
   const userId = util.autoId(); // Generate a new UUID for the user
   const now = util.time.nowISO8601();
 
+  // Extract sendWelcomeEmail and remove it from the item (it's not stored in DB)
+  const { sendWelcomeEmail, ...userInputWithoutEmail } = input;
+  
+  // Store sendWelcomeEmail in stash for the pipeline resolver to use
+  ctx.stash.sendWelcomeEmail = sendWelcomeEmail || false;
+  ctx.stash.input = input;
+
   const newUserItem = {
     id: userId, // DynamoDB table uses 'id' as primary key
     userId, // Keep userId field for backward compatibility/application logic
-    ...input,
+    ...userInputWithoutEmail,
     userAddedById: identity.username, // The SuperAdmin creating this user
     userCreated: now,
     privacyPolicy: false, // Default value, can be updated by user later
     termsAndConditions: false, // Default value, can be updated by user later
+    userProfilePicture: {
+      Bucket: "",
+      Key: ""
+    }, // Default empty S3 object
     // clientType is not set here; it's derived from Cognito groups by the getCWLUser query resolver
   };
 
@@ -40,7 +53,7 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
     key: util.dynamodb.toMapValues({ id: userId }), // Use 'id' as primary key
     attributeValues: util.dynamodb.toMapValues(newUserItem),
     // condition: {
-    //   expression: 'attribute_not_exists(userId)', // Ensure user doesn't already exist
+    //   expression: 'attribute_not_exists(id)', // Ensure user doesn't already exist
     // },
   };
 }
@@ -82,5 +95,6 @@ export function response(ctx: CTX): Output {
     userAddedById: createdUser.userAddedById,
     userCreated: createdUser.userCreated,
     clientType: [], // Will be populated by getCWLUser based on Cognito groups
+    userProfilePicture: createdUser.userProfilePicture || { Bucket: "", Key: "" },
   };
 }

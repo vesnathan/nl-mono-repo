@@ -1,5 +1,8 @@
 import { util, AppSyncIdentityCognito, Context } from '@aws-appsync/utils';
-import { CWLUser, ClientType, GetCWLUserQueryVariables } from '../../../../frontend/src/types/gqlTypes';
+// 'gqlTypes' is a module alias mapped in tsconfig.json to ../frontend/src/types/gqlTypes.ts
+// This allows the resolver compiler to resolve GraphQL generated types during build
+import { CWLUser, ClientType, GetCWLUserQueryVariables } from 'gqlTypes';
+// Import ClientTypes constants from the single source of truth
 import { CWL_CLIENT_TYPES, isValidCWLClientType } from '../../../constants/ClientTypes';
 
 // Use GetCWLUserQueryVariables from shared frontend-generated types
