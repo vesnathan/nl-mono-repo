@@ -313,7 +313,7 @@ export class UserSetupManager {
       const getUserResponse = await this.dynamoClient.send(
         new GetItemCommand({
           TableName: tableName,
-          Key: { id: { S: cognitoUserId } },
+          Key: { userId: { S: cognitoUserId } },
         }),
       );
 
@@ -326,7 +326,7 @@ export class UserSetupManager {
       const currentTimestamp = "1733530302"; // Fixed timestamp from deploy.sh
 
       const userItem = {
-        id: { S: cognitoUserId },
+        userId: { S: cognitoUserId },
         organizationId: { S: "" },
         privacyPolicy: { BOOL: true },
         termsAndConditions: { BOOL: true },
@@ -374,7 +374,7 @@ export class UserSetupManager {
       const getUserResponse = await this.dynamoClient.send(
         new GetItemCommand({
           TableName: tableName,
-          Key: { id: { S: cognitoUserId } },
+          Key: { userId: { S: cognitoUserId } },
         }),
       );
 
