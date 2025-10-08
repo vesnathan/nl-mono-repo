@@ -72,10 +72,6 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
           sendWelcomeEmail: data.sendWelcomeEmail,
         }),
       };
-      console.log(
-        "Sending input to createCWLUser:",
-        JSON.stringify(input, null, 2),
-      );
       return createCWLUserMutationFn(input);
     },
     onSuccess: () => {
