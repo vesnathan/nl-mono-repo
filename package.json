@@ -60,6 +60,8 @@
     "ec2-deployment": "yarn workspace @cwl/ec2-vsc deployment-menu",
     "deploy": "yarn workspace @cwl/deploy deploy",
     "dev": "yarn workspace cwlfrontend dev:local",
+    "dev:cwl:local": "cd packages/cloudwatchlive/frontend && yarn dev:local",
+    "dev:cwl:codespaces": "cd packages/cloudwatchlive/frontend && yarn dev:codespaces",
     "build": "lerna run build --stream",
     "lint": "lerna run lint --stream",
     "tsc": "lerna run tsc --stream",
