@@ -55,17 +55,13 @@
   "scripts": {
     "prepare": "husky install",
     "build-gql": "lerna run build-gql --stream --concurrency 1",
-    "reset-modules": "rm -rf node_modules/ packages/**/*/node_modules",
-    "install-aws-cli-local": "./scripts/install-aws-cli-local.sh",
-    "development": "yarn workspace @cwl/deploy development",
-    "dev-menu": "./dev.sh",
-    "ec2-deployment": "yarn workspace @cwl/ec2-vsc deployment-menu",
-    "dev": "cd packages/cloudwatchlive/frontend && yarn dev",
-    "dev:codespaces": "cd packages/cloudwatchlive/frontend && yarn dev:codespaces",
-    "dev:local": "cd packages/cloudwatchlive/frontend && yarn dev:local",
+    "dev:cwl:local": "cd packages/cloudwatchlive/frontend && yarn dev:local",
+    "dev:cwl:codespaces": "cd packages/cloudwatchlive/frontend && yarn dev:codespaces",
     "build": "lerna run build --stream",
     "lint": "lerna run lint --stream",
     "tsc": "lerna run tsc --stream",
-    "test": "lerna run test --stream"
+    "test": "lerna run test --stream",
+    "deploy": "cd packages/deploy && yarn deploy"
+    
   }
 }
