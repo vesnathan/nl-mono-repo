@@ -76,6 +76,7 @@ Resources:
         AppCloudFrontDomainName: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDomainName
         FromEmail: noreply@cloudwatchlive.com
         AppURL: !Sub "https://${CloudFrontStack.Outputs.CWLCloudFrontDomainName}"
+        TemplateBucketName: !Ref TemplateBucketName
 
   # AppSync API
   AppSyncStack:
