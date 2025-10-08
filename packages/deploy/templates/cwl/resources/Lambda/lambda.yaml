@@ -113,7 +113,7 @@ Resources:
       Role: !GetAtt SendWelcomeEmailRole.Arn
       Code:
         S3Bucket: !Ref TemplateBucketName
-        S3Key: !Sub "functions/${Stage}/sendWelcomeEmail.js"
+        S3Key: !Sub "functions/${Stage}/sendWelcomeEmail.zip"
       Environment:
         Variables:
           STAGE: !Ref Stage
