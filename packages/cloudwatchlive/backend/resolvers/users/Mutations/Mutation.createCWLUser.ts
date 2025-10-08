@@ -1,5 +1,5 @@
 import { util, Context, AppSyncIdentityCognito } from '@aws-appsync/utils';
-import { CWLUserInput, CWLUser } from '../../../../../../../../cloudwatchlive/frontend/src/types/gqlTypes';
+import { CWLUserInput, CWLUser } from '../../../../frontend/src/types/gqlTypes';
 
 // Define Input type for the resolver
 type CreateCWLUserMutationVariables = {
@@ -25,7 +25,8 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
   const now = util.time.nowISO8601();
 
   const newUserItem = {
-    userId,
+    id: userId, // DynamoDB table uses 'id' as primary key
+    userId, // Keep userId field for backward compatibility/application logic
     ...input,
     userAddedById: identity.username, // The SuperAdmin creating this user
     userCreated: now,
@@ -36,7 +37,7 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
 
   return {
     operation: 'PutItem',
-    key: util.dynamodb.toMapValues({ userId }),
+    key: util.dynamodb.toMapValues({ id: userId }), // Use 'id' as primary key
     attributeValues: util.dynamodb.toMapValues(newUserItem),
     // condition: {
     //   expression: 'attribute_not_exists(userId)', // Ensure user doesn't already exist

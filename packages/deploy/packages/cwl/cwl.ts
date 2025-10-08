@@ -321,7 +321,38 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
 
   const region = options.region || process.env.AWS_REGION || 'ap-southeast-2';
 
-  // Build GraphQL schema and frontend before deployment
+  // Initialize clients early to check if stack exists
+  const cfn = new CloudFormationClient({ region });
+  
+  // Check if stack already exists and is in a healthy state
+  let stackExists = false;
+  let stackIsHealthy = false;
+  try {
+    const describeCommand = new DescribeStacksCommand({ StackName: stackName });
+    const response = await cfn.send(describeCommand);
+    const stack = response.Stacks?.[0];
+    
+    if (stack) {
+      stackExists = true;
+      const status = stack.StackStatus;
+      
+      // Only consider stack healthy if it's in a complete/operational state
+      stackIsHealthy = status === 'CREATE_COMPLETE' || 
+                       status === 'UPDATE_COMPLETE' || 
+                       status === 'UPDATE_ROLLBACK_COMPLETE';
+      
+      logger.debug(`Stack ${stackName} exists with status: ${status}`);
+      logger.debug(`Stack is healthy for frontend build: ${stackIsHealthy}`);
+    }
+  } catch (error: any) {
+    if (error.name === 'ValidationError' || error.message?.includes('does not exist')) {
+      logger.debug(`Stack ${stackName} does not exist - will perform initial deployment`);
+    } else {
+      logger.warning(`Error checking stack existence: ${error.message}`);
+    }
+  }
+
+  // Build GraphQL schema and types (always needed)
   try {
     logger.info('📦 Building GraphQL schema and types...');
     const frontendPath = path.join(__dirname, '../../../cloudwatchlive/frontend');
@@ -335,15 +366,27 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     });
     logger.success('✓ GraphQL schema and types generated successfully');
     
-    // Build frontend
-    logger.info('🏗️  Building frontend application...');
-    logger.debug(`Running: yarn build in ${frontendPath}`);
-    execSync('yarn build', { 
-      cwd: frontendPath, 
-      stdio: options.debugMode ? 'inherit' : 'pipe',
-      encoding: 'utf8' 
-    });
-    logger.success('✓ Frontend built successfully');
+    // Skip frontend build if explicitly requested via options
+    if (options.skipFrontendBuild) {
+      logger.info('⏭️  Skipping frontend build (skipFrontendBuild option set)');
+    }
+    // Only build frontend if stack exists AND is healthy (has API endpoint and Cognito outputs)
+    else if (stackIsHealthy) {
+      logger.info('🏗️  Building frontend application...');
+      logger.debug(`Running: yarn build in ${frontendPath}`);
+      execSync('yarn build', { 
+        cwd: frontendPath, 
+        stdio: options.debugMode ? 'inherit' : 'pipe',
+        encoding: 'utf8' 
+      });
+      logger.success('✓ Frontend built successfully');
+    } else if (stackExists) {
+      logger.info('⏭️  Skipping frontend build (stack exists but is not in healthy state)');
+      logger.info('   Stack must be successfully deployed before frontend can be built');
+    } else {
+      logger.info('⏭️  Skipping frontend build (first deployment - backend must be deployed first)');
+      logger.info('   Frontend will be built and deployed after backend is ready');
+    }
     
   } catch (error: any) {
     logger.error(`Build failed: ${error.message}`);
@@ -352,8 +395,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     throw new Error('Pre-deployment build failed. Cannot continue with deployment.');
   }
 
-  // Initialize clients
-  const cfn = new CloudFormationClient({ region });
+  // Initialize remaining clients
   const s3 = new S3({ region });
   const awsUtils = new AwsUtils(region);
   

@@ -1,6 +1,6 @@
 import { util, AppSyncIdentityCognito, Context } from '@aws-appsync/utils';
-import { CWLUser, ClientType, GetCWLUserQueryVariables } from '../../../../../../../../cloudwatchlive/frontend/src/types/gqlTypes';
-import { CWL_CLIENT_TYPES, isValidCWLClientType } from '../../../../../../../../cloudwatchlive/backend/constants/ClientTypes';
+import { CWLUser, ClientType, GetCWLUserQueryVariables } from '../../../../frontend/src/types/gqlTypes';
+import { CWL_CLIENT_TYPES, isValidCWLClientType } from '../../../constants/ClientTypes';
 
 // Use GetCWLUserQueryVariables from shared frontend-generated types
 
@@ -38,9 +38,10 @@ export function request(ctx: Context<GetCWLUserQueryVariables>) {
   console.log(`Getting user data for userId: ${userId}`);
   console.log(`Identity username: ${identity.username}`);
   
+  // DynamoDB table uses 'id' as primary key, not 'userId'
   return {
     operation: "GetItem",
-    key: util.dynamodb.toMapValues({ userId }),
+    key: util.dynamodb.toMapValues({ id: userId }),
   };
 }
 

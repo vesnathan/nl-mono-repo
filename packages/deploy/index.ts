@@ -615,11 +615,24 @@ async function main() {
               }
           }
 
+          // Ask about frontend build for CWL deployments
+          let skipFrontendBuild = false;
+          if (stack === 'all' || stack === StackType.CWL) {
+              const { buildFrontend } = await inquirer.prompt([{
+                type: 'confirm',
+                name: 'buildFrontend',
+                message: 'Build frontend application? (Required for frontend deployment, skip if having build issues)',
+                default: false
+              }]);
+              skipFrontendBuild = !buildFrontend;
+          }
+
           const options: DeploymentOptions = {
               stage,
               adminEmail,
               skipUserCreation: !adminEmail,
               autoDeleteFailedStacks: true,
+              skipFrontendBuild,
           };
 
           const deployAction = async (stackToDeploy: StackType | 'all') => {
