@@ -42,6 +42,7 @@
     "eslint-plugin-security": "^1.7.1",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-sonarjs": "^0.23.0",
+    "husky": "8",
     "jest": "29.7.0",
     "lerna": "^8.2.2",
     "prettier": "^3.1.0",
@@ -51,6 +52,7 @@
     "yargs": "17.7.2"
   },
   "scripts": {
+    "prepare": "husky install",
     "build-gql": "lerna run build-gql --stream --concurrency 1",
     "reset-modules": "rm -rf node_modules/ packages/**/*/node_modules",
     "install-aws-cli-local": "./scripts/install-aws-cli-local.sh",
