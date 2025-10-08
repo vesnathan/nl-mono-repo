@@ -214,7 +214,7 @@ ${jsCode}`;
         resolve();
       });
 
-      archive.on("error", (err) => {
+      archive.on("error", (err: Error) => {
         reject(err);
       });
 
