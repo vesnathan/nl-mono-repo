@@ -1,6 +1,6 @@
 import { util, AppSyncIdentityCognito, Context } from '@aws-appsync/utils';
 import { CWLUser, ClientType, GetCWLUserQueryVariables } from '../../../../../../frontend/src/types/gqlTypes'; // Use shared frontend-generated types
-import { CWL_CLIENT_TYPES, isValidCWLClientType } from '../../../../../constants/ClientTypes';
+import { CWL_CLIENT_TYPES, isValidCWLClientType } from '../../../../../../../../cloudwatchlive/backend/constants/ClientTypes';
 
 // Use GetCWLUserQueryVariables from shared frontend-generated types
 

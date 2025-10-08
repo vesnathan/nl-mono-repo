@@ -1,6 +1,5 @@
 import { util, Context, AppSyncIdentityCognito } from '@aws-appsync/utils';
 import { CWLUserInput, CWLUser } from '../../../../../../frontend/src/types/gqlTypes'; // Use shared frontend-generated types
-import { v4 as uuidv4 } from 'uuid';
 
 // Define Input type for the resolver
 type CreateCWLUserMutationVariables = {
@@ -22,7 +21,7 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
     util.error('Unauthorized: Only SuperAdmins can create users.', 'Unauthorized');
   }
 
-  const userId = uuidv4(); // Generate a new UUID for the user
+  const userId = util.autoId(); // Generate a new UUID for the user
   const now = util.time.nowISO8601();
 
   const newUserItem = {
