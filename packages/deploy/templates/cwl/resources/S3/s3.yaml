@@ -16,7 +16,7 @@ Resources:
   CWLBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "nlmonorepo-cwl-userfiles-${Stage}-${AWS::AccountId}"
+      BucketName: !Sub "nlmonorepo-cwl-userfiles-${Stage}"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
