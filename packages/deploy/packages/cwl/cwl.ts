@@ -508,6 +508,31 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
 
     logger.debug(`Successfully uploaded ${successfulUploads.length} template files`);
 
+    // Upload GraphQL schema file
+    logger.debug('Uploading GraphQL schema file...');
+    const schemaPath = path.join(__dirname, '../../../cloudwatchlive/backend/combined_schema.graphql');
+    
+    if (existsSync(schemaPath)) {
+      const schemaUploadCommand = new PutObjectCommand({
+        Bucket: templateBucketName,
+        Key: 'schema.graphql',
+        Body: createReadStream(schemaPath),
+        ContentType: 'application/graphql'
+      });
+      
+      try {
+        await retryOperation(async () => {
+          await s3.send(schemaUploadCommand);
+          logger.debug('GraphQL schema uploaded successfully');
+        });
+      } catch (error: any) {
+        logger.error(`Failed to upload GraphQL schema: ${error.message}`);
+        throw new Error('GraphQL schema upload failed - deployment cannot continue');
+      }
+    } else {
+      throw new Error(`GraphQL schema file not found at ${schemaPath}`);
+    }
+
     // Compile and upload TypeScript resolvers
     if (options.debugMode) {
       logger.debug('Compiling and uploading AppSync resolvers...');
@@ -519,7 +544,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       throw new Error(`Template bucket ${templateBucketName} not accessible before resolver compilation`);
     }
     
-    const resolverDir = path.join(__dirname, '../../../cloudwatchlive/backend/resources/AppSync/resolvers');
+    const resolverDir = path.join(__dirname, '../../templates/cwl/resources/AppSync/resolvers');
     
     if (existsSync(resolverDir)) {
       // Find all resolver files in the specified directory
