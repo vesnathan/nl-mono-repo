@@ -1,5 +1,5 @@
 import { util, Context, AppSyncIdentityCognito } from '@aws-appsync/utils';
-import { CWLUserInput, CWLUser } from '../../../../../../../../cloudwatchlive/frontend/src/types/gqlTypes';
+import { CWLUserInput, CWLUser } from '../../../../../frontend/src/types/gqlTypes';
 
 // Define Input type for the resolver
 type CreateCWLUserMutationVariables = {
