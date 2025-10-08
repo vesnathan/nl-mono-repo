@@ -39,9 +39,11 @@ gqlTypes.ts
 # auto-generated schema files
 **/combined_schema.graphql
 
-# compiled resolvers (generated during deployment)
+# compiled resolvers and Lambda functions (generated during deployment)
 packages/deploy/packages/*/resolvers/
 packages/deploy/packages/*/lib/
+packages/deploy/templates/cwl/functions/*.js
+packages/deploy/templates/cwl/functions/*.js.map
 
 # nx cache
 .nx/cache
