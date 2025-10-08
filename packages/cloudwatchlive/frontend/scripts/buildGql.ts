@@ -3,19 +3,20 @@ import { execCommandAsPromise } from "shared/scripts/execCommandAsPromise";
 import { mergeGraphqlFiles } from "shared/scripts/mergeGraphqlFiles";
 
 const buildGql = async () => {
-  // recursively look through schema folder and grab files ended with .graphql
-  // and merge them together into one file and .gitignore it.
-  // Make sure to not write them under same folder where we look for smaller .graphql files, otherwise
-  // the combined file will be duplicated in subsequence build
+  // Merge GraphQL schema files from the new locations:
+  // - Operations (Query/Mutation): deploy/templates/cwl/resources/AppSync/schema/
+  // - Types (CWLUser, etc.): shared/types/
   mergeGraphqlFiles({
     INPUT_DIRS: [
-      path.resolve("../backend/resources/AppSync"),
-      path.resolve("../shared/types"),
+      path.resolve("../../deploy/templates/cwl/resources/AppSync/schema"),
+      path.resolve("../../shared/types"),
     ],
-    // the output file is then used by amplify codegen defined in `.graphqlconfig.yml`
+    // Output to backend as the single source of truth for deployment
     OUTPUT_FILE_PATH: path.resolve("../backend/combined_schema.graphql"),
   });
-  const command = `npx amplify codegen types --schema ../backend/combined_schema.graphql --debug`; // Explicitly pass schema
+
+  const schemaPath = path.resolve("../backend/combined_schema.graphql");
+  const command = `npx amplify codegen types --schema ${schemaPath} --debug`;
   await execCommandAsPromise(command);
 };
 

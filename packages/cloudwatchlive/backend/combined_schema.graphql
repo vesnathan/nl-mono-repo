@@ -18,7 +18,7 @@ enum ClientType {
   EventCompanyStaff
   TechCompanyAdmin
   TechCompanyStaff
-  RegisteredAttendee # Corrected typo
+  RegisteredAttendee
   UnregisteredAttendee
 }
 
@@ -38,7 +38,6 @@ type CWLUser @aws_cognito_user_pools {
   clientType: [ClientType!]!
 }
 
-
 input CWLUserInput {
   userEmail: String!
   userTitle: String!
@@ -48,25 +47,3 @@ input CWLUserInput {
   organizationId: String!
   userRole: String!
 }
-
-# These types are added by AppSync. We redefined them here so that it works with "graphql-schema-typescript" package
-# These shouldn't be included in schema file otherwise it'll complain about duplicate type definition
-
-# Scalar type: https://docs.aws.amazon.com/appsync/latest/devguide/scalars.html
-scalar AWSDate
-scalar AWSTime
-scalar AWSDateTime
-scalar AWSTimestamp
-scalar AWSEmail
-scalar AWSJSON
-scalar AWSURL
-scalar AWSPhone
-scalar AWSIPAddress
-
-# auth directives https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#using-additional-authorization-modes
-directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
-directive @aws_auth(cognito_groups: [String!]!) on FIELD_DEFINITION
-directive @aws_api_key on FIELD_DEFINITION | OBJECT
-directive @aws_iam on FIELD_DEFINITION | OBJECT
-directive @aws_oidc on FIELD_DEFINITION | OBJECT
-directive @aws_cognito_user_pools(cognito_groups: [String!]) on FIELD_DEFINITION | OBJECT
