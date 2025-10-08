@@ -1,7 +1,13 @@
 import { Button, cn, Spinner } from "@nextui-org/react";
 import React from "react";
 
-type CWLButtonColor = "primary" | "secondary" | "error" | "transparent" | "danger" | "cancel";
+type CWLButtonColor =
+  | "primary"
+  | "secondary"
+  | "error"
+  | "transparent"
+  | "danger"
+  | "cancel";
 type CWLButtonVariant = "solid" | "light";
 
 type CWLButtonProps = {
@@ -49,7 +55,7 @@ export const CWLButton: React.FC<CWLButtonProps> = ({
       "[&[data-hover=true]]:bg-primary-300 [&[data-hover=true]]:border-primary-300 [&[data-hover=true]]:text-white",
       "[&[data-pressed=true]]:bg-primary-500 [&[data-pressed=true]]:border-primary-500 [&[data-pressed=true]]:text-white",
       "data-[hover=true]:bg-primary-300 data-[hover=true]:border-primary-300 data-[hover=true]:text-white",
-      "data-[pressed=true]:bg-primary-500 data-[pressed=true]:border-primary-500 data-[pressed=true]:text-white"
+      "data-[pressed=true]:bg-primary-500 data-[pressed=true]:border-primary-500 data-[pressed=true]:text-white",
     );
     if (color === "primary") {
       return primaryColor;
@@ -119,10 +125,16 @@ export const CWLButton: React.FC<CWLButtonProps> = ({
       variant="flat"
       radius="sm"
       type={type}
-      className={cn("rounded-[6px] transition-all duration-200", buttonClassName, additionalClassName)}
+      className={cn(
+        "rounded-[6px] transition-all duration-200",
+        buttonClassName,
+        additionalClassName,
+      )}
       onClick={isLoading ? undefined : onClick}
       disabled={isDisabled}
-      startContent={isLoading ? <Spinner size="sm" color="current" /> : frontIcon}
+      startContent={
+        isLoading ? <Spinner size="sm" color="current" /> : frontIcon
+      }
       endContent={endIcon}
     >
       {buttonText}

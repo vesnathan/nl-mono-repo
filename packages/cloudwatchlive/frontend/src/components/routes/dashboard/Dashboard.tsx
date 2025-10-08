@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React from "react";
 import { useUserStore } from "@/stores/userStore";
@@ -22,11 +22,7 @@ export const Dashboard = () => {
   return (
     <div>
       {isSuperAdmin && (
-        <CWLButton 
-          buttonText="Create User"
-          onClick={onOpen} 
-          color="primary"
-        />
+        <CWLButton buttonText="Create User" onClick={onOpen} color="primary" />
       )}
       <Modal isOpen={isOpen} onClose={onClose} placement="top-center">
         <ModalContent className="h-[80vh]">
@@ -36,7 +32,12 @@ export const Dashboard = () => {
                 Create New User
               </ModalHeader>
               <ModalBody>
-                <CreateUserForm onClose={modalClose} onSubmitSuccess={() => { modalClose(); }} />
+                <CreateUserForm
+                  onClose={modalClose}
+                  onSubmitSuccess={() => {
+                    modalClose();
+                  }}
+                />
               </ModalBody>
             </>
           )}

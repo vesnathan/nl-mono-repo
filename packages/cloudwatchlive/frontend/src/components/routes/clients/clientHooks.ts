@@ -16,7 +16,9 @@ export const useSaveSuperAdminClientMutation = (options?: {
   return {
     mutate: (input: MutationInput) => {
       // Only log in development mode
-      if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
         console.log("useSaveSuperAdminClientMutation called with:", input);
       }
       // Simulate success callback if provided
