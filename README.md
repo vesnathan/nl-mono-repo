@@ -12,6 +12,7 @@ A comprehensive monorepo containing AWS-based applications and shared infrastruc
 - [Getting Started](#getting-started)
 - [Deployment](#deployment)
 - [Development](#development)
+- [Multi-Agent Workflow](#multi-agent-workflow)
 - [Stack Management](#stack-management)
 - [Contributing](#contributing)
 
@@ -254,10 +255,18 @@ graph TB
 | Command | Description |
 |---------|-------------|
 | `yarn dev-menu` | Interactive development menu (use ↑/↓ arrows, Enter to select) |
-| `yarn development` | Deploy/update AWS infrastructure |
+| `yarn dev:cwl` | Run CWL frontend dev server locally |
 | `yarn dev:local` | Run frontend dev server locally |
 | `yarn dev:codespaces` | Run frontend dev server in Codespaces |
 | `yarn build-gql` | Generate GraphQL types |
+| `yarn deploy` | Deploy main CWL stack |
+| `yarn deploy:all` | Deploy all stacks (WAF, Shared, CWL) |
+| `yarn deploy:cwl` | Deploy CWL stack only |
+| `yarn deploy:frontend` | Deploy frontend only |
+| `yarn lint` | Run linting across all packages |
+| `yarn test` | Run tests across all packages |
+
+> **Note:** All deployment and package management commands are available from the root directory for convenience.
 
 ### Local Development
 
@@ -294,6 +303,56 @@ yarn test
 cd packages/cloudwatchlive/backend
 yarn test
 ```
+
+## 🤖 Multi-Agent Workflow
+
+This repository supports **parallel development with multiple AI coding agents** using Git worktrees. This enables true concurrent development on different features without conflicts.
+
+### Quick Start
+
+```bash
+# Create worktrees for parallel development
+git worktree add ../nl-mono-repo-agent-1 -b agent-1
+git worktree add ../nl-mono-repo-agent-2 -b agent-2
+
+# Install dependencies in each worktree
+cd ../nl-mono-repo-agent-1 && yarn install
+cd ../nl-mono-repo-agent-2 && yarn install
+
+# Open each worktree in separate VS Code windows
+code /path/to/nl-mono-repo-agent-1 -n
+code /path/to/nl-mono-repo-agent-2 -n
+```
+
+### Agent Responsibilities
+
+**Agent 1 - Backend/Infrastructure:**
+- `packages/cloudwatchlive/backend/` - Lambda functions, AppSync resolvers
+- `packages/deploy/` - CloudFormation templates, deployment scripts
+- Backend business logic and database schema
+
+**Agent 2 - Frontend/UI:**
+- `packages/cloudwatchlive/frontend/` - React components, pages, routing
+- `packages/shared/` - Shared utilities and types
+- UI components and GraphQL integration
+
+### Benefits
+
+- ✅ **Complete isolation** - Each agent has its own file system and dependencies
+- ✅ **Separate branches** - Clean Git workflow with independent feature branches
+- ✅ **No conflicts** - True parallel development without file locking
+- ✅ **Standard workflow** - Merge through pull requests like team members
+
+### Documentation
+
+See [MULTI_AGENT_WORKFLOW.md](MULTI_AGENT_WORKFLOW.md) for comprehensive documentation including:
+- Detailed setup instructions
+- Agent coordination strategies
+- Merge workflows and best practices
+- Troubleshooting guide
+- Complete example workflows
+
+See [WORKTREE_STATUS.md](WORKTREE_STATUS.md) for quick reference of active worktrees and commands.
 
 ## 🔧 Stack Management
 
@@ -426,11 +485,14 @@ The admin user created during deployment is assigned to the **SuperAdmin** group
 
 ## 📚 Additional Documentation
 
+- [Multi-Agent Workflow Guide](MULTI_AGENT_WORKFLOW.md) - Parallel development with Git worktrees
+- [Worktree Status](WORKTREE_STATUS.md) - Active worktrees quick reference
 - [Deployment Guide](packages/deploy/README.md) - Comprehensive deployment documentation
 - [Frontend Documentation](packages/cloudwatchlive/frontend/README.md) - Frontend development guide
 - [Backend Documentation](packages/cloudwatchlive/backend/README.md) - Backend API documentation
 - [AWS STS Guide](AWS-STS-GUIDE.md) - Secure deployment with temporary credentials
 - [CFN Deployment Instructions](CFN_DEPLOYMENT_INSTRUCTIONS.md) - CloudFormation deployment details
+- [Yarn Usage Guide](YARN_USAGE.md) - Yarn-specific commands and workflows
 
 ## 🤝 Contributing
 
