@@ -33,6 +33,7 @@ import { IamManager } from "../../utils/iam-manager";
 import { AwsUtils } from "../../utils/aws-utils";
 import { FrontendDeploymentManager } from "../../utils/frontend-deployment";
 import { ResolverCompiler } from "../../utils/resolver-compiler";
+import { LambdaCompiler } from "../../utils/lambda-compiler";
 import { S3BucketManager } from "../../utils/s3-bucket-manager";
 import {
   addAppSyncBucketPolicy,
@@ -763,6 +764,49 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       }
     } else {
       throw new Error(`GraphQL schema file not found at ${schemaPath}`);
+    }
+
+    // Compile Lambda functions
+    if (options.debugMode) {
+      logger.debug("Compiling Lambda functions...");
+    }
+
+    const lambdaSourceDir = path.join(
+      __dirname,
+      "../../../cloudwatchlive/backend/lambda",
+    );
+    const lambdaOutputDir = path.join(
+      __dirname,
+      "../../templates/cwl/functions",
+    );
+
+    logger.info(`Looking for Lambda functions in: ${lambdaSourceDir}`);
+
+    if (existsSync(lambdaSourceDir)) {
+      logger.success(`Lambda directory found: ${lambdaSourceDir}`);
+
+      const lambdaCompiler = new LambdaCompiler({
+        logger: logger,
+        baseLambdaDir: lambdaSourceDir,
+        outputDir: lambdaOutputDir,
+        s3BucketName: templateBucketName,
+        s3KeyPrefix: "functions",
+        stage: options.stage,
+        region: region,
+        debugMode: options.debugMode,
+      });
+
+      try {
+        await lambdaCompiler.compileLambdaFunctions();
+        logger.success("✓ Lambda functions compiled and uploaded successfully");
+      } catch (error: any) {
+        logger.error(`Lambda compilation failed: ${error.message}`);
+        throw error;
+      }
+    } else {
+      logger.warning(
+        `Lambda directory not found at ${lambdaSourceDir}. Skipping Lambda compilation.`,
+      );
     }
 
     // Compile and upload TypeScript resolvers
