@@ -8,6 +8,11 @@ enum ClientType {
   UnregisteredAttendee
 }
 
+type S3Object {
+  Bucket: String!
+  Key: String!
+}
+
 type CWLUser @aws_cognito_user_pools {
   userId: String!
   organizationId: String!
@@ -22,6 +27,7 @@ type CWLUser @aws_cognito_user_pools {
   userPhone: String!
   userRole: String!
   clientType: [ClientType!]!
+  userProfilePicture: S3Object
 }
 
 input CWLUserInput {
@@ -32,4 +38,5 @@ input CWLUserInput {
   userPhone: String!
   organizationId: String!
   userRole: String!
+  sendWelcomeEmail: Boolean
 }

@@ -66,19 +66,9 @@ Resources:
         AppBucketArn: !GetAtt S3Stack.Outputs.CWLBucketArn # Parameter name changed
         AppBucketRegionalDomainName: !GetAtt S3Stack.Outputs.CWLBucketRegionalDomainName # Parameter name changed
 
-  AppSyncStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: [DynamoDBStack, CognitoStack] 
-    Properties:
-      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appsync.yaml 
-      Parameters:
-        Stage: !Ref Stage
-        TemplateBucketName: !Ref TemplatesBucketName
-        UserPoolId: !GetAtt CognitoStack.Outputs.cwlUserPoolId
-
   LambdaStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [CloudFrontStack, AppSyncStack, CognitoStack] 
+    DependsOn: [CloudFrontStack, CognitoStack] 
     Properties:
       TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml 
       Parameters:
@@ -87,8 +77,22 @@ Resources:
         # Pass the outputs from the CloudFrontStack (which are now generic)
         AppCloudFrontDistributionId: !GetAtt CloudFrontStack.Outputs.CloudFrontDistributionId # Parameter name changed, and got from new child output name
         AppCloudFrontDomainName: !GetAtt CloudFrontStack.Outputs.CloudFrontDomainName # Parameter name changed, and got from new child output name
+        FromEmail: noreply@cloudwatchlive.com
+        AppURL: !Sub "https://${CloudFrontStack.Outputs.CloudFrontDomainName}"
         # CWLUserPoolId is an output from CognitoStack. Lambda template doesn't currently take it as input.
         # If it were needed: AppUserPoolId: !GetAtt CognitoStack.Outputs.cwlUserPoolId
+
+  AppSyncStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [DynamoDBStack, CognitoStack, LambdaStack] 
+    Properties:
+      TemplateURL: !Sub https://${TemplatesBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appsync.yaml 
+      Parameters:
+        Stage: !Ref Stage
+        AppName: cwl
+        TemplateBucketName: !Ref TemplatesBucketName
+        UserPoolId: !GetAtt CognitoStack.Outputs.cwlUserPoolId
+        SendWelcomeEmailFunctionArn: !GetAtt LambdaStack.Outputs.SendWelcomeEmailFunctionArn
 
 Outputs:
   # Cognito Outputs
@@ -160,3 +164,8 @@ Outputs:
   #   Value: !GetAtt LambdaStack.Outputs.PostDeployFunctionArn
   #   Export:
   #     Name: !Sub CWLPostDeployFunctionArn-${Stage}
+
+  CWLSendWelcomeEmailFunctionArn:
+    Value: !GetAtt LambdaStack.Outputs.SendWelcomeEmailFunctionArn
+    Export:
+      Name: !Sub CWLSendWelcomeEmailFunctionArn-${Stage}
