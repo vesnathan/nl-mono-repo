@@ -546,7 +546,10 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     
     const resolverDir = path.join(__dirname, '../../../cloudwatchlive/backend/resolvers');
     
+    logger.info(`Looking for resolvers in: ${resolverDir}`);
+    
     if (existsSync(resolverDir)) {
+      logger.success(`Resolver directory found: ${resolverDir}`);
       // Find all resolver files in the specified directory
       const allFiles = findTypeScriptFiles(resolverDir);
       logger.debug(`Found ${allFiles.length} total TypeScript files in ${resolverDir}`);
@@ -557,20 +560,28 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       });
 
       const resolverFiles = allFiles
-        .filter(file => 
-          !file.endsWith('.bak') && // Exclude backup files
-          path.basename(file) !== 'gqlTypes.ts' && // Exclude the main types file
-          file.includes(path.sep) // IMPORTANT: Only include files in subdirectories
-        )
+        .filter(file => {
+          const shouldInclude = 
+            !file.endsWith('.bak') && // Exclude backup files
+            path.basename(file) !== 'gqlTypes.ts' && // Exclude the main types file
+            file.includes(path.sep); // IMPORTANT: Only include files in subdirectories
+          
+          if (!shouldInclude) {
+            logger.debug(`Excluding file: ${file}`);
+          }
+          return shouldInclude;
+        })
         .map(file => path.relative(resolverDir, file)); // Convert absolute paths to relative paths
 
-      logger.debug(`After filtering, found ${resolverFiles.length} resolver files:`);
+      logger.success(`After filtering, found ${resolverFiles.length} resolver files to compile:`);
       resolverFiles.forEach((file, index) => {
-        logger.debug(`Resolver ${index + 1}: ${file}`);
+        logger.success(`  [${index + 1}] ${file}`);
       });
       
       if (resolverFiles.length === 0) {
-        logger.warning(`No TypeScript resolver files found in ${resolverDir}. This could cause deployment issues.`);
+        const errorMsg = `No TypeScript resolver files found in ${resolverDir}. This will cause deployment to fail.`;
+        logger.error(errorMsg);
+        throw new Error(errorMsg);
       } else {
         // Define constants directory path for CWL
         const constantsDir = path.join(__dirname, '../../../cloudwatchlive/backend/constants');
@@ -660,8 +671,9 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         }
       }
     } else {
-      logger.warning('No resolver directory found at ' + resolverDir);
-      logger.warning('This is unusual and may cause deployment to fail if resolvers are referenced in AppSync template.');
+      const errorMsg = `Resolver directory not found at ${resolverDir}. This will cause deployment to fail if resolvers are referenced in AppSync template.`;
+      logger.error(errorMsg);
+      throw new Error(errorMsg);
     }
 
     // Get KMS Key info from shared stack outputs
