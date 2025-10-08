@@ -544,7 +544,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       throw new Error(`Template bucket ${templateBucketName} not accessible before resolver compilation`);
     }
     
-    const resolverDir = path.join(__dirname, '../../templates/cwl/resources/AppSync/resolvers');
+    const resolverDir = path.join(__dirname, '../../../cloudwatchlive/backend/resolvers');
     
     if (existsSync(resolverDir)) {
       // Find all resolver files in the specified directory

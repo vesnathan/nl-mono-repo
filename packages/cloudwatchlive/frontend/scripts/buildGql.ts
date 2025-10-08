@@ -3,12 +3,12 @@ import { execCommandAsPromise } from "shared/scripts/execCommandAsPromise";
 import { mergeGraphqlFiles } from "shared/scripts/mergeGraphqlFiles";
 
 const buildGql = async () => {
-  // Merge GraphQL schema files from the new locations:
-  // - Operations (Query/Mutation): deploy/templates/cwl/resources/AppSync/schema/
+  // Merge GraphQL schema files from their source locations:
+  // - Operations (Query/Mutation): backend/schema/
   // - Types (CWLUser, etc.): shared/types/
   mergeGraphqlFiles({
     INPUT_DIRS: [
-      path.resolve("../../deploy/templates/cwl/resources/AppSync/schema"),
+      path.resolve("../backend/schema"),
       path.resolve("../../shared/types"),
     ],
     // Output to backend as the single source of truth for deployment
