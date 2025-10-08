@@ -1,6 +1,6 @@
 projects:
-  Codegen Project:
-    schemaPath: combined_schema.graphql
+  app:
+    schemaPath: ../backend/combined_schema.graphql
     includes:
       - src/graphql/**/*.ts
       - src/graphql/**/*.tsx # Restore this line
