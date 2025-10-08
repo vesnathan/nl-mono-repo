@@ -18,10 +18,6 @@ Parameters:
   SendWelcomeEmailFunctionArn:
     Type: String
     Description: ARN of the Lambda function to send welcome emails
-    Default: ""
-
-Conditions:
-  HasSendWelcomeEmailFunction: !Not [!Equals [!Ref SendWelcomeEmailFunctionArn, ""]]
 
 Resources:
   AppSyncLoggingServiceRole:
@@ -86,7 +82,6 @@ Resources:
 
   LambdaDataSource:
     Type: AWS::AppSync::DataSource
-    Condition: HasSendWelcomeEmailFunction
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       Name: !Sub "${AppName}SendWelcomeEmailLambdaDataSource"
@@ -97,7 +92,6 @@ Resources:
 
   AppSyncLambdaInvokeRole:
     Type: AWS::IAM::Role
-    Condition: HasSendWelcomeEmailFunction
     Properties:
       RoleName: !Sub "${AppName}-appsync-lambda-invoke-role-${Stage}"
       AssumeRolePolicyDocument:
@@ -132,9 +126,8 @@ Resources:
         RuntimeVersion: 1.0.0
       CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Queries/Query.getCWLUser.js" 
 
-  CreateCWLUserResolverWithEmail:
+  CreateCWLUserResolver:
     Type: AWS::AppSync::Resolver
-    Condition: HasSendWelcomeEmailFunction
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       TypeName: Mutation
@@ -155,20 +148,6 @@ Resources:
           return ctx.prev.result;
         }
 
-  CreateCWLUserResolverWithoutEmail:
-    Type: AWS::AppSync::Resolver
-    Condition: !Not [!Condition HasSendWelcomeEmailFunction]
-    Properties:
-      ApiId: !GetAtt GraphQlApi.ApiId
-      TypeName: Mutation
-      FieldName: createCWLUser # This might need to be generic if schema changes
-      DataSourceName: !GetAtt MainTableDataSource.Name
-      Kind: UNIT
-      Runtime:
-        Name: APPSYNC_JS
-        RuntimeVersion: 1.0.0
-      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Mutations/Mutation.createCWLUser.js"
-
   CreateUserDynamoDBFunction:
     Type: AWS::AppSync::FunctionConfiguration
     Properties:
@@ -182,7 +161,6 @@ Resources:
 
   SendWelcomeEmailFunction:
     Type: AWS::AppSync::FunctionConfiguration
-    Condition: HasSendWelcomeEmailFunction
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       Name: !Sub "${AppName}SendWelcomeEmailFunction"
