@@ -254,19 +254,23 @@ graph TB
 
 | Command | Description |
 |---------|-------------|
-| `yarn dev-menu` | Interactive development menu (use ↑/↓ arrows, Enter to select) |
-| `yarn dev:cwl` | Run CWL frontend dev server locally |
-| `yarn dev:local` | Run frontend dev server locally |
-| `yarn dev:codespaces` | Run frontend dev server in Codespaces |
-| `yarn build-gql` | Generate GraphQL types |
-| `yarn deploy` | Deploy main CWL stack |
-| `yarn deploy:all` | Deploy all stacks (WAF, Shared, CWL) |
-| `yarn deploy:cwl` | Deploy CWL stack only |
-| `yarn deploy:frontend` | Deploy frontend only |
-| `yarn lint` | Run linting across all packages |
-| `yarn test` | Run tests across all packages |
+| `yarn dev` | Start frontend development server |
+| `yarn deploy` | Deploy the application |
+| `yarn build-gql` | Build GraphQL schemas |
+| `yarn build` | Build all packages |
+| `yarn lint` | Lint all packages |
+| `yarn tsc` | Run TypeScript compiler checks |
+| `yarn test` | Run tests |
 
-> **Note:** All deployment and package management commands are available from the root directory for convenience.
+### Additional Utility Scripts
+
+| Command | Description |
+|---------|-------------|
+| `yarn ec2-deployment` | EC2 instance deployment menu |
+| `yarn reset-modules` | Remove all node_modules directories |
+| `yarn install-aws-cli-local` | Install AWS CLI locally |
+
+> **Note:** For deployment commands, use `cd packages/deploy && yarn <command>`. See [Deployment](#deployment) section below.
 
 ### Local Development
 
