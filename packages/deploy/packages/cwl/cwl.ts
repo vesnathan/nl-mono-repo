@@ -844,18 +844,18 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       });
 
       const resolverFiles = allFiles
+        .map((file) => path.relative(resolverDir, file)) // Convert to relative paths first
         .filter((file) => {
           const shouldInclude =
             !file.endsWith(".bak") && // Exclude backup files
             path.basename(file) !== "gqlTypes.ts" && // Exclude the main types file
-            file.includes(path.sep); // IMPORTANT: Only include files in subdirectories
+            file.includes(path.sep); // IMPORTANT: Only include files in subdirectories (relative path check)
 
           if (!shouldInclude) {
             logger.debug(`Excluding file: ${file}`);
           }
           return shouldInclude;
-        })
-        .map((file) => path.relative(resolverDir, file)); // Convert absolute paths to relative paths
+        });
 
       logger.success(
         `After filtering, found ${resolverFiles.length} resolver files to compile:`,
