@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { ClientType, CWLUser } from "../types/gqlTypes";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
+import { ClientType, CWLUser } from "./gqlTypes";
 
 export const createEmptyCWLUser = (): CWLUser => ({
   __typename: "CWLUser",
@@ -12,8 +12,8 @@ export const createEmptyCWLUser = (): CWLUser => ({
   userLastName: "",
   userPhone: "",
   userRole: "",
-  privacyPolicy: false, 
-  termsAndConditions: false, 
+  privacyPolicy: false,
+  termsAndConditions: false,
   userAddedById: "",
   userCreated: "",
   clientType: [],
@@ -32,7 +32,9 @@ export const CWLUserSchema = z.object({
   termsAndConditions: z.boolean().default(false),
   userAddedById: z.string().min(1, "User added by ID is required"),
   userCreated: z.string().min(1, "User created date is required"),
-  clientType: z.array(z.enum(Object.values(ClientType) as [string, ...string[]])),
+  clientType: z.array(
+    z.enum(Object.values(ClientType) as [string, ...string[]]),
+  ),
 });
 
 export const CWLUserFormValidationSchema = CWLUserSchema.superRefine(
@@ -56,7 +58,10 @@ export const CWLUserFormValidationSchema = CWLUserSchema.superRefine(
         message: "Please enter the contact's phone number",
       },
       { field: "userRole", message: "Please enter the contact's role" },
-      { field: "organizationId", message: "Please select the contact's organization" },
+      {
+        field: "organizationId",
+        message: "Please select the contact's organization",
+      },
     ];
 
     requiredFields.forEach(({ field, message }) => {

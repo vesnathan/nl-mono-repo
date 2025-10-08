@@ -36,8 +36,13 @@ export const CWLUserStoreSetup: FC<Props> = ({ userId, children }) => {
   useEffect(() => {
     if (CWLUser) {
       // Only log in development mode
-      if (process.env.NODE_ENV === 'development') {
-        console.log("CWLUserStoreSetup: Setting user with clientType from GraphQL response:", CWLUser.clientType);
+      // eslint-disable-next-line no-console
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log(
+          "CWLUserStoreSetup: Setting user with clientType from GraphQL response:",
+          CWLUser.clientType,
+        );
       }
       setUser(CWLUser);
     }

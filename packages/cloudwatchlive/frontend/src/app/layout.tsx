@@ -34,7 +34,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <meta name="description" content="Live Conference Streaming Software" />
         {process.env.NODE_ENV === "development" && (
           <>
-            <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+            <script src="https://cdn.jsdelivr.net/npm/eruda" async />
+            {/* eslint-disable-next-line react/no-danger */}
             <script dangerouslySetInnerHTML={{ __html: "eruda.init();" }} />
           </>
         )}

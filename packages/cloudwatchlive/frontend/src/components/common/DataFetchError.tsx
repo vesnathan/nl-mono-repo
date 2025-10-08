@@ -20,7 +20,7 @@ export const DataFetchError: React.FC<Props> = ({
         {errorMessage || "An unexpected error occurred while fetching data"}
       </span>
       {retry && (
-        <CWLButton 
+        <CWLButton
           buttonText="Retry"
           onClick={retry}
           type="button"

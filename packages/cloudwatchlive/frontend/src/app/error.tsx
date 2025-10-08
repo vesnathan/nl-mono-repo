@@ -14,11 +14,7 @@ export default function GlobalError({
     <div>
       <h2>Something went wrong!</h2>
       <p>{error.message}</p>
-      <CWLButton 
-        buttonText="Try again"
-        onClick={() => reset()}
-        type="button"
-      />
+      <CWLButton buttonText="Try again" onClick={() => reset()} type="button" />
     </div>
   );
 }
