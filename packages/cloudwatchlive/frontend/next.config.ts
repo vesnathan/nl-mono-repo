@@ -1,5 +1,5 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from "fs";
+import { join } from "path";
 
 /** @type {import('next').NextConfig} */
 
@@ -7,34 +7,36 @@ import { join } from 'path';
 const getDeploymentOutputs = () => {
   try {
     // Path relative to next.config.ts
-    const outputPath = join(__dirname, '../../deploy/deployment-outputs.json');
-    const fileContent = readFileSync(outputPath, 'utf-8');
+    const outputPath = join(__dirname, "../../deploy/deployment-outputs.json");
+    const fileContent = readFileSync(outputPath, "utf-8");
     const outputs = JSON.parse(fileContent);
-    
+
     // The stack name should be uppercase 'CWL'
     const cwlStack = outputs.stacks.CWL;
     if (!cwlStack) {
       console.warn("CWL stack outputs not found in deployment-outputs.json");
       console.warn("Available stacks:", Object.keys(outputs.stacks));
       return {};
-    };
+    }
 
-    const getValue = (key: string) => cwlStack.outputs.find((o: any) => o.OutputKey === key)?.OutputValue || '';
+    const getValue = (key: string) =>
+      cwlStack.outputs.find((o: any) => o.OutputKey === key)?.OutputValue || "";
 
     return {
-      NEXT_PUBLIC_USER_POOL_ID: getValue('CWLUserPoolId'),
-      NEXT_PUBLIC_USER_POOL_CLIENT_ID: getValue('CWLUserPoolClientId'),
-      NEXT_PUBLIC_IDENTITY_POOL_ID: getValue('CWLIdentityPoolId'),
-      NEXT_PUBLIC_GRAPHQL_URL: getValue('ApiUrl'),
+      NEXT_PUBLIC_USER_POOL_ID: getValue("CWLUserPoolId"),
+      NEXT_PUBLIC_USER_POOL_CLIENT_ID: getValue("CWLUserPoolClientId"),
+      NEXT_PUBLIC_IDENTITY_POOL_ID: getValue("CWLIdentityPoolId"),
+      NEXT_PUBLIC_GRAPHQL_URL: getValue("ApiUrl"),
     };
   } catch (error) {
-    console.warn('Could not read deployment-outputs.json. Build may fail if env vars are not set.');
+    console.warn(
+      "Could not read deployment-outputs.json. Build may fail if env vars are not set.",
+    );
     return {};
   }
 };
 
 const deploymentEnvs = getDeploymentOutputs();
-
 
 const nextConfig = {
   env: {
@@ -49,7 +51,7 @@ const nextConfig = {
     styledComponents: true,
   },
   // Only use "export" for production builds, not during development
-  ...(process.env.NODE_ENV === 'production' ? { output: "export" } : {}),
+  ...(process.env.NODE_ENV === "production" ? { output: "export" } : {}),
   images: {
     unoptimized: true,
   },

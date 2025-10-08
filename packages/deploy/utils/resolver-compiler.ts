@@ -1,11 +1,11 @@
-import { execSync, spawn } from 'child_process';
-import * as fsPromises from 'fs/promises';
-import * as fs from 'fs-extra'; // Changed to fs-extra for better file system operations
-import * as path from 'path';
-import * as os from 'os'; // Added import
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { logger } from './logger'; // Corrected import
-import * as esbuild from 'esbuild'; // Added import for esbuild
+import { execSync, spawn } from "child_process";
+import * as fsPromises from "fs/promises";
+import * as fs from "fs-extra"; // Changed to fs-extra for better file system operations
+import * as path from "path";
+import * as os from "os"; // Added import
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { logger } from "./logger"; // Corrected import
+import * as esbuild from "esbuild"; // Added import for esbuild
 
 // Assuming these types are defined elsewhere or should be defined
 interface ResolverCompilationResult {
@@ -15,10 +15,10 @@ interface ResolverCompilationResult {
 }
 
 interface ResolverInfo {
-    typescriptPath: string;
-    javascriptPath: string;
-    s3Key: string;
-    // Add other necessary properties if any
+  typescriptPath: string;
+  javascriptPath: string;
+  s3Key: string;
+  // Add other necessary properties if any
 }
 
 export interface ResolverCompilerOptions {
@@ -50,7 +50,7 @@ class ResolverCompiler {
   private debugMode: boolean; // Added debugMode
   private constantsDir?: string; // Optional constants directory
 
-  private readonly gqlTypesSourceFileName = 'gqlTypes.ts';
+  private readonly gqlTypesSourceFileName = "gqlTypes.ts";
 
   constructor(options: ResolverCompilerOptions) {
     this.logger = options.logger;
@@ -68,18 +68,23 @@ class ResolverCompiler {
 
     // buildDir is a temporary directory for the entire compilation process of this instance.
     // It will be created by setupBuildDirectory and cleaned up by cleanupBuildDirectory.
-    this.buildDir = path.join(os.tmpdir(), `nl_resolver_build_${this.stage}_${Date.now()}`);
+    this.buildDir = path.join(
+      os.tmpdir(),
+      `nl_resolver_build_${this.stage}_${Date.now()}`,
+    );
   }
 
   private getAppName(): string {
     // this.baseResolverDir is like /workspaces/nl-mono-repo/packages/cloudwatchlive/backend/resolvers
     const parts = this.baseResolverDir.split(path.sep);
-    const packagesIndex = parts.indexOf('packages');
+    const packagesIndex = parts.indexOf("packages");
     if (packagesIndex !== -1 && packagesIndex + 1 < parts.length) {
-        return parts[packagesIndex + 1];
+      return parts[packagesIndex + 1];
     }
-    logger.warning(`Could not determine app name from baseResolverDir: ${this.baseResolverDir}, defaulting to 'unknown'`);
-    return 'unknown';
+    logger.warning(
+      `Could not determine app name from baseResolverDir: ${this.baseResolverDir}, defaulting to 'unknown'`,
+    );
+    return "unknown";
   }
 
   private async recursiveCopy(src: string, dest: string): Promise<void> {
@@ -99,9 +104,9 @@ class ResolverCompiler {
   // Assume findLocalTypescriptCompiler is defined
   private async findLocalTypescriptCompiler(): Promise<string> {
     // Placeholder implementation
-    return 'tsc';
+    return "tsc";
   }
-  
+
   // Assume addHeaderToJs is defined
   private addHeaderToJs(jsContent: string, sourceFilePath: string): string {
     const relativeSourcePath = path.relative(process.cwd(), sourceFilePath);
@@ -116,51 +121,76 @@ class ResolverCompiler {
  *                                                                                                                    *
  **********************************************************************************************************************/
     `;
-    return header.trim() + '\n\n' + jsContent;
+    return header.trim() + "\n\n" + jsContent;
   }
 
   // Assume uploadToS3 is defined
-  private async uploadToS3(s3Key: string, content: string, contentType: string): Promise<void> {
+  private async uploadToS3(
+    s3Key: string,
+    content: string,
+    contentType: string,
+  ): Promise<void> {
     // Placeholder implementation
-    await this.s3Client.send(new PutObjectCommand({
+    await this.s3Client.send(
+      new PutObjectCommand({
         Bucket: this.s3BucketName,
         Key: s3Key,
         Body: content,
-        ContentType: contentType
-    }));
+        ContentType: contentType,
+      }),
+    );
   }
 
-
-  private async runTsc(cwd: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
+  private async runTsc(
+    cwd: string,
+    args: string[],
+  ): Promise<{ stdout: string; stderr: string }> {
     const tscPath = await this.findLocalTypescriptCompiler();
     return new Promise((resolve, reject) => {
-      const process = spawn(tscPath, args, { cwd, stdio: 'pipe' });
-      let stdout = '';
-      let stderr = '';
-      process.stdout.on('data', (data) => (stdout += data.toString()));
-      process.stderr.on('data', (data) => (stderr += data.toString()));
-      process.on('close', (code) => {
+      const process = spawn(tscPath, args, { cwd, stdio: "pipe" });
+      let stdout = "";
+      let stderr = "";
+      process.stdout.on("data", (data) => (stdout += data.toString()));
+      process.stderr.on("data", (data) => (stderr += data.toString()));
+      process.on("close", (code) => {
         if (code === 0) {
           resolve({ stdout, stderr });
         } else {
-          reject(new Error(`tsc exited with code ${code}\\\\nstdout: ${stdout}\\\\nstderr: ${stderr}`));
+          reject(
+            new Error(
+              `tsc exited with code ${code}\\\\nstdout: ${stdout}\\\\nstderr: ${stderr}`,
+            ),
+          );
         }
       });
-      process.on('error', (err) => reject(err));
+      process.on("error", (err) => reject(err));
     });
   }
 
   private async compileAndUploadSharedFile(): Promise<void> {
     if (!this.sharedFileName || !this.sharedFileS3Key) {
-      logger.debug('No shared file specified, skipping shared file compilation.');
+      logger.debug(
+        "No shared file specified, skipping shared file compilation.",
+      );
       return;
     }
     logger.success(`Compiling shared file: ${this.sharedFileName}`); // Essential log
     const sourceFilePath = path.join(this.baseResolverDir, this.sharedFileName);
-    const targetS3Key = path.posix.join(this.s3KeyPrefix, this.stage, this.sharedFileS3Key);
+    const targetS3Key = path.posix.join(
+      this.s3KeyPrefix,
+      this.stage,
+      this.sharedFileS3Key,
+    );
 
-    const tempCompileDir = path.join(this.buildDir, `__${path.basename(this.sharedFileName, '.ts')}Compilation`);
-    await fsPromises.rm(tempCompileDir, { recursive: true, force: true }).catch(() => { /* ignore if not exists */ });
+    const tempCompileDir = path.join(
+      this.buildDir,
+      `__${path.basename(this.sharedFileName, ".ts")}Compilation`,
+    );
+    await fsPromises
+      .rm(tempCompileDir, { recursive: true, force: true })
+      .catch(() => {
+        /* ignore if not exists */
+      });
     await fsPromises.mkdir(tempCompileDir, { recursive: true });
 
     const tempSourceFilePath = path.join(tempCompileDir, this.sharedFileName);
@@ -168,127 +198,181 @@ class ResolverCompiler {
 
     // Create package.json
     const packageJsonContent = {
-      name: `compile-${path.basename(this.sharedFileName, '.ts').toLowerCase()}`, // Ensure valid package name
-      version: '1.0.0',
+      name: `compile-${path.basename(this.sharedFileName, ".ts").toLowerCase()}`, // Ensure valid package name
+      version: "1.0.0",
       private: true,
-      type: 'module',
+      type: "module",
       dependencies: {
-        "graphql": "^16.9.0" // Version from root package.json
+        graphql: "^16.9.0", // Version from root package.json
       },
       devDependencies: {
-        "typescript": "5.5.4" // Version from root package.json
-      }
+        typescript: "5.5.4", // Version from root package.json
+      },
     };
-    const packageJsonPath = path.join(tempCompileDir, 'package.json');
-    await fsPromises.writeFile(packageJsonPath, JSON.stringify(packageJsonContent, null, 2));
-    logger.debug(`Created package.json for ${this.sharedFileName} in ${tempCompileDir}`);
+    const packageJsonPath = path.join(tempCompileDir, "package.json");
+    await fsPromises.writeFile(
+      packageJsonPath,
+      JSON.stringify(packageJsonContent, null, 2),
+    );
+    logger.debug(
+      `Created package.json for ${this.sharedFileName} in ${tempCompileDir}`,
+    );
 
     // Install dependencies
     try {
-      logger.debug(`Installing dependencies for ${this.sharedFileName} in ${tempCompileDir}...`); // Essential log
-      const yarnInstallOutput = execSync('yarn install --ignore-scripts --no-progress --non-interactive', {
-        cwd: tempCompileDir,
-        stdio: this.debugMode ? 'pipe' : 'ignore', // Conditional stdio
-        encoding: 'utf8'
-      });
+      logger.debug(
+        `Installing dependencies for ${this.sharedFileName} in ${tempCompileDir}...`,
+      ); // Essential log
+      const yarnInstallOutput = execSync(
+        "yarn install --ignore-scripts --no-progress --non-interactive",
+        {
+          cwd: tempCompileDir,
+          stdio: this.debugMode ? "pipe" : "ignore", // Conditional stdio
+          encoding: "utf8",
+        },
+      );
       logger.success(`Yarn install completed for ${this.sharedFileName}.`); // Essential log
-      if (yarnInstallOutput) logger.debug(`Yarn install output for ${this.sharedFileName}:\\n${yarnInstallOutput}`);
+      if (yarnInstallOutput)
+        logger.debug(
+          `Yarn install output for ${this.sharedFileName}:\\n${yarnInstallOutput}`,
+        );
     } catch (error: any) {
-      logger.error(`Yarn install failed for ${this.sharedFileName} in ${tempCompileDir}: ${(error as Error).message}`);
-      if (error.stdout) logger.error(`Yarn stdout:\n${error.stdout.toString()}`);
-      if (error.stderr) logger.error(`Yarn stderr:\n${error.stderr.toString()}`);
+      logger.error(
+        `Yarn install failed for ${this.sharedFileName} in ${tempCompileDir}: ${(error as Error).message}`,
+      );
+      if (error.stdout)
+        logger.error(`Yarn stdout:\n${error.stdout.toString()}`);
+      if (error.stderr)
+        logger.error(`Yarn stderr:\n${error.stderr.toString()}`);
       await fsPromises.rm(tempCompileDir, { recursive: true, force: true });
       throw error;
     }
 
     const tsconfigContent = {
       compilerOptions: {
-        target: 'ES2020',
-        module: 'ESNext',
-        moduleResolution: 'node',
+        target: "ES2020",
+        module: "ESNext",
+        moduleResolution: "node",
         esModuleInterop: true,
         strict: true,
         skipLibCheck: true,
         declaration: false,
         sourceMap: false,
-        outDir: '.', // Output .js file in the same directory (tempCompileDir)
-        rootDir: '.',
+        outDir: ".", // Output .js file in the same directory (tempCompileDir)
+        rootDir: ".",
         resolveJsonModule: true, // Often useful
       },
       files: [this.sharedFileName], // Compile only the specific file
-      exclude: ["node_modules"]
+      exclude: ["node_modules"],
     };
-    const tsconfigPath = path.join(tempCompileDir, 'tsconfig.json');
-    await fsPromises.writeFile(tsconfigPath, JSON.stringify(tsconfigContent, null, 2));
-    logger.debug(`Created tsconfig.json for ${this.sharedFileName} in ${tempCompileDir}`);
+    const tsconfigPath = path.join(tempCompileDir, "tsconfig.json");
+    await fsPromises.writeFile(
+      tsconfigPath,
+      JSON.stringify(tsconfigContent, null, 2),
+    );
+    logger.debug(
+      `Created tsconfig.json for ${this.sharedFileName} in ${tempCompileDir}`,
+    );
 
     try {
-      logger.debug(`Running yarn tsc for ${this.sharedFileName} in ${tempCompileDir}`); // Essential log
-      const tscOutput = execSync('yarn tsc --project tsconfig.json --listEmittedFiles', {
-        cwd: tempCompileDir,
-        stdio: this.debugMode ? 'pipe' : 'ignore', // Conditional stdio
-        encoding: 'utf8'
-      });
+      logger.debug(
+        `Running yarn tsc for ${this.sharedFileName} in ${tempCompileDir}`,
+      ); // Essential log
+      const tscOutput = execSync(
+        "yarn tsc --project tsconfig.json --listEmittedFiles",
+        {
+          cwd: tempCompileDir,
+          stdio: this.debugMode ? "pipe" : "ignore", // Conditional stdio
+          encoding: "utf8",
+        },
+      );
       logger.success(`TSC compilation completed for ${this.sharedFileName}.`); // Essential log
-      if (tscOutput) logger.debug(`TSC Output for ${this.sharedFileName}:\\n${tscOutput}`);
+      if (tscOutput)
+        logger.debug(`TSC Output for ${this.sharedFileName}:\\n${tscOutput}`);
     } catch (error: any) {
-      logger.error(`Error compiling ${this.sharedFileName}: ${(error as Error).message}`);
+      logger.error(
+        `Error compiling ${this.sharedFileName}: ${(error as Error).message}`,
+      );
       if (error.stdout) logger.error(`TSC stdout:\n${error.stdout.toString()}`);
       if (error.stderr) logger.error(`TSC stderr:\n${error.stderr.toString()}`);
       // Log contents of tempCompileDir for debugging
       try {
-        const dirContents = await fsPromises.readdir(tempCompileDir, {withFileTypes: true});
+        const dirContents = await fsPromises.readdir(tempCompileDir, {
+          withFileTypes: true,
+        });
         logger.error(`Contents of ${tempCompileDir} on failure:`);
-        dirContents.forEach(entry => logger.error(`${entry.name}${entry.isDirectory() ? '/' : ''}`));
+        dirContents.forEach((entry) =>
+          logger.error(`${entry.name}${entry.isDirectory() ? "/" : ""}`),
+        );
       } catch (lsError) {
-        logger.error(`Could not list contents of ${tempCompileDir}: ${(lsError as Error).message}`);
+        logger.error(
+          `Could not list contents of ${tempCompileDir}: ${(lsError as Error).message}`,
+        );
       }
       await fsPromises.rm(tempCompileDir, { recursive: true, force: true });
       throw error;
     }
 
-    const compiledJsFileName = `${path.basename(this.sharedFileName, '.ts')}.js`;
+    const compiledJsFileName = `${path.basename(this.sharedFileName, ".ts")}.js`;
     const compiledJsPath = path.join(tempCompileDir, compiledJsFileName);
 
     try {
-        await fsPromises.access(compiledJsPath, fs.constants.F_OK);
-        logger.debug(`Successfully found compiled file: ${compiledJsPath}`);
+      await fsPromises.access(compiledJsPath, fs.constants.F_OK);
+      logger.debug(`Successfully found compiled file: ${compiledJsPath}`);
     } catch (e) {
-        logger.error(`Compiled file not found at ${compiledJsPath} after tsc run.`);
-        logger.error(`Contents of ${tempCompileDir} (if not logged above):`);
-        try {
-            const dirContents = await fsPromises.readdir(tempCompileDir);
-            logger.error(dirContents.join('\\n'));
-        } catch (lsError) {
-            logger.error(`Could not list contents of ${tempCompileDir}: ${(lsError as Error).message}`);
-        }
-        await fsPromises.rm(tempCompileDir, { recursive: true, force: true });
-        throw new Error(`Compilation output ${compiledJsFileName} not found in ${tempCompileDir}.`);
+      logger.error(
+        `Compiled file not found at ${compiledJsPath} after tsc run.`,
+      );
+      logger.error(`Contents of ${tempCompileDir} (if not logged above):`);
+      try {
+        const dirContents = await fsPromises.readdir(tempCompileDir);
+        logger.error(dirContents.join("\\n"));
+      } catch (lsError) {
+        logger.error(
+          `Could not list contents of ${tempCompileDir}: ${(lsError as Error).message}`,
+        );
+      }
+      await fsPromises.rm(tempCompileDir, { recursive: true, force: true });
+      throw new Error(
+        `Compilation output ${compiledJsFileName} not found in ${tempCompileDir}.`,
+      );
     }
 
-    let jsContent = await fsPromises.readFile(compiledJsPath, 'utf-8');
+    let jsContent = await fsPromises.readFile(compiledJsPath, "utf-8");
     jsContent = this.addHeaderToJs(jsContent, sourceFilePath);
 
     // Save locally (always)
     if (this.sharedFileS3Key) {
       const appName = this.getAppName();
       // The file is at packages/deploy/utils/resolver-compiler.ts, so root is 4 levels up
-      const monorepoRoot = path.join(__dirname, '..', '..', '..', '..');
+      const monorepoRoot = path.join(__dirname, "..", "..", "..", "..");
       // Save shared file to a 'lib' dir to distinguish from resolvers
-      const localSavePathBaseForApp = path.join(monorepoRoot, 'packages', 'deploy', 'packages', appName, 'lib');
-      const localSavePath = path.join(localSavePathBaseForApp, this.sharedFileS3Key);
+      const localSavePathBaseForApp = path.join(
+        monorepoRoot,
+        "packages",
+        "deploy",
+        "packages",
+        appName,
+        "lib",
+      );
+      const localSavePath = path.join(
+        localSavePathBaseForApp,
+        this.sharedFileS3Key,
+      );
       await this.saveCompiledFileLocally(localSavePath, jsContent);
     }
 
-    await this.uploadToS3(targetS3Key, jsContent, 'application/javascript');
-    logger.success(`Uploaded ${compiledJsFileName} to S3: s3://${this.s3BucketName}/${targetS3Key}`); // Essential log
+    await this.uploadToS3(targetS3Key, jsContent, "application/javascript");
+    logger.success(
+      `Uploaded ${compiledJsFileName} to S3: s3://${this.s3BucketName}/${targetS3Key}`,
+    ); // Essential log
 
     await fsPromises.rm(tempCompileDir, { recursive: true, force: true });
     logger.debug(`Cleaned up temp compile directory: ${tempCompileDir}`);
   }
 
   public async compileAndUploadResolvers(): Promise<void> {
-    logger.success('Starting resolver compilation and upload...'); // Essential log
+    logger.success("Starting resolver compilation and upload..."); // Essential log
     await this.setupBuildDirectory();
     await this.compileAndUploadSharedFile();
 
@@ -296,9 +380,18 @@ class ResolverCompiler {
     logger.debug(`Processing ${totalFiles} resolver files...`); // Essential log
 
     const appName = this.getAppName();
-    const monorepoRoot = path.join(__dirname, '..', '..', '..', '..');
-    const localSavePathBaseForApp = path.join(monorepoRoot, 'packages', 'deploy', 'packages', appName, 'resolvers');
-    logger.debug(`Compiled resolvers will be saved to: ${localSavePathBaseForApp}`);
+    const monorepoRoot = path.join(__dirname, "..", "..", "..", "..");
+    const localSavePathBaseForApp = path.join(
+      monorepoRoot,
+      "packages",
+      "deploy",
+      "packages",
+      appName,
+      "resolvers",
+    );
+    logger.debug(
+      `Compiled resolvers will be saved to: ${localSavePathBaseForApp}`,
+    );
 
     const uploadedResolvers: string[] = [];
     const failedResolvers: { file: string; error: string }[] = [];
@@ -307,65 +400,103 @@ class ResolverCompiler {
       const resolverFileRelativePath = this.resolverFiles[index];
 
       if (resolverFileRelativePath === this.sharedFileName) {
-        logger.debug(`Skipping inlining/recompilation of shared file: ${resolverFileRelativePath} in main loop.`);
+        logger.debug(
+          `Skipping inlining/recompilation of shared file: ${resolverFileRelativePath} in main loop.`,
+        );
         continue;
       }
 
-      logger.debug(`[${index + 1}/${totalFiles}] Processing resolver: ${resolverFileRelativePath}...`); // Essential log
-      const resolverAbsolutePath = path.join(this.baseResolverDir, resolverFileRelativePath);
+      logger.debug(
+        `[${index + 1}/${totalFiles}] Processing resolver: ${resolverFileRelativePath}...`,
+      ); // Essential log
+      const resolverAbsolutePath = path.join(
+        this.baseResolverDir,
+        resolverFileRelativePath,
+      );
 
       try {
-        const originalResolverSourceCode = await fsPromises.readFile(resolverAbsolutePath, 'utf-8');
-        
-        // Pass the original source code and its absolute path for context
-        const compiledJsContent = await this.compileTypeScript(
-          originalResolverSourceCode, 
-          resolverAbsolutePath 
+        const originalResolverSourceCode = await fsPromises.readFile(
+          resolverAbsolutePath,
+          "utf-8",
         );
 
-        const s3Key = path.posix.join(this.s3KeyPrefix, this.stage, resolverFileRelativePath.replace('.ts', '.js'));
-        
+        // Pass the original source code and its absolute path for context
+        const compiledJsContent = await this.compileTypeScript(
+          originalResolverSourceCode,
+          resolverAbsolutePath,
+        );
+
+        const s3Key = path.posix.join(
+          this.s3KeyPrefix,
+          this.stage,
+          resolverFileRelativePath.replace(".ts", ".js"),
+        );
+
         // Always save the compiled file locally to the app's deploy package
-        const localSavePath = path.join(localSavePathBaseForApp, resolverFileRelativePath.replace('.ts', '.js'));
+        const localSavePath = path.join(
+          localSavePathBaseForApp,
+          resolverFileRelativePath.replace(".ts", ".js"),
+        );
         await this.saveCompiledFileLocally(localSavePath, compiledJsContent);
 
         // Now, upload the same content to S3, ensuring consistency
-        await this.uploadToS3(s3Key, compiledJsContent, 'application/javascript');
-        logger.success(`✓ Uploaded ${resolverFileRelativePath} to S3: s3://${this.s3BucketName}/${s3Key}`); // Essential log
+        await this.uploadToS3(
+          s3Key,
+          compiledJsContent,
+          "application/javascript",
+        );
+        logger.success(
+          `✓ Uploaded ${resolverFileRelativePath} to S3: s3://${this.s3BucketName}/${s3Key}`,
+        ); // Essential log
         uploadedResolvers.push(s3Key);
-
       } catch (error: any) {
         const errorMsg = `Failed to compile or upload resolver ${resolverFileRelativePath}: ${error.message}`;
         logger.error(errorMsg);
-        failedResolvers.push({ file: resolverFileRelativePath, error: error.message });
+        failedResolvers.push({
+          file: resolverFileRelativePath,
+          error: error.message,
+        });
       }
     }
-    
+
     // Report summary
     logger.success(`\n📦 Resolver Upload Summary:`);
-    logger.success(`   ✓ Successfully uploaded: ${uploadedResolvers.length} resolvers`);
+    logger.success(
+      `   ✓ Successfully uploaded: ${uploadedResolvers.length} resolvers`,
+    );
     if (failedResolvers.length > 0) {
-      logger.error(`   ✗ Failed to upload: ${failedResolvers.length} resolvers`);
+      logger.error(
+        `   ✗ Failed to upload: ${failedResolvers.length} resolvers`,
+      );
       failedResolvers.forEach(({ file, error }) => {
         logger.error(`     - ${file}: ${error}`);
       });
-      throw new Error(`Failed to upload ${failedResolvers.length} resolver(s). Deployment cannot continue.`);
+      throw new Error(
+        `Failed to upload ${failedResolvers.length} resolver(s). Deployment cannot continue.`,
+      );
     }
-    
-    logger.success('✓ All resolvers compiled and uploaded successfully.\n');
+
+    logger.success("✓ All resolvers compiled and uploaded successfully.\n");
     // await this.cleanupBuildDirectory(); // Cleanup buildDir after all operations
   }
 
-  private async saveCompiledFileLocally(localPath: string, content: string): Promise<void> {
+  private async saveCompiledFileLocally(
+    localPath: string,
+    content: string,
+  ): Promise<void> {
     try {
       await fsPromises.mkdir(path.dirname(localPath), { recursive: true });
       await fsPromises.writeFile(localPath, content);
       logger.debug(`Saved compiled file to ${localPath}`);
     } catch (error) {
       if (error instanceof Error) {
-        logger.error(`Failed to save compiled file to ${localPath}: ${error.message}`);
+        logger.error(
+          `Failed to save compiled file to ${localPath}: ${error.message}`,
+        );
       } else {
-        logger.error(`Failed to save compiled file to ${localPath}: ${String(error)}`);
+        logger.error(
+          `Failed to save compiled file to ${localPath}: ${String(error)}`,
+        );
       }
       throw error;
     }
@@ -377,52 +508,72 @@ class ResolverCompiler {
     await fsPromises.mkdir(this.buildDir, { recursive: true });
 
     // No need to copy gqlTypes.ts - we'll read it directly from its location when needed
-    
+
     // Centralize build configuration and dependency installation
     await this.setupBuildConfiguration();
 
     try {
-        logger.debug(`Installing dependencies in shared build directory: ${this.buildDir}...`);
-        // Removed --frozen-lockfile as we generate the lockfile in this temp environment
-        const yarnOutput = execSync('yarn install --ignore-scripts --no-progress --non-interactive', { 
-            cwd: this.buildDir, 
-            stdio: 'pipe', // Always pipe stdio to catch errors
-            encoding: 'utf8' 
-        });
-        logger.success(`Yarn install completed for shared build directory.`);
-        if (yarnOutput) {
-            logger.debug(`Yarn install output for shared build directory:\n${yarnOutput}`);
-        }
+      logger.debug(
+        `Installing dependencies in shared build directory: ${this.buildDir}...`,
+      );
+      // Removed --frozen-lockfile as we generate the lockfile in this temp environment
+      const yarnOutput = execSync(
+        "yarn install --ignore-scripts --no-progress --non-interactive",
+        {
+          cwd: this.buildDir,
+          stdio: "pipe", // Always pipe stdio to catch errors
+          encoding: "utf8",
+        },
+      );
+      logger.success(`Yarn install completed for shared build directory.`);
+      if (yarnOutput) {
+        logger.debug(
+          `Yarn install output for shared build directory:\n${yarnOutput}`,
+        );
+      }
     } catch (error: any) {
-        logger.error(`Yarn install failed in shared build directory ${this.buildDir}: ${error.message}`);
-        if (error.stdout) logger.error(`Yarn stdout:\n${error.stdout.toString()}`);
-        if (error.stderr) logger.error(`Yarn stderr:\n${error.stderr.toString()}`);
-        throw new Error(`Failed to install dependencies in build directory: ${error.message}`);
+      logger.error(
+        `Yarn install failed in shared build directory ${this.buildDir}: ${error.message}`,
+      );
+      if (error.stdout)
+        logger.error(`Yarn stdout:\n${error.stdout.toString()}`);
+      if (error.stderr)
+        logger.error(`Yarn stderr:\n${error.stderr.toString()}`);
+      throw new Error(
+        `Failed to install dependencies in build directory: ${error.message}`,
+      );
     }
   }
 
   private getResolverNameFromPath(relativePath: string): string {
-    const filename = path.basename(relativePath, '.ts');
+    const filename = path.basename(relativePath, ".ts");
     let fieldName = filename;
-    if (filename.includes('.')) {
-      fieldName = filename.split('.')[1];
-    } else if (filename.includes('_')) {
-      fieldName = filename.split('_')[1];
+    if (filename.includes(".")) {
+      fieldName = filename.split(".")[1];
+    } else if (filename.includes("_")) {
+      fieldName = filename.split("_")[1];
     }
     return fieldName;
   }
 
-  private async setupBuildConfiguration(): Promise<void> { // This configures this.buildDir
+  private async setupBuildConfiguration(): Promise<void> {
+    // This configures this.buildDir
     // Try to find the source package.json to extract dependencies
     // Since resolvers are now in templates, we need to look for the actual backend package
     // For CWL: templates are in packages/deploy/templates/cwl/resources/AppSync/resolvers
     // Backend is in packages/cloudwatchlive/backend/package.json
-    
+
     // Extract app name from baseResolverDir to locate the correct backend package
     const appName = this.getAppName();
-    const monorepoRoot = path.join(__dirname, '..', '..', '..');
-    const sourcePackageJsonPath = path.join(monorepoRoot, 'packages', appName, 'backend', 'package.json');
-    
+    const monorepoRoot = path.join(__dirname, "..", "..", "..");
+    const sourcePackageJsonPath = path.join(
+      monorepoRoot,
+      "packages",
+      appName,
+      "backend",
+      "package.json",
+    );
+
     let sourceDependencies: Record<string, string> = {};
     let sourceDevDependencies: Record<string, string> = {};
 
@@ -432,45 +583,60 @@ class ResolverCompiler {
         const sourcePkg = await fs.readJson(sourcePackageJsonPath); // fs-extra's readJson
         sourceDependencies = sourcePkg.dependencies || {};
         sourceDevDependencies = sourcePkg.devDependencies || {}; // Read devDependencies for types
-        logger.debug(`Successfully read dependencies from source package.json: ${sourcePackageJsonPath}`);
+        logger.debug(
+          `Successfully read dependencies from source package.json: ${sourcePackageJsonPath}`,
+        );
       } else {
-        logger.warning(`Source package.json not found at: ${sourcePackageJsonPath}. Will use default dependencies for temp build.`);
+        logger.warning(
+          `Source package.json not found at: ${sourcePackageJsonPath}. Will use default dependencies for temp build.`,
+        );
       }
     } catch (error: any) {
-      logger.warning(`Error reading source package.json at ${sourcePackageJsonPath}: ${error.message}. Proceeding with default dependencies.`);
+      logger.warning(
+        `Error reading source package.json at ${sourcePackageJsonPath}: ${error.message}. Proceeding with default dependencies.`,
+      );
     }
 
     const packageJsonDependencies: Record<string, string> = {
       // Start with defaults, then override/extend with source dependencies
       "@aws-appsync/utils": "^1.1.1", // Default, might be overridden
-      "graphql": "^16.9.0",         // Default, might be overridden
-      "zod": "^3.23.0",              // Default, might be overridden
+      graphql: "^16.9.0", // Default, might be overridden
+      zod: "^3.23.0", // Default, might be overridden
     };
-    
+
     // Add source dependencies, but filter out local workspace packages
-    const localPackages = new Set(['shared', 'cwlfrontend', 'cwlbackend']); // Add any other local packages here
+    const localPackages = new Set(["shared", "cwlfrontend", "cwlbackend"]); // Add any other local packages here
     if (sourceDependencies) {
       for (const [pkg, version] of Object.entries(sourceDependencies)) {
         if (!localPackages.has(pkg)) {
           packageJsonDependencies[pkg] = version;
         } else {
-          logger.debug(`Excluding local package from temp build dependencies: ${pkg}`);
+          logger.debug(
+            `Excluding local package from temp build dependencies: ${pkg}`,
+          );
         }
       }
     }
-    if (sourceDevDependencies) { // Also filter devDependencies
-        for (const [pkg, version] of Object.entries(sourceDevDependencies)) {
-            if (!localPackages.has(pkg) && !packageJsonDependencies[pkg]) { // Avoid overwriting if already in deps
-                packageJsonDependencies[pkg] = version;
-            } else if (localPackages.has(pkg)) {
-                logger.debug(`Excluding local package from temp build devDependencies: ${pkg}`);
-            }
+    if (sourceDevDependencies) {
+      // Also filter devDependencies
+      for (const [pkg, version] of Object.entries(sourceDevDependencies)) {
+        if (!localPackages.has(pkg) && !packageJsonDependencies[pkg]) {
+          // Avoid overwriting if already in deps
+          packageJsonDependencies[pkg] = version;
+        } else if (localPackages.has(pkg)) {
+          logger.debug(
+            `Excluding local package from temp build devDependencies: ${pkg}`,
+          );
         }
+      }
     }
 
     // Clean up any undefined/null values that might have resulted from the spread if keys existed with no values
     for (const key in packageJsonDependencies) {
-      if (packageJsonDependencies[key] === undefined || packageJsonDependencies[key] === null) {
+      if (
+        packageJsonDependencies[key] === undefined ||
+        packageJsonDependencies[key] === null
+      ) {
         delete packageJsonDependencies[key];
       }
     }
@@ -481,13 +647,17 @@ class ResolverCompiler {
       type: "module",
       private: true,
       dependencies: packageJsonDependencies,
-      devDependencies: { // These are for the build process in temp env
-        "typescript": "5.5.4",        // Updated: Aligned with root, for compilation
-        "@types/node": "^20.12.0"     // Added: For Node.js globals like 'process'
-      }
+      devDependencies: {
+        // These are for the build process in temp env
+        typescript: "5.5.4", // Updated: Aligned with root, for compilation
+        "@types/node": "^20.12.0", // Added: For Node.js globals like 'process'
+      },
     };
-    
-    await fsPromises.writeFile(path.join(this.buildDir, 'package.json'), JSON.stringify(packageJson, null, 2));
+
+    await fsPromises.writeFile(
+      path.join(this.buildDir, "package.json"),
+      JSON.stringify(packageJson, null, 2),
+    );
 
     const tsConfig = {
       compilerOptions: {
@@ -498,167 +668,250 @@ class ResolverCompiler {
         forceConsistentCasingInFileNames: true,
         strict: true,
         skipLibCheck: true,
-        outDir: "./dist", 
-        rootDir: ".", 
-        baseUrl: ".", 
+        outDir: "./dist",
+        rootDir: ".",
+        baseUrl: ".",
         paths: {
-          "gqlTypes": ["./gqlTypes.ts"], 
+          gqlTypes: ["./gqlTypes.ts"],
           // Ensure paths here correctly point to files copied into this.buildDir
-        }
+        },
       },
       include: ["**/*.ts"],
-      exclude: ["node_modules", "dist"]
+      exclude: ["node_modules", "dist"],
     };
-    await fsPromises.writeFile(path.join(this.buildDir, 'tsconfig.json'), JSON.stringify(tsConfig, null, 2));
-    logger.debug('Created package.json and tsconfig.json in build directory');
+    await fsPromises.writeFile(
+      path.join(this.buildDir, "tsconfig.json"),
+      JSON.stringify(tsConfig, null, 2),
+    );
+    logger.debug("Created package.json and tsconfig.json in build directory");
   }
 
-  private async compileTypeScript(originalResolverSourceCode: string, resolverAbsolutePath: string): Promise<string> {
+  private async compileTypeScript(
+    originalResolverSourceCode: string,
+    resolverAbsolutePath: string,
+  ): Promise<string> {
     const resolverFileName = path.basename(resolverAbsolutePath);
-    logger.debug(`Starting compilation for: ${resolverFileName} (from ${resolverAbsolutePath}) using shared build directory: ${this.buildDir}`);
-    
+    logger.debug(
+      `Starting compilation for: ${resolverFileName} (from ${resolverAbsolutePath}) using shared build directory: ${this.buildDir}`,
+    );
+
     let codeToCompile = originalResolverSourceCode;
 
     // Check for 'gqlTypes' import and replace with proper path (both exact match and relative path)
-    const gqlTypesImportRegex1 = /import\s+\{([^}]*)\}\s+from\s+['\"]gqlTypes['\"];?\s*\n?/g;
-    const gqlTypesImportRegex2 = /import\s+\{([^}]*)\}\s+from\s+['\"][^'"]*\/types\/gqlTypes['\"];?\s*\n?/g;
-    
-    const hasGqlTypesImport = gqlTypesImportRegex1.test(originalResolverSourceCode) || gqlTypesImportRegex2.test(originalResolverSourceCode);
-    
+    const gqlTypesImportRegex1 =
+      /import\s+\{([^}]*)\}\s+from\s+['\"]gqlTypes['\"];?\s*\n?/g;
+    const gqlTypesImportRegex2 =
+      /import\s+\{([^}]*)\}\s+from\s+['\"][^'"]*\/types\/gqlTypes['\"];?\s*\n?/g;
+
+    const hasGqlTypesImport =
+      gqlTypesImportRegex1.test(originalResolverSourceCode) ||
+      gqlTypesImportRegex2.test(originalResolverSourceCode);
+
     if (hasGqlTypesImport) {
-      logger.debug(`Found import from 'gqlTypes' in ${resolverFileName}. Replacing with proper path.`);
-      
+      logger.debug(
+        `Found import from 'gqlTypes' in ${resolverFileName}. Replacing with proper path.`,
+      );
+
       // Replace both types of imports with a relative path to the generated types
       codeToCompile = codeToCompile.replace(
-        gqlTypesImportRegex1, 
-        `import { $1 } from './gqlTypes.js';\n`
+        gqlTypesImportRegex1,
+        `import { $1 } from './gqlTypes.js';\n`,
       );
       codeToCompile = codeToCompile.replace(
-        gqlTypesImportRegex2, 
-        `import { $1 } from './gqlTypes.js';\n`
+        gqlTypesImportRegex2,
+        `import { $1 } from './gqlTypes.js';\n`,
       );
-      
+
       // Read gqlTypes.ts directly from its actual location in the types directory
       // Use the frontend-generated gqlTypes.ts (corrected path with packages/)
-      const gqlTypesSourcePath = path.resolve(__dirname, '../../../packages/cloudwatchlive/frontend/src/types/gqlTypes.ts');
-      const targetGqlTypesPath = path.join(this.buildDir, 'gqlTypes.ts');
-      
+      const gqlTypesSourcePath = path.resolve(
+        __dirname,
+        "../../../packages/cloudwatchlive/frontend/src/types/gqlTypes.ts",
+      );
+      const targetGqlTypesPath = path.join(this.buildDir, "gqlTypes.ts");
+
       if (fs.existsSync(gqlTypesSourcePath)) {
         await fsPromises.copyFile(gqlTypesSourcePath, targetGqlTypesPath);
-        logger.debug(`Copied gqlTypes.ts to build directory for ${resolverFileName}.`);
+        logger.debug(
+          `Copied gqlTypes.ts to build directory for ${resolverFileName}.`,
+        );
       } else {
-        logger.error(`gqlTypes.ts not found at ${gqlTypesSourcePath} for ${resolverFileName}.`);
+        logger.error(
+          `gqlTypes.ts not found at ${gqlTypesSourcePath} for ${resolverFileName}.`,
+        );
         throw new Error(`gqlTypes.ts not found: ${gqlTypesSourcePath}`);
       }
     } else {
-      logger.debug(`No import from 'gqlTypes' found in ${resolverFileName}. Compiling as is.`);
+      logger.debug(
+        `No import from 'gqlTypes' found in ${resolverFileName}. Compiling as is.`,
+      );
     }
 
     // Check for constants imports and replace with proper paths
-    const constantsImportRegex = /import\s+\{([^}]*)\}\s+from\s+['\"][^'"]*\/constants\/([^'"]*)['\"];?\s*\n?/g;
+    const constantsImportRegex =
+      /import\s+\{([^}]*)\}\s+from\s+['\"][^'"]*\/constants\/([^'"]*)['\"];?\s*\n?/g;
     let constantsMatch;
-    while ((constantsMatch = constantsImportRegex.exec(originalResolverSourceCode)) !== null) {
+    while (
+      (constantsMatch = constantsImportRegex.exec(
+        originalResolverSourceCode,
+      )) !== null
+    ) {
       const importedItems = constantsMatch[1];
       const constantsFile = constantsMatch[2];
       const fullImportStatement = constantsMatch[0];
-      
-      logger.debug(`Found constants import in ${resolverFileName}: ${fullImportStatement.trim()}`);
-      
+
+      logger.debug(
+        `Found constants import in ${resolverFileName}: ${fullImportStatement.trim()}`,
+      );
+
       // Replace the import with a local path
       codeToCompile = codeToCompile.replace(
         fullImportStatement,
-        `import { ${importedItems} } from './${constantsFile}.js';\n`
+        `import { ${importedItems} } from './${constantsFile}.js';\n`,
       );
-      
+
       // Copy the constants file to the build directory
       if (!this.constantsDir) {
-        logger.error(`Constants directory not provided for ${resolverFileName}. Please specify constantsDir in ResolverCompilerOptions.`);
-        throw new Error(`constantsDir must be specified in ResolverCompilerOptions to locate constants file: ${constantsFile}`);
+        logger.error(
+          `Constants directory not provided for ${resolverFileName}. Please specify constantsDir in ResolverCompilerOptions.`,
+        );
+        throw new Error(
+          `constantsDir must be specified in ResolverCompilerOptions to locate constants file: ${constantsFile}`,
+        );
       }
-      
-      const constantsSourcePath = path.join(this.constantsDir, `${constantsFile}.ts`);
-      const targetConstantsPath = path.join(this.buildDir, `${constantsFile}.ts`);
-      
+
+      const constantsSourcePath = path.join(
+        this.constantsDir,
+        `${constantsFile}.ts`,
+      );
+      const targetConstantsPath = path.join(
+        this.buildDir,
+        `${constantsFile}.ts`,
+      );
+
       if (fs.existsSync(constantsSourcePath)) {
         await fsPromises.copyFile(constantsSourcePath, targetConstantsPath);
-        logger.debug(`Copied ${constantsFile}.ts to build directory for ${resolverFileName}.`);
+        logger.debug(
+          `Copied ${constantsFile}.ts to build directory for ${resolverFileName}.`,
+        );
       } else {
-        logger.error(`Constants file not found at ${constantsSourcePath} for ${resolverFileName}.`);
+        logger.error(
+          `Constants file not found at ${constantsSourcePath} for ${resolverFileName}.`,
+        );
         throw new Error(`Constants file not found: ${constantsSourcePath}`);
       }
     }
-    
+
     const tempResolverPath = path.join(this.buildDir, resolverFileName);
     await fsPromises.writeFile(tempResolverPath, codeToCompile);
-    logger.debug(`Wrote (potentially modified) ${resolverFileName} to ${tempResolverPath}`);
+    logger.debug(
+      `Wrote (potentially modified) ${resolverFileName} to ${tempResolverPath}`,
+    );
 
     // Dependencies are installed once in setupBuildDirectory.
-      
-    const esbuildConfig: esbuild.BuildOptions = { // Added type annotation
+
+    const esbuildConfig: esbuild.BuildOptions = {
+      // Added type annotation
       entryPoints: [tempResolverPath],
       bundle: true,
-      outfile: path.join(this.buildDir, 'dist', resolverFileName.replace('.ts', '.js')),
-      platform: 'node', 
-      format: 'esm', 
-      target: 'es2020', 
-      sourcemap: false, 
-      minify: false, 
-      tsconfig: path.join(this.buildDir, 'tsconfig.json'), 
-      external: ['@aws-appsync/utils'], 
-      logLevel: this.debugMode ? 'info' : 'silent', // Conditional logLevel
+      outfile: path.join(
+        this.buildDir,
+        "dist",
+        resolverFileName.replace(".ts", ".js"),
+      ),
+      platform: "node",
+      format: "esm",
+      target: "es2020",
+      sourcemap: false,
+      minify: false,
+      tsconfig: path.join(this.buildDir, "tsconfig.json"),
+      external: ["@aws-appsync/utils"],
+      logLevel: this.debugMode ? "info" : "silent", // Conditional logLevel
     };
-      
+
     try {
       logger.debug(`Running esbuild for ${resolverFileName}...`); // Essential log
       await esbuild.build(esbuildConfig);
       logger.success(`esbuild completed for ${resolverFileName}.`); // Essential log
 
       const compiledJsPath = esbuildConfig.outfile;
-      if (!compiledJsPath) { // Add this check
-        logger.error(`esbuildConfig.outfile is undefined after build for ${resolverFileName}. This should not happen if 'write: true'.`);
-        throw new Error(`esbuild output path is undefined for ${resolverFileName}`);
+      if (!compiledJsPath) {
+        // Add this check
+        logger.error(
+          `esbuildConfig.outfile is undefined after build for ${resolverFileName}. This should not happen if 'write: true'.`,
+        );
+        throw new Error(
+          `esbuild output path is undefined for ${resolverFileName}`,
+        );
       }
 
       try {
         await fsPromises.access(compiledJsPath, fs.constants.F_OK);
       } catch (e) {
-        logger.error(`Compiled file not found at ${compiledJsPath} after esbuild.`);
+        logger.error(
+          `Compiled file not found at ${compiledJsPath} after esbuild.`,
+        );
         throw new Error(`Compiled JS file not found for ${resolverFileName}`);
       }
-      
-      let jsContentWithHeader = await fsPromises.readFile(compiledJsPath, 'utf-8');
-      jsContentWithHeader = this.addHeaderToJs(jsContentWithHeader, resolverAbsolutePath);
+
+      let jsContentWithHeader = await fsPromises.readFile(
+        compiledJsPath,
+        "utf-8",
+      );
+      jsContentWithHeader = this.addHeaderToJs(
+        jsContentWithHeader,
+        resolverAbsolutePath,
+      );
 
       logger.debug(`Successfully read compiled JS for ${resolverFileName}`);
       return jsContentWithHeader;
     } catch (error: any) {
-      logger.error(`TypeScript compilation failed for ${resolverAbsolutePath}: ${error.message}`);
-      if (this.debugMode && error.stdout) logger.error(`Compilation stdout:\n${error.stdout.toString()}`);
-      if (this.debugMode && error.stderr) logger.error(`Compilation stderr:\n${error.stderr.toString()}`);
+      logger.error(
+        `TypeScript compilation failed for ${resolverAbsolutePath}: ${error.message}`,
+      );
+      if (this.debugMode && error.stdout)
+        logger.error(`Compilation stdout:\n${error.stdout.toString()}`);
+      if (this.debugMode && error.stderr)
+        logger.error(`Compilation stderr:\n${error.stderr.toString()}`);
       // Log contents of tempBuildDir for debugging if in debug mode
       if (this.debugMode) {
         try {
-          logger.error(`Contents of ${this.buildDir} on failure for ${resolverFileName}:`);
-          logger.error(execSync('ls -R', { cwd: this.buildDir, encoding: 'utf8' }).toString());
+          logger.error(
+            `Contents of ${this.buildDir} on failure for ${resolverFileName}:`,
+          );
+          logger.error(
+            execSync("ls -R", {
+              cwd: this.buildDir,
+              encoding: "utf8",
+            }).toString(),
+          );
         } catch (lsError: any) {
-          logger.error(`Could not list contents of ${this.buildDir}: ${lsError.message}`);
+          logger.error(
+            `Could not list contents of ${this.buildDir}: ${lsError.message}`,
+          );
         }
       }
       throw error;
     } finally {
-        try {
-          await fsPromises.rm(tempResolverPath, { recursive: true, force: true });
-        } catch (cleanupError: any) {
-          logger.warning(`Failed to clean up temp resolver file ${tempResolverPath}: ${cleanupError.message}`);
-        }
+      try {
+        await fsPromises.rm(tempResolverPath, { recursive: true, force: true });
+      } catch (cleanupError: any) {
+        logger.warning(
+          `Failed to clean up temp resolver file ${tempResolverPath}: ${cleanupError.message}`,
+        );
+      }
     }
   }
 
-  private async findJavaScriptFileByName(jsFileName: string): Promise<string[]> {
+  private async findJavaScriptFileByName(
+    jsFileName: string,
+  ): Promise<string[]> {
     // This method seems to search globally from '.', which might be too broad.
     // It was also causing issues. If needed, its scope and usage should be clarified.
     // For now, relying on esbuild's output path directly.
-    logger.warning(`findJavaScriptFileByName is called for ${jsFileName}, but its usage is currently under review.`);
+    logger.warning(
+      `findJavaScriptFileByName is called for ${jsFileName}, but its usage is currently under review.`,
+    );
     return [];
     /*
     const findCommand = \`find . -name "${jsFileName}"\`;
@@ -673,18 +926,26 @@ class ResolverCompiler {
 
   private async cleanupBuildDirectory(): Promise<void> {
     if (this.debugMode) {
-      this.logger.debug(`Debug mode: Preserving main build directory: ${this.buildDir}`);
+      this.logger.debug(
+        `Debug mode: Preserving main build directory: ${this.buildDir}`,
+      );
       return;
     }
     try {
       await fsPromises.rm(this.buildDir, { recursive: true, force: true });
     } catch (error: any) {
-      this.logger.error(`Failed to remove main build directory ${this.buildDir}: ${error.message}`);
+      this.logger.error(
+        `Failed to remove main build directory ${this.buildDir}: ${error.message}`,
+      );
     }
   }
-  
-  getResolverS3Location(bucketName: string, stage: string, resolverPath: string): string {
-    const jsPath = resolverPath.replace('.ts', '.js');
+
+  getResolverS3Location(
+    bucketName: string,
+    stage: string,
+    resolverPath: string,
+  ): string {
+    const jsPath = resolverPath.replace(".ts", ".js");
     const s3Key = `resolvers/${stage}/${jsPath}`;
     return `s3://${bucketName}/${s3Key}`;
   }
@@ -692,7 +953,7 @@ class ResolverCompiler {
   // createSimplifiedSharedFunctions is not directly used by the core compilation logic shown
   // but kept for completeness if it's called elsewhere.
   private async createSimplifiedSharedFunctions(): Promise<void> {
-    const sharedFunctionsDir = path.join(this.buildDir, 'shared/functions'); // Operates on buildDir
+    const sharedFunctionsDir = path.join(this.buildDir, "shared/functions"); // Operates on buildDir
     await fsPromises.mkdir(sharedFunctionsDir, { recursive: true });
     // ... content of simplified functions ...
     // Example:
@@ -705,8 +966,11 @@ export const isSuperAdminUserGroup = (identity: AppSyncIdentityCognito): boolean
   return (identity.groups || []).includes(ClientType.SuperAdmin);
 };
 `;
-    await fsPromises.writeFile(path.join(sharedFunctionsDir, 'userGroup.ts'), userGroupContent);
-    this.logger.info('Created simplified shared functions in build directory.');
+    await fsPromises.writeFile(
+      path.join(sharedFunctionsDir, "userGroup.ts"),
+      userGroupContent,
+    );
+    this.logger.info("Created simplified shared functions in build directory.");
     // ... other simplified files ...
   }
 }

@@ -57,8 +57,8 @@ module.exports = {
     ".next/s",
   ],
   rules: {
-    "camelcase": "off",
-    "no-console": ["error", { "allow": ["warn", "error", "info"] }],
+    camelcase: "off",
+    "no-console": ["error", { allow: ["warn", "error", "info"] }],
     "no-use-before-define": ["error", { variables: false }],
     "sonarjs/prefer-single-boolean-return": "off",
     "@typescript-eslint/no-unused-vars": "error",
@@ -95,7 +95,14 @@ module.exports = {
     "import/prefer-default-export": "off",
     "import/no-extraneous-dependencies": [
       "error",
-      { devDependencies: ["playwright/**", "scripts/**", "**/*.test.ts", "**/*.test.tsx"] },
+      {
+        devDependencies: [
+          "playwright/**",
+          "scripts/**",
+          "**/*.test.ts",
+          "**/*.test.tsx",
+        ],
+      },
     ],
     "security/detect-object-injection": "off",
   },

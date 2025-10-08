@@ -18,6 +18,9 @@ Parameters:
   SendWelcomeEmailFunctionArn:
     Type: String
     Description: ARN of the Lambda function to send welcome emails
+  CreateCognitoUserFunctionArn:
+    Type: String
+    Description: ARN of the Lambda function to create Cognito users
 
 Resources:
   AppSyncLoggingServiceRole:
@@ -80,7 +83,7 @@ Resources:
         Fn::ImportValue:
           !Sub "${AppName}-AppSyncDynamoDBRoleArn-${Stage}" # Parameterized import
 
-  LambdaDataSource:
+  SendWelcomeEmailDataSource:
     Type: AWS::AppSync::DataSource
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
@@ -88,6 +91,16 @@ Resources:
       Type: AWS_LAMBDA
       LambdaConfig:
         LambdaFunctionArn: !Ref SendWelcomeEmailFunctionArn
+      ServiceRoleArn: !GetAtt AppSyncLambdaInvokeRole.Arn
+
+  CreateCognitoUserDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}CreateCognitoUserLambdaDataSource"
+      Type: AWS_LAMBDA
+      LambdaConfig:
+        LambdaFunctionArn: !Ref CreateCognitoUserFunctionArn
       ServiceRoleArn: !GetAtt AppSyncLambdaInvokeRole.Arn
 
   AppSyncLambdaInvokeRole:
@@ -109,7 +122,9 @@ Resources:
               - Effect: Allow
                 Action:
                   - lambda:InvokeFunction
-                Resource: !Ref SendWelcomeEmailFunctionArn
+                Resource:
+                  - !Ref SendWelcomeEmailFunctionArn
+                  - !Ref CreateCognitoUserFunctionArn
 
   # Resolvers - Assuming resolver field names (e.g., getCWLUser) remain fixed in the schema for now
   # If these also need to change based on AppName, the schema and resolver configs would need more significant updates.
@@ -135,6 +150,7 @@ Resources:
       Kind: PIPELINE
       PipelineConfig:
         Functions:
+          - !GetAtt CreateCognitoUserFunction.FunctionId
           - !GetAtt CreateUserDynamoDBFunction.FunctionId
           - !GetAtt SendWelcomeEmailFunction.FunctionId
       Runtime:
@@ -147,6 +163,17 @@ Resources:
         export function response(ctx) {
           return ctx.prev.result;
         }
+
+  CreateCognitoUserFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}CreateCognitoUserFunction"
+      DataSourceName: !GetAtt CreateCognitoUserDataSource.Name
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Functions/Function.createCognitoUser.js"
 
   CreateUserDynamoDBFunction:
     Type: AWS::AppSync::FunctionConfiguration
@@ -164,41 +191,11 @@ Resources:
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       Name: !Sub "${AppName}SendWelcomeEmailFunction"
-      DataSourceName: !GetAtt LambdaDataSource.Name
+      DataSourceName: !GetAtt SendWelcomeEmailDataSource.Name
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      Code: |
-        export function request(ctx) {
-          // Check if sendWelcomeEmail flag is set in stash
-          const sendWelcomeEmail = ctx.stash.sendWelcomeEmail;
-          
-          // Only invoke if sendWelcomeEmail is true
-          if (sendWelcomeEmail !== true) {
-            return {
-              operation: 'no-op'
-            };
-          }
-          
-          const user = ctx.prev.result;
-          return {
-            operation: 'Invoke',
-            payload: {
-              userEmail: user.userEmail,
-              userFirstName: user.userFirstName,
-              userLastName: user.userLastName,
-              userId: user.userId
-            }
-          };
-        }
-        
-        export function response(ctx) {
-          if (ctx.error) {
-            console.error('Error sending welcome email:', ctx.error);
-            // Don't fail the whole mutation if email fails
-          }
-          return ctx.prev.result;
-        } 
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Functions/Function.sendWelcomeEmail.js"
 
 Outputs:
   CWLAppSyncApiUrl:

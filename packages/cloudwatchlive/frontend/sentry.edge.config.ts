@@ -1,4 +1,4 @@
-import * as Sentry from '@sentry/nextjs';
+import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
   // dsn: 'https://258350a8a8fe3e2b6c403a4f7c3dfc8c@o4509506959245312.ingest.de.sentry.io/4509506960621648',

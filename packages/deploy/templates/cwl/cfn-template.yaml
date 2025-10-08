@@ -63,22 +63,10 @@ Resources:
         AppBucketArn: !GetAtt S3Stack.Outputs.CWLBucketArn
         AppBucketRegionalDomainName: !GetAtt S3Stack.Outputs.CWLBucketRegionalDomainName
 
-  # AppSync API
-  AppSyncStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: [DynamoDbStack, CloudFrontStack, CognitoStack]
-    Properties:
-      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appsync.yaml
-      Parameters:
-        Stage: !Ref Stage
-        AppName: cwl
-        TemplateBucketName: !Ref TemplateBucketName
-        UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
-
   # Lambda Functions
   LambdaStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [DynamoDbStack, AppSyncStack, CloudFrontStack]
+    DependsOn: [CloudFrontStack, CognitoStack]
     Properties:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml
       Parameters:
@@ -86,6 +74,24 @@ Resources:
         AppName: cwl
         AppCloudFrontDistributionId: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDistributionId
         AppCloudFrontDomainName: !GetAtt CloudFrontStack.Outputs.CWLCloudFrontDomainName
+        FromEmail: noreply@cloudwatchlive.com
+        AppURL: !Sub "https://${CloudFrontStack.Outputs.CWLCloudFrontDomainName}"
+        TemplateBucketName: !Ref TemplateBucketName
+        UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
+
+  # AppSync API
+  AppSyncStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [DynamoDbStack, CognitoStack, LambdaStack]
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appsync.yaml
+      Parameters:
+        Stage: !Ref Stage
+        AppName: cwl
+        TemplateBucketName: !Ref TemplateBucketName
+        UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
+        SendWelcomeEmailFunctionArn: !GetAtt LambdaStack.Outputs.SendWelcomeEmailFunctionArn
+        CreateCognitoUserFunctionArn: !GetAtt LambdaStack.Outputs.CreateCognitoUserFunctionArn
 
 Outputs:
   ApiUrl:
