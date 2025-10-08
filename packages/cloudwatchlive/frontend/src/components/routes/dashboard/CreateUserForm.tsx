@@ -19,6 +19,7 @@ import {
   SalutationValue,
 } from "@/../shared/constants/salutations";
 import { CWL_CLIENT_TYPES } from "@/../../../cloudwatchlive/backend/constants/ClientTypes";
+import { useSetGlobalMessage } from "@/components/common/GlobalMessage";
 
 // Define the Zod schema for form validation
 const createUserSchema = z.object({
@@ -47,6 +48,7 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
   onClose,
   onSubmitSuccess,
 }) => {
+  const setGlobalMessage = useSetGlobalMessage();
   const {
     register,
     handleSubmit,
@@ -66,12 +68,16 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
         userPhone: data.userPhone || "",
         organizationId: data.organizationId,
         userRole: data.userRole,
-        sendWelcomeEmail: data.sendWelcomeEmail || false,
+        ...(data.sendWelcomeEmail && { sendWelcomeEmail: data.sendWelcomeEmail }),
       };
+      console.log("Sending input to createCWLUser:", JSON.stringify(input, null, 2));
       return createCWLUserMutationFn(input);
     },
     onSuccess: () => {
-      // console.log('User created successfully');
+      setGlobalMessage({
+        color: "success",
+        content: "User created successfully!",
+      });
       onSubmitSuccess();
     },
     onError: (error: unknown) => {
@@ -101,8 +107,10 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
         errorMessage = error;
       }
 
-      // eslint-disable-next-line no-alert
-      window.alert(`Error creating user: ${errorMessage}`);
+      setGlobalMessage({
+        color: "error",
+        content: `Error creating user: ${errorMessage}`,
+      });
     },
   });
 
