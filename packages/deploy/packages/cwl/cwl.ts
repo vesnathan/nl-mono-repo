@@ -366,8 +366,12 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     });
     logger.success('✓ GraphQL schema and types generated successfully');
     
+    // Skip frontend build if explicitly requested via options
+    if (options.skipFrontendBuild) {
+      logger.info('⏭️  Skipping frontend build (skipFrontendBuild option set)');
+    }
     // Only build frontend if stack exists AND is healthy (has API endpoint and Cognito outputs)
-    if (stackIsHealthy) {
+    else if (stackIsHealthy) {
       logger.info('🏗️  Building frontend application...');
       logger.debug(`Running: yarn build in ${frontendPath}`);
       execSync('yarn build', { 
