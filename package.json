@@ -6,11 +6,11 @@
     "packages/cloudwatchlive/backend",
     "packages/shared",
     "packages/waf",
-    "packages/shared-aws-assets",
     "packages/deploy",
     "packages/ec2-vsc"
   ],
   "dependencies": {
+    "@anthropic-ai/claude-code": "^2.0.9",
     "@aws-sdk/client-cognito-identity-provider": "3.669.0",
     "@aws-sdk/client-sts": "3.669.0",
     "dotenv": "^16.3.1",
@@ -55,7 +55,6 @@
     "reset-modules": "rm -rf node_modules/ packages/**/*/node_modules",
     "install-aws-cli-local": "./scripts/install-aws-cli-local.sh",
     "development": "yarn workspace @cwl/deploy development",
-    "generate-env": "node generate-env.js",
     "dev-menu": "./dev.sh",
     "ec2-deployment": "yarn workspace @cwl/ec2-vsc deployment-menu",
     "dev": "cd packages/cloudwatchlive/frontend && yarn dev",

@@ -36,6 +36,9 @@
 **/next-env.d.ts
 gqlTypes.ts
 
+# auto-generated schema files
+**/combined_schema.graphql
+
 # nx cache
 .nx/cache
 .nx/workspace-data

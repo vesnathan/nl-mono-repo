@@ -1,6 +1,5 @@
 import { util, Context, AppSyncIdentityCognito } from '@aws-appsync/utils';
-import { CWLUserInput, CWLUser } from '../../../../../types/gqlTypes'; // Using CWLUserInput instead of CreateCWLUserInput
-import { v4 as uuidv4 } from 'uuid';
+import { CWLUserInput, CWLUser } from '../../../../../../../../cloudwatchlive/frontend/src/types/gqlTypes';
 
 // Define Input type for the resolver
 type CreateCWLUserMutationVariables = {
@@ -22,7 +21,7 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
     util.error('Unauthorized: Only SuperAdmins can create users.', 'Unauthorized');
   }
 
-  const userId = uuidv4(); // Generate a new UUID for the user
+  const userId = util.autoId(); // Generate a new UUID for the user
   const now = util.time.nowISO8601();
 
   const newUserItem = {
@@ -68,6 +67,7 @@ export function response(ctx: CTX): Output {
   // when the user data is fetched. For the mutation response, we can return an empty array
   // or a default, as it's not part of the direct creation storage.
   return {
+    __typename: "CWLUser",
     userId: createdUser.userId,
     organizationId: createdUser.organizationId,
     userEmail: createdUser.userEmail,
@@ -81,5 +81,5 @@ export function response(ctx: CTX): Output {
     userAddedById: createdUser.userAddedById,
     userCreated: createdUser.userCreated,
     clientType: [], // Will be populated by getCWLUser based on Cognito groups
-  } as CWLUser;
+  };
 }

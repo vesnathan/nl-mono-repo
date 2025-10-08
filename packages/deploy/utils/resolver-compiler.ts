@@ -32,6 +32,7 @@ export interface ResolverCompilerOptions {
   sharedFileName?: string;
   sharedFileS3Key?: string;
   debugMode?: boolean; // Added debugMode
+  constantsDir?: string; // Optional path to constants directory
 }
 
 class ResolverCompiler {
@@ -47,6 +48,7 @@ class ResolverCompiler {
   private sharedFileName?: string;
   private sharedFileS3Key?: string;
   private debugMode: boolean; // Added debugMode
+  private constantsDir?: string; // Optional constants directory
 
   private readonly gqlTypesSourceFileName = 'gqlTypes.ts';
 
@@ -62,6 +64,7 @@ class ResolverCompiler {
     this.sharedFileS3Key = options.sharedFileS3Key;
     this.s3Client = new S3Client({ region: this.region });
     this.debugMode = options.debugMode || false; // Initialize debugMode
+    this.constantsDir = options.constantsDir; // Initialize constantsDir
 
     // buildDir is a temporary directory for the entire compilation process of this instance.
     // It will be created by setupBuildDirectory and cleaned up by cleanupBuildDirectory.
@@ -393,10 +396,16 @@ class ResolverCompiler {
   }
 
   private async setupBuildConfiguration(): Promise<void> { // This configures this.buildDir
-    // Determine path to the source package.json
-    // this.baseResolverDir is like /workspaces/nl-mono-repo/packages/cloudwatchlive/backend/resources/AppSync/resolvers
-    // The actual package.json is two levels up from baseResolverDir, in the backend package root.
-    const sourcePackageJsonPath = path.join(this.baseResolverDir, '..', '..', '..', 'package.json');
+    // Try to find the source package.json to extract dependencies
+    // Since resolvers are now in templates, we need to look for the actual backend package
+    // For CWL: templates are in packages/deploy/templates/cwl/resources/AppSync/resolvers
+    // Backend is in packages/cloudwatchlive/backend/package.json
+    
+    // Extract app name from baseResolverDir to locate the correct backend package
+    const appName = this.getAppName();
+    const monorepoRoot = path.join(__dirname, '..', '..', '..');
+    const sourcePackageJsonPath = path.join(monorepoRoot, 'packages', appName, 'backend', 'package.json');
+    
     let sourceDependencies: Record<string, string> = {};
     let sourceDevDependencies: Record<string, string> = {};
 
@@ -422,7 +431,7 @@ class ResolverCompiler {
     };
     
     // Add source dependencies, but filter out local workspace packages
-    const localPackages = new Set(['shared', 'shared-aws-assets', 'cwlfrontend', 'cwlbackend']); // Add any other local packages here
+    const localPackages = new Set(['shared', 'cwlfrontend', 'cwlbackend']); // Add any other local packages here
     if (sourceDependencies) {
       for (const [pkg, version] of Object.entries(sourceDependencies)) {
         if (!localPackages.has(pkg)) {
@@ -513,7 +522,8 @@ class ResolverCompiler {
       );
       
       // Read gqlTypes.ts directly from its actual location in the types directory
-      const gqlTypesSourcePath = path.join(this.baseResolverDir, '../../../types', this.gqlTypesSourceFileName);
+      // Use the frontend-generated gqlTypes.ts (corrected path with packages/)
+      const gqlTypesSourcePath = path.resolve(__dirname, '../../../packages/cloudwatchlive/frontend/src/types/gqlTypes.ts');
       const targetGqlTypesPath = path.join(this.buildDir, 'gqlTypes.ts');
       
       if (fs.existsSync(gqlTypesSourcePath)) {
@@ -544,7 +554,12 @@ class ResolverCompiler {
       );
       
       // Copy the constants file to the build directory
-      const constantsSourcePath = path.join(this.baseResolverDir, '../../../constants', `${constantsFile}.ts`);
+      if (!this.constantsDir) {
+        logger.error(`Constants directory not provided for ${resolverFileName}. Please specify constantsDir in ResolverCompilerOptions.`);
+        throw new Error(`constantsDir must be specified in ResolverCompilerOptions to locate constants file: ${constantsFile}`);
+      }
+      
+      const constantsSourcePath = path.join(this.constantsDir, `${constantsFile}.ts`);
       const targetConstantsPath = path.join(this.buildDir, `${constantsFile}.ts`);
       
       if (fs.existsSync(constantsSourcePath)) {

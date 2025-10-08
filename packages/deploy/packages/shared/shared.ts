@@ -76,6 +76,10 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
     throw new Error('Failed to setup role for shared resources');
   }
 
+  // Wait for IAM role to propagate
+  logger.debug('Waiting 10 seconds for IAM role to propagate...');
+  await sleep(10000);
+
   try {
     // Create S3 bucket for templates if it doesn't exist
     try {
@@ -239,7 +243,7 @@ export async function deployShared(options: DeploymentOptions): Promise<void> {
           ParameterValue: options.stage,
         },
         {
-          ParameterKey: 'TemplatesBucketName',
+          ParameterKey: 'TemplateBucketName',
           ParameterValue: templateBucketName,
         }
       ] as Parameter[],

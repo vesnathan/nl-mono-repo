@@ -62,23 +62,15 @@ export class FrontendDeploymentManager {
       // Set environment variable to match deployment stage
       const envStage = stage || 'dev';
       
-      // First, generate environment variables from deployment outputs
-      const rootPath = join(this.frontendPath, '../../..');
-      const generateEnvCommand = `cd ${rootPath} && node generate-env.js`;
-      logger.debug('Generating environment variables from deployment outputs...');
+      // Build the frontend
+      logger.debug('Building frontend application...');
       
       // Only show output in debug mode
       if (getDebugMode()) {
-        execSync(generateEnvCommand, { stdio: 'inherit' });
-        
-        // Then build the frontend
         const buildCommand = `cd ${this.frontendPath} && NODE_ENV=production NEXT_PUBLIC_ENVIRONMENT=${envStage} yarn build`;
         execSync(buildCommand, { stdio: 'inherit' });
       } else {
         // Suppress all output in non-debug mode by redirecting to /dev/null
-        execSync(generateEnvCommand + ' > /dev/null 2>&1', { stdio: 'ignore' });
-        
-        // Then build the frontend with output suppressed
         const buildCommand = `cd ${this.frontendPath} && NODE_ENV=production NEXT_PUBLIC_ENVIRONMENT=${envStage} yarn build > /dev/null 2>&1`;
         execSync(buildCommand, { stdio: 'ignore' });
       }

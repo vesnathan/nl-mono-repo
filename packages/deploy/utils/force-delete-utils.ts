@@ -77,11 +77,19 @@ export class ForceDeleteManager {
     if (stackType === StackType.WAF) {
       conventionalBuckets.push(`nlmonorepo-waf-logs-${stage}`);
       conventionalBuckets.push(`nlmonorepo-waf-templates-${stage}`); // Added for WAF templates bucket
+      // Template bucket with region suffix
+      conventionalBuckets.push(`nlmonorepo-${stage}-cfn-templates-us-east-1`);
     } else if (stackType === StackType.CWL) {
       conventionalBuckets.push(`nlmonorepo-cwl-frontend-${stage}`);
       conventionalBuckets.push(`nlmonorepo-cwl-templates-${stage}`);
+      // Template bucket with region suffix
+      conventionalBuckets.push(`nlmonorepo-${stage}-cfn-templates-${this.region}`);
     } else if (stackType === StackType.Shared) {
         conventionalBuckets.push(`nlmonorepo-shared-templates-${stage}`);
+        // Old naming patterns
+        conventionalBuckets.push(`nlmonorepo-shared-${stage}-templates`);
+        // Template bucket with region suffix
+        conventionalBuckets.push(`nlmonorepo-${stage}-cfn-templates-${this.region}`);
     }
 
     // Removed redundant conditional blocks based on stackIdentifier, as it's typically nlmonorepo-${stackType}
@@ -212,15 +220,23 @@ export class ForceDeleteManager {
     if (stackType === StackType.WAF) {
       conventionalBucketsToDelete.push(`nlmonorepo-waf-logs-${stage}`);
       conventionalBucketsToDelete.push(`nlmonorepo-waf-templates-${stage}`);
+      // Template bucket with region suffix
+      conventionalBucketsToDelete.push(`nlmonorepo-${stage}-cfn-templates-us-east-1`);
     } else if (stackType === StackType.CWL) {
       // For 'cwl', we might have frontend and templates buckets
       // Example: nlmonorepo-cwl-frontend-dev, nlmonorepo-cwl-templates-dev
       // The baseIdentifier 'nlmonorepo-cwl' is consistent with this.
       conventionalBucketsToDelete.push(`${baseIdentifier}-frontend-${stage}`); // e.g., nlmonorepo-cwl-frontend-dev
       conventionalBucketsToDelete.push(`${baseIdentifier}-templates-${stage}`); // e.g., nlmonorepo-cwl-templates-dev
+      // Template bucket with region suffix
+      conventionalBucketsToDelete.push(`nlmonorepo-${stage}-cfn-templates-ap-southeast-2`);
     } else if (stackType === StackType.Shared) {
       // Example: nlmonorepo-shared-templates-dev
       conventionalBucketsToDelete.push(`${baseIdentifier}-templates-${stage}`); // e.g., nlmonorepo-shared-templates-dev
+      // Old naming patterns
+      conventionalBucketsToDelete.push(`nlmonorepo-shared-${stage}-templates`);
+      // Template bucket with region suffix
+      conventionalBucketsToDelete.push(`nlmonorepo-${stage}-cfn-templates-ap-southeast-2`);
     }
     // Add other conventional bucket patterns here if necessary
 
@@ -321,6 +337,10 @@ export class ForceDeleteManager {
       logger.info(`DeleteStack command issued for ${stackName}. Waiting for deletion...`);
       await this.waitForStackDeletion(stackName);
       logger.info(`Successfully deleted stack ${stackName}`);
+      
+      // After stack deletion, also delete the conventionally named buckets
+      logger.info(`Deleting conventionally named buckets for ${stackName}...`);
+      await this.deleteConventionalBuckets(stackIdentifier, stackType, stage);
       
     } catch (error: any) {
       logger.error(`Failed to delete stack ${stackName}:`);

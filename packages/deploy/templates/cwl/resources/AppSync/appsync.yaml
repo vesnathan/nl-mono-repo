@@ -9,6 +9,12 @@ Parameters:
   AppName:
     Type: String
     Description: Application Name (e.g., cwl, wbc)
+  TemplateBucketName:
+    Type: String
+    Description: S3 bucket containing templates and resolvers
+  UserPoolId:
+    Type: String
+    Description: Cognito User Pool ID
 
 Resources:
   AppSyncLoggingServiceRole:
@@ -40,9 +46,7 @@ Resources:
       Name: !Sub "${AppName}-appsync-api-${Stage}"
       AuthenticationType: AMAZON_COGNITO_USER_POOLS
       UserPoolConfig:
-        UserPoolId:
-          Fn::ImportValue:
-            Fn::Sub: "${AppName}-UserPoolId-${Stage}" # Parameterized import
+        UserPoolId: !Ref UserPoolId
         DefaultAction: ALLOW
         AwsRegion: ap-southeast-2 
       AdditionalAuthenticationProviders:
@@ -56,7 +60,7 @@ Resources:
     Type: AWS::AppSync::GraphQLSchema
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
-      DefinitionS3Location: ./schema.graphql 
+      DefinitionS3Location: !Sub "s3://${TemplateBucketName}/schema.graphql" 
 
   MainTableDataSource: # Renamed from CWLUsersTableDataSource for generality
     Type: AWS::AppSync::DataSource
@@ -86,7 +90,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      CodeS3Location: ./resolvers/users/Queries/Query.getCWLUser.js 
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Queries/Query.getCWLUser.js" 
 
   CreateCWLUserResolver:
     Type: AWS::AppSync::Resolver
@@ -99,17 +103,17 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      CodeS3Location: ./resolvers/users/Mutations/Mutation.createCWLUser.js 
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Mutations/Mutation.createCWLUser.js" 
 
 Outputs:
-  AppsyncUrl: # Renamed from CWLAppsyncUrl
+  CWLAppSyncApiUrl:
     Value: !GetAtt GraphQlApi.GraphQLUrl
-    Description: !Sub "GraphQL URL for the ${AppName} AppSync API"
+    Description: "GraphQL URL for the AppSync API"
   
-  AppsyncRealtimeUrl: # Renamed from CWLAppsyncRealtimeUrl
+  CWLAppSyncRealtimeUrl:
     Value: !GetAtt GraphQlApi.RealtimeUrl
-    Description: !Sub "Realtime URL for the ${AppName} AppSync API"
+    Description: "Realtime URL for the AppSync API"
 
-  AppSyncApiId: # Added AppSync API ID Output
+  CWLAppSyncApiId:
     Value: !GetAtt GraphQlApi.ApiId
-    Description: !Sub "API ID for the ${AppName} AppSync API"
+    Description: "API ID for the AppSync API"

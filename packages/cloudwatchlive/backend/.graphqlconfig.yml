@@ -2,17 +2,15 @@ projects:
   Backend Codegen Project:
     schemaPath: combined_schema.graphql
     includes:
-      - resources/AppSync/resolvers/**/*.ts
-      - resources/AppSync/resolvers/**/*.tsx
+      - GetCWLUser.graphql
     excludes:
       - ./amplify/**
-      - types/gqlTypes.ts
+      # - types/gqlTypes.ts (no longer used)
     extensions:
       amplify:
         codeGenTarget: typescript
-        generatedFileName: types/gqlTypes.ts
+        # generatedFileName: types/gqlTypes.ts (no longer used)
         frontend: javascript
         framework: react
 extensions:
   amplify:
-    version: 3

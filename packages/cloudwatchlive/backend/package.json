@@ -17,11 +17,8 @@
     "@aws-sdk/util-dynamodb": "3.669.0",
     "js-yaml": "^4.1.0",
     "shared": "*",
-    "shared-aws-assets": "*",
     "uuid": "^9.0.0",
     "@types/uuid": "^9.0.0"
   },
-  "scripts": {
-    "build-gql": "ts-node ./scripts/buildGql.ts"
-  }
+  "scripts": {}
 }

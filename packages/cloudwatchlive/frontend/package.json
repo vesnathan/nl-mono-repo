@@ -2,10 +2,10 @@
   "name": "cwlfrontend",
   "version": "0.1.0",
   "scripts": {
-    "dev": "node ../../../generate-env.js && next dev",
-    "dev:local": "node ../../../generate-env.js && NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev next dev",
-    "dev:codespaces": "node ../../../generate-env.js && NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev next dev -H 0.0.0.0",
-    "build": "node ../../../generate-env.js && next build",
+    "dev": "next dev",
+    "dev:local": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev next dev",
+    "dev:codespaces": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev next dev -H 0.0.0.0",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "build-gql": "ts-node -TP ../../../tsconfig.node.json ./scripts/buildGql.ts"

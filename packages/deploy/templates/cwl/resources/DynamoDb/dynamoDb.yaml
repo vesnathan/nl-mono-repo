@@ -38,6 +38,39 @@ Resources:
                     - kms:GenerateDataKey*
                   Resource: !Ref KMSKeyArn
 
+    AppSyncDynamoDBRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: !Sub nlmonorepo-${AppName}-appsync-dynamodb-${Stage}
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: appsync.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: AppSyncDynamoDBAccess
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:GetItem
+                    - dynamodb:PutItem
+                    - dynamodb:UpdateItem
+                    - dynamodb:DeleteItem
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                  Resource:
+                    - !GetAtt CWLDataTable.Arn
+                    - !Sub "${CWLDataTable.Arn}/*"
+                - Effect: Allow
+                  Action:
+                    - kms:Decrypt
+                    - kms:GenerateDataKey
+                  Resource: !Ref KMSKeyArn
+
     CWLDataTable: # Renamed from cwlUserTable to CWLDataTable
       Type: AWS::DynamoDB::Table
       DependsOn: DynamoDBRole
@@ -74,6 +107,6 @@ Outputs:
 
     AppSyncDynamoDBRoleArn: # Added for AppSync DataSource ServiceRoleArn
       Description: ARN of the IAM role for AppSync to access DynamoDB
-      Value: !GetAtt DynamoDBRole.Arn
+      Value: !GetAtt AppSyncDynamoDBRole.Arn
       Export:
         Name: !Sub ${AppName}-AppSyncDynamoDBRoleArn-${Stage}

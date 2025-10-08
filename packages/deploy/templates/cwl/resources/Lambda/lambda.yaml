@@ -1,28 +1,30 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'CloudWatch Live Lambda Resources'
+Description: 'Lambda Resources for Application'
 
 Parameters:
   Stage:
     Type: String
     Description: Deployment stage (e.g., dev, prod)
     AllowedPattern: ^[a-zA-Z0-9-]+$
-  CWLCloudFrontDistributionId:
+  AppName:
+    Type: String
+    Description: Application Name (e.g., cwl, wbc)
+  AppCloudFrontDistributionId: # Renamed from CWLCloudFrontDistributionId
     Type: String
     Description: ID of the CloudFront distribution
-  CWLCloudFrontDomainName:
+  AppCloudFrontDomainName: # Renamed from CWLCloudFrontDomainName
     Type: String
     Description: Domain name of the CloudFront distribution
 
 Resources:
-  # Lambda Functions
-  PostFrontEndDeployFunction:
+  PostDeployFunction: # Renamed from PostFrontEndDeployFunction
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub "nlmonorepo-cwl-postfrontenddeploy-${Stage}"
+      FunctionName: !Sub "nlmonorepo-${AppName}-postdeploy-${Stage}" # Simplified and parameterized
       Handler: index.handler
       Runtime: nodejs18.x
       Timeout: 600
-      Role: !GetAtt PostFrontEndDeployRole.Arn
+      Role: !GetAtt PostDeployRole.Arn # Renamed role
       Code:
         ZipFile: |
           const { CloudFront } = require("@aws-sdk/client-cloudfront");
@@ -32,12 +34,12 @@ Resources:
             
             try {
               const CF = new CloudFront();
-              const DistributionId = process.env.cwlCloudFrontDistributionId;
+              // Env var name changed to be generic, value comes from AppCloudFrontDistributionId parameter
+              const distributionId = process.env.AppCloudFrontDistributionId; 
               
-              // Create CloudFront invalidation
-              if (DistributionId) {
+              if (distributionId) {
                 await CF.createInvalidation({
-                  DistributionId,
+                  DistributionId: distributionId,
                   InvalidationBatch: {
                     CallerReference: Date.now().toString(),
                     Paths: {
@@ -46,7 +48,7 @@ Resources:
                     },
                   },
                 });
-                console.log(`Created invalidation for distribution ${DistributionId}`);
+                console.log(`Created invalidation for distribution ${distributionId}`);
               }
               
               return {
@@ -64,12 +66,12 @@ Resources:
       Environment:
         Variables:
           STAGE: !Ref Stage
-          cwlCloudFrontDistributionId: !Ref CWLCloudFrontDistributionId
+          AppCloudFrontDistributionId: !Ref AppCloudFrontDistributionId # Env var name and Ref updated
 
-  PostFrontEndDeployRole:
+  PostDeployRole: # Renamed from PostFrontEndDeployRole
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "nlmonorepo-cwl-postfrontenddeploy-role-${Stage}"
+      RoleName: !Sub "nlmonorepo-${AppName}-postdeploy-role-${Stage}" # Simplified and parameterized
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -88,13 +90,13 @@ Resources:
                 Action:
                   - cloudfront:CreateInvalidation
                   - cloudfront:GetInvalidation
-                Resource: "*"
+                Resource: "*" # Consider restricting this to the specific distribution ARN if possible
 
 Outputs:
-  PostFrontEndDeployFunctionArn:
-    Value: !GetAtt PostFrontEndDeployFunction.Arn
-    Description: ARN of the post-frontend-deploy Lambda function
+  PostDeployFunctionArn: # Renamed from PostFrontEndDeployFunctionArn
+    Value: !GetAtt PostDeployFunction.Arn
+    Description: ARN of the post-deploy Lambda function
   
-  PostFrontEndDeployFunctionName:
-    Value: !Ref PostFrontEndDeployFunction
-    Description: Name of the post-frontend-deploy Lambda function
+  PostDeployFunctionName: # Renamed from PostFrontEndDeployFunctionName
+    Value: !Ref PostDeployFunction
+    Description: Name of the post-deploy Lambda function

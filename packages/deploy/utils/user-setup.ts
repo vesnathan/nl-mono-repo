@@ -61,7 +61,7 @@ export class UserSetupManager {
     await this.ensureCognitoGroups(userPoolId, stage);
 
     // Get user table name
-    const tableName = `nlmonorepo-cwl-usertable-${stage}`;
+    const tableName = `nlmonorepo-cwl-datatable-${stage}`;
     await this.verifyTableExists(tableName);
 
     // Get admin email if not provided
@@ -266,7 +266,7 @@ export class UserSetupManager {
       const getUserResponse = await this.dynamoClient.send(
         new GetItemCommand({
           TableName: tableName,
-          Key: { userId: { S: cognitoUserId } }
+          Key: { id: { S: cognitoUserId } }
         })
       );
 
@@ -279,7 +279,7 @@ export class UserSetupManager {
       const currentTimestamp = '1733530302'; // Fixed timestamp from deploy.sh
       
       const userItem = {
-        userId: { S: cognitoUserId },
+        id: { S: cognitoUserId },
         organizationId: { S: '' },
         privacyPolicy: { BOOL: true },
         termsAndConditions: { BOOL: true },
@@ -321,7 +321,7 @@ export class UserSetupManager {
       const getUserResponse = await this.dynamoClient.send(
         new GetItemCommand({
           TableName: tableName,
-          Key: { userId: { S: cognitoUserId } }
+          Key: { id: { S: cognitoUserId } }
         })
       );
 
