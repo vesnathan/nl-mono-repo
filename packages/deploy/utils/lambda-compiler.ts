@@ -2,7 +2,7 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import * as esbuild from "esbuild";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import AdmZip from "adm-zip";
+import archiver from "archiver";
 import { logger } from "./logger";
 
 export interface LambdaCompilerOptions {
@@ -201,21 +201,36 @@ ${jsCode}`;
   }
 
   private async createZipFile(lambdaFunc: LambdaFunction): Promise<void> {
-    const zip = new AdmZip();
-    
-    // Read the compiled JS file and add it to the ZIP as index.js
-    const jsContent = await fs.readFile(lambdaFunc.outputFile);
-    zip.addFile("index.js", jsContent);
-    
-    // Write the ZIP file
-    zip.writeZip(lambdaFunc.zipFile);
-    
-    if (this.debugMode) {
-      this.logger.debug(`Created ZIP file: ${lambdaFunc.zipFile}`);
-    }
+    return new Promise((resolve, reject) => {
+      const output = fs.createWriteStream(lambdaFunc.zipFile);
+      const archive = archiver("zip", { zlib: { level: 9 } });
+
+      output.on("close", () => {
+        if (this.debugMode) {
+          this.logger.debug(
+            `Created ZIP file: ${lambdaFunc.zipFile} (${archive.pointer()} bytes)`,
+          );
+        }
+        resolve();
+      });
+
+      archive.on("error", (err) => {
+        reject(err);
+      });
+
+      archive.pipe(output);
+
+      // Add the compiled JS file as index.js
+      archive.file(lambdaFunc.outputFile, { name: "index.js" });
+
+      archive.finalize();
+    });
   }
 
-  private async uploadZipToS3(s3Key: string, zipFilePath: string): Promise<void> {
+  private async uploadZipToS3(
+    s3Key: string,
+    zipFilePath: string,
+  ): Promise<void> {
     if (!this.s3Client || !this.s3BucketName) {
       throw new Error("S3 client not configured for upload");
     }
