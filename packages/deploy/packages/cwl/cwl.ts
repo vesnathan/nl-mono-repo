@@ -32,6 +32,7 @@ import { ForceDeleteManager } from '../../utils/force-delete-utils';
 import { OutputsManager } from '../../outputs-manager';
 import { createReadStream, readdirSync, statSync, existsSync } from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
 
 const findYamlFiles = (dir: string): string[] => {
   const files = readdirSync(dir);
@@ -319,6 +320,37 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
   const stopSpinner = logger.infoWithSpinner('Starting CloudWatch Live stack deployment in ap-southeast-2');
 
   const region = options.region || process.env.AWS_REGION || 'ap-southeast-2';
+
+  // Build GraphQL schema and frontend before deployment
+  try {
+    logger.info('📦 Building GraphQL schema and types...');
+    const frontendPath = path.join(__dirname, '../../../cloudwatchlive/frontend');
+    
+    // Run build-gql to generate combined_schema.graphql and gqlTypes.ts
+    logger.debug(`Running: yarn build-gql in ${frontendPath}`);
+    execSync('yarn build-gql', { 
+      cwd: frontendPath, 
+      stdio: options.debugMode ? 'inherit' : 'pipe',
+      encoding: 'utf8' 
+    });
+    logger.success('✓ GraphQL schema and types generated successfully');
+    
+    // Build frontend
+    logger.info('🏗️  Building frontend application...');
+    logger.debug(`Running: yarn build in ${frontendPath}`);
+    execSync('yarn build', { 
+      cwd: frontendPath, 
+      stdio: options.debugMode ? 'inherit' : 'pipe',
+      encoding: 'utf8' 
+    });
+    logger.success('✓ Frontend built successfully');
+    
+  } catch (error: any) {
+    logger.error(`Build failed: ${error.message}`);
+    if (error.stdout) logger.error(`Output: ${error.stdout}`);
+    if (error.stderr) logger.error(`Error output: ${error.stderr}`);
+    throw new Error('Pre-deployment build failed. Cannot continue with deployment.');
+  }
 
   // Initialize clients
   const cfn = new CloudFormationClient({ region });
