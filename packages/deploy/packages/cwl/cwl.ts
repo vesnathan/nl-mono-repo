@@ -572,6 +572,9 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       if (resolverFiles.length === 0) {
         logger.warning(`No TypeScript resolver files found in ${resolverDir}. This could cause deployment issues.`);
       } else {
+        // Define constants directory path for CWL
+        const constantsDir = path.join(__dirname, '../../../cloudwatchlive/backend/constants');
+        
         const resolverCompiler = new ResolverCompiler({
           logger: logger,
           baseResolverDir: resolverDir,
@@ -580,7 +583,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           s3BucketName: templateBucketName,
           region: region,
           resolverFiles: resolverFiles,
-          sharedFileName: 'gqlTypes.ts'
+          sharedFileName: 'gqlTypes.ts',
+          constantsDir: constantsDir
         });
 
         try {

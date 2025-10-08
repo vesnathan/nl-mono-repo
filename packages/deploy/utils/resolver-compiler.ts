@@ -32,6 +32,7 @@ export interface ResolverCompilerOptions {
   sharedFileName?: string;
   sharedFileS3Key?: string;
   debugMode?: boolean; // Added debugMode
+  constantsDir?: string; // Optional path to constants directory
 }
 
 class ResolverCompiler {
@@ -47,6 +48,7 @@ class ResolverCompiler {
   private sharedFileName?: string;
   private sharedFileS3Key?: string;
   private debugMode: boolean; // Added debugMode
+  private constantsDir?: string; // Optional constants directory
 
   private readonly gqlTypesSourceFileName = 'gqlTypes.ts';
 
@@ -62,6 +64,7 @@ class ResolverCompiler {
     this.sharedFileS3Key = options.sharedFileS3Key;
     this.s3Client = new S3Client({ region: this.region });
     this.debugMode = options.debugMode || false; // Initialize debugMode
+    this.constantsDir = options.constantsDir; // Initialize constantsDir
 
     // buildDir is a temporary directory for the entire compilation process of this instance.
     // It will be created by setupBuildDirectory and cleaned up by cleanupBuildDirectory.
@@ -545,7 +548,10 @@ class ResolverCompiler {
       );
       
       // Copy the constants file to the build directory
-      const constantsSourcePath = path.join(this.baseResolverDir, '../../../constants', `${constantsFile}.ts`);
+      // Use provided constantsDir or fall back to a default relative path
+      const constantsSourcePath = this.constantsDir 
+        ? path.join(this.constantsDir, `${constantsFile}.ts`)
+        : path.join(this.baseResolverDir, '../../../../../../cloudwatchlive/backend/constants', `${constantsFile}.ts`);
       const targetConstantsPath = path.join(this.buildDir, `${constantsFile}.ts`);
       
       if (fs.existsSync(constantsSourcePath)) {
