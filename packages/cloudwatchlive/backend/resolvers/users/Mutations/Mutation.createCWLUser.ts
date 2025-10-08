@@ -37,10 +37,7 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
   const userCreated = ctx.prev.result.userCreated;
 
   if (!cognitoSub) {
-    util.error(
-      "Failed to get Cognito sub from previous step",
-      "InternalError",
-    );
+    util.error("Failed to get Cognito sub from previous step", "InternalError");
   }
 
   // Extract sendWelcomeEmail and remove it from the item (it's not stored in DB)

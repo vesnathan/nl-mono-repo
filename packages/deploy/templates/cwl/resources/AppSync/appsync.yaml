@@ -83,7 +83,7 @@ Resources:
         Fn::ImportValue:
           !Sub "${AppName}-AppSyncDynamoDBRoleArn-${Stage}" # Parameterized import
 
-  LambdaDataSource:
+  SendWelcomeEmailDataSource:
     Type: AWS::AppSync::DataSource
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
@@ -191,7 +191,7 @@ Resources:
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       Name: !Sub "${AppName}SendWelcomeEmailFunction"
-      DataSourceName: !GetAtt LambdaDataSource.Name
+      DataSourceName: !GetAtt SendWelcomeEmailDataSource.Name
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0

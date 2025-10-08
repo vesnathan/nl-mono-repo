@@ -96,9 +96,9 @@ export const handler = async (
     }
 
     // Get the Cognito sub (unique identifier)
-    const cognitoSub =
-      createUserResponse.User.Attributes?.find((attr) => attr.Name === "sub")
-        ?.Value;
+    const cognitoSub = createUserResponse.User.Attributes?.find(
+      (attr) => attr.Name === "sub",
+    )?.Value;
 
     if (!cognitoSub) {
       throw new Error("Failed to get Cognito sub from created user");
