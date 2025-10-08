@@ -39,6 +39,10 @@ gqlTypes.ts
 # auto-generated schema files
 **/combined_schema.graphql
 
+# compiled resolvers (generated during deployment)
+packages/deploy/packages/*/resolvers/
+packages/deploy/packages/*/lib/
+
 # nx cache
 .nx/cache
 .nx/workspace-data

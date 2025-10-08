@@ -300,6 +300,9 @@ class ResolverCompiler {
     const localSavePathBaseForApp = path.join(monorepoRoot, 'packages', 'deploy', 'packages', appName, 'resolvers');
     logger.debug(`Compiled resolvers will be saved to: ${localSavePathBaseForApp}`);
 
+    const uploadedResolvers: string[] = [];
+    const failedResolvers: { file: string; error: string }[] = [];
+
     for (let index = 0; index < totalFiles; index++) {
       const resolverFileRelativePath = this.resolverFiles[index];
 
@@ -328,14 +331,28 @@ class ResolverCompiler {
 
         // Now, upload the same content to S3, ensuring consistency
         await this.uploadToS3(s3Key, compiledJsContent, 'application/javascript');
-        logger.success(`Uploaded ${resolverFileRelativePath} to S3: s3://${this.s3BucketName}/${s3Key}`); // Essential log
+        logger.success(`✓ Uploaded ${resolverFileRelativePath} to S3: s3://${this.s3BucketName}/${s3Key}`); // Essential log
+        uploadedResolvers.push(s3Key);
 
       } catch (error: any) {
-        logger.error(`Failed to compile or upload resolver ${resolverFileRelativePath}: ${error.message}`);
-        // Optionally re-throw or collect errors to report at the end
+        const errorMsg = `Failed to compile or upload resolver ${resolverFileRelativePath}: ${error.message}`;
+        logger.error(errorMsg);
+        failedResolvers.push({ file: resolverFileRelativePath, error: error.message });
       }
     }
-    logger.success('Finished all resolver processing.');
+    
+    // Report summary
+    logger.success(`\n📦 Resolver Upload Summary:`);
+    logger.success(`   ✓ Successfully uploaded: ${uploadedResolvers.length} resolvers`);
+    if (failedResolvers.length > 0) {
+      logger.error(`   ✗ Failed to upload: ${failedResolvers.length} resolvers`);
+      failedResolvers.forEach(({ file, error }) => {
+        logger.error(`     - ${file}: ${error}`);
+      });
+      throw new Error(`Failed to upload ${failedResolvers.length} resolver(s). Deployment cannot continue.`);
+    }
+    
+    logger.success('✓ All resolvers compiled and uploaded successfully.\n');
     // await this.cleanupBuildDirectory(); // Cleanup buildDir after all operations
   }
 
