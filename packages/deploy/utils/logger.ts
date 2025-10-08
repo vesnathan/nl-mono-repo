@@ -3,23 +3,36 @@ import chalk from "chalk";
 // Ensure debug mode starts as false
 let isDebugModeEnabled = false;
 
+// Helper function to get formatted timestamp in local timezone
+const getTimestamp = (): string => {
+  const now = new Date();
+  // Format: HH:MM:SS.mmm (24-hour format with milliseconds)
+  const hours = now.getHours().toString().padStart(2, "0");
+  const minutes = now.getMinutes().toString().padStart(2, "0");
+  const seconds = now.getSeconds().toString().padStart(2, "0");
+  const ms = now.getMilliseconds().toString().padStart(3, "0");
+  return `${hours}:${minutes}:${seconds}.${ms}`;
+};
+
 // Spinner animation frames - classic cursor style
 const spinnerFrames = ["|", "/", "-", "\\"];
 let currentSpinnerFrame = 0;
 let spinnerInterval: NodeJS.Timeout | null = null;
 
 const createSpinner = (message: string): (() => void) => {
-  let currentLine = `${chalk.blue("[INFO]")} ${message} ${chalk.cyan("|")}`;
+  const timestamp = chalk.gray(`[${getTimestamp()}]`);
+  let currentLine = `${timestamp} ${chalk.blue("[INFO]")} ${message} ${chalk.cyan("|")}`;
   process.stdout.write(currentLine);
 
   spinnerInterval = setInterval(() => {
     // Clear the current line
     process.stdout.write("\r" + " ".repeat(currentLine.length) + "\r");
 
-    // Update spinner frame
+    // Update spinner frame and timestamp
+    const timestamp = chalk.gray(`[${getTimestamp()}]`);
     currentSpinnerFrame = (currentSpinnerFrame + 1) % spinnerFrames.length;
     const spinnerChar = chalk.cyan(spinnerFrames[currentSpinnerFrame]);
-    currentLine = `${chalk.blue("[INFO]")} ${message} ${spinnerChar}`;
+    currentLine = `${timestamp} ${chalk.blue("[INFO]")} ${message} ${spinnerChar}`;
     process.stdout.write(currentLine);
   }, 150); // Update every 150ms
 
@@ -31,7 +44,8 @@ const createSpinner = (message: string): (() => void) => {
     }
     // Clear the spinner line and write final message
     process.stdout.write("\r" + " ".repeat(currentLine.length) + "\r");
-    console.log(chalk.blue("[INFO]"), message);
+    const timestamp = chalk.gray(`[${getTimestamp()}]`);
+    console.log(timestamp, chalk.blue("[INFO]"), message);
   };
 };
 
@@ -45,7 +59,8 @@ export const logger = {
       spinnerInterval = null;
       process.stdout.write("\r" + " ".repeat(150) + "\r");
     }
-    console.log(chalk.green("[SUCCESS]"), message);
+    const timestamp = chalk.gray(`[${getTimestamp()}]`);
+    console.log(timestamp, chalk.green("[SUCCESS]"), message);
   },
   warning: (message: string) => {
     // If spinner is running, clear it first
@@ -54,7 +69,8 @@ export const logger = {
       spinnerInterval = null;
       process.stdout.write("\r" + " ".repeat(150) + "\r");
     }
-    console.log(chalk.yellow("[WARNING]"), message);
+    const timestamp = chalk.gray(`[${getTimestamp()}]`);
+    console.log(timestamp, chalk.yellow("[WARNING]"), message);
   },
   error: (message: string) => {
     // If spinner is running, clear it first
@@ -63,7 +79,8 @@ export const logger = {
       spinnerInterval = null;
       process.stdout.write("\r" + " ".repeat(150) + "\r");
     }
-    console.log(chalk.red("[ERROR]"), message);
+    const timestamp = chalk.gray(`[${getTimestamp()}]`);
+    console.log(timestamp, chalk.red("[ERROR]"), message);
   },
   info: (message: string) => {
     // If spinner is running, clear it first
@@ -72,7 +89,8 @@ export const logger = {
       spinnerInterval = null;
       process.stdout.write("\r" + " ".repeat(150) + "\r");
     }
-    console.log(chalk.blue("[INFO]"), message);
+    const timestamp = chalk.gray(`[${getTimestamp()}]`);
+    console.log(timestamp, chalk.blue("[INFO]"), message);
   }, // Always shown for deployment progress
 
   // Animated info message with spinner
@@ -89,7 +107,8 @@ export const logger = {
         spinnerInterval = null;
         process.stdout.write("\r" + " ".repeat(150) + "\r");
       }
-      console.log(chalk.magenta("[DEBUG]"), message);
+      const timestamp = chalk.gray(`[${getTimestamp()}]`);
+      console.log(timestamp, chalk.magenta("[DEBUG]"), message);
     }
   },
 };
