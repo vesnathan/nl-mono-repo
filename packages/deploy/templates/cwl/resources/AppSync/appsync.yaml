@@ -18,6 +18,10 @@ Parameters:
   SendWelcomeEmailFunctionArn:
     Type: String
     Description: ARN of the Lambda function to send welcome emails
+    Default: ""
+
+Conditions:
+  HasSendWelcomeEmailFunction: !Not [!Equals [!Ref SendWelcomeEmailFunctionArn, ""]]
 
 Resources:
   AppSyncLoggingServiceRole:
@@ -82,6 +86,7 @@ Resources:
 
   LambdaDataSource:
     Type: AWS::AppSync::DataSource
+    Condition: HasSendWelcomeEmailFunction
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       Name: !Sub "${AppName}SendWelcomeEmailLambdaDataSource"
@@ -92,6 +97,7 @@ Resources:
 
   AppSyncLambdaInvokeRole:
     Type: AWS::IAM::Role
+    Condition: HasSendWelcomeEmailFunction
     Properties:
       RoleName: !Sub "${AppName}-appsync-lambda-invoke-role-${Stage}"
       AssumeRolePolicyDocument:
@@ -161,6 +167,7 @@ Resources:
 
   SendWelcomeEmailFunction:
     Type: AWS::AppSync::FunctionConfiguration
+    Condition: HasSendWelcomeEmailFunction
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       Name: !Sub "${AppName}SendWelcomeEmailFunction"
