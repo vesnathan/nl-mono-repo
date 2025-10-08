@@ -32,8 +32,16 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
     );
   }
 
-  const userId = util.autoId(); // Generate a new UUID for the user
-  const now = util.time.nowISO8601();
+  // Get the Cognito sub from the previous pipeline function (CreateCognitoUserFunction)
+  const cognitoSub = ctx.prev.result.cognitoSub;
+  const userCreated = ctx.prev.result.userCreated;
+
+  if (!cognitoSub) {
+    util.error(
+      "Failed to get Cognito sub from previous step",
+      "InternalError",
+    );
+  }
 
   // Extract sendWelcomeEmail and remove it from the item (it's not stored in DB)
   const { sendWelcomeEmail, ...userInputWithoutEmail } = input;
@@ -43,11 +51,10 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
   ctx.stash.input = input;
 
   const newUserItem = {
-    id: userId, // DynamoDB table uses 'id' as primary key
-    userId, // Keep userId field for backward compatibility/application logic
+    userId: cognitoSub, // DynamoDB table uses 'userId' as primary key (Cognito sub)
     ...userInputWithoutEmail,
     userAddedById: identity.username, // The SuperAdmin creating this user
-    userCreated: now,
+    userCreated: userCreated,
     privacyPolicy: false, // Default value, can be updated by user later
     termsAndConditions: false, // Default value, can be updated by user later
     userProfilePicture: {
@@ -59,11 +66,11 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
 
   return {
     operation: "PutItem",
-    key: util.dynamodb.toMapValues({ id: userId }), // Use 'id' as primary key
+    key: util.dynamodb.toMapValues({ userId: cognitoSub }), // Use 'userId' as primary key
     attributeValues: util.dynamodb.toMapValues(newUserItem),
-    // condition: {
-    //   expression: 'attribute_not_exists(id)', // Ensure user doesn't already exist
-    // },
+    condition: {
+      expression: "attribute_not_exists(userId)", // Ensure user doesn't already exist
+    },
   };
 }
 

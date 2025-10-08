@@ -43,10 +43,10 @@ export function request(ctx: Context<GetCWLUserQueryVariables>) {
   console.log(`Getting user data for userId: ${userId}`);
   console.log(`Identity username: ${identity.username}`);
 
-  // DynamoDB table uses 'id' as primary key, not 'userId'
+  // DynamoDB table uses 'userId' as primary key (Cognito sub)
   return {
     operation: "GetItem",
-    key: util.dynamodb.toMapValues({ id: userId }),
+    key: util.dynamodb.toMapValues({ userId: userId }),
   };
 }
 

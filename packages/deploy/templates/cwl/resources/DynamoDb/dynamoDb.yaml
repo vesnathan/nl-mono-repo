@@ -77,12 +77,12 @@ Resources:
       Properties:
         TableName: !Sub "nlmonorepo-${AppName}-datatable-${Stage}"
         AttributeDefinitions:
-          - AttributeName: "id" # Assuming a generic primary key 'id', adjust as per actual schema
+          - AttributeName: "userId" # Primary key is userId (Cognito sub)
             AttributeType: "S"
           # Add other GSI/LSI attribute definitions here if needed
         BillingMode: PAY_PER_REQUEST
         KeySchema:
-          - AttributeName: "id"
+          - AttributeName: "userId"
             KeyType: "HASH"
         Tags:
           - Key: Name

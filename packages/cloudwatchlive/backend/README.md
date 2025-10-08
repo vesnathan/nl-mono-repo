@@ -493,3 +493,12 @@ yarn remove:cwl --stage dev
 - [AppSync JavaScript Resolvers](https://docs.aws.amazon.com/appsync/latest/devguide/resolver-reference-overview-js.html) - Resolver reference
 - [Amazon DynamoDB Documentation](https://docs.aws.amazon.com/dynamodb/) - NoSQL database
 - [Amazon Cognito Documentation](https://docs.aws.amazon.com/cognito/) - User authentication
+
+## SES Sandbox Email Verification
+
+If you are using AWS SES in sandbox mode (the default for new AWS accounts):
+
+- **The from address must be verified** in SES. The deployment will automatically send a verification email if needed.
+- **The to address (recipient) must also be verified** in SES. You can only send emails to verified addresses in sandbox mode.
+- After clicking the verification link in your email, you do NOT need to re-deploy. The Lambda will work immediately for verified addresses.
+- To move out of sandbox mode, request production access in the AWS SES console.

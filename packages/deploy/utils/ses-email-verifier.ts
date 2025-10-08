@@ -30,8 +30,7 @@ export class SESEmailVerifier {
       });
 
       const response = await this.ses.send(command);
-      const attributes =
-        response.VerificationAttributes?.[this.emailAddress];
+      const attributes = response.VerificationAttributes?.[this.emailAddress];
 
       if (!attributes) {
         return false;
@@ -55,14 +54,27 @@ export class SESEmailVerifier {
         EmailAddress: this.emailAddress,
       });
 
-      await this.ses.send(command);
+      const response = await this.ses.send(command);
+      logger.success(
+        `✓ Verification email request sent successfully to ${this.emailAddress}`,
+      );
       logger.info(
-        `Verification email sent to ${this.emailAddress}. Please check your inbox and click the verification link.`,
+        `  AWS SES should send a verification email within a few minutes.`,
+      );
+      logger.info(
+        `  Check your inbox (and spam folder) for an email from no-reply-aws@amazon.com`,
       );
     } catch (error: any) {
-      logger.error(
-        `Error requesting email verification: ${error.message}`,
-      );
+      logger.error(`Error requesting email verification: ${error.message}`);
+      if (error.code === "InvalidParameterValue") {
+        logger.error(
+          `  The email address format may be invalid: ${this.emailAddress}`,
+        );
+      } else if (error.code === "LimitExceededException") {
+        logger.error(
+          `  AWS SES rate limit exceeded. Please wait a few minutes and try again.`,
+        );
+      }
       throw error;
     }
   }
@@ -108,9 +120,7 @@ export class SESEmailVerifier {
     const isVerified = await this.isEmailVerified();
 
     if (isVerified) {
-      logger.success(
-        `✓ Email ${this.emailAddress} is already verified in SES`,
-      );
+      logger.success(`✓ Email ${this.emailAddress} is already verified in SES`);
       return true;
     }
 
@@ -121,9 +131,7 @@ export class SESEmailVerifier {
     // Show list of currently verified emails
     const verifiedEmails = await this.listVerifiedEmails();
     if (verifiedEmails.length > 0) {
-      logger.info(
-        `Currently verified emails: ${verifiedEmails.join(", ")}`,
-      );
+      logger.info(`Currently verified emails: ${verifiedEmails.join(", ")}`);
     }
 
     // Request verification
@@ -133,11 +141,12 @@ export class SESEmailVerifier {
     logger.warning(
       `\n⚠️  ACTION REQUIRED: Check your inbox at ${this.emailAddress}`,
     );
+    logger.warning(`    Click the verification link in the email from AWS SES`);
     logger.warning(
-      `    Click the verification link in the email from AWS SES`,
+      `\n    NOTE: SES sandbox requires BOTH the from and to addresses to be verified.`,
     );
     logger.warning(
-      `    Re-run deployment after email is verified\n`,
+      `    Verify recipient email addresses here: https://console.aws.amazon.com/ses/home?region=ap-southeast-2#/verified-identities\n`,
     );
 
     return false;

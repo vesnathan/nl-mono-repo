@@ -77,6 +77,7 @@ Resources:
         FromEmail: noreply@cloudwatchlive.com
         AppURL: !Sub "https://${CloudFrontStack.Outputs.CWLCloudFrontDomainName}"
         TemplateBucketName: !Ref TemplateBucketName
+        UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
 
   # AppSync API
   AppSyncStack:
@@ -90,6 +91,7 @@ Resources:
         TemplateBucketName: !Ref TemplateBucketName
         UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
         SendWelcomeEmailFunctionArn: !GetAtt LambdaStack.Outputs.SendWelcomeEmailFunctionArn
+        CreateCognitoUserFunctionArn: !GetAtt LambdaStack.Outputs.CreateCognitoUserFunctionArn
 
 Outputs:
   ApiUrl:

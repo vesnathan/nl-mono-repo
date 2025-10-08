@@ -26,6 +26,9 @@ Parameters:
   TemplateBucketName:
     Type: String
     Description: S3 bucket name for CloudFormation templates
+  UserPoolId:
+    Type: String
+    Description: Cognito User Pool ID for user creation
 
 Resources:
   PostDeployFunction: # Renamed from PostFrontEndDeployFunction
@@ -144,6 +147,47 @@ Resources:
                   - ses:SendRawEmail
                 Resource: "*"
 
+  CreateCognitoUserFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "nlmonorepo-${AppName}-create-cognito-user-${Stage}"
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      Role: !GetAtt CreateCognitoUserRole.Arn
+      Code:
+        S3Bucket: !Ref TemplateBucketName
+        S3Key: !Sub "functions/${Stage}/createCognitoUser.zip"
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+          USER_POOL_ID: !Ref UserPoolId
+
+  CreateCognitoUserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "nlmonorepo-${AppName}-create-cognito-user-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: CognitoUserManagement
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cognito-idp:AdminCreateUser
+                  - cognito-idp:AdminAddUserToGroup
+                  - cognito-idp:AdminSetUserPassword
+                Resource: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPoolId}"
+
 Outputs:
   PostDeployFunctionArn: # Renamed from PostFrontEndDeployFunctionArn
     Value: !GetAtt PostDeployFunction.Arn
@@ -162,3 +206,13 @@ Outputs:
   SendWelcomeEmailFunctionName:
     Value: !Ref SendWelcomeEmailFunction
     Description: Name of the send welcome email Lambda function
+
+  CreateCognitoUserFunctionArn:
+    Value: !GetAtt CreateCognitoUserFunction.Arn
+    Description: ARN of the create Cognito user Lambda function
+    Export:
+      Name: !Sub "${AppName}-CreateCognitoUserFunctionArn-${Stage}"
+  
+  CreateCognitoUserFunctionName:
+    Value: !Ref CreateCognitoUserFunction
+    Description: Name of the create Cognito user Lambda function
