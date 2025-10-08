@@ -94,7 +94,8 @@ To add a new GraphQL API endpoint to CloudWatch Live, follow these steps:
 Add your new query or mutation to the schema:
 
 ```bash
-# File: packages/cloudwatchlive/backend/combined_schema.graphql
+# File: packages/cloudwatchlive/backend/schema/users.graphql
+# Or create a new .graphql file for your domain
 ```
 
 **Example - Adding a new Query:**
@@ -145,14 +146,14 @@ Create a new TypeScript resolver file in the appropriate directory:
 
 **For Queries:**
 ```bash
-# File: packages/deploy/templates/cwl/resources/AppSync/resolvers/[domain]/Queries/Query.[queryName].ts
-# Example: packages/deploy/templates/cwl/resources/AppSync/resolvers/events/Queries/Query.getEvent.ts
+# File: packages/cloudwatchlive/backend/resolvers/[domain]/Queries/Query.[queryName].ts
+# Example: packages/cloudwatchlive/backend/resolvers/events/Queries/Query.getEvent.ts
 ```
 
 **For Mutations:**
 ```bash
-# File: packages/deploy/templates/cwl/resources/AppSync/resolvers/[domain]/Mutations/Mutation.[mutationName].ts
-# Example: packages/deploy/templates/cwl/resources/AppSync/resolvers/events/Mutations/Mutation.createEvent.ts
+# File: packages/cloudwatchlive/backend/resolvers/[domain]/Mutations/Mutation.[mutationName].ts
+# Example: packages/cloudwatchlive/backend/resolvers/events/Mutations/Mutation.createEvent.ts
 ```
 
 **Example Resolver (Query.getEvent.ts):**
@@ -334,8 +335,9 @@ const createEvent = async (input: CreateEventInput) => {
 
 | File | Purpose |
 |------|---------|
-| `packages/cloudwatchlive/backend/combined_schema.graphql` | GraphQL schema definition |
-| `packages/deploy/templates/cwl/resources/AppSync/resolvers/[domain]/[type]/[TypeName].[fieldName].ts` | Resolver implementation |
+| `packages/cloudwatchlive/backend/schema/users.graphql` | GraphQL schema operations (queries, mutations) |
+| `packages/shared/types/[TypeName].graphql` | GraphQL type definitions |
+| `packages/cloudwatchlive/backend/resolvers/[domain]/[type]/[TypeName].[fieldName].ts` | Resolver implementation |
 | `packages/deploy/templates/cwl/resources/AppSync/appsync.yaml` | CloudFormation resolver registration |
 | `packages/deploy/packages/cwl/cwl.ts` | Deployment configuration |
 

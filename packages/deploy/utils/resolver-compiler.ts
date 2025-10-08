@@ -72,7 +72,7 @@ class ResolverCompiler {
   }
 
   private getAppName(): string {
-    // this.baseResolverDir is like /workspaces/nl-mono-repo/packages/cloudwatchlive/backend/resources/AppSync/resolvers
+    // this.baseResolverDir is like /workspaces/nl-mono-repo/packages/cloudwatchlive/backend/resolvers
     const parts = this.baseResolverDir.split(path.sep);
     const packagesIndex = parts.indexOf('packages');
     if (packagesIndex !== -1 && packagesIndex + 1 < parts.length) {
