@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { useUserStore } from "@/stores/userStore";
 import { ClientType } from "@/types/gqlTypes";
 import {
@@ -20,7 +20,7 @@ export const Clients = () => {
     "SuperAdmin" | "EventCompanyAdmin" | null
   >(null);
   const [currentStep, setCurrentStep] = useState(1);
-  const [totalSteps, setTotalSteps] = useState(1);
+  const [totalSteps] = useState(1);
 
   const user = useUserStore((state) => state.user);
   const isSuperAdminUser = user.clientType.includes(ClientType.SuperAdmin);

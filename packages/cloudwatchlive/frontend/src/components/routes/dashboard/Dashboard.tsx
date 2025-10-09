@@ -2,19 +2,10 @@
 
 import React from "react";
 import { useUserStore } from "@/stores/userStore";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  useDisclosure,
-} from "@nextui-org/react";
 import { ClientType } from "../../../types/gqlTypes";
 
 export const Dashboard = () => {
   const { user } = useUserStore();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
   const isSuperAdmin = user.clientType.includes(ClientType.SuperAdmin);
 
   return (
