@@ -6,79 +6,129 @@ import { Button, Card, CardBody } from "@nextui-org/react";
 import LoginBackground from "@/assets/images/login-bg.png";
 import Logo from "@/assets/images/logo/logo.png";
 
-// Placeholder event data
-const PLACEHOLDER_EVENTS = [
+// Event access types
+type EventAccessType = "free" | "paid" | "invite-only";
+
+// Event data structure
+interface Event {
+  id: number;
+  title: string;
+  location: string;
+  date: string;
+  accessType: EventAccessType;
+  price?: string; // Only for paid events
+  image: string;
+  eventOwner: {
+    name: string;
+    company: string;
+  };
+}
+
+// Placeholder event data - only FREE events are shown on landing page
+const PLACEHOLDER_EVENTS: Event[] = [
   {
     id: 1,
     title: "Summer Music Festival 2025",
     location: "Sydney, Australia",
     date: "Dec 15-17, 2025",
-    price: "$299",
+    accessType: "free",
     image:
       "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "John Smith",
+      company: "MegaEvents Australia",
+    },
   },
   {
     id: 2,
     title: "Tech Conference Asia",
     location: "Singapore",
     date: "Jan 20-22, 2026",
-    price: "$599",
+    accessType: "free",
     image:
       "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Sarah Lee",
+      company: "Tech Events Asia",
+    },
   },
   {
     id: 3,
     title: "Art & Design Expo",
     location: "Melbourne, Australia",
     date: "Nov 5-7, 2025",
-    price: "$149",
+    accessType: "free",
     image:
       "https://images.unsplash.com/photo-1531058020387-3be344556be6?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Emma Wilson",
+      company: "Creative Spaces Events",
+    },
   },
   {
     id: 4,
     title: "Food & Wine Festival",
     location: "Adelaide, Australia",
     date: "Oct 28-30, 2025",
-    price: "$199",
+    accessType: "free",
     image:
       "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Marco Rossi",
+      company: "Gourmet Events Co",
+    },
   },
   {
     id: 5,
-    title: "Sports Championship Finals",
+    title: "Community Sports Day",
     location: "Brisbane, Australia",
-    date: "Dec 1-3, 2025",
-    price: "$399",
+    date: "Dec 1, 2025",
+    accessType: "free",
     image:
       "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "David Chen",
+      company: "Brisbane Sports Network",
+    },
   },
   {
     id: 6,
     title: "Comedy Night Special",
     location: "Perth, Australia",
     date: "Nov 18, 2025",
-    price: "$89",
+    accessType: "free",
     image:
       "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Lisa Brown",
+      company: "Laugh Out Loud Productions",
+    },
   },
   {
     id: 7,
-    title: "Gaming Convention",
+    title: "Gaming Convention Keynote",
     location: "Auckland, New Zealand",
-    date: "Jan 10-12, 2026",
-    price: "$249",
+    date: "Jan 10, 2026",
+    accessType: "free",
     image:
       "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "James Taylor",
+      company: "GameCon NZ",
+    },
   },
   {
     id: 8,
-    title: "Wellness Retreat Weekend",
+    title: "Wellness Workshop",
     location: "Gold Coast, Australia",
-    date: "Nov 25-27, 2025",
-    price: "$449",
+    date: "Nov 25, 2025",
+    accessType: "free",
     image:
       "https://images.unsplash.com/photo-1545389336-cf090694435e?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Sophie Green",
+      company: "Mindful Living Events",
+    },
   },
 ];
 
@@ -125,11 +175,12 @@ export default function LandingPage() {
         <section className="max-w-7xl mx-auto px-6 py-16 text-center">
           <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-12 mb-12">
             <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-secondary-500 to-primary-400 bg-clip-text text-transparent">
-              Discover Amazing Events
+              Stream Live Events from Anywhere
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Join thousands of event-goers experiencing unforgettable moments.
-              Find your next adventure today.
+              Watch free live-streamed events from top event management
+              companies worldwide. Join thousands experiencing unforgettable
+              moments in real-time.
             </p>
             <Button
               as={Link}
@@ -145,9 +196,12 @@ export default function LandingPage() {
 
         {/* Events Grid */}
         <section className="max-w-7xl mx-auto px-6 pb-16">
-          <h2 className="text-3xl font-bold text-white mb-8 drop-shadow-lg">
-            Popular Events
+          <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
+            Free Live Events
           </h2>
+          <p className="text-white/90 mb-8 drop-shadow-lg">
+            Watch these events live for free. No registration required.
+          </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {PLACEHOLDER_EVENTS.map((event) => (
@@ -164,28 +218,29 @@ export default function LandingPage() {
                       className="object-cover rounded-t-lg"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                     />
+                    <div className="absolute top-2 left-2 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                      FREE
+                    </div>
                   </div>
                   <div className="p-4">
                     <h3 className="font-semibold text-lg mb-2 line-clamp-2">
                       {event.title}
                     </h3>
+                    <p className="text-xs text-gray-500 mb-1">
+                      by {event.eventOwner.company}
+                    </p>
                     <p className="text-sm text-gray-600 mb-1">
                       {event.location}
                     </p>
                     <p className="text-sm text-gray-500 mb-3">{event.date}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-primary-500">
-                        {event.price}
-                      </span>
-                      <Button
-                        size="sm"
-                        color="primary"
-                        variant="flat"
-                        className="font-semibold"
-                      >
-                        View Details
-                      </Button>
-                    </div>
+                    <Button
+                      size="sm"
+                      color="primary"
+                      variant="flat"
+                      className="font-semibold w-full"
+                    >
+                      Watch Live
+                    </Button>
                   </div>
                 </CardBody>
               </Card>
@@ -197,11 +252,11 @@ export default function LandingPage() {
         <section className="max-w-7xl mx-auto px-6 pb-16">
           <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-12 text-center">
             <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-secondary-500 to-primary-400 bg-clip-text text-transparent">
-              Ready to Join?
+              Are You an Event Organizer?
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Create your account today and start discovering events near you.
-              It&apos;s free to join!
+              Stream your events to a global audience. Offer free streaming,
+              paid access, or invite-only events. Get started today!
             </p>
             <div className="flex gap-4 justify-center">
               <Button
@@ -211,7 +266,7 @@ export default function LandingPage() {
                 color="primary"
                 className="font-semibold text-lg px-8"
               >
-                Sign Up Now
+                Start Streaming
               </Button>
               <Button
                 as={Link}
