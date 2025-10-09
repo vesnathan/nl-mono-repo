@@ -14,7 +14,11 @@ const fetchEvent = async (eventId: string): Promise<EventBase | null> => {
     id: eventId,
     title: `Demo Event ${eventId}`,
     description: "This is a demo event used for local development.",
-    mode: eventId.includes("paid") ? "paid" : eventId.includes("register") ? "register" : "free",
+    mode: eventId.includes("paid")
+      ? "paid"
+      : eventId.includes("register")
+        ? "register"
+        : "free",
     sessions: [
       {
         id: "s1",
@@ -53,7 +57,8 @@ export const EventPage: React.FC<Props> = ({ eventId }) => {
         <div className="mb-4">
           <strong>Registration required</strong>
           <p>
-            Please register to attend. <a href={event.registrationUrl}>Register</a>
+            Please register to attend.{" "}
+            <a href={event.registrationUrl}>Register</a>
           </p>
         </div>
       )}
@@ -62,10 +67,14 @@ export const EventPage: React.FC<Props> = ({ eventId }) => {
         <div className="mb-4">
           <strong>Paid event</strong>
           <p>
-            Tickets available — price: {event.ticketInfo?.currency} {event.ticketInfo?.price}
+            Tickets available — price: {event.ticketInfo?.currency}{" "}
+            {event.ticketInfo?.price}
           </p>
           {event.ticketInfo?.buyUrl && (
-            <a href={event.ticketInfo.buyUrl} className="text-blue-600 underline">
+            <a
+              href={event.ticketInfo.buyUrl}
+              className="text-blue-600 underline"
+            >
               Buy ticket
             </a>
           )}
