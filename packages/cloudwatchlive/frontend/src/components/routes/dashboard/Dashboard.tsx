@@ -2,11 +2,11 @@
 
 import React from "react";
 import { useUserStore } from "@/stores/userStore";
-import { ClientType } from "../../../types/gqlTypes";
+// ClientType import removed as Dashboard doesn't use it
 
 export const Dashboard = () => {
   const { user } = useUserStore();
-  const isSuperAdmin = user.clientType.includes(ClientType.SuperAdmin);
+  // isSuperAdmin removed — not used by Dashboard UI currently
 
   return (
     <div>
