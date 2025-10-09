@@ -19,5 +19,10 @@
     "uuid": "^9.0.0",
     "@types/uuid": "^9.0.0"
   },
-  "scripts": {}
+  "scripts": {
+    "seed:users": "tsx scripts/seed-users.ts",
+    "seed:users:10": "tsx scripts/seed-users.ts 10",
+    "seed:users:25": "tsx scripts/seed-users.ts 25",
+    "seed:users:50": "tsx scripts/seed-users.ts 50"
+  }
 }

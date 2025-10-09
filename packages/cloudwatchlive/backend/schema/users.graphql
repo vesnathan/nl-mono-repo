@@ -10,4 +10,18 @@ type Query {
   # Retrieves a CWLUser by their ID (Cognito Sub)
   getCWLUser(userId: String!): CWLUser
     @aws_cognito_user_pools # Directive for AppSync authorization
+
+  # List all organizations (Event Companies)
+  listOrganizations: [Organization!]!
+}
+
+type Organization {
+  organizationId: String!
+  organizationName: String!
+  organizationType: String!
+  organizationCreated: String!
+  mainAdminUserId: String!
+  adminUserIds: [String!]!
+  staffUserIds: [String!]!
+}
 }

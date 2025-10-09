@@ -26,10 +26,16 @@ export const CWL_CLIENT_TYPES: readonly ClientTypeDefinition[] = [
     description: "Full system administrator access",
   },
   {
+    id: "EventCompanyMainAdmin",
+    value: "EventCompanyMainAdmin",
+    displayName: "Event Company Main Admin",
+    description: "Main administrator managing Event Company Admins",
+  },
+  {
     id: "EventCompanyAdmin",
     value: "EventCompanyAdmin",
     displayName: "Event Company Admin",
-    description: "Event company administrator",
+    description: "Event company administrator managing staff",
   },
   {
     id: "EventCompanyStaff",

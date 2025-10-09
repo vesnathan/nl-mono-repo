@@ -1,5 +1,6 @@
 enum ClientType {
   SuperAdmin
+  EventCompanyMainAdmin
   EventCompanyAdmin
   EventCompanyStaff
   TechCompanyAdmin
@@ -28,6 +29,8 @@ type CWLUser @aws_cognito_user_pools {
   userRole: String!
   clientType: [ClientType!]!
   userProfilePicture: S3Object
+  managedAdminIds: [String!]
+  managedStaffIds: [String!]
 }
 
 input CWLUserInput {
