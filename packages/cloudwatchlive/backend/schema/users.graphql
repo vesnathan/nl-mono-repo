@@ -24,4 +24,4 @@ type Organization {
   adminUserIds: [String!]!
   staffUserIds: [String!]!
 }
-}
+

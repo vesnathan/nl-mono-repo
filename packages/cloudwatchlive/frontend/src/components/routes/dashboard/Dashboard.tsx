@@ -9,9 +9,7 @@ import {
   ModalBody,
   useDisclosure,
 } from "@nextui-org/react";
-import { CWLButton } from "@/components/common/CWLButton";
 import { ClientType } from "../../../types/gqlTypes";
-import { CreateUserForm } from "./CreateUserForm";
 
 export const Dashboard = () => {
   const { user } = useUserStore();
@@ -21,28 +19,8 @@ export const Dashboard = () => {
 
   return (
     <div>
-      {isSuperAdmin && (
-        <CWLButton buttonText="Create User" onClick={onOpen} color="primary" />
-      )}
-      <Modal isOpen={isOpen} onClose={onClose} placement="top-center">
-        <ModalContent className="h-[80vh]">
-          {(modalClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Create New User
-              </ModalHeader>
-              <ModalBody>
-                <CreateUserForm
-                  onClose={modalClose}
-                  onSubmitSuccess={() => {
-                    modalClose();
-                  }}
-                />
-              </ModalBody>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+      <p>Welcome, {user.userFirstName}!</p>
     </div>
   );
 };

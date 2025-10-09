@@ -372,9 +372,13 @@ class ResolverCompiler {
   }
 
   public async compileAndUploadResolvers(): Promise<void> {
-    logger.success("Starting resolver compilation and upload..."); // Essential log
-    await this.setupBuildDirectory();
-    await this.compileAndUploadSharedFile();
+    const stopSpinner = logger.infoWithSpinner("Starting resolver compilation and upload...");
+    try {
+      await this.setupBuildDirectory();
+      await this.compileAndUploadSharedFile();
+    } finally {
+      stopSpinner();
+    }
 
     const totalFiles = this.resolverFiles.length;
     logger.debug(`Processing ${totalFiles} resolver files...`); // Essential log

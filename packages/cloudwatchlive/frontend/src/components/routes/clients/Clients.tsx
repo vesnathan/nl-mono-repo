@@ -30,22 +30,11 @@ export const Clients = () => {
   //   console.log('User clientType (useEffect):', user.clientType);
   // }, [user.clientType, isSuperAdminUser]);
 
-  // Define separate refs for each form
+  // Define a ref for the form. AddUserForm exposes submit() and reset() via useImperativeHandle.
   const addUserFormRef = useRef<{
     submit: () => void;
-    nextStep: () => Promise<boolean>;
-    previousStep: () => void;
     reset: () => void;
-    getStep: () => number;
-    getTotalSteps: () => number;
   } | null>(null);
-
-  useEffect(() => {
-    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
-      setCurrentStep(addUserFormRef.current.getStep());
-      setTotalSteps(addUserFormRef.current.getTotalSteps());
-    }
-  }, [isModalOpen, currentForm]);
 
   const handleOpenModal = () => {
     if (isSuperAdminUser) setCurrentForm("SuperAdmin");
@@ -65,17 +54,11 @@ export const Clients = () => {
   };
 
   const handleNext = async () => {
-    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
-      const success = await addUserFormRef.current.nextStep();
-      if (success) setCurrentStep((prev) => prev + 1);
-    }
+    // No-op: AddUserForm is a single-step form in this implementation.
   };
 
   const handlePrevious = () => {
-    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
-      addUserFormRef.current.previousStep();
-      setCurrentStep((prev) => prev - 1);
-    }
+    // No-op: single-step form
   };
 
   const handleReset = () => {

@@ -1,8 +1,11 @@
 #!/bin/bash
 # Script to set AWS environment variables from mono-repo root .env file
 
-# Path to the root .env file
-ROOT_ENV_FILE="./.env"
+
+# Path to the root .env file (absolute path)
+# Use BASH_SOURCE so this works whether the script is executed or sourced
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_ENV_FILE="${SCRIPT_DIR}/.env"
 
 # Check if the .env file exists
 if [ ! -f "$ROOT_ENV_FILE" ]; then

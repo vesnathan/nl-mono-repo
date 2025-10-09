@@ -1,4 +1,21 @@
 #!/bin/bash
+set -x  # Enable shell debug mode
+
+# Always start in mono-repo root so .env and all relative paths work
+MONOREPO_ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
+cd "$MONOREPO_ROOT"
+DEBUG_LOG="/tmp/seed-users-debug.log"
+exec 3>&1 4>&2
+exec 1> >(tee -a "$DEBUG_LOG" >&3) 2> >(tee -a "$DEBUG_LOG" >&4)
+echo "[DEBUG] Script started at $(date)"
+echo "[DEBUG] Current working directory: $(pwd)"
+echo "[DEBUG] User: $(whoami)"
+echo "[DEBUG] PATH: $PATH"
+echo "[DEBUG] Node version: $(node --version 2>/dev/null || echo 'not found')"
+echo "[DEBUG] Yarn version: $(yarn --version 2>/dev/null || echo 'not found')"
+echo "[DEBUG] AWS CLI version: $(aws --version 2>&1 || echo 'not found')"
+echo "[DEBUG] Environment variables:"
+env | grep -E 'AWS|STAGE|TABLE|NODE|YARN' | sort
 
 # Script to seed DynamoDB with FIXED CWL users (Event Companies with hierarchical structure)
 # This script uses DETERMINISTIC UUIDs - the same names always generate the same UUIDs
@@ -16,6 +33,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}🌱 CWL User Seeding Script${NC}"
+echo "[DEBUG] Script directory: $(dirname "$0")"
 echo ""
 
 # Check if AWS credentials are configured
@@ -58,37 +76,54 @@ if [ -n "$SUPER_ADMIN_USER_ID" ]; then
 fi
 echo ""
 
-# Confirm before proceeding
-read -p "Continue with seeding? (y/N): " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo -e "${YELLOW}⚠️  Seeding cancelled${NC}"
-    exit 0
-fi
 
+
+echo -e "${YELLOW}Proceeding with seeding automatically (no prompt)${NC}"
+echo "[DEBUG] Proceeding with seeding automatically (no prompt)"
+
+# set -x  # Uncomment for full debug output
 # Run the TypeScript script
 echo ""
 echo -e "${BLUE}Running seeding script...${NC}"
 echo ""
 
+
+echo "[DEBUG] About to run seeding script with AWS_REGION=$AWS_REGION, TABLE_NAME=$TABLE_NAME, STAGE=$STAGE"
 export AWS_REGION="$AWS_REGION"
 export TABLE_NAME="$TABLE_NAME"
 export STAGE="$STAGE"
 
-# Change to the backend directory
-cd "$(dirname "$0")/.."
+
+
+# Stay in mono-repo root so .env is always found
+echo "[DEBUG] Staying in mono-repo root: $(pwd)"
+ls -al packages/cloudwatchlive/backend/scripts
 
 # Run using ts-node or npx tsx (no parameters needed - all data is fixed!)
-if command -v tsx &> /dev/null; then
-    tsx scripts/seed-users.ts
-elif command -v ts-node &> /dev/null; then
-    ts-node scripts/seed-users.ts
+
+
+# Use yarn to run the seeding script with local dependencies.
+# When running from the mono-repo root the root package.json may not
+# contain the script, so use --cwd to invoke the script defined in the
+# backend package directly.
+if command -v yarn &> /dev/null; then
+    echo "[DEBUG] Running: yarn --cwd packages/cloudwatchlive/backend run seed:users"
+    if yarn --cwd packages/cloudwatchlive/backend run seed:users; then
+        echo "[DEBUG] yarn --cwd packages/cloudwatchlive/backend run seed:users succeeded"
+    else
+        echo "[DEBUG] yarn --cwd failed, attempting yarn workspace fallback"
+        # Try workspace command (works if workspace name is correct)
+        if yarn workspace cwlbackend run seed:users; then
+            echo "[DEBUG] yarn workspace cwlbackend run seed:users succeeded"
+        else
+            echo -e "${RED}❌ Failed to run seed:users via yarn (workspace and --cwd attempts failed)${NC}"
+            exit 1
+        fi
+    fi
 else
-    echo -e "${RED}❌ Neither tsx nor ts-node found!${NC}"
-    echo "Please install one of them:"
-    echo "  yarn global add tsx"
-    echo "  or"
-    echo "  yarn global add ts-node"
+    echo -e "${RED}❌ Yarn is not installed!${NC}"
+    echo "[DEBUG] Yarn is not installed!"
+    echo "Please install yarn to run this script."
     exit 1
 fi
 

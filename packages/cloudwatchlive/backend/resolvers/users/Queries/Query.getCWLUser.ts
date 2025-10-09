@@ -42,11 +42,11 @@ export function request(ctx: Context<GetCWLUserQueryVariables>) {
 
   console.log(`Getting user data for userId: ${userId}`);
   console.log(`Identity username: ${identity.username}`);
-
-  // DynamoDB table uses 'userId' as primary key (Cognito sub)
+  // DynamoDB CWLDataTable uses a single-table PK/SK schema.
+  // Use PK = USER#<userId> and SK = PROFILE#<userId> when querying.
   return {
     operation: "GetItem",
-    key: util.dynamodb.toMapValues({ userId: userId }),
+    key: util.dynamodb.toMapValues({ PK: `USER#${userId}`, SK: `PROFILE#${userId}` }),
   };
 }
 
@@ -65,7 +65,11 @@ export function response(ctx: CTX): Output {
   const args = ctx.args as GetCWLUserQueryVariables;
   const { userId } = args;
 
-  if (!ctx.result) {
+  // Extract the returned item from ctx.result. For GetItem, AWS may return
+  // { Item: { ... } } or the raw item, depending on runtime.
+  const item = (ctx.result && ((ctx.result as any).Item || ctx.result)) as any;
+
+  if (!item) {
     console.error(`User not found in DynamoDB for userId: ${userId}`);
     console.error(`Identity username: ${identity.username}`);
     console.error(`Identity groups: ${JSON.stringify(identity.groups)}`);
@@ -76,10 +80,7 @@ export function response(ctx: CTX): Output {
     );
   }
 
-  // Assuming ctx.result is the raw item from DynamoDB, cast and map it.
-  // The 'any' cast should be followed by a proper mapping to CWLUser structure if needed.
-  // For now, we'll assume the structure matches CWLUser or is handled by direct return.
-  const userFromDB = ctx.result as any;
+  const userFromDB = item;
 
   // Map Cognito groups to ClientType using single source of truth
   const cognitoGroups = identity.groups || [];

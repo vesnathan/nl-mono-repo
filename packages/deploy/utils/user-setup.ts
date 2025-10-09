@@ -310,10 +310,11 @@ export class UserSetupManager {
         `Attempting to create user in DynamoDB. Table: ${tableName}, cognitoUserId: ${cognitoUserId}, userEmail: '${userEmail}'`,
       ); // Added log
       // Check if user already exists in DynamoDb
+      // Use single-table PK/SK key schema used by CWLDataTable
       const getUserResponse = await this.dynamoClient.send(
         new GetItemCommand({
           TableName: tableName,
-          Key: { userId: { S: cognitoUserId } },
+          Key: { PK: { S: `USER#${cognitoUserId}` }, SK: { S: `PROFILE#${cognitoUserId}` } },
         }),
       );
 
@@ -323,9 +324,13 @@ export class UserSetupManager {
       }
 
       // Create user in DynamoDb with the same schema as deploy.sh
-      const currentTimestamp = "1733530302"; // Fixed timestamp from deploy.sh
+
+      // Build item that conforms to the CWL single-table schema (PK/SK + GSI1 keys)
+      const currentTimestamp = new Date().toISOString();
 
       const userItem = {
+        PK: { S: `USER#${cognitoUserId}` },
+        SK: { S: `PROFILE#${cognitoUserId}` },
         userId: { S: cognitoUserId },
         organizationId: { S: "" },
         privacyPolicy: { BOOL: true },
@@ -344,15 +349,14 @@ export class UserSetupManager {
         },
         userTitle: { S: "Mr" },
         userRole: { S: "System Administrator" },
+        GSI1PK: { S: `ORG#${""}` },
+        GSI1SK: { S: `USER#${cognitoUserId}` },
       };
 
       logger.debug(`Creating user entry in DynamoDb table ${tableName}...`);
-      logger.debug(`User item for DDB: ${JSON.stringify(userItem, null, 2)}`); // Added log
+      logger.debug(`User item for DDB: ${JSON.stringify(userItem, null, 2)}`);
       await this.dynamoClient.send(
-        new PutItemCommand({
-          TableName: tableName,
-          Item: userItem,
-        }),
+        new PutItemCommand({ TableName: tableName, Item: userItem }),
       );
 
       logger.debug(`Created user entry in DynamoDb table ${tableName}`);
@@ -371,16 +375,20 @@ export class UserSetupManager {
   ): Promise<void> {
     try {
       // Validate user exists in DynamoDb
+      // Use the table's PK/SK primary key to fetch the created user item
       const getUserResponse = await this.dynamoClient.send(
         new GetItemCommand({
           TableName: tableName,
-          Key: { userId: { S: cognitoUserId } },
+          Key: {
+            PK: { S: `USER#${cognitoUserId}` },
+            SK: { S: `PROFILE#${cognitoUserId}` },
+          },
         }),
       );
 
       if (!getUserResponse.Item) {
         throw new Error(
-          `User validation failed: User not found in table ${tableName}`,
+          `User validation failed: User not found in table ${tableName} using PK/SK keys`,
         );
       }
 

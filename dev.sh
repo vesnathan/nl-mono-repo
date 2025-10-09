@@ -95,7 +95,7 @@ case $selected in
     0) # Deploy/Update Infrastructure
         echo -e "${BLUE}🏗️  Starting infrastructure deployment...${NC}"
         echo ""
-        yarn workspace @cwl/deploy development
+    yarn workspace @deploy/core development
         deployment_exit_code=$?
         echo ""
         if [ $deployment_exit_code -eq 0 ]; then
