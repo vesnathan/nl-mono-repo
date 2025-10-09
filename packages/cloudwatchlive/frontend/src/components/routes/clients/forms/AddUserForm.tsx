@@ -1,4 +1,4 @@
-("use client");
+"use client";
 
 import { listOrganizationsQueryFn } from "@/graphql/queries/orgQueries";
 

@@ -2,47 +2,16 @@
 
 import React from "react";
 import { useUserStore } from "@/stores/userStore";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  useDisclosure,
-} from "@nextui-org/react";
-import { CWLButton } from "@/components/common/CWLButton";
-import { ClientType } from "../../../types/gqlTypes";
-import { CreateUserForm } from "./CreateUserForm";
+// ClientType import removed as Dashboard doesn't use it
 
 export const Dashboard = () => {
   const { user } = useUserStore();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  const isSuperAdmin = user.clientType.includes(ClientType.SuperAdmin);
+  // isSuperAdmin removed — not used by Dashboard UI currently
 
   return (
     <div>
-      {isSuperAdmin && (
-        <CWLButton buttonText="Create User" onClick={onOpen} color="primary" />
-      )}
-      <Modal isOpen={isOpen} onClose={onClose} placement="top-center">
-        <ModalContent className="h-[80vh]">
-          {(modalClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Create New User
-              </ModalHeader>
-              <ModalBody>
-                <CreateUserForm
-                  onClose={modalClose}
-                  onSubmitSuccess={() => {
-                    modalClose();
-                  }}
-                />
-              </ModalBody>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+      <p>Welcome, {user.userFirstName}!</p>
     </div>
   );
 };

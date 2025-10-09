@@ -14,6 +14,7 @@ type Query {
   # List all organizations (Event Companies)
   listOrganizations: [Organization!]!
 }
+
 type Organization {
   organizationId: String!
   organizationName: String!
@@ -24,8 +25,10 @@ type Organization {
   staffUserIds: [String!]!
 }
 
+
 enum ClientType {
   SuperAdmin
+  EventCompanyMainAdmin
   EventCompanyAdmin
   EventCompanyStaff
   TechCompanyAdmin
@@ -54,6 +57,8 @@ type CWLUser @aws_cognito_user_pools {
   userRole: String!
   clientType: [ClientType!]!
   userProfilePicture: S3Object
+  managedAdminIds: [String!]
+  managedStaffIds: [String!]
 }
 
 input CWLUserInput {

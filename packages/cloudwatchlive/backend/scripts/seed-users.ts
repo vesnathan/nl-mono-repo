@@ -1,4 +1,4 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { v5 as uuidv5 } from "uuid";
 
@@ -14,6 +14,29 @@ const UUID_NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"; // Standard DNS n
 // Initialize DynamoDB client
 const ddbClient = new DynamoDBClient({ region: REGION });
 const docClient = DynamoDBDocumentClient.from(ddbClient);
+
+// Check whether the target table already contains any items. We perform a
+// lightweight Scan with Limit=1 — if any item exists, we assume the table has
+// been seeded and skip the expensive seeding process.
+async function tableHasItems(): Promise<boolean> {
+  try {
+    const resp = await ddbClient.send(
+      new ScanCommand({ TableName: TABLE_NAME, Limit: 1 }),
+    );
+    // Some SDK responses use Count, some include Items array
+    const count =
+      (resp as any).Count ??
+      ((resp as any).Items ? (resp as any).Items.length : 0);
+    return (count || 0) > 0;
+  } catch (err) {
+    console.warn(
+      "⚠️  Could not check table contents, proceeding with seeding:",
+      err instanceof Error ? err.message : err,
+    );
+    // If we can't determine table contents, do not block seeding — fail open.
+    return false;
+  }
+}
 
 // Fixed seed data structure for predictable testing
 interface SeedData {
@@ -951,6 +974,11 @@ async function insertUser(user: CWLUserDB): Promise<void> {
 // Main seed function
 async function seedUsers() {
   try {
+    // If table already contains items, skip seeding to avoid duplicates
+    if (await tableHasItems()) {
+      console.log("ℹ️  Table already contains items — skipping seeding.");
+      return;
+    }
     console.log(`🌱 Starting DETERMINISTIC user seeding process...`);
     console.log(`📍 Region: ${REGION}`);
     console.log(`📊 Table: ${TABLE_NAME}`);

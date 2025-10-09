@@ -15,14 +15,18 @@
     "@aws-sdk/s3-presigned-post": "3.669.0",
     "@aws-sdk/s3-request-presigner": "3.669.0",
     "@aws-sdk/util-dynamodb": "3.669.0",
+    "@types/uuid": "^9.0.0",
     "shared": "*",
-    "uuid": "^9.0.0",
-    "@types/uuid": "^9.0.0"
+    "uuid": "^9.0.0"
   },
   "scripts": {
     "seed:users": "tsx scripts/seed-users.ts",
     "seed:users:10": "tsx scripts/seed-users.ts 10",
     "seed:users:25": "tsx scripts/seed-users.ts 25",
     "seed:users:50": "tsx scripts/seed-users.ts 50"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6"
   }
 }

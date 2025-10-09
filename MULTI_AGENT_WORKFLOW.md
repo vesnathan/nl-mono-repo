@@ -157,7 +157,7 @@ Each worktree can run commands independently:
 ```bash
 # Agent 1 (Backend worktree)
 yarn deploy:cwl                    # Deploy backend changes
-yarn workspace @cwl/deploy deploy  # Deploy specific package
+yarn workspace @deploy/core deploy  # Deploy specific package
 
 # Agent 2 (Frontend worktree)
 yarn dev:cwl                       # Start frontend dev server
