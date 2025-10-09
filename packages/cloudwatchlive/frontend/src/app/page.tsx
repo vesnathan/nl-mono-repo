@@ -17,6 +17,7 @@ interface Event {
   date: string;
   accessType: EventAccessType;
   requiresRegistration: boolean; // Whether user needs to register/login to access
+  isLive: boolean; // Whether event is currently streaming live
   price?: string; // Only for paid events
   image: string;
   eventOwner: {
@@ -25,8 +26,42 @@ interface Event {
   };
 }
 
-// Free events that don't require registration - anyone can watch
-const FREE_NO_REGISTRATION_EVENTS: Event[] = [
+// Events currently live streaming
+const LIVE_EVENTS: Event[] = [
+  {
+    id: 101,
+    title: "Tech Keynote 2025 - LIVE",
+    location: "San Francisco, USA",
+    date: "Oct 9, 2025 - Now",
+    accessType: "free",
+    requiresRegistration: false,
+    isLive: true,
+    image:
+      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Tech Summit",
+      company: "Global Tech Events",
+    },
+  },
+  {
+    id: 102,
+    title: "Live Jazz Concert",
+    location: "New Orleans, USA",
+    date: "Oct 9, 2025 - Now",
+    accessType: "free",
+    requiresRegistration: true,
+    isLive: true,
+    image:
+      "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Jazz Masters",
+      company: "New Orleans Music Hall",
+    },
+  },
+];
+
+// All free events (combined)
+const FREE_EVENTS: Event[] = [
   {
     id: 1,
     title: "Summer Music Festival 2025",
@@ -34,6 +69,7 @@ const FREE_NO_REGISTRATION_EVENTS: Event[] = [
     date: "Dec 15-17, 2025",
     accessType: "free",
     requiresRegistration: false,
+    isLive: false,
     image:
       "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=400&fit=crop",
     eventOwner: {
@@ -48,6 +84,7 @@ const FREE_NO_REGISTRATION_EVENTS: Event[] = [
     date: "Jan 20-22, 2026",
     accessType: "free",
     requiresRegistration: false,
+    isLive: false,
     image:
       "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&h=400&fit=crop",
     eventOwner: {
@@ -57,43 +94,12 @@ const FREE_NO_REGISTRATION_EVENTS: Event[] = [
   },
   {
     id: 3,
-    title: "Community Sports Day",
-    location: "Brisbane, Australia",
-    date: "Dec 1, 2025",
-    accessType: "free",
-    requiresRegistration: false,
-    image:
-      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "David Chen",
-      company: "Brisbane Sports Network",
-    },
-  },
-  {
-    id: 4,
-    title: "Comedy Night Special",
-    location: "Perth, Australia",
-    date: "Nov 18, 2025",
-    accessType: "free",
-    requiresRegistration: false,
-    image:
-      "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Lisa Brown",
-      company: "Laugh Out Loud Productions",
-    },
-  },
-];
-
-// Free events that require registration - user must join/login
-const FREE_WITH_REGISTRATION_EVENTS: Event[] = [
-  {
-    id: 5,
     title: "Art & Design Expo",
     location: "Melbourne, Australia",
     date: "Nov 5-7, 2025",
     accessType: "free",
     requiresRegistration: true,
+    isLive: false,
     image:
       "https://images.unsplash.com/photo-1531058020387-3be344556be6?w=500&h=400&fit=crop",
     eventOwner: {
@@ -102,17 +108,48 @@ const FREE_WITH_REGISTRATION_EVENTS: Event[] = [
     },
   },
   {
-    id: 6,
+    id: 4,
     title: "Food & Wine Festival",
     location: "Adelaide, Australia",
     date: "Oct 28-30, 2025",
     accessType: "free",
     requiresRegistration: true,
+    isLive: false,
     image:
       "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&h=400&fit=crop",
     eventOwner: {
       name: "Marco Rossi",
       company: "Gourmet Events Co",
+    },
+  },
+  {
+    id: 5,
+    title: "Community Sports Day",
+    location: "Brisbane, Australia",
+    date: "Dec 1, 2025",
+    accessType: "free",
+    requiresRegistration: false,
+    isLive: false,
+    image:
+      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "David Chen",
+      company: "Brisbane Sports Network",
+    },
+  },
+  {
+    id: 6,
+    title: "Comedy Night Special",
+    location: "Perth, Australia",
+    date: "Nov 18, 2025",
+    accessType: "free",
+    requiresRegistration: false,
+    isLive: false,
+    image:
+      "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Lisa Brown",
+      company: "Laugh Out Loud Productions",
     },
   },
   {
@@ -122,6 +159,7 @@ const FREE_WITH_REGISTRATION_EVENTS: Event[] = [
     date: "Jan 10, 2026",
     accessType: "free",
     requiresRegistration: true,
+    isLive: false,
     image:
       "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500&h=400&fit=crop",
     eventOwner: {
@@ -136,11 +174,112 @@ const FREE_WITH_REGISTRATION_EVENTS: Event[] = [
     date: "Nov 25, 2025",
     accessType: "free",
     requiresRegistration: true,
+    isLive: false,
     image:
       "https://images.unsplash.com/photo-1545389336-cf090694435e?w=500&h=400&fit=crop",
     eventOwner: {
       name: "Sophie Green",
       company: "Mindful Living Events",
+    },
+  },
+];
+
+// Paid events (all require registration)
+const PAID_EVENTS: Event[] = [
+  {
+    id: 201,
+    title: "Premium Tech Summit 2025",
+    location: "San Francisco, USA",
+    date: "Nov 10-12, 2025",
+    accessType: "paid",
+    requiresRegistration: true,
+    isLive: false,
+    price: "$299",
+    image:
+      "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Tech Leaders",
+      company: "Silicon Valley Events",
+    },
+  },
+  {
+    id: 202,
+    title: "Exclusive VIP Concert - Beyoncé",
+    location: "Los Angeles, USA",
+    date: "Dec 5, 2025",
+    accessType: "paid",
+    requiresRegistration: true,
+    isLive: false,
+    price: "$149",
+    image:
+      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Live Nation",
+      company: "Premium Music Events",
+    },
+  },
+  {
+    id: 203,
+    title: "Business Masterclass Series",
+    location: "London, UK",
+    date: "Jan 15-17, 2026",
+    accessType: "paid",
+    requiresRegistration: true,
+    isLive: false,
+    price: "$499",
+    image:
+      "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Business Elite",
+      company: "Executive Events UK",
+    },
+  },
+  {
+    id: 204,
+    title: "Professional Photography Workshop",
+    location: "Tokyo, Japan",
+    date: "Dec 18-20, 2025",
+    accessType: "paid",
+    requiresRegistration: true,
+    isLive: false,
+    price: "$199",
+    image:
+      "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Photo Masters",
+      company: "Creative Workshop Japan",
+    },
+  },
+  {
+    id: 205,
+    title: "Gourmet Cooking Masterclass",
+    location: "Paris, France",
+    date: "Nov 28-30, 2025",
+    accessType: "paid",
+    requiresRegistration: true,
+    isLive: false,
+    price: "$349",
+    image:
+      "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Chef Antoine",
+      company: "Culinary Excellence Paris",
+    },
+  },
+  {
+    id: 206,
+    title: "Fitness & Wellness Bootcamp",
+    location: "Bali, Indonesia",
+    date: "Jan 8-14, 2026",
+    accessType: "paid",
+    requiresRegistration: true,
+    isLive: false,
+    price: "$599",
+    image:
+      "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Fitness Pro",
+      company: "Wellness Retreats Bali",
     },
   },
 ];
@@ -191,9 +330,9 @@ export default function LandingPage() {
               Stream Live Events from Anywhere
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Watch free live-streamed events from top event management
-              companies worldwide. Join thousands experiencing unforgettable
-              moments in real-time.
+              Watch live-streamed events from top event management companies
+              worldwide. Catch live events or watch archived recordings.
+              Experience unforgettable moments anytime.
             </p>
             <Button
               as={Link}
@@ -207,23 +346,24 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Events Grid */}
+        {/* Live Now Section */}
         <section className="max-w-7xl mx-auto px-6 pb-16">
-          <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
-            Free Live Events - No Registration
-          </h2>
-          <p className="text-white/90 mb-8 drop-shadow-lg">
-            Watch these events live for free. No registration required - just
-            click and watch!
-          </p>
+          <div className="flex items-center gap-3 mb-8">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+              <h2 className="text-3xl font-bold text-white drop-shadow-lg">
+                Live Now
+              </h2>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {FREE_NO_REGISTRATION_EVENTS.map((event) => (
+            {LIVE_EVENTS.map((event) => (
               <Card
                 key={event.id}
-                className="bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                className="bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-red-500"
               >
-                <CardBody className="p-0">
+                <CardBody className="p-0 flex flex-col h-full">
                   <div className="relative w-full h-48">
                     <Image
                       src={event.image}
@@ -232,11 +372,85 @@ export default function LandingPage() {
                       className="object-cover rounded-t-lg"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                     />
-                    <div className="absolute top-2 left-2 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                      FREE
+                    <div className="absolute top-2 left-2 flex gap-2">
+                      <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                        LIVE
+                      </div>
+                      {event.requiresRegistration && (
+                        <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                          REGISTER
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="p-4">
+                  <div className="p-4 flex flex-col flex-grow">
+                    <h3 className="font-semibold text-lg mb-2 line-clamp-2">
+                      {event.title}
+                    </h3>
+                    <p className="text-xs text-gray-500 mb-1">
+                      by {event.eventOwner.company}
+                    </p>
+                    <p className="text-sm text-gray-600 mb-1">
+                      {event.location}
+                    </p>
+                    <p className="text-sm text-red-500 font-semibold mb-3">
+                      Streaming Now
+                    </p>
+                    <Button
+                      as={event.requiresRegistration ? Link : undefined}
+                      href={event.requiresRegistration ? "/login" : undefined}
+                      size="sm"
+                      color="danger"
+                      className="font-semibold w-full mt-auto"
+                    >
+                      {event.requiresRegistration
+                        ? "Register & Watch"
+                        : "Watch Live"}
+                    </Button>
+                  </div>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Free Events Section */}
+        <section className="max-w-7xl mx-auto px-6 pb-16">
+          <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
+            Upcoming Free Events
+          </h2>
+          <p className="text-white/90 mb-8 drop-shadow-lg">
+            Browse upcoming free events. Some may require registration.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {FREE_EVENTS.map((event) => (
+              <Card
+                key={event.id}
+                className="bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105"
+              >
+                <CardBody className="p-0 flex flex-col h-full">
+                  <div className="relative w-full h-48">
+                    <Image
+                      src={event.image}
+                      alt={event.title}
+                      fill
+                      className="object-cover rounded-t-lg"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    />
+                    <div className="absolute top-2 left-2 flex gap-2">
+                      <div className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                        FREE
+                      </div>
+                      {event.requiresRegistration && (
+                        <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                          REGISTER
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-4 flex flex-col flex-grow">
                     <h3 className="font-semibold text-lg mb-2 line-clamp-2">
                       {event.title}
                     </h3>
@@ -248,12 +462,16 @@ export default function LandingPage() {
                     </p>
                     <p className="text-sm text-gray-500 mb-3">{event.date}</p>
                     <Button
+                      as={event.requiresRegistration ? Link : undefined}
+                      href={event.requiresRegistration ? "/login" : undefined}
                       size="sm"
                       color="primary"
                       variant="flat"
-                      className="font-semibold w-full"
+                      className="font-semibold w-full mt-auto"
                     >
-                      Watch Now
+                      {event.requiresRegistration
+                        ? "Register to Watch"
+                        : "Remind Me"}
                     </Button>
                   </div>
                 </CardBody>
@@ -262,23 +480,23 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Events with Registration Section */}
+        {/* Paid Events Section */}
         <section className="max-w-7xl mx-auto px-6 pb-16">
           <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
-            Free Events - Registration Required
+            Premium Paid Events
           </h2>
           <p className="text-white/90 mb-8 drop-shadow-lg">
-            These events are free to watch, but you&apos;ll need to create an
-            account to register.
+            Exclusive paid events requiring registration. Get access to premium
+            content and experiences.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {FREE_WITH_REGISTRATION_EVENTS.map((event) => (
+            {PAID_EVENTS.map((event) => (
               <Card
                 key={event.id}
-                className="bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                className="bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-yellow-500"
               >
-                <CardBody className="p-0">
+                <CardBody className="p-0 flex flex-col h-full">
                   <div className="relative w-full h-48">
                     <Image
                       src={event.image}
@@ -287,11 +505,16 @@ export default function LandingPage() {
                       className="object-cover rounded-t-lg"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                     />
-                    <div className="absolute top-2 left-2 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                      FREE + REGISTRATION
+                    <div className="absolute top-2 left-2 flex gap-2">
+                      <div className="bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                        PAID
+                      </div>
+                    </div>
+                    <div className="absolute top-2 right-2 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-bold">
+                      {event.price}
                     </div>
                   </div>
-                  <div className="p-4">
+                  <div className="p-4 flex flex-col flex-grow">
                     <h3 className="font-semibold text-lg mb-2 line-clamp-2">
                       {event.title}
                     </h3>
@@ -306,10 +529,10 @@ export default function LandingPage() {
                       as={Link}
                       href="/login"
                       size="sm"
-                      color="primary"
-                      className="font-semibold w-full"
+                      color="warning"
+                      className="font-semibold w-full mt-auto"
                     >
-                      Register to Watch
+                      Purchase Ticket
                     </Button>
                   </div>
                 </CardBody>
