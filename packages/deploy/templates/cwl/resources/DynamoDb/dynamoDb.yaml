@@ -71,19 +71,35 @@ Resources:
                     - kms:GenerateDataKey
                   Resource: !Ref KMSKeyArn
 
-    CWLDataTable: # Renamed from cwlUserTable to CWLDataTable
+    CWLDataTable: # Single-table design for organizations, users, and other entities
       Type: AWS::DynamoDB::Table
       DependsOn: DynamoDBRole
       Properties:
         TableName: !Sub "nlmonorepo-${AppName}-datatable-${Stage}"
         AttributeDefinitions:
-          - AttributeName: "userId" # Primary key is userId (Cognito sub)
+          - AttributeName: "PK" # Partition key for single-table design
             AttributeType: "S"
-          # Add other GSI/LSI attribute definitions here if needed
+          - AttributeName: "SK" # Sort key for single-table design
+            AttributeType: "S"
+          - AttributeName: "GSI1PK" # GSI1 partition key for alternate access patterns
+            AttributeType: "S"
+          - AttributeName: "GSI1SK" # GSI1 sort key for alternate access patterns
+            AttributeType: "S"
         BillingMode: PAY_PER_REQUEST
         KeySchema:
-          - AttributeName: "userId"
+          - AttributeName: "PK"
             KeyType: "HASH"
+          - AttributeName: "SK"
+            KeyType: "RANGE"
+        GlobalSecondaryIndexes:
+          - IndexName: "GSI1"
+            KeySchema:
+              - AttributeName: "GSI1PK"
+                KeyType: "HASH"
+              - AttributeName: "GSI1SK"
+                KeyType: "RANGE"
+            Projection:
+              ProjectionType: "ALL"
         Tags:
           - Key: Name
             Value: !Sub "${AppName} DataTable"

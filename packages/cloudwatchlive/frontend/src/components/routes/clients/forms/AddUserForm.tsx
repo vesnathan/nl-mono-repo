@@ -1,8 +1,13 @@
-/* eslint-disable sonarjs/cognitive-complexity */
+("use client");
 
-"use client";
+import { listOrganizationsQueryFn } from "@/graphql/queries/orgQueries";
 
-import React, { forwardRef, useImperativeHandle } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useEffect,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -16,17 +21,36 @@ import {
 import { CWLUser } from "@/types/gqlTypes";
 import { useUserStore } from "@/stores/userStore";
 import { useGetUserJobRoles } from "@/hooks/useGetUserJobRoles";
+
 import { useSaveSuperAdminClientMutation } from "../clientHooks";
+/* eslint-disable sonarjs/cognitive-complexity */
 
 export const AddUserForm = forwardRef(
   ({ onClose }: { onClose: () => void }, ref) => {
     const user = useUserStore((state) => state.user);
     const jobRolesForUserGroup = useGetUserJobRoles(user.clientType);
-
+    const [orgOptions, setOrgOptions] = useState<
+      { id: string; value: string }[]
+    >([]);
     const form = useForm<CWLUser>({
       defaultValues: createEmptyCWLUser(),
       resolver: zodResolver(CWLUserFormValidationSchema),
     });
+
+    useEffect(() => {
+      listOrganizationsQueryFn().then((result) => {
+        const orgs = (result.data?.listOrganizations || []) as Array<{
+          organizationId: string;
+          organizationName: string;
+        }>;
+        setOrgOptions(
+          orgs.map((org) => ({
+            id: org.organizationId,
+            value: org.organizationName,
+          })),
+        );
+      });
+    }, []);
 
     const submitMutation = useSaveSuperAdminClientMutation({
       onSuccess: () => {
@@ -90,10 +114,7 @@ export const AddUserForm = forwardRef(
           fieldPath="organizationId"
           label="Organisation Name"
           placeholder="Select organisation name"
-          options={[
-            { id: "1", value: "Org 1" },
-            { id: "2", value: "Org 2" },
-          ]}
+          options={orgOptions}
         />
       </form>
     );
