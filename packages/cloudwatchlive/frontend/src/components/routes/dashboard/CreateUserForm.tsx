@@ -68,9 +68,15 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
         userPhone: data.userPhone || "",
         organizationId: data.organizationId,
         userRole: data.userRole,
-        ...(data.sendWelcomeEmail && { sendWelcomeEmail: data.sendWelcomeEmail }),
+        ...(data.sendWelcomeEmail && {
+          sendWelcomeEmail: data.sendWelcomeEmail,
+        }),
       };
-      console.log("Sending input to createCWLUser:", JSON.stringify(input, null, 2));
+      // eslint-disable-next-line no-console
+      console.log(
+        "Sending input to createCWLUser:",
+        JSON.stringify(input, null, 2),
+      );
       return createCWLUserMutationFn(input);
     },
     onSuccess: () => {
