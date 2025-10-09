@@ -16,6 +16,7 @@ interface Event {
   location: string;
   date: string;
   accessType: EventAccessType;
+  requiresRegistration: boolean; // Whether user needs to register/login to access
   price?: string; // Only for paid events
   image: string;
   eventOwner: {
@@ -24,14 +25,15 @@ interface Event {
   };
 }
 
-// Placeholder event data - only FREE events are shown on landing page
-const PLACEHOLDER_EVENTS: Event[] = [
+// Free events that don't require registration - anyone can watch
+const FREE_NO_REGISTRATION_EVENTS: Event[] = [
   {
     id: 1,
     title: "Summer Music Festival 2025",
     location: "Sydney, Australia",
     date: "Dec 15-17, 2025",
     accessType: "free",
+    requiresRegistration: false,
     image:
       "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=400&fit=crop",
     eventOwner: {
@@ -45,6 +47,7 @@ const PLACEHOLDER_EVENTS: Event[] = [
     location: "Singapore",
     date: "Jan 20-22, 2026",
     accessType: "free",
+    requiresRegistration: false,
     image:
       "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&h=400&fit=crop",
     eventOwner: {
@@ -54,36 +57,11 @@ const PLACEHOLDER_EVENTS: Event[] = [
   },
   {
     id: 3,
-    title: "Art & Design Expo",
-    location: "Melbourne, Australia",
-    date: "Nov 5-7, 2025",
-    accessType: "free",
-    image:
-      "https://images.unsplash.com/photo-1531058020387-3be344556be6?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Emma Wilson",
-      company: "Creative Spaces Events",
-    },
-  },
-  {
-    id: 4,
-    title: "Food & Wine Festival",
-    location: "Adelaide, Australia",
-    date: "Oct 28-30, 2025",
-    accessType: "free",
-    image:
-      "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Marco Rossi",
-      company: "Gourmet Events Co",
-    },
-  },
-  {
-    id: 5,
     title: "Community Sports Day",
     location: "Brisbane, Australia",
     date: "Dec 1, 2025",
     accessType: "free",
+    requiresRegistration: false,
     image:
       "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=400&fit=crop",
     eventOwner: {
@@ -92,16 +70,49 @@ const PLACEHOLDER_EVENTS: Event[] = [
     },
   },
   {
-    id: 6,
+    id: 4,
     title: "Comedy Night Special",
     location: "Perth, Australia",
     date: "Nov 18, 2025",
     accessType: "free",
+    requiresRegistration: false,
     image:
       "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?w=500&h=400&fit=crop",
     eventOwner: {
       name: "Lisa Brown",
       company: "Laugh Out Loud Productions",
+    },
+  },
+];
+
+// Free events that require registration - user must join/login
+const FREE_WITH_REGISTRATION_EVENTS: Event[] = [
+  {
+    id: 5,
+    title: "Art & Design Expo",
+    location: "Melbourne, Australia",
+    date: "Nov 5-7, 2025",
+    accessType: "free",
+    requiresRegistration: true,
+    image:
+      "https://images.unsplash.com/photo-1531058020387-3be344556be6?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Emma Wilson",
+      company: "Creative Spaces Events",
+    },
+  },
+  {
+    id: 6,
+    title: "Food & Wine Festival",
+    location: "Adelaide, Australia",
+    date: "Oct 28-30, 2025",
+    accessType: "free",
+    requiresRegistration: true,
+    image:
+      "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&h=400&fit=crop",
+    eventOwner: {
+      name: "Marco Rossi",
+      company: "Gourmet Events Co",
     },
   },
   {
@@ -110,6 +121,7 @@ const PLACEHOLDER_EVENTS: Event[] = [
     location: "Auckland, New Zealand",
     date: "Jan 10, 2026",
     accessType: "free",
+    requiresRegistration: true,
     image:
       "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500&h=400&fit=crop",
     eventOwner: {
@@ -123,6 +135,7 @@ const PLACEHOLDER_EVENTS: Event[] = [
     location: "Gold Coast, Australia",
     date: "Nov 25, 2025",
     accessType: "free",
+    requiresRegistration: true,
     image:
       "https://images.unsplash.com/photo-1545389336-cf090694435e?w=500&h=400&fit=crop",
     eventOwner: {
@@ -197,14 +210,15 @@ export default function LandingPage() {
         {/* Events Grid */}
         <section className="max-w-7xl mx-auto px-6 pb-16">
           <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
-            Free Live Events
+            Free Live Events - No Registration
           </h2>
           <p className="text-white/90 mb-8 drop-shadow-lg">
-            Watch these events live for free. No registration required.
+            Watch these events live for free. No registration required - just
+            click and watch!
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {PLACEHOLDER_EVENTS.map((event) => (
+            {FREE_NO_REGISTRATION_EVENTS.map((event) => (
               <Card
                 key={event.id}
                 className="bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105"
@@ -239,7 +253,63 @@ export default function LandingPage() {
                       variant="flat"
                       className="font-semibold w-full"
                     >
-                      Watch Live
+                      Watch Now
+                    </Button>
+                  </div>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Events with Registration Section */}
+        <section className="max-w-7xl mx-auto px-6 pb-16">
+          <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
+            Free Events - Registration Required
+          </h2>
+          <p className="text-white/90 mb-8 drop-shadow-lg">
+            These events are free to watch, but you&apos;ll need to create an
+            account to register.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {FREE_WITH_REGISTRATION_EVENTS.map((event) => (
+              <Card
+                key={event.id}
+                className="bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105"
+              >
+                <CardBody className="p-0">
+                  <div className="relative w-full h-48">
+                    <Image
+                      src={event.image}
+                      alt={event.title}
+                      fill
+                      className="object-cover rounded-t-lg"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    />
+                    <div className="absolute top-2 left-2 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                      FREE + REGISTRATION
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg mb-2 line-clamp-2">
+                      {event.title}
+                    </h3>
+                    <p className="text-xs text-gray-500 mb-1">
+                      by {event.eventOwner.company}
+                    </p>
+                    <p className="text-sm text-gray-600 mb-1">
+                      {event.location}
+                    </p>
+                    <p className="text-sm text-gray-500 mb-3">{event.date}</p>
+                    <Button
+                      as={Link}
+                      href="/login"
+                      size="sm"
+                      color="primary"
+                      className="font-semibold w-full"
+                    >
+                      Register to Watch
                     </Button>
                   </div>
                 </CardBody>
