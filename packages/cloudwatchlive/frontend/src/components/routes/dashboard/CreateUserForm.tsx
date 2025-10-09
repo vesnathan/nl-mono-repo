@@ -72,11 +72,6 @@ export const CreateUserForm: React.FC<CreateUserFormProps> = ({
           sendWelcomeEmail: data.sendWelcomeEmail,
         }),
       };
-      // eslint-disable-next-line no-console
-      console.log(
-        "Sending input to createCWLUser:",
-        JSON.stringify(input, null, 2),
-      );
       return createCWLUserMutationFn(input);
     },
     onSuccess: () => {
