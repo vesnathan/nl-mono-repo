@@ -409,7 +409,9 @@ export class AwsUtils {
       : this.cfClient;
 
     const startTime = Date.now();
-    const stopSpinner = logger.infoWithSpinner(`Waiting for stack ${stackName} to delete...`);
+    const stopSpinner = logger.infoWithSpinner(
+      `Waiting for stack ${stackName} to delete...`,
+    );
     while (true) {
       try {
         const command = new DescribeStacksCommand({ StackName: stackName });

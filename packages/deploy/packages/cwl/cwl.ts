@@ -264,7 +264,6 @@ async function waitForStackDeletion(
   const maxAttempts = 120; // Increased from 30 to 120 (20 minutes)
   const delay = 10000; // 10 seconds
 
-
   // Spinner and timer setup
   const startTime = Date.now();
   let stopSpinner: (() => void) | null = null;
@@ -285,7 +284,9 @@ async function waitForStackDeletion(
 
       if (!stack) {
         if (stopSpinner) stopSpinner();
-        logger.success(`Stack ${stackName} no longer exists - deletion complete`);
+        logger.success(
+          `Stack ${stackName} no longer exists - deletion complete`,
+        );
         return;
       }
 
@@ -320,7 +321,9 @@ async function waitForStackDeletion(
         error.message.includes("does not exist")
       ) {
         if (stopSpinner) stopSpinner();
-        logger.success(`Stack ${stackName} no longer exists - deletion complete`);
+        logger.success(
+          `Stack ${stackName} no longer exists - deletion complete`,
+        );
         return;
       }
 
@@ -1113,9 +1116,11 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         );
 
         // Wait for update to complete
-  const stopUpdateSpinner = logger.infoWithSpinner("Waiting for stack update to complete...");
-  await waitForStackCompletion(cfn, stackName, "UPDATE");
-  stopUpdateSpinner();
+        const stopUpdateSpinner = logger.infoWithSpinner(
+          "Waiting for stack update to complete...",
+        );
+        await waitForStackCompletion(cfn, stackName, "UPDATE");
+        stopUpdateSpinner();
       } else {
         logger.info("Creating new CloudFormation stack...");
         await cfn.send(
@@ -1129,9 +1134,11 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         );
 
         // Wait for creation to complete
-  const stopCreateSpinner = logger.infoWithSpinner("Waiting for stack creation to complete...");
-  await waitForStackCompletion(cfn, stackName, "CREATE");
-  stopCreateSpinner();
+        const stopCreateSpinner = logger.infoWithSpinner(
+          "Waiting for stack creation to complete...",
+        );
+        await waitForStackCompletion(cfn, stackName, "CREATE");
+        stopCreateSpinner();
       }
 
       logger.success(
@@ -1140,9 +1147,14 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
 
       // Always run the user seed shell script after stack deployment
       try {
-        const scriptsPath = path.join(__dirname, "../../../cloudwatchlive/backend/scripts");
+        const scriptsPath = path.join(
+          __dirname,
+          "../../../cloudwatchlive/backend/scripts",
+        );
         const repoRoot = path.join(__dirname, "../../../../");
-        logger.info("🌱 Seeding users into DynamoDB (shell script, with AWS env)...");
+        logger.info(
+          "🌱 Seeding users into DynamoDB (shell script, with AWS env)...",
+        );
         // Run the seeder from the mono-repo root so any 'source .env' logic resolves
         // predictably. We explicitly cd to the repo root then run the scripts by
         // their relative paths to avoid ambiguity with BASH_SOURCE/cwd.
@@ -1154,11 +1166,13 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
               cwd: repoRoot,
               stdio: options.debugMode ? "inherit" : "pipe",
               encoding: "utf8",
-            }
+            },
           );
           logger.success("✓ User table seeded successfully");
         } catch (seedError: any) {
-          logger.error(`User seeding failed: ${seedError instanceof Error ? seedError.message : seedError}`);
+          logger.error(
+            `User seeding failed: ${seedError instanceof Error ? seedError.message : seedError}`,
+          );
           if (seedError.stdout) {
             logger.error(`[Seeder stdout]:\n${seedError.stdout}`);
           }

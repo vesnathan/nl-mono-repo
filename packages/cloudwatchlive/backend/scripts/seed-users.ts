@@ -24,10 +24,15 @@ async function tableHasItems(): Promise<boolean> {
       new ScanCommand({ TableName: TABLE_NAME, Limit: 1 }),
     );
     // Some SDK responses use Count, some include Items array
-    const count = (resp as any).Count ?? ((resp as any).Items ? (resp as any).Items.length : 0);
+    const count =
+      (resp as any).Count ??
+      ((resp as any).Items ? (resp as any).Items.length : 0);
     return (count || 0) > 0;
   } catch (err) {
-    console.warn("⚠️  Could not check table contents, proceeding with seeding:", err instanceof Error ? err.message : err);
+    console.warn(
+      "⚠️  Could not check table contents, proceeding with seeding:",
+      err instanceof Error ? err.message : err,
+    );
     // If we can't determine table contents, do not block seeding — fail open.
     return false;
   }

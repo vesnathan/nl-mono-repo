@@ -372,7 +372,9 @@ class ResolverCompiler {
   }
 
   public async compileAndUploadResolvers(): Promise<void> {
-    const stopSpinner = logger.infoWithSpinner("Starting resolver compilation and upload...");
+    const stopSpinner = logger.infoWithSpinner(
+      "Starting resolver compilation and upload...",
+    );
     try {
       await this.setupBuildDirectory();
       await this.compileAndUploadSharedFile();

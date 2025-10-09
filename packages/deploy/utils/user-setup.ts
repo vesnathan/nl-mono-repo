@@ -314,7 +314,10 @@ export class UserSetupManager {
       const getUserResponse = await this.dynamoClient.send(
         new GetItemCommand({
           TableName: tableName,
-          Key: { PK: { S: `USER#${cognitoUserId}` }, SK: { S: `PROFILE#${cognitoUserId}` } },
+          Key: {
+            PK: { S: `USER#${cognitoUserId}` },
+            SK: { S: `PROFILE#${cognitoUserId}` },
+          },
         }),
       );
 

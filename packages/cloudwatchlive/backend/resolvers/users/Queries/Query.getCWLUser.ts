@@ -46,7 +46,10 @@ export function request(ctx: Context<GetCWLUserQueryVariables>) {
   // Use PK = USER#<userId> and SK = PROFILE#<userId> when querying.
   return {
     operation: "GetItem",
-    key: util.dynamodb.toMapValues({ PK: `USER#${userId}`, SK: `PROFILE#${userId}` }),
+    key: util.dynamodb.toMapValues({
+      PK: `USER#${userId}`,
+      SK: `PROFILE#${userId}`,
+    }),
   };
 }
 

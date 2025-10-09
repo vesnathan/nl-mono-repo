@@ -63,7 +63,10 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
 
   return {
     operation: "PutItem",
-    key: util.dynamodb.toMapValues({ PK: `USER#${cognitoSub}`, SK: `PROFILE#${cognitoSub}` }),
+    key: util.dynamodb.toMapValues({
+      PK: `USER#${cognitoSub}`,
+      SK: `PROFILE#${cognitoSub}`,
+    }),
     attributeValues: util.dynamodb.toMapValues({
       PK: `USER#${cognitoSub}`,
       SK: `PROFILE#${cognitoSub}`,

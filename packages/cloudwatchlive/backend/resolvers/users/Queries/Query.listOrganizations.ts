@@ -22,7 +22,8 @@ export const handler = async () => {
         ExpressionAttributeValues: {
           ":metaPrefix": "METADATA#",
         },
-        ProjectionExpression: "organizationId, organizationName, organizationType, organizationCreated, mainAdminUserId, adminUserIds, staffUserIds",
+        ProjectionExpression:
+          "organizationId, organizationName, organizationType, organizationCreated, mainAdminUserId, adminUserIds, staffUserIds",
         ExclusiveStartKey,
       };
 
