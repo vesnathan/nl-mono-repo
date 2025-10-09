@@ -25,7 +25,8 @@ export async function seedCWLUsers(options: SeedUsersOptions): Promise<void> {
     skipConfirmation = false,
   } = options;
 
-  const totalUsers = numCompanies * (1 + adminsPerCompany + adminsPerCompany * staffPerAdmin);
+  const totalUsers =
+    numCompanies * (1 + adminsPerCompany + adminsPerCompany * staffPerAdmin);
 
   logger.info(`🌱 Seeding CWL Users`);
   logger.info(`Region: ${region}`);
@@ -46,7 +47,7 @@ export async function seedCWLUsers(options: SeedUsersOptions): Promise<void> {
 
   const scriptPath = path.resolve(
     __dirname,
-    "../../cloudwatchlive/backend/scripts/seed-users.ts"
+    "../../cloudwatchlive/backend/scripts/seed-users.ts",
   );
 
   return new Promise((resolve, reject) => {

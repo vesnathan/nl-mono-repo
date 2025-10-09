@@ -20,13 +20,15 @@ export const handler = async () => {
 
   const result = await docClient.send(new QueryCommand(params));
   // Return just the org fields
-  return result.Items?.map((item) => ({
-    organizationId: item.organizationId,
-    organizationName: item.organizationName,
-    organizationType: item.organizationType,
-    organizationCreated: item.organizationCreated,
-    mainAdminUserId: item.mainAdminUserId,
-    adminUserIds: item.adminUserIds,
-    staffUserIds: item.staffUserIds,
-  })) || [];
+  return (
+    result.Items?.map((item) => ({
+      organizationId: item.organizationId,
+      organizationName: item.organizationName,
+      organizationType: item.organizationType,
+      organizationCreated: item.organizationCreated,
+      mainAdminUserId: item.mainAdminUserId,
+      adminUserIds: item.adminUserIds,
+      staffUserIds: item.staffUserIds,
+    })) || []
+  );
 };

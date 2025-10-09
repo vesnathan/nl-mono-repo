@@ -831,7 +831,7 @@ function generateDeterministicPhone(email: string): string {
 
 // Create an organization object
 function createOrganization(
-  companyData: typeof SEED_DATA.companies[0],
+  companyData: (typeof SEED_DATA.companies)[0],
   mainAdminUserId: string,
   adminUserIds: string[],
   staffUserIds: string[],
@@ -904,11 +904,11 @@ async function insertOrganization(org: OrganizationDB): Promise<void> {
         Item: org,
       }),
     );
-    console.log(
-      `🏢 Created organization: ${org.organizationName}`,
-    );
+    console.log(`🏢 Created organization: ${org.organizationName}`);
     console.log(`   🆔 Org ID: ${org.organizationId}`);
-    console.log(`   👔 Main Admin: 1, 👥 Admins: ${org.adminUserIds.length}, 👤 Staff: ${org.staffUserIds.length}`);
+    console.log(
+      `   👔 Main Admin: 1, 👥 Admins: ${org.adminUserIds.length}, 👤 Staff: ${org.staffUserIds.length}`,
+    );
   } catch (error) {
     console.error(
       `❌ Failed to create organization ${org.organizationName}:`,
@@ -928,8 +928,12 @@ async function insertUser(user: CWLUserDB): Promise<void> {
       }),
     );
     const userTypeLabel = user.userType ? ` [${user.userType}]` : "";
-    const adminInfo = user.managedAdminIds ? ` (managing ${user.managedAdminIds.length} admins)` : "";
-    const staffInfo = user.managedStaffIds ? ` (managing ${user.managedStaffIds.length} staff)` : "";
+    const adminInfo = user.managedAdminIds
+      ? ` (managing ${user.managedAdminIds.length} admins)`
+      : "";
+    const staffInfo = user.managedStaffIds
+      ? ` (managing ${user.managedStaffIds.length} staff)`
+      : "";
     console.log(
       `✅ ${user.userFirstName} ${user.userLastName}${userTypeLabel}${adminInfo}${staffInfo}`,
     );
@@ -954,7 +958,8 @@ async function seedUsers() {
     console.log(`🔒 Using fixed UUIDs and names for cross-repo compatibility`);
     console.log("");
 
-    const superAdminUserId = process.env.SUPER_ADMIN_USER_ID || "super-admin-fixed-uuid";
+    const superAdminUserId =
+      process.env.SUPER_ADMIN_USER_ID || "super-admin-fixed-uuid";
 
     const allItems: (OrganizationDB | CWLUserDB)[] = [];
     const userRegistry: { [email: string]: string } = {}; // Email to UUID mapping
@@ -963,7 +968,9 @@ async function seedUsers() {
     let totalAdmins = 0;
     let totalStaff = 0;
 
-    console.log(`🏗️  Building ${SEED_DATA.companies.length} Event Companies with fixed data...`);
+    console.log(
+      `🏗️  Building ${SEED_DATA.companies.length} Event Companies with fixed data...`,
+    );
     console.log("");
 
     // Process each company
@@ -1032,10 +1039,14 @@ async function seedUsers() {
       allItems.unshift(organization); // Add org at the beginning
 
       console.log(`  🆔 Org ID: ${organizationId}`);
-      console.log(`  🏆 Main Admin: ${companyData.mainAdmin.firstName} ${companyData.mainAdmin.lastName}`);
+      console.log(
+        `  🏆 Main Admin: ${companyData.mainAdmin.firstName} ${companyData.mainAdmin.lastName}`,
+      );
       console.log(`     📧 ${companyData.mainAdmin.email}`);
       console.log(`     🆔 ${mainAdminUser.userId}`);
-      console.log(`  👔 ${companyData.admins.length} Admins, 👥 ${allStaffIds.length} Staff`);
+      console.log(
+        `  👔 ${companyData.admins.length} Admins, 👥 ${allStaffIds.length} Staff`,
+      );
       console.log("");
     }
 
@@ -1090,14 +1101,20 @@ async function seedUsers() {
     });
     console.log("");
     console.log(`💡 NoSQL Query Patterns:`);
-    console.log(`   • Get Organization: PK="ORG#<orgId>" AND SK="METADATA#<orgId>"`);
+    console.log(
+      `   • Get Organization: PK="ORG#<orgId>" AND SK="METADATA#<orgId>"`,
+    );
     console.log(`   • Get User: PK="USER#<userId>" AND SK="PROFILE#<userId>"`);
-    console.log(`   • Get Users by Org: GSI1PK="ORG#<orgId>" AND begins_with(GSI1SK, "USER#")`);
+    console.log(
+      `   • Get Users by Org: GSI1PK="ORG#<orgId>" AND begins_with(GSI1SK, "USER#")`,
+    );
     console.log(`   • Get All Event Companies: GSI1PK="ORGTYPE#EventCompany"`);
     console.log("");
     console.log(`🔒 IMPORTANT: All UUIDs are deterministic!`);
     console.log(`   The same email will ALWAYS generate the same UUID.`);
-    console.log(`   Other repos can use the email to generate the matching UUID.`);
+    console.log(
+      `   Other repos can use the email to generate the matching UUID.`,
+    );
   } catch (error) {
     console.error("❌ Seeding failed:", error);
     process.exit(1);

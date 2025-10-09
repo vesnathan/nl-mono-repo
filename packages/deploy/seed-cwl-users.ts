@@ -1,6 +1,9 @@
 #!/usr/bin/env tsx
 
-import { CloudFormationClient, ListExportsCommand } from "@aws-sdk/client-cloudformation";
+import {
+  CloudFormationClient,
+  ListExportsCommand,
+} from "@aws-sdk/client-cloudformation";
 import { seedCWLUsers } from "./utils/seed-users";
 import { logger } from "./utils/logger";
 
@@ -8,7 +11,8 @@ async function main() {
   try {
     const stage = process.env.STAGE || process.argv[2] || "dev";
     const region = process.env.AWS_REGION || "ap-southeast-2";
-    const skipConfirmation = process.argv.includes("--yes") || process.argv.includes("-y");
+    const skipConfirmation =
+      process.argv.includes("--yes") || process.argv.includes("-y");
 
     logger.info(`🌱 CWL Database Seeding - ${stage.toUpperCase()}`);
 
@@ -18,7 +22,7 @@ async function main() {
 
     const exports = exportsResponse.Exports || [];
     const tableNameExport = exports.find(
-      (exp) => exp.Name === `cwlUserTableName-${stage}`
+      (exp) => exp.Name === `cwlUserTableName-${stage}`,
     );
 
     if (!tableNameExport || !tableNameExport.Value) {
