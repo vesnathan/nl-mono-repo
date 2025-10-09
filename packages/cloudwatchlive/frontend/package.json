@@ -2,9 +2,9 @@
   "name": "cwlfrontend",
   "version": "0.1.0",
   "scripts": {
-    "dev": "next dev",
-    "dev:local": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev next dev",
-    "dev:codespaces": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev next dev -H 0.0.0.0",
+    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "dev:clean": "rm -rf .next && NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "dev:local": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev NODE_OPTIONS='--max-old-space-size=4096' next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useUserStore } from "@/stores/userStore";
-import { ClientType } from "@/types/gqlTypes";
 import {
   Modal,
   ModalContent,
@@ -11,6 +10,7 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { CWLButton } from "@/components/common/CWLButton";
+import { ClientType } from "../../../types/gqlTypes";
 import { CreateUserForm } from "./CreateUserForm";
 
 export const Dashboard = () => {

@@ -25,20 +25,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     handleLogout,
   });
 
-  const isUnprotectedPage = pathname === "/login" || pathname === "/login/";
+  const isUnprotectedPage =
+    pathname === "/" || pathname === "/login" || pathname === "/login/";
 
   return (
     <html lang="en" data-theme="lemonade">
       <head>
         <title>Cloud Watch Live</title>
         <meta name="description" content="Live Conference Streaming Software" />
-        {process.env.NODE_ENV === "development" && (
-          <>
-            <script src="https://cdn.jsdelivr.net/npm/eruda" async />
-            {/* eslint-disable-next-line react/no-danger */}
-            <script dangerouslySetInnerHTML={{ __html: "eruda.init();" }} />
-          </>
-        )}
       </head>
       <body>
         <QueryClientProvider
