@@ -144,6 +144,15 @@ for (let i = 1; i <= 100; i++) {
 // Generate 500 events distributed among the 100 users
 const events = [];
 const base = new Date("2025-10-01T08:00:00Z").getTime();
+// try to read available local images so generated mocks use local files when possible
+const imagesDir = path.join(__dirname, "..", "frontend", "public", "images");
+let imageFiles = [];
+try {
+  imageFiles = fs.readdirSync(imagesDir).filter((f) => !f.startsWith('.'));
+} catch (err) {
+  // ignore - generator can still run and fall back to placeholder
+  imageFiles = [];
+}
 for (let j = 0; j < 500; j++) {
   const owner = users[j % users.length];
   const start = new Date(base + j * 1000 * 60 * 60 * 6); // every 6 hours
@@ -162,8 +171,10 @@ for (let j = 0; j < 500; j++) {
     accessType: access,
     requiresRegistration: access !== "free",
     price: price,
-    image:
-      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=500&h=400&fit=crop",
+    // prefer a local image from the frontend public images dir; fall back to the placeholder
+    image: imageFiles.length
+      ? `/images/${imageFiles[j % imageFiles.length]}`
+      : "/images/event-placeholder.svg",
     eventOwner: {
       ownerUserId: owner.userId,
       ownerCompany: owner.organizationId,
