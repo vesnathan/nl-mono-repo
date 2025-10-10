@@ -1,6 +1,6 @@
 import React from "react";
-import { LOGIN_PATH } from "@/constants/layout/navigation/navigation";
 import { AWSBUserStoreSetup } from "@/stores/awsbUserStoreSetup";
+import { LOGIN_PATH } from "@/constants/layout/navigation/navigation";
 import { RequireLoggedIn } from "./RequireLoggedIn";
 import { NextRedirect } from "./NextRedirect";
 

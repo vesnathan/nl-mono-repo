@@ -44,6 +44,6 @@
     "../../shared/scripts/execCommandAsPromise.ts",
     "../../shared/scripts/mergeGraphqlFiles.ts",
     "../../shared/**/*.ts"
-  ],
+, "../../aws-example/frontend/src/components/icons/TinyTickSvgComponent.tsx"  ],
   "exclude": ["node_modules"]
 }

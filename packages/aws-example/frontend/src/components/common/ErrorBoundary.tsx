@@ -1,8 +1,8 @@
 /* eslint-disable react/no-unstable-nested-components */
 import React from "react";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
-import { useEffectOnce } from "@/hooks/useEffectOnce";
 import { AWSBButton } from "@/components/common/AWSBButton";
+import { useEffectOnce } from "@/hooks/useEffectOnce";
 
 const ErrorBoundaryFallback: React.FC<FallbackProps> = ({
   error,
