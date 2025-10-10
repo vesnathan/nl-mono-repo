@@ -14,7 +14,19 @@ const buildGql = async () => {
 
   const schemaPath = path.resolve("../backend/combined_schema.graphql");
   const command = `npx amplify codegen types --schema ${schemaPath} --debug`;
-  await execCommandAsPromise(command);
+  try {
+    await execCommandAsPromise(command);
+  } catch (err) {
+    // amplify codegen may not be configured in every package (e.g. CI or example projects).
+    // Don't fail the whole build when codegen isn't setup — warn and continue.
+    // eslint-disable-next-line no-console
+    console.warn(
+      "amplify codegen failed or is not configured in this package:",
+      err && typeof err === "object" && "message" in err
+        ? (err as { message?: string }).message
+        : err,
+    );
+  }
 };
 
 buildGql();
