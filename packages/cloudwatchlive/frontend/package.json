@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@aws-amplify/auth": "^6.6.0",
+    "@cwl/dev-mocks": "file:../dev-mocks",
     "@hookform/resolvers": "^3.3.4",
     "@iconify/react": "^5.0.2",
     "@nextui-org/react": "2.4.6",
@@ -28,8 +29,8 @@
     "react-dom": "19.0.0-rc-02c0e824-20241028",
     "react-error-boundary": "^4.1.2",
     "react-hook-form": "^7.51.0",
-  "shared": "*",
-  "@cwl/dev-mocks": "file:../dev-mocks",
+    "shared": "*",
+    "sharp": "^0.34.4",
     "tailwindcss": "^3.4.14",
     "uuid": "^13.0.0",
     "zod": "^3.23.8",

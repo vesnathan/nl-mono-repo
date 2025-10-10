@@ -1,0 +1,72 @@
+[
+  {
+    "__typename": "Organization",
+    "organizationId": "85613d1f-fa0c-530e-812c-50784f49b688",
+  "organizationName": "Aurora Events",
+    "organizationCreated": "2025-10-09T00:00:00.000Z",
+    "organizationAddress": null
+  },
+  {
+    "__typename": "Organization",
+    "organizationId": "02297c25-b24c-514a-96c0-061d59025fc1",
+  "organizationName": "BluePeak Media",
+    "organizationCreated": "2025-10-09T00:00:00.000Z",
+    "organizationAddress": null
+  },
+  {
+    "__typename": "Organization",
+    "organizationId": "2aa1b067-aeb1-5111-99ec-d96c696fa838",
+  "organizationName": "Neon Harbor Productions",
+    "organizationCreated": "2025-10-09T00:00:00.000Z",
+    "organizationAddress": null
+  },
+  {
+    "__typename": "Organization",
+    "organizationId": "1d92dd3d-1584-5531-8d2f-b31e45c3b238",
+  "organizationName": "Silverline Studios",
+    "organizationCreated": "2025-10-09T00:00:00.000Z",
+    "organizationAddress": null
+  },
+  {
+    "__typename": "Organization",
+    "organizationId": "708f26c3-50c0-57ec-850e-f6393a7980e1",
+  "organizationName": "Glasshouse Collective",
+    "organizationCreated": "2025-10-09T00:00:00.000Z",
+    "organizationAddress": null
+  },
+  {
+    "__typename": "Organization",
+    "organizationId": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4",
+  "organizationName": "SummitStream Co.",
+    "organizationCreated": "2025-10-09T00:00:00.000Z",
+    "organizationAddress": null
+  },
+  {
+    "__typename": "Organization",
+    "organizationId": "de4dac0f-23bc-5648-aff0-094fa4b77d4a",
+  "organizationName": "EchoWave Entertainment",
+    "organizationCreated": "2025-10-09T00:00:00.000Z",
+    "organizationAddress": null
+  },
+  {
+    "__typename": "Organization",
+    "organizationId": "c3db4408-b147-51e8-ada0-c5d4a684b0eb",
+  "organizationName": "Orchid Lane Events",
+    "organizationCreated": "2025-10-09T00:00:00.000Z",
+    "organizationAddress": null
+  },
+  {
+    "__typename": "Organization",
+    "organizationId": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd",
+  "organizationName": "Crimson Harbor",
+    "organizationCreated": "2025-10-09T00:00:00.000Z",
+    "organizationAddress": null
+  },
+  {
+    "__typename": "Organization",
+    "organizationId": "3ba624cd-41a5-5abe-8f11-04eac505a3ff",
+  "organizationName": "Nimbus Live",
+    "organizationCreated": "2025-10-09T00:00:00.000Z",
+    "organizationAddress": null
+  }
+]

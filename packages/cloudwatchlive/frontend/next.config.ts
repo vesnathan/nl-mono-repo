@@ -51,7 +51,10 @@ const nextConfig = {
     styledComponents: true,
   },
   // Only use "export" for production builds, not during development
-  ...(process.env.NODE_ENV === "production" ? { output: "export" } : {}),
+  // Opt-in static export. Set NEXT_EXPORT=true when you want to build a fully
+  // static exported site. This avoids requiring generateStaticParams for
+  // dynamic routes during regular production builds.
+  ...(process.env.NEXT_EXPORT === "true" ? { output: "export" } : {}),
   images: {
     unoptimized: true,
   },

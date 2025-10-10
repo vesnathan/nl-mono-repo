@@ -230,7 +230,7 @@ const mapEvent = (
   templateId,
 });
 
-export const EventPage: React.FC<Props> = ({ eventId }) => {
+const EventPage: React.FC<Props> = ({ eventId }) => {
   const [event, setEvent] = useState<LocalEvent | null | undefined>(undefined);
 
   useEffect(() => {
