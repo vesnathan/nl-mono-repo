@@ -119,7 +119,10 @@ async function deployAll() {
     const cwlChain = getDependencyChain(StackType.CWL);
     logger.info(`CWL dependency chain: ${cwlChain.join(" → ")}`);
     for (const stack of cwlChain) {
-      const exists = await outputsManager.validateStackExists(stack, deploymentOptions.stage);
+      const exists = await outputsManager.validateStackExists(
+        stack,
+        deploymentOptions.stage,
+      );
       if (exists) {
         logger.info(`Skipping ${stack} — already deployed`);
         continue;
@@ -140,7 +143,10 @@ async function deployAll() {
     const exampleChain = getDependencyChain(StackType.AWS_EXAMPLE);
     logger.info(`aws-example dependency chain: ${exampleChain.join(" → ")}`);
     for (const stack of exampleChain) {
-      const exists = await outputsManager.validateStackExists(stack, deploymentOptions.stage);
+      const exists = await outputsManager.validateStackExists(
+        stack,
+        deploymentOptions.stage,
+      );
       if (exists) {
         logger.info(`Skipping ${stack} — already deployed`);
         continue;
