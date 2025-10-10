@@ -4,6 +4,8 @@
   "workspaces": [
   "packages/cloudwatchlive/frontend",
   "packages/cloudwatchlive/dev-mocks",
+  "packages/aws-example/frontend",
+  "packages/aws-example/backend",
     "packages/cloudwatchlive/backend",
     "packages/shared",
     "packages/waf",
