@@ -16,6 +16,7 @@ export class DependencyValidator {
     [StackType.WAF]: [], // WAF has no dependencies
     [StackType.Shared]: [StackType.WAF], // Shared depends on WAF
     [StackType.CWL]: [StackType.WAF, StackType.Shared], // CWL depends on both WAF and Shared
+    [StackType.AWS_EXAMPLE]: [StackType.Shared], // aws-example depends on Shared
   };
 
   // Define which stacks are dependent on each stack
@@ -23,6 +24,7 @@ export class DependencyValidator {
     [StackType.WAF]: [StackType.Shared, StackType.CWL], // WAF is required by Shared and CWL
     [StackType.Shared]: [StackType.CWL], // Shared is required by CWL
     [StackType.CWL]: [], // CWL has no dependents
+    [StackType.AWS_EXAMPLE]: [], // aws-example has no dependents
   };
 
   constructor() {
@@ -99,8 +101,8 @@ export class DependencyValidator {
       ordered.push(stack);
     };
 
-    // Visit all stacks to ensure we get the complete order
-    for (const stack of [StackType.WAF, StackType.Shared, StackType.CWL]) {
+    // Visit all stacks to ensure we get the complete order (iterate programmatically)
+    for (const stack of Object.values(StackType)) {
       visit(stack);
     }
 
@@ -210,4 +212,32 @@ export class DependencyValidator {
     const removalOrder = this.getRemovalOrder();
     logger.info(`  ${removalOrder.join(" → ")}`);
   }
+}
+
+/**
+ * Returns the ordered dependency chain for a given stack (dependencies first, then the stack).
+ */
+export function getDependencyChain(target: StackType): StackType[] {
+  // Reconstruct the same dependency map used by DependencyValidator
+  const dependencies: Record<StackType, StackType[]> = {
+    [StackType.WAF]: [],
+    [StackType.Shared]: [StackType.WAF],
+    [StackType.CWL]: [StackType.WAF, StackType.Shared],
+    [StackType.AWS_EXAMPLE]: [StackType.Shared],
+  };
+
+  const ordered: StackType[] = [];
+  const visited = new Set<StackType>();
+
+  const visit = (stack: StackType) => {
+    if (visited.has(stack)) return;
+    visited.add(stack);
+    for (const dep of dependencies[stack] || []) {
+      visit(dep);
+    }
+    ordered.push(stack);
+  };
+
+  visit(target);
+  return ordered;
 }

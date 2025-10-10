@@ -813,6 +813,7 @@ async function main() {
                   value: "all",
                 },
                 { name: "CloudWatchLive (CWL)", value: StackType.CWL },
+                { name: "AWS Example (aws-example)", value: StackType.AWS_EXAMPLE },
                 { name: "Shared Resources", value: StackType.Shared },
                 { name: "WAF", value: StackType.WAF },
                 new inquirer.Separator(),

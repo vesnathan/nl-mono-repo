@@ -1,0 +1,4 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Placeholder template for aws-example (no real resources)
+Resources: {}
+Outputs: {}

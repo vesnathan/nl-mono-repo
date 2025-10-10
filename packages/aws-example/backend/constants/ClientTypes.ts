@@ -72,7 +72,9 @@ export const AWSB_CLIENT_TYPES: readonly ClientTypeDefinition[] = [
 export type AWSBClientType = (typeof AWSB_CLIENT_TYPES)[number]["value"];
 
 // Helper to check if a string is a valid client type
-export const isValidAWSBClientType = (value: string): value is AWSBClientType => {
+export const isValidAWSBClientType = (
+  value: string,
+): value is AWSBClientType => {
   return AWSB_CLIENT_TYPES.some((type) => type.value === value);
 };
 

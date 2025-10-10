@@ -44,7 +44,9 @@ export const authResetPassword = async (input: ResetPasswordInput) => {
     }
     default: {
       {
-        const e = new Error(`204.148 unhandled resetPassword nextStep: ${nextStep}`);
+        const e = new Error(
+          `204.148 unhandled resetPassword nextStep: ${nextStep}`,
+        );
         (e as any).cause = resetPasswordError;
         input.onUnhandledError(e);
       }

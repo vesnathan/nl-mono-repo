@@ -34,20 +34,31 @@ export enum StackType {
   WAF = "WAF",
   Shared = "Shared",
   CWL = "CWL",
+  AWS_EXAMPLE = "AWS_EXAMPLE",
 }
 
-export const STACK_ORDER = [StackType.WAF, StackType.Shared, StackType.CWL];
+export const STACK_ORDER = [
+  StackType.WAF,
+  StackType.Shared,
+  StackType.CWL,
+  StackType.AWS_EXAMPLE,
+];
 
 export const TEMPLATE_PATHS: Record<StackType, string> = {
   [StackType.WAF]: join(__dirname, "templates/waf/cfn-template.yaml"),
   [StackType.Shared]: join(__dirname, "templates/shared/cfn-template.yaml"),
   [StackType.CWL]: join(__dirname, "templates/cwl/cfn-template.yaml"),
+  [StackType.AWS_EXAMPLE]: join(
+    __dirname,
+    "templates/aws-example/cfn-template.yaml",
+  ),
 };
 
 export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
   [StackType.WAF]: join(__dirname, "templates/waf/"),
   [StackType.Shared]: join(__dirname, "templates/shared/"),
   [StackType.CWL]: join(__dirname, "templates/cwl/"),
+  [StackType.AWS_EXAMPLE]: join(__dirname, "templates/aws-example/"),
 };
 
 export const getStackName = (stackType: StackType, stage: string) =>

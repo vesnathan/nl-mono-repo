@@ -89,14 +89,14 @@ function replaceTokensInTree(destPackagePath, newName) {
   // and cloudwatchlive -> newName (case-insensitive)
   const replacements = [
     { re: /cloudwatchlive/gi, to: newName },
-    { re: /CWL/g, to: 'AWSB' },
-    { re: /Cwl/g, to: 'Awsb' },
-    { re: /cwl/g, to: 'awsb' },
+    { re: /CWL/g, to: "AWSB" },
+    { re: /Cwl/g, to: "Awsb" },
+    { re: /cwl/g, to: "awsb" },
   ];
 
   function replaceFileTokens(filePath) {
     try {
-      let content = fs.readFileSync(filePath, 'utf8');
+      let content = fs.readFileSync(filePath, "utf8");
       let changed = false;
       for (const { re, to } of replacements) {
         if (re.test(content)) {
@@ -104,7 +104,7 @@ function replaceTokensInTree(destPackagePath, newName) {
           changed = true;
         }
       }
-      if (changed) fs.writeFileSync(filePath, content, 'utf8');
+      if (changed) fs.writeFileSync(filePath, content, "utf8");
     } catch (e) {
       // skip binary files or read errors
     }
