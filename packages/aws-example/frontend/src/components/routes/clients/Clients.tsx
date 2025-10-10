@@ -1,0 +1,145 @@
+"use client";
+
+import React, { useRef, useState, useEffect } from "react";
+import { useUserStore } from "@/stores/userStore";
+import { ClientType } from "@/types/gqlTypes";
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Divider,
+} from "@nextui-org/react";
+import { awsbButton } from "@/components/common/awsbButton";
+import { AddUserForm } from "./forms/AddUserForm";
+
+export const Clients = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentForm, setCurrentForm] = useState<
+    "SuperAdmin" | "EventCompanyAdmin" | null
+  >(null);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [totalSteps, setTotalSteps] = useState(1);
+
+  const user = useUserStore((state) => state.user);
+  const isSuperAdminUser = user.clientType.includes(ClientType.SuperAdmin);
+
+  // useEffect(() => {
+  //   console.log('Is SuperAdmin User (useEffect):', isSuperAdminUser);
+  //   console.log('User clientType (useEffect):', user.clientType);
+  // }, [user.clientType, isSuperAdminUser]);
+
+  // Define separate refs for each form
+  const addUserFormRef = useRef<{
+    submit: () => void;
+    nextStep: () => Promise<boolean>;
+    previousStep: () => void;
+    reset: () => void;
+    getStep: () => number;
+    getTotalSteps: () => number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
+      setCurrentStep(addUserFormRef.current.getStep());
+      setTotalSteps(addUserFormRef.current.getTotalSteps());
+    }
+  }, [isModalOpen, currentForm]);
+
+  const handleOpenModal = () => {
+    if (isSuperAdminUser) setCurrentForm("SuperAdmin");
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setCurrentForm(null);
+    setCurrentStep(1);
+  };
+
+  const handleSubmit = () => {
+    if (currentForm === "SuperAdmin") {
+      addUserFormRef.current?.submit();
+    }
+  };
+
+  const handleNext = async () => {
+    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
+      const success = await addUserFormRef.current.nextStep();
+      if (success) setCurrentStep((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
+      addUserFormRef.current.previousStep();
+      setCurrentStep((prev) => prev - 1);
+    }
+  };
+
+  const handleReset = () => {
+    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
+      addUserFormRef.current.reset();
+      setCurrentStep(1);
+    }
+  };
+
+  return (
+    <>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        aria-labelledby="client-modal-title"
+      >
+        <ModalContent>
+          <ModalHeader id="client-modal-title">Add New Client</ModalHeader>
+          <Divider />
+          <ModalBody className="mb-5">
+            {currentForm === "SuperAdmin" && (
+              <AddUserForm ref={addUserFormRef} onClose={handleCloseModal} />
+            )}
+          </ModalBody>
+          <Divider />
+          <ModalFooter className="flex justify-between">
+            {/* Reset Button (Hard Left) */}
+            <awsbButton
+              buttonText="Reset"
+              onClick={handleReset}
+              color="secondary"
+            />
+
+            <div className="flex space-x-2">
+              {/* Previous Button (Only if not on Step 1) */}
+              {totalSteps > 1 && currentStep > 1 && (
+                <awsbButton
+                  buttonText="Previous"
+                  onClick={handlePrevious}
+                  color="secondary"
+                />
+              )}
+              {/* Next Button (Only if not on last step) */}
+              {totalSteps > 1 && currentStep < totalSteps && (
+                <awsbButton
+                  buttonText="Next"
+                  onClick={handleNext}
+                  color="primary"
+                />
+              )}
+              {/* Submit Button (Only on last step) */}
+              {currentStep === totalSteps && (
+                <awsbButton
+                  buttonText="Submit"
+                  onClick={handleSubmit}
+                  color="primary"
+                />
+              )}
+            </div>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <awsbButton buttonText="New Client" onClick={handleOpenModal} />
+    </>
+  );
+};
