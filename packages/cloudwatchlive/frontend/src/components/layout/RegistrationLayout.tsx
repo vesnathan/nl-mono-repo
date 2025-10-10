@@ -1,8 +1,11 @@
 import React from "react";
 import { Card, CardBody } from "@nextui-org/react";
-import LoginBackground from "@/assets/images/login-bg.png";
+// Static image import for Next/Image optimization
 import Image from "next/image";
-import Logo from "../../assets/images/logo/logo.png";
+// Use public image path to avoid Next's sharp native dependency
+const LoginBackground = "/images/login-bg.png";
+import Logo from "@/components/common/Logo";
+import Link from "next/link";
 
 interface RegistrationLayoutProps {
   children: React.ReactNode;
@@ -20,7 +23,9 @@ const RegistrationLayout = ({ children }: RegistrationLayoutProps) => {
         <Card className="bg-white shadow-xl w-[440px] m-auto text-center p-0 ">
           <CardBody className="p-0">
             <div className="relative flex self-center bg-white p-10">
-              <Image src={Logo} alt="logo" width={180} height={100} />
+              <Link href="/" className="flex items-center">
+                <Logo width={180} height={100} alt="logo" />
+              </Link>
             </div>
             {children}
           </CardBody>

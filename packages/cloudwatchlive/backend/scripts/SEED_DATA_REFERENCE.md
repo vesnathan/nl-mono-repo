@@ -180,7 +180,7 @@ console.log(mainAdminUserId); // Always the same UUID
 
 ```bash
 cd packages/cloudwatchlive/backend/scripts
-./seed-users.sh
+./seed-db.sh
 ```
 
 No parameters needed! The script will create exactly the same data every time.

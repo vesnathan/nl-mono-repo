@@ -1,6 +1,8 @@
 /* eslint-disable sonarjs/no-duplicate-string */
 import { cn, extendVariants, Select, SelectItem } from "@nextui-org/react";
 import React, { useId } from "react";
+import type { SelectProps } from "@nextui-org/select";
+import type { SharedSelection } from "@nextui-org/system";
 
 const triggerClassnames = [
   "min-h-0 h-full",
@@ -108,6 +110,11 @@ export function CWLSelect<T extends string>(props: CWLSelectProps<T>) {
     return new Set([`${value}`]);
   }, [value]);
 
+  const ExtendedNextUISelectTyped =
+    ExtendedNextUISelect as unknown as React.ComponentType<
+      SelectProps<Record<string, unknown>>
+    >;
+
   return (
     <div className={cn("w-full", classNames?.root)}>
       {!!label && (
@@ -125,7 +132,7 @@ export function CWLSelect<T extends string>(props: CWLSelectProps<T>) {
         </label>
       )}
       <div className={cn("flex flex-col w-full", classNames?.inputWrapper)}>
-        <ExtendedNextUISelect
+        <ExtendedNextUISelectTyped
           isLoading={isLoading}
           placeholder={placeholder}
           id={inputId}
@@ -136,9 +143,21 @@ export function CWLSelect<T extends string>(props: CWLSelectProps<T>) {
           isDisabled={isDisabled}
           aria-disabled={isDisabled}
           selectedKeys={selectedKeys}
-          onSelectionChange={(v) => {
-            const newSelections = Array.from(v);
-            onChange?.(((newSelections[0]?.toString() || "") as T) || "");
+          onSelectionChange={(v: SharedSelection) => {
+            // SharedSelection can be 'all' or a Set-like object. Convert to array safely.
+            let arr: string[] = [];
+            if (v === "all") {
+              arr = ["all"];
+            } else if (v && typeof (v as Set<string>).forEach === "function") {
+              try {
+                arr = Array.from(v as Iterable<string>);
+              } catch {
+                arr = [];
+              }
+            } else if (typeof v === "string") {
+              arr = [v];
+            }
+            onChange?.(((arr[0]?.toString() || "") as T) || "");
           }}
           onFocus={onFocus}
           size={size}
@@ -175,7 +194,7 @@ export function CWLSelect<T extends string>(props: CWLSelectProps<T>) {
               </SelectItem>
             );
           })}
-        </ExtendedNextUISelect>
+        </ExtendedNextUISelectTyped>
         {!!helperText && (
           <span
             className={cn(

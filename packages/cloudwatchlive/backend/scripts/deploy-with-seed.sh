@@ -51,7 +51,7 @@ if [[ "$SEED_DB" =~ ^[Yy]([Ee][Ss])?$ ]]; then
     echo ""
     
     cd "../cloudwatchlive/backend/scripts"
-    ./seed-users.sh
+    ./seed-db.sh
     
     echo ""
     echo -e "${GREEN}✅ Database seeding complete${NC}"

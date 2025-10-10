@@ -4256,6 +4256,9 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
+"@cwl/dev-mocks@file:packages/cloudwatchlive/dev-mocks":
+  version "0.0.0-dev"
+
 "@emnapi/core@^1.1.0", "@emnapi/core@^1.4.3":
   version "1.4.3"
   resolved "https://registry.npmjs.org/@emnapi/core/-/core-1.4.3.tgz"
@@ -10912,7 +10915,7 @@
     semver "^7.6.0"
     ts-api-utils "^2.1.0"
 
-"@typescript-eslint/utils@6.21.0":
+"@typescript-eslint/utils@6.21.0", "@typescript-eslint/utils@^6.13.1":
   version "6.21.0"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/utils/-/utils-6.21.0.tgz#4714e7a6b39e773c1c8e97ec587f520840cd8134"
   integrity sha512-NfWVaC8HP9T8cbKQxHcsJBY5YE1O33+jpMwN45qzWWaPDZgLIbo12toGMWnmhvCpd3sIxkpDw3Wv1B3dYrbDQQ==

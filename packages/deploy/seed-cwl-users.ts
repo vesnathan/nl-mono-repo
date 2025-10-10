@@ -4,7 +4,7 @@ import {
   CloudFormationClient,
   ListExportsCommand,
 } from "@aws-sdk/client-cloudformation";
-import { seedCWLUsers } from "./utils/seed-users";
+import { seedCWLDB } from "./utils/seed-users";
 import { logger } from "./utils/logger";
 
 async function main() {
@@ -33,7 +33,7 @@ async function main() {
 
     const tableName = tableNameExport.Value;
 
-    await seedCWLUsers({
+    await seedCWLDB({
       region,
       tableName,
       stage,

@@ -792,6 +792,74 @@ const SEED_DATA: SeedData = {
   ],
 };
 
+// Attempt to load developer mock users (package-local) and, if present,
+// convert them into the SeedData.companies shape so we can use the same
+// seeding logic. This lets deploy-time seeding use the shared mock files.
+function loadMockCompaniesFromDevMocks(): SeedData["companies"] | null {
+  try {
+    // Use path relative to this script
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const path = require("path");
+    const fs = require("fs");
+    const mockPath = path.resolve(__dirname, "../../dev-mocks/mockUsers.json");
+    if (!fs.existsSync(mockPath)) return null;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mockUsers = require(mockPath) as Array<any>;
+    if (!Array.isArray(mockUsers) || mockUsers.length === 0) return null;
+
+    // Group users by company
+    const byCompany: Record<string, any[]> = {};
+    for (const u of mockUsers) {
+      const company = u.company || "Independent";
+      byCompany[company] = byCompany[company] || [];
+      byCompany[company].push(u);
+    }
+
+    const companies: SeedData["companies"] = [];
+    for (const [companyName, users] of Object.entries(byCompany)) {
+      // Simple rules to create hierarchy:
+      // - First user => mainAdmin
+      // - Second user => admin
+      // - Remaining users => staff assigned to the admin (if present)
+      const mainAdminUser = users[0];
+      const adminUsers = users.length > 1 ? [users[1]] : [];
+      const staffForAdmin = users.length > 2 ? users.slice(2) : [];
+
+      const admins = adminUsers.map((a) => ({
+        firstName: a.firstName || a.firstName || "",
+        lastName: a.lastName || a.lastName || "",
+        email: a.email,
+        title: a.title || "Mr",
+        role: a.role || "Event Company Admin",
+        staff: staffForAdmin.map((s) => ({
+          firstName: s.firstName,
+          lastName: s.lastName,
+          email: s.email,
+          title: s.title || "Ms",
+          role: s.role || "Event Company Staff",
+        })),
+      }));
+
+      companies.push({
+        name: companyName,
+        mainAdmin: {
+          firstName: mainAdminUser.firstName,
+          lastName: mainAdminUser.lastName,
+          email: mainAdminUser.email,
+          title: mainAdminUser.title || "Ms",
+          role: mainAdminUser.role || "EventCompanyMainAdmin",
+        },
+        admins,
+      });
+    }
+
+    return companies;
+  } catch (err) {
+    // If anything fails, fallback to hard-coded SEED_DATA
+    return null;
+  }
+}
+
 interface OrganizationDB {
   PK: string;
   SK: string;
@@ -1149,13 +1217,92 @@ async function seedUsers() {
   }
 }
 
-// Run the script
+// --- Additional: seed events using dev-mocks/mockEvents.json ---
+async function seedEvents() {
+  try {
+    // Resolve path relative to this script file
+    // eslint-disable-next-line node/no-unsupported-features/es-builtins
+    const path = require("path");
+    const eventsPath = path.resolve(
+      __dirname,
+      "../../dev-mocks/mockEvents.json",
+    );
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const mockEvents = require(eventsPath) as Array<any>;
+
+    if (!Array.isArray(mockEvents) || mockEvents.length === 0) {
+      console.log("No mock events found to seed.");
+      return;
+    }
+
+    console.log(`🌱 Seeding ${mockEvents.length} mock events to DynamoDB...`);
+
+    let seeded = 0;
+    for (const me of mockEvents) {
+      // Derive deterministic owner userId from email
+      const ownerEmail = me.eventOwnerEmail || me.eventOwner?.email;
+      const ownerId = ownerEmail
+        ? generateDeterministicUserId(ownerEmail)
+        : undefined;
+
+      const eventItem = {
+        PK: `EVENT#${me.id}`,
+        SK: `METADATA#${me.id}`,
+        eventId: String(me.id),
+        title: me.title,
+        shortDescription: me.shortDescription || null,
+        description: me.description || null,
+        location: me.location || null,
+        date: me.date || null,
+        accessType: me.accessType || null,
+        requiresRegistration: !!me.requiresRegistration,
+        isLive: !!me.isLive,
+        price: me.price || null,
+        image: me.image || null,
+        eventOwnerId: ownerId ? ownerId : null,
+        eventOwnerEmail: ownerEmail || null,
+        ticketInfo: me.ticketInfo || null,
+        streamUrl: me.streamUrl || null,
+        sessions: me.sessions || null,
+        createdAt: new Date().toISOString(),
+      };
+
+      try {
+        await docClient.send(
+          new PutCommand({ TableName: TABLE_NAME, Item: eventItem }),
+        );
+        seeded++;
+        console.log(
+          `   ✅ Seeded event ${me.id} (owner: ${ownerEmail || "none"})`,
+        );
+      } catch (err) {
+        console.error(
+          `   ❌ Failed to seed event ${me.id}:`,
+          err instanceof Error ? err.message : err,
+        );
+      }
+
+      // small delay
+      await new Promise((r) => setTimeout(r, 50));
+    }
+
+    console.log(`✨ Seeded ${seeded}/${mockEvents.length} events.`);
+  } catch (err) {
+    console.error(
+      "❌ seedEvents failed:",
+      err instanceof Error ? err.message : err,
+    );
+  }
+}
+
+// Run both user seed and event seed in sequence
 seedUsers()
+  .then(() => seedEvents())
   .then(() => {
-    console.log("🎉 Script completed successfully");
+    console.log("🎉 All seeding completed successfully");
     process.exit(0);
   })
   .catch((error) => {
-    console.error("💥 Script failed:", error);
+    console.error("💥 Seeding failed:", error);
     process.exit(1);
   });

@@ -937,7 +937,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         let resolversBuildHash = "";
         try {
           // Compile and upload resolvers (returns build hash)
-          resolversBuildHash = await resolverCompiler.compileAndUploadResolvers();
+          resolversBuildHash =
+            await resolverCompiler.compileAndUploadResolvers();
 
           // Verify that the resolvers were uploaded successfully
           if (options.debugMode) {

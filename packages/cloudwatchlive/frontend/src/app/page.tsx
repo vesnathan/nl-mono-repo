@@ -2,287 +2,105 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import Logo from "@/components/common/Logo";
 import { Button, Card, CardBody } from "@nextui-org/react";
-import LoginBackground from "@/assets/images/login-bg.png";
-import Logo from "@/assets/images/logo/logo.png";
+// Use static image import so Next/Image can optimize the asset (requires sharp/libvips)
+// Use public image path to avoid Next's sharp native dependency during local build.
+// Ensure the image is copied to packages/cloudwatchlive/frontend/public/images/login-bg.png
+const LoginBackground = "/images/login-bg.png";
+// Import canonical backend mock events directly from dev-mocks package
+// Directly import canonical dev-mocks JSON (dev-only, simple static data)
+// eslint-disable-next-line import/no-extraneous-dependencies
+import MockEventsRaw from "@cwl/dev-mocks/mockEvents.json";
 
-// Event access types
-type EventAccessType = "free" | "paid" | "invite-only";
+const PLACEHOLDER_IMAGE =
+  "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=60";
 
-// Event data structure
-interface Event {
-  id: number;
-  title: string;
-  location: string;
-  date: string;
-  accessType: EventAccessType;
-  requiresRegistration: boolean; // Whether user needs to register/login to access
-  isLive: boolean; // Whether event is currently streaming live
-  price?: string; // Only for paid events
-  image: string;
-  eventOwner: {
-    name: string;
-    company: string;
-  };
+// Derive sections from MOCK_EVENTS
+// Helper: format a start/end ISO range into a human string
+function formatRange(start?: string, end?: string) {
+  if (!start) return "";
+  const s = new Date(start);
+  const e = end ? new Date(end) : null;
+  // If no end or same day -> show local date/time
+  if (!e) return s.toLocaleString();
+  const msInDay = 24 * 60 * 60 * 1000;
+  const dayDiff = Math.round(
+    (e.setHours(0, 0, 0, 0) - s.setHours(0, 0, 0, 0)) / msInDay,
+  );
+  // If same day, show times
+  if (dayDiff === 0)
+    return `${s.toLocaleDateString()} ${s.toLocaleTimeString()} - ${new Date(end!).toLocaleTimeString()}`;
+  // Multi-day but cap under two weeks in UI — format date range
+  return `${s.toLocaleDateString()} — ${e.toLocaleDateString()}`;
 }
 
-// Events currently live streaming
-const LIVE_EVENTS: Event[] = [
-  {
-    id: 101,
-    title: "Tech Keynote 2025 - LIVE",
-    location: "San Francisco, USA",
-    date: "Oct 9, 2025 - Now",
-    accessType: "free",
-    requiresRegistration: false,
-    isLive: true,
-    image:
-      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Tech Summit",
-      company: "Global Tech Events",
-    },
-  },
-  {
-    id: 102,
-    title: "Live Jazz Concert",
-    location: "New Orleans, USA",
-    date: "Oct 9, 2025 - Now",
-    accessType: "free",
-    requiresRegistration: true,
-    isLive: true,
-    image:
-      "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Jazz Masters",
-      company: "New Orleans Music Hall",
-    },
-  },
-];
+interface MockEventOwner {
+  ownerCompany?: string;
+  company?: string;
+}
 
-// All free events (combined)
-const FREE_EVENTS: Event[] = [
-  {
-    id: 1,
-    title: "Summer Music Festival 2025",
-    location: "Sydney, Australia",
-    date: "Dec 15-17, 2025",
-    accessType: "free",
-    requiresRegistration: false,
-    isLive: false,
-    image:
-      "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "John Smith",
-      company: "MegaEvents Australia",
-    },
-  },
-  {
-    id: 2,
-    title: "Tech Conference Asia",
-    location: "Singapore",
-    date: "Jan 20-22, 2026",
-    accessType: "free",
-    requiresRegistration: false,
-    isLive: false,
-    image:
-      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Sarah Lee",
-      company: "Tech Events Asia",
-    },
-  },
-  {
-    id: 3,
-    title: "Art & Design Expo",
-    location: "Melbourne, Australia",
-    date: "Nov 5-7, 2025",
-    accessType: "free",
-    requiresRegistration: true,
-    isLive: false,
-    image:
-      "https://images.unsplash.com/photo-1531058020387-3be344556be6?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Emma Wilson",
-      company: "Creative Spaces Events",
-    },
-  },
-  {
-    id: 4,
-    title: "Food & Wine Festival",
-    location: "Adelaide, Australia",
-    date: "Oct 28-30, 2025",
-    accessType: "free",
-    requiresRegistration: true,
-    isLive: false,
-    image:
-      "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Marco Rossi",
-      company: "Gourmet Events Co",
-    },
-  },
-  {
-    id: 5,
-    title: "Community Sports Day",
-    location: "Brisbane, Australia",
-    date: "Dec 1, 2025",
-    accessType: "free",
-    requiresRegistration: false,
-    isLive: false,
-    image:
-      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "David Chen",
-      company: "Brisbane Sports Network",
-    },
-  },
-  {
-    id: 6,
-    title: "Comedy Night Special",
-    location: "Perth, Australia",
-    date: "Nov 18, 2025",
-    accessType: "free",
-    requiresRegistration: false,
-    isLive: false,
-    image:
-      "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Lisa Brown",
-      company: "Laugh Out Loud Productions",
-    },
-  },
-  {
-    id: 7,
-    title: "Gaming Convention Keynote",
-    location: "Auckland, New Zealand",
-    date: "Jan 10, 2026",
-    accessType: "free",
-    requiresRegistration: true,
-    isLive: false,
-    image:
-      "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "James Taylor",
-      company: "GameCon NZ",
-    },
-  },
-  {
-    id: 8,
-    title: "Wellness Workshop",
-    location: "Gold Coast, Australia",
-    date: "Nov 25, 2025",
-    accessType: "free",
-    requiresRegistration: true,
-    isLive: false,
-    image:
-      "https://images.unsplash.com/photo-1545389336-cf090694435e?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Sophie Green",
-      company: "Mindful Living Events",
-    },
-  },
-];
+interface MockEvent {
+  id: string;
+  title: string;
+  image?: string;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
+  accessType: "free" | "free-register" | "paid" | "invite-paid";
+  requiresRegistration?: boolean;
+  price?: string;
+  eventOwner?: MockEventOwner;
+}
 
-// Paid events (all require registration)
-const PAID_EVENTS: Event[] = [
-  {
-    id: 201,
-    title: "Premium Tech Summit 2025",
-    location: "San Francisco, USA",
-    date: "Nov 10-12, 2025",
-    accessType: "paid",
-    requiresRegistration: true,
-    isLive: false,
-    price: "$299",
-    image:
-      "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Tech Leaders",
-      company: "Silicon Valley Events",
-    },
-  },
-  {
-    id: 202,
-    title: "Exclusive VIP Concert - Beyoncé",
-    location: "Los Angeles, USA",
-    date: "Dec 5, 2025",
-    accessType: "paid",
-    requiresRegistration: true,
-    isLive: false,
-    price: "$149",
-    image:
-      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Live Nation",
-      company: "Premium Music Events",
-    },
-  },
-  {
-    id: 203,
-    title: "Business Masterclass Series",
-    location: "London, UK",
-    date: "Jan 15-17, 2026",
-    accessType: "paid",
-    requiresRegistration: true,
-    isLive: false,
-    price: "$499",
-    image:
-      "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Business Elite",
-      company: "Executive Events UK",
-    },
-  },
-  {
-    id: 204,
-    title: "Professional Photography Workshop",
-    location: "Tokyo, Japan",
-    date: "Dec 18-20, 2025",
-    accessType: "paid",
-    requiresRegistration: true,
-    isLive: false,
-    price: "$199",
-    image:
-      "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Photo Masters",
-      company: "Creative Workshop Japan",
-    },
-  },
-  {
-    id: 205,
-    title: "Gourmet Cooking Masterclass",
-    location: "Paris, France",
-    date: "Nov 28-30, 2025",
-    accessType: "paid",
-    requiresRegistration: true,
-    isLive: false,
-    price: "$349",
-    image:
-      "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Chef Antoine",
-      company: "Culinary Excellence Paris",
-    },
-  },
-  {
-    id: 206,
-    title: "Fitness & Wellness Bootcamp",
-    location: "Bali, Indonesia",
-    date: "Jan 8-14, 2026",
-    accessType: "paid",
-    requiresRegistration: true,
-    isLive: false,
-    price: "$599",
-    image:
-      "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&h=400&fit=crop",
-    eventOwner: {
-      name: "Fitness Pro",
-      company: "Wellness Retreats Bali",
-    },
-  },
-];
+const MockEventsData: MockEvent[] = MockEventsRaw as unknown as MockEvent[];
+
+function getOwnerCompany(event: MockEvent) {
+  // eventOwner.ownerCompany is canonical; tolerate alternative shapes
+  type MaybeOwner = { ownerCompany?: string; company?: string } | undefined;
+  const owner = event.eventOwner as MaybeOwner;
+  return owner?.ownerCompany ?? owner?.company ?? "";
+}
+// Compute live events from startDate/endDate timestamps
+const now = new Date();
+const LIVE_EVENTS: MockEvent[] = MockEventsData.filter((e: MockEvent) => {
+  try {
+    if (!e.startDate || !e.endDate) return false;
+    const s = new Date(e.startDate);
+    const en = new Date(e.endDate);
+    return s <= now && now <= en;
+  } catch {
+    return false;
+  }
+});
+
+const FREE_EVENTS: MockEvent[] = MockEventsData.filter((e: MockEvent) =>
+  ["free", "free-register"].includes(e.accessType),
+).slice(0, 8);
+
+interface MockEventOwner {
+  ownerCompany?: string;
+  company?: string;
+}
+
+interface MockEvent {
+  id: string;
+  title: string;
+  image?: string;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
+  accessType: "free" | "free-register" | "paid" | "invite-paid";
+  requiresRegistration?: boolean;
+  price?: string;
+  eventOwner?: MockEventOwner;
+}
+
+const PAID_EVENTS: MockEvent[] = MockEventsData.filter(
+  (e: MockEvent) => e.accessType === "paid" || e.accessType === "invite-paid",
+).slice(0, 8);
+
+const LIMITED_LIVE_EVENTS = LIVE_EVENTS.slice(0, 8);
 
 export default function LandingPage() {
   return (
@@ -299,7 +117,7 @@ export default function LandingPage() {
         <header className="bg-white/95 backdrop-blur-sm shadow-md sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <Link href="/" className="flex items-center">
-              <Image src={Logo} alt="CloudWatch Live" width={150} height={80} />
+              <Logo width={150} height={80} alt="CloudWatch Live" />
             </Link>
 
             <div className="flex items-center gap-4">
@@ -358,7 +176,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {LIVE_EVENTS.map((event) => (
+            {LIMITED_LIVE_EVENTS.map((event) => (
               <Card
                 key={event.id}
                 className="bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-red-500"
@@ -366,7 +184,7 @@ export default function LandingPage() {
                 <CardBody className="p-0 flex flex-col h-full">
                   <div className="relative w-full h-48">
                     <Image
-                      src={event.image}
+                      src={event.image ?? PLACEHOLDER_IMAGE}
                       alt={event.title}
                       fill
                       className="object-cover rounded-t-lg"
@@ -389,7 +207,7 @@ export default function LandingPage() {
                       {event.title}
                     </h3>
                     <p className="text-xs text-gray-500 mb-1">
-                      by {event.eventOwner.company}
+                      by {getOwnerCompany(event)}
                     </p>
                     <p className="text-sm text-gray-600 mb-1">
                       {event.location}
@@ -398,8 +216,8 @@ export default function LandingPage() {
                       Streaming Now
                     </p>
                     <Button
-                      as={event.requiresRegistration ? Link : undefined}
-                      href={event.requiresRegistration ? "/login" : undefined}
+                      as={Link}
+                      href={`/event/${event.id}`}
                       size="sm"
                       color="danger"
                       className="font-semibold w-full mt-auto"
@@ -433,7 +251,7 @@ export default function LandingPage() {
                 <CardBody className="p-0 flex flex-col h-full">
                   <div className="relative w-full h-48">
                     <Image
-                      src={event.image}
+                      src={event.image ?? PLACEHOLDER_IMAGE}
                       alt={event.title}
                       fill
                       className="object-cover rounded-t-lg"
@@ -455,15 +273,17 @@ export default function LandingPage() {
                       {event.title}
                     </h3>
                     <p className="text-xs text-gray-500 mb-1">
-                      by {event.eventOwner.company}
+                      by {getOwnerCompany(event)}
                     </p>
                     <p className="text-sm text-gray-600 mb-1">
                       {event.location}
                     </p>
-                    <p className="text-sm text-gray-500 mb-3">{event.date}</p>
+                    <p className="text-sm text-gray-500 mb-3">
+                      {formatRange(event.startDate, event.endDate)}
+                    </p>
                     <Button
-                      as={event.requiresRegistration ? Link : undefined}
-                      href={event.requiresRegistration ? "/login" : undefined}
+                      as={Link}
+                      href={`/event/${event.id}`}
                       size="sm"
                       color="primary"
                       variant="flat"
@@ -499,7 +319,7 @@ export default function LandingPage() {
                 <CardBody className="p-0 flex flex-col h-full">
                   <div className="relative w-full h-48">
                     <Image
-                      src={event.image}
+                      src={event.image ?? PLACEHOLDER_IMAGE}
                       alt={event.title}
                       fill
                       className="object-cover rounded-t-lg"
@@ -519,15 +339,19 @@ export default function LandingPage() {
                       {event.title}
                     </h3>
                     <p className="text-xs text-gray-500 mb-1">
-                      by {event.eventOwner.company}
+                      by {getOwnerCompany(event)}
                     </p>
                     <p className="text-sm text-gray-600 mb-1">
                       {event.location}
                     </p>
-                    <p className="text-sm text-gray-500 mb-3">{event.date}</p>
+                    <p className="text-sm text-gray-500 mb-3">
+                      {event.startDate
+                        ? new Date(event.startDate).toLocaleString()
+                        : ""}
+                    </p>
                     <Button
                       as={Link}
-                      href="/login"
+                      href={`/event/${event.id}`}
                       size="sm"
                       color="warning"
                       className="font-semibold w-full mt-auto"
@@ -579,12 +403,7 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6 py-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center">
-                <Image
-                  src={Logo}
-                  alt="CloudWatch Live"
-                  width={120}
-                  height={60}
-                />
+                <Logo width={120} height={60} alt="CloudWatch Live" />
               </div>
               <div className="text-sm text-gray-600">
                 © 2025 CloudWatch Live. All rights reserved.

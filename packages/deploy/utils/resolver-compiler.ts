@@ -400,9 +400,9 @@ class ResolverCompiler {
       `Compiled resolvers will be saved to: ${localSavePathBaseForApp}`,
     );
 
-  const uploadedResolvers: string[] = [];
+    const uploadedResolvers: string[] = [];
     const failedResolvers: { file: string; error: string }[] = [];
-  const compiledFilesRelative: string[] = [];
+    const compiledFilesRelative: string[] = [];
 
     for (let index = 0; index < totalFiles; index++) {
       const resolverFileRelativePath = this.resolverFiles[index];
@@ -457,7 +457,9 @@ class ResolverCompiler {
         ); // Essential log
         uploadedResolvers.push(s3Key);
         // Record relative JS path for hash computation and secondary upload
-        compiledFilesRelative.push(resolverFileRelativePath.replace(".ts", ".js"));
+        compiledFilesRelative.push(
+          resolverFileRelativePath.replace(".ts", ".js"),
+        );
       } catch (error: any) {
         const errorMsg = `Failed to compile or upload resolver ${resolverFileRelativePath}: ${error.message}`;
         logger.error(errorMsg);
@@ -482,7 +484,9 @@ class ResolverCompiler {
           const buf = await fsPromises.readFile(localFile, "utf-8");
           contents.push(buf);
         } catch (err: any) {
-          logger.error(`Failed to read compiled file for hashing: ${localFile} - ${err.message}`);
+          logger.error(
+            `Failed to read compiled file for hashing: ${localFile} - ${err.message}`,
+          );
           throw err;
         }
       }
@@ -498,21 +502,32 @@ class ResolverCompiler {
     // Upload compiled files again under hashed prefix so CloudFormation references change
     const failedHashedUploads: { file: string; error: string }[] = [];
     for (const relPath of compiledFilesRelative) {
-      const s3KeyHashed = path.posix.join(this.s3KeyPrefix, this.stage, buildHash, relPath);
+      const s3KeyHashed = path.posix.join(
+        this.s3KeyPrefix,
+        this.stage,
+        buildHash,
+        relPath,
+      );
       const localPath = path.join(localSavePathBaseForApp, relPath);
       try {
         const content = await fsPromises.readFile(localPath, "utf-8");
         await this.uploadToS3(s3KeyHashed, content, "application/javascript");
-        logger.success(`✓ Uploaded hashed resolver ${relPath} to s3://${this.s3BucketName}/${s3KeyHashed}`);
+        logger.success(
+          `✓ Uploaded hashed resolver ${relPath} to s3://${this.s3BucketName}/${s3KeyHashed}`,
+        );
       } catch (err: any) {
-        logger.error(`Failed to upload hashed resolver ${relPath}: ${err.message}`);
+        logger.error(
+          `Failed to upload hashed resolver ${relPath}: ${err.message}`,
+        );
         failedHashedUploads.push({ file: relPath, error: err.message });
       }
     }
 
     // Report summary for primary uploads
     logger.success(`\n📦 Resolver Upload Summary:`);
-    logger.success(`   ✓ Successfully uploaded: ${uploadedResolvers.length} resolvers`);
+    logger.success(
+      `   ✓ Successfully uploaded: ${uploadedResolvers.length} resolvers`,
+    );
     if (failedResolvers.length > 0) {
       logger.error(
         `   ✗ Failed to upload: ${failedResolvers.length} resolvers`,
@@ -526,8 +541,12 @@ class ResolverCompiler {
     }
 
     if (failedHashedUploads.length > 0) {
-      logger.error(`Failed to upload ${failedHashedUploads.length} hashed resolvers:`);
-      failedHashedUploads.forEach(({ file, error }) => logger.error(`  - ${file}: ${error}`));
+      logger.error(
+        `Failed to upload ${failedHashedUploads.length} hashed resolvers:`,
+      );
+      failedHashedUploads.forEach(({ file, error }) =>
+        logger.error(`  - ${file}: ${error}`),
+      );
       throw new Error(`Failed to upload some hashed resolver files.`);
     }
 
