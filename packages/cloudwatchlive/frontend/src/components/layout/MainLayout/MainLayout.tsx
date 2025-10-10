@@ -36,7 +36,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   const visibleSidebarItems = getVisibleSidebarItems();
 
   const activeSidebarItem = Object.values(visibleSidebarItems).find((item) => {
-    return pathname.startsWith(item.path);
+    const current = pathname ?? "";
+    return current.startsWith(item.path);
   });
 
   return (

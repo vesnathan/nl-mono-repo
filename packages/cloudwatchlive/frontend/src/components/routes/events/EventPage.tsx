@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { EventBase, Session, Speaker } from "@/types/EventTypes";
 import Link from "next/link";
 import Image from "next/image";
+import { Button } from "@nextui-org/react";
 import type { CWLUser } from "@/types/gqlTypes";
 
 // Use canonical dev-mocks JSON directly for frontend testing
@@ -256,121 +257,93 @@ const EventPage: React.FC<Props> = ({ eventId }) => {
     const accentColor = event.template?.accentColor ?? undefined;
     const logoUrl = event.template?.logo ?? undefined;
 
-    const brandStyle = accentColor
-      ? { borderLeft: `4px solid ${accentColor}`, paddingLeft: "12px" }
-      : undefined;
-
-    switch (event.templateId) {
-      case 1:
-        return (
-          <header className="p-6 bg-gray-100 rounded mb-4" style={brandStyle}>
-            <div className="flex items-center gap-4 mb-3">
-              {logoUrl ? (
-                <Image
-                  src={logoUrl || ""}
-                  alt="logo"
-                  width={40}
-                  height={40}
-                  className="h-10 w-10 object-contain"
-                />
-              ) : (
-                <div className="h-10 w-10 rounded bg-gray-300 flex items-center justify-center font-bold">
-                  {event.owner?.company
-                    ? event.owner.company
-                        .split(" ")
-                        .map((w: string) => w[0])
-                        .join("")
-                    : "EV"}
-                </div>
-              )}
-
-              <div>
-                <h1 className="text-3xl font-extrabold">{event.title}</h1>
-                <div className="text-sm text-gray-700">
-                  {event.owner?.company}
-                </div>
+    // Minimal header variations by templateId. We intentionally keep the
+    // header simple (title + optional image/logo) and avoid showing owner
+    // information on the public event page for privacy.
+    if (event.templateId === 2) {
+      return (
+        <header
+          className="p-6 text-white rounded mb-4"
+          style={{
+            background: accentColor ?? "linear-gradient(90deg,#7c3aed,#ec4899)",
+          }}
+        >
+          <div className="flex items-center gap-4">
+            {logoUrl ? (
+              <Image
+                src={logoUrl || ""}
+                alt="logo"
+                width={40}
+                height={40}
+                className="h-10 w-10 object-contain"
+              />
+            ) : (
+              <div className="h-10 w-10 rounded bg-white/20 flex items-center justify-center font-bold">
+                EV
               </div>
+            )}
+            <div>
+              <h1 className="text-3xl font-bold">{event.title}</h1>
             </div>
-          </header>
-        );
-
-      case 2:
-        return (
-          <header
-            className="p-6 text-white rounded mb-4"
-            style={{
-              background:
-                accentColor ?? "linear-gradient(90deg,#7c3aed,#ec4899)",
-            }}
-          >
-            <div className="flex items-center gap-4">
-              {logoUrl ? (
-                <Image
-                  src={logoUrl || ""}
-                  alt="logo"
-                  width={40}
-                  height={40}
-                  className="h-10 w-10 object-contain"
-                />
-              ) : (
-                <div className="h-10 w-10 rounded bg-white/20 flex items-center justify-center font-bold">
-                  {event.owner?.company
-                    ? event.owner.company
-                        .split(" ")
-                        .map((w: string) => w[0])
-                        .join("")
-                    : "EV"}
-                </div>
-              )}
-
-              <div>
-                <h1 className="text-3xl font-bold">{event.title}</h1>
-                <div className="text-sm opacity-90">
-                  Hosted by {event.owner?.name}
-                </div>
-              </div>
-            </div>
-          </header>
-        );
-
-      default:
-        return (
-          <header className="p-0 mb-4" style={brandStyle}>
-            <div className="relative">
-              {event.image && (
-                <Image
-                  src={event.image}
-                  alt={event.title}
-                  width={800}
-                  height={256}
-                  className="w-full h-64 object-cover rounded"
-                />
-              )}
-              <div className="absolute left-6 bottom-6 bg-white/70 py-2 px-3 rounded">
-                <div className="text-lg font-semibold">{event.title}</div>
-                <div className="text-sm text-gray-700">
-                  {event.owner?.company}
-                </div>
-              </div>
-            </div>
-          </header>
-        );
+          </div>
+        </header>
+      );
     }
+
+    if (event.templateId === 1) {
+      return (
+        <header className="p-6 bg-gray-100 rounded mb-4">
+          <div className="flex items-center gap-4 mb-3">
+            {logoUrl ? (
+              <Image
+                src={logoUrl || ""}
+                alt="logo"
+                width={40}
+                height={40}
+                className="h-10 w-10 object-contain"
+              />
+            ) : (
+              <div className="h-10 w-10 rounded bg-gray-300 flex items-center justify-center font-bold">
+                EV
+              </div>
+            )}
+            <div>
+              <h1 className="text-3xl font-extrabold">{event.title}</h1>
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+    return (
+      <header className="p-0 mb-4">
+        <div className="relative">
+          {event.image ? (
+            <Image
+              src={event.image}
+              alt={event.title}
+              width={800}
+              height={256}
+              className="w-full h-64 object-cover rounded"
+            />
+          ) : (
+            <div className="w-full h-64 bg-gray-200 rounded" />
+          )}
+          <div className="absolute left-6 bottom-6 bg-white/70 py-2 px-3 rounded">
+            <div className="text-lg font-semibold">{event.title}</div>
+          </div>
+        </div>
+      </header>
+    );
   };
 
   return (
     <div className="p-6">
       {renderHeader()}
 
-      <p className="mb-4">{event.shortDescription || event.description}</p>
-
-      {event.owner && (
-        <div className="mb-4 border-l-4 pl-3 py-2">
-          <div className="font-semibold">Organiser</div>
-          <div>{event.owner.name}</div>
-          <div className="text-sm text-gray-600">{event.owner.company}</div>
-        </div>
-      )}
+      <p className="mb-4">
+        {event.shortDescription ?? event.description ?? ""}
+      </p>
 
       {event.mode === "free" && (
         <div className="mb-4">
@@ -397,12 +370,17 @@ const EventPage: React.FC<Props> = ({ eventId }) => {
             {event.ticketInfo?.price}
           </p>
           {event.ticketInfo?.buyUrl && (
-            <a
-              href={event.ticketInfo.buyUrl}
-              className="text-blue-600 underline"
-            >
-              Buy ticket
-            </a>
+            <div className="mt-2">
+              <Button
+                as={Link}
+                href={event.ticketInfo.buyUrl}
+                size="md"
+                color="warning"
+                className="font-semibold"
+              >
+                Buy ticket
+              </Button>
+            </div>
           )}
         </div>
       )}
@@ -418,18 +396,45 @@ const EventPage: React.FC<Props> = ({ eventId }) => {
         </div>
       )}
 
+      <div className="mt-6">
+        <Link href="/" className="text-blue-600 underline">
+          &larr; Back to home
+        </Link>
+      </div>
+
       {/* Agenda */}
       {event.sessions && event.sessions.length > 0 && (
         <section>
           <h2 className="text-xl font-semibold mb-2">Agenda</h2>
           <ul className="space-y-3">
-            {event.sessions.map((s) => (
-              <li key={s.id} className="p-3 border rounded">
-                <div className="font-semibold">{s.title}</div>
-                <div className="text-sm text-gray-600">{s.type}</div>
-                <div>{s.description}</div>
-              </li>
-            ))}
+            {event.sessions.map((s) => {
+              const isLive = (() => {
+                try {
+                  if (!s.start || !s.end) return false;
+                  const startMs = Date.parse(String(s.start));
+                  const endMs = Date.parse(String(s.end));
+                  const now = Date.now();
+                  return startMs <= now && now <= endMs;
+                } catch {
+                  return false;
+                }
+              })();
+
+              return (
+                <li key={s.id} className="p-3 border rounded">
+                  <div className="flex items-center gap-3">
+                    <div className="font-semibold">{s.title}</div>
+                    {isLive && (
+                      <div className="text-xs bg-red-500 text-white px-2 py-0.5 rounded font-bold">
+                        LIVE
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600">{s.type}</div>
+                  <div>{s.description}</div>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

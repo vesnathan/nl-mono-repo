@@ -1,0 +1,65 @@
+"use client";
+
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Button, Card, CardBody } from "@nextui-org/react";
+import { MockEvent, imageSrc, SessionStub } from "./eventsUtils";
+
+export default function EventCard({
+  event,
+  variant = "free",
+}: {
+  event: MockEvent;
+  variant?: "live" | "paid" | "free";
+}) {
+  return (
+    <Card
+      key={event.id}
+      className={`bg-white ${
+        variant === "live" ? "border-2 border-red-500" : variant === "paid" ? "border-2 border-yellow-500" : ""
+      }`}
+    >
+      <CardBody className="p-0 flex flex-col h-full">
+        <div className="relative w-full h-48">
+          <Image src={imageSrc(event.image)} alt={String(event.title || "" )} fill className="object-cover rounded-t-lg" />
+
+          <div className="absolute top-2 left-2 flex gap-2">
+            {event.sessions &&
+              event.sessions.length > 0 &&
+              (event.sessions as SessionStub[]).some((s) => {
+                try {
+                  const nowMs = Date.now();
+                  const start = s.start ? Date.parse(String(s.start)) : 0;
+                  const end = s.end ? Date.parse(String(s.end)) : 0;
+                  return start <= nowMs && nowMs <= end;
+                } catch {
+                  return false;
+                }
+              }) && (
+                <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  LIVE
+                </div>
+              )}
+
+            {event.requiresRegistration && (
+              <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">REGISTER</div>
+            )}
+          </div>
+        </div>
+
+        <div className="p-4 flex flex-col flex-grow">
+          <h3 className="font-semibold text-lg mb-2 line-clamp-2">{event.title}</h3>
+          <p className="text-sm text-gray-700 mb-2 line-clamp-2">{String(event.shortDescription || event.description || "")}</p>
+          <p className="text-sm text-gray-600 mb-1">{event.location}</p>
+          <div className="mt-auto">
+            <Button as={Link} href={`/event/${event.id}`} size="sm" className="font-semibold w-full">
+              {event.requiresRegistration ? "Register & Watch" : variant === "live" ? "Watch Live" : variant === "paid" ? "Purchase Ticket" : "Remind Me"}
+            </Button>
+          </div>
+        </div>
+      </CardBody>
+    </Card>
+  );
+}

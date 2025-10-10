@@ -30,7 +30,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     pathname === "/login" ||
     pathname === "/login/" ||
     // Allow public access to individual event pages (some events are free)
-    pathname?.startsWith("/event");
+    pathname?.startsWith("/event") ||
+    // Public discover pages (listing of events) should be accessible without login
+    pathname?.startsWith("/discover");
 
   return (
     <html lang="en" data-theme="lemonade">
