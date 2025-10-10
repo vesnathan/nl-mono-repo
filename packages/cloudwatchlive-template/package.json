@@ -1,0 +1,16 @@
+{
+  "name": "@nl/cloudwatchlive-template",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Template helper to bootstrap new AWS project packages from the cloudwatchlive sample",
+  "main": "scripts/create-template.js",
+  "scripts": {
+    "create": "node scripts/create-template.js"
+  },
+  "keywords": ["template","bootstrap","aws","cloudwatchlive"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
