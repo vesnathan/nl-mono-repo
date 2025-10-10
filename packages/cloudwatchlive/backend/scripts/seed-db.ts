@@ -743,50 +743,6 @@ const SEED_DATA: SeedData = {
             },
           ],
         },
-        {
-          firstName: "Paul",
-          lastName: "Reynolds",
-          email: "paul.reynolds@dynamicevents.com",
-          title: "Mr",
-          role: "Senior Manager",
-          staff: [
-            {
-              firstName: "Brooklyn",
-              lastName: "Sullivan",
-              email: "brooklyn.sullivan@dynamicevents.com",
-              title: "Ms",
-              role: "Support Staff",
-            },
-            {
-              firstName: "Nolan",
-              lastName: "Wallace",
-              email: "nolan.wallace@dynamicevents.com",
-              title: "Mr",
-              role: "Support Staff",
-            },
-            {
-              firstName: "Claire",
-              lastName: "Woods",
-              email: "claire.woods@dynamicevents.com",
-              title: "Ms",
-              role: "Support Staff",
-            },
-            {
-              firstName: "Adrian",
-              lastName: "Cole",
-              email: "adrian.cole@dynamicevents.com",
-              title: "Mr",
-              role: "Support Staff",
-            },
-            {
-              firstName: "Violet",
-              lastName: "West",
-              email: "violet.west@dynamicevents.com",
-              title: "Ms",
-              role: "Support Staff",
-            },
-          ],
-        },
       ],
     },
   ],
@@ -1239,11 +1195,14 @@ async function seedEvents() {
 
     let seeded = 0;
     for (const me of mockEvents) {
-      // Derive deterministic owner userId from email
-      const ownerEmail = me.eventOwnerEmail || me.eventOwner?.email;
-      const ownerId = ownerEmail
-        ? generateDeterministicUserId(ownerEmail)
-        : undefined;
+      // Derive deterministic owner userId from ownerUserId (preferred) or email
+      const ownerUserId = me.eventOwner?.ownerUserId;
+      const ownerEmail = me.eventOwner?.ownerEmail || me.eventOwnerEmail;
+      const ownerId = ownerUserId
+        ? generateDeterministicUserId(ownerUserId)
+        : ownerEmail
+          ? generateDeterministicUserId(ownerEmail)
+          : undefined;
 
       const eventItem = {
         PK: `EVENT#${me.id}`,
@@ -1253,13 +1212,14 @@ async function seedEvents() {
         shortDescription: me.shortDescription || null,
         description: me.description || null,
         location: me.location || null,
-        date: me.date || null,
+        startDate: me.startDate || null,
+        endDate: me.endDate || null,
         accessType: me.accessType || null,
         requiresRegistration: !!me.requiresRegistration,
-        isLive: !!me.isLive,
         price: me.price || null,
         image: me.image || null,
         eventOwnerId: ownerId ? ownerId : null,
+        eventOwnerCompany: me.eventOwner?.ownerCompany || null,
         eventOwnerEmail: ownerEmail || null,
         ticketInfo: me.ticketInfo || null,
         streamUrl: me.streamUrl || null,

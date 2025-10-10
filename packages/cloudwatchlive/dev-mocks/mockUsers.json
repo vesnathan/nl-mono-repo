@@ -1,0 +1,1902 @@
+[
+  {
+    "__typename": "CWLUser",
+    "userId": "8c339138-b01c-56a2-b653-83e09e663243",
+    "organizationId": "85613d1f-fa0c-530e-812c-50784f49b688",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "ava.smith1@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Ava",
+    "userLastName": "Smith",
+    "userPhone": "+614100001",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "61b0babe-fd6d-5f6b-8d83-6ecb7b7cfe17",
+    "organizationId": "02297c25-b24c-514a-96c0-061d59025fc1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "liam.johnson2@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Liam",
+    "userLastName": "Johnson",
+    "userPhone": "+614100002",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "d8b958d4-102b-575c-8479-fffe831ff460",
+    "organizationId": "2aa1b067-aeb1-5111-99ec-d96c696fa838",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "olivia.williams3@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Olivia",
+    "userLastName": "Williams",
+    "userPhone": "+614100003",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "4ad738e1-cf3e-5cfd-a09c-c9747a2f5752",
+    "organizationId": "1d92dd3d-1584-5531-8d2f-b31e45c3b238",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "noah.brown4@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Noah",
+    "userLastName": "Brown",
+    "userPhone": "+614100004",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "13bb987f-5370-58e9-bc15-e098a6761441",
+    "organizationId": "708f26c3-50c0-57ec-850e-f6393a7980e1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "emma.jones5@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Emma",
+    "userLastName": "Jones",
+    "userPhone": "+614100005",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "0b1affbc-33d0-566b-92a7-689924a0cf5c",
+    "organizationId": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "oliver.garcia6@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Oliver",
+    "userLastName": "Garcia",
+    "userPhone": "+614100006",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "246d4007-8bf2-5c88-9983-5c18d11dbe71",
+    "organizationId": "de4dac0f-23bc-5648-aff0-094fa4b77d4a",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "charlotte.miller7@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Charlotte",
+    "userLastName": "Miller",
+    "userPhone": "+614100007",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "bb5cc2d4-ce47-50f1-b611-ebdfd65301a3",
+    "organizationId": "c3db4408-b147-51e8-ada0-c5d4a684b0eb",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "elijah.davis8@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Elijah",
+    "userLastName": "Davis",
+    "userPhone": "+614100008",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "eef31b8d-caa0-54ab-9641-cedffc599055",
+    "organizationId": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "amelia.rodriguez9@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Amelia",
+    "userLastName": "Rodriguez",
+    "userPhone": "+614100009",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "898af507-0d1e-5f96-8336-b8b06f462c8f",
+    "organizationId": "3ba624cd-41a5-5abe-8f11-04eac505a3ff",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "william.martinez10@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "William",
+    "userLastName": "Martinez",
+    "userPhone": "+614100010",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "8769ea0c-e9e1-5290-a938-51b9b0b6e3d2",
+    "organizationId": "85613d1f-fa0c-530e-812c-50784f49b688",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "sophia.hernandez11@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Sophia",
+    "userLastName": "Hernandez",
+    "userPhone": "+614100011",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "3094486f-adbb-5d86-af20-f90bfce33516",
+    "organizationId": "02297c25-b24c-514a-96c0-061d59025fc1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "james.lopez12@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "James",
+    "userLastName": "Lopez",
+    "userPhone": "+614100012",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "9bbd6c10-1155-54e2-a325-e8b764201b0a",
+    "organizationId": "2aa1b067-aeb1-5111-99ec-d96c696fa838",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "isabella.gonzalez13@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Isabella",
+    "userLastName": "Gonzalez",
+    "userPhone": "+614100013",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "9c9ba8c3-a633-509e-b8e4-ffeb5efd517f",
+    "organizationId": "1d92dd3d-1584-5531-8d2f-b31e45c3b238",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "benjamin.wilson14@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Benjamin",
+    "userLastName": "Wilson",
+    "userPhone": "+614100014",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "daada802-dc20-5c20-b557-4b3ceec76043",
+    "organizationId": "708f26c3-50c0-57ec-850e-f6393a7980e1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "mia.anderson15@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Mia",
+    "userLastName": "Anderson",
+    "userPhone": "+614100015",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "5c26383f-4a91-5ece-9677-2d8e769503f1",
+    "organizationId": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "lucas.thomas16@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Lucas",
+    "userLastName": "Thomas",
+    "userPhone": "+614100016",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "6f5403f3-30b2-5c02-a85a-fe9c869eba59",
+    "organizationId": "de4dac0f-23bc-5648-aff0-094fa4b77d4a",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "harper.taylor17@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Harper",
+    "userLastName": "Taylor",
+    "userPhone": "+614100017",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "d0601bde-34d6-5b62-a498-de059683c6c6",
+    "organizationId": "c3db4408-b147-51e8-ada0-c5d4a684b0eb",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "henry.moore18@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Henry",
+    "userLastName": "Moore",
+    "userPhone": "+614100018",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "552cacac-28c3-54dc-99a8-6b5ce80a121a",
+    "organizationId": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "evelyn.jackson19@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Evelyn",
+    "userLastName": "Jackson",
+    "userPhone": "+614100019",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "dfa7e8f8-f9e8-5c99-af40-17181b8cad26",
+    "organizationId": "3ba624cd-41a5-5abe-8f11-04eac505a3ff",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "alexander.martin20@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Alexander",
+    "userLastName": "Martin",
+    "userPhone": "+614100020",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "af25f7d3-3b48-5d14-8c21-6c8902aa5849",
+    "organizationId": "85613d1f-fa0c-530e-812c-50784f49b688",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "grace.clark21@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Grace",
+    "userLastName": "Clark",
+    "userPhone": "+614100021",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "f34caa1e-19ee-5e91-a8a0-c7619b37e4b1",
+    "organizationId": "02297c25-b24c-514a-96c0-061d59025fc1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "daniel.lee22@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Daniel",
+    "userLastName": "Lee",
+    "userPhone": "+614100022",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "161c3efa-dacb-54d2-956c-8c5edd9231d3",
+    "organizationId": "2aa1b067-aeb1-5111-99ec-d96c696fa838",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "abigail.walker23@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Abigail",
+    "userLastName": "Walker",
+    "userPhone": "+614100023",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "f3347e66-207c-590a-bd93-94a4fc98384a",
+    "organizationId": "1d92dd3d-1584-5531-8d2f-b31e45c3b238",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "matthew.hall24@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Matthew",
+    "userLastName": "Hall",
+    "userPhone": "+614100024",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "c8f64410-1446-570a-9bb8-1a5cf88dc54f",
+    "organizationId": "708f26c3-50c0-57ec-850e-f6393a7980e1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "emily.allen25@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Emily",
+    "userLastName": "Allen",
+    "userPhone": "+614100025",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "5e78f7d6-6d0f-5713-8abc-39b2ae3d78f4",
+    "organizationId": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "ava.smith26@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Ava",
+    "userLastName": "Smith",
+    "userPhone": "+614100026",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "718bb8ee-2e94-5cdc-8e14-eae0af72e239",
+    "organizationId": "de4dac0f-23bc-5648-aff0-094fa4b77d4a",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "liam.johnson27@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Liam",
+    "userLastName": "Johnson",
+    "userPhone": "+614100027",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "acb540ac-045d-59f3-8512-2530b76d35d5",
+    "organizationId": "c3db4408-b147-51e8-ada0-c5d4a684b0eb",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "olivia.williams28@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Olivia",
+    "userLastName": "Williams",
+    "userPhone": "+614100028",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "018a654a-a637-5e17-b0c8-4bc9c08890e5",
+    "organizationId": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "noah.brown29@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Noah",
+    "userLastName": "Brown",
+    "userPhone": "+614100029",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "69807ee0-7592-5234-a3d8-453c4c7fb0b6",
+    "organizationId": "3ba624cd-41a5-5abe-8f11-04eac505a3ff",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "emma.jones30@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Emma",
+    "userLastName": "Jones",
+    "userPhone": "+614100030",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "947d8a45-e368-5b0b-8291-115e1a7cebbd",
+    "organizationId": "85613d1f-fa0c-530e-812c-50784f49b688",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "oliver.garcia31@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Oliver",
+    "userLastName": "Garcia",
+    "userPhone": "+614100031",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "40f49398-2e3c-5f75-b7b8-adbd6fda8ca3",
+    "organizationId": "02297c25-b24c-514a-96c0-061d59025fc1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "charlotte.miller32@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Charlotte",
+    "userLastName": "Miller",
+    "userPhone": "+614100032",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "49eacdd4-5d88-55a6-bdf9-6b7aeddad44e",
+    "organizationId": "2aa1b067-aeb1-5111-99ec-d96c696fa838",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "elijah.davis33@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Elijah",
+    "userLastName": "Davis",
+    "userPhone": "+614100033",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "a7731846-7c08-5863-a590-ff63ba298af0",
+    "organizationId": "1d92dd3d-1584-5531-8d2f-b31e45c3b238",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "amelia.rodriguez34@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Amelia",
+    "userLastName": "Rodriguez",
+    "userPhone": "+614100034",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "97ebd24a-89b8-5c9b-a62f-287eb1b18e5f",
+    "organizationId": "708f26c3-50c0-57ec-850e-f6393a7980e1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "william.martinez35@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "William",
+    "userLastName": "Martinez",
+    "userPhone": "+614100035",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "2042d8d9-023f-5900-a2e6-b4721ef2ae5e",
+    "organizationId": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "sophia.hernandez36@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Sophia",
+    "userLastName": "Hernandez",
+    "userPhone": "+614100036",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "c6dfae66-8101-5eb2-8c8f-cfff84be19b2",
+    "organizationId": "de4dac0f-23bc-5648-aff0-094fa4b77d4a",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "james.lopez37@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "James",
+    "userLastName": "Lopez",
+    "userPhone": "+614100037",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "4876932c-d974-5005-b203-f894e3c8a329",
+    "organizationId": "c3db4408-b147-51e8-ada0-c5d4a684b0eb",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "isabella.gonzalez38@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Isabella",
+    "userLastName": "Gonzalez",
+    "userPhone": "+614100038",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "19ea31ac-9714-51d1-9d95-f29c7d0d946d",
+    "organizationId": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "benjamin.wilson39@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Benjamin",
+    "userLastName": "Wilson",
+    "userPhone": "+614100039",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "836381eb-8b82-51d2-ad68-8323c1a7955d",
+    "organizationId": "3ba624cd-41a5-5abe-8f11-04eac505a3ff",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "mia.anderson40@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Mia",
+    "userLastName": "Anderson",
+    "userPhone": "+614100040",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "0762df69-ff7c-5820-85a3-b93db8583bc5",
+    "organizationId": "85613d1f-fa0c-530e-812c-50784f49b688",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "lucas.thomas41@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Lucas",
+    "userLastName": "Thomas",
+    "userPhone": "+614100041",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "02c6fd3c-d5ec-51ba-95d0-a2cad2e56406",
+    "organizationId": "02297c25-b24c-514a-96c0-061d59025fc1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "harper.taylor42@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Harper",
+    "userLastName": "Taylor",
+    "userPhone": "+614100042",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "51bbdd35-eac1-52f2-8fc4-960d51c8a1c7",
+    "organizationId": "2aa1b067-aeb1-5111-99ec-d96c696fa838",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "henry.moore43@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Henry",
+    "userLastName": "Moore",
+    "userPhone": "+614100043",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "70204c2f-ad1e-5c66-a165-c5d3c50ca60c",
+    "organizationId": "1d92dd3d-1584-5531-8d2f-b31e45c3b238",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "evelyn.jackson44@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Evelyn",
+    "userLastName": "Jackson",
+    "userPhone": "+614100044",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "a4a8f2b9-cc06-5c23-bf61-8ef06f18a1ce",
+    "organizationId": "708f26c3-50c0-57ec-850e-f6393a7980e1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "alexander.martin45@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Alexander",
+    "userLastName": "Martin",
+    "userPhone": "+614100045",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "4d0ea82c-fe18-57ba-9037-36a91e41032c",
+    "organizationId": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "grace.clark46@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Grace",
+    "userLastName": "Clark",
+    "userPhone": "+614100046",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "cc20acaf-553b-52e8-89d0-942c04c95f1c",
+    "organizationId": "de4dac0f-23bc-5648-aff0-094fa4b77d4a",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "daniel.lee47@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Daniel",
+    "userLastName": "Lee",
+    "userPhone": "+614100047",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "2ff43837-cc50-5cd1-9445-595eabefe2fa",
+    "organizationId": "c3db4408-b147-51e8-ada0-c5d4a684b0eb",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "abigail.walker48@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Abigail",
+    "userLastName": "Walker",
+    "userPhone": "+614100048",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "03cbb85c-8f9e-579b-b40a-64d75e6750ae",
+    "organizationId": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "matthew.hall49@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Matthew",
+    "userLastName": "Hall",
+    "userPhone": "+614100049",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "cea11a0f-b2ef-5a13-bab9-2fc5645d0b80",
+    "organizationId": "3ba624cd-41a5-5abe-8f11-04eac505a3ff",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "emily.allen50@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Emily",
+    "userLastName": "Allen",
+    "userPhone": "+614100050",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "ad6fdf90-205d-578d-a633-9d6f91a01c80",
+    "organizationId": "85613d1f-fa0c-530e-812c-50784f49b688",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "ava.smith51@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Ava",
+    "userLastName": "Smith",
+    "userPhone": "+614100051",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "cf242aa2-0da4-5262-8c2e-743a53e5f98a",
+    "organizationId": "02297c25-b24c-514a-96c0-061d59025fc1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "liam.johnson52@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Liam",
+    "userLastName": "Johnson",
+    "userPhone": "+614100052",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "7ecc9710-cfcd-58d0-9a3d-5ad162990ebe",
+    "organizationId": "2aa1b067-aeb1-5111-99ec-d96c696fa838",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "olivia.williams53@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Olivia",
+    "userLastName": "Williams",
+    "userPhone": "+614100053",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "8641315f-35dc-5b0b-be7f-32649baff424",
+    "organizationId": "1d92dd3d-1584-5531-8d2f-b31e45c3b238",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "noah.brown54@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Noah",
+    "userLastName": "Brown",
+    "userPhone": "+614100054",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "fe6ac562-09e5-540d-8875-3a545b59c147",
+    "organizationId": "708f26c3-50c0-57ec-850e-f6393a7980e1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "emma.jones55@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Emma",
+    "userLastName": "Jones",
+    "userPhone": "+614100055",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "d6e19596-3c07-54ed-84d3-583f03748dda",
+    "organizationId": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "oliver.garcia56@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Oliver",
+    "userLastName": "Garcia",
+    "userPhone": "+614100056",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "c08c4454-4810-5cf5-95d0-ddeb86143edc",
+    "organizationId": "de4dac0f-23bc-5648-aff0-094fa4b77d4a",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "charlotte.miller57@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Charlotte",
+    "userLastName": "Miller",
+    "userPhone": "+614100057",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "6961e7f0-750a-5e72-b87f-ac4f2d7a42ef",
+    "organizationId": "c3db4408-b147-51e8-ada0-c5d4a684b0eb",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "elijah.davis58@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Elijah",
+    "userLastName": "Davis",
+    "userPhone": "+614100058",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "76133e84-8fbc-56f2-be3c-f0fd8147042d",
+    "organizationId": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "amelia.rodriguez59@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Amelia",
+    "userLastName": "Rodriguez",
+    "userPhone": "+614100059",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "dfd04fb8-0448-5b73-8bf0-bab736f43952",
+    "organizationId": "3ba624cd-41a5-5abe-8f11-04eac505a3ff",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "william.martinez60@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "William",
+    "userLastName": "Martinez",
+    "userPhone": "+614100060",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "74d711d7-c77a-5daa-9d32-66aafcd1f36c",
+    "organizationId": "85613d1f-fa0c-530e-812c-50784f49b688",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "sophia.hernandez61@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Sophia",
+    "userLastName": "Hernandez",
+    "userPhone": "+614100061",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "2295d6b0-f44e-5e2b-b545-0cc44a99d437",
+    "organizationId": "02297c25-b24c-514a-96c0-061d59025fc1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "james.lopez62@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "James",
+    "userLastName": "Lopez",
+    "userPhone": "+614100062",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "98980d0c-647f-5334-92fb-0402c94b7a79",
+    "organizationId": "2aa1b067-aeb1-5111-99ec-d96c696fa838",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "isabella.gonzalez63@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Isabella",
+    "userLastName": "Gonzalez",
+    "userPhone": "+614100063",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "28580b35-71f9-5ff0-b60e-cce30758ded7",
+    "organizationId": "1d92dd3d-1584-5531-8d2f-b31e45c3b238",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "benjamin.wilson64@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Benjamin",
+    "userLastName": "Wilson",
+    "userPhone": "+614100064",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "48adc348-d931-5548-bf1f-89c8a226e976",
+    "organizationId": "708f26c3-50c0-57ec-850e-f6393a7980e1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "mia.anderson65@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Mia",
+    "userLastName": "Anderson",
+    "userPhone": "+614100065",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "a7f3df92-fced-5e2b-8d7f-e67eb963a00b",
+    "organizationId": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "lucas.thomas66@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Lucas",
+    "userLastName": "Thomas",
+    "userPhone": "+614100066",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "0018653e-c796-51fa-83a1-d56fffab35d8",
+    "organizationId": "de4dac0f-23bc-5648-aff0-094fa4b77d4a",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "harper.taylor67@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Harper",
+    "userLastName": "Taylor",
+    "userPhone": "+614100067",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "9570282a-2c42-51d1-9c7f-c2902f0ee6a1",
+    "organizationId": "c3db4408-b147-51e8-ada0-c5d4a684b0eb",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "henry.moore68@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Henry",
+    "userLastName": "Moore",
+    "userPhone": "+614100068",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "54472f06-54a5-584d-b136-049fdd6888d9",
+    "organizationId": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "evelyn.jackson69@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Evelyn",
+    "userLastName": "Jackson",
+    "userPhone": "+614100069",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "0ce5679c-07dc-5c5b-8232-78b6f80728ff",
+    "organizationId": "3ba624cd-41a5-5abe-8f11-04eac505a3ff",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "alexander.martin70@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Alexander",
+    "userLastName": "Martin",
+    "userPhone": "+614100070",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "546893a5-1a38-5e38-bc54-a5ae32acb5f1",
+    "organizationId": "85613d1f-fa0c-530e-812c-50784f49b688",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "grace.clark71@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Grace",
+    "userLastName": "Clark",
+    "userPhone": "+614100071",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "bc80d3ed-9aae-5204-ad13-e74684feb05e",
+    "organizationId": "02297c25-b24c-514a-96c0-061d59025fc1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "daniel.lee72@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Daniel",
+    "userLastName": "Lee",
+    "userPhone": "+614100072",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "91044ff8-5326-5d6d-9429-7b6645bfcc10",
+    "organizationId": "2aa1b067-aeb1-5111-99ec-d96c696fa838",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "abigail.walker73@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Abigail",
+    "userLastName": "Walker",
+    "userPhone": "+614100073",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "0006851d-8593-55fd-a971-e46ee8df3c77",
+    "organizationId": "1d92dd3d-1584-5531-8d2f-b31e45c3b238",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "matthew.hall74@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Matthew",
+    "userLastName": "Hall",
+    "userPhone": "+614100074",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "d453cc1a-f94d-5c8e-ad4b-5dc432aa1c2c",
+    "organizationId": "708f26c3-50c0-57ec-850e-f6393a7980e1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "emily.allen75@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Emily",
+    "userLastName": "Allen",
+    "userPhone": "+614100075",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "4a33a1ea-fbeb-577a-9722-9fcefb1020f6",
+    "organizationId": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "ava.smith76@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Ava",
+    "userLastName": "Smith",
+    "userPhone": "+614100076",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "6eba57a3-0557-5dff-b38e-51833be35155",
+    "organizationId": "de4dac0f-23bc-5648-aff0-094fa4b77d4a",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "liam.johnson77@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Liam",
+    "userLastName": "Johnson",
+    "userPhone": "+614100077",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "4188e9e4-ebf7-53f0-99ae-79263bf3dbd6",
+    "organizationId": "c3db4408-b147-51e8-ada0-c5d4a684b0eb",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "olivia.williams78@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Olivia",
+    "userLastName": "Williams",
+    "userPhone": "+614100078",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "e9c7845f-c2cc-585b-847e-090f725afb9e",
+    "organizationId": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "noah.brown79@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Noah",
+    "userLastName": "Brown",
+    "userPhone": "+614100079",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "6e56b546-b901-56bf-9ee4-5da5e7c41184",
+    "organizationId": "3ba624cd-41a5-5abe-8f11-04eac505a3ff",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "emma.jones80@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Emma",
+    "userLastName": "Jones",
+    "userPhone": "+614100080",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "8f999151-7ba7-5f71-922c-19be910c7f95",
+    "organizationId": "85613d1f-fa0c-530e-812c-50784f49b688",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "oliver.garcia81@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Oliver",
+    "userLastName": "Garcia",
+    "userPhone": "+614100081",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "582828f5-02c1-5a5a-9f82-c2cf07fa0c04",
+    "organizationId": "02297c25-b24c-514a-96c0-061d59025fc1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "charlotte.miller82@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Charlotte",
+    "userLastName": "Miller",
+    "userPhone": "+614100082",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "2efd358d-8924-5f77-86e9-3c2e72c37bc7",
+    "organizationId": "2aa1b067-aeb1-5111-99ec-d96c696fa838",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "elijah.davis83@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Elijah",
+    "userLastName": "Davis",
+    "userPhone": "+614100083",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "ab11056f-efb6-5db1-b1e0-605cc6863583",
+    "organizationId": "1d92dd3d-1584-5531-8d2f-b31e45c3b238",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "amelia.rodriguez84@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Amelia",
+    "userLastName": "Rodriguez",
+    "userPhone": "+614100084",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "49dc153c-1c65-566d-aea5-5b6bcda6b751",
+    "organizationId": "708f26c3-50c0-57ec-850e-f6393a7980e1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "william.martinez85@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "William",
+    "userLastName": "Martinez",
+    "userPhone": "+614100085",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "7cc695f9-518a-582a-9915-dce91ee59a15",
+    "organizationId": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "sophia.hernandez86@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Sophia",
+    "userLastName": "Hernandez",
+    "userPhone": "+614100086",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "2b509b1e-57b4-504d-aac8-808e81f68e57",
+    "organizationId": "de4dac0f-23bc-5648-aff0-094fa4b77d4a",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "james.lopez87@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "James",
+    "userLastName": "Lopez",
+    "userPhone": "+614100087",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "9a3d675e-f883-59bd-8f96-673c32183550",
+    "organizationId": "c3db4408-b147-51e8-ada0-c5d4a684b0eb",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "isabella.gonzalez88@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Isabella",
+    "userLastName": "Gonzalez",
+    "userPhone": "+614100088",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "b06bfdcc-b9d8-58fd-8b12-b546866bc237",
+    "organizationId": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "benjamin.wilson89@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Benjamin",
+    "userLastName": "Wilson",
+    "userPhone": "+614100089",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "0f8a1529-822e-54c3-a01f-d87ec4b38265",
+    "organizationId": "3ba624cd-41a5-5abe-8f11-04eac505a3ff",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "mia.anderson90@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Mia",
+    "userLastName": "Anderson",
+    "userPhone": "+614100090",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "cec75597-16d3-5f13-864a-8abe36553078",
+    "organizationId": "85613d1f-fa0c-530e-812c-50784f49b688",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "lucas.thomas91@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Lucas",
+    "userLastName": "Thomas",
+    "userPhone": "+614100091",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "847211cf-8f24-5429-b872-2330475a77dc",
+    "organizationId": "02297c25-b24c-514a-96c0-061d59025fc1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "harper.taylor92@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Harper",
+    "userLastName": "Taylor",
+    "userPhone": "+614100092",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "13b379c5-2b54-5b75-a460-f0e70ddf4bc5",
+    "organizationId": "2aa1b067-aeb1-5111-99ec-d96c696fa838",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "henry.moore93@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Henry",
+    "userLastName": "Moore",
+    "userPhone": "+614100093",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "32ed62a0-b0a3-5d4e-992e-4b382678da73",
+    "organizationId": "1d92dd3d-1584-5531-8d2f-b31e45c3b238",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "evelyn.jackson94@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Evelyn",
+    "userLastName": "Jackson",
+    "userPhone": "+614100094",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "725355dc-7f11-5b26-ae7c-3de4ec224077",
+    "organizationId": "708f26c3-50c0-57ec-850e-f6393a7980e1",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "alexander.martin95@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Alexander",
+    "userLastName": "Martin",
+    "userPhone": "+614100095",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "537708b7-aecf-5104-a894-87eb3bfe00af",
+    "organizationId": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "grace.clark96@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Grace",
+    "userLastName": "Clark",
+    "userPhone": "+614100096",
+    "userRole": "User",
+    "clientType": [
+      "TechCompanyStaff"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "cefa2b0d-682d-58ff-864a-cacefe26b775",
+    "organizationId": "de4dac0f-23bc-5648-aff0-094fa4b77d4a",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "daniel.lee97@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Daniel",
+    "userLastName": "Lee",
+    "userPhone": "+614100097",
+    "userRole": "User",
+    "clientType": [
+      "RegisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "eb4c59c9-773e-5c97-9fc0-d7895fede843",
+    "organizationId": "c3db4408-b147-51e8-ada0-c5d4a684b0eb",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "abigail.walker98@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Abigail",
+    "userLastName": "Walker",
+    "userPhone": "+614100098",
+    "userRole": "User",
+    "clientType": [
+      "UnregisteredAttendee"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "a95016bf-797a-5abe-ab4c-21653b941b28",
+    "organizationId": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "matthew.hall99@example.com",
+    "userTitle": "Mr",
+    "userFirstName": "Matthew",
+    "userLastName": "Hall",
+    "userPhone": "+614100099",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyMainAdmin"
+    ],
+    "userProfilePicture": null
+  },
+  {
+    "__typename": "CWLUser",
+    "userId": "b281c593-2999-5a5b-af82-7ea3498d4d64",
+    "organizationId": "3ba624cd-41a5-5abe-8f11-04eac505a3ff",
+    "privacyPolicy": true,
+    "termsAndConditions": true,
+    "userAddedById": "a93f460b-04ce-570e-b15e-03a8adf471e1",
+    "userCreated": "2025-10-09T00:00:00.000Z",
+    "userEmail": "emily.allen100@example.com",
+    "userTitle": "Ms",
+    "userFirstName": "Emily",
+    "userLastName": "Allen",
+    "userPhone": "+614100100",
+    "userRole": "User",
+    "clientType": [
+      "EventCompanyAdmin"
+    ],
+    "userProfilePicture": null
+  }
+]

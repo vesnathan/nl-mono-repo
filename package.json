@@ -2,7 +2,8 @@
   "name": "root",
   "private": true,
   "workspaces": [
-    "packages/cloudwatchlive/frontend",
+  "packages/cloudwatchlive/frontend",
+  "packages/cloudwatchlive/dev-mocks",
     "packages/cloudwatchlive/backend",
     "packages/shared",
     "packages/waf",
@@ -30,6 +31,7 @@
     "@types/react-dom": "^18.2.18",
     "@types/validator": "^13.11.7",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
+  "@typescript-eslint/utils": "^6.13.1",
     "autoprefixer": "^10.4.17",
     "dotenv": "^16.3.1",
     "eslint": "^8.54.0",

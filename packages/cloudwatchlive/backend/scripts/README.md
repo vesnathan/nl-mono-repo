@@ -10,7 +10,7 @@ All user and organization IDs are **deterministic** - meaning the same email/nam
 - Same email → Same UUID (every time)
 - Same company name → Same Org ID (every time)
 
-## seed-users.ts
+## seed-db.ts
 
 Seeds the DynamoDB table with 5 Event Companies containing ~100 users total (all with fixed names and emails).
 
@@ -46,7 +46,7 @@ yarn global add ts-node
 cd packages/cloudwatchlive/backend/scripts
 
 # Just run it - no parameters needed!
-./seed-users.sh
+./seed-db.sh
 ```
 
 #### Using the TypeScript script directly:
@@ -58,7 +58,7 @@ export TABLE_NAME="nlmonorepo-shared-usertable-dev"
 export STAGE="dev"
 
 # Run the script (no parameters needed)
-tsx scripts/seed-users.ts
+tsx scripts/seed-db.ts
 ```
 
 ### Deploy with Seeding

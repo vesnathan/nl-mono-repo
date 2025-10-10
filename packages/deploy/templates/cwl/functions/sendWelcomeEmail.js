@@ -6,7 +6,7 @@
  * 
  * To make changes, edit the source TypeScript file and run the build.
  * 
- * Generated: 2025-10-09T06:50:33.017Z
+ * Generated: 2025-10-10T02:42:08.109Z
  */
 
 "use strict";var i=Object.defineProperty;var p=Object.getOwnPropertyDescriptor;var m=Object.getOwnPropertyNames;var h=Object.prototype.hasOwnProperty;var g=(o,e)=>{for(var t in e)i(o,t,{get:e[t],enumerable:!0})},y=(o,e,t,a)=>{if(e&&typeof e=="object"||typeof e=="function")for(let s of m(e))!h.call(o,s)&&s!==t&&i(o,s,{get:()=>e[s],enumerable:!(a=p(e,s))||a.enumerable});return o};var b=o=>y(i({},"__esModule",{value:!0}),o);var E={};g(E,{handler:()=>C});module.exports=b(E);var r=require("@aws-sdk/client-ses"),v=new r.SESClient({region:process.env.AWS_REGION||"ap-southeast-2"}),x=process.env.FROM_EMAIL||"noreply@cloudwatchlive.com",f=process.env.APP_URL||"https://cloudwatchlive.com",C=async o=>{console.log("Sending welcome email to:",o.userEmail);let{userEmail:e,userFirstName:t,userLastName:a,userId:s}=o,c=`${f}/login?userId=${s}`,l=`

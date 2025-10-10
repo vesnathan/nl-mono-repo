@@ -13,7 +13,7 @@ export interface SeedUsersOptions {
   skipConfirmation?: boolean;
 }
 
-export async function seedCWLUsers(options: SeedUsersOptions): Promise<void> {
+export async function seedCWLDB(options: SeedUsersOptions): Promise<void> {
   const {
     region,
     tableName,
@@ -47,7 +47,7 @@ export async function seedCWLUsers(options: SeedUsersOptions): Promise<void> {
 
   const scriptPath = path.resolve(
     __dirname,
-    "../../cloudwatchlive/backend/scripts/seed-users.ts",
+    "../../cloudwatchlive/backend/scripts/seed-db.ts",
   );
 
   return new Promise((resolve, reject) => {

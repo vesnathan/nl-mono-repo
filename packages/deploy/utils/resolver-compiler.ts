@@ -4,6 +4,7 @@ import * as fs from "fs-extra"; // Changed to fs-extra for better file system op
 import * as path from "path";
 import * as os from "os"; // Added import
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import * as crypto from "crypto";
 import { logger } from "./logger"; // Corrected import
 import * as esbuild from "esbuild"; // Added import for esbuild
 
@@ -371,7 +372,7 @@ class ResolverCompiler {
     logger.debug(`Cleaned up temp compile directory: ${tempCompileDir}`);
   }
 
-  public async compileAndUploadResolvers(): Promise<void> {
+  public async compileAndUploadResolvers(): Promise<string> {
     const stopSpinner = logger.infoWithSpinner(
       "Starting resolver compilation and upload...",
     );
@@ -401,6 +402,7 @@ class ResolverCompiler {
 
     const uploadedResolvers: string[] = [];
     const failedResolvers: { file: string; error: string }[] = [];
+    const compiledFilesRelative: string[] = [];
 
     for (let index = 0; index < totalFiles; index++) {
       const resolverFileRelativePath = this.resolverFiles[index];
@@ -444,7 +446,6 @@ class ResolverCompiler {
           resolverFileRelativePath.replace(".ts", ".js"),
         );
         await this.saveCompiledFileLocally(localSavePath, compiledJsContent);
-
         // Now, upload the same content to S3, ensuring consistency
         await this.uploadToS3(
           s3Key,
@@ -455,6 +456,10 @@ class ResolverCompiler {
           `✓ Uploaded ${resolverFileRelativePath} to S3: s3://${this.s3BucketName}/${s3Key}`,
         ); // Essential log
         uploadedResolvers.push(s3Key);
+        // Record relative JS path for hash computation and secondary upload
+        compiledFilesRelative.push(
+          resolverFileRelativePath.replace(".ts", ".js"),
+        );
       } catch (error: any) {
         const errorMsg = `Failed to compile or upload resolver ${resolverFileRelativePath}: ${error.message}`;
         logger.error(errorMsg);
@@ -465,7 +470,60 @@ class ResolverCompiler {
       }
     }
 
-    // Report summary
+    // Compute build hash from compiled files saved locally
+    logger.debug("Computing resolver build hash from compiled files...");
+    let buildHash = "";
+    try {
+      // Read all compiled files from localSavePathBaseForApp
+      const contents: string[] = [];
+      // Sort names to get deterministic ordering
+      compiledFilesRelative.sort();
+      for (const relPath of compiledFilesRelative) {
+        const localFile = path.join(localSavePathBaseForApp, relPath);
+        try {
+          const buf = await fsPromises.readFile(localFile, "utf-8");
+          contents.push(buf);
+        } catch (err: any) {
+          logger.error(
+            `Failed to read compiled file for hashing: ${localFile} - ${err.message}`,
+          );
+          throw err;
+        }
+      }
+      const hasher = crypto.createHash("sha256");
+      for (const c of contents) hasher.update(c);
+      buildHash = hasher.digest("hex").slice(0, 16);
+      logger.success(`Computed resolvers build hash: ${buildHash}`);
+    } catch (err: any) {
+      logger.error(`Error computing build hash: ${err.message}`);
+      throw err;
+    }
+
+    // Upload compiled files again under hashed prefix so CloudFormation references change
+    const failedHashedUploads: { file: string; error: string }[] = [];
+    for (const relPath of compiledFilesRelative) {
+      const s3KeyHashed = path.posix.join(
+        this.s3KeyPrefix,
+        this.stage,
+        buildHash,
+        relPath,
+      );
+      const localPath = path.join(localSavePathBaseForApp, relPath);
+      try {
+        const content = await fsPromises.readFile(localPath, "utf-8");
+        await this.uploadToS3(s3KeyHashed, content, "application/javascript");
+        logger.success(
+          `✓ Uploaded hashed resolver ${relPath} to s3://${this.s3BucketName}/${s3KeyHashed}`,
+        );
+      } catch (err: any) {
+        logger.error(
+          `Failed to upload hashed resolver ${relPath}: ${err.message}`,
+        );
+        failedHashedUploads.push({ file: relPath, error: err.message });
+      }
+    }
+
+    // Report summary for primary uploads
     logger.success(`\n📦 Resolver Upload Summary:`);
     logger.success(
       `   ✓ Successfully uploaded: ${uploadedResolvers.length} resolvers`,
@@ -482,8 +540,20 @@ class ResolverCompiler {
       );
     }
 
+    if (failedHashedUploads.length > 0) {
+      logger.error(
+        `Failed to upload ${failedHashedUploads.length} hashed resolvers:`,
+      );
+      failedHashedUploads.forEach(({ file, error }) =>
+        logger.error(`  - ${file}: ${error}`),
+      );
+      throw new Error(`Failed to upload some hashed resolver files.`);
+    }
+
     logger.success("✓ All resolvers compiled and uploaded successfully.\n");
     // await this.cleanupBuildDirectory(); // Cleanup buildDir after all operations
+
+    return buildHash;
   }
 
   private async saveCompiledFileLocally(

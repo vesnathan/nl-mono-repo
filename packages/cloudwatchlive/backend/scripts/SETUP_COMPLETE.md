@@ -2,7 +2,7 @@
 
 ## 🎯 What Was Created
 
-### 1. **seed-users.ts** - Main Seeding Script
+### 1. **seed-db.ts** - Main Seeding Script
 - Creates **DETERMINISTIC** users and organizations
 - Uses **UUIDv5** for consistent, repeatable UUIDs
 - Seeds **5 companies** with **~100 users total**
@@ -12,7 +12,7 @@
   - 15 EventCompanyAdmins (3 per company)
   - 75 EventCompanyStaff (5 per admin)
 
-### 2. **seed-users.sh** - Shell Wrapper
+### 2. **seed-db.sh** - Shell Wrapper
 - Easy-to-use bash script
 - Auto-detects AWS region and table name
 - No parameters needed (all data is fixed!)
@@ -72,7 +72,7 @@ const orgId = uuidv5('Elite Events Co.', UUID_NAMESPACE);
 ### Quick Start
 ```bash
 cd packages/cloudwatchlive/backend/scripts
-./seed-users.sh
+./seed-db.sh
 ```
 
 ### Deploy with Seeding
@@ -183,4 +183,4 @@ The seeding script is now:
 
 ## 🎉 Ready to Use!
 
-Run `./seed-users.sh` to seed your database with predictable, cross-repo compatible test data!
+Run `./seed-db.sh` to seed your database with predictable, cross-repo compatible test data!
