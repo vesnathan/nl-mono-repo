@@ -133,19 +133,25 @@ function main() {
 
   // Add new package workspaces to root package.json (frontend/backend)
   try {
-    const rootPkgPath = path.join(root, 'package.json');
+    const rootPkgPath = path.join(root, "package.json");
     if (fs.existsSync(rootPkgPath)) {
-      const rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
-      if (!Array.isArray(rootPkg.workspaces)) rootPkg.workspaces = rootPkg.workspaces || [];
+      const rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, "utf8"));
+      if (!Array.isArray(rootPkg.workspaces))
+        rootPkg.workspaces = rootPkg.workspaces || [];
       const frontendEntry = `packages/${newPkg}/frontend`;
       const backendEntry = `packages/${newPkg}/backend`;
-      if (!rootPkg.workspaces.includes(frontendEntry)) rootPkg.workspaces.push(frontendEntry);
-      if (!rootPkg.workspaces.includes(backendEntry)) rootPkg.workspaces.push(backendEntry);
-      fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + '\n');
-      console.log('Added workspace entries to root package.json');
+      if (!rootPkg.workspaces.includes(frontendEntry))
+        rootPkg.workspaces.push(frontendEntry);
+      if (!rootPkg.workspaces.includes(backendEntry))
+        rootPkg.workspaces.push(backendEntry);
+      fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + "\n");
+      console.log("Added workspace entries to root package.json");
     }
   } catch (e) {
-    console.error('Failed to update root package.json workspaces:', e && e.message ? e.message : e);
+    console.error(
+      "Failed to update root package.json workspaces:",
+      e && e.message ? e.message : e,
+    );
   }
 
   console.log("Created package at", dest);
