@@ -1,7 +1,7 @@
 /**
- * awsb Client Types - Single Source of Truth
+ * AWSB Client Types - Single Source of Truth
  *
- * This file defines all client types used throughout the application.
+ * This file defines all client types used throughout the CloudWatch Live application.
  * Any changes to client types should be made here and will automatically
  * propagate to:
  * - GraphQL schema enum
@@ -18,7 +18,7 @@ export interface ClientTypeDefinition {
   description?: string;
 }
 
-export const awsb_CLIENT_TYPES: readonly ClientTypeDefinition[] = [
+export const AWSB_CLIENT_TYPES: readonly ClientTypeDefinition[] = [
   {
     id: "SuperAdmin",
     value: "SuperAdmin",
@@ -26,10 +26,16 @@ export const awsb_CLIENT_TYPES: readonly ClientTypeDefinition[] = [
     description: "Full system administrator access",
   },
   {
+    id: "EventCompanyMainAdmin",
+    value: "EventCompanyMainAdmin",
+    displayName: "Event Company Main Admin",
+    description: "Main administrator managing Event Company Admins",
+  },
+  {
     id: "EventCompanyAdmin",
     value: "EventCompanyAdmin",
     displayName: "Event Company Admin",
-    description: "Event company administrator",
+    description: "Event company administrator managing staff",
   },
   {
     id: "EventCompanyStaff",
@@ -63,25 +69,23 @@ export const awsb_CLIENT_TYPES: readonly ClientTypeDefinition[] = [
   },
 ] as const;
 
-export type awsbClientType = (typeof awsb_CLIENT_TYPES)[number]["value"];
+export type AWSBClientType = (typeof AWSB_CLIENT_TYPES)[number]["value"];
 
 // Helper to check if a string is a valid client type
-export const isValidawsbClientType = (
-  value: string,
-): value is awsbClientType => {
-  return awsb_CLIENT_TYPES.some((type) => type.value === value);
+export const isValidAWSBClientType = (value: string): value is AWSBClientType => {
+  return AWSB_CLIENT_TYPES.some((type) => type.value === value);
 };
 
 // Get display name for a client type value
 export const getClientTypeDisplayName = (value: string): string => {
-  const clientType = awsb_CLIENT_TYPES.find((type) => type.value === value);
+  const clientType = AWSB_CLIENT_TYPES.find((type) => type.value === value);
   return clientType?.displayName || value;
 };
 
 // For use in Cognito group creation - extract just the values
-export const awsb_COGNITO_GROUPS = awsb_CLIENT_TYPES.map((type) => type.value);
+export const AWSB_COGNITO_GROUPS = AWSB_CLIENT_TYPES.map((type) => type.value);
 
 // For GraphQL schema generation - extract just the values
-export const awsb_CLIENT_TYPE_ENUM_VALUES = awsb_CLIENT_TYPES.map(
+export const AWSB_CLIENT_TYPE_ENUM_VALUES = AWSB_CLIENT_TYPES.map(
   (type) => type.value,
 );

@@ -3,7 +3,7 @@ import environment from "./masterConfig";
 
 // Removed the JSON import as it's no longer needed
 
-type awsbOutput = {
+type AWSBOutput = {
   awsbUserPoolId: string;
   awsbUserPoolClientId: string;
   awsbIdentityPoolId: string;
@@ -11,7 +11,7 @@ type awsbOutput = {
 };
 
 type DeploymentOutputMap = {
-  awsb: awsbOutput;
+  AWSB: AWSBOutput;
 };
 
 // Removed the getOutputValue function as it's no longer needed
@@ -27,8 +27,8 @@ export function getDeploymentOutput<T extends keyof DeploymentOutputMap>(
   type DeploymentOutput = DeploymentOutputMap[T];
   // eslint-disable-next-line sonarjs/no-small-switch
   switch (outputType) {
-    case "awsb": {
-      const deploymentOutput: awsbOutput = {
+    case "AWSB": {
+      const deploymentOutput: AWSBOutput = {
         awsbUserPoolId: process.env.NEXT_PUBLIC_USER_POOL_ID || "",
         awsbUserPoolClientId: process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID || "",
         awsbIdentityPoolId: process.env.NEXT_PUBLIC_IDENTITY_POOL_ID || "",
@@ -43,10 +43,10 @@ export function getDeploymentOutput<T extends keyof DeploymentOutputMap>(
       ) {
         // eslint-disable-next-line no-console
         console.error(
-          "Missing required environment variables for awsb configuration.",
+          "Missing required environment variables for AWSB configuration.",
         );
         // Depending on the desired behavior, you might want to throw an error
-        // throw new Error('Missing required environment variables for awsb configuration.');
+        // throw new Error('Missing required environment variables for AWSB configuration.');
       }
 
       return deploymentOutput as DeploymentOutput;

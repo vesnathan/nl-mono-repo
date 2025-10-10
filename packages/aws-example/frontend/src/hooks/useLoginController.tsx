@@ -1,10 +1,10 @@
 import React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSetGlobalMessage } from "@/components/common/GlobalMessage";
-import { awsbAuthConfirmResetPassword } from "shared/functions/awsbAuthConfirmResetPassword";
-import { awsbAuthConfirmSignIn } from "shared/functions/awsbAuthConfirmSignIn";
-import { awsbAuthResetPassword } from "shared/functions/awsbAuthResetPassword";
-import { awsbAuthSignIn } from "shared/functions/awsbAuthSignIn";
+import { authConfirmResetPassword } from "shared/functions/authConfirmResetPassword";
+import { authConfirmSignIn } from "shared/functions/authConfirmSignIn";
+import { authResetPassword } from "shared/functions/authResetPassword";
+import { authSignIn } from "shared/functions/authSignIn";
 
 export const useLoginController = (options: {
   onLoginSuccess: () => void;
@@ -50,7 +50,7 @@ export const useLoginController = (options: {
         type: "all",
       });
       setErrorMessage("");
-      await awsbAuthSignIn({
+      await authSignIn({
         username: input.username,
         password: input.password,
         onSuccess: options.onLoginSuccess,
@@ -81,7 +81,7 @@ export const useLoginController = (options: {
     }) => {
       const { challengeResponse, challengeType } = input;
       setErrorMessage("");
-      await awsbAuthConfirmSignIn({
+      await authConfirmSignIn({
         challengeResponse,
         onSuccess: options.onLoginSuccess,
         onNewPasswordRequired: () => setActiveStep("login-enter-new-password"),
@@ -111,7 +111,7 @@ export const useLoginController = (options: {
       onCodeSent: () => void;
     }) => {
       setErrorMessage("");
-      await awsbAuthResetPassword({
+      await authResetPassword({
         username: input.username,
         onSuccess: input.onSuccess,
         onCodeSent: input.onCodeSent,
@@ -137,7 +137,7 @@ export const useLoginController = (options: {
       onSuccess: () => void;
     }) => {
       setErrorMessage("");
-      await awsbAuthConfirmResetPassword({
+      await authConfirmResetPassword({
         username: input.username,
         confirmationCode: input.confirmationCode,
         newPassword: input.newPassword,

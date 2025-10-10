@@ -4,7 +4,10 @@ import { FC, ReactNode, useState } from "react";
 import to from "await-to-js";
 import { AuthUser, getCurrentUser } from "aws-amplify/auth";
 import { Progress } from "@nextui-org/react";
+import type { ProgressProps } from "@nextui-org/progress";
 import { useEffectOnce } from "../../hooks/useEffectOnce";
+
+const ProgressAny = Progress as unknown as React.ComponentType<ProgressProps>;
 
 type Props = {
   renderNotLoggedIn?: () => ReactNode;
@@ -32,7 +35,11 @@ export const RequireLoggedIn: FC<Props> = ({
 
   if (!checked) {
     return (
-      <Progress size="sm" isIndeterminate aria-label="Checking current user" />
+      <ProgressAny
+        size="sm"
+        isIndeterminate
+        aria-label="Checking current user"
+      />
     );
   }
 

@@ -1,17 +1,17 @@
 import { GraphQLResult, generateClient } from "aws-amplify/api";
 import {
-  awsbUserInput,
-  CreateawsbUserMutation,
-  CreateawsbUserMutationVariables,
+  AWSBUserInput,
+  CreateAWSBUserMutation,
+  CreateAWSBUserMutationVariables,
 } from "../../types/gqlTypes";
 
 const amplifyGraphqlClient = generateClient();
 
-export const CREATE_awsb_USER = /* GraphQL */ `
-  mutation CreateawsbUser(
-    $input: awsbUserInput! # Changed from CreateawsbUserInput
+export const CREATE_AWSB_USER = /* GraphQL */ `
+  mutation CreateAWSBUser(
+    $input: AWSBUserInput! # Changed from CreateAWSBUserInput
   ) {
-    createawsbUser(input: $input) {
+    createAWSBUser(input: $input) {
       # Removed condition argument
       userId
       userAddedById
@@ -29,13 +29,13 @@ export const CREATE_awsb_USER = /* GraphQL */ `
   }
 `;
 
-export const createawsbUserMutationFn = async (input: awsbUserInput) => {
+export const createAWSBUserMutationFn = async (input: AWSBUserInput) => {
   try {
-    const result = (await amplifyGraphqlClient.graphql<CreateawsbUserMutation>({
-      query: CREATE_awsb_USER,
-      variables: { input } as CreateawsbUserMutationVariables,
+    const result = (await amplifyGraphqlClient.graphql<CreateAWSBUserMutation>({
+      query: CREATE_AWSB_USER,
+      variables: { input } as CreateAWSBUserMutationVariables,
       authMode: "userPool",
-    })) as GraphQLResult<CreateawsbUserMutation>;
+    })) as GraphQLResult<CreateAWSBUserMutation>;
 
     // Check for GraphQL errors
     if (result.errors && result.errors.length > 0) {

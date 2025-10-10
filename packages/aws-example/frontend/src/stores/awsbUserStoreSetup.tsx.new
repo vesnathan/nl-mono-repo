@@ -10,8 +10,8 @@ import { FC, PropsWithChildren, useEffect, useState } from "react";
 import to from "await-to-js";
 import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
 import {
-  getawsbUserQueryFn,
-  getawsbUserQueryKey,
+  getAWSBUserQueryFn,
+  getAWSBUserQueryKey,
 } from "../graphql/queries/userQueries";
 import { ClientType } from "@/graphql/gqlTypes";
 
@@ -19,23 +19,23 @@ type Props = PropsWithChildren & {
   userId: string;
 };
 
-export const awsbUserStoreSetup: FC<Props> = ({ userId, children }) => {
+export const AWSBUserStoreSetup: FC<Props> = ({ userId, children }) => {
   const setUser = useUserStore((state) => state.setUser);
   const router = useRouter();
   
   // We'll always set a default client type
   const [clientTypes, setClientTypes] = useState<ClientType[]>([ClientType.UnregisteredAttendee]);
 
-  const queryKey = getawsbUserQueryKey(userId);
+  const queryKey = getAWSBUserQueryKey(userId);
 
   const { data, error, isPending } = useQuery({
     retry: false,
-    queryFn: () => getawsbUserQueryFn({ userId }),
+    queryFn: () => getAWSBUserQueryFn({ userId }),
     queryKey,
   });
 
   // Extract the user data
-  const awsbUser = data?.data?.getawsbUser;
+  const AWSBUser = data?.data?.getAWSBUser;
 
   // Try to get Cognito user to extract groups
   useEffect(() => {
@@ -92,12 +92,12 @@ export const awsbUserStoreSetup: FC<Props> = ({ userId, children }) => {
 
   // Update user in store when GraphQL data is available
   useEffect(() => {
-    if (data?.data?.getawsbUser) {
+    if (data?.data?.getAWSBUser) {
       // Use clientType from GraphQL response if available, otherwise use our state
       const userWithClientType = {
-        ...data.data.getawsbUser,
-        clientType: data.data.getawsbUser.clientType?.length > 0 
-          ? data.data.getawsbUser.clientType 
+        ...data.data.getAWSBUser,
+        clientType: data.data.getAWSBUser.clientType?.length > 0 
+          ? data.data.getAWSBUser.clientType 
           : clientTypes
       };
       
@@ -111,7 +111,7 @@ export const awsbUserStoreSetup: FC<Props> = ({ userId, children }) => {
     );
   }
 
-  if (error || !awsbUser) {
+  if (error || !AWSBUser) {
     return (
       <DataFetchError
         error={error}

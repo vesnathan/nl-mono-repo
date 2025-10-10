@@ -1,26 +1,26 @@
 import { util, Context, AppSyncIdentityCognito } from "@aws-appsync/utils";
 // 'gqlTypes' is a module alias mapped in tsconfig.json to ../frontend/src/types/gqlTypes.ts
 // This allows the resolver compiler to resolve GraphQL generated types during build
-import { awsbUserInput, awsbUser } from "gqlTypes";
+import { AWSBUserInput, AWSBUser } from "gqlTypes";
 
 // Define Input type for the resolver
-type CreateawsbUserMutationVariables = {
-  input: awsbUserInput;
+type CreateAWSBUserMutationVariables = {
+  input: AWSBUserInput;
 };
 
-// Define Output type for the resolver - it's awsbUser as per schema
-type Output = awsbUser;
+// Define Output type for the resolver - it's AWSBUser as per schema
+type Output = AWSBUser;
 
 // Define CTX for the response function context
 type CTX = Context<
-  CreateawsbUserMutationVariables,
+  CreateAWSBUserMutationVariables,
   object,
   object,
   object,
   Output
 >;
 
-export function request(ctx: Context<CreateawsbUserMutationVariables>) {
+export function request(ctx: Context<CreateAWSBUserMutationVariables>) {
   const { input } = ctx.args;
   const identity = ctx.identity as AppSyncIdentityCognito;
 
@@ -58,15 +58,22 @@ export function request(ctx: Context<CreateawsbUserMutationVariables>) {
       Bucket: "",
       Key: "",
     }, // Default empty S3 object
-    // clientType is not set here; it's derived from Cognito groups by the getawsbUser query resolver
+    // clientType is not set here; it's derived from Cognito groups by the getAWSBUser query resolver
   };
 
   return {
     operation: "PutItem",
-    key: util.dynamodb.toMapValues({ userId: cognitoSub }), // Use 'userId' as primary key
-    attributeValues: util.dynamodb.toMapValues(newUserItem),
+    key: util.dynamodb.toMapValues({
+      PK: `USER#${cognitoSub}`,
+      SK: `PROFILE#${cognitoSub}`,
+    }),
+    attributeValues: util.dynamodb.toMapValues({
+      PK: `USER#${cognitoSub}`,
+      SK: `PROFILE#${cognitoSub}`,
+      ...newUserItem,
+    }),
     condition: {
-      expression: "attribute_not_exists(userId)", // Ensure user doesn't already exist
+      expression: "attribute_not_exists(PK) AND attribute_not_exists(SK)",
     },
   };
 }
@@ -86,18 +93,18 @@ export function response(ctx: CTX): Output {
   console.log("User creation successful, result:", JSON.stringify(ctx.result));
   // The result of PutItem is the item itself if successful and no error occurred.
   // However, AppSync typically returns the `attributeValues` passed in the request for PutItem.
-  // We need to construct the awsbUser object that matches the GraphQL schema.
+  // We need to construct the AWSBUser object that matches the GraphQL schema.
 
   // The ctx.result from a PutItem operation is usually the item that was put.
   // If you used `returnValues: 'ALL_OLD'` or similar, it might be different.
   // Assuming ctx.result directly contains the newly created user's attributes.
   const createdUser = ctx.result as any;
 
-  // The clientType will be dynamically added by the Query.getawsbUser resolver
+  // The clientType will be dynamically added by the Query.getAWSBUser resolver
   // when the user data is fetched. For the mutation response, we can return an empty array
   // or a default, as it's not part of the direct creation storage.
   return {
-    __typename: "awsbUser",
+    __typename: "AWSBUser",
     userId: createdUser.userId,
     organizationId: createdUser.organizationId,
     userEmail: createdUser.userEmail,
@@ -110,7 +117,7 @@ export function response(ctx: CTX): Output {
     termsAndConditions: createdUser.termsAndConditions,
     userAddedById: createdUser.userAddedById,
     userCreated: createdUser.userCreated,
-    clientType: [], // Will be populated by getawsbUser based on Cognito groups
+    clientType: [], // Will be populated by getAWSBUser based on Cognito groups
     userProfilePicture: createdUser.userProfilePicture || {
       Bucket: "",
       Key: "",

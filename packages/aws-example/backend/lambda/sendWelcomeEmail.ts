@@ -68,7 +68,7 @@ export const handler = async (event: WelcomeEmailEvent) => {
       <body>
         <div class="container">
           <div class="header">
-            <h1>Welcome to the app!</h1>
+            <h1>Welcome to CloudWatch Live!</h1>
           </div>
           <div class="content">
             <p>Hello ${userFirstName} ${userLastName},</p>
@@ -79,7 +79,7 @@ export const handler = async (event: WelcomeEmailEvent) => {
             <p>If the button doesn't work, copy and paste this link into your browser:</p>
             <p style="word-break: break-all; color: #4CAF50;">${loginLink}</p>
             <p>If you have any questions, please don't hesitate to contact our support team.</p>
-            <p>Best regards,<br>The the app Team</p>
+            <p>Best regards,<br>The CloudWatch Live Team</p>
           </div>
           <div class="footer">
             <p>This is an automated message. Please do not reply to this email.</p>
@@ -90,7 +90,7 @@ export const handler = async (event: WelcomeEmailEvent) => {
   `;
 
   const textBody = `
-    Welcome to the app!
+    Welcome to CloudWatch Live!
     
     Hello ${userFirstName} ${userLastName},
     
@@ -101,7 +101,7 @@ export const handler = async (event: WelcomeEmailEvent) => {
     If you have any questions, please don't hesitate to contact our support team.
     
     Best regards,
-    The the app Team
+    The CloudWatch Live Team
     
     This is an automated message. Please do not reply to this email.
   `;
@@ -113,7 +113,7 @@ export const handler = async (event: WelcomeEmailEvent) => {
     },
     Message: {
       Subject: {
-        Data: "Welcome to the app - Your Account is Ready!",
+        Data: "Welcome to CloudWatch Live - Your Account is Ready!",
         Charset: "UTF-8",
       },
       Body: {

@@ -1,8 +1,8 @@
 import { LoginController } from "@/hooks/useLoginController";
 import { useEnterKeySubmit } from "@/hooks/useEnterKeySubmit";
 import React from "react";
-import { awsbButton } from "../common/awsbButton";
-import { awsbTextField } from "../common/awsbTextField";
+import { AWSBButton } from "@/components/common/AWSBButton";
+import { AWSBTextField } from "@/components/common/AWSBTextField";
 
 type Props = {
   loginController: LoginController;
@@ -33,7 +33,7 @@ export const TOTPForm: React.FC<Props> = ({ loginController }) => {
       </div>
 
       <div className="flex flex-col gap-2.5">
-        <awsbTextField
+        <AWSBTextField
           label="TOTP Code"
           testId="TOTP-code-input"
           value={TOTPCode}
@@ -44,7 +44,7 @@ export const TOTPForm: React.FC<Props> = ({ loginController }) => {
 
         <div className="text-error-500 text-body2">{errorMessage}</div>
 
-        <awsbButton
+        <AWSBButton
           buttonText="Submit"
           additionalClassName="w-[140px] m-auto h-[40px]"
           isDisabled={confirmSignInMutation.isPending}

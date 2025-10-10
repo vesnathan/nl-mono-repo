@@ -11,25 +11,27 @@ const getDeploymentOutputs = () => {
     const fileContent = readFileSync(outputPath, "utf-8");
     const outputs = JSON.parse(fileContent);
 
-    // The stack name should be uppercase 'awsb'
-    const awsbStack = outputs.stacks.awsb;
+    // The stack name should be uppercase 'AWSB'
+    const awsbStack = outputs.stacks.AWSB;
     if (!awsbStack) {
-      console.warn("awsb stack outputs not found in deployment-outputs.json");
+      console.warn("AWSB stack outputs not found in deployment-outputs.json");
       console.warn("Available stacks:", Object.keys(outputs.stacks));
       return {};
     }
 
+    type Output = { OutputKey: string; OutputValue: string };
+
     const getValue = (key: string) =>
-      awsbStack.outputs.find((o: any) => o.OutputKey === key)?.OutputValue ||
+      awsbStack.outputs.find((o: Output) => o.OutputKey === key)?.OutputValue ||
       "";
 
     return {
-      NEXT_PUBLIC_USER_POOL_ID: getValue("awsbUserPoolId"),
-      NEXT_PUBLIC_USER_POOL_CLIENT_ID: getValue("awsbUserPoolClientId"),
-      NEXT_PUBLIC_IDENTITY_POOL_ID: getValue("awsbIdentityPoolId"),
+      NEXT_PUBLIC_USER_POOL_ID: getValue("AWSBUserPoolId"),
+      NEXT_PUBLIC_USER_POOL_CLIENT_ID: getValue("AWSBUserPoolClientId"),
+      NEXT_PUBLIC_IDENTITY_POOL_ID: getValue("AWSBIdentityPoolId"),
       NEXT_PUBLIC_GRAPHQL_URL: getValue("ApiUrl"),
     };
-  } catch (error) {
+  } catch {
     console.warn(
       "Could not read deployment-outputs.json. Build may fail if env vars are not set.",
     );
@@ -52,7 +54,10 @@ const nextConfig = {
     styledComponents: true,
   },
   // Only use "export" for production builds, not during development
-  ...(process.env.NODE_ENV === "production" ? { output: "export" } : {}),
+  // Opt-in static export. Set NEXT_EXPORT=true when you want to build a fully
+  // static exported site. This avoids requiring generateStaticParams for
+  // dynamic routes during regular production builds.
+  ...(process.env.NEXT_EXPORT === "true" ? { output: "export" } : {}),
   images: {
     unoptimized: true,
   },

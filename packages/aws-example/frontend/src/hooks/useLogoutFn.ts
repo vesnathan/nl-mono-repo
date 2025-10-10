@@ -1,4 +1,4 @@
-import { awsbAuthSignOut } from "shared/functions/awsbAuthSignOut";
+import { authSignOut } from "shared/functions/authSignOut";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { LOGIN_PATH } from "@/constants/layout/navigation/navigation";
@@ -6,7 +6,7 @@ import { LOGIN_PATH } from "@/constants/layout/navigation/navigation";
 export const useLogoutFn = () => {
   const router = useRouter();
   return useCallback(async () => {
-    await awsbAuthSignOut();
+    await authSignOut();
     router.replace(LOGIN_PATH);
   }, [router]);
 };

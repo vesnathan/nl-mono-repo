@@ -1,6 +1,7 @@
 "use client";
 
 import { Progress } from "@nextui-org/react";
+import type { ProgressProps } from "@nextui-org/progress";
 import { LOGIN_PATH } from "@/constants/layout/navigation/navigation";
 import { useUserStore } from "@/stores/userStore";
 import { useQuery } from "@tanstack/react-query";
@@ -8,53 +9,55 @@ import { DataFetchError } from "@/components/common/DataFetchError";
 import { useRouter } from "next/navigation";
 import { FC, PropsWithChildren, useEffect } from "react";
 import {
-  getawsbUserQueryFn,
-  getawsbUserQueryKey,
+  getAWSBUserQueryFn,
+  getAWSBUserQueryKey,
 } from "../graphql/queries/userQueries";
+
+const ProgressAny = Progress as unknown as React.ComponentType<ProgressProps>;
 
 type Props = PropsWithChildren & {
   userId: string;
 };
 
-export const awsbUserStoreSetup: FC<Props> = ({ userId, children }) => {
+export const AWSBUserStoreSetup: FC<Props> = ({ userId, children }) => {
   const setUser = useUserStore((state) => state.setUser);
   const router = useRouter();
 
-  const queryKey = getawsbUserQueryKey(userId);
+  const queryKey = getAWSBUserQueryKey(userId);
 
   const { data, error, isPending } = useQuery({
     retry: false,
-    queryFn: () => getawsbUserQueryFn({ userId }),
+    queryFn: () => getAWSBUserQueryFn({ userId }),
     queryKey,
   });
 
   // Extract the user data
-  const awsbUser = data?.data?.getawsbUser;
+  const AWSBUser = data?.data?.getAWSBUser;
 
   // Set user in store when GraphQL data is available
   // The resolver already handles Cognito group to clientType mapping
   useEffect(() => {
-    if (awsbUser) {
+    if (AWSBUser) {
       // Only log in development mode
       // eslint-disable-next-line no-console
       if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console
         console.log(
-          "awsbUserStoreSetup: Setting user with clientType from GraphQL response:",
-          awsbUser.clientType,
+          "AWSBUserStoreSetup: Setting user with clientType from GraphQL response:",
+          AWSBUser.clientType,
         );
       }
-      setUser(awsbUser);
+      setUser(AWSBUser);
     }
-  }, [awsbUser, setUser]);
+  }, [AWSBUser, setUser]);
 
   if (isPending) {
     return (
-      <Progress size="sm" isIndeterminate aria-label="Loading user data" />
+      <ProgressAny size="sm" isIndeterminate aria-label="Loading user data" />
     );
   }
 
-  if (error || !awsbUser) {
+  if (error || !AWSBUser) {
     return (
       <DataFetchError
         error={error}

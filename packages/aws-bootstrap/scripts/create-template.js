@@ -85,20 +85,41 @@ function updatePackageJsonNames(destPackagePath, newName) {
 }
 
 function replaceTokensInTree(destPackagePath, newName) {
+  // Case-aware replacements: replace CWL/Cwl/cwl to AWSB/Awsb/awsb respectively
+  // and cloudwatchlive -> newName (case-insensitive)
   const replacements = [
-    { from: "cloudwatchlive", to: newName, flags: "gi" },
-    { from: "cwl", to: "awsb", flags: "gi" },
-    { from: "CWL", to: "AWSB", flags: "g" },
+    { re: /cloudwatchlive/gi, to: newName },
+    { re: /CWL/g, to: 'AWSB' },
+    { re: /Cwl/g, to: 'Awsb' },
+    { re: /cwl/g, to: 'awsb' },
   ];
+
+  function replaceFileTokens(filePath) {
+    try {
+      let content = fs.readFileSync(filePath, 'utf8');
+      let changed = false;
+      for (const { re, to } of replacements) {
+        if (re.test(content)) {
+          content = content.replace(re, to);
+          changed = true;
+        }
+      }
+      if (changed) fs.writeFileSync(filePath, content, 'utf8');
+    } catch (e) {
+      // skip binary files or read errors
+    }
+  }
+
   function walk(dir) {
     const items = fs.readdirSync(dir);
     for (const item of items) {
       const full = path.join(dir, item);
       const stat = fs.statSync(full);
       if (stat.isDirectory()) walk(full);
-      else replaceInFile(full, replacements);
+      else replaceFileTokens(full);
     }
   }
+
   walk(destPackagePath);
 }
 

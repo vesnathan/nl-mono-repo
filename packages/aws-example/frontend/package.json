@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "tsc": "node ./node_modules/typescript/bin/tsc",
     "dev:clean": "rm -rf .next && NODE_OPTIONS='--max-old-space-size=4096' next dev",
     "dev:local": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev NODE_OPTIONS='--max-old-space-size=4096' next dev",
     "build": "next build",
@@ -12,6 +13,7 @@
   },
   "dependencies": {
     "@aws-amplify/auth": "^6.6.0",
+    
     "@hookform/resolvers": "^3.3.4",
     "@iconify/react": "^5.0.2",
     "@nextui-org/react": "2.4.6",
@@ -28,6 +30,7 @@
     "react-error-boundary": "^4.1.2",
     "react-hook-form": "^7.51.0",
     "shared": "*",
+    "sharp": "^0.34.4",
     "tailwindcss": "^3.4.14",
     "uuid": "^13.0.0",
     "zod": "^3.23.8",

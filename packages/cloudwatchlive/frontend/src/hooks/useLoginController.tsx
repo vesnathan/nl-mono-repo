@@ -1,10 +1,10 @@
 import React from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSetGlobalMessage } from "@/components/common/GlobalMessage";
-import { cwlAuthConfirmResetPassword } from "shared/functions/cwlAuthConfirmResetPassword";
-import { cwlAuthConfirmSignIn } from "shared/functions/cwlAuthConfirmSignIn";
-import { cwlAuthResetPassword } from "shared/functions/cwlAuthResetPassword";
-import { cwlAuthSignIn } from "shared/functions/cwlAuthSignIn";
+import { authConfirmResetPassword } from "shared/functions/authConfirmResetPassword";
+import { authConfirmSignIn } from "shared/functions/authConfirmSignIn";
+import { authResetPassword } from "shared/functions/authResetPassword";
+import { authSignIn } from "shared/functions/authSignIn";
 
 export const useLoginController = (options: {
   onLoginSuccess: () => void;
@@ -50,7 +50,7 @@ export const useLoginController = (options: {
         type: "all",
       });
       setErrorMessage("");
-      await cwlAuthSignIn({
+      await authSignIn({
         username: input.username,
         password: input.password,
         onSuccess: options.onLoginSuccess,
@@ -81,7 +81,7 @@ export const useLoginController = (options: {
     }) => {
       const { challengeResponse, challengeType } = input;
       setErrorMessage("");
-      await cwlAuthConfirmSignIn({
+      await authConfirmSignIn({
         challengeResponse,
         onSuccess: options.onLoginSuccess,
         onNewPasswordRequired: () => setActiveStep("login-enter-new-password"),
@@ -111,7 +111,7 @@ export const useLoginController = (options: {
       onCodeSent: () => void;
     }) => {
       setErrorMessage("");
-      await cwlAuthResetPassword({
+      await authResetPassword({
         username: input.username,
         onSuccess: input.onSuccess,
         onCodeSent: input.onCodeSent,
@@ -137,7 +137,7 @@ export const useLoginController = (options: {
       onSuccess: () => void;
     }) => {
       setErrorMessage("");
-      await cwlAuthConfirmResetPassword({
+      await authConfirmResetPassword({
         username: input.username,
         confirmationCode: input.confirmationCode,
         newPassword: input.newPassword,

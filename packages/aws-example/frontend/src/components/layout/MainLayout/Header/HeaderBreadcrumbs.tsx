@@ -11,7 +11,7 @@ const HeaderBreadcrumbs: React.FC<HeaderBreadcrumbsProps> = ({
   activeSidebarItem,
 }) => {
   const searchParams = useSearchParams();
-  const curTabValue = searchParams.get("tab");
+  const curTabValue = searchParams?.get("tab") ?? undefined;
 
   const subNavItemLabel = useMemo((): string | undefined => {
     if (!activeSidebarItem) return undefined;

@@ -3,7 +3,7 @@
 import React, { PropsWithChildren } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@nextui-org/react";
-import { awsbErrorBoundary } from "@/components/common/ErrorBoundary";
+import { AWSBErrorBoundary } from "@/components/common/ErrorBoundary";
 import { mainNavConfig } from "@/constants/layout/navigation/navigation";
 import {
   MainLayoutSidebar,
@@ -36,7 +36,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   const visibleSidebarItems = getVisibleSidebarItems();
 
   const activeSidebarItem = Object.values(visibleSidebarItems).find((item) => {
-    return pathname.startsWith(item.path);
+    const current = pathname ?? "";
+    return current.startsWith(item.path);
   });
 
   return (
@@ -73,7 +74,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
             classNames?.contentWrapper,
           )}
         >
-          <awsbErrorBoundary>{children}</awsbErrorBoundary>
+          <AWSBErrorBoundary>{children}</AWSBErrorBoundary>
         </div>
       </div>
     </>

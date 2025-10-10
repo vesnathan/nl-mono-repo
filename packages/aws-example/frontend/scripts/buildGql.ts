@@ -5,7 +5,7 @@ import { mergeGraphqlFiles } from "shared/scripts/mergeGraphqlFiles";
 const buildGql = async () => {
   // Merge GraphQL schema files from their source locations:
   // - Operations (Query/Mutation): backend/schema/
-  // - Types (awsbUser, etc.): shared/types/
+  // - Types (AWSBUser, etc.): shared/types/
   mergeGraphqlFiles({
     INPUT_DIRS: [
       path.resolve("../backend/schema"),

@@ -1,13 +1,27 @@
-# This file defines the Query and Mutation operations for the awsb AppSync API
-# Type definitions (awsbUser, ClientType, awsbUserInput) come from shared types
+# This file defines the Query and Mutation operations for the AWSB AppSync API
+# Type definitions (AWSBUser, ClientType, AWSBUserInput) come from shared types
 
 type Mutation {
-  # Creates a new awsb User
-  createawsbUser(input: awsbUserInput!): awsbUser
+  # Creates a new AWSB User
+  createAWSBUser(input: AWSBUserInput!): AWSBUser
 }
 
 type Query {
-  # Retrieves a awsbUser by their ID (Cognito Sub)
-  getawsbUser(userId: String!): awsbUser
+  # Retrieves a AWSBUser by their ID (Cognito Sub)
+  getAWSBUser(userId: String!): AWSBUser
     @aws_cognito_user_pools # Directive for AppSync authorization
+
+  # List all organizations (Event Companies)
+  listOrganizations: [Organization!]!
 }
+
+type Organization {
+  organizationId: String!
+  organizationName: String!
+  organizationType: String!
+  organizationCreated: String!
+  mainAdminUserId: String!
+  adminUserIds: [String!]!
+  staffUserIds: [String!]!
+}
+

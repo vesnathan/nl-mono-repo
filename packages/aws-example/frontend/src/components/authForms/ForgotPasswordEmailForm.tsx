@@ -3,8 +3,8 @@ import { useEnterKeySubmit } from "@/hooks/useEnterKeySubmit";
 import { Divider } from "@nextui-org/react";
 import React from "react";
 import { REGEX } from "@shared/constants/RegEx";
-import { awsbButton } from "../common/awsbButton";
-import { awsbTextField } from "../common/awsbTextField";
+import { AWSBButton } from "@/components/common/AWSBButton";
+import { AWSBTextField } from "@/components/common/AWSBTextField";
 
 type Props = {
   loginController: LoginController;
@@ -61,7 +61,7 @@ export const ForgotPasswordEmailForm: React.FC<Props> = ({
         </div>
 
         <div className="flex flex-col gap-2.5">
-          <awsbTextField
+          <AWSBTextField
             label="Email Address"
             value={forgetPWEmail}
             onClear={() => setForgetPWEmail("")}
@@ -71,7 +71,7 @@ export const ForgotPasswordEmailForm: React.FC<Props> = ({
 
           <div className="text-error-500 text-body2">{errorMessage}</div>
 
-          <awsbButton
+          <AWSBButton
             buttonText="Submit"
             additionalClassName="w-[140px] m-auto h-[40px]"
             isDisabled={isSubmitDisabled}
@@ -80,7 +80,7 @@ export const ForgotPasswordEmailForm: React.FC<Props> = ({
         </div>
       </form>
       <Divider />
-      <awsbButton
+      <AWSBButton
         buttonText={
           <span className="text-neutral-700 text-body2 font-bold">Login</span>
         }

@@ -1,7 +1,7 @@
 {
   "name": "awsb-lambda-functions",
   "version": "1.0.0",
-  "description": "Lambda functions for backend",
+  "description": "Lambda functions for CloudWatch Live backend",
   "main": "sendWelcomeEmail.js",
   "scripts": {
     "build": "tsc"

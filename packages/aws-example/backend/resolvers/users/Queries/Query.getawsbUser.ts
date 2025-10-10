@@ -1,25 +1,25 @@
 import { util, AppSyncIdentityCognito, Context } from "@aws-appsync/utils";
 // 'gqlTypes' is a module alias mapped in tsconfig.json to ../frontend/src/types/gqlTypes.ts
 // This allows the resolver compiler to resolve GraphQL generated types during build
-import { awsbUser, ClientType, GetawsbUserQueryVariables } from "gqlTypes";
+import { AWSBUser, ClientType, GetAWSBUserQueryVariables } from "gqlTypes";
 // Import ClientTypes constants from the single source of truth
 import {
-  awsb_CLIENT_TYPES,
-  isValidawsbClientType,
+  AWSB_CLIENT_TYPES,
+  isValidAWSBClientType,
 } from "../../../constants/ClientTypes";
 
-// Use GetawsbUserQueryVariables from shared frontend-generated types
+// Use GetAWSBUserQueryVariables from shared frontend-generated types
 
-// Define Output type for the resolver - it's awsbUser as per schema for a successful response
-type Output = awsbUser;
+// Define Output type for the resolver - it's AWSBUser as per schema for a successful response
+type Output = AWSBUser;
 
 // Define CTX for the response function context
 // Args, Result, PrevResult, Source, Info
-type CTX = Context<GetawsbUserQueryVariables, object, object, object, Output>;
+type CTX = Context<GetAWSBUserQueryVariables, object, object, object, Output>;
 
-export function request(ctx: Context<GetawsbUserQueryVariables>) {
+export function request(ctx: Context<GetAWSBUserQueryVariables>) {
   // It's good practice to cast args to the specific type
-  const args = ctx.args as GetawsbUserQueryVariables;
+  const args = ctx.args as GetAWSBUserQueryVariables;
   const { userId } = args;
 
   if (!userId) {
@@ -42,11 +42,14 @@ export function request(ctx: Context<GetawsbUserQueryVariables>) {
 
   console.log(`Getting user data for userId: ${userId}`);
   console.log(`Identity username: ${identity.username}`);
-
-  // DynamoDB table uses 'userId' as primary key (Cognito sub)
+  // DynamoDB AWSBDataTable uses a single-table PK/SK schema.
+  // Use PK = USER#<userId> and SK = PROFILE#<userId> when querying.
   return {
     operation: "GetItem",
-    key: util.dynamodb.toMapValues({ userId: userId }),
+    key: util.dynamodb.toMapValues({
+      PK: `USER#${userId}`,
+      SK: `PROFILE#${userId}`,
+    }),
   };
 }
 
@@ -62,10 +65,14 @@ export function response(ctx: CTX): Output {
 
   const identity = ctx.identity as AppSyncIdentityCognito;
   // Retrieve args safely, it's good practice to cast or ensure it's the correct type.
-  const args = ctx.args as GetawsbUserQueryVariables;
+  const args = ctx.args as GetAWSBUserQueryVariables;
   const { userId } = args;
 
-  if (!ctx.result) {
+  // Extract the returned item from ctx.result. For GetItem, AWS may return
+  // { Item: { ... } } or the raw item, depending on runtime.
+  const item = (ctx.result && ((ctx.result as any).Item || ctx.result)) as any;
+
+  if (!item) {
     console.error(`User not found in DynamoDB for userId: ${userId}`);
     console.error(`Identity username: ${identity.username}`);
     console.error(`Identity groups: ${JSON.stringify(identity.groups)}`);
@@ -76,10 +83,7 @@ export function response(ctx: CTX): Output {
     );
   }
 
-  // Assuming ctx.result is the raw item from DynamoDB, cast and map it.
-  // The 'any' cast should be followed by a proper mapping to awsbUser structure if needed.
-  // For now, we'll assume the structure matches awsbUser or is handled by direct return.
-  const userFromDB = ctx.result as any;
+  const userFromDB = item;
 
   // Map Cognito groups to ClientType using single source of truth
   const cognitoGroups = identity.groups || [];
@@ -91,7 +95,7 @@ export function response(ctx: CTX): Output {
   const clientType: ClientType[] = [];
 
   for (const group of cognitoGroups) {
-    if (isValidawsbClientType(group)) {
+    if (isValidAWSBClientType(group)) {
       // Map the valid group name to the corresponding ClientType enum value
       clientType.push(ClientType[group as keyof typeof ClientType]);
       console.log(`Mapped group "${group}" to ClientType.${group}`);
@@ -109,24 +113,24 @@ export function response(ctx: CTX): Output {
 
   console.log(`Final clientType array:`, JSON.stringify(clientType));
 
-  // Construct the final awsbUser object
-  // Ensure all non-nullable fields of awsbUser are present.
+  // Construct the final AWSBUser object
+  // Ensure all non-nullable fields of AWSBUser are present.
   // This is a simplified mapping. A more robust solution would involve
-  // explicitly creating the awsbUser object and populating its fields.
-  const resolvedUser: awsbUser = {
+  // explicitly creating the AWSBUser object and populating its fields.
+  const resolvedUser: AWSBUser = {
     ...userFromDB, // Spread raw DB result
     userId: userFromDB.userId || userId, // Ensure userId is present
     clientType: clientType,
-    // Ensure other non-nullable fields from awsbUser are present, e.g.:
+    // Ensure other non-nullable fields from AWSBUser are present, e.g.:
     // email: userFromDB.email || "",
     // username: userFromDB.username || "",
     // createdAt: userFromDB.createdAt || new Date().toISOString(),
     // updatedAt: userFromDB.updatedAt || new Date().toISOString(),
-    // Add other fields as defined in awsbUser type from gqlTypes.ts
+    // Add other fields as defined in AWSBUser type from gqlTypes.ts
     // If fields are optional in DB but non-nullable in GQL, provide defaults or ensure they exist.
   };
 
-  // Validate that resolvedUser matches the Output type (awsbUser)
+  // Validate that resolvedUser matches the Output type (AWSBUser)
   // This is more of a conceptual step here, TypeScript handles static typing.
   // At runtime, ensure the object structure is correct.
 

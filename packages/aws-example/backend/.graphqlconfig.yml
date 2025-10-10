@@ -2,7 +2,7 @@ projects:
   Backend Codegen Project:
     schemaPath: combined_schema.graphql
     includes:
-      - GetawsbUser.graphql
+      - GetAWSBUser.graphql
     excludes:
       - ./amplify/**
       # - types/gqlTypes.ts (no longer used)

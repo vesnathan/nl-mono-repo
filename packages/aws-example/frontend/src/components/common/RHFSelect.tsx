@@ -5,12 +5,12 @@ import {
   PathValue,
   UseFormReturn,
 } from "react-hook-form";
-import { awsbSelect, awsbSelectProps } from "./awsbSelect";
+import { AWSBSelect, AWSBSelectProps } from "./AWSBSelect";
 
 type RHFSelectProps<
   TValues extends FieldValues,
   TPath extends FieldPath<TValues>,
-> = Omit<awsbSelectProps, "value" | "isError" | "helperText"> & {
+> = Omit<AWSBSelectProps, "value" | "isError" | "helperText"> & {
   form: UseFormReturn<TValues>;
   fieldPath: TPath;
   requiredMessage?: string;
@@ -41,7 +41,7 @@ export function RHFSelect<
       }}
       render={({ field, fieldState }) => {
         return (
-          <awsbSelect
+          <AWSBSelect
             value={field.value}
             isError={!!fieldState.error}
             helperText={fieldState.error?.message}

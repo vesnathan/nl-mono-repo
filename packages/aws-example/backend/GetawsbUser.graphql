@@ -1,6 +1,6 @@
 # Example operation to enable Amplify codegen for backend
-query GetawsbUser($userId: String!) {
-  getawsbUser(userId: $userId) {
+query GetAWSBUser($userId: String!) {
+  getAWSBUser(userId: $userId) {
     userId
     organizationId
     privacyPolicy

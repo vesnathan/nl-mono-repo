@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { awsbButton } from "@/components/common/awsbButton";
+import { AWSBButton } from "@/components/common/AWSBButton";
 
 export default function GlobalError({
   error,
@@ -14,7 +14,7 @@ export default function GlobalError({
     <div>
       <h2>Something went wrong!</h2>
       <p>{error.message}</p>
-      <awsbButton
+      <AWSBButton
         buttonText="Try again"
         onClick={() => reset()}
         type="button"

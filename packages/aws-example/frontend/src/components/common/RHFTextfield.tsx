@@ -5,12 +5,12 @@ import {
   PathValue,
   UseFormReturn,
 } from "react-hook-form";
-import { awsbTextField, awsbTextFieldProps } from "./awsbTextField";
+import { AWSBTextField, AWSBTextFieldProps } from "./AWSBTextField";
 
 export type RHFTextFieldProps<
   TValues extends FieldValues,
   TPath extends FieldPath<TValues>,
-> = Omit<awsbTextFieldProps, "value" | "onClear" | "isError" | "helperText"> & {
+> = Omit<AWSBTextFieldProps, "value" | "onClear" | "isError" | "helperText"> & {
   form: UseFormReturn<TValues>;
   fieldPath: TPath;
   isClearable?: boolean;
@@ -44,7 +44,7 @@ export function RHFTextField<
         validate: customValidation,
       }}
       render={({ field, fieldState }) => (
-        <awsbTextField
+        <AWSBTextField
           helperText={fieldState.error?.message || ""}
           isError={!!fieldState.error}
           value={field.value ?? ""}
