@@ -1,8 +1,6 @@
-import { Button, cn, Spinner } from "@nextui-org/react";
-import type { SpinnerProps } from "@nextui-org/spinner";
+import { Button, cn } from "@nextui-org/react";
+import { Spinner } from "@heroui/spinner";
 import React from "react";
-
-const SpinnerAny = Spinner as unknown as React.ComponentType<SpinnerProps>;
 
 type AWSBButtonColor =
   | "primary"
@@ -135,9 +133,7 @@ export const AWSBButton: React.FC<AWSBButtonProps> = ({
       )}
       onClick={isLoading ? undefined : onClick}
       disabled={isDisabled}
-      startContent={
-        isLoading ? <SpinnerAny size="sm" color="current" /> : frontIcon
-      }
+      startContent={isLoading ? <Spinner /> : frontIcon}
       endContent={endIcon}
     >
       {buttonText}

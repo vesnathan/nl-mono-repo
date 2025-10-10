@@ -13,7 +13,7 @@ import {
   getAWSBUserQueryFn,
   getAWSBUserQueryKey,
 } from "../graphql/queries/userQueries";
-import { ClientType } from "@/graphql/gqlTypes";
+import { ClientType } from "@/types/gqlTypes";
 
 type Props = PropsWithChildren & {
   userId: string;
@@ -24,7 +24,7 @@ export const AWSBUserStoreSetup: FC<Props> = ({ userId, children }) => {
   const router = useRouter();
   
   // We'll always set a default client type
-  const [clientTypes, setClientTypes] = useState<ClientType[]>([ClientType.UnregisteredAttendee]);
+  const [clientTypes, setClientTypes] = useState<ClientType[]>([ClientType.Visitor]);
 
   const queryKey = getAWSBUserQueryKey(userId);
 
@@ -52,27 +52,20 @@ export const AWSBUserStoreSetup: FC<Props> = ({ userId, children }) => {
           const mappedClientTypes: ClientType[] = [];
           
           for (const group of cognitoGroups) {
+            // Normalize legacy group names into the two allowed ClientType values
             switch (group) {
               case 'SuperAdmin':
-                mappedClientTypes.push(ClientType.SuperAdmin);
-                break;
               case 'EventCompanyAdmin':
-                mappedClientTypes.push(ClientType.EventCompanyAdmin);
-                break;
+              case 'EventCompanyMainAdmin':
               case 'EventCompanyStaff':
-                mappedClientTypes.push(ClientType.EventCompanyStaff);
-                break;
               case 'TechCompanyAdmin':
-                mappedClientTypes.push(ClientType.TechCompanyAdmin);
-                break;
               case 'TechCompanyStaff':
-                mappedClientTypes.push(ClientType.TechCompanyStaff);
+                mappedClientTypes.push(ClientType.Admin);
                 break;
               case 'RegisteredAttendee':
-                mappedClientTypes.push(ClientType.RegisteredAttendee);
-                break;
               case 'UnregisteredAttendee':
-                mappedClientTypes.push(ClientType.UnregisteredAttendee);
+              default:
+                mappedClientTypes.push(ClientType.Visitor);
                 break;
             }
           }

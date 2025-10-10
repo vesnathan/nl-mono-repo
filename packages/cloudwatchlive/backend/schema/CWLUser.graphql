@@ -1,12 +1,6 @@
 enum ClientType {
-  SuperAdmin
-  EventCompanyMainAdmin
-  EventCompanyAdmin
-  EventCompanyStaff
-  TechCompanyAdmin
-  TechCompanyStaff
-  RegisteredAttendee
-  UnregisteredAttendee
+  Admin
+  Visitor
 }
 
 type S3Object {

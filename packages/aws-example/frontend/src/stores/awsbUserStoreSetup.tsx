@@ -1,7 +1,7 @@
 "use client";
 
 import { Progress } from "@nextui-org/react";
-import type { ProgressProps } from "@nextui-org/progress";
+// no ProgressProps needed; using Progress directly
 import { LOGIN_PATH } from "@/constants/layout/navigation/navigation";
 import { useUserStore } from "@/stores/userStore";
 import { useQuery } from "@tanstack/react-query";
@@ -13,7 +13,7 @@ import {
   getAWSBUserQueryKey,
 } from "../graphql/queries/userQueries";
 
-const ProgressAny = Progress as unknown as React.ComponentType<ProgressProps>;
+// using @heroui Progress component directly
 
 type Props = PropsWithChildren & {
   userId: string;
@@ -52,9 +52,7 @@ export const AWSBUserStoreSetup: FC<Props> = ({ userId, children }) => {
   }, [AWSBUser, setUser]);
 
   if (isPending) {
-    return (
-      <ProgressAny size="sm" isIndeterminate aria-label="Loading user data" />
-    );
+    return <Progress isIndeterminate aria-label="Loading user data" />;
   }
 
   if (error || !AWSBUser) {
