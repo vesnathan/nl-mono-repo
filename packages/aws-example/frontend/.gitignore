@@ -1,8 +1,0 @@
-# Agent workspace specific dev scripts
-# These are not committed to avoid port conflicts with main repo
-dev.sh
-restart-dev.sh
-
-# But we DO track the example files (keep these committed)
-!dev.sh.example
-!restart-dev.sh.example

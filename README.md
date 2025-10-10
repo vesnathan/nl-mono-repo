@@ -266,7 +266,6 @@ graph TB
 
 | Command | Description |
 |---------|-------------|
-| `yarn ec2-deployment` | EC2 instance deployment menu |
 | `yarn reset-modules` | Remove all node_modules directories |
 | `yarn install-aws-cli-local` | Install AWS CLI locally |
 

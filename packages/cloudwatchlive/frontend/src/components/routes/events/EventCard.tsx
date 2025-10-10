@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
+// Using a plain <img> gives a simple onError fallback for missing local files.
 import Link from "next/link";
 import { Button, Card, CardBody } from "@nextui-org/react";
 import {
@@ -10,6 +10,7 @@ import {
   SessionStub,
   FALLBACK_REMOTE_IMAGES,
   isRemoteSrc,
+  PLACEHOLDER_IMAGE,
 } from "./eventsUtils";
 
 function RemoteImg({ initialSrc, alt }: { initialSrc: string; alt: string }) {
@@ -19,7 +20,24 @@ function RemoteImg({ initialSrc, alt }: { initialSrc: string; alt: string }) {
     tried.current.add(src);
     const next = FALLBACK_REMOTE_IMAGES.find((f) => !tried.current.has(f));
     if (next) setSrc(next);
-    else setSrc("/images/event-placeholder.svg");
+    else setSrc(PLACEHOLDER_IMAGE);
+  };
+  // eslint-disable-next-line @next/next/no-img-element
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      onError={onError}
+      className="object-cover rounded-t-lg w-full h-full absolute inset-0"
+    />
+  );
+}
+
+function LocalImg({ initialSrc, alt }: { initialSrc: string; alt: string }) {
+  const [src, setSrc] = React.useState<string>(initialSrc || PLACEHOLDER_IMAGE);
+  const onError = () => {
+    setSrc(PLACEHOLDER_IMAGE);
   };
   // eslint-disable-next-line @next/next/no-img-element
   return (
@@ -80,14 +98,9 @@ export default function EventCard({ event, variant = "free" }: Props) {
               );
             }
 
-            // local path — use next/image for better handling
+            // local path — render a local <img> with onError fallback to the placeholder
             return (
-              <Image
-                src={initial}
-                alt={String(event.title || "")}
-                fill
-                className="object-cover rounded-t-lg"
-              />
+              <LocalImg initialSrc={initial} alt={String(event.title || "")} />
             );
           })()}
 
