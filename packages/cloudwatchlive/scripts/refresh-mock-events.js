@@ -68,7 +68,15 @@ for (let i = 0; i < events.length; i++) {
   e.title = `${adj} ${theme}`;
 
   // shortDescription and description get richer text
-  e.shortDescription = `${adj} ${theme} — join industry experts for a focused session.`;
+  const suffixes = [
+    "— join industry experts for a focused session.",
+    "— practical takeaways and in-depth demos.",
+    "— live talks, panels and networking opportunities.",
+    "— hands-on sessions with Q&A and demos.",
+    "— curated talks from industry leaders.",
+  ];
+  const suffix = suffixes[i % suffixes.length];
+  e.shortDescription = `${adj} ${theme} ${suffix}`;
   e.description = `Join us for the ${adj.toLowerCase()} ${theme.toLowerCase()}. This event brings together practitioners, leaders, and enthusiasts to share insights, demos, and practical takeaways. Expect lightning talks, panel discussions, and networking opportunities.`;
 
   // rotate images to avoid repetition
