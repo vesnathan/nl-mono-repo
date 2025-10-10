@@ -7,10 +7,7 @@ const buildGql = async () => {
   // - Operations (Query/Mutation): backend/schema/
   // - Types (AWSBUser, etc.): shared/types/
   mergeGraphqlFiles({
-    INPUT_DIRS: [
-      path.resolve("../backend/schema"),
-      path.resolve("../../shared/types"),
-    ],
+    INPUT_DIRS: [path.resolve("../backend/schema")],
     // Output to backend as the single source of truth for deployment
     OUTPUT_FILE_PATH: path.resolve("../backend/combined_schema.graphql"),
   });
