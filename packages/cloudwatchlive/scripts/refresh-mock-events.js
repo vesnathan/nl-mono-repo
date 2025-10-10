@@ -45,16 +45,25 @@ const adjectives = [
   "Briefing",
   "Curated",
 ];
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 // prefer local images from the frontend public images folder
-const localImagesDir = path.join(__dirname, '..', 'frontend', 'public', 'images');
+const localImagesDir = path.join(
+  __dirname,
+  "..",
+  "frontend",
+  "public",
+  "images",
+);
 let images = [];
 try {
-  images = fs.readdirSync(localImagesDir).filter(f => /\.(jpg|jpeg|png|svg)$/i.test(f)).map(f => '/images/' + f);
+  images = fs
+    .readdirSync(localImagesDir)
+    .filter((f) => /\.(jpg|jpeg|png|svg)$/i.test(f))
+    .map((f) => "/images/" + f);
 } catch (e) {
-  images = ['/images/event-placeholder.svg'];
+  images = ["/images/event-placeholder.svg"];
 }
 
 function choose(arr, i) {

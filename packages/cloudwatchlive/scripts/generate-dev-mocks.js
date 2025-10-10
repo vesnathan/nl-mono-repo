@@ -148,7 +148,7 @@ const base = new Date("2025-10-01T08:00:00Z").getTime();
 const imagesDir = path.join(__dirname, "..", "frontend", "public", "images");
 let imageFiles = [];
 try {
-  imageFiles = fs.readdirSync(imagesDir).filter((f) => !f.startsWith('.'));
+  imageFiles = fs.readdirSync(imagesDir).filter((f) => !f.startsWith("."));
 } catch (err) {
   // ignore - generator can still run and fall back to placeholder
   imageFiles = [];
