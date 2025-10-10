@@ -18,7 +18,7 @@ Examples:
 - ❌ `npm install`
 - ✅ `yarn add package-name`
 - ❌ `npm install package-name`
-- ✅ `yarn workspace ec2-vsc add @aws-sdk/client-ec2`
+ - ✅ `yarn workspace <workspace-name> add @aws-sdk/client-ec2` (replace with the target workspace)
 - ❌ `npm install @aws-sdk/client-ec2`
 
 ### Workspace Structure:
@@ -29,4 +29,4 @@ This is a Yarn workspace monorepo with the following packages:
 - `packages/waf`
 - `packages/shared-aws-assets`
 - `packages/deploy`
-- `packages/ec2-vsc`
+- (removed) `packages/ec2-vsc` (this package was removed from the workspace)
