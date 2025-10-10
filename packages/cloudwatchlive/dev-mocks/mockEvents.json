@@ -5,12 +5,12 @@
     "shortDescription": "Interactive AI Summit — join industry experts for a focused session.",
     "description": "Join us for the interactive ai summit. This event brings together practitioners, leaders, and enthusiasts to share insights, demos, and practical takeaways. Expect lightning talks, panel discussions, and networking opportunities.",
     "location": "Melbourne, Australia",
-  "startDate": "2026-10-01T08:00:00.000Z",
-  "endDate": "2026-10-03T18:00:00.000Z",
+    "startDate": "2026-10-01T08:00:00.000Z",
+    "endDate": "2026-10-03T18:00:00.000Z",
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-  "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/event-placeholder.svg",
     "eventOwner": {
       "ownerUserId": "8c339138-b01c-56a2-b653-83e09e663243",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -35,12 +35,12 @@
     "shortDescription": "Exclusive Design Workshop — join industry experts for a focused session.",
     "description": "Join us for the exclusive design workshop. This event brings together practitioners, leaders, and enthusiasts to share insights, demos, and practical takeaways. Expect lightning talks, panel discussions, and networking opportunities.",
     "location": "Melbourne, Australia",
-  "startDate": "2027-05-12T09:00:00.000Z",
-  "endDate": "2027-05-12T17:00:00.000Z",
+    "startDate": "2027-05-12T09:00:00.000Z",
+    "endDate": "2027-05-12T17:00:00.000Z",
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-  "image": null,
+    "image": "/images/event-placeholder.svg",
     "eventOwner": {
       "ownerUserId": "61b0babe-fd6d-5f6b-8d83-6ecb7b7cfe17",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -57,12 +57,12 @@
     "shortDescription": "Hands-on Indie Music Live — join industry experts for a focused session.",
     "description": "Join us for the hands-on indie music live. This event brings together practitioners, leaders, and enthusiasts to share insights, demos, and practical takeaways. Expect lightning talks, panel discussions, and networking opportunities.",
     "location": "Melbourne, Australia",
-  "startDate": "2025-11-20T18:00:00.000Z",
-  "endDate": "2025-11-30T22:00:00.000Z",
+    "startDate": "2025-11-20T18:00:00.000Z",
+    "endDate": "2025-11-30T22:00:00.000Z",
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$45",
-  "image": "https://images.unsplash.com/photo-1526481280698-9689030a0c2b?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/event-placeholder.svg",
     "eventOwner": {
       "ownerUserId": "d8b958d4-102b-575c-8479-fffe831ff460",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -84,12 +84,12 @@
     "shortDescription": "Annual Startup Pitch Night — join industry experts for a focused session.",
     "description": "Join us for the annual startup pitch night. This event brings together practitioners, leaders, and enthusiasts to share insights, demos, and practical takeaways. Expect lightning talks, panel discussions, and networking opportunities.",
     "location": "Melbourne, Australia",
-  "startDate": "2025-12-01T10:00:00.000Z",
-  "endDate": "2025-12-01T12:00:00.000Z",
+    "startDate": "2025-12-01T10:00:00.000Z",
+    "endDate": "2025-12-01T12:00:00.000Z",
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-  "image": null,
+    "image": "/images/3e6c87e5-5890-5db0-abe6-9c04fc3a8109.jpg",
     "eventOwner": {
       "ownerUserId": "4ad738e1-cf3e-5cfd-a09c-c9747a2f5752",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -106,12 +106,12 @@
     "shortDescription": "Intensive Product Launch — join industry experts for a focused session.",
     "description": "Join us for the intensive product launch. This event brings together practitioners, leaders, and enthusiasts to share insights, demos, and practical takeaways. Expect lightning talks, panel discussions, and networking opportunities.",
     "location": "Melbourne, Australia",
-  "startDate": "2026-01-15T09:00:00.000Z",
-  "endDate": "2026-01-20T17:00:00.000Z",
+    "startDate": "2026-01-15T09:00:00.000Z",
+    "endDate": "2026-01-20T17:00:00.000Z",
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-  "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/14cd83b4-ea41-505f-bc29-2800cb45c114.jpg",
     "eventOwner": {
       "ownerUserId": "13bb987f-5370-58e9-bc15-e098a6761441",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -133,7 +133,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$25",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/81eeba05-94ea-5e21-a75c-e56a91583362.jpg",
     "eventOwner": {
       "ownerUserId": "0b1affbc-33d0-566b-92a7-689924a0cf5c",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -160,7 +160,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/6fa37c92-6526-5840-aea1-9dc930fba3d1.jpg",
     "eventOwner": {
       "ownerUserId": "246d4007-8bf2-5c88-9983-5c18d11dbe71",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -182,7 +182,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/334722e0-cf65-5aaf-a79c-2471973d3b7d.jpg",
     "eventOwner": {
       "ownerUserId": "bb5cc2d4-ce47-50f1-b611-ebdfd65301a3",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -212,7 +212,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$55",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/e779064e-ff0f-5a7d-8399-defd82873aa7.jpg",
     "eventOwner": {
       "ownerUserId": "eef31b8d-caa0-54ab-9641-cedffc599055",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -283,7 +283,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$35",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/bd4645af-ebff-50a7-afa0-242fb561426e.jpg",
     "eventOwner": {
       "ownerUserId": "3094486f-adbb-5d86-af20-f90bfce33516",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -310,7 +310,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/23896da9-d4ab-5143-9206-6f635e9726b9.jpg",
     "eventOwner": {
       "ownerUserId": "9bbd6c10-1155-54e2-a325-e8b764201b0a",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -332,7 +332,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/c619cdf1-8677-5841-9ca8-c7b895b3eb92.jpg",
     "eventOwner": {
       "ownerUserId": "9c9ba8c3-a633-509e-b8e4-ffeb5efd517f",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -354,7 +354,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$65",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/b618eb9b-6c60-5865-bbc9-5e26e4f96cf2.jpg",
     "eventOwner": {
       "ownerUserId": "daada802-dc20-5c20-b557-4b3ceec76043",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -389,7 +389,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/f15a95e8-6d14-57e7-934a-941234b918d1.jpg",
     "eventOwner": {
       "ownerUserId": "5c26383f-4a91-5ece-9677-2d8e769503f1",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -411,7 +411,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/f2ea0be3-baee-55aa-825c-71654a536dd7.jpg",
     "eventOwner": {
       "ownerUserId": "6f5403f3-30b2-5c02-a85a-fe9c869eba59",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -482,7 +482,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/dd711930-e64c-502c-a40d-83c965ed9b17.jpg",
     "eventOwner": {
       "ownerUserId": "dfa7e8f8-f9e8-5c99-af40-17181b8cad26",
       "ownerCompany": "3ba624cd-41a5-5abe-8f11-04eac505a3ff"
@@ -504,7 +504,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$25",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/72e25f8d-727e-5b39-997f-16ed44042079.jpg",
     "eventOwner": {
       "ownerUserId": "af25f7d3-3b48-5d14-8c21-6c8902aa5849",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -531,7 +531,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/c4821b2f-5b94-5875-a26f-7f9876aa56c5.jpg",
     "eventOwner": {
       "ownerUserId": "f34caa1e-19ee-5e91-a8a0-c7619b37e4b1",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -561,7 +561,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/ae9367c2-0b4e-5f36-b894-ebf10fa95a4a.jpg",
     "eventOwner": {
       "ownerUserId": "161c3efa-dacb-54d2-956c-8c5edd9231d3",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -583,7 +583,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$55",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/3e2f035b-59c3-5511-ae4f-d86652cc5792.jpg",
     "eventOwner": {
       "ownerUserId": "f3347e66-207c-590a-bd93-94a4fc98384a",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -610,7 +610,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/070a4db8-3103-5560-9a0b-096bc84655ce.jpg",
     "eventOwner": {
       "ownerUserId": "c8f64410-1446-570a-9bb8-1a5cf88dc54f",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -681,7 +681,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/cf55032f-1c54-5296-940c-f96695616faa.jpg",
     "eventOwner": {
       "ownerUserId": "acb540ac-045d-59f3-8512-2530b76d35d5",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -703,7 +703,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/99a19f21-2ffb-5ca2-a08e-3835e70f2bbf.jpg",
     "eventOwner": {
       "ownerUserId": "018a654a-a637-5e17-b0c8-4bc9c08890e5",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -733,7 +733,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$65",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/37dbd26f-95e6-5902-b6df-7bf5a15659ab.jpg",
     "eventOwner": {
       "ownerUserId": "69807ee0-7592-5234-a3d8-453c4c7fb0b6",
       "ownerCompany": "3ba624cd-41a5-5abe-8f11-04eac505a3ff"
@@ -760,7 +760,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/fa8dbc9d-ec75-521f-9280-384f86ab6142.jpg",
     "eventOwner": {
       "ownerUserId": "947d8a45-e368-5b0b-8291-115e1a7cebbd",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -782,7 +782,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/772b9d85-e9ab-57f5-9604-c332e4ff01a5.jpg",
     "eventOwner": {
       "ownerUserId": "40f49398-2e3c-5f75-b7b8-adbd6fda8ca3",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -804,7 +804,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$45",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/6e14b4b1-67ec-5533-8c10-b0d7090fc390.jpg",
     "eventOwner": {
       "ownerUserId": "49eacdd4-5d88-55a6-bdf9-6b7aeddad44e",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -875,7 +875,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$25",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/940a381a-eacc-5660-bf17-c31ceeb9c25e.jpg",
     "eventOwner": {
       "ownerUserId": "2042d8d9-023f-5900-a2e6-b4721ef2ae5e",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -910,7 +910,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/64624193-3112-5a11-b6fd-2fa5c08392bb.jpg",
     "eventOwner": {
       "ownerUserId": "c6dfae66-8101-5eb2-8c8f-cfff84be19b2",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -932,7 +932,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/1741e676-5e3d-58f7-b464-70dd98a33387.jpg",
     "eventOwner": {
       "ownerUserId": "4876932c-d974-5005-b203-f894e3c8a329",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -954,7 +954,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$55",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/aa2969d4-5082-5459-981f-432a1cd9b22a.jpg",
     "eventOwner": {
       "ownerUserId": "19ea31ac-9714-51d1-9d95-f29c7d0d946d",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -981,7 +981,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/2200e701-ba47-5f96-85ca-3b6580e460a2.jpg",
     "eventOwner": {
       "ownerUserId": "836381eb-8b82-51d2-ad68-8323c1a7955d",
       "ownerCompany": "3ba624cd-41a5-5abe-8f11-04eac505a3ff"
@@ -1003,7 +1003,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/5afd432a-c6cb-555d-9b88-bbada3ab8811.jpg",
     "eventOwner": {
       "ownerUserId": "0762df69-ff7c-5820-85a3-b93db8583bc5",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -1082,7 +1082,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/0db9eb3b-2e27-5c24-8f5e-c90b877025ed.jpg",
     "eventOwner": {
       "ownerUserId": "70204c2f-ad1e-5c66-a165-c5d3c50ca60c",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -1104,7 +1104,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$65",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/a92aed27-724f-5061-9ab4-f3543763c1b2.jpg",
     "eventOwner": {
       "ownerUserId": "a4a8f2b9-cc06-5c23-bf61-8ef06f18a1ce",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -1131,7 +1131,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/6cc58171-fa29-5ffa-9252-5c9a4c7edb22.jpg",
     "eventOwner": {
       "ownerUserId": "4d0ea82c-fe18-57ba-9037-36a91e41032c",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -1153,7 +1153,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/06102080-79e0-5ec2-a4db-6933457c6793.jpg",
     "eventOwner": {
       "ownerUserId": "cc20acaf-553b-52e8-89d0-942c04c95f1c",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -1175,7 +1175,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$45",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/1dca5ca4-97da-5cad-95b4-245cd375ba25.jpg",
     "eventOwner": {
       "ownerUserId": "2ff43837-cc50-5cd1-9445-595eabefe2fa",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -1202,7 +1202,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/4913617d-0a7d-58ce-8006-b7c83dbd318e.jpg",
     "eventOwner": {
       "ownerUserId": "03cbb85c-8f9e-579b-b40a-64d75e6750ae",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -1281,7 +1281,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/334f6550-e061-5250-92d9-ff91c0379985.jpg",
     "eventOwner": {
       "ownerUserId": "cf242aa2-0da4-5262-8c2e-743a53e5f98a",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -1303,7 +1303,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/11881096-a5a7-533c-b1e0-5c4430dd08c8.jpg",
     "eventOwner": {
       "ownerUserId": "7ecc9710-cfcd-58d0-9a3d-5ad162990ebe",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -1325,7 +1325,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$55",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/d9378fed-fde6-5271-bfb0-d8112e35dc12.jpg",
     "eventOwner": {
       "ownerUserId": "8641315f-35dc-5b0b-be7f-32649baff424",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -1352,7 +1352,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/e57c68d6-e440-510c-9f85-88bed5c6b043.jpg",
     "eventOwner": {
       "ownerUserId": "fe6ac562-09e5-540d-8875-3a545b59c147",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -1374,7 +1374,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/46c84d9f-4578-56ce-ad9c-b889a82c29ed.jpg",
     "eventOwner": {
       "ownerUserId": "d6e19596-3c07-54ed-84d3-583f03748dda",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -1396,7 +1396,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$35",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/11719273-8b52-5de3-b4c7-f1bba5be244b.jpg",
     "eventOwner": {
       "ownerUserId": "c08c4454-4810-5cf5-95d0-ddeb86143edc",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -1475,7 +1475,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$65",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/4305b948-c64c-5590-ba26-da331333140c.jpg",
     "eventOwner": {
       "ownerUserId": "dfd04fb8-0448-5b73-8bf0-bab736f43952",
       "ownerCompany": "3ba624cd-41a5-5abe-8f11-04eac505a3ff"
@@ -1502,7 +1502,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/c719d904-ea73-524f-a1a3-8c881adbfeed.jpg",
     "eventOwner": {
       "ownerUserId": "74d711d7-c77a-5daa-9d32-66aafcd1f36c",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -1524,7 +1524,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/61dddb66-3c36-5a24-8e16-ac1238b98f5d.jpg",
     "eventOwner": {
       "ownerUserId": "2295d6b0-f44e-5e2b-b545-0cc44a99d437",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -1546,7 +1546,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$45",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/ba7d03fe-a2da-5a9b-92c9-012519df710e.jpg",
     "eventOwner": {
       "ownerUserId": "98980d0c-647f-5334-92fb-0402c94b7a79",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -1573,7 +1573,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/6b08b603-33b2-5e0d-99f7-4eeb0ec3045f.jpg",
     "eventOwner": {
       "ownerUserId": "28580b35-71f9-5ff0-b60e-cce30758ded7",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -1603,7 +1603,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/5a432e7a-e35b-5ab9-8d71-3a0e2832c626.jpg",
     "eventOwner": {
       "ownerUserId": "48adc348-d931-5548-bf1f-89c8a226e976",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -1674,7 +1674,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/20a4fdf6-fa2c-5eda-a1bd-8895f6281c5b.jpg",
     "eventOwner": {
       "ownerUserId": "9570282a-2c42-51d1-9c7f-c2902f0ee6a1",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -1696,7 +1696,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$55",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/fd14f705-1995-594d-a700-1fa57b9c7dc7.jpg",
     "eventOwner": {
       "ownerUserId": "54472f06-54a5-584d-b136-049fdd6888d9",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -1723,7 +1723,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/21d7c8aa-a384-51dc-bbe7-6c5e2eb77dec.jpg",
     "eventOwner": {
       "ownerUserId": "0ce5679c-07dc-5c5b-8232-78b6f80728ff",
       "ownerCompany": "3ba624cd-41a5-5abe-8f11-04eac505a3ff"
@@ -1745,7 +1745,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/dc207d98-3a05-5ae5-ae91-920cba07b86e.jpg",
     "eventOwner": {
       "ownerUserId": "546893a5-1a38-5e38-bc54-a5ae32acb5f1",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -1775,7 +1775,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$35",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/10d7d310-40cc-55a1-b30a-822e72fc87ec.jpg",
     "eventOwner": {
       "ownerUserId": "bc80d3ed-9aae-5204-ad13-e74684feb05e",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -1802,7 +1802,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/7c1c561d-573a-501b-ba56-023ef6fc0c19.jpg",
     "eventOwner": {
       "ownerUserId": "91044ff8-5326-5d6d-9429-7b6645bfcc10",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -1873,7 +1873,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/34382296-1527-56e5-9ebb-eb7760b66f1c.jpg",
     "eventOwner": {
       "ownerUserId": "4a33a1ea-fbeb-577a-9722-9fcefb1020f6",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -1895,7 +1895,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/750a35f7-137f-581f-9075-9d98b9ad766c.jpg",
     "eventOwner": {
       "ownerUserId": "6eba57a3-0557-5dff-b38e-51833be35155",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -1917,7 +1917,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$45",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/9ebda386-7555-52d1-ab7f-70b86f15ddb7.jpg",
     "eventOwner": {
       "ownerUserId": "4188e9e4-ebf7-53f0-99ae-79263bf3dbd6",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -1952,7 +1952,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/7aa7bfac-9030-5275-b205-a05f7ec48481.jpg",
     "eventOwner": {
       "ownerUserId": "e9c7845f-c2cc-585b-847e-090f725afb9e",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -1974,7 +1974,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/5dae5c4c-397f-54a8-9092-db60ad0e8c04.jpg",
     "eventOwner": {
       "ownerUserId": "6e56b546-b901-56bf-9ee4-5da5e7c41184",
       "ownerCompany": "3ba624cd-41a5-5abe-8f11-04eac505a3ff"
@@ -1996,7 +1996,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$25",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/772671f3-22d9-5f8f-8c3c-ba9662c31c60.jpg",
     "eventOwner": {
       "ownerUserId": "8f999151-7ba7-5f71-922c-19be910c7f95",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -2067,7 +2067,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$55",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/aeae090e-d36b-5fab-bb09-03334d559051.jpg",
     "eventOwner": {
       "ownerUserId": "ab11056f-efb6-5db1-b1e0-605cc6863583",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -2094,7 +2094,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/58bcaf3b-9180-5811-ac06-83cb0e9bc076.jpg",
     "eventOwner": {
       "ownerUserId": "49dc153c-1c65-566d-aea5-5b6bcda6b751",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -2124,7 +2124,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/3399e8f9-97df-5844-9ffa-d75820ac8695.jpg",
     "eventOwner": {
       "ownerUserId": "7cc695f9-518a-582a-9915-dce91ee59a15",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -2146,7 +2146,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$35",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/b7f68424-e87b-580c-b770-0172fe4fc7f2.jpg",
     "eventOwner": {
       "ownerUserId": "2b509b1e-57b4-504d-aac8-808e81f68e57",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -2173,7 +2173,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/a1fac10e-1bea-5ecc-81c6-3a0b7867b8a3.jpg",
     "eventOwner": {
       "ownerUserId": "9a3d675e-f883-59bd-8f96-673c32183550",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -2195,7 +2195,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/2221c3f0-8715-5854-bf1e-539549347975.jpg",
     "eventOwner": {
       "ownerUserId": "b06bfdcc-b9d8-58fd-8b12-b546866bc237",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -2266,7 +2266,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/9a4e66ef-56ff-58c3-afb1-76005deb3faa.jpg",
     "eventOwner": {
       "ownerUserId": "847211cf-8f24-5429-b872-2330475a77dc",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -2296,7 +2296,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$45",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/27fb779c-4857-5b0c-abdb-f5bb9fac02cf.jpg",
     "eventOwner": {
       "ownerUserId": "13b379c5-2b54-5b75-a460-f0e70ddf4bc5",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -2323,7 +2323,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/8a7848a3-6267-536b-96fc-c3033e3f46c8.jpg",
     "eventOwner": {
       "ownerUserId": "32ed62a0-b0a3-5d4e-992e-4b382678da73",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -2345,7 +2345,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/c65593b9-cc6d-5674-8ffb-6720ec90c79b.jpg",
     "eventOwner": {
       "ownerUserId": "725355dc-7f11-5b26-ae7c-3de4ec224077",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -2367,7 +2367,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$25",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/7b95a3b0-a7f0-57a2-8d00-31e281d680b0.jpg",
     "eventOwner": {
       "ownerUserId": "537708b7-aecf-5104-a894-87eb3bfe00af",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -2394,7 +2394,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/e14ecb47-4fcc-51a0-ad57-a488ef8d46e2.jpg",
     "eventOwner": {
       "ownerUserId": "cefa2b0d-682d-58ff-864a-cacefe26b775",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -2473,7 +2473,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/96b07641-489d-5880-a59a-624e267ef371.jpg",
     "eventOwner": {
       "ownerUserId": "b281c593-2999-5a5b-af82-7ea3498d4d64",
       "ownerCompany": "3ba624cd-41a5-5abe-8f11-04eac505a3ff"
@@ -2495,7 +2495,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/b0ddec68-ac98-5859-9c94-ac56a82e4403.jpg",
     "eventOwner": {
       "ownerUserId": "8c339138-b01c-56a2-b653-83e09e663243",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -2517,7 +2517,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$35",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/8ad1d9e6-6072-521d-a722-b1b71c835dba.jpg",
     "eventOwner": {
       "ownerUserId": "61b0babe-fd6d-5f6b-8d83-6ecb7b7cfe17",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -2544,7 +2544,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/b36e0eec-c1a4-5e2a-bca1-83152c8ca95e.jpg",
     "eventOwner": {
       "ownerUserId": "d8b958d4-102b-575c-8479-fffe831ff460",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -2566,7 +2566,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/d95e407e-0555-576e-9e7b-925890fb5d53.jpg",
     "eventOwner": {
       "ownerUserId": "4ad738e1-cf3e-5cfd-a09c-c9747a2f5752",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -2588,7 +2588,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$65",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/4bb32aa3-34ba-5879-9c99-3999a3194d0e.jpg",
     "eventOwner": {
       "ownerUserId": "13bb987f-5370-58e9-bc15-e098a6761441",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -2667,7 +2667,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$45",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/4557a1cb-20e2-5c26-ae44-c9e61c5d18f0.jpg",
     "eventOwner": {
       "ownerUserId": "bb5cc2d4-ce47-50f1-b611-ebdfd65301a3",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -2694,7 +2694,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/b8248370-37bd-529b-a1a0-9f7d1c791fe2.jpg",
     "eventOwner": {
       "ownerUserId": "eef31b8d-caa0-54ab-9641-cedffc599055",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -2716,7 +2716,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/b4789ea9-c8eb-58d3-82e2-4db3652625ce.jpg",
     "eventOwner": {
       "ownerUserId": "898af507-0d1e-5f96-8336-b8b06f462c8f",
       "ownerCompany": "3ba624cd-41a5-5abe-8f11-04eac505a3ff"
@@ -2738,7 +2738,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$25",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/2cbc3611-187c-5a2a-a3db-f6a271c87a80.jpg",
     "eventOwner": {
       "ownerUserId": "8769ea0c-e9e1-5290-a938-51b9b0b6e3d2",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -2765,7 +2765,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/1f63f8a3-bd15-5638-80ea-ebad803a32ab.jpg",
     "eventOwner": {
       "ownerUserId": "3094486f-adbb-5d86-af20-f90bfce33516",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -2787,7 +2787,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/e0a10fe6-69bb-5d19-8d20-e69ed20b058b.jpg",
     "eventOwner": {
       "ownerUserId": "9bbd6c10-1155-54e2-a325-e8b764201b0a",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -2866,7 +2866,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/863e7058-91f7-5a35-a3bd-4d893f39fc2a.jpg",
     "eventOwner": {
       "ownerUserId": "5c26383f-4a91-5ece-9677-2d8e769503f1",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -2888,7 +2888,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$35",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/c5bfd046-e695-5943-9857-be01c1bb269a.jpg",
     "eventOwner": {
       "ownerUserId": "6f5403f3-30b2-5c02-a85a-fe9c869eba59",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -2915,7 +2915,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/901af785-44ea-5bdd-a63e-5d0829a8ebcd.jpg",
     "eventOwner": {
       "ownerUserId": "d0601bde-34d6-5b62-a498-de059683c6c6",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -2937,7 +2937,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/0a69d44d-8543-5d9c-8740-d2731d93a6a5.jpg",
     "eventOwner": {
       "ownerUserId": "552cacac-28c3-54dc-99a8-6b5ce80a121a",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -2959,7 +2959,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$65",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/6a8f31f2-17a5-5fb4-a7e7-598359318570.jpg",
     "eventOwner": {
       "ownerUserId": "dfa7e8f8-f9e8-5c99-af40-17181b8cad26",
       "ownerCompany": "3ba624cd-41a5-5abe-8f11-04eac505a3ff"
@@ -2994,7 +2994,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/27fcc799-3a49-5bcf-8619-73c0b80e4f5a.jpg",
     "eventOwner": {
       "ownerUserId": "af25f7d3-3b48-5d14-8c21-6c8902aa5849",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -3065,7 +3065,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/01fcbfea-ceb8-5480-a8c0-4396b1bce082.jpg",
     "eventOwner": {
       "ownerUserId": "f3347e66-207c-590a-bd93-94a4fc98384a",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -3087,7 +3087,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/f0c023c0-c52d-5d36-8330-574de98cef6e.jpg",
     "eventOwner": {
       "ownerUserId": "c8f64410-1446-570a-9bb8-1a5cf88dc54f",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -3109,7 +3109,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$25",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/4afae7bc-5a69-5286-8b7a-e3be466eb4e6.jpg",
     "eventOwner": {
       "ownerUserId": "5e78f7d6-6d0f-5713-8abc-39b2ae3d78f4",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -3136,7 +3136,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/8bbb7081-101d-5d12-af2d-52d1888a8a6d.jpg",
     "eventOwner": {
       "ownerUserId": "718bb8ee-2e94-5cdc-8e14-eae0af72e239",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -3166,7 +3166,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/a4383468-2702-5f73-85ba-78683ec36fde.jpg",
     "eventOwner": {
       "ownerUserId": "acb540ac-045d-59f3-8512-2530b76d35d5",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -3188,7 +3188,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$55",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/63551706-54ac-504f-bf48-b09030cf9393.jpg",
     "eventOwner": {
       "ownerUserId": "018a654a-a637-5e17-b0c8-4bc9c08890e5",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -3259,7 +3259,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$35",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/ea13f335-8e65-5df4-8543-977096195242.jpg",
     "eventOwner": {
       "ownerUserId": "40f49398-2e3c-5f75-b7b8-adbd6fda8ca3",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -3286,7 +3286,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/509355a4-2c8d-5dc7-b48e-88c23cea05e7.jpg",
     "eventOwner": {
       "ownerUserId": "49eacdd4-5d88-55a6-bdf9-6b7aeddad44e",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -3308,7 +3308,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/a567982c-ee6a-56c4-a130-b323012559e8.jpg",
     "eventOwner": {
       "ownerUserId": "a7731846-7c08-5863-a590-ff63ba298af0",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -3338,7 +3338,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$65",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/610372fe-ba92-5fd5-a1a5-f1dc5d724b34.jpg",
     "eventOwner": {
       "ownerUserId": "97ebd24a-89b8-5c9b-a62f-287eb1b18e5f",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -3365,7 +3365,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/343426dc-3c60-5422-a89f-d1340244c2fb.jpg",
     "eventOwner": {
       "ownerUserId": "2042d8d9-023f-5900-a2e6-b4721ef2ae5e",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -3387,7 +3387,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/bf64a3f4-bfe8-5051-bbbe-9937be2cd502.jpg",
     "eventOwner": {
       "ownerUserId": "c6dfae66-8101-5eb2-8c8f-cfff84be19b2",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -3458,7 +3458,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/e414f1ba-de72-57b6-acec-942b00fd82c4.jpg",
     "eventOwner": {
       "ownerUserId": "836381eb-8b82-51d2-ad68-8323c1a7955d",
       "ownerCompany": "3ba624cd-41a5-5abe-8f11-04eac505a3ff"
@@ -3480,7 +3480,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$25",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/aafb1ed3-493f-50d6-a42f-a76001eda645.jpg",
     "eventOwner": {
       "ownerUserId": "0762df69-ff7c-5820-85a3-b93db8583bc5",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -3515,7 +3515,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/fd54cdee-9788-5b57-bd5f-0e4d093a2b7a.jpg",
     "eventOwner": {
       "ownerUserId": "02c6fd3c-d5ec-51ba-95d0-a2cad2e56406",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -3537,7 +3537,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/e9d51bda-3a11-5609-a194-b5e2570f9140.jpg",
     "eventOwner": {
       "ownerUserId": "51bbdd35-eac1-52f2-8fc4-960d51c8a1c7",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -3559,7 +3559,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$55",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/182a5c8d-0f08-5c3b-8c94-d6c61fd33472.jpg",
     "eventOwner": {
       "ownerUserId": "70204c2f-ad1e-5c66-a165-c5d3c50ca60c",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -3586,7 +3586,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/35e60eff-6d4e-5e77-9b9b-4f13d620b563.jpg",
     "eventOwner": {
       "ownerUserId": "a4a8f2b9-cc06-5c23-bf61-8ef06f18a1ce",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -3657,7 +3657,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/2099bb9b-3071-5939-912a-678ff6d00667.jpg",
     "eventOwner": {
       "ownerUserId": "2ff43837-cc50-5cd1-9445-595eabefe2fa",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -3687,7 +3687,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/39c603ec-79d3-53bd-89fe-abeffedd9c45.jpg",
     "eventOwner": {
       "ownerUserId": "03cbb85c-8f9e-579b-b40a-64d75e6750ae",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -3709,7 +3709,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$65",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/af716355-e660-50d7-8f47-fac568947983.jpg",
     "eventOwner": {
       "ownerUserId": "cea11a0f-b2ef-5a13-bab9-2fc5645d0b80",
       "ownerCompany": "3ba624cd-41a5-5abe-8f11-04eac505a3ff"
@@ -3736,7 +3736,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/50c54afd-249b-5d41-91b5-9b6f6fd829d5.jpg",
     "eventOwner": {
       "ownerUserId": "ad6fdf90-205d-578d-a633-9d6f91a01c80",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -3758,7 +3758,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/2b87e059-50f2-549e-81e0-87f785015fe5.jpg",
     "eventOwner": {
       "ownerUserId": "cf242aa2-0da4-5262-8c2e-743a53e5f98a",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -3780,7 +3780,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$45",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/6cd9d738-b13c-5341-843c-621c37db01bb.jpg",
     "eventOwner": {
       "ownerUserId": "7ecc9710-cfcd-58d0-9a3d-5ad162990ebe",
       "ownerCompany": "2aa1b067-aeb1-5111-99ec-d96c696fa838"
@@ -3859,7 +3859,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$25",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/c6b8575a-5058-575a-8adf-25ab5be2bc9a.jpg",
     "eventOwner": {
       "ownerUserId": "d6e19596-3c07-54ed-84d3-583f03748dda",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -3886,7 +3886,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/d024b412-987a-523b-9e28-dd5587c01789.jpg",
     "eventOwner": {
       "ownerUserId": "c08c4454-4810-5cf5-95d0-ddeb86143edc",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -3908,7 +3908,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/f33d891c-d383-5f04-908a-bd5bec76125b.jpg",
     "eventOwner": {
       "ownerUserId": "6961e7f0-750a-5e72-b87f-ac4f2d7a42ef",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -3930,7 +3930,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$55",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/1e87e362-f829-5650-8249-8bd8e2113c8d.jpg",
     "eventOwner": {
       "ownerUserId": "76133e84-8fbc-56f2-be3c-f0fd8147042d",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -3957,7 +3957,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/74ba3f72-724a-5ccd-a2dd-6446a1420c4c.jpg",
     "eventOwner": {
       "ownerUserId": "dfd04fb8-0448-5b73-8bf0-bab736f43952",
       "ownerCompany": "3ba624cd-41a5-5abe-8f11-04eac505a3ff"
@@ -3979,7 +3979,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/b1275f99-f43b-5e6c-bec7-2c22e2aadbfd.jpg",
     "eventOwner": {
       "ownerUserId": "74d711d7-c77a-5daa-9d32-66aafcd1f36c",
       "ownerCompany": "85613d1f-fa0c-530e-812c-50784f49b688"
@@ -4058,7 +4058,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/300b5451-0142-56d6-a854-5760bf0fae76.jpg",
     "eventOwner": {
       "ownerUserId": "28580b35-71f9-5ff0-b60e-cce30758ded7",
       "ownerCompany": "1d92dd3d-1584-5531-8d2f-b31e45c3b238"
@@ -4080,7 +4080,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$65",
-    "image": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/5604cefc-ae7f-55d6-b0c5-d581edab3149.jpg",
     "eventOwner": {
       "ownerUserId": "48adc348-d931-5548-bf1f-89c8a226e976",
       "ownerCompany": "708f26c3-50c0-57ec-850e-f6393a7980e1"
@@ -4107,7 +4107,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/de09ce03-a8d5-5340-9fc6-b73c9167408a.jpg",
     "eventOwner": {
       "ownerUserId": "a7f3df92-fced-5e2b-8d7f-e67eb963a00b",
       "ownerCompany": "51ccf8ca-e151-58b2-9ccb-badf5bc4fcb4"
@@ -4129,7 +4129,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/b4ebc2cd-ef4c-54d0-99b4-31e88e2612e3.jpg",
     "eventOwner": {
       "ownerUserId": "0018653e-c796-51fa-83a1-d56fffab35d8",
       "ownerCompany": "de4dac0f-23bc-5648-aff0-094fa4b77d4a"
@@ -4151,7 +4151,7 @@
     "accessType": "paid",
     "requiresRegistration": true,
     "price": "$45",
-    "image": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/893935cb-45e2-5149-b565-af97c9783b4d.jpg",
     "eventOwner": {
       "ownerUserId": "9570282a-2c42-51d1-9c7f-c2902f0ee6a1",
       "ownerCompany": "c3db4408-b147-51e8-ada0-c5d4a684b0eb"
@@ -4178,7 +4178,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/bab7610f-1a76-5734-ac80-2dd5d695b80a.jpg",
     "eventOwner": {
       "ownerUserId": "54472f06-54a5-584d-b136-049fdd6888d9",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"
@@ -4257,7 +4257,7 @@
     "accessType": "free",
     "requiresRegistration": false,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/6bd7f089-386f-5db9-8868-8289070630af.jpg",
     "eventOwner": {
       "ownerUserId": "bc80d3ed-9aae-5204-ad13-e74684feb05e",
       "ownerCompany": "02297c25-b24c-514a-96c0-061d59025fc1"
@@ -5171,7 +5171,7 @@
     "accessType": "free-register",
     "requiresRegistration": true,
     "price": "",
-    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
+    "image": "/images/6af98661-fb77-50a5-94de-fdfcee04cefe.jpg",
     "eventOwner": {
       "ownerUserId": "eef31b8d-caa0-54ab-9641-cedffc599055",
       "ownerCompany": "7ef30f85-7e5c-580b-9cf1-6b4adb1a71fd"

@@ -4,59 +4,18 @@ import MockEventsRaw from "@cwl/dev-mocks/mockEvents.json"; // canonical dev-moc
 import Image from "next/image";
 import Link from "next/link";
 import Logo from "@/components/common/Logo";
-import { Button, Card, CardBody } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
+import EventCard from "@/components/routes/events/EventCard";
+import { MockEvent as UtilsMockEvent } from "@/components/routes/events/eventsUtils";
 // Use public image path to avoid Next's sharp native dependency during local build.
 // Ensure the image is copied to packages/cloudwatchlive/frontend/public/images/login-bg.png
 const LoginBackground = "/images/login-bg.png";
 
-const PLACEHOLDER_IMAGE =
-  "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=60";
-
-// Derive sections from MOCK_EVENTS
-// Helper: format a start/end ISO range into a human string
-function formatRange(start?: string, end?: string) {
-  if (!start) return "";
-  const s = new Date(start);
-  const e = end ? new Date(end) : null;
-  // If no end or same day -> show local date/time
-  if (!e) return s.toLocaleString();
-  const msInDay = 24 * 60 * 60 * 1000;
-  const dayDiff = Math.round(
-    (e.setHours(0, 0, 0, 0) - s.setHours(0, 0, 0, 0)) / msInDay,
-  );
-  // If same day, show times
-  if (dayDiff === 0)
-    return `${s.toLocaleDateString()} ${s.toLocaleTimeString()} - ${new Date(end!).toLocaleTimeString()}`;
-  // Multi-day but cap under two weeks in UI — format date range
-  return `${s.toLocaleDateString()} — ${e.toLocaleDateString()}`;
-}
-
-interface MockEventOwner {
-  ownerCompany?: string;
-  company?: string;
-}
-
-interface MockEvent {
-  id: string;
-  title: string;
-  image?: string;
-  location?: string;
-  startDate?: string;
-  endDate?: string;
-  accessType: "free" | "free-register" | "paid" | "invite-paid";
-  requiresRegistration?: boolean;
-  price?: string;
-  eventOwner?: MockEventOwner;
-}
+// Use canonical MockEvent type from eventsUtils to ensure session shape matches
+type MockEvent = UtilsMockEvent;
 
 const MockEventsData: MockEvent[] = MockEventsRaw as unknown as MockEvent[];
 
-function getOwnerCompany(event: MockEvent) {
-  // eventOwner.ownerCompany is canonical; tolerate alternative shapes
-  type MaybeOwner = { ownerCompany?: string; company?: string } | undefined;
-  const owner = event.eventOwner as MaybeOwner;
-  return owner?.ownerCompany ?? owner?.company ?? "";
-}
 // Compute live events from startDate/endDate timestamps
 const now = new Date();
 const LIVE_EVENTS: MockEvent[] = MockEventsData.filter((e: MockEvent) => {
@@ -70,33 +29,23 @@ const LIVE_EVENTS: MockEvent[] = MockEventsData.filter((e: MockEvent) => {
   }
 });
 
-const FREE_EVENTS: MockEvent[] = MockEventsData.filter((e: MockEvent) =>
-  ["free", "free-register"].includes(e.accessType),
-).slice(0, 8);
+// Prepare counts and limited slices for the landing page (max 8 shown)
+const MAX_SECTION = 8;
 
-interface MockEventOwner {
-  ownerCompany?: string;
-  company?: string;
-}
+const ALL_FREE = MockEventsData.filter((e: MockEvent) =>
+  ["free", "free-register"].includes(e.accessType ?? ""),
+);
+const FREE_EVENTS: MockEvent[] = ALL_FREE.slice(0, MAX_SECTION);
 
-interface MockEvent {
-  id: string;
-  title: string;
-  image?: string;
-  location?: string;
-  startDate?: string;
-  endDate?: string;
-  accessType: "free" | "free-register" | "paid" | "invite-paid";
-  requiresRegistration?: boolean;
-  price?: string;
-  eventOwner?: MockEventOwner;
-}
-
-const PAID_EVENTS: MockEvent[] = MockEventsData.filter(
+const ALL_PAID = MockEventsData.filter(
   (e: MockEvent) => e.accessType === "paid" || e.accessType === "invite-paid",
-).slice(0, 8);
+);
+const PAID_EVENTS: MockEvent[] = ALL_PAID.slice(0, MAX_SECTION);
 
-const LIMITED_LIVE_EVENTS = LIVE_EVENTS.slice(0, 8);
+const LIMITED_LIVE_EVENTS = LIVE_EVENTS.slice(0, MAX_SECTION);
+const TOTAL_LIVE = LIVE_EVENTS.length;
+const TOTAL_FREE = ALL_FREE.length;
+const TOTAL_PAID = ALL_PAID.length;
 
 export default function LandingPage() {
   return (
@@ -158,6 +107,16 @@ export default function LandingPage() {
               Get Started
             </Button>
           </div>
+          {TOTAL_LIVE > MAX_SECTION && (
+            <div className="mt-4 text-right">
+              <Link
+                href="/discover/events/live"
+                className="underline text-white"
+              >
+                View all Live events ({TOTAL_LIVE})
+              </Link>
+            </div>
+          )}
         </section>
 
         {/* Live Now Section */}
@@ -173,60 +132,19 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {LIMITED_LIVE_EVENTS.map((event) => (
-              <Card
-                key={event.id}
-                className="bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-red-500"
-              >
-                <CardBody className="p-0 flex flex-col h-full">
-                  <div className="relative w-full h-48">
-                    <Image
-                      src={event.image ?? PLACEHOLDER_IMAGE}
-                      alt={event.title}
-                      fill
-                      className="object-cover rounded-t-lg"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                    />
-                    <div className="absolute top-2 left-2 flex gap-2">
-                      <div className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                        <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                        LIVE
-                      </div>
-                      {event.requiresRegistration && (
-                        <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                          REGISTER
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="p-4 flex flex-col flex-grow">
-                    <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-                      {event.title}
-                    </h3>
-                    <p className="text-xs text-gray-500 mb-1">
-                      by {getOwnerCompany(event)}
-                    </p>
-                    <p className="text-sm text-gray-600 mb-1">
-                      {event.location}
-                    </p>
-                    <p className="text-sm text-red-500 font-semibold mb-3">
-                      Streaming Now
-                    </p>
-                    <Button
-                      as={Link}
-                      href={`/event/${event.id}`}
-                      size="sm"
-                      color="danger"
-                      className="font-semibold w-full mt-auto"
-                    >
-                      {event.requiresRegistration
-                        ? "Register & Watch"
-                        : "Watch Live"}
-                    </Button>
-                  </div>
-                </CardBody>
-              </Card>
+              <EventCard key={event.id} event={event} variant="live" />
             ))}
           </div>
+          {TOTAL_LIVE > MAX_SECTION && (
+            <div className="mt-4 text-right">
+              <Link
+                href="/discover/events/live"
+                className="underline text-white"
+              >
+                View all Live events ({TOTAL_LIVE})
+              </Link>
+            </div>
+          )}
         </section>
 
         {/* Free Events Section */}
@@ -240,60 +158,19 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {FREE_EVENTS.map((event) => (
-              <Card
-                key={event.id}
-                className="bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105"
-              >
-                <CardBody className="p-0 flex flex-col h-full">
-                  <div className="relative w-full h-48">
-                    <Image
-                      src={event.image ?? PLACEHOLDER_IMAGE}
-                      alt={event.title}
-                      fill
-                      className="object-cover rounded-t-lg"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                    />
-                    <div className="absolute top-2 left-2 flex gap-2">
-                      <div className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        FREE
-                      </div>
-                      {event.requiresRegistration && (
-                        <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                          REGISTER
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="p-4 flex flex-col flex-grow">
-                    <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-                      {event.title}
-                    </h3>
-                    <p className="text-xs text-gray-500 mb-1">
-                      by {getOwnerCompany(event)}
-                    </p>
-                    <p className="text-sm text-gray-600 mb-1">
-                      {event.location}
-                    </p>
-                    <p className="text-sm text-gray-500 mb-3">
-                      {formatRange(event.startDate, event.endDate)}
-                    </p>
-                    <Button
-                      as={Link}
-                      href={`/event/${event.id}`}
-                      size="sm"
-                      color="primary"
-                      variant="flat"
-                      className="font-semibold w-full mt-auto"
-                    >
-                      {event.requiresRegistration
-                        ? "Register to Watch"
-                        : "Remind Me"}
-                    </Button>
-                  </div>
-                </CardBody>
-              </Card>
+              <EventCard key={event.id} event={event} variant="free" />
             ))}
           </div>
+          {TOTAL_FREE > MAX_SECTION && (
+            <div className="mt-4 text-right">
+              <Link
+                href="/discover/events/free"
+                className="underline text-white"
+              >
+                View all Free events ({TOTAL_FREE})
+              </Link>
+            </div>
+          )}
         </section>
 
         {/* Paid Events Section */}
@@ -308,57 +185,19 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {PAID_EVENTS.map((event) => (
-              <Card
-                key={event.id}
-                className="bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105 border-2 border-yellow-500"
-              >
-                <CardBody className="p-0 flex flex-col h-full">
-                  <div className="relative w-full h-48">
-                    <Image
-                      src={event.image ?? PLACEHOLDER_IMAGE}
-                      alt={event.title}
-                      fill
-                      className="object-cover rounded-t-lg"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                    />
-                    <div className="absolute top-2 left-2 flex gap-2">
-                      <div className="bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                        PAID
-                      </div>
-                    </div>
-                    <div className="absolute top-2 right-2 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-bold">
-                      {event.price}
-                    </div>
-                  </div>
-                  <div className="p-4 flex flex-col flex-grow">
-                    <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-                      {event.title}
-                    </h3>
-                    <p className="text-xs text-gray-500 mb-1">
-                      by {getOwnerCompany(event)}
-                    </p>
-                    <p className="text-sm text-gray-600 mb-1">
-                      {event.location}
-                    </p>
-                    <p className="text-sm text-gray-500 mb-3">
-                      {event.startDate
-                        ? new Date(event.startDate).toLocaleString()
-                        : ""}
-                    </p>
-                    <Button
-                      as={Link}
-                      href={`/event/${event.id}`}
-                      size="sm"
-                      color="warning"
-                      className="font-semibold w-full mt-auto"
-                    >
-                      Purchase Ticket
-                    </Button>
-                  </div>
-                </CardBody>
-              </Card>
+              <EventCard key={event.id} event={event} variant="paid" />
             ))}
           </div>
+          {TOTAL_PAID > MAX_SECTION && (
+            <div className="mt-4 text-right">
+              <Link
+                href="/discover/events/paid"
+                className="underline text-white"
+              >
+                View all Paid events ({TOTAL_PAID})
+              </Link>
+            </div>
+          )}
         </section>
 
         {/* CTA Section */}
