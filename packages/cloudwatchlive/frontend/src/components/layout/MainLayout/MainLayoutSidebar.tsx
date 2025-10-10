@@ -3,11 +3,11 @@
 import { useSidebarStore } from "@/stores/sidebarStore";
 import { cn } from "@nextui-org/react";
 import { useEffect } from "react";
-import NextImage from "next/image";
+import Link from "next/link";
+import Logo from "@/components/common/Logo";
 import { useMediaQuery } from "shared/hooks/useMediaQuery";
 import ArrowLeftSvg from "../../../assets/images/SVGR/arrowLeftSvg";
 import ArrowRightSvg from "../../../assets/images/SVGR/arrowRightSvg";
-import CWALogo from "../../../assets/images/logo/logo.png";
 import { NavItem, NavItemData } from "./SideBarNavItem";
 
 const DRAWER_WIDTH = 240;
@@ -102,13 +102,9 @@ export function MainLayoutSidebar({
         <div
           className={cn("relative", "my-4", collapsed ? "mx-[30px]" : "mx-4")}
         >
-          <NextImage
-            key={`logo-${collapsed}`}
-            alt="Logo"
-            src={CWALogo}
-            width={collapsed ? 38 : 126}
-            // height={collapsed ? 38 : 40}
-          />
+          <Link href="/" className="flex items-center">
+            <Logo width={collapsed ? 38 : 126} alt="CloudWatch Live" />
+          </Link>
         </div>
 
         {/* Item list */}

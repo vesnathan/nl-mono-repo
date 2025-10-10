@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { useUserStore } from "@/stores/userStore";
 import { ClientType } from "@/types/gqlTypes";
 import {
@@ -11,8 +11,11 @@ import {
   ModalHeader,
   Divider,
 } from "@nextui-org/react";
+import type { ModalProps } from "@nextui-org/modal";
 import { CWLButton } from "@/components/common/CWLButton";
 import { AddUserForm } from "./forms/AddUserForm";
+// Cast Modal to a component typed with ModalProps (avoids `any`).
+const ModalAny = Modal as unknown as React.ComponentType<ModalProps>;
 
 export const Clients = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,7 +23,7 @@ export const Clients = () => {
     "SuperAdmin" | "EventCompanyAdmin" | null
   >(null);
   const [currentStep, setCurrentStep] = useState(1);
-  const [totalSteps, setTotalSteps] = useState(1);
+  const [totalSteps] = useState(1);
 
   const user = useUserStore((state) => state.user);
   const isSuperAdminUser = user.clientType.includes(ClientType.SuperAdmin);
@@ -30,22 +33,11 @@ export const Clients = () => {
   //   console.log('User clientType (useEffect):', user.clientType);
   // }, [user.clientType, isSuperAdminUser]);
 
-  // Define separate refs for each form
+  // Define a ref for the form. AddUserForm exposes submit() and reset() via useImperativeHandle.
   const addUserFormRef = useRef<{
     submit: () => void;
-    nextStep: () => Promise<boolean>;
-    previousStep: () => void;
     reset: () => void;
-    getStep: () => number;
-    getTotalSteps: () => number;
   } | null>(null);
-
-  useEffect(() => {
-    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
-      setCurrentStep(addUserFormRef.current.getStep());
-      setTotalSteps(addUserFormRef.current.getTotalSteps());
-    }
-  }, [isModalOpen, currentForm]);
 
   const handleOpenModal = () => {
     if (isSuperAdminUser) setCurrentForm("SuperAdmin");
@@ -65,17 +57,11 @@ export const Clients = () => {
   };
 
   const handleNext = async () => {
-    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
-      const success = await addUserFormRef.current.nextStep();
-      if (success) setCurrentStep((prev) => prev + 1);
-    }
+    // No-op: AddUserForm is a single-step form in this implementation.
   };
 
   const handlePrevious = () => {
-    if (currentForm === "SuperAdmin" && addUserFormRef.current) {
-      addUserFormRef.current.previousStep();
-      setCurrentStep((prev) => prev - 1);
-    }
+    // No-op: single-step form
   };
 
   const handleReset = () => {
@@ -87,57 +73,58 @@ export const Clients = () => {
 
   return (
     <>
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        aria-labelledby="client-modal-title"
-      >
-        <ModalContent>
-          <ModalHeader id="client-modal-title">Add New Client</ModalHeader>
-          <Divider />
-          <ModalBody className="mb-5">
-            {currentForm === "SuperAdmin" && (
-              <AddUserForm ref={addUserFormRef} onClose={handleCloseModal} />
-            )}
-          </ModalBody>
-          <Divider />
-          <ModalFooter className="flex justify-between">
-            {/* Reset Button (Hard Left) */}
-            <CWLButton
-              buttonText="Reset"
-              onClick={handleReset}
-              color="secondary"
-            />
+      {isModalOpen && (
+        <ModalAny
+          onClose={handleCloseModal}
+          aria-labelledby="client-modal-title"
+        >
+          <ModalContent>
+            <ModalHeader id="client-modal-title">Add New Client</ModalHeader>
+            <Divider />
+            <ModalBody className="mb-5">
+              {currentForm === "SuperAdmin" && (
+                <AddUserForm ref={addUserFormRef} onClose={handleCloseModal} />
+              )}
+            </ModalBody>
+            <Divider />
+            <ModalFooter className="flex justify-between">
+              {/* Reset Button (Hard Left) */}
+              <CWLButton
+                buttonText="Reset"
+                onClick={handleReset}
+                color="secondary"
+              />
 
-            <div className="flex space-x-2">
-              {/* Previous Button (Only if not on Step 1) */}
-              {totalSteps > 1 && currentStep > 1 && (
-                <CWLButton
-                  buttonText="Previous"
-                  onClick={handlePrevious}
-                  color="secondary"
-                />
-              )}
-              {/* Next Button (Only if not on last step) */}
-              {totalSteps > 1 && currentStep < totalSteps && (
-                <CWLButton
-                  buttonText="Next"
-                  onClick={handleNext}
-                  color="primary"
-                />
-              )}
-              {/* Submit Button (Only on last step) */}
-              {currentStep === totalSteps && (
-                <CWLButton
-                  buttonText="Submit"
-                  onClick={handleSubmit}
-                  color="primary"
-                />
-              )}
-            </div>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+              <div className="flex space-x-2">
+                {/* Previous Button (Only if not on Step 1) */}
+                {totalSteps > 1 && currentStep > 1 && (
+                  <CWLButton
+                    buttonText="Previous"
+                    onClick={handlePrevious}
+                    color="secondary"
+                  />
+                )}
+                {/* Next Button (Only if not on last step) */}
+                {totalSteps > 1 && currentStep < totalSteps && (
+                  <CWLButton
+                    buttonText="Next"
+                    onClick={handleNext}
+                    color="primary"
+                  />
+                )}
+                {/* Submit Button (Only on last step) */}
+                {currentStep === totalSteps && (
+                  <CWLButton
+                    buttonText="Submit"
+                    onClick={handleSubmit}
+                    color="primary"
+                  />
+                )}
+              </div>
+            </ModalFooter>
+          </ModalContent>
+        </ModalAny>
+      )}
 
       <CWLButton buttonText="New Client" onClick={handleOpenModal} />
     </>

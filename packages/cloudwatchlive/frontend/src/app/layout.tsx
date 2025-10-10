@@ -26,7 +26,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   });
 
   const isUnprotectedPage =
-    pathname === "/" || pathname === "/login" || pathname === "/login/";
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname === "/login/" ||
+    // Allow public access to individual event pages (some events are free)
+    pathname?.startsWith("/event");
 
   return (
     <html lang="en" data-theme="lemonade">

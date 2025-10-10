@@ -1,0 +1,8 @@
+{
+  "name": "@cwl/dev-mocks",
+  "version": "0.0.0-dev",
+  "private": true,
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": ["mockUsers.json", "mockEvents.json", "mockOrgs.json", "index.js", "index.d.ts"]
+}

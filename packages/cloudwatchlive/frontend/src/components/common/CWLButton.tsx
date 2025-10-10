@@ -1,5 +1,8 @@
 import { Button, cn, Spinner } from "@nextui-org/react";
+import type { SpinnerProps } from "@nextui-org/spinner";
 import React from "react";
+
+const SpinnerAny = Spinner as unknown as React.ComponentType<SpinnerProps>;
 
 type CWLButtonColor =
   | "primary"
@@ -133,7 +136,7 @@ export const CWLButton: React.FC<CWLButtonProps> = ({
       onClick={isLoading ? undefined : onClick}
       disabled={isDisabled}
       startContent={
-        isLoading ? <Spinner size="sm" color="current" /> : frontIcon
+        isLoading ? <SpinnerAny size="sm" color="current" /> : frontIcon
       }
       endContent={endIcon}
     >

@@ -264,6 +264,17 @@ async function waitForStackDeletion(
   const maxAttempts = 120; // Increased from 30 to 120 (20 minutes)
   const delay = 10000; // 10 seconds
 
+  // Spinner and timer setup
+  const startTime = Date.now();
+  let stopSpinner: (() => void) | null = null;
+  let lastMsg = "";
+  const getElapsed = () => {
+    const ms = Date.now() - startTime;
+    const s = Math.floor(ms / 1000) % 60;
+    const m = Math.floor(ms / 60000);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
   for (let i = 0; i < maxAttempts; i++) {
     try {
       const response = await cfn.send(
@@ -272,36 +283,52 @@ async function waitForStackDeletion(
       const stack = response.Stacks?.[0];
 
       if (!stack) {
-        logger.debug(`Stack ${stackName} no longer exists - deletion complete`);
+        if (stopSpinner) stopSpinner();
+        logger.success(
+          `Stack ${stackName} no longer exists - deletion complete`,
+        );
         return;
       }
 
       const status = stack.StackStatus;
       if (status === "DELETE_COMPLETE") {
-        logger.debug(`Stack ${stackName} deletion completed successfully`);
+        if (stopSpinner) stopSpinner();
+        logger.success(`Stack ${stackName} deletion completed successfully`);
         return;
       }
 
       if (status === "DELETE_FAILED") {
+        if (stopSpinner) stopSpinner();
         throw new Error(
           `Stack ${stackName} deletion failed with status: ${status}`,
         );
       }
 
-      logger.debug(
-        `Waiting for ${stackName} deletion... Status: ${status} (${i + 1}/${maxAttempts}) - ${Math.round(((i + 1) / maxAttempts) * 100)}% complete`,
-      );
+      // Show spinner and timer
+      const msg = `Waiting for stack ${stackName} to delete... Current status: ${status} (${i + 1}/${maxAttempts}) [${getElapsed()}]`;
+      if (!stopSpinner) {
+        stopSpinner = logger.infoWithSpinner(msg);
+        lastMsg = msg;
+      } else if (msg !== lastMsg && stopSpinner) {
+        stopSpinner();
+        stopSpinner = logger.infoWithSpinner(msg);
+        lastMsg = msg;
+      }
       await new Promise((resolve) => setTimeout(resolve, delay));
     } catch (error: any) {
       if (
         error.name === "ValidationError" &&
         error.message.includes("does not exist")
       ) {
-        logger.debug(`Stack ${stackName} no longer exists - deletion complete`);
+        if (stopSpinner) stopSpinner();
+        logger.success(
+          `Stack ${stackName} no longer exists - deletion complete`,
+        );
         return;
       }
 
       if (i === maxAttempts - 1) {
+        if (stopSpinner) stopSpinner();
         throw error;
       }
 
@@ -513,6 +540,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
   // Initialize remaining clients
   const s3 = new S3({ region });
   const awsUtils = new AwsUtils(region);
+  // Will be set after resolver compilation; passed to CloudFormation as a parameter
+  let resolversBuildHash: string | undefined = undefined;
 
   // Set up IAM role
   const iamManager = new IamManager(region); // Pass region string to IamManager
@@ -905,9 +934,11 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           constantsDir: constantsDir,
         });
 
+        let resolversBuildHash = "";
         try {
-          // Compile and upload resolvers
-          await resolverCompiler.compileAndUploadResolvers();
+          // Compile and upload resolvers (returns build hash)
+          resolversBuildHash =
+            await resolverCompiler.compileAndUploadResolvers();
 
           // Verify that the resolvers were uploaded successfully
           if (options.debugMode) {
@@ -915,9 +946,11 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           }
 
           // First verification: Check using ListObjectsV2
+          // List objects under the specific build hash prefix to verify uploads
+          const hashedPrefix = `resolvers/${options.stage}/${resolversBuildHash}/`;
           const listCommand = new ListObjectsV2Command({
             Bucket: templateBucketName,
-            Prefix: `resolvers/${options.stage}/`,
+            Prefix: hashedPrefix,
           });
 
           let retryCount = 0;
@@ -957,8 +990,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           // Second verification: Use the S3BucketManager to verify specific resolvers
           // Check for the resolvers we need in the schema
           const keyResolvers = [
-            `resolvers/${options.stage}/users/Queries/Query.getCWLUser.js`,
-            `resolvers/${options.stage}/users/Mutations/Mutation.createCWLUser.js`,
+            `resolvers/${options.stage}/${resolversBuildHash}/users/Queries/Query.getCWLUser.js`,
+            `resolvers/${options.stage}/${resolversBuildHash}/users/Mutations/Mutation.createCWLUser.js`,
           ];
 
           const missingResolvers: string[] = [];
@@ -1054,6 +1087,14 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       { ParameterKey: "WebACLArn", ParameterValue: webAclArn },
     ];
 
+    // If we have a resolvers build hash computed earlier, pass it to CloudFormation
+    if (typeof resolversBuildHash !== "undefined" && resolversBuildHash) {
+      stackParams.push({
+        ParameterKey: "ResolversBuildHash",
+        ParameterValue: resolversBuildHash,
+      });
+    }
+
     try {
       // Check if the stack exists
       let stackExists = false;
@@ -1089,8 +1130,11 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         );
 
         // Wait for update to complete
-        logger.info("Waiting for stack update to complete...");
+        const stopUpdateSpinner = logger.infoWithSpinner(
+          "Waiting for stack update to complete...",
+        );
         await waitForStackCompletion(cfn, stackName, "UPDATE");
+        stopUpdateSpinner();
       } else {
         logger.info("Creating new CloudFormation stack...");
         await cfn.send(
@@ -1104,13 +1148,57 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         );
 
         // Wait for creation to complete
-        logger.info("Waiting for stack creation to complete...");
+        const stopCreateSpinner = logger.infoWithSpinner(
+          "Waiting for stack creation to complete...",
+        );
         await waitForStackCompletion(cfn, stackName, "CREATE");
+        stopCreateSpinner();
       }
 
       logger.success(
         `CloudFormation stack ${stackName} deployed/updated successfully`,
       );
+
+      // Always run the user seed shell script after stack deployment
+      try {
+        const scriptsPath = path.join(
+          __dirname,
+          "../../../cloudwatchlive/backend/scripts",
+        );
+        const repoRoot = path.join(__dirname, "../../../../");
+        logger.info(
+          "🌱 Seeding users into DynamoDB (shell script, with AWS env)...",
+        );
+        // Run the seeder from the mono-repo root so any 'source .env' logic resolves
+        // predictably. We explicitly cd to the repo root then run the scripts by
+        // their relative paths to avoid ambiguity with BASH_SOURCE/cwd.
+        let output = "";
+        try {
+          output = execSync(
+            `bash -lc 'cd "${repoRoot}" && source "./set-aws-env.sh" && ./packages/cloudwatchlive/backend/scripts/seed-db.sh'`,
+            {
+              cwd: repoRoot,
+              stdio: options.debugMode ? "inherit" : "pipe",
+              encoding: "utf8",
+            },
+          );
+          logger.success("✓ User table seeded successfully");
+        } catch (seedError: any) {
+          logger.error(
+            `User seeding failed: ${seedError instanceof Error ? seedError.message : seedError}`,
+          );
+          if (seedError.stdout) {
+            logger.error(`[Seeder stdout]:\n${seedError.stdout}`);
+          }
+          if (seedError.stderr) {
+            logger.error(`[Seeder stderr]:\n${seedError.stderr}`);
+          }
+          throw seedError;
+        }
+      } catch (seedError) {
+        // Already logged above
+        throw seedError;
+      }
     } catch (cfnError: any) {
       logger.error(`CloudFormation deployment failed: ${cfnError.message}`);
       throw cfnError;

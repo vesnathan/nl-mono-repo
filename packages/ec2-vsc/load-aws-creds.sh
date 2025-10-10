@@ -2,7 +2,9 @@
 # Script to load AWS credentials from mono-repo root .env file into current terminal
 
 # Path to the root .env file (used for all deployments in mono-repo)
-ROOT_ENV_FILE="../../.env"
+# Resolve relative to this script's location so it works when executed from any CWD
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_ENV_FILE="${SCRIPT_DIR}/../../.env"
 
 # Function to safely exit/return based on how script is called
 safe_exit() {

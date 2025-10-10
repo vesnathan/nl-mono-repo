@@ -1,6 +1,7 @@
 "use client";
 
 import { Progress } from "@nextui-org/react";
+import type { ProgressProps } from "@nextui-org/progress";
 import { LOGIN_PATH } from "@/constants/layout/navigation/navigation";
 import { useUserStore } from "@/stores/userStore";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +12,8 @@ import {
   getCWLUserQueryFn,
   getCWLUserQueryKey,
 } from "../graphql/queries/userQueries";
+
+const ProgressAny = Progress as unknown as React.ComponentType<ProgressProps>;
 
 type Props = PropsWithChildren & {
   userId: string;
@@ -50,7 +53,7 @@ export const CWLUserStoreSetup: FC<Props> = ({ userId, children }) => {
 
   if (isPending) {
     return (
-      <Progress size="sm" isIndeterminate aria-label="Loading user data" />
+      <ProgressAny size="sm" isIndeterminate aria-label="Loading user data" />
     );
   }
 

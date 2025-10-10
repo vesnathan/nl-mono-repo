@@ -63,10 +63,17 @@ export function request(ctx: Context<CreateCWLUserMutationVariables>) {
 
   return {
     operation: "PutItem",
-    key: util.dynamodb.toMapValues({ userId: cognitoSub }), // Use 'userId' as primary key
-    attributeValues: util.dynamodb.toMapValues(newUserItem),
+    key: util.dynamodb.toMapValues({
+      PK: `USER#${cognitoSub}`,
+      SK: `PROFILE#${cognitoSub}`,
+    }),
+    attributeValues: util.dynamodb.toMapValues({
+      PK: `USER#${cognitoSub}`,
+      SK: `PROFILE#${cognitoSub}`,
+      ...newUserItem,
+    }),
     condition: {
-      expression: "attribute_not_exists(userId)", // Ensure user doesn't already exist
+      expression: "attribute_not_exists(PK) AND attribute_not_exists(SK)",
     },
   };
 }

@@ -12,6 +12,9 @@ Parameters:
   TemplateBucketName:
     Type: String
     Description: S3 bucket containing templates and resolvers
+  ResolversBuildHash:
+    Type: String
+    Description: Optional build hash used to version resolver S3 keys (set by deploy script)
   UserPoolId:
     Type: String
     Description: Cognito User Pool ID
@@ -139,7 +142,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Queries/Query.getCWLUser.js" 
+  CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Queries/Query.getCWLUser.js" 
 
   CreateCWLUserResolver:
     Type: AWS::AppSync::Resolver
@@ -173,7 +176,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Functions/Function.createCognitoUser.js"
+  CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.createCognitoUser.js"
 
   CreateUserDynamoDBFunction:
     Type: AWS::AppSync::FunctionConfiguration
@@ -184,7 +187,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Mutations/Mutation.createCWLUser.js"
+  CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Mutations/Mutation.createCWLUser.js"
 
   SendWelcomeEmailFunction:
     Type: AWS::AppSync::FunctionConfiguration
@@ -195,7 +198,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/users/Functions/Function.sendWelcomeEmail.js"
+  CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.sendWelcomeEmail.js"
 
 Outputs:
   CWLAppSyncApiUrl:

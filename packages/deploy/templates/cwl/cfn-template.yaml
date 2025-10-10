@@ -21,6 +21,9 @@ Parameters:
   WebACLArn:
     Type: String
     Description: WAF Web ACL ARN from us-east-1 region
+  ResolversBuildHash:
+    Type: String
+    Description: Optional build hash to version resolver S3 keys
 
 Resources:
   # DynamoDb Tables
@@ -92,6 +95,7 @@ Resources:
         UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
         SendWelcomeEmailFunctionArn: !GetAtt LambdaStack.Outputs.SendWelcomeEmailFunctionArn
         CreateCognitoUserFunctionArn: !GetAtt LambdaStack.Outputs.CreateCognitoUserFunctionArn
+        ResolversBuildHash: !Ref ResolversBuildHash
 
 Outputs:
   ApiUrl:
