@@ -45,16 +45,17 @@ const adjectives = [
   "Briefing",
   "Curated",
 ];
-const images = [
-  "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&h=500&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1515165562835-c6a36e1f1a0b?w=800&h=500&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1526481280698-9689030a0c2b?w=800&h=500&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800&h=500&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&h=500&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=500&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&h=500&auto=format&fit=crop&q=80",
-];
+const fs = require('fs');
+const path = require('path');
+
+// prefer local images from the frontend public images folder
+const localImagesDir = path.join(__dirname, '..', 'frontend', 'public', 'images');
+let images = [];
+try {
+  images = fs.readdirSync(localImagesDir).filter(f => /\.(jpg|jpeg|png|svg)$/i.test(f)).map(f => '/images/' + f);
+} catch (e) {
+  images = ['/images/event-placeholder.svg'];
+}
 
 function choose(arr, i) {
   return arr[i % arr.length];
