@@ -540,6 +540,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
   // Initialize remaining clients
   const s3 = new S3({ region });
   const awsUtils = new AwsUtils(region);
+  // Will be set after resolver compilation; passed to CloudFormation as a parameter
+  let resolversBuildHash: string | undefined = undefined;
 
   // Set up IAM role
   const iamManager = new IamManager(region); // Pass region string to IamManager
@@ -932,9 +934,10 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           constantsDir: constantsDir,
         });
 
+        let resolversBuildHash = "";
         try {
-          // Compile and upload resolvers
-          await resolverCompiler.compileAndUploadResolvers();
+          // Compile and upload resolvers (returns build hash)
+          resolversBuildHash = await resolverCompiler.compileAndUploadResolvers();
 
           // Verify that the resolvers were uploaded successfully
           if (options.debugMode) {
@@ -942,9 +945,11 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           }
 
           // First verification: Check using ListObjectsV2
+          // List objects under the specific build hash prefix to verify uploads
+          const hashedPrefix = `resolvers/${options.stage}/${resolversBuildHash}/`;
           const listCommand = new ListObjectsV2Command({
             Bucket: templateBucketName,
-            Prefix: `resolvers/${options.stage}/`,
+            Prefix: hashedPrefix,
           });
 
           let retryCount = 0;
@@ -984,8 +989,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           // Second verification: Use the S3BucketManager to verify specific resolvers
           // Check for the resolvers we need in the schema
           const keyResolvers = [
-            `resolvers/${options.stage}/users/Queries/Query.getCWLUser.js`,
-            `resolvers/${options.stage}/users/Mutations/Mutation.createCWLUser.js`,
+            `resolvers/${options.stage}/${resolversBuildHash}/users/Queries/Query.getCWLUser.js`,
+            `resolvers/${options.stage}/${resolversBuildHash}/users/Mutations/Mutation.createCWLUser.js`,
           ];
 
           const missingResolvers: string[] = [];
@@ -1081,6 +1086,14 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       { ParameterKey: "WebACLArn", ParameterValue: webAclArn },
     ];
 
+    // If we have a resolvers build hash computed earlier, pass it to CloudFormation
+    if (typeof resolversBuildHash !== "undefined" && resolversBuildHash) {
+      stackParams.push({
+        ParameterKey: "ResolversBuildHash",
+        ParameterValue: resolversBuildHash,
+      });
+    }
+
     try {
       // Check if the stack exists
       let stackExists = false;
@@ -1161,7 +1174,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         let output = "";
         try {
           output = execSync(
-            `bash -lc 'cd "${repoRoot}" && source "./set-aws-env.sh" && ./packages/cloudwatchlive/backend/scripts/seed-users.sh'`,
+            `bash -lc 'cd "${repoRoot}" && source "./set-aws-env.sh" && ./packages/cloudwatchlive/backend/scripts/seed-db.sh'`,
             {
               cwd: repoRoot,
               stdio: options.debugMode ? "inherit" : "pipe",
