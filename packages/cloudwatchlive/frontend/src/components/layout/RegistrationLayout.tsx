@@ -2,10 +2,10 @@ import React from "react";
 import { Card, CardBody } from "@nextui-org/react";
 // Static image import for Next/Image optimization
 import Image from "next/image";
-// Use public image path to avoid Next's sharp native dependency
-const LoginBackground = "/images/login-bg.png";
 import Logo from "@/components/common/Logo";
 import Link from "next/link";
+// Use public image path to avoid Next's sharp native dependency
+const LoginBackground = "/images/login-bg.png";
 
 interface RegistrationLayoutProps {
   children: React.ReactNode;

@@ -1,17 +1,13 @@
 "use client";
 
+import MockEventsRaw from "@cwl/dev-mocks/mockEvents.json"; // canonical dev-mocks
 import Image from "next/image";
 import Link from "next/link";
 import Logo from "@/components/common/Logo";
 import { Button, Card, CardBody } from "@nextui-org/react";
-// Use static image import so Next/Image can optimize the asset (requires sharp/libvips)
 // Use public image path to avoid Next's sharp native dependency during local build.
 // Ensure the image is copied to packages/cloudwatchlive/frontend/public/images/login-bg.png
 const LoginBackground = "/images/login-bg.png";
-// Import canonical backend mock events directly from dev-mocks package
-// Directly import canonical dev-mocks JSON (dev-only, simple static data)
-// eslint-disable-next-line import/no-extraneous-dependencies
-import MockEventsRaw from "@cwl/dev-mocks/mockEvents.json";
 
 const PLACEHOLDER_IMAGE =
   "https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?w=800&h=500&auto=format&fit=crop&q=60";

@@ -1,9 +1,14 @@
 import React from "react";
 import EventPage from "@/components/routes/events/EventPage";
 
-// Inline typed parameters for Next page default export to avoid type alias collisions
-export default function Page(props: any) {
-  const eventId = props?.params?.eventId ?? "";
+// Typed parameters for Next page default export
+export default function Page(props: unknown) {
+  // Narrow unknown to the expected shape without using `any`.
+  const maybeParams = (props as { params?: { eventId?: string } } | undefined)
+    ?.params;
+
+  const eventId = maybeParams?.eventId ?? "";
+
   return <EventPage eventId={String(eventId)} />;
 }
 

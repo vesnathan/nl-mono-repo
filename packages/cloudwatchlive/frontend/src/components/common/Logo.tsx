@@ -1,10 +1,10 @@
 "use client";
 
 import NextImage from "next/image";
+import React from "react";
 // Static import for logo image
 // Use public image path to avoid Next's sharp native dependency
 const LogoImg = "/images/logo.png";
-import React from "react";
 
 interface LogoProps {
   width?: number;
