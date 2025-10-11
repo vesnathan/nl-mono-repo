@@ -399,8 +399,7 @@ class ResolverCompiler {
       `Compiled resolvers will be saved to: ${localSavePathBaseForApp}`,
     );
 
-    const uploadedResolvers: string[] = [];
-    const failedResolvers: { file: string; error: string }[] = [];
+  const failedResolvers: { file: string; error: string }[] = [];
     const compiledFilesRelative: string[] = [];
 
     for (let index = 0; index < totalFiles; index++) {
@@ -433,29 +432,15 @@ class ResolverCompiler {
           resolverAbsolutePath,
         );
 
-        const s3Key = path.posix.join(
-          this.s3KeyPrefix,
-          this.stage,
-          resolverFileRelativePath.replace(".ts", ".js"),
-        );
-
-        // Always save the compiled file locally to the app's deploy package
+        // Determine local save path and persist compiled file for hashing
         const localSavePath = path.join(
           localSavePathBaseForApp,
           resolverFileRelativePath.replace(".ts", ".js"),
         );
         await this.saveCompiledFileLocally(localSavePath, compiledJsContent);
-        // Now, upload the same content to S3, ensuring consistency
-        await this.uploadToS3(
-          s3Key,
-          compiledJsContent,
-          "application/javascript",
-        );
-        logger.success(
-          `✓ Uploaded ${resolverFileRelativePath} to S3: s3://${this.s3BucketName}/${s3Key}`,
-        ); // Essential log
-        uploadedResolvers.push(s3Key);
-        // Record relative JS path for hash computation and secondary upload
+        // Do NOT upload to the non-hashed S3 path here. We'll compute a build hash
+        // and upload the canonical files under the hashed prefix so CloudFormation
+        // references stable, versioned assets only.
         compiledFilesRelative.push(
           resolverFileRelativePath.replace(".ts", ".js"),
         );
@@ -523,9 +508,9 @@ class ResolverCompiler {
     }
 
     // Report summary for primary uploads
-    logger.success(`\n📦 Resolver Upload Summary:`);
+    logger.success(`\n📦 Resolver Compilation Summary:`);
     logger.success(
-      `   ✓ Successfully uploaded: ${uploadedResolvers.length} resolvers`,
+      `   ✓ Successfully compiled: ${compiledFilesRelative.length} resolvers (will be uploaded under hashed prefix)`,
     );
     if (failedResolvers.length > 0) {
       logger.error(
