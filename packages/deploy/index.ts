@@ -145,6 +145,22 @@ class DeploymentManager {
         logger.info(`Removing stack outputs from deployment-outputs.json...`);
         await this.outputsManager.removeStackOutputs(stackType, stage);
         logger.info(`✓ Stack outputs removed from deployment-outputs.json`);
+        // As a best-effort final cleanup step, attempt to delete any conventionally
+        // named buckets that may remain (template buckets, frontend buckets, etc.).
+        try {
+          logger.info(
+            `Attempting final conventional bucket deletion for ${stackName}...`,
+          );
+          await forceDeleteManager.deleteConventionalBuckets(
+            stackIdentifier,
+            stackType,
+            stage,
+          );
+        } catch (bucketErr: any) {
+          logger.warning(
+            `Final conventional bucket deletion for ${stackName} failed (continuing): ${bucketErr.message || bucketErr}`,
+          );
+        }
       } else {
         logger.warning(
           `Stack ${stackName} does not exist in ${region}. Nothing to remove.`,
@@ -154,11 +170,19 @@ class DeploymentManager {
         logger.info(`Checking for orphaned S3 buckets...`);
         const forceDeleteManager = new ForceDeleteManager(region, stage);
         const stackIdentifier = `nlmonorepo-${stackType.toLowerCase()}`;
-        await forceDeleteManager.deleteConventionalBuckets(
-          stackIdentifier,
-          stackType,
-          stage,
-        );
+        // If the stack doesn't exist, still attempt to delete conventional buckets
+        // (this handles cases where the CFN stack was removed but buckets remained).
+        try {
+          await forceDeleteManager.deleteConventionalBuckets(
+            stackIdentifier,
+            stackType,
+            stage,
+          );
+        } catch (bucketErr: any) {
+          logger.warning(
+            `Conventional bucket deletion for orphaned stack ${stackName} failed: ${bucketErr.message || bucketErr}`,
+          );
+        }
       }
     } catch (error: unknown) {
       logger.error(
