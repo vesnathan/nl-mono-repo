@@ -1,0 +1,9 @@
+schema: "../backend/combined_schema.graphql"
+generates:
+  ./src/types/gqlTypes.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+    config:
+      skipTypename: false
+      enumsAsTypes: false

@@ -20,10 +20,10 @@
     "uuid": "^9.0.0"
   },
   "scripts": {
-  "seed:db": "tsx scripts/seed-db.ts",
-  "seed:db:10": "tsx scripts/seed-db.ts 10",
-  "seed:db:25": "tsx scripts/seed-db.ts 25",
-  "seed:db:50": "tsx scripts/seed-db.ts 50"
+    "seed:db": "tsx scripts/seed-db.ts",
+    "seed:db:10": "tsx scripts/seed-db.ts 10",
+    "seed:db:25": "tsx scripts/seed-db.ts 25",
+    "seed:db:50": "tsx scripts/seed-db.ts 50"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",

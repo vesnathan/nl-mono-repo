@@ -25,15 +25,17 @@ Seeds the DynamoDB table with 5 Event Companies containing ~100 users total (all
 ### Prerequisites
 
 - AWS credentials configured
-- AWS CLI installed  
+- AWS CLI installed
 - Either `tsx` or `ts-node` installed globally
 
 Install tsx (recommended):
+
 ```bash
 yarn global add tsx
 ```
 
 Or ts-node:
+
 ```bash
 yarn global add ts-node
 ```
@@ -87,7 +89,7 @@ The script creates **FIXED** Event Company organizational structures with:
 
 - **Organizations**: Separate DynamoDB records for each company
 - **Event Company Main Admins**: Top-level admins with `managedAdminIds` array
-- **Event Company Admins**: Mid-level admins with `managedStaffIds` array  
+- **Event Company Admins**: Mid-level admins with `managedStaffIds` array
 - **Event Company Staff**: Individual staff members
 - All users have:
   - **Deterministic UUIDs** (based on email)
@@ -95,7 +97,7 @@ The script creates **FIXED** Event Company organizational structures with:
   - Deterministic phone numbers (based on email)
   - Proper DynamoDB keys (PK, SK, GSI1PK, GSI1SK)
   - `userType` field indicating their role level
-  
+
 ### Data is FIXED and REPEATABLE
 
 - Same 5 companies every time
@@ -192,6 +194,7 @@ To remove seeded users, you'll need to delete them individually through AWS Cons
 ### Troubleshooting
 
 **Error: AWS credentials not configured**
+
 ```bash
 aws configure
 # or
@@ -200,11 +203,13 @@ export AWS_SECRET_ACCESS_KEY="..."
 ```
 
 **Error: Neither tsx nor ts-node found**
+
 ```bash
 npm install -g tsx
 ```
 
 **Error: Table not found**
+
 - Verify the table name matches your deployment
 - Check the AWS region is correct
 - Ensure you have permissions to write to the table

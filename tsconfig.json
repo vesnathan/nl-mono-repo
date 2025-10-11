@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "gqlTypes": [
+        "packages/aws-example/frontend/src/types/gqlTypes",
+        "packages/cloudwatchlive/frontend/src/types/gqlTypes"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "packages/**/*/src/**/*",
+    "packages/**/*/tsconfig.json"
+  ],
+  "exclude": ["**/frontend/**", "**/*.jsx", "**/*.tsx", "node_modules", "dist"]
+}

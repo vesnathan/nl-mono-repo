@@ -19,9 +19,13 @@ function parseStackType(stackTypeStr: string): StackType {
       return StackType.Shared;
     case "cwl":
       return StackType.CWL;
+    case "aws-example":
+    case "awsexample":
+    case "aws-example":
+      return StackType.AwsExample;
     default:
       throw new Error(
-        `Invalid stack type: ${stackTypeStr}. Must be one of: waf, shared, cwl`,
+        `Invalid stack type: ${stackTypeStr}. Must be one of: waf, shared, cwl, aws-example`,
       );
   }
 }
@@ -106,9 +110,10 @@ program
       const stage = options.stage;
       const maxWaitMinutes = parseInt(options.maxWait);
 
-      // Delete in reverse dependency order: cwl -> shared -> waf
+      // Delete in reverse dependency order: aws-example & cwl -> shared -> waf
       const stackTypes: StackType[] = [
         StackType.CWL,
+        StackType.AwsExample,
         StackType.Shared,
         StackType.WAF,
       ];
@@ -193,7 +198,12 @@ program
 
       const stackTypes = specificType
         ? [specificType]
-        : [StackType.WAF, StackType.Shared, StackType.CWL];
+        : [
+            StackType.WAF,
+            StackType.Shared,
+            StackType.CWL,
+            StackType.AwsExample,
+          ];
 
       logger.info(`Cleaning up S3 buckets for stage ${stage}`);
 
@@ -251,7 +261,12 @@ program
       logger.debug(`Stage: ${stage}, Type: ${specificType}`);
       const stackTypes = specificType
         ? [specificType]
-        : [StackType.WAF, StackType.Shared, StackType.CWL];
+        : [
+            StackType.WAF,
+            StackType.Shared,
+            StackType.CWL,
+            StackType.AwsExample,
+          ];
 
       logger.info(`Checking stack status for stage ${stage}`);
 

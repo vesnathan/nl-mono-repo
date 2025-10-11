@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { useUserStore } from "@/stores/userStore";
-import { ClientType } from "@/types/gqlTypes";
 import {
   Modal,
   ModalBody,
@@ -25,14 +23,6 @@ export const Clients = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [totalSteps] = useState(1);
 
-  const user = useUserStore((state) => state.user);
-  const isSuperAdminUser = user.clientType.includes(ClientType.SuperAdmin);
-
-  // useEffect(() => {
-  //   console.log('Is SuperAdmin User (useEffect):', isSuperAdminUser);
-  //   console.log('User clientType (useEffect):', user.clientType);
-  // }, [user.clientType, isSuperAdminUser]);
-
   // Define a ref for the form. AddUserForm exposes submit() and reset() via useImperativeHandle.
   const addUserFormRef = useRef<{
     submit: () => void;
@@ -40,7 +30,6 @@ export const Clients = () => {
   } | null>(null);
 
   const handleOpenModal = () => {
-    if (isSuperAdminUser) setCurrentForm("SuperAdmin");
     setIsModalOpen(true);
   };
 
@@ -51,9 +40,7 @@ export const Clients = () => {
   };
 
   const handleSubmit = () => {
-    if (currentForm === "SuperAdmin") {
-      addUserFormRef.current?.submit();
-    }
+    addUserFormRef.current?.submit();
   };
 
   const handleNext = async () => {

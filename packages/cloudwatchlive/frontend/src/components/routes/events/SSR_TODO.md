@@ -3,6 +3,7 @@ Server rendering is not yet available for event pages.
 Why SSR? For SEO, social previews, and faster first paint we should render event pages on the server.
 
 Plan (future):
+
 - Move event data lookup into the server component (or into getServerSideProps / app router server layout)
 - Use the shared dev-mocks/mockEvents.json as a source while BE is not available
 - Optionally generate static pages for known event IDs

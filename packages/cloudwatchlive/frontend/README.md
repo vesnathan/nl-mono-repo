@@ -97,12 +97,12 @@ yarn deploy:frontend
 
 ### Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `yarn dev` | Start development server |
-| `yarn build` | Build for production |
+| Command      | Description                     |
+| ------------ | ------------------------------- |
+| `yarn dev`   | Start development server        |
+| `yarn build` | Build for production            |
 | `yarn start` | Start production server (local) |
-| `yarn lint` | Run ESLint |
+| `yarn lint`  | Run ESLint                      |
 
 ### Configuration Files
 
@@ -149,16 +149,19 @@ The frontend uses AWS Cognito for user authentication:
 ### Common Issues
 
 #### Development Server Issues
+
 - **Port conflicts**: Change port with `yarn dev -p 3001`
 - **Missing dependencies**: Run `yarn install` from the monorepo root
 - **Environment issues**: Ensure AWS infrastructure is deployed
 
 #### Build Issues
+
 - **Configuration errors**: Check that deployment outputs are available
 - **TypeScript errors**: Run `yarn lint` to identify issues
 - **Missing GraphQL schema**: Ensure backend is deployed first
 
 #### Deployment Issues
+
 - **S3 upload failures**: Check AWS credentials and S3 bucket permissions
 - **CloudFront caching**: Cache invalidation may take 5-15 minutes
 - **CORS issues**: Verify AppSync API configuration

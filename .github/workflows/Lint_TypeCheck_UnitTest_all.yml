@@ -32,7 +32,7 @@ jobs:
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/yarn.lock', '**/package.json') }}
 
       - name: Yarn Install
-        run: | 
+        run: |
           yarn install --frozen-lockfile
           yarn build-gql
 

@@ -9,7 +9,7 @@ Resources:
     Properties:
       RoleName: !Sub nl-mono-repo-vpc-${Stage}
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -19,7 +19,7 @@ Resources:
       Policies:
         - PolicyName: VPCManagement
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -197,12 +197,12 @@ Outputs:
     Export:
       Name: !Sub shared-assets-sharedSubnet2-${Stage}
 
-  PrivateSubnet1Id: 
+  PrivateSubnet1Id:
     Value: !Ref PrivateSubnet1
     Export:
       Name: !Sub shared-assets-privateSubnet1-${Stage}
 
-  PrivateSubnet2Id: 
+  PrivateSubnet2Id:
     Value: !Ref PrivateSubnet2
     Export:
       Name: !Sub shared-assets-privateSubnet2-${Stage}

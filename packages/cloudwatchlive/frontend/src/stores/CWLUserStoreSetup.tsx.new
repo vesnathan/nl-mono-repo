@@ -54,7 +54,7 @@ export const CWLUserStoreSetup: FC<Props> = ({ userId, children }) => {
           for (const group of cognitoGroups) {
             switch (group) {
               case 'SuperAdmin':
-                mappedClientTypes.push(ClientType.SuperAdmin);
+                mappedClientTypes.push(ClientType.Admin);
                 break;
               case 'EventCompanyAdmin':
                 mappedClientTypes.push(ClientType.EventCompanyAdmin);

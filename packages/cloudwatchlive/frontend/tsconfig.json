@@ -8,9 +8,9 @@
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-  "module": "esnext",
-  "moduleResolution": "node",
-  "resolveJsonModule": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
@@ -43,7 +43,8 @@
     "../../shared/scripts/buildGqlTypesOnBackend.ts",
     "../../shared/scripts/execCommandAsPromise.ts",
     "../../shared/scripts/mergeGraphqlFiles.ts",
-    "../../shared/**/*.ts"
+    "../../shared/**/*.ts",
+    "../../aws-example/frontend/src/components/icons/TinyTickSvgComponent.tsx"
   ],
   "exclude": ["node_modules"]
 }

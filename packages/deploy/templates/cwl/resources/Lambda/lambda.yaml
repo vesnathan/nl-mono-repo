@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Lambda Resources for Application'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Lambda Resources for Application"
 
 Parameters:
   Stage:
@@ -42,7 +42,7 @@ Resources:
       Code:
         ZipFile: |
           const { CloudFront } = require("@aws-sdk/client-cloudfront");
-          
+
           exports.handler = async (event) => {
             console.log('Post front-end deployment handler called');
             
@@ -87,7 +87,7 @@ Resources:
     Properties:
       RoleName: !Sub "nlmonorepo-${AppName}-postdeploy-role-${Stage}" # Simplified and parameterized
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -98,7 +98,7 @@ Resources:
       Policies:
         - PolicyName: CloudFrontInvalidation
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -128,7 +128,7 @@ Resources:
     Properties:
       RoleName: !Sub "nlmonorepo-${AppName}-send-welcome-email-role-${Stage}"
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -139,7 +139,7 @@ Resources:
       Policies:
         - PolicyName: SESEmailSending
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -168,7 +168,7 @@ Resources:
     Properties:
       RoleName: !Sub "nlmonorepo-${AppName}-create-cognito-user-role-${Stage}"
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -179,7 +179,7 @@ Resources:
       Policies:
         - PolicyName: CognitoUserManagement
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -192,7 +192,7 @@ Outputs:
   PostDeployFunctionArn: # Renamed from PostFrontEndDeployFunctionArn
     Value: !GetAtt PostDeployFunction.Arn
     Description: ARN of the post-deploy Lambda function
-  
+
   PostDeployFunctionName: # Renamed from PostFrontEndDeployFunctionName
     Value: !Ref PostDeployFunction
     Description: Name of the post-deploy Lambda function
@@ -202,7 +202,7 @@ Outputs:
     Description: ARN of the send welcome email Lambda function
     Export:
       Name: !Sub "${AppName}-SendWelcomeEmailFunctionArn-${Stage}"
-  
+
   SendWelcomeEmailFunctionName:
     Value: !Ref SendWelcomeEmailFunction
     Description: Name of the send welcome email Lambda function
@@ -212,7 +212,7 @@ Outputs:
     Description: ARN of the create Cognito user Lambda function
     Export:
       Name: !Sub "${AppName}-CreateCognitoUserFunctionArn-${Stage}"
-  
+
   CreateCognitoUserFunctionName:
     Value: !Ref CreateCognitoUserFunction
     Description: Name of the create Cognito user Lambda function

@@ -6,8 +6,8 @@ All UUIDs are generated using UUIDv5 (deterministic) based on email addresses.
 ## UUID Generation
 
 ```typescript
-import { v5 as uuidv5 } from 'uuid';
-const UUID_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8'; // Standard DNS namespace
+import { v5 as uuidv5 } from "uuid";
+const UUID_NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"; // Standard DNS namespace
 
 // Generate user ID from email
 function generateUserId(email: string): string {
@@ -22,12 +22,12 @@ function generateOrgId(companyName: string): string {
 
 ## Organizations
 
-| Company Name | Organization ID |
-|---|---|
-| Elite Events Co. | `e3f4b5c6-d7e8-5f90-a1b2-c3d4e5f67890` (generated from name) |
-| Premier Productions | `a1b2c3d4-e5f6-5789-0abc-def012345678` (generated from name) |
-| Global Event Solutions | `1234abcd-5678-5ef0-1234-567890abcdef` (generated from name) |
-| Stellar Events Group | `fedcba98-7654-5321-0fed-cba987654321` (generated from name) |
+| Company Name             | Organization ID                                              |
+| ------------------------ | ------------------------------------------------------------ |
+| Elite Events Co.         | `e3f4b5c6-d7e8-5f90-a1b2-c3d4e5f67890` (generated from name) |
+| Premier Productions      | `a1b2c3d4-e5f6-5789-0abc-def012345678` (generated from name) |
+| Global Event Solutions   | `1234abcd-5678-5ef0-1234-567890abcdef` (generated from name) |
+| Stellar Events Group     | `fedcba98-7654-5321-0fed-cba987654321` (generated from name) |
 | Dynamic Event Management | `abcd1234-efgh-5678-ijkl-9012mnop3456` (generated from name) |
 
 ## Sample Users (use the email to generate UUID)
@@ -35,15 +35,18 @@ function generateOrgId(companyName: string): string {
 ###Elite Events Co.
 
 **Main Admin:**
+
 - Email: `sarah.johnson@eliteevents.com`
 - UUID: Generate via `uuidv5('sarah.johnson@eliteevents.com', UUID_NAMESPACE)`
 
 **Admins:**
+
 - `michael.chen@eliteevents.com`
 - `jennifer.martinez@eliteevents.com`
 - `robert.davis@eliteevents.com`
 
 **Sample Staff:**
+
 - `emily.rodriguez@eliteevents.com`
 - `david.kim@eliteevents.com`
 - `jessica.patel@eliteevents.com`
@@ -52,14 +55,17 @@ function generateOrgId(companyName: string): string {
 ### Premier Productions
 
 **Main Admin:**
+
 - Email: `james.robertson@premierproductions.com`
 
 **Admins:**
+
 - `catherine.hughes@premierproductions.com`
 - `elizabeth.cooper@premierproductions.com`
 - `william.brooks@premierproductions.com`
 
 **Sample Staff:**
+
 - `andrew.foster@premierproductions.com`
 - `rachel.bennett@premierproductions.com`
 - `kevin.murphy@premierproductions.com`
@@ -68,14 +74,17 @@ function generateOrgId(companyName: string): string {
 ### Global Event Solutions
 
 **Main Admin:**
+
 - Email: `patricia.nelson@globalevents.com`
 
 **Admins:**
+
 - `thomas.mitchell@globalevents.com`
 - `linda.evans@globalevents.com`
 - `richard.cook@globalevents.com`
 
 **Sample Staff:**
+
 - `emma.roberts@globalevents.com`
 - `jacob.turner@globalevents.com`
 - `abigail.phillips@globalevents.com`
@@ -84,14 +93,17 @@ function generateOrgId(companyName: string): string {
 ### Stellar Events Group
 
 **Main Admin:**
+
 - Email: `mark.harrison@stellarevents.com`
 
 **Admins:**
+
 - `angela.peterson@stellarevents.com`
 - `barbara.kelly@stellarevents.com`
 - `charles.ross@stellarevents.com`
 
 **Sample Staff:**
+
 - `connor.gray@stellarevents.com`
 - `natalie.ramirez@stellarevents.com`
 - `aaron.james@stellarevents.com`
@@ -100,14 +112,17 @@ function generateOrgId(companyName: string): string {
 ### Dynamic Event Management
 
 **Main Admin:**
+
 - Email: `margaret.foster@dynamicevents.com`
 
 **Admins:**
+
 - `steven.butler@dynamicevents.com`
 - `nancy.hayes@dynamicevents.com`
 - `paul.reynolds@dynamicevents.com`
 
 **Sample Staff:**
+
 - `evelyn.simmons@dynamicevents.com`
 - `christian.foster@dynamicevents.com`
 - `aubrey.russell@dynamicevents.com`
@@ -125,10 +140,10 @@ function generateOrgId(companyName: string): string {
 
 ```typescript
 // Example: Get Elite Events Main Admin UUID
-import { v5 as uuidv5 } from 'uuid';
+import { v5 as uuidv5 } from "uuid";
 
-const UUID_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
-const mainAdminEmail = 'sarah.johnson@eliteevents.com';
+const UUID_NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+const mainAdminEmail = "sarah.johnson@eliteevents.com";
 const mainAdminUserId = uuidv5(mainAdminEmail, UUID_NAMESPACE);
 
 console.log(mainAdminUserId); // Always the same UUID
@@ -137,12 +152,14 @@ console.log(mainAdminUserId); // Always the same UUID
 ## DynamoDB Keys
 
 ### Organization
+
 - **PK:** `ORG#<organizationId>`
 - **SK:** `METADATA#<organizationId>`
 - **GSI1PK:** `ORGTYPE#EventCompany`
 - **GSI1SK:** `ORG#<organizationId>`
 
 ### User
+
 - **PK:** `USER#<userId>`
 - **SK:** `PROFILE#<userId>`
 - **GSI1PK:** `ORG#<organizationId>`
@@ -151,6 +168,7 @@ console.log(mainAdminUserId); // Always the same UUID
 ## Fields
 
 ### Organization Fields
+
 - `organizationId` - UUID (deterministic from name)
 - `organizationName` - Company name
 - `organizationType` - "EventCompany"
@@ -160,6 +178,7 @@ console.log(mainAdminUserId); // Always the same UUID
 - `organizationCreated` - ISO timestamp
 
 ### User Fields
+
 - `userId` - UUID (deterministic from email)
 - `organizationId` - UUID of organization
 - `userEmail` - Email address (unique)
