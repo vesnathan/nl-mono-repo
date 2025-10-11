@@ -250,8 +250,12 @@ export class ForceDeleteManager {
       try {
         // Check if bucket exists before attempting to delete
         await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
-        logger.info(`Bucket ${bucketName} exists. Attempting to delete (attempt ${attempt}/${maxAttempts})...`);
-        await this.s3Client.send(new DeleteBucketCommand({ Bucket: bucketName }));
+        logger.info(
+          `Bucket ${bucketName} exists. Attempting to delete (attempt ${attempt}/${maxAttempts})...`,
+        );
+        await this.s3Client.send(
+          new DeleteBucketCommand({ Bucket: bucketName }),
+        );
         logger.info(`Successfully deleted S3 bucket ${bucketName}.`);
         return;
       } catch (error: any) {
@@ -261,7 +265,9 @@ export class ForceDeleteManager {
           error.name === "NotFound" ||
           (error.$metadata && error.$metadata.httpStatusCode === 404)
         ) {
-          logger.info(`S3 bucket ${bucketName} does not exist, skipping deletion.`);
+          logger.info(
+            `S3 bucket ${bucketName} does not exist, skipping deletion.`,
+          );
           return;
         }
 
@@ -292,7 +298,10 @@ export class ForceDeleteManager {
             if (objs.Contents && objs.Contents.length > 0) {
               const ids = objs.Contents.map((o) => ({ Key: o.Key! }));
               await this.s3Client.send(
-                new DeleteObjectsCommand({ Bucket: bucketName, Delete: { Objects: ids } }),
+                new DeleteObjectsCommand({
+                  Bucket: bucketName,
+                  Delete: { Objects: ids },
+                }),
               );
               logger.info(
                 `Deleted ${ids.length} non-versioned objects from ${bucketName} as fallback.`,

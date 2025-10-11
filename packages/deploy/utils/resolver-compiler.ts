@@ -342,24 +342,24 @@ class ResolverCompiler {
     let jsContent = await fsPromises.readFile(compiledJsPath, "utf-8");
     jsContent = this.addHeaderToJs(jsContent, sourceFilePath);
 
-      // Save locally for debugging, but do NOT persist into tracked package folders.
-      // Use a repo-local cache directory that is git-ignored: .cache/deploy/<app>/lib
-      if (this.sharedFileS3Key) {
-        const appName = this.getAppName();
-        const monorepoRoot = path.join(__dirname, "..", "..", "..", "..");
-        const localSavePathBaseForApp = path.join(
-          monorepoRoot,
-          ".cache",
-          "deploy",
-          appName,
-          "lib",
-        );
-        const localSavePath = path.join(
-          localSavePathBaseForApp,
-          this.sharedFileS3Key,
-        );
-        await this.saveCompiledFileLocally(localSavePath, jsContent);
-      }
+    // Save locally for debugging, but do NOT persist into tracked package folders.
+    // Use a repo-local cache directory that is git-ignored: .cache/deploy/<app>/lib
+    if (this.sharedFileS3Key) {
+      const appName = this.getAppName();
+      const monorepoRoot = path.join(__dirname, "..", "..", "..", "..");
+      const localSavePathBaseForApp = path.join(
+        monorepoRoot,
+        ".cache",
+        "deploy",
+        appName,
+        "lib",
+      );
+      const localSavePath = path.join(
+        localSavePathBaseForApp,
+        this.sharedFileS3Key,
+      );
+      await this.saveCompiledFileLocally(localSavePath, jsContent);
+    }
 
     await this.uploadToS3(targetS3Key, jsContent, "application/javascript");
     logger.success(
