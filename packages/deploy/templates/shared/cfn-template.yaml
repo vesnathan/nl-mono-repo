@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Shared AWS resources for NL Mono Repo applications'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Shared AWS resources for NL Mono Repo applications"
 
 Parameters:
   Stage:

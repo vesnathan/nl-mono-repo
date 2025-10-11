@@ -6,24 +6,16 @@
   "dependencies": {
     "@aws-appsync/utils": "^1.10.1",
     "@aws-sdk/client-cloudformation": "3.669.0",
-    "@aws-sdk/client-cloudfront": "3.669.0",
     "@aws-sdk/client-cognito-identity-provider": "3.669.0",
     "@aws-sdk/client-dynamodb": "3.669.0",
-    "@aws-sdk/client-s3": "3.669.0",
-    "@aws-sdk/client-ses": "3.669.0",
     "@aws-sdk/lib-dynamodb": "3.669.0",
-    "@aws-sdk/s3-presigned-post": "3.669.0",
-    "@aws-sdk/s3-request-presigner": "3.669.0",
     "@aws-sdk/util-dynamodb": "3.669.0",
     "@types/uuid": "^9.0.0",
     "shared": "*",
     "uuid": "^9.0.0"
   },
   "scripts": {
-    "seed:db": "tsx scripts/seed-db.ts",
-    "seed:db:10": "tsx scripts/seed-db.ts 10",
-    "seed:db:25": "tsx scripts/seed-db.ts 25",
-    "seed:db:50": "tsx scripts/seed-db.ts 50"
+    "seed:db": "tsx scripts/seed-db.ts"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",

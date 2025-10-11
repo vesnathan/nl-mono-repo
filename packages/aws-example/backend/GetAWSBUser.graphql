@@ -2,7 +2,6 @@
 query GetAWSBUser($userId: String!) {
   getAWSBUser(userId: $userId) {
     userId
-    organizationId
     privacyPolicy
     termsAndConditions
     userAddedById
@@ -12,7 +11,6 @@ query GetAWSBUser($userId: String!) {
     userFirstName
     userLastName
     userPhone
-    userRole
     clientType
   }
 }

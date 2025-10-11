@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'CloudWatch Live Cognito User Pool Resources'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudWatch Live Cognito User Pool Resources"
 
 Parameters:
   Stage:
@@ -19,7 +19,7 @@ Resources:
       Policies:
         PasswordPolicy:
           MinimumLength: 8
-      MfaConfiguration: 'OFF'
+      MfaConfiguration: "OFF"
       UserPoolTags:
         Stack: !Sub "nlmonorepo-cwl-${Stage}"
 
@@ -53,7 +53,7 @@ Resources:
     Properties:
       RoleName: !Sub "nlmonorepo-cwl-authenticated-role-${Stage}"
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:

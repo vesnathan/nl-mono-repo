@@ -23,8 +23,6 @@ export const CREATE_AWSB_USER = /* GraphQL */ `
       userPhone
       userTitle
       userCreated
-      organizationId
-      userRole
     }
   }
 `;

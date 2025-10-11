@@ -24,7 +24,7 @@ export const AWSBUserStoreSetup: FC<Props> = ({ userId, children }) => {
   const router = useRouter();
   
   // We'll always set a default client type
-  const [clientTypes, setClientTypes] = useState<ClientType[]>([ClientType.Visitor]);
+  const [clientTypes, setClientTypes] = useState<ClientType[]>([ClientType.UnauthenticatedUser]);
 
   const queryKey = getAWSBUserQueryKey(userId);
 
@@ -50,22 +50,19 @@ export const AWSBUserStoreSetup: FC<Props> = ({ userId, children }) => {
           
           // Map Cognito groups to ClientType enum values
           const mappedClientTypes: ClientType[] = [];
-          
+
           for (const group of cognitoGroups) {
-            // Normalize legacy group names into the two allowed ClientType values
+            // Map Cognito groups to ClientType values
             switch (group) {
-              case 'SuperAdmin':
-              case 'EventCompanyAdmin':
-              case 'EventCompanyMainAdmin':
-              case 'EventCompanyStaff':
-              case 'TechCompanyAdmin':
-              case 'TechCompanyStaff':
-                mappedClientTypes.push(ClientType.Admin);
+              case 'SiteAdmin':
+                mappedClientTypes.push(ClientType.SiteAdmin);
                 break;
-              case 'RegisteredAttendee':
-              case 'UnregisteredAttendee':
+              case 'AuthenticatedUser':
+                mappedClientTypes.push(ClientType.AuthenticatedUser);
+                break;
+              case 'UnauthenticatedUser':
               default:
-                mappedClientTypes.push(ClientType.Visitor);
+                mappedClientTypes.push(ClientType.UnauthenticatedUser);
                 break;
             }
           }

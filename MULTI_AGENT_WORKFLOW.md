@@ -1,9 +1,11 @@
 # Multi-Agent Development Workflow for nl-mono-repo
 
 ## Overview
+
 This guide demonstrates how to run multiple AI coding agents simultaneously on this monorepo using Git worktrees. This enables true parallel development with complete isolation - like having multiple developers working on different features simultaneously.
 
 ## Why Git Worktrees?
+
 - **Complete isolation**: Each agent has its own file system, no file conflicts
 - **Separate branches**: Clean Git separation for each agent's work
 - **Shared Git history**: Same repository, different working directories
@@ -64,7 +66,9 @@ code /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo -n
 ## Recommended Agent Responsibilities
 
 ### Agent 1: Backend & Infrastructure
+
 **Primary Focus:**
+
 - `packages/cloudwatchlive/backend/`
   - Lambda functions (`lambda/`)
   - AppSync resolvers (`resolvers/`)
@@ -75,6 +79,7 @@ code /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo -n
   - Infrastructure as Code
 
 **Typical Tasks:**
+
 - Create new Lambda functions
 - Update AppSync pipeline resolvers
 - Modify CloudFormation resources
@@ -82,7 +87,9 @@ code /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo -n
 - Database schema changes
 
 ### Agent 2: Frontend & UI
+
 **Primary Focus:**
+
 - `packages/cloudwatchlive/frontend/`
   - React components (`src/components/`)
   - Pages and routing (`src/app/`)
@@ -93,6 +100,7 @@ code /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo -n
   - Form validation schemas
 
 **Typical Tasks:**
+
 - Create new UI components
 - Implement form handling
 - Add new routes/pages
@@ -100,7 +108,9 @@ code /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo -n
 - Frontend GraphQL integration
 
 ### Agent 3: DevOps & Testing (Optional)
+
 **Primary Focus:**
+
 - CI/CD configuration
 - Testing infrastructure
 - Build optimization
@@ -228,6 +238,7 @@ git push origin agent2/frontend-work
 ```
 
 Then create PRs on GitHub:
+
 1. Review each PR independently
 2. Run CI/CD checks
 3. Merge when approved
@@ -242,12 +253,14 @@ Then create PRs on GitHub:
 If both agents need to modify `packages/shared/`:
 
 **Option A: Sequential**
+
 1. Agent 1 completes shared changes first
 2. Agent 1 pushes and merges
 3. Agent 2 pulls changes: `git pull origin main`
 4. Agent 2 continues with updated shared code
 
 **Option B: Communication**
+
 - Document intended changes in shared modules
 - One agent "claims" a shared module for the sprint
 - Use separate files when possible
@@ -294,6 +307,7 @@ This allows both agents to merge incomplete features safely.
 ## Management Commands
 
 ### List All Worktrees
+
 ```bash
 git worktree list
 
@@ -304,6 +318,7 @@ git worktree list
 ```
 
 ### Remove Worktrees When Complete
+
 ```bash
 # After merging, clean up
 git worktree remove /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo-backend
@@ -319,6 +334,7 @@ git push origin --delete agent2/frontend-work
 ```
 
 ### Prune Deleted Worktrees
+
 ```bash
 # If you manually deleted worktree directories
 git worktree prune
@@ -402,7 +418,7 @@ Each agent should update relevant documentation:
 - Document new Lambda functions
 - Update API documentation
 
-# Agent 2  
+# Agent 2
 - Update component storybook
 - Document new props/hooks
 - Update user-facing docs
@@ -430,12 +446,14 @@ Create a `WORKTREE_LOG.md` to track agent activities:
 ## 2025-10-09
 
 ### Agent 1 (Backend) - branch: agent1/user-auth
+
 - ✅ Created createCognitoUser Lambda
 - ✅ Added AppSync pipeline resolver
 - 🔄 In progress: Email verification flow
-- ⏸️  Blocked: Waiting for SES sandbox approval
+- ⏸️ Blocked: Waiting for SES sandbox approval
 
 ### Agent 2 (Frontend) - branch: agent2/login-ui
+
 - ✅ Created LoginForm component
 - ✅ Added form validation
 - 🔄 In progress: Password reset flow
@@ -449,6 +467,7 @@ Create a `WORKTREE_LOG.md` to track agent activities:
 Let's implement a "User Profile" feature using two agents:
 
 ### Setup
+
 ```bash
 cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo
 git worktree add ../nl-mono-repo-profile-backend -b agent1/user-profile-backend
@@ -462,6 +481,7 @@ code /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo-profile-frontend -n
 ```
 
 ### Agent 1: Backend Implementation
+
 ```bash
 # AI Agent tasks in backend worktree:
 # 1. Create Lambda: updateUserProfile.ts
@@ -476,6 +496,7 @@ git push origin agent1/user-profile-backend
 ```
 
 ### Agent 2: Frontend Implementation
+
 ```bash
 # AI Agent tasks in frontend worktree:
 # 1. Create ProfileSettings component
@@ -491,6 +512,7 @@ git push origin agent2/user-profile-frontend
 ```
 
 ### Integration
+
 ```bash
 # Create PRs for both branches
 # Review and merge agent1/user-profile-backend first
@@ -504,6 +526,7 @@ yarn deploy
 ```
 
 ### Cleanup
+
 ```bash
 git worktree remove ../nl-mono-repo-profile-backend
 git worktree remove ../nl-mono-repo-profile-frontend
@@ -516,6 +539,7 @@ git branch -d agent2/user-profile-frontend
 ## Summary
 
 **Multi-agent worktree workflow provides:**
+
 - ✅ Complete isolation between agents
 - ✅ No file conflicts or locking issues
 - ✅ Independent testing and development
@@ -524,6 +548,7 @@ git branch -d agent2/user-profile-frontend
 - ✅ Clean separation of frontend/backend work
 
 **Remember:**
+
 1. Each worktree is a separate developer's workspace
 2. Review work before merging (like reviewing PR from team member)
 3. Test integrated changes after merging

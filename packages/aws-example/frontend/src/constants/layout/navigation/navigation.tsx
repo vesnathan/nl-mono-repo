@@ -17,13 +17,6 @@ interface SidebarItems {
 }
 
 export const mainNavConfig = {
-  dashboard: {
-    title: "Dashboard",
-    path: "/dashboard",
-    icon: () => {
-      return <Icon icon="clarity:dashboard-line" />;
-    },
-  },
   logout: {
     title: "Log out",
     path: "/logout",
@@ -33,4 +26,4 @@ export const mainNavConfig = {
   },
 } as const satisfies SidebarItems;
 
-export const DEFAULT_REDIRECT_PATH = mainNavConfig.dashboard.path;
+export const DEFAULT_REDIRECT_PATH = "/";

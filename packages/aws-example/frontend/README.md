@@ -97,12 +97,12 @@ yarn deploy:frontend
 
 ### Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `yarn dev` | Start development server |
-| `yarn build` | Build for production |
+| Command      | Description                     |
+| ------------ | ------------------------------- |
+| `yarn dev`   | Start development server        |
+| `yarn build` | Build for production            |
 | `yarn start` | Start production server (local) |
-| `yarn lint` | Run ESLint |
+| `yarn lint`  | Run ESLint                      |
 
 ### Configuration Files
 
@@ -126,7 +126,7 @@ The frontend uses AWS Cognito for user authentication:
 - **Login/Logout**: Cognito-hosted UI or custom components
 - **Token Management**: Automatic refresh and validation
 - **Role-based Access**: SuperAdmin, Admin, and User roles
-- **Multi-tenant Support**: Organization-based access control
+- **Multi-tenant Support**: (removed) application focuses on single-tenant user roles
 
 ## 🎨 UI/UX
 
@@ -140,7 +140,7 @@ The frontend uses AWS Cognito for user authentication:
 ### Key Components
 
 - **Log Viewer**: Real-time log streaming with filtering
-- **User Management**: Admin interface for user and organization management
+- **User Management**: Admin interface for user management
 - **Dashboard**: Overview of log activity and system status
 - **Settings**: Configuration and preference management
 
@@ -149,16 +149,19 @@ The frontend uses AWS Cognito for user authentication:
 ### Common Issues
 
 #### Development Server Issues
+
 - **Port conflicts**: Change port with `yarn dev -p 3001`
 - **Missing dependencies**: Run `yarn install` from the monorepo root
 - **Environment issues**: Ensure AWS infrastructure is deployed
 
 #### Build Issues
+
 - **Configuration errors**: Check that deployment outputs are available
 - **TypeScript errors**: Run `yarn lint` to identify issues
 - **Missing GraphQL schema**: Ensure backend is deployed first
 
 #### Deployment Issues
+
 - **S3 upload failures**: Check AWS credentials and S3 bucket permissions
 - **CloudFront caching**: Cache invalidation may take 5-15 minutes
 - **CORS issues**: Verify AppSync API configuration

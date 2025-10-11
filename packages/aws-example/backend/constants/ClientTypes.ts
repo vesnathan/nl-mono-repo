@@ -1,7 +1,7 @@
 /**
  * AWSB Client Types - Single Source of Truth
  *
- * This file defines all client types used throughout the CloudWatch Live application.
+ * This file defines all client types used throughout the AWS Example application.
  * Any changes to client types should be made here and will automatically
  * propagate to:
  * - GraphQL schema enum
@@ -20,52 +20,22 @@ export interface ClientTypeDefinition {
 
 export const AWSB_CLIENT_TYPES: readonly ClientTypeDefinition[] = [
   {
-    id: "SuperAdmin",
-    value: "SuperAdmin",
-    displayName: "Super Admin",
-    description: "Full system administrator access",
+    id: "SiteAdmin",
+    value: "SiteAdmin",
+    displayName: "Site Admin",
+    description: "Site administrator with full access",
   },
   {
-    id: "EventCompanyMainAdmin",
-    value: "EventCompanyMainAdmin",
-    displayName: "Event Company Main Admin",
-    description: "Main administrator managing Event Company Admins",
+    id: "AuthenticatedUser",
+    value: "AuthenticatedUser",
+    displayName: "Authenticated User",
+    description: "Authenticated user",
   },
   {
-    id: "EventCompanyAdmin",
-    value: "EventCompanyAdmin",
-    displayName: "Event Company Admin",
-    description: "Event company administrator managing staff",
-  },
-  {
-    id: "EventCompanyStaff",
-    value: "EventCompanyStaff",
-    displayName: "Event Company Staff",
-    description: "Event company staff member",
-  },
-  {
-    id: "TechCompanyAdmin",
-    value: "TechCompanyAdmin",
-    displayName: "Tech Company Admin",
-    description: "Technology company administrator",
-  },
-  {
-    id: "TechCompanyStaff",
-    value: "TechCompanyStaff",
-    displayName: "Tech Company Staff",
-    description: "Technology company staff member",
-  },
-  {
-    id: "RegisteredAttendee",
-    value: "RegisteredAttendee",
-    displayName: "Registered Attendee",
-    description: "Registered event attendee",
-  },
-  {
-    id: "UnregisteredAttendee",
-    value: "UnregisteredAttendee",
-    displayName: "Unregistered Attendee",
-    description: "Unregistered event attendee",
+    id: "UnauthenticatedUser",
+    value: "UnauthenticatedUser",
+    displayName: "Unauthenticated User",
+    description: "Guest user without authentication",
   },
 ] as const;
 

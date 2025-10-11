@@ -16,7 +16,7 @@ export class DependencyValidator {
     [StackType.WAF]: [], // WAF has no dependencies
     [StackType.Shared]: [StackType.WAF], // Shared depends on WAF
     [StackType.CWL]: [StackType.WAF, StackType.Shared], // CWL depends on both WAF and Shared
-    [StackType.AWS_EXAMPLE]: [StackType.Shared], // aws-example depends on Shared
+    [StackType.AwsExample]: [StackType.Shared], // aws-example depends on Shared
   };
 
   // Define which stacks are dependent on each stack
@@ -24,7 +24,7 @@ export class DependencyValidator {
     [StackType.WAF]: [StackType.Shared, StackType.CWL], // WAF is required by Shared and CWL
     [StackType.Shared]: [StackType.CWL], // Shared is required by CWL
     [StackType.CWL]: [], // CWL has no dependents
-    [StackType.AWS_EXAMPLE]: [], // aws-example has no dependents
+    [StackType.AwsExample]: [], // aws-example has no dependents
   };
 
   constructor() {
@@ -223,7 +223,7 @@ export function getDependencyChain(target: StackType): StackType[] {
     [StackType.WAF]: [],
     [StackType.Shared]: [StackType.WAF],
     [StackType.CWL]: [StackType.WAF, StackType.Shared],
-    [StackType.AWS_EXAMPLE]: [StackType.Shared],
+    [StackType.AwsExample]: [StackType.Shared],
   };
 
   const ordered: StackType[] = [];

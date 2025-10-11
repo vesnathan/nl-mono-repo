@@ -1,6 +1,16 @@
+type S3Object {
+  Bucket: String!
+  Key: String!
+}
+
+enum ClientType {
+  SiteAdmin
+  AuthenticatedUser
+  UnauthenticatedUser
+}
+
 type AWSBUser @aws_cognito_user_pools {
   userId: String!
-  organizationId: String!
   privacyPolicy: Boolean!
   termsAndConditions: Boolean!
   userAddedById: String!
@@ -10,9 +20,9 @@ type AWSBUser @aws_cognito_user_pools {
   userFirstName: String!
   userLastName: String!
   userPhone: String!
-  userRole: String!
   clientType: [ClientType!]!
   userProfilePicture: S3Object
+
 }
 
 input AWSBUserInput {
@@ -21,7 +31,6 @@ input AWSBUserInput {
   userFirstName: String!
   userLastName: String!
   userPhone: String!
-  organizationId: String!
-  userRole: String!
   sendWelcomeEmail: Boolean
+
 }

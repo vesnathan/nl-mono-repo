@@ -140,7 +140,7 @@ async function deployAll() {
     }
 
     // Deploy aws-example and its dependencies (e.g., Shared)
-    const exampleChain = getDependencyChain(StackType.AWS_EXAMPLE);
+    const exampleChain = getDependencyChain(StackType.AwsExample);
     logger.info(`aws-example dependency chain: ${exampleChain.join(" → ")}`);
     for (const stack of exampleChain) {
       const exists = await outputsManager.validateStackExists(
@@ -159,7 +159,7 @@ async function deployAll() {
         await deployShared({ ...deploymentOptions });
       } else if (stack === StackType.CWL) {
         await deployCwl(deploymentOptions);
-      } else if (stack === StackType.AWS_EXAMPLE) {
+      } else if (stack === StackType.AwsExample) {
         await deployAwsExample(deploymentOptions);
       }
       logger.success(`${stack} deployed`);

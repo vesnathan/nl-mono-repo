@@ -8,14 +8,12 @@ const createDefaultAWSBUser = (): AWSBUser => ({
   userFirstName: "",
   userLastName: "",
   userCreated: "",
-  organizationId: "",
   privacyPolicy: false,
   termsAndConditions: false,
   userAddedById: "",
   clientType: [],
   userTitle: "",
   userPhone: "",
-  userRole: "",
 });
 
 // --------------------user store-----------

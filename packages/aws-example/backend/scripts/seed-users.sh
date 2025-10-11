@@ -17,11 +17,10 @@ echo "[DEBUG] AWS CLI version: $(aws --version 2>&1 || echo 'not found')"
 echo "[DEBUG] Environment variables:"
 env | grep -E 'AWS|STAGE|TABLE|NODE|YARN' | sort
 
-# Script to seed DynamoDB with FIXED AWSB users (Event Companies with hierarchical structure)
-# This script uses DETERMINISTIC UUIDs - the same names always generate the same UUIDs
+# Script to seed DynamoDB with simple test users
+# This script uses DETERMINISTIC UUIDs - the same emails always generate the same UUIDs
 # This allows other repos to reference these users by email/UUID
 # Usage: ./seed-users.sh
-# No parameters needed - creates 5 companies with 100 users total (all predefined)
 
 set -e
 
@@ -32,7 +31,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🌱 AWSB User Seeding Script${NC}"
+echo -e "${BLUE}🌱 AWS Example User Seeding Script${NC}"
 echo "[DEBUG] Script directory: $(dirname "$0")"
 echo ""
 
@@ -44,8 +43,6 @@ if ! aws sts get-caller-identity > /dev/null 2>&1; then
 fi
 
 echo -e "${GREEN}✅ AWS credentials verified${NC}"
-
-# No parameters needed - all data is fixed and deterministic!
 
 # Get current AWS region
 AWS_REGION=${AWS_REGION:-$(aws configure get region)}
@@ -60,52 +57,38 @@ STAGE=${STAGE:-"dev"}
 TABLE_NAME=$(aws cloudformation list-exports \
     --region "$AWS_REGION" \
     --query "Exports[?Name=='awsbUserTableName-${STAGE}'].Value" \
-    --output text 2>/dev/null || echo "nlmonorepo-shared-usertable-${STAGE}")
+    --output text 2>/dev/null || echo "nlmonorepo-awsb-datatable-${STAGE}")
 
 echo ""
 echo -e "${BLUE}Configuration:${NC}"
-echo -e "  Region:          ${YELLOW}${AWS_REGION}${NC}"
-echo -e "  Stage:           ${YELLOW}${STAGE}${NC}"
-echo -e "  Table:           ${YELLOW}${TABLE_NAME}${NC}"
-echo -e "  Event Companies: ${YELLOW}5${NC} (fixed)"
-echo -e "  Total Users:     ${YELLOW}~100${NC} (fixed)"
-echo -e "  UUID Mode:       ${YELLOW}Deterministic${NC} (same every time)"
-echo -e "  Total Users:        ${YELLOW}$((NUM_COMPANIES * (1 + ADMINS_PER_COMPANY + ADMINS_PER_COMPANY * STAFF_PER_ADMIN)))${NC}"
+echo -e "  Region:      ${YELLOW}${AWS_REGION}${NC}"
+echo -e "  Stage:       ${YELLOW}${STAGE}${NC}"
+echo -e "  Table:       ${YELLOW}${TABLE_NAME}${NC}"
+echo -e "  Total Users: ${YELLOW}6${NC} (fixed)"
+echo -e "  UUID Mode:   ${YELLOW}Deterministic${NC} (same every time)"
 if [ -n "$SUPER_ADMIN_USER_ID" ]; then
-    echo -e "  Super Admin ID:     ${YELLOW}${SUPER_ADMIN_USER_ID}${NC}"
+    echo -e "  Super Admin ID: ${YELLOW}${SUPER_ADMIN_USER_ID}${NC}"
 fi
 echo ""
 
+echo -e "${YELLOW}Proceeding with seeding automatically${NC}"
+echo "[DEBUG] Proceeding with seeding automatically"
 
-
-echo -e "${YELLOW}Proceeding with seeding automatically (no prompt)${NC}"
-echo "[DEBUG] Proceeding with seeding automatically (no prompt)"
-
-# set -x  # Uncomment for full debug output
 # Run the TypeScript script
 echo ""
 echo -e "${BLUE}Running seeding script...${NC}"
 echo ""
-
 
 echo "[DEBUG] About to run seeding script with AWS_REGION=$AWS_REGION, TABLE_NAME=$TABLE_NAME, STAGE=$STAGE"
 export AWS_REGION="$AWS_REGION"
 export TABLE_NAME="$TABLE_NAME"
 export STAGE="$STAGE"
 
-
-
 # Stay in mono-repo root so .env is always found
 echo "[DEBUG] Staying in mono-repo root: $(pwd)"
 ls -al packages/aws-example/backend/scripts
 
-# Run using ts-node or npx tsx (no parameters needed - all data is fixed!)
-
-
-# Use yarn to run the seeding script with local dependencies.
-# When running from the mono-repo root the root package.json may not
-# contain the script, so use --cwd to invoke the script defined in the
-# backend package directly.
+# Use yarn to run the seeding script with local dependencies
 if command -v yarn &> /dev/null; then
     echo "[DEBUG] Running: yarn --cwd packages/aws-example/backend run seed:users"
     if yarn --cwd packages/aws-example/backend run seed:users; then
@@ -116,7 +99,7 @@ if command -v yarn &> /dev/null; then
         if yarn workspace awsbbackend run seed:users; then
             echo "[DEBUG] yarn workspace awsbbackend run seed:users succeeded"
         else
-            echo -e "${RED}❌ Failed to run seed:users via yarn (workspace and --cwd attempts failed)${NC}"
+            echo -e "${RED}❌ Failed to run seed:users via yarn${NC}"
             exit 1
         fi
     fi

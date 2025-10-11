@@ -22,9 +22,13 @@ import {
 } from "./types";
 import { deployShared } from "./packages/shared/shared";
 import { deployCwl } from "./packages/cwl/cwl";
+import { deployAwsExample } from "./packages/aws-example/aws-example";
 import { ForceDeleteManager } from "./utils/force-delete-utils";
 import { OutputsManager } from "./outputs-manager";
-import { DependencyValidator } from "./dependency-validator";
+import {
+  DependencyValidator,
+  getDependencyChain,
+} from "./dependency-validator";
 import {
   CloudFormationClient,
   CreateStackCommand,
@@ -42,6 +46,7 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { REGEX } from "../shared/constants/RegEx"; // Corrected import
 import { execSync } from "child_process"; // Import execSync
 import path from "path"; // Import path
+import { readdirSync } from "fs";
 
 // Load environment variables from mono-repo root
 config({ path: path.resolve(__dirname, "../../.env") });
@@ -81,14 +86,21 @@ class DeploymentManager {
       effectiveRegion === this.region
         ? this.forceDeleteManager
         : new ForceDeleteManager(effectiveRegion);
-    const stackName = getStackName(stackType, stage);
+    const fullStackName = getStackName(stackType, stage);
+    const stackIdentifier = `nlmonorepo-${stackType.toLowerCase()}`;
 
     logger.info(
-      `Starting force delete for stack ${stackName} in region ${effectiveRegion}`,
+      `Starting force delete for stack ${fullStackName} in region ${effectiveRegion}`,
     );
-    // The new forceDeleteStack in force-delete-utils is expecting the stackName, stackType, and stage
-    await forceDeleteManager.forceDeleteStack(stackName, stackType, stage);
-    logger.success(`Force delete process completed for stack ${stackName}.`);
+    // forceDeleteStack expects a base identifier (e.g., nlmonorepo-cwl) so pass stackIdentifier
+    await forceDeleteManager.forceDeleteStack(
+      stackIdentifier,
+      stackType,
+      stage,
+    );
+    logger.success(
+      `Force delete process completed for stack ${fullStackName}.`,
+    );
   }
 
   async removeStack(
@@ -287,10 +299,37 @@ class DeploymentManager {
     };
 
     try {
+      // Check if dependencies are satisfied
       const dependenciesValid =
         await this.dependencyValidator.validateDependencies(stackType, stage);
+
       if (!dependenciesValid) {
-        throw new Error(`Dependency validation failed for ${stackType} stack`);
+        // Get the full dependency chain for this stack
+        const dependencyChain = getDependencyChain(stackType);
+        logger.info(
+          `Auto-deploying missing dependencies for ${stackType}: ${dependencyChain.filter((s) => s !== stackType).join(", ")}`,
+        );
+
+        // Deploy each dependency that's not already deployed
+        for (const depStack of dependencyChain) {
+          // Skip the target stack itself
+          if (depStack === stackType) continue;
+
+          // Check if this dependency is already deployed
+          const depExists = await this.outputsManager.validateStackExists(
+            depStack,
+            stage,
+          );
+
+          if (!depExists) {
+            logger.info(`Deploying missing dependency: ${depStack}`);
+            await this.deployStack(depStack, deploymentOptionsWithRegion);
+            // Reload outputs after each dependency deployment
+            this.outputsManager = new OutputsManager();
+          } else {
+            logger.debug(`Dependency ${depStack} is already deployed`);
+          }
+        }
       }
 
       if (deploymentOptionsWithRegion.autoDeleteFailedStacks) {
@@ -317,6 +356,9 @@ class DeploymentManager {
       } else if (stackType === StackType.CWL) {
         // Corrected: deployCwl expects only options
         await deployCwl(deploymentOptionsWithRegion);
+      } else if (stackType === StackType.AwsExample) {
+        // Deploy AWS Example stack
+        await deployAwsExample(deploymentOptionsWithRegion);
       } else {
         // Fallback to deployStackInternal for other types if any, or could throw error
         await this.deployStackInternal(stackType, deploymentOptionsWithRegion);
@@ -609,7 +651,11 @@ class DeploymentManager {
       });
     }
 
-    if (stackType === StackType.Shared || stackType === StackType.CWL) {
+    if (
+      stackType === StackType.Shared ||
+      stackType === StackType.CWL ||
+      stackType === StackType.AwsExample
+    ) {
       const webAclId = await this.outputsManager.getOutputValue(
         StackType.WAF,
         stage,
@@ -657,6 +703,41 @@ class DeploymentManager {
       } else {
         logger.warning(
           "TemplateBucketName not found in Shared outputs, skipping parameter.",
+        );
+      }
+    }
+
+    if (stackType === StackType.AwsExample) {
+      // Add KMS parameters from Shared stack
+      const kmsKeyId = await this.outputsManager.getOutputValue(
+        StackType.Shared,
+        stage,
+        "KMSKeyId",
+      );
+      if (kmsKeyId) {
+        allParameters.push({
+          ParameterKey: "KMSKeyId",
+          ParameterValue: kmsKeyId,
+        });
+      } else {
+        logger.warning(
+          "KMSKeyId not found in Shared outputs, skipping parameter.",
+        );
+      }
+
+      const kmsKeyArn = await this.outputsManager.getOutputValue(
+        StackType.Shared,
+        stage,
+        "KMSKeyArn",
+      );
+      if (kmsKeyArn) {
+        allParameters.push({
+          ParameterKey: "KMSKeyArn",
+          ParameterValue: kmsKeyArn,
+        });
+      } else {
+        logger.warning(
+          "KMSKeyArn not found in Shared outputs, skipping parameter.",
         );
       }
     }
@@ -815,7 +896,7 @@ async function main() {
                 { name: "CloudWatchLive (CWL)", value: StackType.CWL },
                 {
                   name: "AWS Example (aws-example)",
-                  value: StackType.AWS_EXAMPLE,
+                  value: StackType.AwsExample,
                 },
                 { name: "Shared Resources", value: StackType.Shared },
                 { name: "WAF", value: StackType.WAF },
@@ -848,7 +929,11 @@ async function main() {
           ]);
 
           let adminEmail: string | undefined;
-          if (stack === "all" || stack === StackType.CWL) {
+          if (
+            stack === "all" ||
+            stack === StackType.CWL ||
+            stack === StackType.AwsExample
+          ) {
             const { needsAdmin } = await inquirer.prompt([
               {
                 type: "confirm",
@@ -943,16 +1028,75 @@ async function main() {
           logger.menu("Remove Stacks");
           logger.menu("=".repeat(40));
 
+          // Build a dynamic choices list from the templates directory so menus reflect available stack templates
+          const buildStackTypeChoices = (): Array<{
+            name: string;
+            value: any;
+          }> => {
+            const templatesDir = path.resolve(__dirname, "templates");
+            const baseChoices: Array<{ name: string; value: any }> = [
+              { name: "All", value: "all" },
+            ];
+
+            try {
+              const entries = readdirSync(templatesDir, {
+                withFileTypes: true,
+              });
+
+              // map known template folder names to StackType and friendly labels
+              const mapping: Record<
+                string,
+                { type: StackType; label: string }
+              > = {
+                cwl: { type: StackType.CWL, label: "CloudWatchLive (CWL)" },
+                "aws-example": {
+                  type: StackType.AwsExample,
+                  label: "AWS Example (aws-example)",
+                },
+                shared: { type: StackType.Shared, label: "Shared Resources" },
+                waf: { type: StackType.WAF, label: "WAF" },
+              };
+
+              // Preserve a sensible order
+              const order = ["cwl", "aws-example", "shared", "waf"];
+
+              for (const key of order) {
+                const found = entries.find(
+                  (e) => e.isDirectory() && e.name === key,
+                );
+                if (found && mapping[key]) {
+                  baseChoices.push({
+                    name: mapping[key].label,
+                    value: mapping[key].type,
+                  });
+                }
+              }
+
+              return baseChoices;
+            } catch (err) {
+              // If we can't read the templates folder for any reason, fall back to the static list
+              return [
+                { name: "All", value: "all" },
+                { name: "CloudWatchLive (CWL)", value: StackType.CWL },
+                {
+                  name: "AWS Example (aws-example)",
+                  value: StackType.AwsExample,
+                },
+                { name: "Shared Resources", value: StackType.Shared },
+                { name: "WAF", value: StackType.WAF },
+              ];
+            }
+          };
+
+          const stackTypeChoices = buildStackTypeChoices();
+
           const { stack } = await inquirer.prompt([
             {
               type: "list",
               name: "stack",
               message: "Which stack do you want to remove?",
               choices: [
-                { name: "All", value: "all" },
-                { name: "CloudWatchLive (CWL)", value: StackType.CWL },
-                { name: "Shared Resources", value: StackType.Shared },
-                { name: "WAF", value: StackType.WAF },
+                ...stackTypeChoices,
                 new inquirer.Separator(),
                 { name: "A specific resource (force delete)", value: "force" },
                 { name: "<- Go Back", value: "back" },

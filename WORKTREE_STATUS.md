@@ -3,11 +3,13 @@
 ## Created Worktrees
 
 ### Main Repository
+
 - **Path**: `/home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo`
 - **Branch**: `docs/multi-agent-worktree-setup`
 - **Purpose**: Documentation and integration workspace
 
 ### Agent 1 Workspace
+
 - **Path**: `/home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo-agent-1`
 - **Branch**: `agent-1`
 - **Purpose**: Backend/Infrastructure development
@@ -18,6 +20,7 @@
   - AppSync pipeline resolvers
 
 ### Agent 2 Workspace
+
 - **Path**: `/home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo-agent-2`
 - **Branch**: `agent-2`
 - **Purpose**: Frontend/UI development
@@ -30,6 +33,7 @@
 ## Quick Commands
 
 ### Open Worktrees in VS Code
+
 ```bash
 # Open Agent 1 workspace
 code /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo-agent-1 -n
@@ -42,11 +46,13 @@ code /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo -n
 ```
 
 ### List All Worktrees
+
 ```bash
 git worktree list
 ```
 
 ### Work in Worktrees
+
 ```bash
 # Agent 1 - Backend work
 cd /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo-agent-1
@@ -62,6 +68,7 @@ git push origin agent-2
 ```
 
 ### Cleanup When Done
+
 ```bash
 # Remove worktrees
 git worktree remove /home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo-agent-1
@@ -73,12 +80,14 @@ git branch -d agent-2
 ```
 
 ## Current Status
+
 - ✅ Worktrees created
 - ✅ Dependencies installed
 - ✅ Branches initialized
 - 🔄 Ready for parallel development
 
 ## Next Steps
+
 1. Open each worktree in separate VS Code windows
 2. Assign tasks to each agent/workspace
 3. Work independently in each workspace

@@ -3,78 +3,84 @@ import path from "path";
 import { execCommandAsPromise } from "shared/scripts/execCommandAsPromise";
 import { mergeGraphqlFiles } from "shared/scripts/mergeGraphqlFiles";
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 const buildGql = async () => {
-  // Merge GraphQL schema files from their source locations:
-  // - Operations (Query/Mutation): backend/schema/
-  // - Types (AWSBUser, etc.): shared/types/
+  // Merge package-local schema files into the combined schema used for codegen
   mergeGraphqlFiles({
     INPUT_DIRS: [path.resolve("../backend/schema")],
-    // Output to backend as the single source of truth for deployment
     OUTPUT_FILE_PATH: path.resolve("../backend/combined_schema.graphql"),
   });
 
   const schemaPath = path.resolve("../backend/combined_schema.graphql");
-  const command = `npx amplify codegen types --schema ${schemaPath} --debug`;
+  const amplifyTypesCmd = `npx amplify codegen types --schema ${schemaPath} --debug`;
+
+  const forceFallback = process.env.FORCE_GQL_CODEGEN === "true";
+
+  let generated = false;
   try {
-    await execCommandAsPromise(command);
-  } catch (err) {
-    // amplify codegen may not be configured in every package (e.g. CI or example projects).
-    // Don't fail the whole build when codegen isn't setup — warn and continue.
-    // eslint-disable-next-line no-console
-    console.warn(
-      "amplify codegen failed or is not configured in this package:",
-      err && typeof err === "object" && "message" in err
-        ? (err as { message?: string }).message
-        : err,
-    );
-
-    // Fallback: try to generate types using graphql-codegen (non-amplify).
-    // This ensures example packages (which may not have Amplify configured)
-    // still produce `src/types/gqlTypes.ts` for linting/build purposes.
-    try {
-      const outDir = path.resolve(__dirname, "../src/types");
-      if (!fs.existsSync(outDir)) {
-        fs.mkdirSync(outDir, { recursive: true });
-      }
-
-      const tmpConfigPath = path.resolve(__dirname, "../codegen.temp.yml");
-      const yaml = `schema: "${schemaPath}"
-generates:
-  ./src/types/gqlTypes.ts:
-    plugins:
-      - typescript
-      - typescript-operations
-    config: {}
-`;
-      fs.writeFileSync(tmpConfigPath, yaml, "utf8");
-
-      // Run graphql-codegen via npx. Use --yes to auto-accept and reduce CI noise.
-      const codegenCmd = `npx --yes @graphql-codegen/cli generate --config ${tmpConfigPath}`;
+    if (forceFallback) {
+      // Skip amplify attempt and force graphql-codegen fallback
       // eslint-disable-next-line no-console
       console.info(
-        "amplify not configured: attempting graphql-codegen fallback...",
+        "FORCE_GQL_CODEGEN=true — skipping Amplify and forcing graphql-codegen fallback",
       );
-      await execCommandAsPromise(codegenCmd);
-      // Clean up temporary config
+      throw new Error("Forced fallback");
+    }
+    // Try Amplify codegen first. Capture stdout so CI output is cleaner.
+    await execCommandAsPromise(amplifyTypesCmd, { captureStdOut: true });
+    generated = true;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("amplify codegen types failed:", err);
+
+    // If environment requests automatic setup, run interactive `amplify codegen add`.
+    if (process.env.AMPLIFY_CODEGEN_ADD_AUTO === "true") {
+      try {
+        // eslint-disable-next-line no-console
+        console.info(
+          "Running 'amplify codegen add' because AMPLIFY_CODEGEN_ADD_AUTO=true",
+        );
+        await execCommandAsPromise("npx amplify codegen add");
+
+        // Retry codegen
+        await execCommandAsPromise(amplifyTypesCmd, { captureStdOut: true });
+        generated = true;
+      } catch (addErr) {
+        // eslint-disable-next-line no-console
+        console.warn("'amplify codegen add' failed:", addErr);
+      }
+    } else {
+      // eslint-disable-next-line no-console
+      console.info(
+        "amplify codegen not configured; falling back to graphql-codegen",
+      );
+    }
+  }
+
+  if (!generated) {
+    // Non-amplify fallback using graphql-codegen (non-interactive)
+    try {
+      const outDir = path.resolve(__dirname, "../src/types");
+      if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+
+      const tmpConfigPath = path.resolve(__dirname, "../codegen.temp.yml");
+      const yaml = `schema: "${schemaPath}"\ngenerates:\n  ./src/types/gqlTypes.ts:\n    plugins:\n      - typescript\n      - typescript-operations\n    config: {}\n`;
+      fs.writeFileSync(tmpConfigPath, yaml, "utf8");
+
+      // eslint-disable-next-line no-console
+      console.info(
+        "Running graphql-codegen fallback to generate src/types/gqlTypes.ts",
+      );
+      await execCommandAsPromise(
+        `npx --yes @graphql-codegen/cli generate --config ${tmpConfigPath}`,
+      );
       try {
         fs.unlinkSync(tmpConfigPath);
-      } catch (error) {
-        // consume the error variable so linters don't complain about unused vars
-        if (error) {
-          /* ignore */
-        }
+      } catch {
+        /* ignore */
       }
     } catch (fallbackErr) {
       // eslint-disable-next-line no-console
-      console.warn(
-        "graphql-codegen fallback failed:",
-        fallbackErr &&
-          typeof fallbackErr === "object" &&
-          "message" in fallbackErr
-          ? (fallbackErr as { message?: string }).message
-          : fallbackErr,
-      );
+      console.warn("graphql-codegen fallback failed:", fallbackErr);
     }
   }
 };

@@ -1,40 +1,34 @@
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
-import { ClientType, AWSBUser } from "./gqlTypes";
+import { AWSBUser } from "./gqlTypes";
 
 export const createEmptyAWSBUser = (): AWSBUser => ({
   __typename: "AWSBUser",
   userId: uuidv4(),
-  organizationId: "",
   userEmail: "",
   userTitle: "",
   userFirstName: "",
   userLastName: "",
   userPhone: "",
-  userRole: "",
   privacyPolicy: false,
   termsAndConditions: false,
   userAddedById: "",
   userCreated: "",
   clientType: [],
+  userProfilePicture: { __typename: "S3Object", Bucket: "", Key: "" },
 });
 
 export const AWSBUserSchema = z.object({
   userId: z.string().default(() => uuidv4()),
-  organizationId: z.string().default(() => uuidv4()),
   userEmail: z.string().min(1, "Contact email is required"),
   userTitle: z.string().optional(),
   userFirstName: z.string().min(1, "Contact first name is required"),
   userLastName: z.string().min(1, "Contact last name is required"),
   userPhone: z.string().min(1, "Contact phone number is required"),
-  userRole: z.string().min(1, "Contact role is required"),
   privacyPolicy: z.boolean().default(false),
   termsAndConditions: z.boolean().default(false),
   userAddedById: z.string().min(1, "User added by ID is required"),
   userCreated: z.string().min(1, "User created date is required"),
-  clientType: z.array(
-    z.enum(Object.values(ClientType) as [string, ...string[]]),
-  ),
 });
 
 export const AWSBUserFormValidationSchema = AWSBUserSchema.superRefine(
@@ -56,11 +50,6 @@ export const AWSBUserFormValidationSchema = AWSBUserSchema.superRefine(
       {
         field: "userPhone",
         message: "Please enter the contact's phone number",
-      },
-      { field: "userRole", message: "Please enter the contact's role" },
-      {
-        field: "organizationId",
-        message: "Please select the contact's organization",
       },
     ];
 

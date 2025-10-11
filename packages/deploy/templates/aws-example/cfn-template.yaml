@@ -1,4 +1,147 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: Placeholder template for aws-example (no real resources)
-Resources: {}
-Outputs: {}
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "AWS Example Backend Infrastructure"
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  TemplateBucketName:
+    Type: String
+    Description: Name of the S3 bucket containing nested stack templates
+  KMSKeyId:
+    Type: String
+    Description: KMS Key ID for encryption
+  KMSKeyArn:
+    Type: String
+    Description: KMS Key ARN for encryption
+  WebACLId:
+    Type: String
+    Description: WAF Web ACL ID from us-east-1 region
+  WebACLArn:
+    Type: String
+    Description: WAF Web ACL ARN from us-east-1 region
+  ResolversBuildHash:
+    Type: String
+    Description: Optional build hash to version resolver S3 keys
+
+Resources:
+  # DynamoDb Tables
+  DynamoDbStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/DynamoDb/dynamoDb.yaml
+      Parameters:
+        Stage: !Ref Stage
+        AppName: awsb
+        KMSKeyArn: !Ref KMSKeyArn
+
+  # S3 Buckets for frontend and assets
+  S3Stack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/S3/s3.yaml
+      Parameters:
+        Stage: !Ref Stage
+        KMSKeyId: !Ref KMSKeyId
+
+  # Cognito Resources
+  CognitoStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Cognito/cognito.yaml
+      Parameters:
+        Stage: !Ref Stage
+
+  # CloudFront Distribution
+  CloudFrontStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: S3Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/CloudFront/cloudfront.yaml
+      Parameters:
+        Stage: !Ref Stage
+        AppName: awsb
+        AppBucketName: !GetAtt S3Stack.Outputs.AWSBBucketName
+        AppBucketArn: !GetAtt S3Stack.Outputs.AWSBBucketArn
+        AppBucketRegionalDomainName: !GetAtt S3Stack.Outputs.AWSBBucketRegionalDomainName
+
+  # Lambda Functions
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [CloudFrontStack, CognitoStack]
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml
+      Parameters:
+        Stage: !Ref Stage
+        AppName: awsb
+        AppCloudFrontDistributionId: !GetAtt CloudFrontStack.Outputs.AWSBCloudFrontDistributionId
+        AppCloudFrontDomainName: !GetAtt CloudFrontStack.Outputs.AWSBCloudFrontDomainName
+        FromEmail: noreply@awsexample.com
+        AppURL: !Sub "https://${CloudFrontStack.Outputs.AWSBCloudFrontDomainName}"
+        TemplateBucketName: !Ref TemplateBucketName
+        UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
+
+  # AppSync API
+  AppSyncStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [DynamoDbStack, CognitoStack, LambdaStack]
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appsync.yaml
+      Parameters:
+        Stage: !Ref Stage
+        AppName: awsb
+        TemplateBucketName: !Ref TemplateBucketName
+        UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
+        SendWelcomeEmailFunctionArn: !GetAtt LambdaStack.Outputs.SendWelcomeEmailFunctionArn
+        CreateCognitoUserFunctionArn: !GetAtt LambdaStack.Outputs.CreateCognitoUserFunctionArn
+        ResolversBuildHash: !Ref ResolversBuildHash
+
+Outputs:
+  ApiUrl:
+    Description: AppSync API URL
+    Value: !GetAtt AppSyncStack.Outputs.AWSBAppSyncApiUrl
+    Export:
+      Name: !Sub nlmonorepo-awsb-${Stage}-api-url
+
+  ApiId:
+    Description: AppSync API ID
+    Value: !GetAtt AppSyncStack.Outputs.AWSBAppSyncApiId
+    Export:
+      Name: !Sub nlmonorepo-awsb-${Stage}-api-id
+
+  AWSBUserPoolId:
+    Description: "Cognito User Pool ID for AWSB"
+    Value: !GetAtt CognitoStack.Outputs.UserPoolId
+    Export:
+      Name: !Sub "nlmonorepo-awsb-${Stage}-user-pool-id"
+
+  AWSBUserPoolClientId:
+    Description: "Cognito User Pool Client ID for AWSB"
+    Value: !GetAtt CognitoStack.Outputs.UserPoolClientId
+    Export:
+      Name: !Sub "nlmonorepo-awsb-${Stage}-user-pool-client-id"
+
+  AWSBIdentityPoolId:
+    Description: "Cognito Identity Pool ID for AWSB"
+    Value: !GetAtt CognitoStack.Outputs.IdentityPoolId
+    Export:
+      Name: !Sub "nlmonorepo-awsb-${Stage}-identity-pool-id"
+
+  WebsiteBucket:
+    Description: "S3 bucket for frontend website assets"
+    Value: !GetAtt S3Stack.Outputs.AWSBBucketName
+    Export:
+      Name: !Sub "nlmonorepo-awsb-${Stage}-website-bucket"
+
+  CloudFrontDistributionId:
+    Description: "CloudFront Distribution ID"
+    Value: !GetAtt CloudFrontStack.Outputs.AWSBCloudFrontDistributionId
+    Export:
+      Name: !Sub "nlmonorepo-awsb-${Stage}-cloudfront-id"
+
+  CloudFrontDomainName:
+    Description: "CloudFront Distribution Domain Name"
+    Value: !GetAtt CloudFrontStack.Outputs.AWSBCloudFrontDomainName
+    Export:
+      Name: !Sub "nlmonorepo-awsb-${Stage}-cloudfront-domain"

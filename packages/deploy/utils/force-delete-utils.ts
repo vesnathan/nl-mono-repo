@@ -34,6 +34,10 @@ export class ForceDeleteManager {
     this.iamClient = new IAMClient({ region: this.region });
   }
 
+  private async sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
   public async emptyStackS3Buckets(
     stackIdentifier: string,
     stackType: StackType,
@@ -52,6 +56,9 @@ export class ForceDeleteManager {
           "WAFLogsBucketName",
           "FrontendBucketName",
           "TemplatesBucketName",
+          // AWS Example specific outputs
+          "AWSBBucketName",
+          "WebsiteBucket",
         ];
 
         stack.Outputs.forEach((output: Output) => {
@@ -89,6 +96,15 @@ export class ForceDeleteManager {
       conventionalBuckets.push(`nlmonorepo-cwl-frontend-${stage}`);
       conventionalBuckets.push(`nlmonorepo-cwl-templates-${stage}`);
       // Template bucket with region suffix
+      conventionalBuckets.push(
+        `nlmonorepo-${stage}-cfn-templates-${this.region}`,
+      );
+    } else if (stackType === StackType.AwsExample) {
+      // aws-example frontend and template naming
+      // Note: the aws-example package uses a slightly different frontend bucket name (nlmonorepo-awsb-userfiles-<stage>)
+      conventionalBuckets.push(`nlmonorepo-awsb-userfiles-${stage}`);
+      conventionalBuckets.push(`nlmonorepo-awsexample-templates-${stage}`);
+      // Template bucket with region suffix (same pattern as others)
       conventionalBuckets.push(
         `nlmonorepo-${stage}-cfn-templates-${this.region}`,
       );
@@ -229,26 +245,72 @@ export class ForceDeleteManager {
       logger.warning("Attempted to delete a bucket with no name. Skipping.");
       return;
     }
-    try {
-      // Check if bucket exists before attempting to delete
-      await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
-      logger.info(`Bucket ${bucketName} exists. Attempting to delete...`);
-      await this.s3Client.send(new DeleteBucketCommand({ Bucket: bucketName }));
-      logger.info(`Successfully deleted S3 bucket ${bucketName}.`);
-    } catch (error: any) {
-      if (
-        error.name === "NoSuchBucket" ||
-        error.name === "NotFound" ||
-        (error.$metadata && error.$metadata.httpStatusCode === 404)
-      ) {
-        logger.info(
-          `S3 bucket ${bucketName} does not exist, skipping deletion.`,
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        // Check if bucket exists before attempting to delete
+        await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
+        logger.info(`Bucket ${bucketName} exists. Attempting to delete (attempt ${attempt}/${maxAttempts})...`);
+        await this.s3Client.send(new DeleteBucketCommand({ Bucket: bucketName }));
+        logger.info(`Successfully deleted S3 bucket ${bucketName}.`);
+        return;
+      } catch (error: any) {
+        // If bucket not found, consider it deleted
+        if (
+          error.name === "NoSuchBucket" ||
+          error.name === "NotFound" ||
+          (error.$metadata && error.$metadata.httpStatusCode === 404)
+        ) {
+          logger.info(`S3 bucket ${bucketName} does not exist, skipping deletion.`);
+          return;
+        }
+
+        const msg = error.message || String(error);
+        logger.warning(
+          `Attempt ${attempt} failed to delete bucket ${bucketName}: ${msg}`,
         );
-      } else {
-        logger.error(
-          `Failed to delete S3 bucket ${bucketName}: ${error.message}. This might be due to permissions or other issues.`,
-        );
-        // Do not re-throw, as this is a best-effort cleanup
+
+        // If this was the last attempt, log an error and return; otherwise try to empty again and retry
+        if (attempt === maxAttempts) {
+          logger.error(
+            `Failed to delete S3 bucket ${bucketName} after ${maxAttempts} attempts: ${msg}`,
+          );
+          return; // best-effort
+        }
+
+        // Try to empty the bucket again (both versioned and non-versioned) then retry after a short delay
+        try {
+          logger.info(
+            `Re-attempting to empty bucket ${bucketName} before retrying deletion (attempt ${attempt})...`,
+          );
+          await this.emptyS3Bucket(bucketName);
+          // Non-versioned fallback: list objects and delete them
+          try {
+            const objs = await this.s3Client.send(
+              new ListObjectsV2Command({ Bucket: bucketName }),
+            );
+            if (objs.Contents && objs.Contents.length > 0) {
+              const ids = objs.Contents.map((o) => ({ Key: o.Key! }));
+              await this.s3Client.send(
+                new DeleteObjectsCommand({ Bucket: bucketName, Delete: { Objects: ids } }),
+              );
+              logger.info(
+                `Deleted ${ids.length} non-versioned objects from ${bucketName} as fallback.`,
+              );
+            }
+          } catch (nonverr: any) {
+            logger.debug(
+              `Non-versioned fallback delete failed for ${bucketName}: ${nonverr.message || String(nonverr)}`,
+            );
+          }
+        } catch (emptyErr: any) {
+          logger.warning(
+            `Failed to empty bucket ${bucketName} during delete retry: ${emptyErr.message || String(emptyErr)}`,
+          );
+        }
+
+        // Backoff before retrying
+        await this.sleep(2000 * attempt);
       }
     }
   }

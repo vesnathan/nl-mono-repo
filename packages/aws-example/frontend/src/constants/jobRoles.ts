@@ -1,37 +1,37 @@
-export const superAdminJobRoles = [
+export const siteAdminJobRoles = [
   {
-    id: "Event Management Company",
-    value: "Event Management Company",
+    id: "Administrator",
+    value: "Administrator",
   },
   {
-    id: "Event Tech Company",
-    value: "Event Tech Company",
+    id: "Manager",
+    value: "Manager",
   },
 ];
 
-export const eventManagementCompanyJobRoles = [
+export const userJobRoles = [
   {
-    id: "Event Manager",
-    value: "Event Manager",
+    id: "Developer",
+    value: "Developer",
   },
   {
-    id: "Event Coordinator",
-    value: "Event Coordinator",
+    id: "Designer",
+    value: "Designer",
   },
   {
-    id: "Event Assistant",
-    value: "Event Assistant",
+    id: "Analyst",
+    value: "Analyst",
   },
   {
-    id: "Event Staff",
-    value: "Event Staff",
+    id: "Coordinator",
+    value: "Coordinator",
   },
   {
-    id: "Event Volunteer",
-    value: "Event Volunteer",
+    id: "Specialist",
+    value: "Specialist",
   },
   {
-    id: "Event Security",
-    value: "Event Security",
+    id: "Consultant",
+    value: "Consultant",
   },
 ];

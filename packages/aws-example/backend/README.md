@@ -12,6 +12,7 @@ The CloudWatch Live backend provides:
 - **Cognito integration** for user authentication and authorization
 - **Real-time subscriptions** for live data streaming
 - **Role-based access control** with multi-tenant support
+- **Role-based access control** for user roles
 
 ## 🏗️ Architecture
 
@@ -19,7 +20,7 @@ The CloudWatch Live backend provides:
 
 - **AppSync API**: GraphQL endpoint with real-time subscriptions
 - **JavaScript Resolvers**: Direct DynamoDB operations (compiled from TypeScript)
-- **DynamoDB Tables**: User data, events, organizations, and application state
+- **DynamoDB Tables**: User data, events, and application state
 - **Cognito User Pool**: Authentication and user management
 - **CloudFormation**: Infrastructure as Code with nested stacks
 
@@ -65,7 +66,7 @@ yarn deploy
 
 # The deployment tool will:
 # 1. Deploy WAF stack (us-east-1)
-# 2. Deploy Shared Assets stack (ap-southeast-2)  
+# 2. Deploy Shared Assets stack (ap-southeast-2)
 # 3. Deploy CloudWatch Live stack with backend (ap-southeast-2)
 # 4. Create admin user in Cognito and DynamoDB
 # 5. Deploy frontend to S3 and CloudFront
@@ -99,6 +100,7 @@ Add your new query or mutation to the schema:
 ```
 
 **Example - Adding a new Query:**
+
 ```graphql
 type Query {
   getAWSBUser(userId: ID!): AWSBUser
@@ -115,6 +117,7 @@ type Event {
 ```
 
 **Example - Adding a new Mutation:**
+
 ```graphql
 type Mutation {
   createAWSBUser(input: CreateAWSBUserInput!): AWSBUser
@@ -145,27 +148,30 @@ This generates types in `packages/aws-example/frontend/src/types/gqlTypes.ts`
 Create a new TypeScript resolver file in the appropriate directory:
 
 **For Queries:**
+
 ```bash
 # File: packages/aws-example/backend/resolvers/[domain]/Queries/Query.[queryName].ts
 # Example: packages/aws-example/backend/resolvers/events/Queries/Query.getEvent.ts
 ```
 
 **For Mutations:**
+
 ```bash
 # File: packages/aws-example/backend/resolvers/[domain]/Mutations/Mutation.[mutationName].ts
 # Example: packages/aws-example/backend/resolvers/events/Mutations/Mutation.createEvent.ts
 ```
 
 **Example Resolver (Query.getEvent.ts):**
+
 ```typescript
-import { util } from '@aws-appsync/utils';
-import type { Context } from '@aws-appsync/utils';
+import { util } from "@aws-appsync/utils";
+import type { Context } from "@aws-appsync/utils";
 
 export function request(ctx: Context) {
   const { eventId } = ctx.arguments;
 
   return {
-    operation: 'GetItem',
+    operation: "GetItem",
     key: util.dynamodb.toMapValues({ id: eventId }),
   };
 }
@@ -179,9 +185,10 @@ export function response(ctx: Context) {
 ```
 
 **Example Resolver (Mutation.createEvent.ts):**
+
 ```typescript
-import { util } from '@aws-appsync/utils';
-import type { Context } from '@aws-appsync/utils';
+import { util } from "@aws-appsync/utils";
+import type { Context } from "@aws-appsync/utils";
 
 export function request(ctx: Context) {
   const { input } = ctx.arguments;
@@ -194,7 +201,7 @@ export function request(ctx: Context) {
   };
 
   return {
-    operation: 'PutItem',
+    operation: "PutItem",
     key: util.dynamodb.toMapValues({ id }),
     attributeValues: util.dynamodb.toMapValues(item),
   };
@@ -217,6 +224,7 @@ Add the resolver resource to the AppSync CloudFormation template:
 ```
 
 **Example:**
+
 ```yaml
 Resources:
   # ... existing resources ...
@@ -260,11 +268,11 @@ Find the `resolverFiles` array and add your new resolver paths:
 
 ```typescript
 const resolverFiles = [
-  'users/Queries/Query.getAWSBUser.ts',
-  'users/Mutations/Mutation.createAWSBUser.ts',
+  "users/Queries/Query.getAWSBUser.ts",
+  "users/Mutations/Mutation.createAWSBUser.ts",
   // Add your new resolvers
-  'events/Queries/Query.getEvent.ts',
-  'events/Mutations/Mutation.createEvent.ts',
+  "events/Queries/Query.getEvent.ts",
+  "events/Mutations/Mutation.createEvent.ts",
 ];
 ```
 
@@ -278,6 +286,7 @@ yarn deploy
 ```
 
 The deployment process will:
+
 1. Upload the updated schema to S3
 2. Compile your TypeScript resolvers to JavaScript
 3. Upload compiled resolvers to S3
@@ -289,8 +298,8 @@ Import the generated types and use them in your React components:
 
 ```typescript
 // Import generated types
-import { GetEventQuery, CreateEventMutation } from '@/types/gqlTypes';
-import { generateClient } from 'aws-amplify/api';
+import { GetEventQuery, CreateEventMutation } from "@/types/gqlTypes";
+import { generateClient } from "aws-amplify/api";
 
 const client = generateClient();
 
@@ -307,7 +316,7 @@ const getEvent = async (eventId: string) => {
         }
       }
     `,
-    variables: { eventId }
+    variables: { eventId },
   });
   return response.data.getEvent;
 };
@@ -325,7 +334,7 @@ const createEvent = async (input: CreateEventInput) => {
         }
       }
     `,
-    variables: { input }
+    variables: { input },
   });
   return response.data.createEvent;
 };
@@ -333,13 +342,13 @@ const createEvent = async (input: CreateEventInput) => {
 
 #### Key Files Summary
 
-| File | Purpose |
-|------|---------|
-| `packages/aws-example/backend/schema/users.graphql` | GraphQL schema operations (queries, mutations) |
-| `packages/shared/types/[TypeName].graphql` | GraphQL type definitions |
-| `packages/aws-example/backend/resolvers/[domain]/[type]/[TypeName].[fieldName].ts` | Resolver implementation |
-| `packages/deploy/templates/awsb/resources/AppSync/appsync.yaml` | CloudFormation resolver registration |
-| `packages/deploy/packages/awsb/awsb.ts` | Deployment configuration |
+| File                                                                               | Purpose                                        |
+| ---------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `packages/aws-example/backend/schema/users.graphql`                                | GraphQL schema operations (queries, mutations) |
+| `packages/shared/types/[TypeName].graphql`                                         | GraphQL type definitions                       |
+| `packages/aws-example/backend/resolvers/[domain]/[type]/[TypeName].[fieldName].ts` | Resolver implementation                        |
+| `packages/deploy/templates/awsb/resources/AppSync/appsync.yaml`                    | CloudFormation resolver registration           |
+| `packages/deploy/packages/awsb/awsb.ts`                                            | Deployment configuration                       |
 
 #### Tips
 
@@ -390,14 +399,14 @@ yarn update:awsb --stage dev
 
 ### CloudFormation Templates
 
-| Template | Description | Location |
-|----------|-------------|----------|
-| `AppSync/appsync.yaml` | GraphQL API configuration | `/resources/AppSync/` |
-| `DynamoDb/dynamoDb.yaml` | Database tables | `/resources/DynamoDb/` |
-| `Cognito/cognito.yaml` | Authentication setup | `/resources/Cognito/` |
-| `S3/s3.yaml` | Storage buckets | `/resources/S3/` |
-| `CloudFront/cloudfront.yaml` | CDN distribution | `/resources/CloudFront/` |
-| `Lambda/lambda.yaml` | Post-deployment functions | `/resources/Lambda/` |
+| Template                     | Description               | Location                 |
+| ---------------------------- | ------------------------- | ------------------------ |
+| `AppSync/appsync.yaml`       | GraphQL API configuration | `/resources/AppSync/`    |
+| `DynamoDb/dynamoDb.yaml`     | Database tables           | `/resources/DynamoDb/`   |
+| `Cognito/cognito.yaml`       | Authentication setup      | `/resources/Cognito/`    |
+| `S3/s3.yaml`                 | Storage buckets           | `/resources/S3/`         |
+| `CloudFront/cloudfront.yaml` | CDN distribution          | `/resources/CloudFront/` |
+| `Lambda/lambda.yaml`         | Post-deployment functions | `/resources/Lambda/`     |
 
 ### Stack Outputs
 
@@ -458,22 +467,26 @@ yarn remove:awsb --stage dev
 ### Common Backend Issues
 
 #### GraphQL Schema Issues
+
 - **Schema validation errors**: Ensure all GraphQL types and resolvers are properly defined
 - **Resolver compilation**: Check that TypeScript resolvers compile successfully
 - **S3 upload failures**: Verify S3 bucket permissions for resolver uploads
 
 #### DynamoDB Issues
+
 - **Table creation failures**: Check IAM permissions for DynamoDB operations
 - **Data access errors**: Verify AppSync data source role has proper DynamoDB access policies
 - **Export/import issues**: Ensure DynamoDB table names are properly exported from CloudFormation
 
 #### Cognito Authentication Issues
+
 - **User pool configuration**: Verify Cognito User Pool settings match frontend configuration
 - **User group creation**: Check that all required user groups are created during deployment
 - **Identity Pool**: Ensure Identity Pool is properly configured with User Pool as provider
 - **Cross-stack references**: Ensure Cognito resources are properly exported for frontend use
 
 #### Resolver Issues
+
 - **Compilation errors**: Check TypeScript resolver code for syntax errors
 - **Runtime errors**: Check AppSync logs in CloudWatch for resolver execution errors
 - **Permission issues**: Verify AppSync data source roles have necessary permissions

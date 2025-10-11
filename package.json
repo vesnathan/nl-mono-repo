@@ -10,10 +10,12 @@
     "packages/shared",
     "packages/waf",
     "packages/deploy",
-    "packages/ec2-vsc"
+    "packages/ec2-vsc",
+    "packages/a-new-app/frontend",
+    "packages/a-new-app/backend"
   ],
   "dependencies": {
-    "@anthropic-ai/claude-code": "^2.0.9",
+    "@anthropic-ai/claude-code": "^2.0.14",
     "@aws-sdk/client-cognito-identity-provider": "3.669.0",
     "@aws-sdk/client-sts": "3.669.0",
     "dotenv": "^16.3.1",
@@ -63,7 +65,9 @@
     "install-aws-cli-local": "./scripts/install-aws-cli-local.sh",
     "ec2-deployment": "yarn workspace @cwl/ec2-vsc deployment-menu",
     "deploy": "yarn workspace @deploy/core deploy",
+    "create-aws-package": "node packages/aws-bootstrap/scripts/create-template.js",
     "dev:cwl": "yarn workspace cwlfrontend dev:local",
+    "dev:awse": "yarn workspace awsbfrontend dev:local",
     "build": "lerna run build --stream",
     "lint": "lerna run lint --stream",
     "tsc": "lerna run tsc --stream",

@@ -58,7 +58,6 @@ export function request(ctx: Context<CreateAWSBUserMutationVariables>) {
       Bucket: "",
       Key: "",
     }, // Default empty S3 object
-    // clientType is not set here; it's derived from Cognito groups by the getAWSBUser query resolver
   };
 
   return {
@@ -100,24 +99,21 @@ export function response(ctx: CTX): Output {
   // Assuming ctx.result directly contains the newly created user's attributes.
   const createdUser = ctx.result as any;
 
-  // The clientType will be dynamically added by the Query.getAWSBUser resolver
-  // when the user data is fetched. For the mutation response, we can return an empty array
-  // or a default, as it's not part of the direct creation storage.
+  // The clientType will be populated by Query.getAWSBUser based on Cognito groups
+  // For the mutation response, return an empty array
   return {
     __typename: "AWSBUser",
     userId: createdUser.userId,
-    organizationId: createdUser.organizationId,
     userEmail: createdUser.userEmail,
     userTitle: createdUser.userTitle,
     userFirstName: createdUser.userFirstName,
     userLastName: createdUser.userLastName,
     userPhone: createdUser.userPhone,
-    userRole: createdUser.userRole,
     privacyPolicy: createdUser.privacyPolicy,
     termsAndConditions: createdUser.termsAndConditions,
     userAddedById: createdUser.userAddedById,
     userCreated: createdUser.userCreated,
-    clientType: [], // Will be populated by getAWSBUser based on Cognito groups
+    clientType: [],
     userProfilePicture: createdUser.userProfilePicture || {
       Bucket: "",
       Key: "",

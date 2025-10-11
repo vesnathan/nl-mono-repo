@@ -2,11 +2,7 @@
   "extends": "../../../tsconfig.next.json",
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -25,42 +21,18 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@/constants/*": [
-        "./src/constants/*"
-      ],
-      "@/components/*": [
-        "./src/components/*"
-      ],
-      "@/hooks/*": [
-        "./src/hooks/*"
-      ],
-      "@/layouts/*": [
-        "./src/layouts/*"
-      ],
-      "@/pages/*": [
-        "./src/pages/*"
-      ],
-      "@/styles/*": [
-        "./src/styles/*"
-      ],
-      "@/utils/*": [
-        "./src/utils/*"
-      ],
-      "@/stores/*": [
-        "./src/stores/*"
-      ],
-      "@/SVGR/*": [
-        "./src/SVGR/*"
-      ],
-      "@/graphQL/*": [
-        "./src/graphQL/*"
-      ],
-      "@shared/*": [
-        "../../shared/*"
-      ]
+      "@/*": ["./src/*"],
+      "@/constants/*": ["./src/constants/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/layouts/*": ["./src/layouts/*"],
+      "@/pages/*": ["./src/pages/*"],
+      "@/styles/*": ["./src/styles/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/stores/*": ["./src/stores/*"],
+      "@/SVGR/*": ["./src/SVGR/*"],
+      "@/graphQL/*": ["./src/graphQL/*"],
+      "@shared/*": ["../../shared/*"]
     }
   },
   "include": [
@@ -74,7 +46,5 @@
     "src/functions/v",
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

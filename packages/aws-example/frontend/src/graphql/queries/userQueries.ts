@@ -19,13 +19,11 @@ const getAWSBUserQueryStr = `
         privacyPolicy
         termsAndConditions
         userFirstName
-        userLastName     
+        userLastName
         userEmail
         userPhone
         userTitle
         userCreated
-        organizationId
-        userRole
         clientType
       }
     }

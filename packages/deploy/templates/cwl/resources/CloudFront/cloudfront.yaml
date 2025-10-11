@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'CloudFront Resources for Application'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudFront Resources for Application"
 
 Parameters:
   Stage:
@@ -33,7 +33,7 @@ Resources:
             Action:
               - s3:GetObject
               - s3:ListBucket
-            Resource: 
+            Resource:
               - !Ref AppBucketArn
               - !Sub "${AppBucketArn}/*"
             Condition:
@@ -42,7 +42,7 @@ Resources:
 
   AppCloudFrontOAC: # Renamed from CWLCloudFrontOAC
     Type: AWS::CloudFront::OriginAccessControl
-    Properties: 
+    Properties:
       OriginAccessControlConfig:
         Name: !Sub "${AppName}BucketOAC"
         Description: "Origin Access Control for application bucket"
@@ -59,7 +59,7 @@ Resources:
           - DomainName: !Ref AppBucketRegionalDomainName
             Id: S3Origin
             S3OriginConfig:
-              OriginAccessIdentity: '' # Required to be empty when using OAC
+              OriginAccessIdentity: "" # Required to be empty when using OAC
             OriginAccessControlId: !GetAtt AppCloudFrontOAC.Id
         DefaultRootObject: index.html
         Enabled: true
@@ -74,7 +74,7 @@ Outputs:
   CWLCloudFrontDistributionId:
     Value: !Ref AppCloudFrontDistribution
     Description: "ID of the CloudFront distribution"
-  
+
   CWLCloudFrontDomainName:
     Value: !GetAtt AppCloudFrontDistribution.DomainName
     Description: "Domain name of the CloudFront distribution"

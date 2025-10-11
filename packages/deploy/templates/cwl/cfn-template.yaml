@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'CloudWatch Live Backend Infrastructure'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudWatch Live Backend Infrastructure"
 
 Parameters:
   Stage:
@@ -109,7 +109,7 @@ Outputs:
     Value: !GetAtt AppSyncStack.Outputs.CWLAppSyncApiId
     Export:
       Name: !Sub nlmonorepo-cwl-${Stage}-api-id
-      
+
   CWLUserPoolId:
     Description: "Cognito User Pool ID for CWL"
     Value: !GetAtt CognitoStack.Outputs.UserPoolId

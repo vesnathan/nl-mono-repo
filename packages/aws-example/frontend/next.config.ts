@@ -11,10 +11,12 @@ const getDeploymentOutputs = () => {
     const fileContent = readFileSync(outputPath, "utf-8");
     const outputs = JSON.parse(fileContent);
 
-    // The stack name should be uppercase 'AWSB'
-    const awsbStack = outputs.stacks.AWSB;
+    // The stack name is 'AwsExample' (matching StackType enum)
+    const awsbStack = outputs.stacks.AwsExample;
     if (!awsbStack) {
-      console.warn("AWSB stack outputs not found in deployment-outputs.json");
+      console.warn(
+        "AwsExample stack outputs not found in deployment-outputs.json",
+      );
       console.warn("Available stacks:", Object.keys(outputs.stacks));
       return {};
     }
@@ -25,15 +27,32 @@ const getDeploymentOutputs = () => {
       awsbStack.outputs.find((o: Output) => o.OutputKey === key)?.OutputValue ||
       "";
 
-    return {
+    const envVars = {
       NEXT_PUBLIC_USER_POOL_ID: getValue("AWSBUserPoolId"),
       NEXT_PUBLIC_USER_POOL_CLIENT_ID: getValue("AWSBUserPoolClientId"),
       NEXT_PUBLIC_IDENTITY_POOL_ID: getValue("AWSBIdentityPoolId"),
       NEXT_PUBLIC_GRAPHQL_URL: getValue("ApiUrl"),
     };
-  } catch {
+
+    // Check if any required env vars are missing
+    const missingVars = Object.entries(envVars)
+      .filter(([_, value]) => !value)
+      .map(([key]) => key);
+
+    if (missingVars.length > 0) {
+      console.warn(
+        "⚠️  AwsExample stack is deployed but missing outputs:",
+        missingVars.join(", "),
+      );
+      console.warn(
+        "   This is expected for a placeholder stack. Deploy a real stack with Cognito & AppSync for full functionality.",
+      );
+    }
+
+    return envVars;
+  } catch (error) {
     console.warn(
-      "Could not read deployment-outputs.json. Build may fail if env vars are not set.",
+      "Could not read deployment-outputs.json. Using empty env vars for development.",
     );
     return {};
   }

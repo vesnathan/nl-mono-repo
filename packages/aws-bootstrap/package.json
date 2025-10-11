@@ -7,7 +7,12 @@
   "scripts": {
     "create": "node scripts/create-template.js"
   },
-  "keywords": ["template","bootstrap","aws","aws-bootstrap"],
+  "keywords": [
+    "template",
+    "bootstrap",
+    "aws",
+    "aws-bootstrap"
+  ],
   "author": "",
   "license": "MIT",
   "engines": {

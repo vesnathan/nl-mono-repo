@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'AppSync Resources for the application'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "AppSync Resources for the application"
 
 Parameters:
   Stage:
@@ -47,7 +47,7 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: "*" 
+                Resource: "*"
 
   GraphQlApi:
     Type: AWS::AppSync::GraphQLApi
@@ -57,19 +57,19 @@ Resources:
       UserPoolConfig:
         UserPoolId: !Ref UserPoolId
         DefaultAction: ALLOW
-        AwsRegion: ap-southeast-2 
+        AwsRegion: ap-southeast-2
       AdditionalAuthenticationProviders:
         - AuthenticationType: AWS_IAM
       LogConfig:
         CloudWatchLogsRoleArn: !GetAtt AppSyncLoggingServiceRole.Arn
-        FieldLogLevel: ALL 
+        FieldLogLevel: ALL
         ExcludeVerboseContent: false
 
   GraphQlSchema:
     Type: AWS::AppSync::GraphQLSchema
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
-      DefinitionS3Location: !Sub "s3://${TemplateBucketName}/schema.graphql" 
+      DefinitionS3Location: !Sub "s3://${TemplateBucketName}/schema.graphql"
 
   MainTableDataSource: # Renamed from CWLUsersTableDataSource for generality
     Type: AWS::AppSync::DataSource
@@ -79,12 +79,10 @@ Resources:
       Type: AMAZON_DYNAMODB
       DynamoDBConfig:
         TableName:
-          Fn::ImportValue:
-            !Sub "${AppName}-DataTableName-${Stage}" # Parameterized import
+          Fn::ImportValue: !Sub "${AppName}-DataTableName-${Stage}" # Parameterized import
         AwsRegion: !Ref AWS::Region
       ServiceRoleArn:
-        Fn::ImportValue:
-          !Sub "${AppName}-AppSyncDynamoDBRoleArn-${Stage}" # Parameterized import
+        Fn::ImportValue: !Sub "${AppName}-AppSyncDynamoDBRoleArn-${Stage}" # Parameterized import
 
   SendWelcomeEmailDataSource:
     Type: AWS::AppSync::DataSource
@@ -142,7 +140,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-  CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Queries/Query.getCWLUser.js" 
+      Code: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Queries/Query.getCWLUser.js"
 
   CreateCWLUserResolver:
     Type: AWS::AppSync::Resolver
@@ -176,7 +174,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-  CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.createCognitoUser.js"
+      Code: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.createCognitoUser.js"
 
   CreateUserDynamoDBFunction:
     Type: AWS::AppSync::FunctionConfiguration
@@ -187,7 +185,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-  CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Mutations/Mutation.createCWLUser.js"
+      Code: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Mutations/Mutation.createCWLUser.js"
 
   SendWelcomeEmailFunction:
     Type: AWS::AppSync::FunctionConfiguration
@@ -198,13 +196,13 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-  CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.sendWelcomeEmail.js"
+      Code: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.sendWelcomeEmail.js"
 
 Outputs:
   CWLAppSyncApiUrl:
     Value: !GetAtt GraphQlApi.GraphQLUrl
     Description: "GraphQL URL for the AppSync API"
-  
+
   CWLAppSyncRealtimeUrl:
     Value: !GetAtt GraphQlApi.RealtimeUrl
     Description: "Realtime URL for the AppSync API"

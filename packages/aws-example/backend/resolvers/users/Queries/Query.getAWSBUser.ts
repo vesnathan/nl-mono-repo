@@ -106,33 +106,20 @@ export function response(ctx: CTX): Output {
 
   if (clientType.length === 0) {
     console.log(
-      `No groups mapped to ClientType, adding default UnregisteredAttendee`,
+      `No groups mapped to ClientType, adding default UnauthenticatedUser`,
     );
-    clientType.push(ClientType.UnregisteredAttendee);
+    clientType.push(ClientType.UnauthenticatedUser);
   }
 
   console.log(`Final clientType array:`, JSON.stringify(clientType));
 
   // Construct the final AWSBUser object
   // Ensure all non-nullable fields of AWSBUser are present.
-  // This is a simplified mapping. A more robust solution would involve
-  // explicitly creating the AWSBUser object and populating its fields.
   const resolvedUser: AWSBUser = {
     ...userFromDB, // Spread raw DB result
     userId: userFromDB.userId || userId, // Ensure userId is present
     clientType: clientType,
-    // Ensure other non-nullable fields from AWSBUser are present, e.g.:
-    // email: userFromDB.email || "",
-    // username: userFromDB.username || "",
-    // createdAt: userFromDB.createdAt || new Date().toISOString(),
-    // updatedAt: userFromDB.updatedAt || new Date().toISOString(),
-    // Add other fields as defined in AWSBUser type from gqlTypes.ts
-    // If fields are optional in DB but non-nullable in GQL, provide defaults or ensure they exist.
   };
-
-  // Validate that resolvedUser matches the Output type (AWSBUser)
-  // This is more of a conceptual step here, TypeScript handles static typing.
-  // At runtime, ensure the object structure is correct.
 
   return resolvedUser;
 }
