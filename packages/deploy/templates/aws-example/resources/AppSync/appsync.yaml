@@ -202,6 +202,13 @@ Resources:
         RuntimeVersion: 1.0.0
     CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.sendWelcomeEmail.js"
 
+  # Explicit AppSync LogGroup so we can control retention
+  AppSyncApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/appsync/apis/${GraphQlApi.ApiId}"
+      RetentionInDays: !Ref LogRetentionInDays
+
 Outputs:
   AWSBAppSyncApiUrl:
     Value: !GetAtt GraphQlApi.GraphQLUrl

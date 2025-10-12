@@ -24,6 +24,10 @@ Parameters:
   ResolversBuildHash:
     Type: String
     Description: Optional build hash to version resolver S3 keys
+  LogRetentionInDays:
+    Type: Number
+    Description: Number of days to retain CloudWatch Logs for nested stacks
+    Default: 14
 
 Resources:
   # DynamoDb Tables
@@ -81,6 +85,7 @@ Resources:
         AppURL: !Sub "https://${CloudFrontStack.Outputs.AWSBCloudFrontDomainName}"
         TemplateBucketName: !Ref TemplateBucketName
         UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
+  LogRetentionInDays: !Ref LogRetentionInDays
 
   # AppSync API
   AppSyncStack:
@@ -96,6 +101,7 @@ Resources:
         SendWelcomeEmailFunctionArn: !GetAtt LambdaStack.Outputs.SendWelcomeEmailFunctionArn
         CreateCognitoUserFunctionArn: !GetAtt LambdaStack.Outputs.CreateCognitoUserFunctionArn
         ResolversBuildHash: !Ref ResolversBuildHash
+        LogRetentionInDays: !Ref LogRetentionInDays
 
 Outputs:
   ApiUrl:
