@@ -15,6 +15,10 @@ Parameters:
   ResolversBuildHash:
     Type: String
     Description: Optional build hash used to version resolver S3 keys (set by deploy script)
+  LogRetentionInDays:
+    Type: Number
+    Description: Number of days to retain CloudWatch Logs for AppSync and Lambda
+    Default: 14
   UserPoolId:
     Type: String
     Description: Cognito User Pool ID
@@ -210,3 +214,7 @@ Outputs:
   AWSBAppSyncApiId:
     Value: !GetAtt GraphQlApi.ApiId
     Description: "API ID for the AppSync API"
+
+  AppSyncLogGroupName:
+    Description: Name of the AppSync CloudWatch LogGroup
+    Value: !Sub "/aws/appsync/apis/${GraphQlApi.ApiId}"

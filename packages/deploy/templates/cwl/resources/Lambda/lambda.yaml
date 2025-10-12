@@ -29,6 +29,10 @@ Parameters:
   UserPoolId:
     Type: String
     Description: Cognito User Pool ID for user creation
+  LogRetentionInDays:
+    Type: Number
+    Description: Number of days to retain CloudWatch Logs for Lambda functions
+    Default: 14
 
 Resources:
   PostDeployFunction: # Renamed from PostFrontEndDeployFunction
@@ -81,6 +85,25 @@ Resources:
         Variables:
           STAGE: !Ref Stage
           AppCloudFrontDistributionId: !Ref AppCloudFrontDistributionId # Env var name and Ref updated
+
+  # CloudWatch Log Groups for Lambda functions
+  PostDeployFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${PostDeployFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+  SendWelcomeEmailFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${SendWelcomeEmailFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+  CreateCognitoUserFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${CreateCognitoUserFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
 
   PostDeployRole: # Renamed from PostFrontEndDeployRole
     Type: AWS::IAM::Role
