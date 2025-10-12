@@ -88,7 +88,11 @@ export class ForceDeleteManager {
     );
 
     // Use dynamic project configuration to get all buckets for this stack type
-    const conventionalBuckets = getProjectBuckets(stackType, stage, this.region);
+    const conventionalBuckets = getProjectBuckets(
+      stackType,
+      stage,
+      this.region,
+    );
 
     conventionalBuckets.forEach((bucketName) => {
       if (bucketName && !bucketsToEmpty.includes(bucketName)) {
@@ -304,7 +308,11 @@ export class ForceDeleteManager {
     );
 
     // Use dynamic project configuration to get all buckets for this stack type
-    const uniqueBucketsToDelete = getProjectBuckets(stackType, stage, this.region);
+    const uniqueBucketsToDelete = getProjectBuckets(
+      stackType,
+      stage,
+      this.region,
+    );
 
     if (uniqueBucketsToDelete.length === 0) {
       logger.info(

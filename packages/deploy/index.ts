@@ -232,7 +232,9 @@ class DeploymentManager {
     // Get deployment order dynamically based on dependencies
     const deploymentOrder = this.dependencyValidator.getDeploymentOrder();
 
-    logger.info(`Deploying all stacks in dependency order: ${deploymentOrder.join(" -> ")}`);
+    logger.info(
+      `Deploying all stacks in dependency order: ${deploymentOrder.join(" -> ")}`,
+    );
 
     for (const stackType of deploymentOrder) {
       logger.info(`\n🚀 Deploying ${stackType} stack...`);

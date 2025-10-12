@@ -316,9 +316,14 @@ async function removePackageInteractive() {
         return false;
       }
     });
-  // Exclude internal/protected packages from the default deletion list
-  const protectedPackages = new Set(["aws-bootstrap", "deploy", "shared", "waf"]);
-  return items.filter((i) => !protectedPackages.has(i));
+    // Exclude internal/protected packages from the default deletion list
+    const protectedPackages = new Set([
+      "aws-bootstrap",
+      "deploy",
+      "shared",
+      "waf",
+    ]);
+    return items.filter((i) => !protectedPackages.has(i));
   }
 
   let longName = await prompt(
@@ -455,7 +460,12 @@ async function removePackageInteractive() {
 
   // Remove deploy/project-config.ts entries for this stack (best-effort)
   try {
-    const projectConfigPath = path.join(root, "packages", "deploy", "project-config.ts");
+    const projectConfigPath = path.join(
+      root,
+      "packages",
+      "deploy",
+      "project-config.ts",
+    );
     if (fs.existsSync(projectConfigPath)) {
       let content = fs.readFileSync(projectConfigPath, "utf8");
       const pascalCaseName = longName
@@ -579,7 +589,12 @@ function removePackageForce(longName) {
 
   // Best-effort remove entries from deploy/project-config.ts
   try {
-    const projectConfigPath = path.join(root, "packages", "deploy", "project-config.ts");
+    const projectConfigPath = path.join(
+      root,
+      "packages",
+      "deploy",
+      "project-config.ts",
+    );
     if (fs.existsSync(projectConfigPath)) {
       let content = fs.readFileSync(projectConfigPath, "utf8");
       const pascalCaseName = longName
@@ -834,7 +849,11 @@ async function main() {
   );
   const replacements = [
     // Replace hardcoded titles with project title (must be before identifier replacements)
-    { from: "AWS Example Application", to: `${projectTitle} Application`, flags: "g" },
+    {
+      from: "AWS Example Application",
+      to: `${projectTitle} Application`,
+      flags: "g",
+    },
     { from: "AWS Example", to: projectTitle, flags: "g" },
     // PascalCase and UPPERCASE replacements for component identifiers
     // and exported symbols that are already PascalCase stay PascalCase.
@@ -1084,9 +1103,16 @@ async function main() {
   }
 
   // Update project-config.ts with the new project configuration
-  console.log("\n🔧 Adding project configuration to deploy/project-config.ts...");
+  console.log(
+    "\n🔧 Adding project configuration to deploy/project-config.ts...",
+  );
   try {
-    const projectConfigPath = path.join(root, "packages", "deploy", "project-config.ts");
+    const projectConfigPath = path.join(
+      root,
+      "packages",
+      "deploy",
+      "project-config.ts",
+    );
     if (fs.existsSync(projectConfigPath)) {
       let content = fs.readFileSync(projectConfigPath, "utf8");
 
@@ -1110,7 +1136,8 @@ async function main() {
 `;
 
       // Find the closing brace of PROJECT_CONFIGS and add before it
-      const projectConfigsRegex = /(export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = \{[^;]*)(};)/s;
+      const projectConfigsRegex =
+        /(export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = \{[^;]*)(};)/s;
       if (!content.includes(`[StackType.${pascalCaseName}]:`)) {
         content = content.replace(
           projectConfigsRegex,
@@ -1119,10 +1146,14 @@ async function main() {
         fs.writeFileSync(projectConfigPath, content, "utf8");
         console.log("✅ Updated deploy/project-config.ts");
       } else {
-        console.log("⚠️  Project already exists in project-config.ts, skipping");
+        console.log(
+          "⚠️  Project already exists in project-config.ts, skipping",
+        );
       }
     } else {
-      console.warn("⚠️  project-config.ts not found - you may need to add project configuration manually");
+      console.warn(
+        "⚠️  project-config.ts not found - you may need to add project configuration manually",
+      );
     }
   } catch (e) {
     console.error("⚠️  Failed to update project-config.ts:", e.message);
@@ -1140,8 +1171,12 @@ async function main() {
   console.log(`   • Added StackType.${pascalCaseName} to deploy/types.ts`);
   console.log(`   • Added project config to deploy/project-config.ts`);
   console.log("\nNext steps:");
-  console.log(`  1. Review project configuration in packages/deploy/project-config.ts`);
-  console.log(`     - Update dependencies (currently set to [StackType.Shared])`);
+  console.log(
+    `  1. Review project configuration in packages/deploy/project-config.ts`,
+  );
+  console.log(
+    `     - Update dependencies (currently set to [StackType.Shared])`,
+  );
   console.log(`     - Adjust bucket naming patterns if needed`);
   console.log(`     - Set hasFrontend/hasLambdas/hasResolvers flags correctly`);
   console.log(`  2. Create deployment function at:`);
@@ -1150,7 +1185,9 @@ async function main() {
   console.log(`     (See deployAwsExample or deployCwl for examples)`);
   console.log(`  4. Create CloudFormation templates in:`);
   console.log(`     packages/deploy/templates/${longName}/`);
-  console.log(`  5. Update service-specific configuration (Sentry, ports, etc.)`);
+  console.log(
+    `  5. Update service-specific configuration (Sentry, ports, etc.)`,
+  );
   console.log(`  6. Run 'yarn deploy' to deploy your new stack\n`);
 }
 

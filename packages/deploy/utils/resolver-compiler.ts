@@ -399,7 +399,7 @@ class ResolverCompiler {
       `Compiled resolvers will be saved to: ${localSavePathBaseForApp}`,
     );
 
-  const failedResolvers: { file: string; error: string }[] = [];
+    const failedResolvers: { file: string; error: string }[] = [];
     const compiledFilesRelative: string[] = [];
 
     for (let index = 0; index < totalFiles; index++) {
@@ -914,9 +914,7 @@ class ResolverCompiler {
               "",
             );
             await fsPromises.writeFile(outfile, content, "utf-8");
-            logger.debug(
-              `Removed @aws-appsync/utils import from ${outfile}`,
-            );
+            logger.debug(`Removed @aws-appsync/utils import from ${outfile}`);
           } catch (error: any) {
             logger.warning(
               `Failed to remove @aws-appsync/utils import: ${error.message}`,

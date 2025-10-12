@@ -119,7 +119,6 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
   },
 };
 
-
 /**
  * Get project configuration by stack type
  */
@@ -141,21 +140,27 @@ export function getProjectBuckets(
   // Add template bucket
   if (config.buckets.templates) {
     buckets.push(
-      config.buckets.templates.replace("{stage}", stage).replace("{region}", region),
+      config.buckets.templates
+        .replace("{stage}", stage)
+        .replace("{region}", region),
     );
   }
 
   // Add frontend bucket
   if (config.buckets.frontend) {
     buckets.push(
-      config.buckets.frontend.replace("{stage}", stage).replace("{region}", region),
+      config.buckets.frontend
+        .replace("{stage}", stage)
+        .replace("{region}", region),
     );
   }
 
   // Add additional buckets
   if (config.buckets.additional) {
     for (const bucket of config.buckets.additional) {
-      buckets.push(bucket.replace("{stage}", stage).replace("{region}", region));
+      buckets.push(
+        bucket.replace("{stage}", stage).replace("{region}", region),
+      );
     }
   }
 
