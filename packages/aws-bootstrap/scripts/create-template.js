@@ -35,17 +35,69 @@ function validateShortName(name) {
 }
 
 function copyRecursive(src, dest, ignore = []) {
-  if (!fs.existsSync(src)) return;
-  const stat = fs.statSync(src);
-  if (stat.isDirectory()) {
-    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
-    const items = fs.readdirSync(src);
-    for (const item of items) {
-      if (ignore.includes(item)) continue;
-      copyRecursive(path.join(src, item), path.join(dest, item), ignore);
+  // Use fs-extra's robust copySync if available to preserve dotfiles, symlinks,
+  // and file modes. Provide a filter so the ignore array is honored.
+  try {
+    const fsExtra = require("fs-extra");
+    fsExtra.copySync(src, dest, {
+      dereference: true,
+      preserveTimestamps: true,
+      errorOnExist: false,
+      recursive: true,
+      filter: (srcPath) => {
+        // Compute path relative to source root
+        const rel = path.relative(src, srcPath);
+        if (!rel) return true; // root
+        const seg = rel.split(path.sep)[0];
+        // If the top-level segment is in the ignore list, skip
+        if (ignore.includes(seg)) return false;
+        return true;
+      },
+    });
+    return;
+  } catch (e) {
+    // Fallback to a conservative copy if fs-extra isn't available.
+    if (!fs.existsSync(src)) return;
+    const stat = fs.statSync(src);
+    if (stat.isDirectory()) {
+      if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+      const items = fs.readdirSync(src, { withFileTypes: true });
+      for (const entry of items) {
+        const item = entry.name;
+        if (ignore.includes(item)) continue;
+        const srcItem = path.join(src, item);
+        const destItem = path.join(dest, item);
+        if (entry.isDirectory()) {
+          copyRecursive(srcItem, destItem, ignore);
+        } else if (entry.isSymbolicLink()) {
+          try {
+            const link = fs.readlinkSync(srcItem);
+            fs.symlinkSync(link, destItem);
+          } catch (syErr) {
+            // fallback to a regular copy
+            try {
+              fs.copyFileSync(srcItem, destItem);
+            } catch (copyErr) {
+              // ignore
+            }
+          }
+        } else {
+          try {
+            fs.copyFileSync(srcItem, destItem);
+            const st = fs.statSync(srcItem);
+            try {
+              fs.chmodSync(destItem, st.mode);
+            } catch (chmodErr) {
+              // best-effort
+            }
+          } catch (copyErr) {
+            // ignore binary/read errors
+          }
+        }
+      }
+    } else {
+      fs.copyFileSync(src, dest);
     }
-  } else {
-    fs.copyFileSync(src, dest);
   }
 }
 
@@ -158,14 +210,10 @@ function sanitizeComponents(
       const tokens = [
         "aws-example",
         "aws_example",
-        "awb", // defensive
-        "awsb",
-        "awse",
         "awse",
         "awsex",
         "aws",
         "awsexample",
-        "awsb",
       ];
       const hasToken = tokens.some((t) => lower.includes(t));
       if (!hasToken) continue; // skip files that don't include placeholders
@@ -183,15 +231,12 @@ function sanitizeComponents(
         // Prefer PascalCase and Capitalized short name
         newName = newName.replace(/AwsExample/gi, pascalCaseName);
         newName = newName.replace(/AWSExample/gi, pascalCaseName);
-        newName = newName.replace(/Awsb/gi, capitalizedShortName);
         newName = newName.replace(/AWSE/gi, capitalizedShortName);
         newName = newName.replace(/Awse/gi, capitalizedShortName);
       } else {
         // Prefer kebab-case longName and shortName for lowercase-starting files
         newName = newName.replace(/aws-example/gi, longName);
         newName = newName.replace(/aws_example/gi, longName);
-        newName = newName.replace(/awsb/gi, shortName);
-        newName = newName.replace(/awse/gi, shortName);
         newName = newName.replace(/awse/gi, shortName);
       }
 
@@ -408,6 +453,33 @@ async function removePackageInteractive() {
     console.error("Failed to update deploy/types.ts:", e.message);
   }
 
+  // Remove deploy/project-config.ts entries for this stack (best-effort)
+  try {
+    const projectConfigPath = path.join(root, "packages", "deploy", "project-config.ts");
+    if (fs.existsSync(projectConfigPath)) {
+      let content = fs.readFileSync(projectConfigPath, "utf8");
+      const pascalCaseName = longName
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join("");
+
+      // Remove the entire project config entry (multi-line)
+      // Match from [StackType.X]: { through the closing },
+      content = content.replace(
+        new RegExp(
+          `\\s*\\[StackType\\.${pascalCaseName}\\]:\\s*\\{[\\s\\S]*?\\},?\\n`,
+          "g",
+        ),
+        "",
+      );
+
+      fs.writeFileSync(projectConfigPath, content, "utf8");
+      console.log("Updated deploy/project-config.ts (best-effort)");
+    }
+  } catch (e) {
+    console.error("Failed to update deploy/project-config.ts:", e.message);
+  }
+
   console.log("Cleanup complete.");
 }
 
@@ -505,6 +577,32 @@ function removePackageForce(longName) {
     console.error("Failed to update deploy/types.ts:", e.message);
   }
 
+  // Best-effort remove entries from deploy/project-config.ts
+  try {
+    const projectConfigPath = path.join(root, "packages", "deploy", "project-config.ts");
+    if (fs.existsSync(projectConfigPath)) {
+      let content = fs.readFileSync(projectConfigPath, "utf8");
+      const pascalCaseName = longName
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join("");
+
+      // Remove the entire project config entry (multi-line)
+      content = content.replace(
+        new RegExp(
+          `\\s*\\[StackType\\.${pascalCaseName}\\]:\\s*\\{[\\s\\S]*?\\},?\\n`,
+          "g",
+        ),
+        "",
+      );
+
+      fs.writeFileSync(projectConfigPath, content, "utf8");
+      console.log("Updated deploy/project-config.ts (force-delete)");
+    }
+  } catch (e) {
+    console.error("Failed to update deploy/project-config.ts:", e.message);
+  }
+
   console.log(`Force-delete cleanup for ${longName} finished.`);
 }
 
@@ -523,8 +621,7 @@ function updatePackageJsonNames(destPackagePath, longName, shortName) {
             pkg.name = pkg.name
               .replace(/aws-example/gi, longName)
               .replace(/aws_example/gi, longName)
-              .replace(/awse/gi, shortName)
-              .replace(/awsb/gi, shortName);
+              .replace(/awse/gi, shortName);
             fs.writeFileSync(full, JSON.stringify(pkg, null, 2) + "\n");
           }
         } catch (e) {
@@ -704,13 +801,10 @@ async function main() {
   renameFilesWithPatterns(dest, [
     { from: "AwsExample", to: pascalCaseName, flags: "g" },
     { from: "AWSExample", to: pascalCaseName, flags: "g" },
-    { from: "Awsb", to: capitalizedShortName, flags: "g" },
-    { from: "AWSB", to: upperShortName, flags: "g" },
     { from: "Awse", to: capitalizedShortName, flags: "g" },
     { from: "AWSE", to: upperShortName, flags: "g" },
     // Lowercase / kebab-case replacements last (use word boundaries where helpful)
     { from: "\\baws-example\\b", to: longName, flags: "gi" },
-    { from: "\\bawsb\\b", to: shortName, flags: "g" },
     { from: "\\bawse\\b", to: shortName, flags: "g" },
   ]);
 
@@ -724,22 +818,22 @@ async function main() {
 
   // Replace tokens inside files
   console.log(
-    `\n🔍 Replacing tokens in files (aws-example → ${longName}, awsb → ${shortName})...`,
+    `\n🔍 Replacing tokens in files (aws-example → ${longName}, awse → ${shortName})...`,
   );
   const replacements = [
-    // PascalCase and UPPERCASE replacements first so component identifiers
+    // Replace hardcoded titles with project title (must be before identifier replacements)
+    { from: "AWS Example Application", to: `${projectTitle} Application`, flags: "g" },
+    { from: "AWS Example", to: projectTitle, flags: "g" },
+    // PascalCase and UPPERCASE replacements for component identifiers
     // and exported symbols that are already PascalCase stay PascalCase.
     { from: "AwsExample", to: pascalCaseName, flags: "g" },
     { from: "AWSExample", to: pascalCaseName, flags: "g" },
-    { from: "Awsb", to: capitalizedShortName, flags: "g" },
-    { from: "AWSB", to: upperShortName, flags: "g" },
     { from: "Awse", to: capitalizedShortName, flags: "g" },
     { from: "AWSE", to: upperShortName, flags: "g" },
     // Lowercase / kebab-case replacements after. Use word boundaries to avoid
     // touching parts of identifiers that were handled above.
     { from: "\\baws-example\\b", to: longName, flags: "gi" },
     { from: "\\baws_example\\b", to: longName, flags: "gi" },
-    { from: "\\bawsb\\b", to: shortName, flags: "g" },
     { from: "\\bawse\\b", to: shortName, flags: "g" },
   ];
   replaceTokensInTree(dest, replacements);
@@ -977,23 +1071,74 @@ async function main() {
     );
   }
 
+  // Update project-config.ts with the new project configuration
+  console.log("\n🔧 Adding project configuration to deploy/project-config.ts...");
+  try {
+    const projectConfigPath = path.join(root, "packages", "deploy", "project-config.ts");
+    if (fs.existsSync(projectConfigPath)) {
+      let content = fs.readFileSync(projectConfigPath, "utf8");
+
+      // Create the new project configuration entry
+      const newProjectConfig = `
+  [StackType.${pascalCaseName}]: {
+    stackType: StackType.${pascalCaseName},
+    displayName: "${projectTitle}",
+    templateDir: "${longName}",
+    packageDir: "${longName}",
+    dependsOn: [StackType.Shared], // TODO: Update dependencies as needed
+    buckets: {
+      templates: "nlmonorepo-${longName}-templates-{stage}",
+      frontend: "nlmonorepo-${shortName}-userfiles-{stage}",
+      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],
+    },
+    hasFrontend: true,
+    hasLambdas: true,
+    hasResolvers: true,
+  },
+`;
+
+      // Find the closing brace of PROJECT_CONFIGS and add before it
+      const projectConfigsRegex = /(export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = \{[^;]*)(};)/s;
+      if (!content.includes(`[StackType.${pascalCaseName}]:`)) {
+        content = content.replace(
+          projectConfigsRegex,
+          `$1${newProjectConfig}\n$2`,
+        );
+        fs.writeFileSync(projectConfigPath, content, "utf8");
+        console.log("✅ Updated deploy/project-config.ts");
+      } else {
+        console.log("⚠️  Project already exists in project-config.ts, skipping");
+      }
+    } else {
+      console.warn("⚠️  project-config.ts not found - you may need to add project configuration manually");
+    }
+  } catch (e) {
+    console.error("⚠️  Failed to update project-config.ts:", e.message);
+    console.log(
+      "   You may need to manually add the project configuration to packages/deploy/project-config.ts",
+    );
+  }
+
   console.log("\n===========================================");
   console.log("✅ Package created successfully!");
   console.log("===========================================");
   console.log(`\n📍 Location: ${dest}\n`);
-  console.log("Next steps:");
-  console.log(`  1. Run 'yarn install' to install dependencies`);
-  console.log(`  2. Review and update the CloudFormation template at:`);
-  console.log(`     packages/deploy/templates/${longName}/cfn-template.yaml`);
-  console.log(
-    `  3. Update any service-specific configuration (Sentry, ports, etc.)`,
-  );
-  console.log(
-    `  4. Add deployment logic to packages/deploy/packages/${longName}/`,
-  );
-  console.log(
-    `  5. Update dependency-validator.ts to define stack dependencies`,
-  );
+  console.log("✅ Auto-configured:");
+  console.log(`   • Added to root package.json workspaces`);
+  console.log(`   • Added StackType.${pascalCaseName} to deploy/types.ts`);
+  console.log(`   • Added project config to deploy/project-config.ts`);
+  console.log("\nNext steps:");
+  console.log(`  1. Review project configuration in packages/deploy/project-config.ts`);
+  console.log(`     - Update dependencies (currently set to [StackType.Shared])`);
+  console.log(`     - Adjust bucket naming patterns if needed`);
+  console.log(`     - Set hasFrontend/hasLambdas/hasResolvers flags correctly`);
+  console.log(`  2. Create deployment function at:`);
+  console.log(`     packages/deploy/packages/${longName}/${longName}.ts`);
+  console.log(`  3. Register deployment function in packages/deploy/index.ts`);
+  console.log(`     (See deployAwsExample or deployCwl for examples)`);
+  console.log(`  4. Create CloudFormation templates in:`);
+  console.log(`     packages/deploy/templates/${longName}/`);
+  console.log(`  5. Update service-specific configuration (Sentry, ports, etc.)`);
   console.log(`  6. Run 'yarn deploy' to deploy your new stack\n`);
 }
 
