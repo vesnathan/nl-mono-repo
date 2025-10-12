@@ -140,7 +140,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      Code: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Queries/Query.getCWLUser.js"
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Queries/Query.getCWLUser.js"
 
   CreateCWLUserResolver:
     Type: AWS::AppSync::Resolver
@@ -174,7 +174,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      Code: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.createCognitoUser.js"
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.createCognitoUser.js"
 
   CreateUserDynamoDBFunction:
     Type: AWS::AppSync::FunctionConfiguration
@@ -185,7 +185,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      Code: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Mutations/Mutation.createCWLUser.js"
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Mutations/Mutation.createCWLUser.js"
 
   SendWelcomeEmailFunction:
     Type: AWS::AppSync::FunctionConfiguration
@@ -196,7 +196,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      Code: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.sendWelcomeEmail.js"
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.sendWelcomeEmail.js"
 
 Outputs:
   CWLAppSyncApiUrl:

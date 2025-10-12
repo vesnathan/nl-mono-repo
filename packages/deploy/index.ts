@@ -29,6 +29,7 @@ import {
   DependencyValidator,
   getDependencyChain,
 } from "./dependency-validator";
+import { getProjectConfig } from "./project-config";
 import {
   CloudFormationClient,
   CreateStackCommand,
@@ -228,17 +229,21 @@ class DeploymentManager {
     // Ensure debug mode is properly set
     setLoggerDebugMode(options.debugMode || false);
 
-    logger.debug("Deploying all stacks in order: WAF -> Shared -> CWL");
+    // Get deployment order dynamically based on dependencies
+    const deploymentOrder = this.dependencyValidator.getDeploymentOrder();
 
-    await this.deployStack(StackType.WAF, options);
-    this.outputsManager = new OutputsManager(); // Reload outputs to get WAF outputs
+    logger.info(`Deploying all stacks in dependency order: ${deploymentOrder.join(" -> ")}`);
 
-    await this.deployStack(StackType.Shared, options);
-    this.outputsManager = new OutputsManager(); // Reload outputs to get Shared outputs
+    for (const stackType of deploymentOrder) {
+      logger.info(`\n🚀 Deploying ${stackType} stack...`);
+      await this.deployStack(stackType, options);
 
-    await this.deployStack(StackType.CWL, options);
+      // Reload outputs after each stack deployment to make them available to next stack
+      this.outputsManager = new OutputsManager();
+      logger.success(`✓ ${stackType} stack deployed successfully\n`);
+    }
 
-    logger.success("All stacks deployed successfully.");
+    logger.success("🎉 All stacks deployed successfully!");
   }
 
   public getRegion(): string {
@@ -803,20 +808,17 @@ class DeploymentManager {
   }
 
   async removeAllStacks(options: DeploymentOptions): Promise<void> {
+    // Get removal order dynamically (reverse of deployment order)
+    const stacksToRemove = this.dependencyValidator.getRemovalOrder();
+
     logger.info(`========================================`);
     logger.info(`Starting removal of ALL stacks for stage: ${options.stage}`);
     logger.info(`========================================`);
     logger.info(
-      `Stacks will be removed in dependency order: CWL → Shared → WAF`,
+      `Stacks will be removed in reverse dependency order: ${stacksToRemove.join(" → ")}`,
     );
     logger.info(`This process may take several minutes...`);
 
-    // Corrected: Use StackType enum and correct order for deletion (reverse of creation)
-    const stacksToRemove: StackType[] = [
-      StackType.CWL,
-      StackType.Shared,
-      StackType.WAF,
-    ];
     let successCount = 0;
     let failureCount = 0;
 
@@ -907,26 +909,26 @@ async function main() {
           logger.menu("Deploy/Update Stacks");
           logger.menu("=".repeat(40));
 
+          // Build dynamic stack choices from project config
+          const stackChoices = [
+            {
+              name: "All (recommended for first-time setup)",
+              value: "all",
+            },
+            ...Object.values(StackType).map((stackType) => ({
+              name: getProjectConfig(stackType).displayName,
+              value: stackType,
+            })),
+            new inquirer.Separator(),
+            { name: "<- Go Back", value: "back" },
+          ];
+
           const { stack } = await inquirer.prompt([
             {
               type: "list",
               name: "stack",
               message: "Which stack do you want to deploy/update?",
-              choices: [
-                {
-                  name: "All (recommended for first-time setup)",
-                  value: "all",
-                },
-                { name: "CloudWatchLive (CWL)", value: StackType.CWL },
-                {
-                  name: "AWS Example (aws-example)",
-                  value: StackType.AwsExample,
-                },
-                { name: "Shared Resources", value: StackType.Shared },
-                { name: "WAF", value: StackType.WAF },
-                new inquirer.Separator(),
-                { name: "<- Go Back", value: "back" },
-              ],
+              choices: stackChoices,
             },
           ]);
 
@@ -1052,67 +1054,14 @@ async function main() {
           logger.menu("Remove Stacks");
           logger.menu("=".repeat(40));
 
-          // Build a dynamic choices list from the templates directory so menus reflect available stack templates
-          const buildStackTypeChoices = (): Array<{
-            name: string;
-            value: any;
-          }> => {
-            const templatesDir = path.resolve(__dirname, "templates");
-            const baseChoices: Array<{ name: string; value: any }> = [
-              { name: "All", value: "all" },
-            ];
-
-            try {
-              const entries = readdirSync(templatesDir, {
-                withFileTypes: true,
-              });
-
-              // map known template folder names to StackType and friendly labels
-              const mapping: Record<
-                string,
-                { type: StackType; label: string }
-              > = {
-                cwl: { type: StackType.CWL, label: "CloudWatchLive (CWL)" },
-                "aws-example": {
-                  type: StackType.AwsExample,
-                  label: "AWS Example (aws-example)",
-                },
-                shared: { type: StackType.Shared, label: "Shared Resources" },
-                waf: { type: StackType.WAF, label: "WAF" },
-              };
-
-              // Preserve a sensible order
-              const order = ["cwl", "aws-example", "shared", "waf"];
-
-              for (const key of order) {
-                const found = entries.find(
-                  (e) => e.isDirectory() && e.name === key,
-                );
-                if (found && mapping[key]) {
-                  baseChoices.push({
-                    name: mapping[key].label,
-                    value: mapping[key].type,
-                  });
-                }
-              }
-
-              return baseChoices;
-            } catch (err) {
-              // If we can't read the templates folder for any reason, fall back to the static list
-              return [
-                { name: "All", value: "all" },
-                { name: "CloudWatchLive (CWL)", value: StackType.CWL },
-                {
-                  name: "AWS Example (aws-example)",
-                  value: StackType.AwsExample,
-                },
-                { name: "Shared Resources", value: StackType.Shared },
-                { name: "WAF", value: StackType.WAF },
-              ];
-            }
-          };
-
-          const stackTypeChoices = buildStackTypeChoices();
+          // Build dynamic stack choices from project config
+          const stackTypeChoices = [
+            { name: "All", value: "all" },
+            ...Object.values(StackType).map((stackType) => ({
+              name: getProjectConfig(stackType).displayName,
+              value: stackType,
+            })),
+          ];
 
           const { stack } = await inquirer.prompt([
             {

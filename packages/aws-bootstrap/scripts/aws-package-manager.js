@@ -320,10 +320,117 @@ async function removePackageInteractive() {
   const protectedPackages = new Set(["aws-bootstrap", "deploy", "shared", "waf"]);
   return items.filter((i) => !protectedPackages.has(i));
   }
+      // Exclude internal/protected packages from the default deletion list
+  // Helper: collect all package.json paths under packages/ (exclude node_modules)
+  function collectAllPackageJsons() {
+    const base = path.join(root, "packages");
+    const results = [];
+    function walk(dir) {
+      const items = fs.readdirSync(dir, { withFileTypes: true });
+      for (const it of items) {
+        if (it.name === "node_modules") continue;
+        const full = path.join(dir, it.name);
+        if (it.isDirectory()) {
+          walk(full);
+        } else if (it.isFile() && it.name === "package.json") {
+          results.push(full);
+        }
+      }
+    }
+    if (fs.existsSync(base)) walk(base);
+    return results;
+  }
 
-  let longName = await prompt(
-    "Enter the package long name to delete (kebab-case) or press Enter to choose from a list",
-  );
+  // Helper: get declared package names inside a package folder (may include multiple package.jsons)
+  function getLocalPackageNames(longName) {
+    const pkgDir = path.join(root, "packages", longName);
+    const names = new Set();
+    if (!fs.existsSync(pkgDir)) return Array.from(names);
+    function walk(dir) {
+      const items = fs.readdirSync(dir, { withFileTypes: true });
+      for (const it of items) {
+        const full = path.join(dir, it.name);
+        if (it.isDirectory()) {
+          if (it.name === "node_modules") continue;
+          walk(full);
+        } else if (it.isFile() && it.name === "package.json") {
+          try {
+            const pkg = JSON.parse(fs.readFileSync(full, "utf8"));
+            if (pkg && pkg.name) names.add(pkg.name);
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+    }
+    walk(pkgDir);
+    return Array.from(names);
+  }
+
+  // Helper: find packages that depend on any of the given package names
+  function findDependents(targetNames, excludeLongName) {
+    const dependents = [];
+    const allPkgJsons = collectAllPackageJsons();
+    for (const pj of allPkgJsons) {
+      // skip package.json files that live under the target package directory
+      if (excludeLongName && pj.indexOf(path.join("packages", excludeLongName)) !== -1) continue;
+      try {
+        const content = JSON.parse(fs.readFileSync(pj, "utf8"));
+        const deps = Object.assign({}, content.dependencies || {}, content.devDependencies || {}, content.peerDependencies || {}, content.optionalDependencies || {});
+        const matched = [];
+        for (const tn of targetNames) {
+          if (deps && Object.prototype.hasOwnProperty.call(deps, tn)) matched.push(tn);
+        }
+        if (matched.length > 0) {
+          // derive a user-friendly name for the dependent package
+          const dependentPkgName = content.name || path.basename(path.dirname(pj));
+          dependents.push({ packageJson: pj, packageName: dependentPkgName, matches: matched });
+        }
+      } catch (e) {
+        // ignore parse errors
+      }
+    }
+    return dependents;
+  }
+
+  // Helper: derive top-level package long name from a package.json path
+  function getLongNameFromPackageJsonPath(pkgJsonPath) {
+    // Expect .../packages/<longName>/.../package.json
+    const rel = path.relative(root, path.dirname(pkgJsonPath));
+    const parts = rel.split(path.sep);
+    const idx = parts.indexOf("packages");
+    if (idx === -1) {
+      // fallback: first segment
+      return parts[0] || null;
+    }
+    return parts[idx + 1] || null;
+  }
+
+  // Helper: detect if a package appears to be "deployed".
+  // We treat a package as deployed if there are deploy templates for it
+  // under packages/deploy/templates/<longName> or if project-config.ts references it.
+  function isPackageDeployed(longName) {
+    if (!longName) return false;
+    const templatesDir = path.join(root, "packages", "deploy", "templates", longName);
+    if (fs.existsSync(templatesDir)) return true;
+    // Also check project-config.ts for templateDir or packageDir entries
+    try {
+      const projConfigPath = path.join(root, "packages", "deploy", "project-config.ts");
+      if (!fs.existsSync(projConfigPath)) return false;
+      const content = fs.readFileSync(projConfigPath, "utf8");
+      if (content.includes(`templateDir: "${longName}"`) || content.includes(`packageDir: "${longName}"`) || content.includes(`templates/${longName}/`)) {
+        return true;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return false;
+  }
+
+  // If a package name was provided as a CLI arg (e.g. when calling
+  // `node ... delete <pkg>`), use that. Otherwise directly present the
+  // interactive list so users don't have to type Enter first.
+  let longName = process.argv[3] && process.argv[3].toLowerCase();
   if (!longName) {
     const choices = await listPackagesForRemoval();
     if (!choices || choices.length === 0) {
@@ -332,27 +439,163 @@ async function removePackageInteractive() {
       );
       return;
     }
-    console.log("\nAvailable packages to remove:");
-    choices.forEach((c, idx) => console.log(`  ${idx + 1}) ${c}`));
-    const pick = await prompt(
-      "Enter number to delete or type package name (or empty to cancel)",
-    );
-    if (!pick) {
-      console.log("Cancelled.");
+
+    // Build interactive list with disabled flags for packages required by deployed packages
+    const items = [];
+    for (const pkgName of choices) {
+      const localNames = getLocalPackageNames(pkgName);
+      const dependents = findDependents(localNames, pkgName) || [];
+      const deployedDependents = dependents.filter((d) => {
+        const dependentLongName = getLongNameFromPackageJsonPath(d.packageJson);
+        return isPackageDeployed(dependentLongName);
+      });
+      if (deployedDependents.length > 0) {
+        items.push({ label: pkgName, disabled: true, reason: deployedDependents.map(d => d.packageName).join(', ') });
+      } else {
+        items.push({ label: pkgName, disabled: false });
+      }
+    }
+
+    async function interactiveSelectWithDisabled(question, items, defaultIndex = 0) {
+      // Non-interactive fallback
+      if (!process.stdin.isTTY) {
+        console.log(`\n${question}`);
+        items.forEach((it, idx) => {
+          const suffix = it.disabled ? ` (blocked by ${it.reason})` : '';
+          console.log(`  ${idx + 1}) ${it.label}${suffix}`);
+        });
+        while (true) {
+          const pick = await prompt(`Enter number to delete or type package name (or empty to cancel)`, String(defaultIndex + 1));
+          if (!pick) return null;
+          const pickNum = parseInt(pick, 10);
+          if (!isNaN(pickNum) && pickNum >= 1 && pickNum <= items.length) {
+            const selected = items[pickNum - 1];
+            if (selected.disabled) {
+              console.log(`Cannot delete ${selected.label}: blocked by deployed package(s): ${selected.reason}`);
+              continue;
+            }
+            return selected.label;
+          }
+          // typed name
+          const typed = pick.trim();
+          const found = items.find((it) => it.label === typed);
+          if (found) {
+            if (found.disabled) {
+              console.log(`Cannot delete ${found.label}: blocked by deployed package(s): ${found.reason}`);
+              continue;
+            }
+            return found.label;
+          }
+          console.log('Invalid selection, try again.');
+        }
+      }
+
+      return new Promise((resolve) => {
+        const stdout = process.stdout;
+        let selected = defaultIndex;
+        // ensure default isn't disabled
+        if (items[selected] && items[selected].disabled) {
+          // find first non-disabled
+          const idx = items.findIndex(it => !it.disabled);
+          selected = idx >= 0 ? idx : defaultIndex;
+        }
+
+        const title = question;
+        const render = (first) => {
+          if (!first) stdout.write(`\x1b[${items.length + 1}A`);
+          stdout.write('\x1b[0J');
+          stdout.write(`\n${title}\n`);
+          items.forEach((it, i) => {
+            const label = it.disabled ? `${it.label} (blocked by ${it.reason})` : it.label;
+            if (i === selected) {
+              if (it.disabled) stdout.write(`\x1b[7m\x1b[2m  ${label}  \x1b[0m\n`); // inverse + dim
+              else stdout.write(`\x1b[7m  ${label}  \x1b[0m\n`); // inverse
+            } else {
+              if (it.disabled) stdout.write(`\x1b[2m   ${label}\x1b[0m\n`); // dim
+              else stdout.write(`   ${label}\n`);
+            }
+          });
+        };
+
+        render(true);
+
+        const onKey = (str, key) => {
+          if (key && key.name === 'up') {
+            // move up skipping disabled
+            let i = selected;
+            do { i = (i - 1 + items.length) % items.length; } while (items[i].disabled && i !== selected);
+            selected = i;
+            render(false);
+            return;
+          }
+          if (key && key.name === 'down') {
+            let i = selected;
+            do { i = (i + 1) % items.length; } while (items[i].disabled && i !== selected);
+            selected = i;
+            render(false);
+            return;
+          }
+          if (key && (key.name === 'return' || key.name === 'enter')) {
+            const it = items[selected];
+            if (it.disabled) {
+              // beep and stay
+              stdout.write('\x07');
+              return;
+            }
+            cleanup();
+            stdout.write('\n');
+            resolve(it.label);
+            return;
+          }
+          if (key && key.ctrl && key.name === 'c') {
+            cleanup();
+            process.exit();
+          }
+        };
+
+        function cleanup() {
+          try {
+            process.stdin.removeListener('keypress', onKey);
+            process.stdin.setRawMode(false);
+          } catch (e) {}
+        }
+
+        readline.emitKeypressEvents(process.stdin);
+        process.stdin.setRawMode(true);
+        process.stdin.on('keypress', onKey);
+      });
+    }
+
+    const pickLabel = await interactiveSelectWithDisabled('Available packages to remove (use ↑/↓, Enter to choose):', items, 0);
+    if (!pickLabel) {
+      console.log('Cancelled.');
       return;
     }
-    // If numeric selection, pick by index
-    const pickNum = parseInt(pick, 10);
-    if (!isNaN(pickNum) && pickNum >= 1 && pickNum <= choices.length) {
-      longName = choices[pickNum - 1];
-    } else {
-      longName = pick; // assume user typed a package name
-    }
+    longName = pickLabel;
   }
   const dest = path.join(root, "packages", longName);
   if (!fs.existsSync(dest)) {
     console.error("Package not found:", dest);
     return;
+  }
+
+  // Prevent deleting if this package is required by other deployed packages
+  try {
+    const localNames = getLocalPackageNames(longName);
+    const dependents = findDependents(localNames, longName);
+    // Filter dependents to those which are deployed
+    const deployedDependents = dependents.filter((d) => {
+      const dependentLongName = getLongNameFromPackageJsonPath(d.packageJson);
+      return isPackageDeployed(dependentLongName);
+    });
+    if (deployedDependents.length > 0) {
+      console.error("Cannot delete package because the following deployed packages depend on it:");
+      deployedDependents.forEach((d) => console.error(`  - ${d.packageName} (matches: ${d.matches.join(",")})`));
+      console.error("Remove or undeploy those packages first, then retry deletion.");
+      return;
+    }
+  } catch (e) {
+    // if our checks fail, be conservative and continue (or optionally block) — opt to continue
   }
   const confirm = await prompt(
     `Permanently delete ${longName}? This will remove files and update workspace/deploy. (yes/no)`,
@@ -462,6 +705,19 @@ async function removePackageInteractive() {
         .split("-")
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join("");
+    // Helper: run yarn at repo root to refresh workspaces and lockfile (best-effort)
+    async function runYarnAtRoot() {
+      try {
+        const { execSync } = require('child_process');
+        console.log('\n🔁 Running `yarn` at repo root to refresh workspaces...');
+        execSync('yarn install --check-files', { stdio: 'inherit', cwd: path.resolve(__dirname, '../../..') });
+        console.log('✅ yarn completed');
+      } catch (err) {
+        console.warn('⚠️  Running yarn failed (non-fatal):', err && err.message ? err.message : err);
+        console.log('   You may need to run `yarn` manually to update workspaces and lockfile.');
+      }
+    }
+    // Auto-install is handled at the top-level main() via shouldAutoinstall flag.
 
       // Remove the entire project config entry (multi-line)
       // Match from [StackType.X]: { through the closing },
@@ -489,6 +745,23 @@ function removePackageForce(longName) {
   if (!longName) {
     console.error("No package name provided to --force-delete");
     return;
+  }
+  // Prevent force-delete if other deployed packages depend on this package
+  try {
+    const localNames = getLocalPackageNames(longName);
+    const dependents = findDependents(localNames, longName);
+    const deployedDependents = dependents.filter((d) => {
+      const dependentLongName = getLongNameFromPackageJsonPath(d.packageJson);
+      return isPackageDeployed(dependentLongName);
+    });
+    if (deployedDependents.length > 0) {
+      console.error("Refusing to delete package: the following deployed packages depend on it:");
+      deployedDependents.forEach((d) => console.error(`  - ${d.packageName} (matches: ${d.matches.join(",")})`));
+      console.error("Undeploy or remove those packages first, or run the operation in your CI after confirming it's safe.");
+      return;
+    }
+  } catch (e) {
+    // ignore check errors and proceed with caution
   }
   const dest = path.join(root, "packages", longName);
   if (!fs.existsSync(dest)) {
@@ -604,6 +877,16 @@ function removePackageForce(longName) {
   }
 
   console.log(`Force-delete cleanup for ${longName} finished.`);
+  // Run yarn at repo root to refresh workspaces and lockfile (best-effort)
+  try {
+    const { execSync } = require('child_process');
+    console.log('\n🔁 Running `yarn` at repo root to refresh workspaces...');
+    execSync('yarn install --check-files', { stdio: 'inherit', cwd: path.resolve(__dirname, '../../..') });
+    console.log('✅ yarn completed');
+  } catch (err) {
+    console.warn('⚠️  Running yarn failed (non-fatal):', err && err.message ? err.message : err);
+    console.log('   You may need to run `yarn` manually to update workspaces and lockfile.');
+  }
 }
 
 function updatePackageJsonNames(destPackagePath, longName, shortName) {
@@ -636,21 +919,240 @@ function updatePackageJsonNames(destPackagePath, longName, shortName) {
 async function main() {
   // Parse CLI arg if provided
   let rawArg = process.argv[2] && process.argv[2].toLowerCase();
-  // If no argument provided, show a concise numeric menu for create/delete
-  if (!rawArg) {
-    console.log("\nSelect an action:");
-    console.log("  1) Create a package");
-    console.log("  2) Delete a package");
-    const pick = await prompt("Enter 1 or 2 (default 1)", "1");
-    if (pick.trim() === "2" || /^delete$/i.test(pick.trim())) {
-      rawArg = "delete";
-    } else {
-      rawArg = "create";
+  // Autoinstall behavior: run `yarn install` after create/delete by default.
+  // Users can opt out with --no-autoinstall
+  const shouldAutoinstall = !process.argv.includes('--no-autoinstall');
+  // Support quick non-interactive listing of removable packages
+  if (process.argv.includes("--list-removable") || process.argv.includes("--list-removable-json")) {
+    const jsonOut = process.argv.includes("--list-removable-json");
+    const root = path.resolve(__dirname, "../../..");
+    const packagesRoot = path.join(root, "packages");
+    function collectTopLevelPackageDirs() {
+      if (!fs.existsSync(packagesRoot)) return [];
+      return fs.readdirSync(packagesRoot).filter((d) => {
+        try {
+          return fs.statSync(path.join(packagesRoot, d)).isDirectory();
+        } catch (e) {
+          return false;
+        }
+      });
     }
+
+    function getLocalPackageNames(longName) {
+      const pkgDir = path.join(root, "packages", longName);
+      const names = new Set();
+      if (!fs.existsSync(pkgDir)) return Array.from(names);
+      function walk(dir) {
+        const items = fs.readdirSync(dir, { withFileTypes: true });
+        for (const it of items) {
+          const full = path.join(dir, it.name);
+          if (it.isDirectory()) {
+            if (it.name === "node_modules") continue;
+            walk(full);
+          } else if (it.isFile() && it.name === "package.json") {
+            try {
+              const pkg = JSON.parse(fs.readFileSync(full, "utf8"));
+              if (pkg && pkg.name) names.add(pkg.name);
+            } catch (e) {
+              // ignore
+            }
+          }
+        }
+      }
+      walk(pkgDir);
+      return Array.from(names);
+    }
+
+    function collectAllPackageJsons() {
+      const base = path.join(root, "packages");
+      const results = [];
+      function walk(dir) {
+        const items = fs.readdirSync(dir, { withFileTypes: true });
+        for (const it of items) {
+          if (it.name === "node_modules") continue;
+          const full = path.join(dir, it.name);
+          if (it.isDirectory()) {
+            walk(full);
+          } else if (it.isFile() && it.name === "package.json") {
+            results.push(full);
+          }
+        }
+      }
+      if (fs.existsSync(base)) walk(base);
+      return results;
+    }
+
+    function findDependents(targetNames, excludeLongName) {
+      const dependents = [];
+      const allPkgJsons = collectAllPackageJsons();
+      for (const pj of allPkgJsons) {
+        if (excludeLongName && pj.indexOf(path.join("packages", excludeLongName)) !== -1) continue;
+        try {
+          const content = JSON.parse(fs.readFileSync(pj, "utf8"));
+          const deps = Object.assign({}, content.dependencies || {}, content.devDependencies || {}, content.peerDependencies || {}, content.optionalDependencies || {});
+          const matched = [];
+          for (const tn of targetNames) {
+            if (deps && Object.prototype.hasOwnProperty.call(deps, tn)) matched.push(tn);
+          }
+          if (matched.length > 0) {
+            const dependentPkgName = content.name || path.basename(path.dirname(pj));
+            dependents.push({ packageJson: pj, packageName: dependentPkgName, matches: matched });
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+      return dependents;
+    }
+
+    function getLongNameFromPackageJsonPath(pkgJsonPath) {
+      const rel = path.relative(root, path.dirname(pkgJsonPath));
+      const parts = rel.split(path.sep);
+      const idx = parts.indexOf("packages");
+      if (idx === -1) return parts[0] || null;
+      return parts[idx + 1] || null;
+    }
+
+    function isPackageDeployed(longName) {
+      if (!longName) return false;
+      const templatesDir = path.join(root, "packages", "deploy", "templates", longName);
+      if (fs.existsSync(templatesDir)) return true;
+      try {
+        const projConfigPath = path.join(root, "packages", "deploy", "project-config.ts");
+        if (!fs.existsSync(projConfigPath)) return false;
+        const content = fs.readFileSync(projConfigPath, "utf8");
+        if (content.includes(`templateDir: "${longName}"`) || content.includes(`packageDir: "${longName}"`) || content.includes(`templates/${longName}/`)) {
+          return true;
+        }
+      } catch (e) {
+        // ignore
+      }
+      return false;
+    }
+
+    const protectedPackages = new Set(["aws-bootstrap", "deploy", "shared", "waf"]);
+    const choices = (function(){
+      const packagesRoot = path.join(root, 'packages');
+      if (!fs.existsSync(packagesRoot)) return [];
+      return fs.readdirSync(packagesRoot).filter((d) => {
+        try { return fs.statSync(path.join(packagesRoot, d)).isDirectory(); } catch(e){ return false; }
+      }).filter((i) => !protectedPackages.has(i));
+    })();
+
+    const items = [];
+    for (const pkgName of choices) {
+      const localNames = getLocalPackageNames(pkgName);
+      const dependents = findDependents(localNames, pkgName) || [];
+      const deployedDependents = dependents.filter((d) => {
+        const dependentLongName = getLongNameFromPackageJsonPath(d.packageJson);
+        return isPackageDeployed(dependentLongName);
+      });
+      if (deployedDependents.length > 0) {
+        items.push({ label: pkgName, disabled: true, reason: deployedDependents.map(d => d.packageName).join(', ') });
+      } else {
+        items.push({ label: pkgName, disabled: false });
+      }
+    }
+
+    if (jsonOut) {
+      console.log(JSON.stringify(items, null, 2));
+    } else {
+      // plain list: only print labels
+      items.forEach((it) => console.log(it.label));
+    }
+    return;
+  }
+  // If no argument provided, show an interactive select menu (arrow keys + Enter)
+  if (!rawArg) {
+    async function selectMenu(question, options, defaultIndex = 0) {
+      // Fallback for non-interactive environments
+      if (!process.stdin.isTTY) {
+        console.log(`\n${question}`);
+        options.forEach((o, i) => console.log(`  ${i + 1}) ${o}`));
+        const pick = await prompt(`Enter number (1-${options.length})`, String(defaultIndex + 1));
+        const idx = parseInt(pick, 10) - 1;
+        return options[Math.max(0, Math.min(options.length - 1, isNaN(idx) ? defaultIndex : idx))];
+      }
+
+      return new Promise((resolve) => {
+        const stdout = process.stdout;
+        let selected = defaultIndex;
+        const title = question;
+        const render = (first) => {
+          if (!first) {
+            // move cursor up to redraw
+            stdout.write(`\x1b[${options.length + 1}A`);
+          }
+          // clear lines and re-render
+          stdout.write('\x1b[0J');
+          stdout.write(`\n${title}\n`);
+          options.forEach((opt, i) => {
+            if (i === selected) stdout.write(`\x1b[7m  ${opt}  \x1b[0m\n`); // inverse
+            else stdout.write(`   ${opt}\n`);
+          });
+        };
+
+        // initial render
+        render(true);
+
+        const onKey = (str, key) => {
+          if (key && key.name === 'up') {
+            selected = (selected - 1 + options.length) % options.length;
+            render(false);
+            return;
+          }
+          if (key && key.name === 'down') {
+            selected = (selected + 1) % options.length;
+            render(false);
+            return;
+          }
+          if (key && (key.name === 'return' || key.name === 'enter')) {
+            cleanup();
+            // move cursor to end after selection
+            stdout.write('\n');
+            resolve(options[selected]);
+            return;
+          }
+          if (key && key.ctrl && key.name === 'c') {
+            cleanup();
+            process.exit();
+          }
+        };
+
+        function cleanup() {
+          try {
+            process.stdin.removeListener('keypress', onKey);
+            process.stdin.setRawMode(false);
+          } catch (e) {
+            // noop
+          }
+        }
+
+        readline.emitKeypressEvents(process.stdin);
+        process.stdin.setRawMode(true);
+        process.stdin.on('keypress', onKey);
+      });
+    }
+
+    const choice = await selectMenu('Select action:', ['Create a package', 'Delete a package'], 0);
+    if (/^delete/i.test(choice)) rawArg = 'delete';
+    else rawArg = 'create';
   }
   // Support --force-delete <package> (non-interactive) and 'delete' (interactive)
   if (rawArg === "delete" || rawArg === "remove") {
     await removePackageInteractive();
+    if (shouldAutoinstall) {
+      // ensure the installed state is refreshed after deletion
+      try {
+        const { execSync } = require('child_process');
+        console.log('\n🔁 Running `yarn` at repo root to refresh workspaces...');
+        execSync('yarn install --check-files', { stdio: 'inherit', cwd: path.resolve(__dirname, '../../..') });
+        console.log('✅ yarn completed');
+      } catch (err) {
+        console.warn('⚠️  Running yarn failed (non-fatal):', err && err.message ? err.message : err);
+        console.log('   You may need to run `yarn` manually to update workspaces and lockfile.');
+      }
+    }
     return;
   }
   if (rawArg === "--force-delete" || rawArg === "force-delete") {
@@ -665,12 +1167,23 @@ async function main() {
         `Dry-run: --force-delete ${pkg} (no --confirm provided). No changes made.`,
       );
       console.log(
-        `To actually delete, run: node packages/aws-bootstrap/scripts/create-template.js --force-delete ${pkg} --confirm`,
+        `To actually delete, run: node packages/aws-bootstrap/scripts/aws-package-manager.js --force-delete ${pkg} --confirm`,
       );
       process.exit(0);
     }
     // proceed with destructive action
     removePackageForce(pkg);
+    if (shouldAutoinstall) {
+      try {
+        const { execSync } = require('child_process');
+        console.log('\n🔁 Running `yarn` at repo root to refresh workspaces...');
+        execSync('yarn install --check-files', { stdio: 'inherit', cwd: path.resolve(__dirname, '../../..') });
+        console.log('✅ yarn completed');
+      } catch (err) {
+        console.warn('⚠️  Running yarn failed (non-fatal):', err && err.message ? err.message : err);
+        console.log('   You may need to run `yarn` manually to update workspaces and lockfile.');
+      }
+    }
     return;
   }
   console.log("\n===========================================");
@@ -1091,23 +1604,7 @@ async function main() {
       let content = fs.readFileSync(projectConfigPath, "utf8");
 
       // Create the new project configuration entry
-      const newProjectConfig = `
-  [StackType.${pascalCaseName}]: {
-    stackType: StackType.${pascalCaseName},
-    displayName: "${projectTitle}",
-    templateDir: "${longName}",
-    packageDir: "${longName}",
-    dependsOn: [StackType.Shared], // TODO: Update dependencies as needed
-    buckets: {
-      templates: "nlmonorepo-${longName}-templates-{stage}",
-      frontend: "nlmonorepo-${shortName}-userfiles-{stage}",
-      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],
-    },
-    hasFrontend: true,
-    hasLambdas: true,
-    hasResolvers: true,
-  },
-`;
+      const newProjectConfig = `\n  [StackType.${pascalCaseName}]: {\n    stackType: StackType.${pascalCaseName},\n    displayName: "${projectTitle}",\n    templateDir: "${longName}",\n    packageDir: "${longName}",\n    dependsOn: [StackType.Shared], // TODO: Update dependencies as needed\n    buckets: {\n      templates: "nlmonorepo-${longName}-templates-{stage}",\n      frontend: "nlmonorepo-${shortName}-userfiles-{stage}",\n      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],\n    },\n    hasFrontend: true,\n    hasLambdas: true,\n    hasResolvers: true,\n  },\n`;
 
       // Find the closing brace of PROJECT_CONFIGS and add before it
       const projectConfigsRegex = /(export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = \{[^;]*)(};)/s;

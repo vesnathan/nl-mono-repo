@@ -870,6 +870,18 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       );
     }
 
+    // Add AppSync bucket policy to allow AppSync to read resolver code from S3
+    logger.info("Adding AppSync bucket policy...");
+    try {
+      await addAppSyncBucketPolicy(templateBucketName, region);
+      logger.success("AppSync bucket policy configured successfully");
+    } catch (error: any) {
+      logger.error(`Failed to add AppSync bucket policy: ${error.message}`);
+      throw new Error(
+        `AppSync bucket policy configuration failed - deployment cannot continue`,
+      );
+    }
+
     const resolverDir = path.join(
       __dirname,
       "../../../cloudwatchlive/backend/resolvers",
@@ -934,7 +946,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           constantsDir: constantsDir,
         });
 
-        let resolversBuildHash = "";
+        // Use the outer-scoped resolversBuildHash so it is available when building CloudFormation parameters
+        resolversBuildHash = "";
         try {
           // Compile and upload resolvers (returns build hash)
           resolversBuildHash =
@@ -1087,13 +1100,16 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       { ParameterKey: "WebACLArn", ParameterValue: webAclArn },
     ];
 
-    // If we have a resolvers build hash computed earlier, pass it to CloudFormation
-    if (typeof resolversBuildHash !== "undefined" && resolversBuildHash) {
-      stackParams.push({
-        ParameterKey: "ResolversBuildHash",
-        ParameterValue: resolversBuildHash,
-      });
+    // ResolversBuildHash is required by the CloudFormation template
+    if (!resolversBuildHash) {
+      throw new Error(
+        "ResolversBuildHash is required but was not computed. Resolver compilation may have failed.",
+      );
     }
+    stackParams.push({
+      ParameterKey: "ResolversBuildHash",
+      ParameterValue: resolversBuildHash,
+    });
 
     try {
       // Check if the stack exists

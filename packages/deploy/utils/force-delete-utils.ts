@@ -20,6 +20,7 @@ import {
 import { IAMClient } from "@aws-sdk/client-iam";
 import { logger } from "./logger";
 import { StackType, getStackName } from "../types";
+import { getProjectBuckets } from "../project-config";
 
 export class ForceDeleteManager {
   private cfnClient: CloudFormationClient;
@@ -85,41 +86,9 @@ export class ForceDeleteManager {
     logger.info(
       `Checking for S3 buckets by naming convention for type ${stackType} and stage ${stage}...`,
     );
-    const conventionalBuckets: string[] = [];
 
-    if (stackType === StackType.WAF) {
-      conventionalBuckets.push(`nlmonorepo-waf-logs-${stage}`);
-      conventionalBuckets.push(`nlmonorepo-waf-templates-${stage}`); // Added for WAF templates bucket
-      // Template bucket with region suffix
-      conventionalBuckets.push(`nlmonorepo-${stage}-cfn-templates-us-east-1`);
-    } else if (stackType === StackType.CWL) {
-      conventionalBuckets.push(`nlmonorepo-cwl-frontend-${stage}`);
-      conventionalBuckets.push(`nlmonorepo-cwl-templates-${stage}`);
-      // Template bucket with region suffix
-      conventionalBuckets.push(
-        `nlmonorepo-${stage}-cfn-templates-${this.region}`,
-      );
-    } else if (stackType === StackType.AwsExample) {
-      // aws-example frontend and template naming
-      // Note: the aws-example package uses a slightly different frontend bucket name (nlmonorepo-awsb-userfiles-<stage>)
-      conventionalBuckets.push(`nlmonorepo-awsb-userfiles-${stage}`);
-      conventionalBuckets.push(`nlmonorepo-awsexample-templates-${stage}`);
-      // Template bucket with region suffix (same pattern as others)
-      conventionalBuckets.push(
-        `nlmonorepo-${stage}-cfn-templates-${this.region}`,
-      );
-    } else if (stackType === StackType.Shared) {
-      conventionalBuckets.push(`nlmonorepo-shared-templates-${stage}`);
-      // Old naming patterns
-      conventionalBuckets.push(`nlmonorepo-shared-${stage}-templates`);
-      // Template bucket with region suffix
-      conventionalBuckets.push(
-        `nlmonorepo-${stage}-cfn-templates-${this.region}`,
-      );
-    }
-
-    // Removed redundant conditional blocks based on stackIdentifier, as it's typically nlmonorepo-${stackType}
-    // e.g., if (stackIdentifier.toLowerCase().includes('waf')) { conventionalBuckets.push(`${stackIdentifier}-logs-${stage}`); }
+    // Use dynamic project configuration to get all buckets for this stack type
+    const conventionalBuckets = getProjectBuckets(stackType, stage, this.region);
 
     conventionalBuckets.forEach((bucketName) => {
       if (bucketName && !bucketsToEmpty.includes(bucketName)) {
@@ -334,41 +303,8 @@ export class ForceDeleteManager {
       `Attempting to delete conventionally named S3 buckets for identifier ${baseIdentifier}, type ${stackType}, stage ${stage}...`,
     );
 
-    const conventionalBucketsToDelete: string[] = [];
-    // Logic to identify conventional buckets, similar to emptyStackS3Buckets
-    if (stackType === StackType.WAF) {
-      conventionalBucketsToDelete.push(`nlmonorepo-waf-logs-${stage}`);
-      conventionalBucketsToDelete.push(`nlmonorepo-waf-templates-${stage}`);
-      // Template bucket with region suffix
-      conventionalBucketsToDelete.push(
-        `nlmonorepo-${stage}-cfn-templates-us-east-1`,
-      );
-    } else if (stackType === StackType.CWL) {
-      // For 'cwl', we might have frontend and templates buckets
-      // Example: nlmonorepo-cwl-frontend-dev, nlmonorepo-cwl-templates-dev
-      // The baseIdentifier 'nlmonorepo-cwl' is consistent with this.
-      conventionalBucketsToDelete.push(`${baseIdentifier}-frontend-${stage}`); // e.g., nlmonorepo-cwl-frontend-dev
-      conventionalBucketsToDelete.push(`${baseIdentifier}-templates-${stage}`); // e.g., nlmonorepo-cwl-templates-dev
-      // Template bucket with region suffix
-      conventionalBucketsToDelete.push(
-        `nlmonorepo-${stage}-cfn-templates-ap-southeast-2`,
-      );
-    } else if (stackType === StackType.Shared) {
-      // Example: nlmonorepo-shared-templates-dev
-      conventionalBucketsToDelete.push(`${baseIdentifier}-templates-${stage}`); // e.g., nlmonorepo-shared-templates-dev
-      // Old naming patterns
-      conventionalBucketsToDelete.push(`nlmonorepo-shared-${stage}-templates`);
-      // Template bucket with region suffix
-      conventionalBucketsToDelete.push(
-        `nlmonorepo-${stage}-cfn-templates-ap-southeast-2`,
-      );
-    }
-    // Add other conventional bucket patterns here if necessary
-
-    // Filter out any empty or duplicate names, though the construction logic should prevent this.
-    const uniqueBucketsToDelete = [
-      ...new Set(conventionalBucketsToDelete.filter((b) => b)),
-    ];
+    // Use dynamic project configuration to get all buckets for this stack type
+    const uniqueBucketsToDelete = getProjectBuckets(stackType, stage, this.region);
 
     if (uniqueBucketsToDelete.length === 0) {
       logger.info(

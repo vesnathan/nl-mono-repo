@@ -890,6 +890,42 @@ class ResolverCompiler {
 
     // Dependencies are installed once in setupBuildDirectory.
 
+    // Plugin to remove @aws-appsync/utils import since AppSync provides util as a global
+    const buildDir = this.buildDir; // Capture in closure for plugin
+    const removeAppSyncImportPlugin: esbuild.Plugin = {
+      name: "remove-appsync-import",
+      setup(build) {
+        build.onEnd(async () => {
+          const outfile = path.join(
+            buildDir,
+            "dist",
+            resolverFileName.replace(".ts", ".js"),
+          );
+          try {
+            let content = await fsPromises.readFile(outfile, "utf-8");
+            // Remove import statement for @aws-appsync/utils
+            content = content.replace(
+              /import\s*{\s*util\s*}\s*from\s*["']@aws-appsync\/utils["'];?\s*/g,
+              "",
+            );
+            // Remove any other imports from @aws-appsync/utils
+            content = content.replace(
+              /import\s*.*\s*from\s*["']@aws-appsync\/utils["'];?\s*/g,
+              "",
+            );
+            await fsPromises.writeFile(outfile, content, "utf-8");
+            logger.debug(
+              `Removed @aws-appsync/utils import from ${outfile}`,
+            );
+          } catch (error: any) {
+            logger.warning(
+              `Failed to remove @aws-appsync/utils import: ${error.message}`,
+            );
+          }
+        });
+      },
+    };
+
     const esbuildConfig: esbuild.BuildOptions = {
       // Added type annotation
       entryPoints: [tempResolverPath],
@@ -906,6 +942,7 @@ class ResolverCompiler {
       minify: false,
       tsconfig: path.join(this.buildDir, "tsconfig.json"),
       external: ["@aws-appsync/utils"],
+      plugins: [removeAppSyncImportPlugin],
       logLevel: this.debugMode ? "info" : "silent", // Conditional logLevel
     };
 
