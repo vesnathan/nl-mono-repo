@@ -55,7 +55,7 @@ cd packages/aws-example/backend/scripts
 ```bash
 # Set environment variables
 export AWS_REGION="ap-southeast-2"
-export TABLE_NAME="nlmonorepo-awsb-datatable-dev"
+export TABLE_NAME="nlmonorepo-awse-datatable-dev"
 export STAGE="dev"
 
 # Run the script (no parameters needed)
@@ -65,7 +65,7 @@ tsx scripts/seed-db.ts
 ### Environment Variables
 
 - `AWS_REGION`: AWS region where your DynamoDB table is located (default: ap-southeast-2)
-- `TABLE_NAME`: Name of the DynamoDB table (default: nlmonorepo-awsb-datatable-dev)
+- `TABLE_NAME`: Name of the DynamoDB table (default: nlmonorepo-awse-datatable-dev)
 - `STAGE`: Deployment stage (default: dev)
 
 ### What the script does
@@ -99,7 +99,7 @@ The script creates **FIXED** test users with:
 ```
 🌱 Starting AWS Example database seeding...
 📍 Region: ap-southeast-2
-📊 Table: nlmonorepo-awsb-datatable-dev
+📊 Table: nlmonorepo-awse-datatable-dev
 🏷️  Stage: dev
 
 🏗️  Creating 4 test users...

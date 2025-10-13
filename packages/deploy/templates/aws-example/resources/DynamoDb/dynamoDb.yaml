@@ -5,8 +5,8 @@ Parameters:
   AppName:
     Type: String
     Description: Application Name
-    Default: awsb
-  # KMSKeyArn will be passed from the main AWSB stack, which gets it from SharedKMSKeyArn output
+    Default: awse
+  # KMSKeyArn will be passed from the main AWSE stack, which gets it from SharedKMSKeyArn output
   KMSKeyArn:
     Type: String
     Description: ARN of the KMS key for encryption
@@ -111,12 +111,12 @@ Resources:
         StreamViewType: NEW_AND_OLD_IMAGES # Adjust as needed
 
 Outputs:
-  AWSBDataTableName: # Output name expected by parent AWSB stack
+  AWSBDataTableName: # Output name expected by parent AWSE stack
     Value: !Ref AWSBDataTable
     Export:
       Name: !Sub ${AppName}-DataTableName-${Stage}
 
-  AWSBDataTableArn: # Output name expected by parent AWSB stack
+  AWSBDataTableArn: # Output name expected by parent AWSE stack
     Value: !GetAtt AWSBDataTable.Arn
     Export:
       Name: !Sub ${AppName}-DataTableArn-${Stage}

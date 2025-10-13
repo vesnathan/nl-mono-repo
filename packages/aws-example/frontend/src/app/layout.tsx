@@ -37,8 +37,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" data-theme="lemonade">
       <head>
-        <title>Cloud Watch Live</title>
-        <meta name="description" content="Live Conference Streaming Software" />
+        <title>AWS Example</title>
+        <meta name="description" content="AWS Example Application" />
       </head>
       <body>
         <QueryClientProvider

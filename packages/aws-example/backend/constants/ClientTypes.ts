@@ -1,5 +1,5 @@
 /**
- * AWSB Client Types - Single Source of Truth
+ * AWSE Client Types - Single Source of Truth
  *
  * This file defines all client types used throughout the AWS Example application.
  * Any changes to client types should be made here and will automatically

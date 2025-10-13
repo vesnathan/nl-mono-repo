@@ -8,7 +8,7 @@ Parameters:
     AllowedPattern: ^[a-zA-Z0-9-]+$
   AppName:
     Type: String
-    Description: Application Name (e.g., awsb, wbc)
+    Description: Application Name (e.g., awse, wbc)
   AppBucketName: # Renamed from AWSBBucketName
     Type: String
     Description: Name of the S3 bucket for CloudFront origin

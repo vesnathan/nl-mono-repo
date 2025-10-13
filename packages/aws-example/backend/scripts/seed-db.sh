@@ -42,8 +42,8 @@ STAGE=${STAGE:-"dev"}
 # Get table name from CloudFormation exports or use default
 TABLE_NAME=$(aws cloudformation list-exports \
     --region "$AWS_REGION" \
-    --query "Exports[?Name=='awsb-DataTableName-${STAGE}'].Value" \
-    --output text 2>/dev/null || echo "nlmonorepo-awsb-datatable-${STAGE}")
+    --query "Exports[?Name=='awse-DataTableName-${STAGE}'].Value" \
+    --output text 2>/dev/null || echo "nlmonorepo-awse-datatable-${STAGE}")
 
 echo ""
 echo -e "${BLUE}Configuration:${NC}"

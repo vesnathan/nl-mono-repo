@@ -66,16 +66,16 @@ The script automatically:
 
 1. **Copies and renames files**:
 
-   - `awsb*.ts` → `<shortname>*.ts`
+   - `awse*.ts` → `<shortname>*.ts`
    - `AWSBUser.graphql` → `<SHORTNAME>User.graphql`
 
 2. **Replaces tokens in all files**:
 
    - `aws-example` → your long name
    - `AWS_EXAMPLE` → `YOUR_LONG_NAME` (uppercase with underscores)
-   - `awsb` → your short name
-   - `AWSB` → your short name (uppercase)
-   - `Awsb` → your short name (capitalized)
+   - `awse` → your short name
+   - `AWSE` → your short name (uppercase)
+   - `Awse` → your short name (capitalized)
 
 3. **Updates configuration files**:
    - Root `package.json` workspaces

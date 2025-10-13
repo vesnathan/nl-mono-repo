@@ -8,7 +8,7 @@ Parameters:
     AllowedPattern: ^[a-zA-Z0-9-]+$
   AppName:
     Type: String
-    Description: Application Name (e.g., awsb, wbc)
+    Description: Application Name (e.g., awse, wbc)
   TemplateBucketName:
     Type: String
     Description: S3 bucket containing templates and resolvers
@@ -144,7 +144,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-    CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Queries/Query.getAWSBUser.js"
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Queries/Query.getAWSBUser.js"
 
   CreateAWSBUserResolver:
     Type: AWS::AppSync::Resolver
@@ -178,7 +178,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-    CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.createCognitoUser.js"
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.createCognitoUser.js"
 
   CreateUserDynamoDBFunction:
     Type: AWS::AppSync::FunctionConfiguration
@@ -189,7 +189,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-    CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Mutations/Mutation.createAWSBUser.js"
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Mutations/Mutation.createAWSBUser.js"
 
   SendWelcomeEmailFunction:
     Type: AWS::AppSync::FunctionConfiguration
@@ -200,7 +200,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-    CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.sendWelcomeEmail.js"
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.sendWelcomeEmail.js"
 
   # Explicit AppSync LogGroup so we can control retention
   AppSyncApiLogGroup:

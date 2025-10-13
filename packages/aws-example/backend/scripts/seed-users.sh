@@ -57,7 +57,7 @@ STAGE=${STAGE:-"dev"}
 TABLE_NAME=$(aws cloudformation list-exports \
     --region "$AWS_REGION" \
     --query "Exports[?Name=='awsbUserTableName-${STAGE}'].Value" \
-    --output text 2>/dev/null || echo "nlmonorepo-awsb-datatable-${STAGE}")
+    --output text 2>/dev/null || echo "nlmonorepo-awse-datatable-${STAGE}")
 
 echo ""
 echo -e "${BLUE}Configuration:${NC}"

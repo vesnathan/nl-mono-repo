@@ -8,7 +8,7 @@ Parameters:
     AllowedPattern: ^[a-zA-Z0-9-]+$
   AppName:
     Type: String
-    Description: Application Name (e.g., awsb, wbc)
+    Description: Application Name (e.g., awse, wbc)
   AppCloudFrontDistributionId: # Renamed from AWSBCloudFrontDistributionId
     Type: String
     Description: ID of the CloudFront distribution
@@ -40,7 +40,7 @@ Resources:
     Properties:
       FunctionName: !Sub "nlmonorepo-${AppName}-postdeploy-${Stage}" # Simplified and parameterized
       Handler: index.handler
-      Runtime: nodejs18.x
+      Runtime: nodejs20.x
       Timeout: 600
       Role: !GetAtt PostDeployRole.Arn # Renamed role
       Code:
@@ -86,25 +86,6 @@ Resources:
           STAGE: !Ref Stage
           AppCloudFrontDistributionId: !Ref AppCloudFrontDistributionId # Env var name and Ref updated
 
-    # CloudWatch Log Groups for Lambda functions
-    PostDeployFunctionLogGroup:
-      Type: AWS::Logs::LogGroup
-      Properties:
-        LogGroupName: !Sub "/aws/lambda/${PostDeployFunction}"
-        RetentionInDays: !Ref LogRetentionInDays
-
-    SendWelcomeEmailFunctionLogGroup:
-      Type: AWS::Logs::LogGroup
-      Properties:
-        LogGroupName: !Sub "/aws/lambda/${SendWelcomeEmailFunction}"
-        RetentionInDays: !Ref LogRetentionInDays
-
-    CreateCognitoUserFunctionLogGroup:
-      Type: AWS::Logs::LogGroup
-      Properties:
-        LogGroupName: !Sub "/aws/lambda/${CreateCognitoUserFunction}"
-        RetentionInDays: !Ref LogRetentionInDays
-
   PostDeployRole: # Renamed from PostFrontEndDeployRole
     Type: AWS::IAM::Role
     Properties:
@@ -134,7 +115,7 @@ Resources:
     Properties:
       FunctionName: !Sub "nlmonorepo-${AppName}-send-welcome-email-${Stage}"
       Handler: index.handler
-      Runtime: nodejs18.x
+      Runtime: nodejs20.x
       Timeout: 30
       Role: !GetAtt SendWelcomeEmailRole.Arn
       Code:
@@ -175,7 +156,7 @@ Resources:
     Properties:
       FunctionName: !Sub "nlmonorepo-${AppName}-create-cognito-user-${Stage}"
       Handler: index.handler
-      Runtime: nodejs18.x
+      Runtime: nodejs20.x
       Timeout: 30
       Role: !GetAtt CreateCognitoUserRole.Arn
       Code:
@@ -210,6 +191,32 @@ Resources:
                   - cognito-idp:AdminAddUserToGroup
                   - cognito-idp:AdminSetUserPassword
                 Resource: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPoolId}"
+
+  # CloudWatch Log Groups for Lambda functions (must be defined after the Lambda functions)
+  # DeletionPolicy: Retain allows CloudFormation to adopt existing log groups created by Lambda
+  PostDeployFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${PostDeployFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+  SendWelcomeEmailFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${SendWelcomeEmailFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+  CreateCognitoUserFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${CreateCognitoUserFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
 
 Outputs:
   PostDeployFunctionArn: # Renamed from PostFrontEndDeployFunctionArn

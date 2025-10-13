@@ -79,7 +79,7 @@ If you need to deploy just the backend infrastructure:
 ```bash
 # Deploy CloudWatch Live stack only (requires dependencies)
 cd packages/deploy
-yarn deploy:awsb --stage dev
+yarn deploy:awse --stage dev
 ```
 
 **Note**: This requires that the WAF and Shared Assets stacks are already deployed, as the CloudWatch Live stack depends on their outputs.
@@ -220,7 +220,7 @@ export function response(ctx: Context) {
 Add the resolver resource to the AppSync CloudFormation template:
 
 ```bash
-# File: packages/deploy/templates/awsb/resources/AppSync/appsync.yaml
+# File: packages/deploy/templates/awse/resources/AppSync/appsync.yaml
 ```
 
 **Example:**
@@ -261,7 +261,7 @@ Resources:
 Update the deployment configuration to include your new resolver:
 
 ```bash
-# File: packages/deploy/packages/awsb/awsb.ts
+# File: packages/deploy/packages/awse/awse.ts
 ```
 
 Find the `resolverFiles` array and add your new resolver paths:
@@ -347,8 +347,8 @@ const createEvent = async (input: CreateEventInput) => {
 | `packages/aws-example/backend/schema/users.graphql`                                | GraphQL schema operations (queries, mutations) |
 | `packages/shared/types/[TypeName].graphql`                                         | GraphQL type definitions                       |
 | `packages/aws-example/backend/resolvers/[domain]/[type]/[TypeName].[fieldName].ts` | Resolver implementation                        |
-| `packages/deploy/templates/awsb/resources/AppSync/appsync.yaml`                    | CloudFormation resolver registration           |
-| `packages/deploy/packages/awsb/awsb.ts`                                            | Deployment configuration                       |
+| `packages/deploy/templates/awse/resources/AppSync/appsync.yaml`                    | CloudFormation resolver registration           |
+| `packages/deploy/packages/awse/awse.ts`                                            | Deployment configuration                       |
 
 #### Tips
 
@@ -386,7 +386,7 @@ To update the backend infrastructure:
 ```bash
 # Update CloudWatch Live stack
 cd packages/deploy
-yarn update:awsb --stage dev
+yarn update:awse --stage dev
 
 # This will:
 # 1. Deploy updated CloudFormation templates
@@ -452,7 +452,7 @@ To remove just the CloudWatch Live stack (including backend):
 ```bash
 # Remove CloudWatch Live stack only
 cd packages/deploy
-yarn remove:awsb --stage dev
+yarn remove:awse --stage dev
 
 # This removes:
 # - AppSync API and resolvers

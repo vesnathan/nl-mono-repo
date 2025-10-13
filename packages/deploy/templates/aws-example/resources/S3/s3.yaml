@@ -16,7 +16,7 @@ Resources:
   AWSBBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "nlmonorepo-awsb-userfiles-${Stage}"
+      BucketName: !Sub "nlmonorepo-awse-userfiles-${Stage}"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true

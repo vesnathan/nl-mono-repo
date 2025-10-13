@@ -37,7 +37,7 @@ Resources:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/DynamoDb/dynamoDb.yaml
       Parameters:
         Stage: !Ref Stage
-        AppName: awsb
+        AppName: awse
         KMSKeyArn: !Ref KMSKeyArn
 
   # S3 Buckets for frontend and assets
@@ -65,7 +65,7 @@ Resources:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/CloudFront/cloudfront.yaml
       Parameters:
         Stage: !Ref Stage
-        AppName: awsb
+        AppName: awse
         AppBucketName: !GetAtt S3Stack.Outputs.AWSBBucketName
         AppBucketArn: !GetAtt S3Stack.Outputs.AWSBBucketArn
         AppBucketRegionalDomainName: !GetAtt S3Stack.Outputs.AWSBBucketRegionalDomainName
@@ -78,14 +78,14 @@ Resources:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml
       Parameters:
         Stage: !Ref Stage
-        AppName: awsb
+        AppName: awse
         AppCloudFrontDistributionId: !GetAtt CloudFrontStack.Outputs.AWSBCloudFrontDistributionId
         AppCloudFrontDomainName: !GetAtt CloudFrontStack.Outputs.AWSBCloudFrontDomainName
         FromEmail: noreply@awsexample.com
         AppURL: !Sub "https://${CloudFrontStack.Outputs.AWSBCloudFrontDomainName}"
         TemplateBucketName: !Ref TemplateBucketName
         UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
-  LogRetentionInDays: !Ref LogRetentionInDays
+        LogRetentionInDays: !Ref LogRetentionInDays
 
   # AppSync API
   AppSyncStack:
@@ -95,7 +95,7 @@ Resources:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appsync.yaml
       Parameters:
         Stage: !Ref Stage
-        AppName: awsb
+        AppName: awse
         TemplateBucketName: !Ref TemplateBucketName
         UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
         SendWelcomeEmailFunctionArn: !GetAtt LambdaStack.Outputs.SendWelcomeEmailFunctionArn
@@ -108,46 +108,46 @@ Outputs:
     Description: AppSync API URL
     Value: !GetAtt AppSyncStack.Outputs.AWSBAppSyncApiUrl
     Export:
-      Name: !Sub nlmonorepo-awsb-${Stage}-api-url
+      Name: !Sub nlmonorepo-awse-${Stage}-api-url
 
   ApiId:
     Description: AppSync API ID
     Value: !GetAtt AppSyncStack.Outputs.AWSBAppSyncApiId
     Export:
-      Name: !Sub nlmonorepo-awsb-${Stage}-api-id
+      Name: !Sub nlmonorepo-awse-${Stage}-api-id
 
   AWSBUserPoolId:
-    Description: "Cognito User Pool ID for AWSB"
+    Description: "Cognito User Pool ID for AWSE"
     Value: !GetAtt CognitoStack.Outputs.UserPoolId
     Export:
-      Name: !Sub "nlmonorepo-awsb-${Stage}-user-pool-id"
+      Name: !Sub "nlmonorepo-awse-${Stage}-user-pool-id"
 
   AWSBUserPoolClientId:
-    Description: "Cognito User Pool Client ID for AWSB"
+    Description: "Cognito User Pool Client ID for AWSE"
     Value: !GetAtt CognitoStack.Outputs.UserPoolClientId
     Export:
-      Name: !Sub "nlmonorepo-awsb-${Stage}-user-pool-client-id"
+      Name: !Sub "nlmonorepo-awse-${Stage}-user-pool-client-id"
 
   AWSBIdentityPoolId:
-    Description: "Cognito Identity Pool ID for AWSB"
+    Description: "Cognito Identity Pool ID for AWSE"
     Value: !GetAtt CognitoStack.Outputs.IdentityPoolId
     Export:
-      Name: !Sub "nlmonorepo-awsb-${Stage}-identity-pool-id"
+      Name: !Sub "nlmonorepo-awse-${Stage}-identity-pool-id"
 
   WebsiteBucket:
     Description: "S3 bucket for frontend website assets"
     Value: !GetAtt S3Stack.Outputs.AWSBBucketName
     Export:
-      Name: !Sub "nlmonorepo-awsb-${Stage}-website-bucket"
+      Name: !Sub "nlmonorepo-awse-${Stage}-website-bucket"
 
   CloudFrontDistributionId:
     Description: "CloudFront Distribution ID"
     Value: !GetAtt CloudFrontStack.Outputs.AWSBCloudFrontDistributionId
     Export:
-      Name: !Sub "nlmonorepo-awsb-${Stage}-cloudfront-id"
+      Name: !Sub "nlmonorepo-awse-${Stage}-cloudfront-id"
 
   CloudFrontDomainName:
     Description: "CloudFront Distribution Domain Name"
     Value: !GetAtt CloudFrontStack.Outputs.AWSBCloudFrontDomainName
     Export:
-      Name: !Sub "nlmonorepo-awsb-${Stage}-cloudfront-domain"
+      Name: !Sub "nlmonorepo-awse-${Stage}-cloudfront-domain"

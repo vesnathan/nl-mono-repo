@@ -1,7 +1,7 @@
 import type { ResourcesConfig } from "aws-amplify";
 import { getDeploymentOutput } from "./deploymentOutputs";
 
-const DEPLOYMENT_OUTPUT = getDeploymentOutput("AWSB");
+const DEPLOYMENT_OUTPUT = getDeploymentOutput("AWSE");
 const AWS_REGION = "ap-southeast-2";
 export const AMPLIFY_CONFIG: ResourcesConfig = {
   Auth: {

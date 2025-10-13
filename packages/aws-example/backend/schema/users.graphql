@@ -1,8 +1,8 @@
-# This file defines the Query and Mutation operations for the AWSB AppSync API
+# This file defines the Query and Mutation operations for the AWSE AppSync API
 # Type definitions (AWSBUser, ClientType, AWSBUserInput) come from shared types
 
 type Mutation {
-  # Creates a new AWSB User
+  # Creates a new AWSE User
   createAWSBUser(input: AWSBUserInput!): AWSBUser
 }
 

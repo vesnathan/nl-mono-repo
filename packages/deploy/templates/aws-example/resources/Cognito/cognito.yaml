@@ -10,7 +10,7 @@ Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Sub "nlmonorepo-awsb-userpool-${Stage}"
+      UserPoolName: !Sub "nlmonorepo-awse-userpool-${Stage}"
       Schema:
         - Name: email
           AttributeDataType: String
@@ -21,12 +21,12 @@ Resources:
           MinimumLength: 8
       MfaConfiguration: "OFF"
       UserPoolTags:
-        Stack: !Sub "nlmonorepo-awsb-${Stage}"
+        Stack: !Sub "nlmonorepo-awse-${Stage}"
 
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      ClientName: !Sub "nlmonorepo-awsb-client-${Stage}"
+      ClientName: !Sub "nlmonorepo-awse-client-${Stage}"
       UserPoolId: !Ref UserPool
       GenerateSecret: false
       SupportedIdentityProviders:
@@ -51,7 +51,7 @@ Resources:
   AuthenticatedRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "nlmonorepo-awsb-authenticated-role-${Stage}"
+      RoleName: !Sub "nlmonorepo-awse-authenticated-role-${Stage}"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -84,7 +84,7 @@ Outputs:
     Description: Provider name of the Cognito User Pool
     Value: !GetAtt UserPool.ProviderName
     Export:
-      Name: !Sub "nlmonorepo-awsb-${Stage}-user-pool-provider-name"
+      Name: !Sub "nlmonorepo-awse-${Stage}-user-pool-provider-name"
 
   IdentityPoolId:
     Description: ID of the Cognito Identity Pool

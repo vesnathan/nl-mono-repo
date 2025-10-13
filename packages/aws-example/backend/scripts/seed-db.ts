@@ -4,7 +4,7 @@ import { v5 as uuidv5 } from "uuid";
 
 // Configuration
 const REGION = process.env.AWS_REGION || "ap-southeast-2";
-const TABLE_NAME = process.env.TABLE_NAME || "nlmonorepo-awsb-datatable-dev";
+const TABLE_NAME = process.env.TABLE_NAME || "nlmonorepo-awse-datatable-dev";
 const STAGE = process.env.STAGE || "dev";
 
 // UUID namespace for deterministic UUID generation

@@ -70,6 +70,7 @@
     "build": "lerna run build --stream",
     "lint": "lerna run lint --stream",
     "tsc": "lerna run tsc --stream",
-    "test": "lerna run test --stream"
-  }
+    "test": "lerna run test --stream",
+    "dev:cwl": "yarn workspace cwlfrontend dev:local"
+    }
 }

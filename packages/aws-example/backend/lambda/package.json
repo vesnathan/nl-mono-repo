@@ -1,5 +1,5 @@
 {
-  "name": "awsb-lambda-functions",
+  "name": "awse-lambda-functions",
   "version": "1.0.0",
   "description": "Lambda functions for CloudWatch Live backend",
   "main": "sendWelcomeEmail.js",

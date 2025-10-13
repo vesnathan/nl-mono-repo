@@ -36,31 +36,39 @@ echo -e "${BLUE}🌱 CWL DB Seeding Script${NC}"
 echo "[DEBUG] Script directory: $(dirname "$0")"
 echo ""
 
-# Check if AWS credentials are configured
-if ! aws sts get-caller-identity > /dev/null 2>&1; then
+# Check if AWS credentials are configured via environment variables
+if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
     echo -e "${RED}❌ AWS credentials not configured!${NC}"
     echo "Please configure your AWS credentials first."
     exit 1
 fi
 
-echo -e "${GREEN}✅ AWS credentials verified${NC}"
+echo -e "${GREEN}✅ AWS credentials verified (via environment variables)${NC}"
 
 # No parameters needed - all data is fixed and deterministic!
 
-# Get current AWS region
-AWS_REGION=${AWS_REGION:-$(aws configure get region)}
-if [ -z "$AWS_REGION" ]; then
-    AWS_REGION="ap-southeast-2"
-fi
+# Get current AWS region from environment or use default
+AWS_REGION=${AWS_REGION:-"ap-southeast-2"}
 
 # Get stage from environment or use default
 STAGE=${STAGE:-"dev"}
 
-# Get table name from CloudFormation exports or use default
-TABLE_NAME=$(aws cloudformation list-exports \
-    --region "$AWS_REGION" \
-    --query "Exports[?Name=='cwlUserTableName-${STAGE}'].Value" \
-    --output text 2>/dev/null || echo "nlmonorepo-shared-usertable-${STAGE}")
+# Get table name from environment or CloudFormation exports or use default
+if [ -n "$TABLE_NAME" ]; then
+    echo "[DEBUG] Using TABLE_NAME from environment: $TABLE_NAME"
+else
+    # Try to get from CloudFormation if AWS CLI is available
+    if command -v aws &> /dev/null && aws --version &> /dev/null; then
+        TABLE_NAME=$(aws cloudformation list-exports \
+            --region "$AWS_REGION" \
+            --query "Exports[?Name=='cwlUserTableName-${STAGE}'].Value" \
+            --output text 2>/dev/null || echo "nlmonorepo-shared-usertable-${STAGE}")
+    else
+        # AWS CLI not available, use default naming convention
+        TABLE_NAME="nlmonorepo-shared-usertable-${STAGE}"
+        echo "[DEBUG] AWS CLI not available, using default table name: $TABLE_NAME"
+    fi
+fi
 
 echo ""
 echo -e "${BLUE}Configuration:${NC}"
