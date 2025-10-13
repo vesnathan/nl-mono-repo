@@ -103,7 +103,7 @@ Add your new query or mutation to the schema:
 
 ```graphql
 type Query {
-  getAWSBUser(userId: ID!): AWSBUser
+  getAWSEUser(userId: ID!): AWSEUser
   # Add your new query
   getEvent(eventId: ID!): Event
 }
@@ -120,7 +120,7 @@ type Event {
 
 ```graphql
 type Mutation {
-  createAWSBUser(input: CreateAWSBUserInput!): AWSBUser
+  createAWSEUser(input: CreateAWSEUserInput!): AWSEUser
   # Add your new mutation
   createEvent(input: CreateEventInput!): Event
 }
@@ -268,8 +268,8 @@ Find the `resolverFiles` array and add your new resolver paths:
 
 ```typescript
 const resolverFiles = [
-  "users/Queries/Query.getAWSBUser.ts",
-  "users/Mutations/Mutation.createAWSBUser.ts",
+  "users/Queries/Query.getAWSEUser.ts",
+  "users/Mutations/Mutation.createAWSEUser.ts",
   // Add your new resolvers
   "events/Queries/Query.getEvent.ts",
   "events/Mutations/Mutation.createEvent.ts",

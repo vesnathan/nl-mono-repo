@@ -13,7 +13,7 @@ Parameters:
 
 Resources:
   # S3 Bucket for storing nextjs/react app
-  AWSBBucket:
+  AWSEBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "nlmonorepo-awse-userfiles-${Stage}"
@@ -34,20 +34,20 @@ Conditions:
   HasKMSKey: !Not [!Equals [!Ref KMSKeyId, ""]]
 
 Outputs:
-  AWSBBucketName:
-    Value: !Ref AWSBBucket
+  AWSEBucketName:
+    Value: !Ref AWSEBucket
     Description: Name of the CloudWatchLive bucket
     Export:
-      Name: !Sub "awsbUserFilesBucketName-${Stage}"
+      Name: !Sub "awseUserFilesBucketName-${Stage}"
 
-  AWSBBucketArn:
-    Value: !GetAtt AWSBBucket.Arn
+  AWSEBucketArn:
+    Value: !GetAtt AWSEBucket.Arn
     Description: ARN of the CloudWatchLive bucket
     Export:
-      Name: !Sub "awsbUserFilesBucketArn-${Stage}"
+      Name: !Sub "awseUserFilesBucketArn-${Stage}"
 
-  AWSBBucketRegionalDomainName:
-    Value: !GetAtt AWSBBucket.RegionalDomainName
+  AWSEBucketRegionalDomainName:
+    Value: !GetAtt AWSEBucket.RegionalDomainName
     Description: Regional domain name of the CloudWatchLive bucket
     Export:
-      Name: !Sub "awsbUserFilesBucketRegionalDomainName-${Stage}"
+      Name: !Sub "awseUserFilesBucketRegionalDomainName-${Stage}"

@@ -1,5 +1,5 @@
 {
-  "name": "awsbbackend",
+  "name": "awsebackend",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -15,7 +15,8 @@
     "uuid": "^9.0.0"
   },
   "scripts": {
-    "seed:db": "tsx scripts/seed-db.ts"
+    "seed:db": "tsx scripts/seed-db.ts",
+    "seed:users": "tsx scripts/seed-users.ts"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",

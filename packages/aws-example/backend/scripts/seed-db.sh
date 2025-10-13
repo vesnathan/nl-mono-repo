@@ -21,29 +21,37 @@ NC='\033[0m'
 echo -e "${BLUE}🌱 AWS Example DB Seeding Script${NC}"
 echo ""
 
-# Check AWS credentials
-if ! aws sts get-caller-identity > /dev/null 2>&1; then
+# Check if AWS credentials are configured via environment variables
+if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
     echo -e "${RED}❌ AWS credentials not configured!${NC}"
     echo "Please configure your AWS credentials first."
     exit 1
 fi
 
-echo -e "${GREEN}✅ AWS credentials verified${NC}"
+echo -e "${GREEN}✅ AWS credentials verified (via environment variables)${NC}"
 
-# Get current AWS region
-AWS_REGION=${AWS_REGION:-$(aws configure get region)}
-if [ -z "$AWS_REGION" ]; then
-    AWS_REGION="ap-southeast-2"
-fi
+# Get current AWS region from environment or use default
+AWS_REGION=${AWS_REGION:-"ap-southeast-2"}
 
 # Get stage from environment or use default
 STAGE=${STAGE:-"dev"}
 
-# Get table name from CloudFormation exports or use default
-TABLE_NAME=$(aws cloudformation list-exports \
-    --region "$AWS_REGION" \
-    --query "Exports[?Name=='awse-DataTableName-${STAGE}'].Value" \
-    --output text 2>/dev/null || echo "nlmonorepo-awse-datatable-${STAGE}")
+# Get table name from environment or CloudFormation exports or use default
+if [ -n "$TABLE_NAME" ]; then
+    echo "[DEBUG] Using TABLE_NAME from environment: $TABLE_NAME"
+else
+    # Try to get from CloudFormation if AWS CLI is available
+    if command -v aws &> /dev/null && aws --version &> /dev/null; then
+        TABLE_NAME=$(aws cloudformation list-exports \
+            --region "$AWS_REGION" \
+            --query "Exports[?Name=='awse-DataTableName-${STAGE}'].Value" \
+            --output text 2>/dev/null || echo "nlmonorepo-awse-datatable-${STAGE}")
+    else
+        # AWS CLI not available, use default naming convention
+        TABLE_NAME="nlmonorepo-awse-datatable-${STAGE}"
+        echo "[DEBUG] AWS CLI not available, using default table name: $TABLE_NAME"
+    fi
+fi
 
 echo ""
 echo -e "${BLUE}Configuration:${NC}"
@@ -66,8 +74,8 @@ if command -v yarn &> /dev/null; then
         echo "[DEBUG] Seeding succeeded"
     else
         echo "[DEBUG] yarn --cwd failed, attempting yarn workspace fallback"
-        if yarn workspace awsbbackend run seed:db; then
-            echo "[DEBUG] yarn workspace awsbbackend run seed:db succeeded"
+        if yarn workspace awsebackend run seed:db; then
+            echo "[DEBUG] yarn workspace awsebackend run seed:db succeeded"
         else
             echo -e "${RED}❌ Failed to run seed:db via yarn${NC}"
             exit 1

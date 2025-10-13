@@ -56,7 +56,7 @@ STAGE=${STAGE:-"dev"}
 # Get table name from CloudFormation exports or use default
 TABLE_NAME=$(aws cloudformation list-exports \
     --region "$AWS_REGION" \
-    --query "Exports[?Name=='awsbUserTableName-${STAGE}'].Value" \
+    --query "Exports[?Name=='awseUserTableName-${STAGE}'].Value" \
     --output text 2>/dev/null || echo "nlmonorepo-awse-datatable-${STAGE}")
 
 echo ""
@@ -96,8 +96,8 @@ if command -v yarn &> /dev/null; then
     else
         echo "[DEBUG] yarn --cwd failed, attempting yarn workspace fallback"
         # Try workspace command (works if workspace name is correct)
-        if yarn workspace awsbbackend run seed:users; then
-            echo "[DEBUG] yarn workspace awsbbackend run seed:users succeeded"
+        if yarn workspace awsebackend run seed:users; then
+            echo "[DEBUG] yarn workspace awsebackend run seed:users succeeded"
         else
             echo -e "${RED}❌ Failed to run seed:users via yarn${NC}"
             exit 1

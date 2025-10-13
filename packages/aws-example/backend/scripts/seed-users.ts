@@ -75,7 +75,7 @@ const SEED_DATA = {
   ],
 };
 
-interface AWSBUserDB {
+interface AWSEUserDB {
   PK: string;
   SK: string;
   userId: string;
@@ -111,10 +111,10 @@ function generateDeterministicPhone(email: string): string {
 }
 
 // Create a user object
-function createAWSBUser(superAdminUserId: string, userData: any): AWSBUserDB {
+function createAWSEUser(superAdminUserId: string, userData: any): AWSEUserDB {
   const userId = generateDeterministicUserId(userData.email);
 
-  const user: AWSBUserDB = {
+  const user: AWSEUserDB = {
     PK: `USER#${userId}`,
     SK: `PROFILE#${userId}`,
     userId,
@@ -135,7 +135,7 @@ function createAWSBUser(superAdminUserId: string, userData: any): AWSBUserDB {
 }
 
 // Insert a user into DynamoDB
-async function insertUser(user: AWSBUserDB): Promise<void> {
+async function insertUser(user: AWSEUserDB): Promise<void> {
   try {
     await docClient.send(
       new PutCommand({
@@ -173,7 +173,7 @@ async function seedUsers() {
     const superAdminUserId =
       process.env.SUPER_ADMIN_USER_ID || "super-admin-fixed-uuid";
 
-    const allItems: AWSBUserDB[] = [];
+    const allItems: AWSEUserDB[] = [];
     const userRegistry: { [email: string]: string } = {};
 
     console.log(`🏗️  Building ${SEED_DATA.users.length} test users...`);
@@ -181,7 +181,7 @@ async function seedUsers() {
 
     // Create users
     for (const userData of SEED_DATA.users) {
-      const user = createAWSBUser(superAdminUserId, userData);
+      const user = createAWSEUser(superAdminUserId, userData);
       allItems.push(user);
       userRegistry[userData.email] = user.userId;
     }
@@ -195,7 +195,7 @@ async function seedUsers() {
 
     for (const item of allItems) {
       try {
-        await insertUser(item as AWSBUserDB);
+        await insertUser(item as AWSEUserDB);
         successCount++;
         // Small delay to avoid throttling
         await new Promise((resolve) => setTimeout(resolve, 100));

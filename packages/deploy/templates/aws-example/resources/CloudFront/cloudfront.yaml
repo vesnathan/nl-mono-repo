@@ -9,18 +9,18 @@ Parameters:
   AppName:
     Type: String
     Description: Application Name (e.g., awse, wbc)
-  AppBucketName: # Renamed from AWSBBucketName
+  AppBucketName: # Renamed from AWSEBucketName
     Type: String
     Description: Name of the S3 bucket for CloudFront origin
-  AppBucketArn: # Renamed from AWSBBucketArn
+  AppBucketArn: # Renamed from AWSEBucketArn
     Type: String
     Description: ARN of the S3 bucket for CloudFront origin
-  AppBucketRegionalDomainName: # Renamed from AWSBBucketRegionalDomainName
+  AppBucketRegionalDomainName: # Renamed from AWSEBucketRegionalDomainName
     Type: String
     Description: Regional domain name of the S3 bucket for CloudFront origin
 
 Resources:
-  AppBucketPolicy: # Renamed from AWSBBucketPolicy
+  AppBucketPolicy: # Renamed from AWSEBucketPolicy
     Type: "AWS::S3::BucketPolicy"
     Properties:
       Bucket: !Ref AppBucketName
@@ -40,7 +40,7 @@ Resources:
               StringEquals:
                 AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${AppCloudFrontDistribution}"
 
-  AppCloudFrontOAC: # Renamed from AWSBCloudFrontOAC
+  AppCloudFrontOAC: # Renamed from AWSECloudFrontOAC
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
@@ -50,7 +50,7 @@ Resources:
         SigningProtocol: sigv4
         OriginAccessControlOriginType: s3
 
-  AppCloudFrontDistribution: # Renamed from AWSBCloudFrontDistribution
+  AppCloudFrontDistribution: # Renamed from AWSECloudFrontDistribution
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
@@ -71,10 +71,10 @@ Resources:
           OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # CORS-S3Origin
 
 Outputs:
-  AWSBCloudFrontDistributionId:
+  AWSECloudFrontDistributionId:
     Value: !Ref AppCloudFrontDistribution
     Description: "ID of the CloudFront distribution"
 
-  AWSBCloudFrontDomainName:
+  AWSECloudFrontDomainName:
     Value: !GetAtt AppCloudFrontDistribution.DomainName
     Description: "Domain name of the CloudFront distribution"

@@ -1,19 +1,19 @@
 import { GraphQLResult, generateClient } from "aws-amplify/api";
 import {
-  GetAWSBUserQuery,
-  GetAWSBUserQueryVariables,
+  GetAWSEUserQuery,
+  GetAWSEUserQueryVariables,
 } from "../../types/gqlTypes";
 
 const amplifyGraphqlClient = generateClient();
 
 export const userQueryKeys = {
-  getAWSBUser: "getAWSBUser",
+  getAWSEUser: "getAWSEUser",
 };
 
-// getAWSBUser Query
-const getAWSBUserQueryStr = `
-    query GetAWSBUser($userId: String!) {
-      getAWSBUser(userId: $userId) {
+// getAWSEUser Query
+const getAWSEUserQueryStr = `
+    query GetAWSEUser($userId: String!) {
+      getAWSEUser(userId: $userId) {
         userId
         userAddedById
         privacyPolicy
@@ -29,15 +29,15 @@ const getAWSBUserQueryStr = `
     }
 `;
 
-export const getAWSBUserQueryKey = (userId: string) => [
-  userQueryKeys.getAWSBUser,
+export const getAWSEUserQueryKey = (userId: string) => [
+  userQueryKeys.getAWSEUser,
   userId,
 ];
 
-export const getAWSBUserQueryFn = (variables: GetAWSBUserQueryVariables) => {
+export const getAWSEUserQueryFn = (variables: GetAWSEUserQueryVariables) => {
   return amplifyGraphqlClient.graphql({
-    query: getAWSBUserQueryStr,
+    query: getAWSEUserQueryStr,
     variables,
     authMode: "userPool",
-  }) as Promise<GraphQLResult<GetAWSBUserQuery>>;
+  }) as Promise<GraphQLResult<GetAWSEUserQuery>>;
 };

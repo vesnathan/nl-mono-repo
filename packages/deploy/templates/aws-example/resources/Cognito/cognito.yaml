@@ -35,7 +35,7 @@ Resources:
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
     Properties:
-      IdentityPoolName: !Sub "nlmonorepo_awsb_identity_pool_${Stage}"
+      IdentityPoolName: !Sub "nlmonorepo_awse_identity_pool_${Stage}"
       AllowUnauthenticatedIdentities: false
       CognitoIdentityProviders:
         - ClientId: !Ref UserPoolClient

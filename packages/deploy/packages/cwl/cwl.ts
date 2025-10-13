@@ -42,6 +42,7 @@ import {
 } from "../../utils/s3-resolver-validator";
 import { ForceDeleteManager } from "../../utils/force-delete-utils";
 import { OutputsManager } from "../../outputs-manager";
+import { cleanupLogGroups } from "../../utils/loggroup-cleanup";
 import { createReadStream, readdirSync, statSync, existsSync } from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
@@ -1112,6 +1113,13 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     });
 
     try {
+      // Clean up any orphaned LogGroups before deployment
+      await cleanupLogGroups({
+        appName: "cwl",
+        stage: options.stage,
+        region: options.region || process.env.AWS_REGION || "ap-southeast-2",
+      });
+
       // Check if the stack exists
       let stackExists = false;
       try {

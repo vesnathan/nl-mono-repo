@@ -1,6 +1,6 @@
 /**
  * AppSync Pipeline Function: Send Welcome Email
- * This function is part of the createAWSBUser pipeline and conditionally invokes
+ * This function is part of the createAWSEUser pipeline and conditionally invokes
  * the Lambda function to send a welcome email to newly created users.
  */
 

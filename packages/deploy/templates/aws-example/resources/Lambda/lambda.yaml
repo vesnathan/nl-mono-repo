@@ -9,10 +9,10 @@ Parameters:
   AppName:
     Type: String
     Description: Application Name (e.g., awse, wbc)
-  AppCloudFrontDistributionId: # Renamed from AWSBCloudFrontDistributionId
+  AppCloudFrontDistributionId: # Renamed from AWSECloudFrontDistributionId
     Type: String
     Description: ID of the CloudFront distribution
-  AppCloudFrontDomainName: # Renamed from AWSBCloudFrontDomainName
+  AppCloudFrontDomainName: # Renamed from AWSECloudFrontDomainName
     Type: String
     Description: Domain name of the CloudFront distribution
   FromEmail:
@@ -193,10 +193,10 @@ Resources:
                 Resource: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPoolId}"
 
   # CloudWatch Log Groups for Lambda functions (must be defined after the Lambda functions)
-  # DeletionPolicy: Retain allows CloudFormation to adopt existing log groups created by Lambda
+  # DeletionPolicy: Delete ensures LogGroups are removed when stack is deleted
   PostDeployFunctionLogGroup:
     Type: AWS::Logs::LogGroup
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     UpdateReplacePolicy: Retain
     Properties:
       LogGroupName: !Sub "/aws/lambda/${PostDeployFunction}"
@@ -204,7 +204,7 @@ Resources:
 
   SendWelcomeEmailFunctionLogGroup:
     Type: AWS::Logs::LogGroup
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     UpdateReplacePolicy: Retain
     Properties:
       LogGroupName: !Sub "/aws/lambda/${SendWelcomeEmailFunction}"
@@ -212,7 +212,7 @@ Resources:
 
   CreateCognitoUserFunctionLogGroup:
     Type: AWS::Logs::LogGroup
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     UpdateReplacePolicy: Retain
     Properties:
       LogGroupName: !Sub "/aws/lambda/${CreateCognitoUserFunction}"

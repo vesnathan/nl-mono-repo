@@ -1,25 +1,25 @@
 import { util, AppSyncIdentityCognito, Context } from "@aws-appsync/utils";
 // 'gqlTypes' is a module alias mapped in tsconfig.json to ../frontend/src/types/gqlTypes.ts
 // This allows the resolver compiler to resolve GraphQL generated types during build
-import { AWSBUser, ClientType, GetAWSBUserQueryVariables } from "gqlTypes";
+import { AWSEUser, ClientType, GetAWSEUserQueryVariables } from "gqlTypes";
 // Import ClientTypes constants from the single source of truth
 import {
-  AWSB_CLIENT_TYPES,
-  isValidAWSBClientType,
+  AWSE_CLIENT_TYPES,
+  isValidAWSEClientType,
 } from "../../../constants/ClientTypes";
 
-// Use GetAWSBUserQueryVariables from shared frontend-generated types
+// Use GetAWSEUserQueryVariables from shared frontend-generated types
 
-// Define Output type for the resolver - it's AWSBUser as per schema for a successful response
-type Output = AWSBUser;
+// Define Output type for the resolver - it's AWSEUser as per schema for a successful response
+type Output = AWSEUser;
 
 // Define CTX for the response function context
 // Args, Result, PrevResult, Source, Info
-type CTX = Context<GetAWSBUserQueryVariables, object, object, object, Output>;
+type CTX = Context<GetAWSEUserQueryVariables, object, object, object, Output>;
 
-export function request(ctx: Context<GetAWSBUserQueryVariables>) {
+export function request(ctx: Context<GetAWSEUserQueryVariables>) {
   // It's good practice to cast args to the specific type
-  const args = ctx.args as GetAWSBUserQueryVariables;
+  const args = ctx.args as GetAWSEUserQueryVariables;
   const { userId } = args;
 
   if (!userId) {
@@ -42,7 +42,7 @@ export function request(ctx: Context<GetAWSBUserQueryVariables>) {
 
   console.log(`Getting user data for userId: ${userId}`);
   console.log(`Identity username: ${identity.username}`);
-  // DynamoDB AWSBDataTable uses a single-table PK/SK schema.
+  // DynamoDB AWSEDataTable uses a single-table PK/SK schema.
   // Use PK = USER#<userId> and SK = PROFILE#<userId> when querying.
   return {
     operation: "GetItem",
@@ -65,7 +65,7 @@ export function response(ctx: CTX): Output {
 
   const identity = ctx.identity as AppSyncIdentityCognito;
   // Retrieve args safely, it's good practice to cast or ensure it's the correct type.
-  const args = ctx.args as GetAWSBUserQueryVariables;
+  const args = ctx.args as GetAWSEUserQueryVariables;
   const { userId } = args;
 
   // Extract the returned item from ctx.result. For GetItem, AWS may return
@@ -95,7 +95,7 @@ export function response(ctx: CTX): Output {
   const clientType: ClientType[] = [];
 
   for (const group of cognitoGroups) {
-    if (isValidAWSBClientType(group)) {
+    if (isValidAWSEClientType(group)) {
       // Map the valid group name to the corresponding ClientType enum value
       clientType.push(ClientType[group as keyof typeof ClientType]);
       console.log(`Mapped group "${group}" to ClientType.${group}`);
@@ -113,9 +113,9 @@ export function response(ctx: CTX): Output {
 
   console.log(`Final clientType array:`, JSON.stringify(clientType));
 
-  // Construct the final AWSBUser object
-  // Ensure all non-nullable fields of AWSBUser are present.
-  const resolvedUser: AWSBUser = {
+  // Construct the final AWSEUser object
+  // Ensure all non-nullable fields of AWSEUser are present.
+  const resolvedUser: AWSEUser = {
     ...userFromDB, // Spread raw DB result
     userId: userFromDB.userId || userId, // Ensure userId is present
     clientType: clientType,

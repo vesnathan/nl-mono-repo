@@ -12,8 +12,8 @@ const getDeploymentOutputs = () => {
     const outputs = JSON.parse(fileContent);
 
     // The stack name is 'AwsExample' (matching StackType enum)
-    const awsbStack = outputs.stacks.AwsExample;
-    if (!awsbStack) {
+    const awseStack = outputs.stacks.AwsExample;
+    if (!awseStack) {
       console.warn(
         "AwsExample stack outputs not found in deployment-outputs.json",
       );
@@ -24,13 +24,13 @@ const getDeploymentOutputs = () => {
     type Output = { OutputKey: string; OutputValue: string };
 
     const getValue = (key: string) =>
-      awsbStack.outputs.find((o: Output) => o.OutputKey === key)?.OutputValue ||
+      awseStack.outputs.find((o: Output) => o.OutputKey === key)?.OutputValue ||
       "";
 
     const envVars = {
-      NEXT_PUBLIC_USER_POOL_ID: getValue("AWSBUserPoolId"),
-      NEXT_PUBLIC_USER_POOL_CLIENT_ID: getValue("AWSBUserPoolClientId"),
-      NEXT_PUBLIC_IDENTITY_POOL_ID: getValue("AWSBIdentityPoolId"),
+      NEXT_PUBLIC_USER_POOL_ID: getValue("AWSEUserPoolId"),
+      NEXT_PUBLIC_USER_POOL_CLIENT_ID: getValue("AWSEUserPoolClientId"),
+      NEXT_PUBLIC_IDENTITY_POOL_ID: getValue("AWSEIdentityPoolId"),
       NEXT_PUBLIC_GRAPHQL_URL: getValue("ApiUrl"),
     };
 

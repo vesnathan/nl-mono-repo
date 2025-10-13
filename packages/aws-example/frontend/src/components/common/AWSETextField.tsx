@@ -42,7 +42,7 @@ const ExtendedNextUIInput = extendVariants(Input, {
   },
 });
 
-export interface AWSBTextFieldProps {
+export interface AWSETextFieldProps {
   id?: string;
   testId?: string;
   type?: "text" | "number" | "date" | "password" | "time";
@@ -86,9 +86,9 @@ export interface AWSBTextFieldProps {
   autoFocus?: boolean;
 }
 
-export const AWSBTextField = React.forwardRef<
+export const AWSETextField = React.forwardRef<
   HTMLInputElement,
-  AWSBTextFieldProps
+  AWSETextFieldProps
 >((props, refToforward) => {
   const {
     id,

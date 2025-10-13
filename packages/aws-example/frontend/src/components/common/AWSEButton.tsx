@@ -2,21 +2,21 @@ import { Button, cn } from "@nextui-org/react";
 import { Spinner } from "@heroui/spinner";
 import React from "react";
 
-type AWSBButtonColor =
+type AWSEButtonColor =
   | "primary"
   | "secondary"
   | "error"
   | "transparent"
   | "danger"
   | "cancel";
-type AWSBButtonVariant = "solid" | "light";
+type AWSEButtonVariant = "solid" | "light";
 
-type AWSBButtonProps = {
+type AWSEButtonProps = {
   id?: string;
   buttonText: React.ReactNode;
   size?: "sm" | "md";
-  color?: AWSBButtonColor;
-  variant?: AWSBButtonVariant;
+  color?: AWSEButtonColor;
+  variant?: AWSEButtonVariant;
   type?: "button" | "submit" | "reset";
   onClick?: (e: React.MouseEvent) => void;
   additionalClassName?: string;
@@ -26,7 +26,7 @@ type AWSBButtonProps = {
   isLoading?: boolean;
 };
 
-export const AWSBButton: React.FC<AWSBButtonProps> = ({
+export const AWSEButton: React.FC<AWSEButtonProps> = ({
   id,
   buttonText,
   size,

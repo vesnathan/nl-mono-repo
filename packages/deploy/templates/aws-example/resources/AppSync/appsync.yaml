@@ -75,7 +75,7 @@ Resources:
       ApiId: !GetAtt GraphQlApi.ApiId
       DefinitionS3Location: !Sub "s3://${TemplateBucketName}/schema.graphql"
 
-  MainTableDataSource: # Renamed from AWSBUsersTableDataSource for generality
+  MainTableDataSource: # Renamed from AWSEUsersTableDataSource for generality
     Type: AWS::AppSync::DataSource
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
@@ -131,27 +131,27 @@ Resources:
                   - !Ref SendWelcomeEmailFunctionArn
                   - !Ref CreateCognitoUserFunctionArn
 
-  # Resolvers - Assuming resolver field names (e.g., getAWSBUser) remain fixed in the schema for now
+  # Resolvers - Assuming resolver field names (e.g., getAWSEUser) remain fixed in the schema for now
   # If these also need to change based on AppName, the schema and resolver configs would need more significant updates.
-  GetAWSBUserResolver:
+  GetAWSEUserResolver:
     Type: AWS::AppSync::Resolver
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       TypeName: Query
-      FieldName: getAWSBUser # This might need to be generic if schema changes
+      FieldName: getAWSEUser # This might need to be generic if schema changes
       DataSourceName: !GetAtt MainTableDataSource.Name # Updated to MainTableDataSource
       Kind: UNIT
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Queries/Query.getAWSBUser.js"
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Queries/Query.getAWSEUser.js"
 
-  CreateAWSBUserResolver:
+  CreateAWSEUserResolver:
     Type: AWS::AppSync::Resolver
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       TypeName: Mutation
-      FieldName: createAWSBUser # This might need to be generic if schema changes
+      FieldName: createAWSEUser # This might need to be generic if schema changes
       Kind: PIPELINE
       PipelineConfig:
         Functions:
@@ -189,7 +189,7 @@ Resources:
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Mutations/Mutation.createAWSBUser.js"
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Mutations/Mutation.createAWSEUser.js"
 
   SendWelcomeEmailFunction:
     Type: AWS::AppSync::FunctionConfiguration
@@ -203,22 +203,25 @@ Resources:
       CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.sendWelcomeEmail.js"
 
   # Explicit AppSync LogGroup so we can control retention
+  # DeletionPolicy: Delete ensures LogGroup is removed when stack is deleted
   AppSyncApiLogGroup:
     Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Retain
     Properties:
       LogGroupName: !Sub "/aws/appsync/apis/${GraphQlApi.ApiId}"
       RetentionInDays: !Ref LogRetentionInDays
 
 Outputs:
-  AWSBAppSyncApiUrl:
+  AWSEAppSyncApiUrl:
     Value: !GetAtt GraphQlApi.GraphQLUrl
     Description: "GraphQL URL for the AppSync API"
 
-  AWSBAppSyncRealtimeUrl:
+  AWSEAppSyncRealtimeUrl:
     Value: !GetAtt GraphQlApi.RealtimeUrl
     Description: "Realtime URL for the AppSync API"
 
-  AWSBAppSyncApiId:
+  AWSEAppSyncApiId:
     Value: !GetAtt GraphQlApi.ApiId
     Description: "API ID for the AppSync API"
 

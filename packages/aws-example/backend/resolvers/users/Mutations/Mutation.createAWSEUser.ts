@@ -1,26 +1,26 @@
 import { util, Context, AppSyncIdentityCognito } from "@aws-appsync/utils";
 // 'gqlTypes' is a module alias mapped in tsconfig.json to ../frontend/src/types/gqlTypes.ts
 // This allows the resolver compiler to resolve GraphQL generated types during build
-import { AWSBUserInput, AWSBUser } from "gqlTypes";
+import { AWSEUserInput, AWSEUser } from "gqlTypes";
 
 // Define Input type for the resolver
-type CreateAWSBUserMutationVariables = {
-  input: AWSBUserInput;
+type CreateAWSEUserMutationVariables = {
+  input: AWSEUserInput;
 };
 
-// Define Output type for the resolver - it's AWSBUser as per schema
-type Output = AWSBUser;
+// Define Output type for the resolver - it's AWSEUser as per schema
+type Output = AWSEUser;
 
 // Define CTX for the response function context
 type CTX = Context<
-  CreateAWSBUserMutationVariables,
+  CreateAWSEUserMutationVariables,
   object,
   object,
   object,
   Output
 >;
 
-export function request(ctx: Context<CreateAWSBUserMutationVariables>) {
+export function request(ctx: Context<CreateAWSEUserMutationVariables>) {
   const { input } = ctx.args;
   const identity = ctx.identity as AppSyncIdentityCognito;
 
@@ -92,17 +92,17 @@ export function response(ctx: CTX): Output {
   console.log("User creation successful, result:", JSON.stringify(ctx.result));
   // The result of PutItem is the item itself if successful and no error occurred.
   // However, AppSync typically returns the `attributeValues` passed in the request for PutItem.
-  // We need to construct the AWSBUser object that matches the GraphQL schema.
+  // We need to construct the AWSEUser object that matches the GraphQL schema.
 
   // The ctx.result from a PutItem operation is usually the item that was put.
   // If you used `returnValues: 'ALL_OLD'` or similar, it might be different.
   // Assuming ctx.result directly contains the newly created user's attributes.
   const createdUser = ctx.result as any;
 
-  // The clientType will be populated by Query.getAWSBUser based on Cognito groups
+  // The clientType will be populated by Query.getAWSEUser based on Cognito groups
   // For the mutation response, return an empty array
   return {
-    __typename: "AWSBUser",
+    __typename: "AWSEUser",
     userId: createdUser.userId,
     userEmail: createdUser.userEmail,
     userTitle: createdUser.userTitle,

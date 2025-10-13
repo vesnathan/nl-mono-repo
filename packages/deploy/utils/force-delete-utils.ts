@@ -58,7 +58,7 @@ export class ForceDeleteManager {
           "FrontendBucketName",
           "TemplatesBucketName",
           // AWS Example specific outputs
-          "AWSBBucketName",
+          "AWSEBucketName",
           "WebsiteBucket",
         ];
 

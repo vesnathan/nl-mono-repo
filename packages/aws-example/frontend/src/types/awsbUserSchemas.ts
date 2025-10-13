@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
-import { AWSBUser } from "./gqlTypes";
+import { AWSEUser } from "./gqlTypes";
 
-export const createEmptyAWSBUser = (): AWSBUser => ({
-  __typename: "AWSBUser",
+export const createEmptyAWSEUser = (): AWSEUser => ({
+  __typename: "AWSEUser",
   userId: uuidv4(),
   userEmail: "",
   userTitle: "",
@@ -18,7 +18,7 @@ export const createEmptyAWSBUser = (): AWSBUser => ({
   userProfilePicture: { __typename: "S3Object", Bucket: "", Key: "" },
 });
 
-export const AWSBUserSchema = z.object({
+export const AWSEUserSchema = z.object({
   userId: z.string().default(() => uuidv4()),
   userEmail: z.string().min(1, "Contact email is required"),
   userTitle: z.string().optional(),
@@ -31,7 +31,7 @@ export const AWSBUserSchema = z.object({
   userCreated: z.string().min(1, "User created date is required"),
 });
 
-export const AWSBUserFormValidationSchema = AWSBUserSchema.superRefine(
+export const AWSEUserFormValidationSchema = AWSEUserSchema.superRefine(
   (val, ctx) => {
     const requiredFields = [
       {

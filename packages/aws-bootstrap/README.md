@@ -67,7 +67,7 @@ The script automatically:
 1. **Copies and renames files**:
 
    - `awse*.ts` → `<shortname>*.ts`
-   - `AWSBUser.graphql` → `<SHORTNAME>User.graphql`
+   - `AWSEUser.graphql` → `<SHORTNAME>User.graphql`
 
 2. **Replaces tokens in all files**:
 

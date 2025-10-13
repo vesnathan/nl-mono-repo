@@ -34,9 +34,10 @@ function replaceInFile(file) {
     if (isBinary(file)) return false;
     const original = fs.readFileSync(file, 'utf8');
     let updated = original
-      .replace(/\bawsb\b/g, 'awse')
-      .replace(/\bAWSB\b/g, 'AWSE')
-      .replace(/\bAwsb\b/g, 'Awse');
+      // replace inside identifiers as well (no word boundaries)
+      .replace(/AWSE/g, 'AWSE')
+      .replace(/Awse/g, 'Awse')
+      .replace(/awse/g, 'awse');
     if (updated !== original) {
       fs.writeFileSync(file, updated, 'utf8');
       return true;

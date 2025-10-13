@@ -5,12 +5,12 @@ import {
   PathValue,
   UseFormReturn,
 } from "react-hook-form";
-import { AWSBTextField, AWSBTextFieldProps } from "./AWSBTextField";
+import { AWSETextField, AWSETextFieldProps } from "./AWSETextField";
 
 export type RHFTextFieldProps<
   TValues extends FieldValues,
   TPath extends FieldPath<TValues>,
-> = Omit<AWSBTextFieldProps, "value" | "onClear" | "isError" | "helperText"> & {
+> = Omit<AWSETextFieldProps, "value" | "onClear" | "isError" | "helperText"> & {
   form: UseFormReturn<TValues>;
   fieldPath: TPath;
   isClearable?: boolean;
@@ -32,7 +32,7 @@ export function RHFTextField<
     requiredMessage,
     customValidation,
     customClassName,
-    ...awsbTextFieldProps
+    ...awseTextFieldProps
   } = props;
 
   return (
@@ -44,18 +44,18 @@ export function RHFTextField<
         validate: customValidation,
       }}
       render={({ field, fieldState }) => (
-        <AWSBTextField
+        <AWSETextField
           helperText={fieldState.error?.message || ""}
           isError={!!fieldState.error}
           value={field.value ?? ""}
           onClear={isClearable ? () => field.onChange("") : undefined}
-          {...awsbTextFieldProps}
-          id={awsbTextFieldProps.id ?? fieldPath}
-          testId={awsbTextFieldProps.testId ?? fieldPath}
+          {...awseTextFieldProps}
+          id={awseTextFieldProps.id ?? fieldPath}
+          testId={awseTextFieldProps.testId ?? fieldPath}
           onChange={(e, newValue) => {
             field.onChange(newValue);
             form.clearErrors(fieldPath); // Clear the error for this field
-            awsbTextFieldProps.onChange?.(e, newValue);
+            awseTextFieldProps.onChange?.(e, newValue);
           }}
           customClassName={customClassName}
         />

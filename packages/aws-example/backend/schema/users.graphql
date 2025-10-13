@@ -1,14 +1,14 @@
 # This file defines the Query and Mutation operations for the AWSE AppSync API
-# Type definitions (AWSBUser, ClientType, AWSBUserInput) come from shared types
+# Type definitions (AWSEUser, ClientType, AWSEUserInput) come from shared types
 
 type Mutation {
   # Creates a new AWSE User
-  createAWSBUser(input: AWSBUserInput!): AWSBUser
+  createAWSEUser(input: AWSEUserInput!): AWSEUser
 }
 
 type Query {
-  # Retrieves a AWSBUser by their ID (Cognito Sub)
-  getAWSBUser(userId: String!): AWSBUser
+  # Retrieves a AWSEUser by their ID (Cognito Sub)
+  getAWSEUser(userId: String!): AWSEUser
     @aws_cognito_user_pools # Directive for AppSync authorization
 
 }

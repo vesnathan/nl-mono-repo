@@ -9,7 +9,7 @@ enum ClientType {
   UnauthenticatedUser
 }
 
-type AWSBUser @aws_cognito_user_pools {
+type AWSEUser @aws_cognito_user_pools {
   userId: String!
   privacyPolicy: Boolean!
   termsAndConditions: Boolean!
@@ -25,7 +25,7 @@ type AWSBUser @aws_cognito_user_pools {
 
 }
 
-input AWSBUserInput {
+input AWSEUserInput {
   userEmail: String!
   userTitle: String!
   userFirstName: String!

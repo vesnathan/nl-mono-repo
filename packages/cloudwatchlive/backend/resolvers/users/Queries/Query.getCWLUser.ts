@@ -108,7 +108,9 @@ export function response(ctx: CTX): Output {
     console.log(
       `No groups mapped to ClientType, adding default UnregisteredAttendee`,
     );
-    clientType.push(ClientType.UnregisteredAttendee);
+    // 'UnregisteredAttendee' is not present in the generated ClientType enum
+    // Use Visitor as the sensible default mapped client type
+    clientType.push(ClientType.Visitor);
   }
 
   console.log(`Final clientType array:`, JSON.stringify(clientType));

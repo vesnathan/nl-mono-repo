@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unstable-nested-components */
 import React from "react";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
-import { AWSBButton } from "@/components/common/AWSBButton";
+import { AWSEButton } from "@/components/common/AWSEButton";
 import { useEffectOnce } from "@/hooks/useEffectOnce";
 
 const ErrorBoundaryFallback: React.FC<FallbackProps> = ({
@@ -15,13 +15,13 @@ const ErrorBoundaryFallback: React.FC<FallbackProps> = ({
   return (
     <div className="bg-red-500 p-2 shadow-md text-center">
       <span className="text-white">An unexpected error has occurred</span>
-      <AWSBButton buttonText="Retry" onClick={resetErrorBoundary} />
+      <AWSEButton buttonText="Retry" onClick={resetErrorBoundary} />
     </div>
   );
 };
 
 type Props = React.PropsWithChildren<object>;
-export const AWSBErrorBoundary: React.FC<Props> = ({ children }) => {
+export const AWSEErrorBoundary: React.FC<Props> = ({ children }) => {
   return (
     <ErrorBoundary
       fallbackRender={(fallbackProps) => {

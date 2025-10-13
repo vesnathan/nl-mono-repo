@@ -30,9 +30,11 @@ import { LambdaCompiler } from "../../utils/lambda-compiler";
 import { S3BucketManager } from "../../utils/s3-bucket-manager";
 import { OutputsManager } from "../../outputs-manager";
 import { addAppSyncBucketPolicy } from "../../utils/s3-resolver-validator";
+import { cleanupLogGroups } from "../../utils/loggroup-cleanup";
 import { createReadStream, readdirSync, statSync, existsSync } from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
+import { UserSetupManager } from "../../utils/user-setup";
 
 const findYamlFiles = (dir: string): string[] => {
   const files = readdirSync(dir);
@@ -151,23 +153,6 @@ async function waitForStackCompletion(
         );
         return;
       }
-
-      if (failureStatuses.includes(status)) {
-        throw new Error(
-          `Stack ${stackName} ${operation.toLowerCase()} failed with status: ${status}`,
-        );
-      }
-
-      if (inProgressStatuses.includes(status)) {
-        logger.debug(
-          `Waiting for ${stackName} ${operation.toLowerCase()}... Status: ${status} (${i + 1}/${maxAttempts}) - ${Math.round(((i + 1) / maxAttempts) * 100)}% complete`,
-        );
-      } else {
-        logger.debug(
-          `Stack ${stackName} status: ${status} (${i + 1}/${maxAttempts})`,
-        );
-      }
-
       await new Promise((resolve) => setTimeout(resolve, delay));
     } catch (error: any) {
       if (i === maxAttempts - 1) {
@@ -856,6 +841,13 @@ export async function deployAwsExample(
         );
       }
 
+      // Clean up any orphaned LogGroups before deployment
+      await cleanupLogGroups({
+        appName: "awse",
+        stage: options.stage,
+        region: region,
+      });
+
       // Check if the stack exists
       let stackExists = false;
       try {
@@ -919,9 +911,58 @@ export async function deployAwsExample(
         `CloudFormation stack ${stackName} deployed/updated successfully`,
       );
 
-      // TODO: Add user seeding script for aws-example if needed
-      // For now, we'll skip this step as it's specific to the application
-      logger.info("⏭️  User seeding not yet configured for AWS Example");
+      // Run seeding and admin-user creation for AWS Example (if possible)
+      try {
+        const repoRoot = path.join(__dirname, "../../../../");
+        logger.info("🌱 Seeding AWSE users into DynamoDB (shell script, with AWS env)...");
+
+        try {
+          execSync(
+            `bash -lc 'cd "${repoRoot}" && source "./set-aws-env.sh" && ./packages/aws-example/backend/scripts/seed-users.sh'`,
+            {
+              cwd: repoRoot,
+              stdio: options.debugMode ? "inherit" : "pipe",
+              encoding: "utf8",
+            },
+          );
+          logger.success("✓ AWSE user table seeded successfully");
+        } catch (seedError: any) {
+          logger.error(
+            `AWSE user seeding failed: ${seedError instanceof Error ? seedError.message : seedError}`,
+          );
+          if (seedError.stdout) logger.error(`[Seeder stdout]:\n${seedError.stdout}`);
+          if (seedError.stderr) logger.error(`[Seeder stderr]:\n${seedError.stderr}`);
+          // Do not throw here: attempt admin creation may still be desirable
+        }
+
+        // Attempt to create admin user in Cognito (if admin email provided or set in env)
+        try {
+          const region = options.region || process.env.AWS_REGION || "ap-southeast-2";
+          const adminEmail = options.adminEmail || process.env.ADMIN_EMAIL;
+          if (!adminEmail) {
+            logger.info(
+              "No admin email provided (options.adminEmail or ADMIN_EMAIL). Skipping Cognito admin creation.",
+            );
+          } else {
+            logger.info(`👤 Creating Cognito admin user for AWSE: ${adminEmail}`);
+            const userManager = new UserSetupManager(region, "awse");
+            await userManager.createAdminUser({
+              stage: options.stage,
+              adminEmail,
+              region,
+              stackType: "awse",
+            });
+            logger.success("✓ Cognito admin user created for AWSE");
+          }
+        } catch (userError: any) {
+          logger.error(
+            `AWSE Cognito admin creation failed: ${userError instanceof Error ? userError.message : userError}`,
+          );
+          // don't throw to avoid failing the entire deploy; surface error to logs
+        }
+      } catch (err) {
+        logger.error(`AWSE post-deploy tasks failed: ${err instanceof Error ? err.message : err}`);
+      }
     } catch (cfnError: any) {
       logger.error(`CloudFormation deployment failed: ${cfnError.message}`);
       throw cfnError;

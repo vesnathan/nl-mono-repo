@@ -1,5 +1,5 @@
 import React from "react";
-import { AWSBUserStoreSetup } from "@/stores/awsbUserStoreSetup";
+import { AWSEUserStoreSetup } from "@/stores/awseUserStoreSetup";
 import { LOGIN_PATH } from "@/constants/layout/navigation/navigation";
 import { RequireLoggedIn } from "./RequireLoggedIn";
 import { NextRedirect } from "./NextRedirect";
@@ -14,9 +14,9 @@ export const RequireAuth: React.FC<Props> = ({ children }) => {
         return <NextRedirect path={LOGIN_PATH} />;
       }}
       renderLoggedIn={(currentUser) => (
-        <AWSBUserStoreSetup userId={currentUser.username}>
+        <AWSEUserStoreSetup userId={currentUser.username}>
           {children}
-        </AWSBUserStoreSetup>
+        </AWSEUserStoreSetup>
       )}
     />
   );

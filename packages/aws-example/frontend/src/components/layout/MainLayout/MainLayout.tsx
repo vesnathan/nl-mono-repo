@@ -3,7 +3,7 @@
 import React, { PropsWithChildren } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@nextui-org/react";
-import { AWSBErrorBoundary } from "@/components/common/ErrorBoundary";
+import { AWSEErrorBoundary } from "@/components/common/ErrorBoundary";
 import { mainNavConfig } from "@/constants/layout/navigation/navigation";
 import {
   MainLayoutSidebar,
@@ -74,7 +74,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
             classNames?.contentWrapper,
           )}
         >
-          <AWSBErrorBoundary>{children}</AWSBErrorBoundary>
+          <AWSEErrorBoundary>{children}</AWSEErrorBoundary>
         </div>
       </div>
     </>

@@ -2,8 +2,8 @@ import { LoginController } from "@/hooks/useLoginController";
 import { useEnterKeySubmit } from "@/hooks/useEnterKeySubmit";
 import { Divider } from "@nextui-org/react";
 import React from "react";
-import { AWSBButton } from "@/components/common/AWSBButton";
-import { AWSBTextField } from "@/components/common/AWSBTextField";
+import { AWSEButton } from "@/components/common/AWSEButton";
+import { AWSETextField } from "@/components/common/AWSETextField";
 
 type Props = {
   loginController: LoginController;
@@ -51,12 +51,12 @@ export const LoginForm: React.FC<Props> = ({
       <p className="font-regular text-body2 mb-5 text-neutral-700">
         Please log in to continue.
       </p>
-      <AWSBTextField
+      <AWSETextField
         label="Email address:"
         onChange={(e) => setUserEmail(e.target.value)}
       />
       <div className="mt-2">
-        <AWSBTextField
+        <AWSETextField
           label="Password"
           type="password"
           onChange={(e) => setUserPassword(e.target.value)}
@@ -64,7 +64,7 @@ export const LoginForm: React.FC<Props> = ({
       </div>
       <div className="mt-2 text-error-500 text-body2">{errorMessage}</div>
       <div>
-        <AWSBButton
+        <AWSEButton
           buttonText="Log in"
           additionalClassName="h-[40px] w-full mt-4"
           isDisabled={isLoginDisabled}

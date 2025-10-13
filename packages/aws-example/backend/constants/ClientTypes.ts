@@ -18,7 +18,7 @@ export interface ClientTypeDefinition {
   description?: string;
 }
 
-export const AWSB_CLIENT_TYPES: readonly ClientTypeDefinition[] = [
+export const AWSE_CLIENT_TYPES: readonly ClientTypeDefinition[] = [
   {
     id: "SiteAdmin",
     value: "SiteAdmin",
@@ -39,25 +39,25 @@ export const AWSB_CLIENT_TYPES: readonly ClientTypeDefinition[] = [
   },
 ] as const;
 
-export type AWSBClientType = (typeof AWSB_CLIENT_TYPES)[number]["value"];
+export type AWSEClientType = (typeof AWSE_CLIENT_TYPES)[number]["value"];
 
 // Helper to check if a string is a valid client type
-export const isValidAWSBClientType = (
+export const isValidAWSEClientType = (
   value: string,
-): value is AWSBClientType => {
-  return AWSB_CLIENT_TYPES.some((type) => type.value === value);
+): value is AWSEClientType => {
+  return AWSE_CLIENT_TYPES.some((type) => type.value === value);
 };
 
 // Get display name for a client type value
 export const getClientTypeDisplayName = (value: string): string => {
-  const clientType = AWSB_CLIENT_TYPES.find((type) => type.value === value);
+  const clientType = AWSE_CLIENT_TYPES.find((type) => type.value === value);
   return clientType?.displayName || value;
 };
 
 // For use in Cognito group creation - extract just the values
-export const AWSB_COGNITO_GROUPS = AWSB_CLIENT_TYPES.map((type) => type.value);
+export const AWSE_COGNITO_GROUPS = AWSE_CLIENT_TYPES.map((type) => type.value);
 
 // For GraphQL schema generation - extract just the values
-export const AWSB_CLIENT_TYPE_ENUM_VALUES = AWSB_CLIENT_TYPES.map(
+export const AWSE_CLIENT_TYPE_ENUM_VALUES = AWSE_CLIENT_TYPES.map(
   (type) => type.value,
 );

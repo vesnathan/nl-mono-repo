@@ -2,8 +2,8 @@ import { LoginController } from "@/hooks/useLoginController";
 import { useEnterKeySubmit } from "@/hooks/useEnterKeySubmit";
 import { Divider } from "@nextui-org/react";
 import React from "react";
-import { AWSBButton } from "@/components/common/AWSBButton";
-import { AWSBTextField } from "@/components/common/AWSBTextField";
+import { AWSEButton } from "@/components/common/AWSEButton";
+import { AWSETextField } from "@/components/common/AWSETextField";
 
 type Props = {
   loginController: LoginController;
@@ -49,7 +49,7 @@ export const ForgotPasswordResetCodeForm: React.FC<Props> = ({
         </div>
 
         <div className="flex flex-col gap-2.5">
-          <AWSBTextField
+          <AWSETextField
             label="Reset Password Code"
             testId="reset-code-input"
             value={forgetPWCode}
@@ -60,7 +60,7 @@ export const ForgotPasswordResetCodeForm: React.FC<Props> = ({
 
           <div className="text-error-500 text-body2">{errorMessage}</div>
 
-          <AWSBButton
+          <AWSEButton
             buttonText="Submit"
             additionalClassName="w-[140px] m-auto h-[40px]"
             onClick={submitHandler}
@@ -69,7 +69,7 @@ export const ForgotPasswordResetCodeForm: React.FC<Props> = ({
         </div>
       </div>
       <Divider />
-      <AWSBButton
+      <AWSEButton
         buttonText={
           <span className="text-neutral-700 text-body2 font-bold">
             Use another email address

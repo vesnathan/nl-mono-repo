@@ -3,8 +3,8 @@ import { Divider } from "@nextui-org/react";
 import { LoginController } from "@/hooks/useLoginController";
 import { useEnterKeySubmit } from "@/hooks/useEnterKeySubmit";
 import { authValidatePassword } from "shared/functions/authValidatePassword";
-import { AWSBButton } from "../common/AWSBButton";
-import { AWSBTextField } from "../common/AWSBTextField";
+import { AWSEButton } from "../common/AWSEButton";
+import { AWSETextField } from "../common/AWSETextField";
 import PasswordHelper from "../common/PasswordHelper";
 
 type Props = {
@@ -71,7 +71,7 @@ export const NewPasswordForm: React.FC<Props> = ({
           <span className="text-neutral-800 font-semibold text-body2 mb-1">
             New Password
           </span>
-          <AWSBTextField
+          <AWSETextField
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="Enter your new password"
@@ -80,7 +80,7 @@ export const NewPasswordForm: React.FC<Props> = ({
           <span className="text-neutral-800 font-semibold text-body2 mt-3 mb-1">
             Confirm Password
           </span>
-          <AWSBTextField
+          <AWSETextField
             value={confirmNewPassword}
             onChange={(e) => setConfirmNewPassword(e.target.value)}
             placeholder="Enter your password again"
@@ -94,7 +94,7 @@ export const NewPasswordForm: React.FC<Props> = ({
       <Divider />
       <div className="flex flex-row justify-center w-full">
         <div className="w-full p-4">
-          <AWSBButton
+          <AWSEButton
             buttonText="Submit"
             additionalClassName="h-[40px] w-full"
             isDisabled={buttonDisabled}
