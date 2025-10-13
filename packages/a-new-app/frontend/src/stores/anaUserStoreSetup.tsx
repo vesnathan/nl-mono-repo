@@ -9,8 +9,8 @@ import { DataFetchError } from "@/components/common/DataFetchError";
 import { useRouter } from "next/navigation";
 import { FC, PropsWithChildren, useEffect } from "react";
 import {
-  getAWSEUserQueryFn,
-  getAWSEUserQueryKey,
+  getANAUserQueryFn,
+  getANAUserQueryKey,
 } from "../graphql/queries/userQueries";
 
 // using @heroui Progress component directly
@@ -19,43 +19,43 @@ type Props = PropsWithChildren & {
   userId: string;
 };
 
-export const AWSEUserStoreSetup: FC<Props> = ({ userId, children }) => {
+export const ANAUserStoreSetup: FC<Props> = ({ userId, children }) => {
   const setUser = useUserStore((state) => state.setUser);
   const router = useRouter();
 
-  const queryKey = getAWSEUserQueryKey(userId);
+  const queryKey = getANAUserQueryKey(userId);
 
   const { data, error, isPending } = useQuery({
     retry: false,
-    queryFn: () => getAWSEUserQueryFn({ userId }),
+    queryFn: () => getANAUserQueryFn({ userId }),
     queryKey,
   });
 
   // Extract the user data
-  const AWSEUser = data?.data?.getAWSEUser;
+  const ANAUser = data?.data?.getANAUser;
 
   // Set user in store when GraphQL data is available
   // The resolver already handles Cognito group to clientType mapping
   useEffect(() => {
-    if (AWSEUser) {
+    if (ANAUser) {
       // Only log in development mode
       // eslint-disable-next-line no-console
       if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console
         console.log(
-          "AWSEUserStoreSetup: Setting user with clientType from GraphQL response:",
-          AWSEUser.clientType,
+          "ANAUserStoreSetup: Setting user with clientType from GraphQL response:",
+          ANAUser.clientType,
         );
       }
-      setUser(AWSEUser);
+      setUser(ANAUser);
     }
-  }, [AWSEUser, setUser]);
+  }, [ANAUser, setUser]);
 
   if (isPending) {
     return <Progress isIndeterminate aria-label="Loading user data" />;
   }
 
-  if (error || !AWSEUser) {
+  if (error || !ANAUser) {
     return (
       <DataFetchError
         error={error}

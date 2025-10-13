@@ -294,6 +294,32 @@ function sanitizeComponents(
           );
           changed = true;
         }
+        // replace absolute path aliases like '@/path/oldBase' or '~/path/oldBase'
+        const reAlias = new RegExp(
+          "([\"'])(@|~)(/[^\"']*)(" + oldBase + ")([\"'])",
+          "g",
+        );
+        if (reAlias.test(content)) {
+          content = content.replace(
+            reAlias,
+            (m, q1, alias, prefix, base, q2) =>
+              `${q1}${alias}${prefix}${newBase}${q2}`,
+          );
+          changed = true;
+        }
+        // replace absolute path aliases ending with extension
+        const reAliasExt = new RegExp(
+          "([\"'])(@|~)(/[^\"']*)(" + oldBase + ")\\.(tsx|ts|jsx|js)([\"'])",
+          "g",
+        );
+        if (reAliasExt.test(content)) {
+          content = content.replace(
+            reAliasExt,
+            (m, q1, alias, prefix, base, ext, q2) =>
+              `${q1}${alias}${prefix}${newBase}.${ext}${q2}`,
+          );
+          changed = true;
+        }
       }
       if (changed) fs.writeFileSync(full, content, "utf8");
     }
@@ -631,12 +657,46 @@ function updatePackageJsonNames(destPackagePath, longName, shortName) {
       else if (item === "package.json") {
         try {
           const pkg = JSON.parse(fs.readFileSync(full, "utf8"));
+          let modified = false;
+
           if (pkg && typeof pkg.name === "string") {
             // Replace common placeholders in package name
-            pkg.name = pkg.name
+            const newName = pkg.name
               .replace(/aws-example/gi, longName)
               .replace(/aws_example/gi, longName)
               .replace(/awse/gi, shortName);
+            if (newName !== pkg.name) {
+              pkg.name = newName;
+              modified = true;
+            }
+          }
+
+          // Replace dependency names (workspace dependencies like awsebackend -> {shortName}backend)
+          const depTypes = [
+            "dependencies",
+            "devDependencies",
+            "peerDependencies",
+            "optionalDependencies",
+          ];
+          for (const depType of depTypes) {
+            if (pkg[depType] && typeof pkg[depType] === "object") {
+              const deps = pkg[depType];
+              const oldKeys = Object.keys(deps);
+              for (const oldKey of oldKeys) {
+                const newKey = oldKey
+                  .replace(/aws-example/gi, longName)
+                  .replace(/aws_example/gi, longName)
+                  .replace(/awse/gi, shortName);
+                if (newKey !== oldKey) {
+                  deps[newKey] = deps[oldKey];
+                  delete deps[oldKey];
+                  modified = true;
+                }
+              }
+            }
+          }
+
+          if (modified) {
             fs.writeFileSync(full, JSON.stringify(pkg, null, 2) + "\n");
           }
         } catch (e) {
@@ -814,7 +874,15 @@ async function main() {
   console.log(`  Copying to:   ${dest}\n`);
 
   // Copy the source package (excluding node_modules and build artifacts)
-  copyRecursive(src, dest, ["node_modules", ".next", "dist", "build"]);
+  copyRecursive(src, dest, [
+    "node_modules",
+    ".next",
+    "dist",
+    "build",
+    ".nx",
+    "deployment-outputs",
+    ".cache",
+  ]);
 
   console.log("✅ Files copied successfully");
 
@@ -1053,42 +1121,46 @@ async function main() {
       let content = fs.readFileSync(deployTypesPath, "utf8");
 
       // Add new stack type to enum (using PascalCase)
-      const stackTypeEnumRegex = /(export enum StackType \{[^}]*)(})/;
+      // Find the last entry in the enum (ends with ,) and insert after it
+      const stackTypeEnumRegex = /(export enum StackType \{[\s\S]*?),(\s*\})/;
       if (!content.includes(`${pascalCaseName} = "${pascalCaseName}"`)) {
         content = content.replace(
           stackTypeEnumRegex,
-          `$1  ${pascalCaseName} = "${pascalCaseName}",\n$2`,
+          `$1,\n  ${pascalCaseName} = "${pascalCaseName}",$2`,
         );
       }
 
       // Add to STACK_ORDER
-      const stackOrderRegex = /(export const STACK_ORDER = \[[^\]]*)(])/;
+      // Find the last entry in the array (ends with ,) and insert after it
+      const stackOrderRegex = /(export const STACK_ORDER = \[[\s\S]*?),(\s*\])/;
       if (!content.includes(`StackType.${pascalCaseName}`)) {
         content = content.replace(
           stackOrderRegex,
-          `$1  StackType.${pascalCaseName},\n$2`,
+          `$1,\n  StackType.${pascalCaseName},$2`,
         );
       }
 
       // Add template path
+      // Find the last entry before the closing comment/brace
       const templatePathsRegex =
-        /(export const TEMPLATE_PATHS: Record<StackType, string> = \{[^}]*)(})/;
+        /(export const TEMPLATE_PATHS: Record<StackType, string> = \{[\s\S]*?\),)(\s*\/\/[^\n]*\n\s*\})/;
       const templatePath = `join(__dirname, "templates/${longName}/cfn-template.yaml")`;
       if (!content.includes(`[StackType.${pascalCaseName}]`)) {
         content = content.replace(
           templatePathsRegex,
-          `$1  [StackType.${pascalCaseName}]: ${templatePath},\n$2`,
+          `$1\n  [StackType.${pascalCaseName}]: ${templatePath},$2`,
         );
       }
 
       // Add template resources path
+      // Find the last entry before the closing comment/brace
       const resourcesPathsRegex =
-        /(export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = \{[^}]*)(})/;
+        /(export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = \{[\s\S]*?\),)(\s*\/\/[^\n]*\n\s*\})/;
       const resourcesPath = `join(__dirname, "templates/${longName}/")`;
       if (!content.includes(`[StackType.${pascalCaseName}]: join`)) {
         content = content.replace(
           resourcesPathsRegex,
-          `$1  [StackType.${pascalCaseName}]: ${resourcesPath},\n$2`,
+          `$1\n  [StackType.${pascalCaseName}]: ${resourcesPath},$2`,
         );
       }
 
@@ -1135,13 +1207,13 @@ async function main() {
   },
 `;
 
-      // Find the closing brace of PROJECT_CONFIGS and add before it
+      // Find the last config entry (ends with },) and add after it
       const projectConfigsRegex =
-        /(export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = \{[^;]*)(};)/s;
+        /(export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = \{[\s\S]*?  \},)(\s*\};)/;
       if (!content.includes(`[StackType.${pascalCaseName}]:`)) {
         content = content.replace(
           projectConfigsRegex,
-          `$1${newProjectConfig}\n$2`,
+          `$1${newProjectConfig}$2`,
         );
         fs.writeFileSync(projectConfigPath, content, "utf8");
         console.log("✅ Updated deploy/project-config.ts");

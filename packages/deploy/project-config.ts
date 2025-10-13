@@ -117,6 +117,24 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
     hasLambdas: true,
     hasResolvers: true,
   },
+
+
+  [StackType.ANewApp]: {
+    stackType: StackType.ANewApp,
+    displayName: "A New App",
+    templateDir: "a-new-app",
+    packageDir: "a-new-app",
+    dependsOn: [StackType.Shared], // TODO: Update dependencies as needed
+    buckets: {
+      templates: "nlmonorepo-a-new-app-templates-{stage}",
+      frontend: "nlmonorepo-ana-userfiles-{stage}",
+      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],
+    },
+    hasFrontend: true,
+    hasLambdas: true,
+    hasResolvers: true,
+  },
+
 };
 
 /**

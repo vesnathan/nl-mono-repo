@@ -71,6 +71,7 @@
     "lint": "lerna run lint --stream",
     "tsc": "lerna run tsc --stream",
     "test": "lerna run test --stream",
-    "dev:cwl": "yarn workspace cwlfrontend dev:local"
-    }
+    "dev:cwl": "yarn workspace cwlfrontend dev:local",
+    "dev:ana": "yarn workspace anafrontend dev:local"
+  }
 }
