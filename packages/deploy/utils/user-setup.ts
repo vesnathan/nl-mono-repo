@@ -23,6 +23,8 @@ import { logger } from "./logger";
 import { REGEX } from "../../shared/constants/RegEx"; // Corrected import
 import { CWL_COGNITO_GROUPS } from "../../cloudwatchlive/backend/constants/ClientTypes";
 import { AWSE_COGNITO_GROUPS } from "../../aws-example/backend/constants/ClientTypes";
+import { StackType, getStackName } from "../types";
+import { OutputsManager } from "../outputs-manager";
 
 export type StackTypeForUser = "cwl" | "awse";
 
@@ -106,12 +108,33 @@ export class UserSetupManager {
   private async getCognitoUserPoolId(stage: string): Promise<string> {
     try {
       // Determine stack name and output key based on stack type
+      // Resolve full CloudFormation stack name using shared helper so naming is consistent
       const stackName =
         this.stackType === "awse"
-          ? `nlmonorepo-awse-${stage}`
-          : `nlmonorepo-cwl-${stage}`;
+          ? getStackName(StackType.AwsExample, stage)
+          : getStackName(StackType.CWL, stage);
       const outputKey =
         this.stackType === "awse" ? "AWSEUserPoolId" : "CWLUserPoolId";
+
+      // First, try to read locally-saved deployment outputs (faster and avoids AWS calls when available)
+      try {
+        const outputsManager = new OutputsManager();
+        const localOutput = await outputsManager.getOutputValue(
+          this.stackType === "awse" ? StackType.AwsExample : StackType.CWL,
+          stage,
+          outputKey,
+        );
+        if (localOutput) {
+          logger.debug(
+            `Found Cognito User Pool ID in local outputs for ${stackName}: ${localOutput}`,
+          );
+          return localOutput;
+        }
+      } catch (err) {
+        logger.debug(`No local outputs available or failed to read outputs: ${(err as Error).message}`);
+      }
+
+      logger.debug(`Resolving Cognito User Pool ID by describing stack ${stackName} (output key: ${outputKey})`);
 
       // Try to get from CloudFormation stack outputs first
       const describeStacksResponse = await this.cloudFormationClient.send(
@@ -132,8 +155,22 @@ export class UserSetupManager {
       const listExportsResponse = await this.cloudFormationClient.send(
         new ListExportsCommand({}),
       );
-      const userPoolExport = listExportsResponse.Exports?.find(
-        (exp) => exp.Name === `nlmonorepo-shared-${stage}-user-pool-id`,
+
+      // Try several likely export names to be resilient to small naming differences
+      const possibleExportNames: string[] =
+        this.stackType === "awse"
+          ? [
+              `nlmonorepo-awse-${stage}-user-pool-id`,
+              `nlmonorepo-awsexample-${stage}-user-pool-id`,
+              `nlmonorepo-shared-${stage}-user-pool-id`,
+            ]
+          : [
+              `nlmonorepo-cwl-${stage}-user-pool-id`,
+              `nlmonorepo-shared-${stage}-user-pool-id`,
+            ];
+
+      const userPoolExport = listExportsResponse.Exports?.find((exp) =>
+        possibleExportNames.includes(exp.Name || ""),
       );
 
       if (userPoolExport?.Value) {

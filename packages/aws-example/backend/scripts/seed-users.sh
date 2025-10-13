@@ -35,14 +35,19 @@ echo -e "${BLUE}🌱 AWS Example User Seeding Script${NC}"
 echo "[DEBUG] Script directory: $(dirname "$0")"
 echo ""
 
-# Check if AWS credentials are configured
-if ! aws sts get-caller-identity > /dev/null 2>&1; then
-    echo -e "${RED}❌ AWS credentials not configured!${NC}"
-    echo "Please configure your AWS credentials first."
-    exit 1
+# Check for AWS CLI and credentials, but do not fail if aws CLI is missing or broken.
+# The seeding implementation uses the Node AWS SDK (via yarn scripts) and will use
+# environment variables if present. This check is only advisory to help debug
+# local environments where aws CLI is available but misconfigured.
+if command -v aws > /dev/null 2>&1; then
+    if aws sts get-caller-identity > /dev/null 2>&1; then
+        echo -e "${GREEN}✅ AWS CLI and credentials verified${NC}"
+    else
+        echo -e "${YELLOW}⚠️  AWS CLI found but could not verify credentials. Proceeding; the seeder will rely on AWS SDK and environment variables.${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠️  AWS CLI not found. Proceeding; the seeder will rely on AWS SDK and environment variables.${NC}"
 fi
-
-echo -e "${GREEN}✅ AWS credentials verified${NC}"
 
 # Get current AWS region
 AWS_REGION=${AWS_REGION:-$(aws configure get region)}
