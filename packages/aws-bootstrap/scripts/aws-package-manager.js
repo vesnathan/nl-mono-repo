@@ -341,6 +341,7 @@ async function removePackageInteractive() {
       "deploy",
       "shared",
       "waf",
+      "aws-example", // Template package for cloning
     ]);
     return items.filter((i) => !protectedPackages.has(i));
   }
@@ -1241,6 +1242,7 @@ async function main() {
       "deploy",
       "shared",
       "waf",
+      "aws-example", // Template package for cloning
     ]);
     const choices = (function () {
       const packagesRoot = path.join(root, "packages");

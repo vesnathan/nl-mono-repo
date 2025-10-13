@@ -348,6 +348,7 @@ async function removePackageInteractive() {
       "deploy",
       "shared",
       "waf",
+      "aws-example", // Template package for cloning
     ]);
     return items.filter((i) => !protectedPackages.has(i));
   }
