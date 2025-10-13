@@ -65,7 +65,9 @@ export class UserSetupManager {
       this.stackType = stackType;
     }
 
-    logger.debug(`Setting up admin user for stage: ${stage}, stackType: ${this.stackType}`);
+    logger.debug(
+      `Setting up admin user for stage: ${stage}, stackType: ${this.stackType}`,
+    );
     logger.debug(`Admin email received in createAdminUser: '${adminEmail}'`); // Added log
 
     // Get user pool ID
@@ -76,9 +78,10 @@ export class UserSetupManager {
     await this.ensureCognitoGroups(userPoolId, stage);
 
     // Get user table name based on stack type
-    const tableName = this.stackType === "awse"
-      ? `nlmonorepo-awse-datatable-${stage}`
-      : `nlmonorepo-cwl-datatable-${stage}`;
+    const tableName =
+      this.stackType === "awse"
+        ? `nlmonorepo-awse-datatable-${stage}`
+        : `nlmonorepo-cwl-datatable-${stage}`;
     await this.verifyTableExists(tableName);
 
     // Get admin email if not provided
@@ -103,12 +106,12 @@ export class UserSetupManager {
   private async getCognitoUserPoolId(stage: string): Promise<string> {
     try {
       // Determine stack name and output key based on stack type
-      const stackName = this.stackType === "awse"
-        ? `nlmonorepo-awse-${stage}`
-        : `nlmonorepo-cwl-${stage}`;
-      const outputKey = this.stackType === "awse"
-        ? "AWSEUserPoolId"
-        : "CWLUserPoolId";
+      const stackName =
+        this.stackType === "awse"
+          ? `nlmonorepo-awse-${stage}`
+          : `nlmonorepo-cwl-${stage}`;
+      const outputKey =
+        this.stackType === "awse" ? "AWSEUserPoolId" : "CWLUserPoolId";
 
       // Try to get from CloudFormation stack outputs first
       const describeStacksResponse = await this.cloudFormationClient.send(
@@ -137,7 +140,9 @@ export class UserSetupManager {
         return userPoolExport.Value;
       }
 
-      throw new Error(`Could not find Cognito User Pool ID for ${this.stackType} stage ${stage}`);
+      throw new Error(
+        `Could not find Cognito User Pool ID for ${this.stackType} stage ${stage}`,
+      );
     } catch (error) {
       logger.error(
         `Error getting Cognito User Pool ID: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -153,9 +158,8 @@ export class UserSetupManager {
     logger.debug("Checking Cognito user groups...");
 
     // Use the single source of truth for client types based on stack type
-    const requiredGroups = this.stackType === "awse"
-      ? AWSE_COGNITO_GROUPS
-      : CWL_COGNITO_GROUPS;
+    const requiredGroups =
+      this.stackType === "awse" ? AWSE_COGNITO_GROUPS : CWL_COGNITO_GROUPS;
 
     try {
       const listGroupsResponse = await this.cognitoClient.send(
@@ -293,7 +297,8 @@ export class UserSetupManager {
       logger.success("Set permanent password for user");
 
       // Add user to admin group (varies by stack type)
-      const adminGroupName = this.stackType === "awse" ? "SiteAdmin" : "SuperAdmin";
+      const adminGroupName =
+        this.stackType === "awse" ? "SiteAdmin" : "SuperAdmin";
       logger.debug(`Adding user to ${adminGroupName} group...`);
       await this.cognitoClient.send(
         new AdminAddUserToGroupCommand({

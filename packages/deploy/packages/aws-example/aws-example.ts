@@ -914,7 +914,9 @@ export async function deployAwsExample(
       // Run seeding and admin-user creation for AWS Example (if possible)
       try {
         const repoRoot = path.join(__dirname, "../../../../");
-        logger.info("🌱 Seeding AWSE users into DynamoDB (shell script, with AWS env)...");
+        logger.info(
+          "🌱 Seeding AWSE users into DynamoDB (shell script, with AWS env)...",
+        );
 
         try {
           execSync(
@@ -930,21 +932,26 @@ export async function deployAwsExample(
           logger.error(
             `AWSE user seeding failed: ${seedError instanceof Error ? seedError.message : seedError}`,
           );
-          if (seedError.stdout) logger.error(`[Seeder stdout]:\n${seedError.stdout}`);
-          if (seedError.stderr) logger.error(`[Seeder stderr]:\n${seedError.stderr}`);
+          if (seedError.stdout)
+            logger.error(`[Seeder stdout]:\n${seedError.stdout}`);
+          if (seedError.stderr)
+            logger.error(`[Seeder stderr]:\n${seedError.stderr}`);
           // Do not throw here: attempt admin creation may still be desirable
         }
 
         // Attempt to create admin user in Cognito (if admin email provided or set in env)
         try {
-          const region = options.region || process.env.AWS_REGION || "ap-southeast-2";
+          const region =
+            options.region || process.env.AWS_REGION || "ap-southeast-2";
           const adminEmail = options.adminEmail || process.env.ADMIN_EMAIL;
           if (!adminEmail) {
             logger.info(
               "No admin email provided (options.adminEmail or ADMIN_EMAIL). Skipping Cognito admin creation.",
             );
           } else {
-            logger.info(`👤 Creating Cognito admin user for AWSE: ${adminEmail}`);
+            logger.info(
+              `👤 Creating Cognito admin user for AWSE: ${adminEmail}`,
+            );
             const userManager = new UserSetupManager(region, "awse");
             await userManager.createAdminUser({
               stage: options.stage,
@@ -961,7 +968,9 @@ export async function deployAwsExample(
           // don't throw to avoid failing the entire deploy; surface error to logs
         }
       } catch (err) {
-        logger.error(`AWSE post-deploy tasks failed: ${err instanceof Error ? err.message : err}`);
+        logger.error(
+          `AWSE post-deploy tasks failed: ${err instanceof Error ? err.message : err}`,
+        );
       }
     } catch (cfnError: any) {
       logger.error(`CloudFormation deployment failed: ${cfnError.message}`);
