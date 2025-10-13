@@ -5,7 +5,7 @@ import {
 import { ClientType } from "@/types/gqlTypes";
 
 export const useGetUserJobRoles = (clientType: ClientType[]) => {
-  return clientType.includes(ClientType.SuperAdmin)
+  return clientType.includes(ClientType.Admin)
     ? [...superAdminJobRoles, ...eventManagementCompanyJobRoles]
     : eventManagementCompanyJobRoles;
 };

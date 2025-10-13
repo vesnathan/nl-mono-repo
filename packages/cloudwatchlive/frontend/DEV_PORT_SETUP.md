@@ -7,9 +7,11 @@ This workspace uses **port 3001** for the frontend dev server to avoid conflicts
 ## How It Works
 
 ### Package.json Scripts
+
 The `package.json` scripts do NOT hardcode the port. They use Next.js defaults (port 3000) unless overridden.
 
 ### Shell Scripts (Agent Workspace Specific - Not Committed)
+
 - `dev.sh` - Runs dev server on port 3001
 - `restart-dev.sh` - Cleans cache and runs dev server on port 3001
 
@@ -18,6 +20,7 @@ These scripts are in `.gitignore` and will NOT be merged to main repo. They are 
 ## When Merging to Main
 
 The `package.json` changes are **safe to merge** because:
+
 1. ✅ Port is NOT hardcoded in package.json scripts
 2. ✅ Memory optimization (`NODE_OPTIONS='--max-old-space-size=4096'`) benefits everyone
 3. ✅ New `dev:clean` script is a useful addition
@@ -27,6 +30,7 @@ The `package.json` changes are **safe to merge** because:
 ## Running Dev Server
 
 ### In Agent Workspace (Port 3001)
+
 ```bash
 ./dev.sh
 # or
@@ -34,6 +38,7 @@ The `package.json` changes are **safe to merge** because:
 ```
 
 ### In Main Repo (Port 3000 - default)
+
 ```bash
 yarn dev
 # or
@@ -41,6 +46,7 @@ yarn dev:local
 ```
 
 ### Manual Port Override (Any Workspace)
+
 ```bash
 yarn dev -- -p 3002
 ```
@@ -48,6 +54,7 @@ yarn dev -- -p 3002
 ## Memory Optimization
 
 All dev scripts now include `NODE_OPTIONS='--max-old-space-size=4096'` which allocates 4GB of memory to Node.js. This prevents:
+
 - Dev server crashes
 - Compilation timeouts
 - Memory pressure during hot reload
@@ -63,6 +70,7 @@ The `dev.sh` and `restart-dev.sh` scripts are specific to the agent workspace an
 To set up a new agent workspace (e.g., agent-3, agent-4, etc.):
 
 1. **Copy the example files:**
+
    ```bash
    cd packages/cloudwatchlive/frontend
    cp dev.sh.example dev.sh
@@ -70,12 +78,14 @@ To set up a new agent workspace (e.g., agent-3, agent-4, etc.):
    ```
 
 2. **Edit both files and change the PORT variable:**
+
    ```bash
    # In dev.sh and restart-dev.sh, update:
    PORT=3003  # For agent-3, use 3003; for agent-4, use 3004, etc.
    ```
 
 3. **Make them executable:**
+
    ```bash
    chmod +x dev.sh restart-dev.sh
    ```

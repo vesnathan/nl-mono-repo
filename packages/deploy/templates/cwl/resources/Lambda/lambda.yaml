@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Lambda Resources for Application'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Lambda Resources for Application"
 
 Parameters:
   Stage:
@@ -29,6 +29,10 @@ Parameters:
   UserPoolId:
     Type: String
     Description: Cognito User Pool ID for user creation
+  LogRetentionInDays:
+    Type: Number
+    Description: Number of days to retain CloudWatch Logs for Lambda functions
+    Default: 14
 
 Resources:
   PostDeployFunction: # Renamed from PostFrontEndDeployFunction
@@ -36,13 +40,13 @@ Resources:
     Properties:
       FunctionName: !Sub "nlmonorepo-${AppName}-postdeploy-${Stage}" # Simplified and parameterized
       Handler: index.handler
-      Runtime: nodejs18.x
+      Runtime: nodejs20.x
       Timeout: 600
       Role: !GetAtt PostDeployRole.Arn # Renamed role
       Code:
         ZipFile: |
           const { CloudFront } = require("@aws-sdk/client-cloudfront");
-          
+
           exports.handler = async (event) => {
             console.log('Post front-end deployment handler called');
             
@@ -87,7 +91,7 @@ Resources:
     Properties:
       RoleName: !Sub "nlmonorepo-${AppName}-postdeploy-role-${Stage}" # Simplified and parameterized
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -98,7 +102,7 @@ Resources:
       Policies:
         - PolicyName: CloudFrontInvalidation
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -111,7 +115,7 @@ Resources:
     Properties:
       FunctionName: !Sub "nlmonorepo-${AppName}-send-welcome-email-${Stage}"
       Handler: index.handler
-      Runtime: nodejs18.x
+      Runtime: nodejs20.x
       Timeout: 30
       Role: !GetAtt SendWelcomeEmailRole.Arn
       Code:
@@ -128,7 +132,7 @@ Resources:
     Properties:
       RoleName: !Sub "nlmonorepo-${AppName}-send-welcome-email-role-${Stage}"
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -139,7 +143,7 @@ Resources:
       Policies:
         - PolicyName: SESEmailSending
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -152,7 +156,7 @@ Resources:
     Properties:
       FunctionName: !Sub "nlmonorepo-${AppName}-create-cognito-user-${Stage}"
       Handler: index.handler
-      Runtime: nodejs18.x
+      Runtime: nodejs20.x
       Timeout: 30
       Role: !GetAtt CreateCognitoUserRole.Arn
       Code:
@@ -168,7 +172,7 @@ Resources:
     Properties:
       RoleName: !Sub "nlmonorepo-${AppName}-create-cognito-user-role-${Stage}"
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -179,7 +183,7 @@ Resources:
       Policies:
         - PolicyName: CognitoUserManagement
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -188,11 +192,37 @@ Resources:
                   - cognito-idp:AdminSetUserPassword
                 Resource: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPoolId}"
 
+  # CloudWatch Log Groups for Lambda functions (must be defined after the Lambda functions)
+  # DeletionPolicy: Delete ensures LogGroups are removed when stack is deleted
+  PostDeployFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${PostDeployFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+  SendWelcomeEmailFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${SendWelcomeEmailFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+  CreateCognitoUserFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${CreateCognitoUserFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
+
 Outputs:
   PostDeployFunctionArn: # Renamed from PostFrontEndDeployFunctionArn
     Value: !GetAtt PostDeployFunction.Arn
     Description: ARN of the post-deploy Lambda function
-  
+
   PostDeployFunctionName: # Renamed from PostFrontEndDeployFunctionName
     Value: !Ref PostDeployFunction
     Description: Name of the post-deploy Lambda function
@@ -202,7 +232,7 @@ Outputs:
     Description: ARN of the send welcome email Lambda function
     Export:
       Name: !Sub "${AppName}-SendWelcomeEmailFunctionArn-${Stage}"
-  
+
   SendWelcomeEmailFunctionName:
     Value: !Ref SendWelcomeEmailFunction
     Description: Name of the send welcome email Lambda function
@@ -212,7 +242,7 @@ Outputs:
     Description: ARN of the create Cognito user Lambda function
     Export:
       Name: !Sub "${AppName}-CreateCognitoUserFunctionArn-${Stage}"
-  
+
   CreateCognitoUserFunctionName:
     Value: !Ref CreateCognitoUserFunction
     Description: Name of the create Cognito user Lambda function

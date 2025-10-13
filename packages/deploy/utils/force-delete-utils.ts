@@ -20,6 +20,7 @@ import {
 import { IAMClient } from "@aws-sdk/client-iam";
 import { logger } from "./logger";
 import { StackType, getStackName } from "../types";
+import { getProjectBuckets } from "../project-config";
 
 export class ForceDeleteManager {
   private cfnClient: CloudFormationClient;
@@ -32,6 +33,10 @@ export class ForceDeleteManager {
     this.cfnClient = new CloudFormationClient({ region: this.region });
     this.s3Client = new S3Client({ region: this.region });
     this.iamClient = new IAMClient({ region: this.region });
+  }
+
+  private async sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   public async emptyStackS3Buckets(
@@ -52,6 +57,9 @@ export class ForceDeleteManager {
           "WAFLogsBucketName",
           "FrontendBucketName",
           "TemplatesBucketName",
+          // AWS Example specific outputs
+          "AWSEBucketName",
+          "WebsiteBucket",
         ];
 
         stack.Outputs.forEach((output: Output) => {
@@ -78,32 +86,13 @@ export class ForceDeleteManager {
     logger.info(
       `Checking for S3 buckets by naming convention for type ${stackType} and stage ${stage}...`,
     );
-    const conventionalBuckets: string[] = [];
 
-    if (stackType === StackType.WAF) {
-      conventionalBuckets.push(`nlmonorepo-waf-logs-${stage}`);
-      conventionalBuckets.push(`nlmonorepo-waf-templates-${stage}`); // Added for WAF templates bucket
-      // Template bucket with region suffix
-      conventionalBuckets.push(`nlmonorepo-${stage}-cfn-templates-us-east-1`);
-    } else if (stackType === StackType.CWL) {
-      conventionalBuckets.push(`nlmonorepo-cwl-frontend-${stage}`);
-      conventionalBuckets.push(`nlmonorepo-cwl-templates-${stage}`);
-      // Template bucket with region suffix
-      conventionalBuckets.push(
-        `nlmonorepo-${stage}-cfn-templates-${this.region}`,
-      );
-    } else if (stackType === StackType.Shared) {
-      conventionalBuckets.push(`nlmonorepo-shared-templates-${stage}`);
-      // Old naming patterns
-      conventionalBuckets.push(`nlmonorepo-shared-${stage}-templates`);
-      // Template bucket with region suffix
-      conventionalBuckets.push(
-        `nlmonorepo-${stage}-cfn-templates-${this.region}`,
-      );
-    }
-
-    // Removed redundant conditional blocks based on stackIdentifier, as it's typically nlmonorepo-${stackType}
-    // e.g., if (stackIdentifier.toLowerCase().includes('waf')) { conventionalBuckets.push(`${stackIdentifier}-logs-${stage}`); }
+    // Use dynamic project configuration to get all buckets for this stack type
+    const conventionalBuckets = getProjectBuckets(
+      stackType,
+      stage,
+      this.region,
+    );
 
     conventionalBuckets.forEach((bucketName) => {
       if (bucketName && !bucketsToEmpty.includes(bucketName)) {
@@ -229,26 +218,81 @@ export class ForceDeleteManager {
       logger.warning("Attempted to delete a bucket with no name. Skipping.");
       return;
     }
-    try {
-      // Check if bucket exists before attempting to delete
-      await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
-      logger.info(`Bucket ${bucketName} exists. Attempting to delete...`);
-      await this.s3Client.send(new DeleteBucketCommand({ Bucket: bucketName }));
-      logger.info(`Successfully deleted S3 bucket ${bucketName}.`);
-    } catch (error: any) {
-      if (
-        error.name === "NoSuchBucket" ||
-        error.name === "NotFound" ||
-        (error.$metadata && error.$metadata.httpStatusCode === 404)
-      ) {
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        // Check if bucket exists before attempting to delete
+        await this.s3Client.send(new HeadBucketCommand({ Bucket: bucketName }));
         logger.info(
-          `S3 bucket ${bucketName} does not exist, skipping deletion.`,
+          `Bucket ${bucketName} exists. Attempting to delete (attempt ${attempt}/${maxAttempts})...`,
         );
-      } else {
-        logger.error(
-          `Failed to delete S3 bucket ${bucketName}: ${error.message}. This might be due to permissions or other issues.`,
+        await this.s3Client.send(
+          new DeleteBucketCommand({ Bucket: bucketName }),
         );
-        // Do not re-throw, as this is a best-effort cleanup
+        logger.info(`Successfully deleted S3 bucket ${bucketName}.`);
+        return;
+      } catch (error: any) {
+        // If bucket not found, consider it deleted
+        if (
+          error.name === "NoSuchBucket" ||
+          error.name === "NotFound" ||
+          (error.$metadata && error.$metadata.httpStatusCode === 404)
+        ) {
+          logger.info(
+            `S3 bucket ${bucketName} does not exist, skipping deletion.`,
+          );
+          return;
+        }
+
+        const msg = error.message || String(error);
+        logger.warning(
+          `Attempt ${attempt} failed to delete bucket ${bucketName}: ${msg}`,
+        );
+
+        // If this was the last attempt, log an error and return; otherwise try to empty again and retry
+        if (attempt === maxAttempts) {
+          logger.error(
+            `Failed to delete S3 bucket ${bucketName} after ${maxAttempts} attempts: ${msg}`,
+          );
+          return; // best-effort
+        }
+
+        // Try to empty the bucket again (both versioned and non-versioned) then retry after a short delay
+        try {
+          logger.info(
+            `Re-attempting to empty bucket ${bucketName} before retrying deletion (attempt ${attempt})...`,
+          );
+          await this.emptyS3Bucket(bucketName);
+          // Non-versioned fallback: list objects and delete them
+          try {
+            const objs = await this.s3Client.send(
+              new ListObjectsV2Command({ Bucket: bucketName }),
+            );
+            if (objs.Contents && objs.Contents.length > 0) {
+              const ids = objs.Contents.map((o) => ({ Key: o.Key! }));
+              await this.s3Client.send(
+                new DeleteObjectsCommand({
+                  Bucket: bucketName,
+                  Delete: { Objects: ids },
+                }),
+              );
+              logger.info(
+                `Deleted ${ids.length} non-versioned objects from ${bucketName} as fallback.`,
+              );
+            }
+          } catch (nonverr: any) {
+            logger.debug(
+              `Non-versioned fallback delete failed for ${bucketName}: ${nonverr.message || String(nonverr)}`,
+            );
+          }
+        } catch (emptyErr: any) {
+          logger.warning(
+            `Failed to empty bucket ${bucketName} during delete retry: ${emptyErr.message || String(emptyErr)}`,
+          );
+        }
+
+        // Backoff before retrying
+        await this.sleep(2000 * attempt);
       }
     }
   }
@@ -263,41 +307,12 @@ export class ForceDeleteManager {
       `Attempting to delete conventionally named S3 buckets for identifier ${baseIdentifier}, type ${stackType}, stage ${stage}...`,
     );
 
-    const conventionalBucketsToDelete: string[] = [];
-    // Logic to identify conventional buckets, similar to emptyStackS3Buckets
-    if (stackType === StackType.WAF) {
-      conventionalBucketsToDelete.push(`nlmonorepo-waf-logs-${stage}`);
-      conventionalBucketsToDelete.push(`nlmonorepo-waf-templates-${stage}`);
-      // Template bucket with region suffix
-      conventionalBucketsToDelete.push(
-        `nlmonorepo-${stage}-cfn-templates-us-east-1`,
-      );
-    } else if (stackType === StackType.CWL) {
-      // For 'cwl', we might have frontend and templates buckets
-      // Example: nlmonorepo-cwl-frontend-dev, nlmonorepo-cwl-templates-dev
-      // The baseIdentifier 'nlmonorepo-cwl' is consistent with this.
-      conventionalBucketsToDelete.push(`${baseIdentifier}-frontend-${stage}`); // e.g., nlmonorepo-cwl-frontend-dev
-      conventionalBucketsToDelete.push(`${baseIdentifier}-templates-${stage}`); // e.g., nlmonorepo-cwl-templates-dev
-      // Template bucket with region suffix
-      conventionalBucketsToDelete.push(
-        `nlmonorepo-${stage}-cfn-templates-ap-southeast-2`,
-      );
-    } else if (stackType === StackType.Shared) {
-      // Example: nlmonorepo-shared-templates-dev
-      conventionalBucketsToDelete.push(`${baseIdentifier}-templates-${stage}`); // e.g., nlmonorepo-shared-templates-dev
-      // Old naming patterns
-      conventionalBucketsToDelete.push(`nlmonorepo-shared-${stage}-templates`);
-      // Template bucket with region suffix
-      conventionalBucketsToDelete.push(
-        `nlmonorepo-${stage}-cfn-templates-ap-southeast-2`,
-      );
-    }
-    // Add other conventional bucket patterns here if necessary
-
-    // Filter out any empty or duplicate names, though the construction logic should prevent this.
-    const uniqueBucketsToDelete = [
-      ...new Set(conventionalBucketsToDelete.filter((b) => b)),
-    ];
+    // Use dynamic project configuration to get all buckets for this stack type
+    const uniqueBucketsToDelete = getProjectBuckets(
+      stackType,
+      stage,
+      this.region,
+    );
 
     if (uniqueBucketsToDelete.length === 0) {
       logger.info(

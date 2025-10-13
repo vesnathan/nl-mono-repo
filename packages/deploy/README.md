@@ -92,21 +92,21 @@ yarn remove:waf --stage dev
 
 ## 🔧 Command Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--stage <stage>` | Deployment stage (dev, staging, prod) | `dev` |
+| Option                  | Description                                | Default                      |
+| ----------------------- | ------------------------------------------ | ---------------------------- |
+| `--stage <stage>`       | Deployment stage (dev, staging, prod)      | `dev`                        |
 | `--admin-email <email>` | Admin user email for Cognito user creation | Required for full deployment |
-| `--skip-user-creation` | Skip admin user creation during deployment | `false` |
-| `--no-auto-delete` | Disable auto-deletion of failed stacks | `false` |
-| `--aws-region <region>` | AWS Region for application stacks | `ap-southeast-2` |
+| `--skip-user-creation`  | Skip admin user creation during deployment | `false`                      |
+| `--no-auto-delete`      | Disable auto-deletion of failed stacks     | `false`                      |
+| `--aws-region <region>` | AWS Region for application stacks          | `ap-southeast-2`             |
 
 ## 🌍 Environment Variables
 
-| Variable | Description | CLI Alternative |
-|----------|-------------|-----------------|
-| `ADMIN_EMAIL` | Admin user email | `--admin-email` |
-| `AWS_REGION` | AWS Region | `--aws-region` |
-| `AWS_ACCESS_KEY_ID` | AWS Access Key ID | AWS CLI configuration |
+| Variable                | Description           | CLI Alternative       |
+| ----------------------- | --------------------- | --------------------- |
+| `ADMIN_EMAIL`           | Admin user email      | `--admin-email`       |
+| `AWS_REGION`            | AWS Region            | `--aws-region`        |
+| `AWS_ACCESS_KEY_ID`     | AWS Access Key ID     | AWS CLI configuration |
 | `AWS_SECRET_ACCESS_KEY` | AWS Secret Access Key | AWS CLI configuration |
 
 ## 👤 Admin User Management
@@ -114,6 +114,7 @@ yarn remove:waf --stage dev
 During deployment, the system automatically creates an admin user with the following setup:
 
 ### User Creation Process
+
 1. **Cognito User Groups**: Creates SuperAdmin, Admin, and User groups
 2. **User Account**: Creates user in Cognito User Pool with provided email
 3. **Password Setup**: Sets permanent password `Temp1234!` (must be changed on first login)
@@ -122,6 +123,7 @@ During deployment, the system automatically creates an admin user with the follo
 6. **Validation**: Validates successful user creation
 
 ### Default Admin User Details
+
 - **Email**: Specified via `--admin-email` or `ADMIN_EMAIL` environment variable
 - **Password**: `Temp1234!` (temporary - must be changed on first login)
 - **Groups**: SuperAdmin (full access)
@@ -130,6 +132,7 @@ During deployment, the system automatically creates an admin user with the follo
 ## 🏗️ Architecture & Dependencies
 
 ### Stack Deployment Order
+
 ```mermaid
 graph TB
     A[WAF Stack<br/>us-east-1] --> B[Shared Assets Stack<br/>ap-southeast-2]
@@ -139,6 +142,7 @@ graph TB
 ```
 
 ### Stack Dependencies
+
 - **WAF Stack**: Independent, deployed first (us-east-1 region)
 - **Shared Assets**: Depends on WAF, provides shared infrastructure (ap-southeast-2)
 - **CloudWatch Live**: Depends on Shared Assets for VPC, KMS, etc. (ap-southeast-2)
@@ -155,7 +159,7 @@ The deployment tool automatically manages dependencies:
 # Update shared stack - will prompt to update dependent CWL stack
 yarn update:shared --stage dev
 
-# Update CWL stack only - no dependents to update  
+# Update CWL stack only - no dependents to update
 yarn update:cwl --stage dev
 
 # Update WAF stack only - no dependents to update
@@ -192,6 +196,7 @@ yarn remove:waf --stage dev          # Remove WAF stack only
 ```
 
 **Removal Features:**
+
 - ✅ Single confirmation prompt before destructive actions
 - ✅ Real-time progress updates during removal
 - ⚠️ Automatic dependency order (CWL → Shared → WAF)
@@ -203,21 +208,25 @@ yarn remove:waf --stage dev          # Remove WAF stack only
 ### Common Issues
 
 #### User Creation Failures
+
 - **AWS Permissions**: Verify AWS credentials have Cognito and DynamoDB permissions
 - **Stack Outputs**: Ensure CloudFormation stacks have completed successfully and all outputs are available
 - **Region Configuration**: Check that the correct region is configured for application stacks
 
 #### Failed Stack Recovery
+
 - **Automatic Cleanup**: Failed stacks are automatically deleted and redeployed by default
 - **Manual Override**: Use `--no-auto-delete` flag to disable automatic cleanup for debugging
 - **Stack Dependencies**: Ensure dependent stacks are deployed in the correct order
 
 #### Multi-Region Issues
+
 - **WAF Region**: WAF stack must be in `us-east-1` for CloudFront integration
 - **Application Region**: Application stacks are deployed in `ap-southeast-2` by default
 - **Cross-Region References**: The tool automatically handles cross-region CloudFormation exports/imports
 
 #### Frontend Deployment Issues
+
 - **Build Failures**: Check that all required environment variables are set
 - **S3 Upload Errors**: Verify S3 bucket exists and has correct permissions
 - **CloudFront Issues**: Cache invalidation may take 5-15 minutes to propagate
@@ -232,6 +241,7 @@ yarn remove:waf --stage dev          # Remove WAF stack only
 ## 📋 Examples
 
 ### Complete Development Setup
+
 ```bash
 # Deploy everything for development
 cd packages/deploy
@@ -239,6 +249,7 @@ yarn deploy all --stage dev --admin-email dev-admin@company.com
 ```
 
 ### Update Workflow (Most Common)
+
 ```bash
 # Update shared infrastructure and dependent CWL stack
 cd packages/deploy
@@ -246,6 +257,7 @@ yarn update:shared --stage dev
 ```
 
 ### Frontend Update Only
+
 ```bash
 # Quick frontend update without backend changes
 cd packages/deploy
@@ -253,6 +265,7 @@ yarn deploy:frontend --stage dev
 ```
 
 ### Production Deployment
+
 ```bash
 # Deploy to production environment
 cd packages/deploy
@@ -260,6 +273,7 @@ yarn deploy all --stage prod --admin-email prod-admin@company.com
 ```
 
 ### Complete Environment Removal
+
 ```bash
 # Remove all stacks for a stage
 cd packages/deploy

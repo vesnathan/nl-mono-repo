@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "baseUrl": ".",
+    "paths": {
+      "gqlTypes": ["../frontend/src/types/gqlTypes.ts"]
+    }
+  },
+  "include": ["constants", "resolvers"],
+  "exclude": ["node_modules"]
+}

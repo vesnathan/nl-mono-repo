@@ -342,17 +342,15 @@ class ResolverCompiler {
     let jsContent = await fsPromises.readFile(compiledJsPath, "utf-8");
     jsContent = this.addHeaderToJs(jsContent, sourceFilePath);
 
-    // Save locally (always)
+    // Save locally for debugging, but do NOT persist into tracked package folders.
+    // Use a repo-local cache directory that is git-ignored: .cache/deploy/<app>/lib
     if (this.sharedFileS3Key) {
       const appName = this.getAppName();
-      // The file is at packages/deploy/utils/resolver-compiler.ts, so root is 4 levels up
       const monorepoRoot = path.join(__dirname, "..", "..", "..", "..");
-      // Save shared file to a 'lib' dir to distinguish from resolvers
       const localSavePathBaseForApp = path.join(
         monorepoRoot,
-        "packages",
+        ".cache",
         "deploy",
-        "packages",
         appName,
         "lib",
       );
@@ -388,11 +386,12 @@ class ResolverCompiler {
 
     const appName = this.getAppName();
     const monorepoRoot = path.join(__dirname, "..", "..", "..", "..");
+    // Save compiled resolver files into a repo-local cache directory (not tracked):
+    // .cache/deploy/<app>/resolvers
     const localSavePathBaseForApp = path.join(
       monorepoRoot,
-      "packages",
+      ".cache",
       "deploy",
-      "packages",
       appName,
       "resolvers",
     );
@@ -400,7 +399,6 @@ class ResolverCompiler {
       `Compiled resolvers will be saved to: ${localSavePathBaseForApp}`,
     );
 
-    const uploadedResolvers: string[] = [];
     const failedResolvers: { file: string; error: string }[] = [];
     const compiledFilesRelative: string[] = [];
 
@@ -434,29 +432,15 @@ class ResolverCompiler {
           resolverAbsolutePath,
         );
 
-        const s3Key = path.posix.join(
-          this.s3KeyPrefix,
-          this.stage,
-          resolverFileRelativePath.replace(".ts", ".js"),
-        );
-
-        // Always save the compiled file locally to the app's deploy package
+        // Determine local save path and persist compiled file for hashing
         const localSavePath = path.join(
           localSavePathBaseForApp,
           resolverFileRelativePath.replace(".ts", ".js"),
         );
         await this.saveCompiledFileLocally(localSavePath, compiledJsContent);
-        // Now, upload the same content to S3, ensuring consistency
-        await this.uploadToS3(
-          s3Key,
-          compiledJsContent,
-          "application/javascript",
-        );
-        logger.success(
-          `✓ Uploaded ${resolverFileRelativePath} to S3: s3://${this.s3BucketName}/${s3Key}`,
-        ); // Essential log
-        uploadedResolvers.push(s3Key);
-        // Record relative JS path for hash computation and secondary upload
+        // Do NOT upload to the non-hashed S3 path here. We'll compute a build hash
+        // and upload the canonical files under the hashed prefix so CloudFormation
+        // references stable, versioned assets only.
         compiledFilesRelative.push(
           resolverFileRelativePath.replace(".ts", ".js"),
         );
@@ -524,9 +508,9 @@ class ResolverCompiler {
     }
 
     // Report summary for primary uploads
-    logger.success(`\n📦 Resolver Upload Summary:`);
+    logger.success(`\n📦 Resolver Compilation Summary:`);
     logger.success(
-      `   ✓ Successfully uploaded: ${uploadedResolvers.length} resolvers`,
+      `   ✓ Successfully compiled: ${compiledFilesRelative.length} resolvers (will be uploaded under hashed prefix)`,
     );
     if (failedResolvers.length > 0) {
       logger.error(
@@ -798,24 +782,44 @@ class ResolverCompiler {
         `import { $1 } from './gqlTypes.js';\n`,
       );
 
-      // Read gqlTypes.ts directly from its actual location in the types directory
-      // Use the frontend-generated gqlTypes.ts (corrected path with packages/)
-      const gqlTypesSourcePath = path.resolve(
-        __dirname,
-        "../../../packages/cloudwatchlive/frontend/src/types/gqlTypes.ts",
-      );
+      // Read gqlTypes.ts from the app's frontend or backend generated types
+      // Prefer frontend generated types, then backend, then fall back to the old cloudwatchlive path
+      const appNameForTypes = this.getAppName();
+      const candidatePaths = [
+        path.resolve(
+          __dirname,
+          `../../../packages/${appNameForTypes}/frontend/src/types/gqlTypes.ts`,
+        ),
+        path.resolve(
+          __dirname,
+          `../../../packages/${appNameForTypes}/backend/src/types/gqlTypes.ts`,
+        ),
+      ];
+
+      let gqlTypesSourcePath: string | undefined = undefined;
+      for (const p of candidatePaths) {
+        if (fs.existsSync(p)) {
+          gqlTypesSourcePath = p;
+          break;
+        }
+      }
+
       const targetGqlTypesPath = path.join(this.buildDir, "gqlTypes.ts");
 
-      if (fs.existsSync(gqlTypesSourcePath)) {
+      if (gqlTypesSourcePath) {
         await fsPromises.copyFile(gqlTypesSourcePath, targetGqlTypesPath);
         logger.debug(
-          `Copied gqlTypes.ts to build directory for ${resolverFileName}.`,
+          `Copied gqlTypes.ts to build directory for ${resolverFileName} from ${gqlTypesSourcePath}.`,
         );
       } else {
+        // Fail hard when app-specific gqlTypes.ts is missing to avoid silently
+        // falling back to another app's types (which can produce invalid bundles).
         logger.error(
-          `gqlTypes.ts not found at ${gqlTypesSourcePath} for ${resolverFileName}.`,
+          `gqlTypes.ts not found for app '${appNameForTypes}'. Checked: ${candidatePaths.join(", ")}`,
         );
-        throw new Error(`gqlTypes.ts not found: ${gqlTypesSourcePath}`);
+        throw new Error(
+          `gqlTypes.ts not found for app '${appNameForTypes}'. Please generate GraphQL types for this app before deploying.`,
+        );
       }
     } else {
       logger.debug(
@@ -886,6 +890,40 @@ class ResolverCompiler {
 
     // Dependencies are installed once in setupBuildDirectory.
 
+    // Plugin to remove @aws-appsync/utils import since AppSync provides util as a global
+    const buildDir = this.buildDir; // Capture in closure for plugin
+    const removeAppSyncImportPlugin: esbuild.Plugin = {
+      name: "remove-appsync-import",
+      setup(build) {
+        build.onEnd(async () => {
+          const outfile = path.join(
+            buildDir,
+            "dist",
+            resolverFileName.replace(".ts", ".js"),
+          );
+          try {
+            let content = await fsPromises.readFile(outfile, "utf-8");
+            // Remove import statement for @aws-appsync/utils
+            content = content.replace(
+              /import\s*{\s*util\s*}\s*from\s*["']@aws-appsync\/utils["'];?\s*/g,
+              "",
+            );
+            // Remove any other imports from @aws-appsync/utils
+            content = content.replace(
+              /import\s*.*\s*from\s*["']@aws-appsync\/utils["'];?\s*/g,
+              "",
+            );
+            await fsPromises.writeFile(outfile, content, "utf-8");
+            logger.debug(`Removed @aws-appsync/utils import from ${outfile}`);
+          } catch (error: any) {
+            logger.warning(
+              `Failed to remove @aws-appsync/utils import: ${error.message}`,
+            );
+          }
+        });
+      },
+    };
+
     const esbuildConfig: esbuild.BuildOptions = {
       // Added type annotation
       entryPoints: [tempResolverPath],
@@ -902,6 +940,7 @@ class ResolverCompiler {
       minify: false,
       tsconfig: path.join(this.buildDir, "tsconfig.json"),
       external: ["@aws-appsync/utils"],
+      plugins: [removeAppSyncImportPlugin],
       logLevel: this.debugMode ? "info" : "silent", // Conditional logLevel
     };
 
@@ -1039,7 +1078,7 @@ import type { AppSyncIdentityCognito } from "@aws-appsync/utils";
 import { ClientType } from "gqlTypes"; 
 
 export const isSuperAdminUserGroup = (identity: AppSyncIdentityCognito): boolean => {
-  return (identity.groups || []).includes(ClientType.SuperAdmin);
+  return (identity.groups || []).includes(ClientType.Admin);
 };
 `;
     await fsPromises.writeFile(

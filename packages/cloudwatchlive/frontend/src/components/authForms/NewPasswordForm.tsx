@@ -2,7 +2,7 @@ import React from "react";
 import { Divider } from "@nextui-org/react";
 import { LoginController } from "@/hooks/useLoginController";
 import { useEnterKeySubmit } from "@/hooks/useEnterKeySubmit";
-import { cwlAuthValidatePassword } from "shared/functions/cwlAuthValidatePassword";
+import { authValidatePassword } from "shared/functions/authValidatePassword";
 import { CWLButton } from "../common/CWLButton";
 import { CWLTextField } from "../common/CWLTextField";
 import PasswordHelper from "../common/PasswordHelper";
@@ -23,7 +23,7 @@ export const NewPasswordForm: React.FC<Props> = ({
   const [confirmNewPassword, setConfirmNewPassword] = React.useState("");
 
   const newPasswordValidateResult = React.useMemo(() => {
-    return cwlAuthValidatePassword(newPassword);
+    return authValidatePassword(newPassword);
   }, [newPassword]);
   const newPasswordValid = React.useMemo(() => {
     if (newPassword !== confirmNewPassword) {

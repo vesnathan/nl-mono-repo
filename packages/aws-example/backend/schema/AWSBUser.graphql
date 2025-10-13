@@ -1,0 +1,36 @@
+type S3Object {
+  Bucket: String!
+  Key: String!
+}
+
+enum ClientType {
+  SiteAdmin
+  AuthenticatedUser
+  UnauthenticatedUser
+}
+
+type AWSEUser @aws_cognito_user_pools {
+  userId: String!
+  privacyPolicy: Boolean!
+  termsAndConditions: Boolean!
+  userAddedById: String!
+  userCreated: String!
+  userEmail: String!
+  userTitle: String!
+  userFirstName: String!
+  userLastName: String!
+  userPhone: String!
+  clientType: [ClientType!]!
+  userProfilePicture: S3Object
+
+}
+
+input AWSEUserInput {
+  userEmail: String!
+  userTitle: String!
+  userFirstName: String!
+  userLastName: String!
+  userPhone: String!
+  sendWelcomeEmail: Boolean
+
+}

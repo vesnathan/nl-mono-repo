@@ -3,6 +3,10 @@ import path from "path";
 import { deployShared } from "./packages/shared/shared";
 import { deployWaf } from "./packages/waf/waf";
 import { deployCwl } from "./packages/cwl/cwl";
+import { deployAwsExample } from "./packages/aws-example/aws-example";
+import { OutputsManager } from "./outputs-manager";
+import { getDependencyChain } from "./dependency-validator";
+import { StackType } from "./types";
 import { logger } from "./utils/logger";
 import inquirer from "inquirer";
 
@@ -109,22 +113,57 @@ async function deployAll() {
       createAdminUser, // Added option
     };
 
-    // Step 1: Deploy shared resources first
-    logger.info("Step 1: Deploying shared resources...");
-    // Pass stackUpdateStrategy to deployShared if it needs to behave differently
-    await deployShared({ ...deploymentOptions });
-    logger.success("Shared resources deployed successfully");
+    const outputsManager = new OutputsManager();
 
-    // Step 2: Deploy WAF (in us-east-1)
-    logger.info("Step 2: Deploying WAF resources...");
-    // Pass stackUpdateStrategy to deployWaf if it needs to behave differently
-    await deployWaf({ ...deploymentOptions });
-    logger.success("WAF resources deployed successfully");
+    // Deploy the dependency chain for CWL (WAF -> Shared -> CWL)
+    const cwlChain = getDependencyChain(StackType.CWL);
+    logger.info(`CWL dependency chain: ${cwlChain.join(" → ")}`);
+    for (const stack of cwlChain) {
+      const exists = await outputsManager.validateStackExists(
+        stack,
+        deploymentOptions.stage,
+      );
+      if (exists) {
+        logger.info(`Skipping ${stack} — already deployed`);
+        continue;
+      }
 
-    // Step 3: Deploy CloudWatch Live (CWL)
-    logger.info("Step 3: Deploying CloudWatch Live resources...");
-    await deployCwl(deploymentOptions); // Pass all options to deployCwl
-    logger.success("CloudWatch Live resources deployed successfully");
+      logger.info(`Deploying ${stack}...`);
+      if (stack === StackType.WAF) {
+        await deployWaf({ ...deploymentOptions });
+      } else if (stack === StackType.Shared) {
+        await deployShared({ ...deploymentOptions });
+      } else if (stack === StackType.CWL) {
+        await deployCwl(deploymentOptions);
+      }
+      logger.success(`${stack} deployed`);
+    }
+
+    // Deploy aws-example and its dependencies (e.g., Shared)
+    const exampleChain = getDependencyChain(StackType.AwsExample);
+    logger.info(`aws-example dependency chain: ${exampleChain.join(" → ")}`);
+    for (const stack of exampleChain) {
+      const exists = await outputsManager.validateStackExists(
+        stack,
+        deploymentOptions.stage,
+      );
+      if (exists) {
+        logger.info(`Skipping ${stack} — already deployed`);
+        continue;
+      }
+
+      logger.info(`Deploying ${stack}...`);
+      if (stack === StackType.WAF) {
+        await deployWaf({ ...deploymentOptions });
+      } else if (stack === StackType.Shared) {
+        await deployShared({ ...deploymentOptions });
+      } else if (stack === StackType.CWL) {
+        await deployCwl(deploymentOptions);
+      } else if (stack === StackType.AwsExample) {
+        await deployAwsExample(deploymentOptions);
+      }
+      logger.success(`${stack} deployed`);
+    }
 
     logger.success("All deployments completed successfully");
   } catch (error: unknown) {

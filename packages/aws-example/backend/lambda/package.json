@@ -1,0 +1,16 @@
+{
+  "name": "awse-lambda-functions",
+  "version": "1.0.0",
+  "description": "Lambda functions for CloudWatch Live backend",
+  "main": "sendWelcomeEmail.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

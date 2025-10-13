@@ -22,9 +22,14 @@ import {
 } from "./types";
 import { deployShared } from "./packages/shared/shared";
 import { deployCwl } from "./packages/cwl/cwl";
+import { deployAwsExample } from "./packages/aws-example/aws-example";
 import { ForceDeleteManager } from "./utils/force-delete-utils";
 import { OutputsManager } from "./outputs-manager";
-import { DependencyValidator } from "./dependency-validator";
+import {
+  DependencyValidator,
+  getDependencyChain,
+} from "./dependency-validator";
+import { getProjectConfig } from "./project-config";
 import {
   CloudFormationClient,
   CreateStackCommand,
@@ -42,6 +47,7 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { REGEX } from "../shared/constants/RegEx"; // Corrected import
 import { execSync } from "child_process"; // Import execSync
 import path from "path"; // Import path
+import { readdirSync } from "fs";
 
 // Load environment variables from mono-repo root
 config({ path: path.resolve(__dirname, "../../.env") });
@@ -81,14 +87,21 @@ class DeploymentManager {
       effectiveRegion === this.region
         ? this.forceDeleteManager
         : new ForceDeleteManager(effectiveRegion);
-    const stackName = getStackName(stackType, stage);
+    const fullStackName = getStackName(stackType, stage);
+    const stackIdentifier = `nlmonorepo-${stackType.toLowerCase()}`;
 
     logger.info(
-      `Starting force delete for stack ${stackName} in region ${effectiveRegion}`,
+      `Starting force delete for stack ${fullStackName} in region ${effectiveRegion}`,
     );
-    // The new forceDeleteStack in force-delete-utils is expecting the stackName, stackType, and stage
-    await forceDeleteManager.forceDeleteStack(stackName, stackType, stage);
-    logger.success(`Force delete process completed for stack ${stackName}.`);
+    // forceDeleteStack expects a base identifier (e.g., nlmonorepo-cwl) so pass stackIdentifier
+    await forceDeleteManager.forceDeleteStack(
+      stackIdentifier,
+      stackType,
+      stage,
+    );
+    logger.success(
+      `Force delete process completed for stack ${fullStackName}.`,
+    );
   }
 
   async removeStack(
@@ -133,6 +146,22 @@ class DeploymentManager {
         logger.info(`Removing stack outputs from deployment-outputs.json...`);
         await this.outputsManager.removeStackOutputs(stackType, stage);
         logger.info(`✓ Stack outputs removed from deployment-outputs.json`);
+        // As a best-effort final cleanup step, attempt to delete any conventionally
+        // named buckets that may remain (template buckets, frontend buckets, etc.).
+        try {
+          logger.info(
+            `Attempting final conventional bucket deletion for ${stackName}...`,
+          );
+          await forceDeleteManager.deleteConventionalBuckets(
+            stackIdentifier,
+            stackType,
+            stage,
+          );
+        } catch (bucketErr: any) {
+          logger.warning(
+            `Final conventional bucket deletion for ${stackName} failed (continuing): ${bucketErr.message || bucketErr}`,
+          );
+        }
       } else {
         logger.warning(
           `Stack ${stackName} does not exist in ${region}. Nothing to remove.`,
@@ -142,11 +171,19 @@ class DeploymentManager {
         logger.info(`Checking for orphaned S3 buckets...`);
         const forceDeleteManager = new ForceDeleteManager(region, stage);
         const stackIdentifier = `nlmonorepo-${stackType.toLowerCase()}`;
-        await forceDeleteManager.deleteConventionalBuckets(
-          stackIdentifier,
-          stackType,
-          stage,
-        );
+        // If the stack doesn't exist, still attempt to delete conventional buckets
+        // (this handles cases where the CFN stack was removed but buckets remained).
+        try {
+          await forceDeleteManager.deleteConventionalBuckets(
+            stackIdentifier,
+            stackType,
+            stage,
+          );
+        } catch (bucketErr: any) {
+          logger.warning(
+            `Conventional bucket deletion for orphaned stack ${stackName} failed: ${bucketErr.message || bucketErr}`,
+          );
+        }
       }
     } catch (error: unknown) {
       logger.error(
@@ -192,17 +229,23 @@ class DeploymentManager {
     // Ensure debug mode is properly set
     setLoggerDebugMode(options.debugMode || false);
 
-    logger.debug("Deploying all stacks in order: WAF -> Shared -> CWL");
+    // Get deployment order dynamically based on dependencies
+    const deploymentOrder = this.dependencyValidator.getDeploymentOrder();
 
-    await this.deployStack(StackType.WAF, options);
-    this.outputsManager = new OutputsManager(); // Reload outputs to get WAF outputs
+    logger.info(
+      `Deploying all stacks in dependency order: ${deploymentOrder.join(" -> ")}`,
+    );
 
-    await this.deployStack(StackType.Shared, options);
-    this.outputsManager = new OutputsManager(); // Reload outputs to get Shared outputs
+    for (const stackType of deploymentOrder) {
+      logger.info(`\n🚀 Deploying ${stackType} stack...`);
+      await this.deployStack(stackType, options);
 
-    await this.deployStack(StackType.CWL, options);
+      // Reload outputs after each stack deployment to make them available to next stack
+      this.outputsManager = new OutputsManager();
+      logger.success(`✓ ${stackType} stack deployed successfully\n`);
+    }
 
-    logger.success("All stacks deployed successfully.");
+    logger.success("🎉 All stacks deployed successfully!");
   }
 
   public getRegion(): string {
@@ -287,10 +330,37 @@ class DeploymentManager {
     };
 
     try {
+      // Check if dependencies are satisfied
       const dependenciesValid =
         await this.dependencyValidator.validateDependencies(stackType, stage);
+
       if (!dependenciesValid) {
-        throw new Error(`Dependency validation failed for ${stackType} stack`);
+        // Get the full dependency chain for this stack
+        const dependencyChain = getDependencyChain(stackType);
+        logger.info(
+          `Auto-deploying missing dependencies for ${stackType}: ${dependencyChain.filter((s) => s !== stackType).join(", ")}`,
+        );
+
+        // Deploy each dependency that's not already deployed
+        for (const depStack of dependencyChain) {
+          // Skip the target stack itself
+          if (depStack === stackType) continue;
+
+          // Check if this dependency is already deployed
+          const depExists = await this.outputsManager.validateStackExists(
+            depStack,
+            stage,
+          );
+
+          if (!depExists) {
+            logger.info(`Deploying missing dependency: ${depStack}`);
+            await this.deployStack(depStack, deploymentOptionsWithRegion);
+            // Reload outputs after each dependency deployment
+            this.outputsManager = new OutputsManager();
+          } else {
+            logger.debug(`Dependency ${depStack} is already deployed`);
+          }
+        }
       }
 
       if (deploymentOptionsWithRegion.autoDeleteFailedStacks) {
@@ -317,6 +387,9 @@ class DeploymentManager {
       } else if (stackType === StackType.CWL) {
         // Corrected: deployCwl expects only options
         await deployCwl(deploymentOptionsWithRegion);
+      } else if (stackType === StackType.AwsExample) {
+        // Deploy AWS Example stack
+        await deployAwsExample(deploymentOptionsWithRegion);
       } else {
         // Fallback to deployStackInternal for other types if any, or could throw error
         await this.deployStackInternal(stackType, deploymentOptionsWithRegion);
@@ -609,7 +682,11 @@ class DeploymentManager {
       });
     }
 
-    if (stackType === StackType.Shared || stackType === StackType.CWL) {
+    if (
+      stackType === StackType.Shared ||
+      stackType === StackType.CWL ||
+      stackType === StackType.AwsExample
+    ) {
       const webAclId = await this.outputsManager.getOutputValue(
         StackType.WAF,
         stage,
@@ -661,6 +738,41 @@ class DeploymentManager {
       }
     }
 
+    if (stackType === StackType.AwsExample) {
+      // Add KMS parameters from Shared stack
+      const kmsKeyId = await this.outputsManager.getOutputValue(
+        StackType.Shared,
+        stage,
+        "KMSKeyId",
+      );
+      if (kmsKeyId) {
+        allParameters.push({
+          ParameterKey: "KMSKeyId",
+          ParameterValue: kmsKeyId,
+        });
+      } else {
+        logger.warning(
+          "KMSKeyId not found in Shared outputs, skipping parameter.",
+        );
+      }
+
+      const kmsKeyArn = await this.outputsManager.getOutputValue(
+        StackType.Shared,
+        stage,
+        "KMSKeyArn",
+      );
+      if (kmsKeyArn) {
+        allParameters.push({
+          ParameterKey: "KMSKeyArn",
+          ParameterValue: kmsKeyArn,
+        });
+      } else {
+        logger.warning(
+          "KMSKeyArn not found in Shared outputs, skipping parameter.",
+        );
+      }
+    }
+
     return allParameters;
   }
 
@@ -698,20 +810,17 @@ class DeploymentManager {
   }
 
   async removeAllStacks(options: DeploymentOptions): Promise<void> {
+    // Get removal order dynamically (reverse of deployment order)
+    const stacksToRemove = this.dependencyValidator.getRemovalOrder();
+
     logger.info(`========================================`);
     logger.info(`Starting removal of ALL stacks for stage: ${options.stage}`);
     logger.info(`========================================`);
     logger.info(
-      `Stacks will be removed in dependency order: CWL → Shared → WAF`,
+      `Stacks will be removed in reverse dependency order: ${stacksToRemove.join(" → ")}`,
     );
     logger.info(`This process may take several minutes...`);
 
-    // Corrected: Use StackType enum and correct order for deletion (reverse of creation)
-    const stacksToRemove: StackType[] = [
-      StackType.CWL,
-      StackType.Shared,
-      StackType.WAF,
-    ];
     let successCount = 0;
     let failureCount = 0;
 
@@ -802,22 +911,26 @@ async function main() {
           logger.menu("Deploy/Update Stacks");
           logger.menu("=".repeat(40));
 
+          // Build dynamic stack choices from project config
+          const stackChoices = [
+            {
+              name: "All (recommended for first-time setup)",
+              value: "all",
+            },
+            ...Object.values(StackType).map((stackType) => ({
+              name: getProjectConfig(stackType).displayName,
+              value: stackType,
+            })),
+            new inquirer.Separator(),
+            { name: "<- Go Back", value: "back" },
+          ];
+
           const { stack } = await inquirer.prompt([
             {
               type: "list",
               name: "stack",
               message: "Which stack do you want to deploy/update?",
-              choices: [
-                {
-                  name: "All (recommended for first-time setup)",
-                  value: "all",
-                },
-                { name: "CloudWatchLive (CWL)", value: StackType.CWL },
-                { name: "Shared Resources", value: StackType.Shared },
-                { name: "WAF", value: StackType.WAF },
-                new inquirer.Separator(),
-                { name: "<- Go Back", value: "back" },
-              ],
+              choices: stackChoices,
             },
           ]);
 
@@ -844,7 +957,11 @@ async function main() {
           ]);
 
           let adminEmail: string | undefined;
-          if (stack === "all" || stack === StackType.CWL) {
+          if (
+            stack === "all" ||
+            stack === StackType.CWL ||
+            stack === StackType.AwsExample
+          ) {
             const { needsAdmin } = await inquirer.prompt([
               {
                 type: "confirm",
@@ -939,16 +1056,22 @@ async function main() {
           logger.menu("Remove Stacks");
           logger.menu("=".repeat(40));
 
+          // Build dynamic stack choices from project config
+          const stackTypeChoices = [
+            { name: "All", value: "all" },
+            ...Object.values(StackType).map((stackType) => ({
+              name: getProjectConfig(stackType).displayName,
+              value: stackType,
+            })),
+          ];
+
           const { stack } = await inquirer.prompt([
             {
               type: "list",
               name: "stack",
               message: "Which stack do you want to remove?",
               choices: [
-                { name: "All", value: "all" },
-                { name: "CloudWatchLive (CWL)", value: StackType.CWL },
-                { name: "Shared Resources", value: StackType.Shared },
-                { name: "WAF", value: StackType.WAF },
+                ...stackTypeChoices,
                 new inquirer.Separator(),
                 { name: "A specific resource (force delete)", value: "force" },
                 { name: "<- Go Back", value: "back" },

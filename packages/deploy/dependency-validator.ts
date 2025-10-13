@@ -1,6 +1,11 @@
 import { logger } from "./utils/logger";
 import { StackType } from "./types";
 import { OutputsManager } from "./outputs-manager";
+import {
+  getProjectDependencies,
+  getProjectDependents,
+  PROJECT_CONFIGS,
+} from "./project-config";
 
 export interface StackDependency {
   stack: StackType;
@@ -11,22 +16,23 @@ export interface StackDependency {
 export class DependencyValidator {
   private outputsManager: OutputsManager;
 
-  // Define the dependency graph
-  private readonly dependencies: Record<StackType, StackType[]> = {
-    [StackType.WAF]: [], // WAF has no dependencies
-    [StackType.Shared]: [StackType.WAF], // Shared depends on WAF
-    [StackType.CWL]: [StackType.WAF, StackType.Shared], // CWL depends on both WAF and Shared
-  };
+  // Build the dependency graph dynamically from project config
+  private readonly dependencies: Record<StackType, StackType[]>;
 
-  // Define which stacks are dependent on each stack
-  private readonly dependents: Record<StackType, StackType[]> = {
-    [StackType.WAF]: [StackType.Shared, StackType.CWL], // WAF is required by Shared and CWL
-    [StackType.Shared]: [StackType.CWL], // Shared is required by CWL
-    [StackType.CWL]: [], // CWL has no dependents
-  };
+  // Build which stacks are dependent on each stack dynamically
+  private readonly dependents: Record<StackType, StackType[]>;
 
   constructor() {
     this.outputsManager = new OutputsManager();
+
+    // Initialize dependencies from project config
+    this.dependencies = {} as Record<StackType, StackType[]>;
+    this.dependents = {} as Record<StackType, StackType[]>;
+
+    for (const stackType of Object.values(StackType)) {
+      this.dependencies[stackType] = getProjectDependencies(stackType);
+      this.dependents[stackType] = getProjectDependents(stackType);
+    }
   }
 
   /**
@@ -99,8 +105,8 @@ export class DependencyValidator {
       ordered.push(stack);
     };
 
-    // Visit all stacks to ensure we get the complete order
-    for (const stack of [StackType.WAF, StackType.Shared, StackType.CWL]) {
+    // Visit all stacks to ensure we get the complete order (iterate programmatically)
+    for (const stack of Object.values(StackType)) {
       visit(stack);
     }
 
@@ -210,4 +216,34 @@ export class DependencyValidator {
     const removalOrder = this.getRemovalOrder();
     logger.info(`  ${removalOrder.join(" → ")}`);
   }
+}
+
+/**
+ * Returns the ordered dependency chain for a given stack (dependencies first, then the stack).
+ */
+export function getDependencyChain(target: StackType): StackType[] {
+  // Build dependencies dynamically from project config
+  const dependencies: Record<StackType, StackType[]> = {} as Record<
+    StackType,
+    StackType[]
+  >;
+
+  for (const stackType of Object.values(StackType)) {
+    dependencies[stackType] = getProjectDependencies(stackType);
+  }
+
+  const ordered: StackType[] = [];
+  const visited = new Set<StackType>();
+
+  const visit = (stack: StackType) => {
+    if (visited.has(stack)) return;
+    visited.add(stack);
+    for (const dep of dependencies[stack] || []) {
+      visit(dep);
+    }
+    ordered.push(stack);
+  };
+
+  visit(target);
+  return ordered;
 }
