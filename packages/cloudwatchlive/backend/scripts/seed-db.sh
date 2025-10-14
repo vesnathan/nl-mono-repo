@@ -53,20 +53,23 @@ AWS_REGION=${AWS_REGION:-"ap-southeast-2"}
 # Get stage from environment or use default
 STAGE=${STAGE:-"dev"}
 
-# Get table name from environment or CloudFormation exports or use default
+# Get table name from environment or prefer deployment-outputs.json, then CloudFormation exports, then default
 if [ -n "$TABLE_NAME" ]; then
     echo "[DEBUG] Using TABLE_NAME from environment: $TABLE_NAME"
 else
-    # Try to get from CloudFormation if AWS CLI is available
-    if command -v aws &> /dev/null && aws --version &> /dev/null; then
-        TABLE_NAME=$(aws cloudformation list-exports \
-            --region "$AWS_REGION" \
-            --query "Exports[?Name=='cwlUserTableName-${STAGE}'].Value" \
-            --output text 2>/dev/null || echo "nlmonorepo-shared-usertable-${STAGE}")
-    else
-        # AWS CLI not available, use default naming convention
-        TABLE_NAME="nlmonorepo-shared-usertable-${STAGE}"
-        echo "[DEBUG] AWS CLI not available, using default table name: $TABLE_NAME"
+    TABLE_NAME=""
+    TABLE_NAME=$(node -e "const fs=require('fs'); const path=require('path'); try{ const stage=process.argv[1]; const p=path.join(__dirname,'../../../../deploy/deployment-outputs.json'); const content=fs.readFileSync(p,'utf8'); const obj=JSON.parse(content); const stack=obj.stacks && obj.stacks['CWL']; if(stack && stack.outputs){ for(const out of stack.outputs){ const en=(out.ExportName||'').toLowerCase(); const ok=(out.OutputKey||'').toLowerCase(); if(en.includes('datatable')||ok.includes('datatable')||ok.includes('datatablename')){ console.log(out.OutputValue); process.exit(0);} } } process.exit(1);}catch(e){ process.exit(1);}" "$STAGE" 2>/dev/null || true)
+
+    if [ -z "$TABLE_NAME" ]; then
+        if command -v aws &> /dev/null && aws --version &> /dev/null; then
+            TABLE_NAME=$(aws cloudformation list-exports \
+                --region "$AWS_REGION" \
+                --query "Exports[?Name=='cwlUserTableName-${STAGE}'].Value" \
+                --output text 2>/dev/null || echo "nlmonorepo-shared-usertable-${STAGE}")
+        else
+            TABLE_NAME="nlmonorepo-shared-usertable-${STAGE}"
+            echo "[DEBUG] AWS CLI not available, using default table name: $TABLE_NAME"
+        fi
     fi
 fi
 

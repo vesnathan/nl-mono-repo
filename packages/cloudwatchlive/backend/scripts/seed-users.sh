@@ -56,11 +56,17 @@ fi
 # Get stage from environment or use default
 STAGE=${STAGE:-"dev"}
 
-# Get table name from CloudFormation exports or use default
-TABLE_NAME=$(aws cloudformation list-exports \
-    --region "$AWS_REGION" \
-    --query "Exports[?Name=='cwlUserTableName-${STAGE}'].Value" \
-    --output text 2>/dev/null || echo "nlmonorepo-shared-usertable-${STAGE}")
+# Try to read parameterized outputs from deployment-outputs.json first (preferred).
+# If that fails, fall back to CloudFormation exports (legacy) and then to a sensible default.
+TABLE_NAME=""
+TABLE_NAME=$(node -e "const fs=require('fs'); const path=require('path'); try{ const stage=process.argv[1]; const p=path.join(__dirname,'../../../../deploy/deployment-outputs.json'); const content=fs.readFileSync(p,'utf8'); const obj=JSON.parse(content); const stack=obj.stacks && obj.stacks['CWL']; if(stack && stack.outputs){ for(const out of stack.outputs){ const en=(out.ExportName||'').toLowerCase(); const ok=(out.OutputKey||'').toLowerCase(); if(en.includes('datatable')||ok.includes('datatable')||ok.includes('datatablename')){ console.log(out.OutputValue); process.exit(0);} } } process.exit(1);}catch(e){ process.exit(1);}" "$STAGE" 2>/dev/null || true)
+
+if [ -z "$TABLE_NAME" ]; then
+    TABLE_NAME=$(aws cloudformation list-exports \
+        --region "$AWS_REGION" \
+        --query "Exports[?Name=='cwlUserTableName-${STAGE}'].Value" \
+        --output text 2>/dev/null || echo "nlmonorepo-shared-usertable-${STAGE}")
+fi
 
 echo ""
 echo -e "${BLUE}Configuration:${NC}"
