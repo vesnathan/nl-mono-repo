@@ -1,6 +1,7 @@
 {
-  "extends": "../../../tsconfig.node.json",
+  "extends": "../../../tsconfig.json",
   "compilerOptions": {
+    "module": "commonjs",
     "baseUrl": ".",
     "paths": {
       "gqlTypes": ["../frontend/src/types/gqlTypes.ts"]

@@ -936,7 +936,9 @@ function removePackageForce(longName) {
         }
       }
       fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + "\n");
-      console.log("Updated root package.json workspaces and scripts (force-delete)");
+      console.log(
+        "Updated root package.json workspaces and scripts (force-delete)",
+      );
     }
   } catch (e) {
     console.error("Failed to update root package.json:", e.message);
@@ -1677,7 +1679,9 @@ async function main() {
       }
 
       fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + "\n");
-      console.log("✅ Added workspace entries and dev script to root package.json");
+      console.log(
+        "✅ Added workspace entries and dev script to root package.json",
+      );
     }
   } catch (e) {
     console.error(
@@ -1819,7 +1823,9 @@ async function main() {
       }
 
       fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + "\n");
-      console.log("✅ Added workspace entries and dev script to root package.json");
+      console.log(
+        "✅ Added workspace entries and dev script to root package.json",
+      );
     }
   } catch (e) {
     console.error(

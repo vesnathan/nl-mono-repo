@@ -10,6 +10,7 @@
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "node",
+    "baseUrl": ".",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -35,16 +36,15 @@
     }
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "src/functions/v",
+    "../../shared/**/*.ts",
     "../../shared/scripts/buildGqlTypesOnBackend.ts",
     "../../shared/scripts/execCommandAsPromise.ts",
     "../../shared/scripts/mergeGraphqlFiles.ts",
-    "../../shared/**/*.ts",
-    "../../aws-example/frontend/src/components/icons/TinyTickSvgComponent.tsx"
+    "next-env.d.ts",
+    "src/functions/v",
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

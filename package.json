@@ -12,7 +12,9 @@
     "packages/deploy",
     "packages/ec2-vsc",
     "packages/a-new-app/frontend",
-    "packages/a-new-app/backend"
+    "packages/a-new-app/backend",
+    "packages/new-app-2/frontend",
+    "packages/new-app-2/backend"
   ],
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.0.14",
@@ -42,6 +44,7 @@
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-next": "^14.0.3",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-import-resolver-typescript": "^3.5.2",
     "eslint-plugin-jsx-a11y": "^6.8.0",
     "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-react": "^7.33.2",
@@ -72,6 +75,7 @@
     "tsc": "lerna run tsc --stream",
     "test": "lerna run test --stream",
     "dev:cwl": "yarn workspace cwlfrontend dev:local",
-    "dev:ana": "yarn workspace anafrontend dev:local"
+    "dev:ana": "yarn workspace anafrontend dev:local",
+    "dev:na2": "yarn workspace na2frontend dev:local"
   }
 }

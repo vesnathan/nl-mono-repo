@@ -119,7 +119,11 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
   },    hasFrontend: true,
     hasLambdas: true,
     hasResolvers: true,
+  },    hasFrontend: true,
+    hasLambdas: true,
+    hasResolvers: true,
   },
+
 
 };
 

@@ -1,8 +1,5 @@
 import { GraphQLResult, generateClient } from "aws-amplify/api";
-import {
-  GetAWSEUserQuery,
-  GetAWSEUserQueryVariables,
-} from "../../types/gqlTypes";
+import { GetAWSEUserQuery, GetAWSEUserQueryVariables } from "@/types/gqlTypes";
 
 const amplifyGraphqlClient = generateClient();
 

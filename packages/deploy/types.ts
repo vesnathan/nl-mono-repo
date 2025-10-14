@@ -34,13 +34,15 @@ export enum StackType {
   WAF = "WAF",
   Shared = "Shared",
   CWL = "CWL",
-  AwsExample = "AwsExample",}
+  AwsExample = "AwsExample",
+  NewApp2 = "NewApp2",
+}
 
 export const STACK_ORDER = [
   StackType.WAF,
   StackType.Shared,
   StackType.CWL,
-  StackType.AwsExample
+  StackType.AwsExample,
 ];
 
 export const TEMPLATE_PATHS: Record<StackType, string> = {
@@ -50,14 +52,14 @@ export const TEMPLATE_PATHS: Record<StackType, string> = {
   [StackType.AwsExample]: join(
     __dirname,
     "templates/aws-example/cfn-template.yaml",
-  ),  // Add additional stack template mappings here when you add templates/
+  ),
 };
 
 export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
   [StackType.WAF]: join(__dirname, "templates/waf/"),
   [StackType.Shared]: join(__dirname, "templates/shared/"),
   [StackType.CWL]: join(__dirname, "templates/cwl/"),
-  [StackType.AwsExample]: join(__dirname, "templates/aws-example/"),  // Add entries for new templates here
+  [StackType.AwsExample]: join(__dirname, "templates/aws-example/"), // Add entries for new templates here
 };
 
 export const getStackName = (stackType: StackType, stage: string) =>
