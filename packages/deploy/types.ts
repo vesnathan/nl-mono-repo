@@ -35,7 +35,6 @@ export enum StackType {
   Shared = "Shared",
   CWL = "CWL",
   AwsExample = "AwsExample",
-  NewApp2 = "NewApp2",
 }
 
 export const STACK_ORDER = [

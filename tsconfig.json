@@ -6,8 +6,7 @@
       "@/*": ["src/*"],
       "gqlTypes": [
         "packages/aws-example/frontend/src/types/gqlTypes",
-        "packages/cloudwatchlive/frontend/src/types/gqlTypes",
-        "packages/newapp2/frontend/src/types/gqlTypes"
+        "packages/cloudwatchlive/frontend/src/types/gqlTypes"
       ]
     }
   },
