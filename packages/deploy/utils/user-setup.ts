@@ -131,10 +131,14 @@ export class UserSetupManager {
           return localOutput;
         }
       } catch (err) {
-        logger.debug(`No local outputs available or failed to read outputs: ${(err as Error).message}`);
+        logger.debug(
+          `No local outputs available or failed to read outputs: ${(err as Error).message}`,
+        );
       }
 
-      logger.debug(`Resolving Cognito User Pool ID by describing stack ${stackName} (output key: ${outputKey})`);
+      logger.debug(
+        `Resolving Cognito User Pool ID by describing stack ${stackName} (output key: ${outputKey})`,
+      );
 
       // Try to get from CloudFormation stack outputs first
       const describeStacksResponse = await this.cloudFormationClient.send(

@@ -3,7 +3,7 @@ import {
   AWSEUserInput,
   CreateAWSEUserMutation,
   CreateAWSEUserMutationVariables,
-} from "../../types/gqlTypes";
+} from "@/types/gqlTypes";
 
 const amplifyGraphqlClient = generateClient();
 

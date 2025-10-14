@@ -3,7 +3,7 @@ import {
   CWLUserInput,
   CreateCWLUserMutation,
   CreateCWLUserMutationVariables,
-} from "../../types/gqlTypes";
+} from "@/types/gqlTypes";
 
 const amplifyGraphqlClient = generateClient();
 

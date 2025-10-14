@@ -207,14 +207,7 @@ function sanitizeComponents(
       // to avoid touching hooks or unrelated files. Detect tokens case-insensitively.
       const basename = item.replace(/\.[^.]+$/, "");
       const lower = basename.toLowerCase();
-      const tokens = [
-        "aws-example",
-        "aws_example",
-        "awse",
-        "awsex",
-        "aws",
-        "awsexample",
-      ];
+      const tokens = ["aws-example", "aws_example", "awse", "awsexample"];
       const hasToken = tokens.some((t) => lower.includes(t));
       if (!hasToken) continue; // skip files that don't include placeholders
 
@@ -294,6 +287,32 @@ function sanitizeComponents(
           );
           changed = true;
         }
+        // replace absolute path aliases like '@/path/oldBase' or '~/path/oldBase'
+        const reAlias = new RegExp(
+          "([\"'])(@|~)(/[^\"']*)(" + oldBase + ")([\"'])",
+          "g",
+        );
+        if (reAlias.test(content)) {
+          content = content.replace(
+            reAlias,
+            (m, q1, alias, prefix, base, q2) =>
+              `${q1}${alias}${prefix}${newBase}${q2}`,
+          );
+          changed = true;
+        }
+        // replace absolute path aliases ending with extension
+        const reAliasExt = new RegExp(
+          "([\"'])(@|~)(/[^\"']*)(" + oldBase + ")\\.(tsx|ts|jsx|js)([\"'])",
+          "g",
+        );
+        if (reAliasExt.test(content)) {
+          content = content.replace(
+            reAliasExt,
+            (m, q1, alias, prefix, base, ext, q2) =>
+              `${q1}${alias}${prefix}${newBase}.${ext}${q2}`,
+          );
+          changed = true;
+        }
       }
       if (changed) fs.writeFileSync(full, content, "utf8");
     }
@@ -322,6 +341,7 @@ async function removePackageInteractive() {
       "deploy",
       "shared",
       "waf",
+      "aws-example", // Template package for cloning
     ]);
     return items.filter((i) => !protectedPackages.has(i));
   }
@@ -705,7 +725,7 @@ async function removePackageInteractive() {
     );
   }
 
-  // Remove workspace entries from root package.json
+  // Remove workspace entries and dev scripts from root package.json
   try {
     const rootPkgPath = path.join(root, "package.json");
     if (fs.existsSync(rootPkgPath)) {
@@ -722,9 +742,17 @@ async function removePackageInteractive() {
           if (w === frontendEntry || w === backendEntry) return false;
           return true;
         });
-        fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + "\n");
-        console.log("Updated root package.json workspaces");
       }
+      // Remove dev script for this package (e.g., "dev:awse", "dev:da")
+      if (rootPkg.scripts && typeof rootPkg.scripts === "object") {
+        const devScriptName = `dev:${shortName}`;
+        if (rootPkg.scripts[devScriptName]) {
+          delete rootPkg.scripts[devScriptName];
+          console.log(`   Removed script: ${devScriptName}`);
+        }
+      }
+      fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + "\n");
+      console.log("Updated root package.json workspaces and scripts");
     }
   } catch (e) {
     console.error("Failed to update root package.json:", e.message);
@@ -886,7 +914,7 @@ function removePackageForce(longName) {
     );
   }
 
-  // Remove workspace entries from root package.json (robust)
+  // Remove workspace entries and dev scripts from root package.json (robust)
   try {
     const rootPkgPath = path.join(root, "package.json");
     if (fs.existsSync(rootPkgPath)) {
@@ -898,9 +926,19 @@ function removePackageForce(longName) {
           if (normalized.includes(`packages/${longName}/`)) return false;
           return true;
         });
-        fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + "\n");
-        console.log("Updated root package.json workspaces (force-delete)");
       }
+      // Remove dev script for this package (e.g., "dev:awse", "dev:da")
+      if (rootPkg.scripts && typeof rootPkg.scripts === "object") {
+        const devScriptName = `dev:${shortName}`;
+        if (rootPkg.scripts[devScriptName]) {
+          delete rootPkg.scripts[devScriptName];
+          console.log(`   Removed script: ${devScriptName}`);
+        }
+      }
+      fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + "\n");
+      console.log(
+        "Updated root package.json workspaces and scripts (force-delete)",
+      );
     }
   } catch (e) {
     console.error("Failed to update root package.json:", e.message);
@@ -1002,12 +1040,46 @@ function updatePackageJsonNames(destPackagePath, longName, shortName) {
       else if (item === "package.json") {
         try {
           const pkg = JSON.parse(fs.readFileSync(full, "utf8"));
+          let modified = false;
+
           if (pkg && typeof pkg.name === "string") {
             // Replace common placeholders in package name
-            pkg.name = pkg.name
+            const newName = pkg.name
               .replace(/aws-example/gi, longName)
               .replace(/aws_example/gi, longName)
               .replace(/awse/gi, shortName);
+            if (newName !== pkg.name) {
+              pkg.name = newName;
+              modified = true;
+            }
+          }
+
+          // Replace dependency names (workspace dependencies like awsebackend -> {shortName}backend)
+          const depTypes = [
+            "dependencies",
+            "devDependencies",
+            "peerDependencies",
+            "optionalDependencies",
+          ];
+          for (const depType of depTypes) {
+            if (pkg[depType] && typeof pkg[depType] === "object") {
+              const deps = pkg[depType];
+              const oldKeys = Object.keys(deps);
+              for (const oldKey of oldKeys) {
+                const newKey = oldKey
+                  .replace(/aws-example/gi, longName)
+                  .replace(/aws_example/gi, longName)
+                  .replace(/awse/gi, shortName);
+                if (newKey !== oldKey) {
+                  deps[newKey] = deps[oldKey];
+                  delete deps[oldKey];
+                  modified = true;
+                }
+              }
+            }
+          }
+
+          if (modified) {
             fs.writeFileSync(full, JSON.stringify(pkg, null, 2) + "\n");
           }
         } catch (e) {
@@ -1172,6 +1244,7 @@ async function main() {
       "deploy",
       "shared",
       "waf",
+      "aws-example", // Template package for cloning
     ]);
     const choices = (function () {
       const packagesRoot = path.join(root, "packages");
@@ -1498,7 +1571,15 @@ async function main() {
   console.log(`  Copying to:   ${dest}\n`);
 
   // Copy the source package (excluding node_modules and build artifacts)
-  copyRecursive(src, dest, ["node_modules", ".next", "dist", "build"]);
+  copyRecursive(src, dest, [
+    "node_modules",
+    ".next",
+    "dist",
+    "build",
+    ".nx",
+    "deployment-outputs",
+    ".cache",
+  ]);
 
   console.log("✅ Files copied successfully");
 
@@ -1574,7 +1655,7 @@ async function main() {
   }
 
   // Add new package workspaces to root package.json (frontend/backend)
-  console.log("\n🔧 Updating root package.json workspaces...");
+  console.log("\n🔧 Updating root package.json workspaces and scripts...");
   try {
     const rootPkgPath = path.join(root, "package.json");
     if (fs.existsSync(rootPkgPath)) {
@@ -1587,8 +1668,20 @@ async function main() {
         rootPkg.workspaces.push(frontendEntry);
       if (!rootPkg.workspaces.includes(backendEntry))
         rootPkg.workspaces.push(backendEntry);
+
+      // Add dev script for the new package
+      if (!rootPkg.scripts) rootPkg.scripts = {};
+      const devScriptName = `dev:${shortName}`;
+      const devScriptValue = `yarn workspace ${shortName}frontend dev:local`;
+      if (!rootPkg.scripts[devScriptName]) {
+        rootPkg.scripts[devScriptName] = devScriptValue;
+        console.log(`   Added script: ${devScriptName}`);
+      }
+
       fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + "\n");
-      console.log("✅ Added workspace entries to root package.json");
+      console.log(
+        "✅ Added workspace entries and dev script to root package.json",
+      );
     }
   } catch (e) {
     console.error(
@@ -1706,7 +1799,7 @@ async function main() {
   })();
 
   // Add new package workspaces to root package.json (frontend/backend)
-  console.log("\n🔧 Updating root package.json workspaces...");
+  console.log("\n🔧 Updating root package.json workspaces and scripts...");
   try {
     const rootPkgPath = path.join(root, "package.json");
     if (fs.existsSync(rootPkgPath)) {
@@ -1719,8 +1812,20 @@ async function main() {
         rootPkg.workspaces.push(frontendEntry);
       if (!rootPkg.workspaces.includes(backendEntry))
         rootPkg.workspaces.push(backendEntry);
+
+      // Add dev script for the new package
+      if (!rootPkg.scripts) rootPkg.scripts = {};
+      const devScriptName = `dev:${shortName}`;
+      const devScriptValue = `yarn workspace ${shortName}frontend dev:local`;
+      if (!rootPkg.scripts[devScriptName]) {
+        rootPkg.scripts[devScriptName] = devScriptValue;
+        console.log(`   Added script: ${devScriptName}`);
+      }
+
       fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + "\n");
-      console.log("✅ Added workspace entries to root package.json");
+      console.log(
+        "✅ Added workspace entries and dev script to root package.json",
+      );
     }
   } catch (e) {
     console.error(
@@ -1737,42 +1842,46 @@ async function main() {
       let content = fs.readFileSync(deployTypesPath, "utf8");
 
       // Add new stack type to enum (using PascalCase)
-      const stackTypeEnumRegex = /(export enum StackType \{[^}]*)(})/;
+      // Find the last entry in the enum (ends with ,) and insert after it
+      const stackTypeEnumRegex = /(export enum StackType \{[\s\S]*?),(\s*\})/;
       if (!content.includes(`${pascalCaseName} = "${pascalCaseName}"`)) {
         content = content.replace(
           stackTypeEnumRegex,
-          `$1  ${pascalCaseName} = "${pascalCaseName}",\n$2`,
+          `$1,\n  ${pascalCaseName} = "${pascalCaseName}",$2`,
         );
       }
 
       // Add to STACK_ORDER
-      const stackOrderRegex = /(export const STACK_ORDER = \[[^\]]*)(])/;
+      // Find the last entry in the array (ends with ,) and insert after it
+      const stackOrderRegex = /(export const STACK_ORDER = \[[\s\S]*?),(\s*\])/;
       if (!content.includes(`StackType.${pascalCaseName}`)) {
         content = content.replace(
           stackOrderRegex,
-          `$1  StackType.${pascalCaseName},\n$2`,
+          `$1,\n  StackType.${pascalCaseName},$2`,
         );
       }
 
       // Add template path
+      // Find the last entry before the closing comment/brace
       const templatePathsRegex =
-        /(export const TEMPLATE_PATHS: Record<StackType, string> = \{[^}]*)(})/;
+        /(export const TEMPLATE_PATHS: Record<StackType, string> = \{[\s\S]*?\),)(\s*\/\/[^\n]*\n\s*\})/;
       const templatePath = `join(__dirname, "templates/${longName}/cfn-template.yaml")`;
       if (!content.includes(`[StackType.${pascalCaseName}]`)) {
         content = content.replace(
           templatePathsRegex,
-          `$1  [StackType.${pascalCaseName}]: ${templatePath},\n$2`,
+          `$1\n  [StackType.${pascalCaseName}]: ${templatePath},$2`,
         );
       }
 
       // Add template resources path
+      // Find the last entry before the closing comment/brace
       const resourcesPathsRegex =
-        /(export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = \{[^}]*)(})/;
+        /(export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = \{[\s\S]*?\),)(\s*\/\/[^\n]*\n\s*\})/;
       const resourcesPath = `join(__dirname, "templates/${longName}/")`;
       if (!content.includes(`[StackType.${pascalCaseName}]: join`)) {
         content = content.replace(
           resourcesPathsRegex,
-          `$1  [StackType.${pascalCaseName}]: ${resourcesPath},\n$2`,
+          `$1\n  [StackType.${pascalCaseName}]: ${resourcesPath},$2`,
         );
       }
 
@@ -1803,13 +1912,13 @@ async function main() {
       // Create the new project configuration entry
       const newProjectConfig = `\n  [StackType.${pascalCaseName}]: {\n    stackType: StackType.${pascalCaseName},\n    displayName: "${projectTitle}",\n    templateDir: "${longName}",\n    packageDir: "${longName}",\n    dependsOn: [StackType.Shared], // TODO: Update dependencies as needed\n    buckets: {\n      templates: "nlmonorepo-${longName}-templates-{stage}",\n      frontend: "nlmonorepo-${shortName}-userfiles-{stage}",\n      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],\n    },\n    hasFrontend: true,\n    hasLambdas: true,\n    hasResolvers: true,\n  },\n`;
 
-      // Find the closing brace of PROJECT_CONFIGS and add before it
+      // Find the last config entry (ends with },) and add after it
       const projectConfigsRegex =
-        /(export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = \{[^;]*)(};)/s;
+        /(export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = \{[\s\S]*?  \},)(\s*\};)/;
       if (!content.includes(`[StackType.${pascalCaseName}]:`)) {
         content = content.replace(
           projectConfigsRegex,
-          `$1${newProjectConfig}\n$2`,
+          `$1${newProjectConfig}$2`,
         );
         fs.writeFileSync(projectConfigPath, content, "utf8");
         console.log("✅ Updated deploy/project-config.ts");
