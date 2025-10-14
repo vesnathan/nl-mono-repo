@@ -30,6 +30,7 @@ import { LambdaCompiler } from "../../utils/lambda-compiler";
 import { S3BucketManager } from "../../utils/s3-bucket-manager";
 import { OutputsManager } from "../../outputs-manager";
 import { candidateExportNames } from "../../utils/export-names";
+import { seedDB } from "../../utils/seed-db";
 import { addAppSyncBucketPolicy } from "../../utils/s3-resolver-validator";
 import { cleanupLogGroups } from "../../utils/loggroup-cleanup";
 import { createReadStream, readdirSync, statSync, existsSync } from "fs";
@@ -950,24 +951,43 @@ export async function deployAwsExample(
         );
 
         try {
-          execSync(
-            `bash -lc 'cd "${repoRoot}" && source "./set-aws-env.sh" && ./packages/aws-example/backend/scripts/seed-users.sh'`,
-            {
-              cwd: repoRoot,
-              stdio: options.debugMode ? "inherit" : "pipe",
-              encoding: "utf8",
-            },
+          // Programmatic seeding: prefer parameterized deployment outputs lookup
+          const outputsManagerForSeed = new OutputsManager();
+          const candidates = candidateExportNames(
+            StackType.AwsExample,
+            options.stage,
+            "datatable-name",
           );
-          logger.success("✓ AWSE user table seeded successfully");
-        } catch (seedError: any) {
+
+          let tableName =
+            (await outputsManagerForSeed.findOutputValueByCandidates(
+              options.stage,
+              candidates,
+            )) || `nlmonorepo-awse-datatable-${options.stage}`;
+
+          logger.info(
+            "🌱 Seeding AWSE users into DynamoDB (programmatic seeder)...",
+          );
+
+          try {
+            await seedDB({
+              region,
+              tableName,
+              stage: options.stage,
+              appName: "aws-example",
+              skipConfirmation: true,
+            });
+            logger.success("✓ AWSE user table seeded successfully");
+          } catch (seedError: any) {
+            logger.error(
+              `AWSE user seeding failed: ${seedError instanceof Error ? seedError.message : seedError}`,
+            );
+            // keep previous behavior: do not throw here - admin creation may still be desirable
+          }
+        } catch (seedOuterErr: any) {
           logger.error(
-            `AWSE user seeding failed: ${seedError instanceof Error ? seedError.message : seedError}`,
+            `AWSE seeding orchestration failed: ${seedOuterErr instanceof Error ? seedOuterErr.message : seedOuterErr}`,
           );
-          if (seedError.stdout)
-            logger.error(`[Seeder stdout]:\n${seedError.stdout}`);
-          if (seedError.stderr)
-            logger.error(`[Seeder stderr]:\n${seedError.stderr}`);
-          // Do not throw here: attempt admin creation may still be desirable
         }
 
         // Attempt to create admin user in Cognito (if admin email provided or set in env)

@@ -285,6 +285,57 @@ A: Ensure you've added your project to both `TEMPLATE_PATHS` and `TEMPLATE_RESOU
 4. **Testing**: Always test deployment and removal in a dev environment first
 5. **Documentation**: Update project-specific README files with deployment instructions
 
+## Database seeding convention (per-package)
+
+Each backend package is expected to provide its own database seeder because the single DynamoDB table may contain different entity shapes per project (users, organisations, domain-specific entities, etc.). Follow this convention so the centralized deploy utilities can discover and run the correct seeder automatically:
+
+- Seeder file location (canonical): `packages/<appName>/backend/scripts/seed-db.ts`
+  - Use `seed-db.ts` as the canonical filename — the table often contains more than only users.
+  - The script should read configuration from environment variables: `AWS_REGION`, `TABLE_NAME`, `STAGE` and optionally `SUPER_ADMIN_USER_ID`.
+  - Implement the seeder to be idempotent or to detect an already-seeded table (recommended: lightweight Scan Limit=1 check).
+
+- Package.json scripts (recommended):
+
+```json
+"scripts": {
+  "seed:db": "tsx scripts/seed-db.ts",
+  // optional presets for sizes
+  "seed:db:10": "tsx scripts/seed-db.ts 10",
+  "seed:db:50": "tsx scripts/seed-db.ts 50"
+}
+```
+
+- How deployers should call the seeder
+
+  Deploy code (for example `packages/deploy/packages/cwl/cwl.ts` or `packages/deploy/packages/aws-example/aws-example.ts`) should call the centralized programmatic utility `seedDB` located at `packages/deploy/utils/seed-db.ts` and pass the `appName` (the package folder name). This allows the deploy utility to resolve per-package seeder scripts automatically and keeps the runtime environment consistent.
+
+  Example (TypeScript - programmatic):
+
+  ```ts
+  import { seedDB } from "../../utils/seed-db";
+
+  // ... after deployment and outputs lookup ...
+  await seedDB({
+    region: 'ap-southeast-2',
+    tableName: 'nlmonorepo-<app>-datatable-dev',
+    stage: 'dev',
+    appName: 'your-package-folder-name',
+    skipConfirmation: true,
+  });
+  ```
+
+  The centralized `seedDB` util will try common filenames (in order):
+  - `packages/<appName>/backend/scripts/seed-db.ts`
+  - `packages/<appName>/backend/scripts/seed.ts`
+  - `packages/<appName>/backend/scripts/seed-db.ts`
+  - `packages/<appName>/backend/scripts/seed-db.js`
+
+- Per-package differences
+
+  The actual entities seeded will likely differ per package. That's expected. Keep the seeder focused on reasonable default/dev fixtures for that package's schema. If you need to seed large datasets for performance tests, add optional scripts like `seed:db:50` that take arguments.
+
+This convention keeps deploy orchestration consistent and makes it easy to add new projects with their own schema and seed data.
+
 ## Need Help?
 
 - Review existing projects like `aws-example` or `cwl` as reference implementations

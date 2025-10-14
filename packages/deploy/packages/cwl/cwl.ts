@@ -42,6 +42,7 @@ import {
 } from "../../utils/s3-resolver-validator";
 import { ForceDeleteManager } from "../../utils/force-delete-utils";
 import { OutputsManager } from "../../outputs-manager";
+import { candidateExportNames } from "../../utils/export-names";
 import { cleanupLogGroups } from "../../utils/loggroup-cleanup";
 import { createReadStream, readdirSync, statSync, existsSync } from "fs";
 import * as path from "path";
@@ -1185,27 +1186,36 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
 
       // Always run the user seed shell script after stack deployment
       try {
-        const scriptsPath = path.join(
-          __dirname,
-          "../../../cloudwatchlive/backend/scripts",
+        // Programmatic seeding: prefer using central seedDB util so per-package
+        // seeders are discovered via appName.
+        logger.info("🌱 Seeding users into DynamoDB (programmatic seeder)...");
+        const outputsManagerForSeed = new OutputsManager();
+        const candidates = candidateExportNames(
+          StackType.CWL,
+          options.stage,
+          "datatable-name",
         );
-        const repoRoot = path.join(__dirname, "../../../../");
-        logger.info(
-          "🌱 Seeding users into DynamoDB (shell script, with AWS env)...",
-        );
-        // Run the seeder from the mono-repo root so any 'source .env' logic resolves
-        // predictably. We explicitly cd to the repo root then run the scripts by
-        // their relative paths to avoid ambiguity with BASH_SOURCE/cwd.
-        let output = "";
+
+        let tableName =
+          (await outputsManagerForSeed.findOutputValueByCandidates(
+            options.stage,
+            candidates,
+          )) || `nlmonorepo-shared-usertable-${options.stage}`;
+
         try {
-          output = execSync(
-            `bash -lc 'cd "${repoRoot}" && source "./set-aws-env.sh" && ./packages/cloudwatchlive/backend/scripts/seed-db.sh'`,
-            {
-              cwd: repoRoot,
-              stdio: options.debugMode ? "inherit" : "pipe",
-              encoding: "utf8",
-            },
-          );
+          const regionToUse = options.region || process.env.AWS_REGION || "ap-southeast-2";
+          // Import seedDB from deploy utils
+          const { seedDB } = await import("../../utils/seed-db");
+          await seedDB({
+            region: regionToUse,
+            tableName,
+            stage: options.stage,
+            appName: "cloudwatchlive",
+            skipConfirmation: true,
+            numCompanies: 5,
+            adminsPerCompany: 3,
+            staffPerAdmin: 5,
+          });
           logger.success("✓ User table seeded successfully");
         } catch (seedError: any) {
           logger.error(

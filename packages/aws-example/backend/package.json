@@ -16,7 +16,7 @@
   },
   "scripts": {
     "seed:db": "tsx scripts/seed-db.ts",
-    "seed:users": "tsx scripts/seed-users.ts"
+    "seed": "tsx scripts/seed-db.ts"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
