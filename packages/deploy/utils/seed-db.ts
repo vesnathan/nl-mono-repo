@@ -27,9 +27,9 @@ export async function seedDB(options: SeedDBOptions): Promise<void> {
     region,
     tableName,
     stage,
-      numCompanies,
-      adminsPerCompany,
-      staffPerAdmin,
+    numCompanies,
+    adminsPerCompany,
+    staffPerAdmin,
     superAdminUserId,
     extraArgs,
     extraEnv,
@@ -125,8 +125,12 @@ export async function seedDB(options: SeedDBOptions): Promise<void> {
 
   if (dryRun) {
     logger.info("Dry-run enabled: not spawning tsx.");
-    logger.info(`Would run: tsx ${args.map((a) => JSON.stringify(a)).join(" ")}`);
-    logger.info(`With env: AWS_REGION=${runEnv.AWS_REGION}, TABLE_NAME=${runEnv.TABLE_NAME}, STAGE=${runEnv.STAGE}`);
+    logger.info(
+      `Would run: tsx ${args.map((a) => JSON.stringify(a)).join(" ")}`,
+    );
+    logger.info(
+      `With env: AWS_REGION=${runEnv.AWS_REGION}, TABLE_NAME=${runEnv.TABLE_NAME}, STAGE=${runEnv.STAGE}`,
+    );
     if (extraEnv && Object.keys(extraEnv).length > 0) {
       logger.info(`Extra env: ${JSON.stringify(extraEnv)}`);
     }

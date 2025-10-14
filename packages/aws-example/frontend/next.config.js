@@ -9,11 +9,16 @@ function getDeploymentOutputs() {
 
     const outputs = Object.values(parsed.stacks || {})
       .flatMap((s) => s.outputs || [])
-      .map((o) => ({ key: o.OutputKey, value: o.OutputValue, exportName: o.ExportName }));
+      .map((o) => ({
+        key: o.OutputKey,
+        value: o.OutputValue,
+        exportName: o.ExportName,
+      }));
 
     // Helper: produce prioritized candidate export names for this app
     const appName = "awse"; // short app identifier for aws-example
-    const stage = process.env.NEXT_PUBLIC_ENVIRONMENT || process.env.STAGE || "dev";
+    const stage =
+      process.env.NEXT_PUBLIC_ENVIRONMENT || process.env.STAGE || "dev";
     function paramCandidates(suffix) {
       const base = `nlmonorepo-${appName}-${stage}-${suffix}`;
       const alt = `nlmonorepo-${appName}example-${stage}-${suffix}`; // transitional
@@ -24,20 +29,28 @@ function getDeploymentOutputs() {
       const candidates = paramCandidates(suffix);
       // check ExportName candidates first
       for (const c of candidates) {
-        const hit = outputs.find((o) => (o.exportName || "").toLowerCase() === c);
+        const hit = outputs.find(
+          (o) => (o.exportName || "").toLowerCase() === c,
+        );
         if (hit) return hit.value;
       }
 
       // then try export names that end with the suffix
-      const byExportSuffix = outputs.find((o) => (o.exportName || "").toLowerCase().endsWith(suffix.toLowerCase()));
+      const byExportSuffix = outputs.find((o) =>
+        (o.exportName || "").toLowerCase().endsWith(suffix.toLowerCase()),
+      );
       if (byExportSuffix) return byExportSuffix.value;
 
       // then try output keys that end with suffix
-      const byKeySuffix = outputs.find((o) => (o.key || "").toLowerCase().endsWith(suffix.toLowerCase()));
+      const byKeySuffix = outputs.find((o) =>
+        (o.key || "").toLowerCase().endsWith(suffix.toLowerCase()),
+      );
       if (byKeySuffix) return byKeySuffix.value;
 
       // then try legacy explicit keys
-      const legacyHit = legacy.map((k) => outputs.find((o) => (o.key || "") === k)).find(Boolean);
+      const legacyHit = legacy
+        .map((k) => outputs.find((o) => (o.key || "") === k))
+        .find(Boolean);
       if (legacyHit) return legacyHit.value;
 
       return "";
@@ -45,8 +58,12 @@ function getDeploymentOutputs() {
 
     return {
       NEXT_PUBLIC_USER_POOL_ID: find("user-pool-id", ["AWSEUserPoolId"]),
-      NEXT_PUBLIC_USER_POOL_CLIENT_ID: find("user-pool-client-id", ["AWSEUserPoolClientId"]),
-      NEXT_PUBLIC_IDENTITY_POOL_ID: find("identity-pool-id", ["AWSEIdentityPoolId"]),
+      NEXT_PUBLIC_USER_POOL_CLIENT_ID: find("user-pool-client-id", [
+        "AWSEUserPoolClientId",
+      ]),
+      NEXT_PUBLIC_IDENTITY_POOL_ID: find("identity-pool-id", [
+        "AWSEIdentityPoolId",
+      ]),
       NEXT_PUBLIC_GRAPHQL_URL: find("api-url", ["ApiUrl"]),
     };
   } catch (e) {

@@ -1203,7 +1203,8 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
           )) || `nlmonorepo-shared-usertable-${options.stage}`;
 
         try {
-          const regionToUse = options.region || process.env.AWS_REGION || "ap-southeast-2";
+          const regionToUse =
+            options.region || process.env.AWS_REGION || "ap-southeast-2";
           // Import seedDB from deploy utils
           const { seedDB } = await import("../../utils/seed-db");
           await seedDB({

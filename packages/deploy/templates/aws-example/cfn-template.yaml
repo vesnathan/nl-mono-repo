@@ -6,6 +6,10 @@ Parameters:
     Type: String
     Description: Deployment stage (e.g., dev, prod)
     AllowedPattern: ^[a-zA-Z0-9-]+$
+  AppName:
+    Type: String
+    Description: Application short name (used in export names)
+    Default: awse
   TemplateBucketName:
     Type: String
     Description: Name of the S3 bucket containing nested stack templates

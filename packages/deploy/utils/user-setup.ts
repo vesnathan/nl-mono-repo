@@ -123,7 +123,11 @@ export class UserSetupManager {
         const outputsManager = new OutputsManager();
         const targetStackType =
           this.stackType === "awse" ? StackType.AwsExample : StackType.CWL;
-        const candidates = candidateExportNames(targetStackType, stage, "user-pool-id");
+        const candidates = candidateExportNames(
+          targetStackType,
+          stage,
+          "user-pool-id",
+        );
         const localOutput = await outputsManager.findOutputValueByCandidates(
           stage,
           candidates,
@@ -167,7 +171,11 @@ export class UserSetupManager {
       // Build candidate export names and prefer parameterized names, then legacy
       const targetStackType =
         this.stackType === "awse" ? StackType.AwsExample : StackType.CWL;
-      const candidates = candidateExportNames(targetStackType, stage, "user-pool-id");
+      const candidates = candidateExportNames(
+        targetStackType,
+        stage,
+        "user-pool-id",
+      );
       // Keep the original output key as a last-resort fallback
       candidates.push(outputKey);
 
