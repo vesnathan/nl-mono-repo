@@ -37,18 +37,20 @@ Conditions:
   HasKMSKey: !Not [!Equals [!Ref KMSKeyId, ""]]
 
 Outputs:
-  BucketName:
-    Value: !Ref AWSEBucket
+  AWSEBucketName:
     Description: Name of the application bucket
+    Value: !Ref AWSEBucket
     Export:
-      BucketName:
-        Value: !Ref AWSEBucket
-        Description: Name of the application S3 bucket
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-bucket"
 
-      BucketArn:
-        Value: !GetAtt AWSEBucket.Arn
-        Description: ARN of the application S3 bucket
+  AWSEBucketArn:
+    Description: ARN of the application S3 bucket
+    Value: !GetAtt AWSEBucket.Arn
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-bucket-arn"
 
-      BucketRegionalDomainName:
-        Value: !GetAtt AWSEBucket.RegionalDomainName
-        Description: Regional domain name of the application S3 bucket
+  AWSEBucketRegionalDomainName:
+    Description: Regional domain name of the application S3 bucket
+    Value: !GetAtt AWSEBucket.RegionalDomainName
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-bucket-regional-domain"

@@ -71,18 +71,14 @@ Resources:
           OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # CORS-S3Origin
 
 Outputs:
-  CloudFrontDistributionId:
-    Value: !Ref AppCloudFrontDistribution
+  AWSECloudFrontDistributionId:
     Description: "ID of the CloudFront distribution"
+    Value: !Ref AppCloudFrontDistribution
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-cloudfront-id"
 
-  CloudFrontDomainName:
-    Value: !GetAtt AppCloudFrontDistribution.DomainName
+  AWSECloudFrontDomainName:
     Description: "Domain name of the CloudFront distribution"
-
-    AWSECloudFrontDistributionId:
-      Value: !Ref AppCloudFrontDistribution
-      Description: "ID of the CloudFront distribution"
-
-    AWSECloudFrontDomainName:
-      Value: !GetAtt AppCloudFrontDistribution.DomainName
-      Description: "Domain name of the CloudFront distribution"
+    Value: !GetAtt AppCloudFrontDistribution.DomainName
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-cloudfront-domain"

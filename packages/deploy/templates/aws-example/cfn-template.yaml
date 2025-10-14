@@ -142,7 +142,7 @@ Outputs:
 
   WebsiteBucket:
     Description: "S3 bucket for frontend website assets"
-    Value: !GetAtt S3Stack.Outputs.BucketName
+    Value: !GetAtt S3Stack.Outputs.AWSEBucketName
     Export:
       Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-bucket"
 
