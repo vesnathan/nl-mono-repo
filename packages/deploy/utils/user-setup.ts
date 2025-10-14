@@ -25,6 +25,7 @@ import { CWL_COGNITO_GROUPS } from "../../cloudwatchlive/backend/constants/Clien
 import { COGNITO_GROUPS as AWSE_COGNITO_GROUPS } from "../../aws-example/backend/constants/ClientTypes";
 import { StackType, getStackName } from "../types";
 import { OutputsManager } from "../outputs-manager";
+import { getAppNameForStackType } from "../utils/stack-utils";
 
 export type StackTypeForUser = "cwl" | "awse";
 
@@ -160,29 +161,29 @@ export class UserSetupManager {
         new ListExportsCommand({}),
       );
 
-      // Try several likely export names to be resilient to small naming differences
-      // Build parameterized export names: prefer nlmonorepo-<appName>-<stage>-user-pool-id
-      const appName = this.stackType === "awse" ? "awse" : "cwl";
-      const possibleExportNames: string[] =
-        this.stackType === "awse"
-          ? [
-              `nlmonorepo-${appName}-${stage}-user-pool-id`,
-              `nlmonorepo-awsexample-${stage}-user-pool-id`,
-              `nlmonorepo-awse-${stage}-user-pool-id`,
-              `nlmonorepo-shared-${stage}-user-pool-id`,
-            ]
-          : [
-              `nlmonorepo-${appName}-${stage}-user-pool-id`,
-              `nlmonorepo-shared-${stage}-user-pool-id`,
-            ];
+      // Build a prioritized list of possible export names so deploy utilities
+      // can find the right exported value for a given appName/stage. Prefer
+      // the new parameterized pattern and keep legacy fallbacks for existing installs.
+      const appName = getAppNameForStackType(
+        this.stackType === "awse" ? StackType.AwsExample : StackType.CWL,
+      );
+
+      const possibleExportNames: string[] = [
+        // Preferred parameterized export
+        `nlmonorepo-${appName}-${stage}-user-pool-id`,
+        // Transitional/legacy fallbacks
+        `nlmonorepo-${appName}example-${stage}-user-pool-id`,
+        `nlmonorepo-${appName}-${stage}-user-pool-id`.replace("--", "-"),
+        `nlmonorepo-${appName}-${stage}-user-pool-id`.replace("-example", ""),
+        `AWSEUserPoolId`,
+        `CWLUserPoolId`,
+      ];
 
       const userPoolExport = listExportsResponse.Exports?.find((exp) =>
         possibleExportNames.includes(exp.Name || ""),
       );
 
-      if (userPoolExport?.Value) {
-        return userPoolExport.Value;
-      }
+      if (userPoolExport?.Value) return userPoolExport.Value;
 
       throw new Error(
         `Could not find Cognito User Pool ID for ${this.stackType} stage ${stage}`,

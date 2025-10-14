@@ -42,9 +42,7 @@ export const CLIENT_TYPES: readonly ClientTypeDefinition[] = [
 export type ClientType = (typeof CLIENT_TYPES)[number]["value"];
 
 // Helper to check if a string is a valid client type
-export const isValidClientType = (
-  value: string,
-): value is ClientType => {
+export const isValidClientType = (value: string): value is ClientType => {
   return CLIENT_TYPES.some((type) => type.value === value);
 };
 
@@ -58,6 +56,4 @@ export const getClientTypeDisplayName = (value: string): string => {
 export const COGNITO_GROUPS = CLIENT_TYPES.map((type) => type.value);
 
 // For GraphQL schema generation - extract just the values
-export const CLIENT_TYPE_ENUM_VALUES = CLIENT_TYPES.map(
-  (type) => type.value,
-);
+export const CLIENT_TYPE_ENUM_VALUES = CLIENT_TYPES.map((type) => type.value);

@@ -432,19 +432,21 @@ async function removePackageInteractive() {
       const rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, "utf8"));
       const frontendEntry = `packages/${longName}/frontend`;
       const backendEntry = `packages/${longName}/backend`;
-        if (Array.isArray(rootPkg.workspaces)) {
-          // Remove any workspace entries that reference this package directory (robust to variants)
-          rootPkg.workspaces = rootPkg.workspaces.filter((w) => {
-            if (typeof w !== "string") return true;
-            const normalized = w.replace(/\\\\/g, "/").trim();
-            // remove entries that contain the package path anywhere
-            if (normalized.includes(`packages/${longName}`)) return false;
-            // remove exact matches for frontend/backend
-            if (normalized === frontendEntry || normalized === backendEntry) return false;
-            // Also handle accidental single-token entries like the short name (e.g., 'osh')
-            if (normalized === longName || normalized === inferredShortName) return false;
-            return true;
-          });
+      if (Array.isArray(rootPkg.workspaces)) {
+        // Remove any workspace entries that reference this package directory (robust to variants)
+        rootPkg.workspaces = rootPkg.workspaces.filter((w) => {
+          if (typeof w !== "string") return true;
+          const normalized = w.replace(/\\\\/g, "/").trim();
+          // remove entries that contain the package path anywhere
+          if (normalized.includes(`packages/${longName}`)) return false;
+          // remove exact matches for frontend/backend
+          if (normalized === frontendEntry || normalized === backendEntry)
+            return false;
+          // Also handle accidental single-token entries like the short name (e.g., 'osh')
+          if (normalized === longName || normalized === inferredShortName)
+            return false;
+          return true;
+        });
         fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + "\n");
         console.log("Updated root package.json workspaces");
       }
@@ -1120,87 +1122,115 @@ async function main() {
   // Update the deploy package to include the new stack
   console.log("\n🔧 Adding stack type to deploy package...");
   try {
-          const deployTypesPath = path.join(root, "packages", "deploy", "types.ts");
-          if (fs.existsSync(deployTypesPath)) {
-            let content = fs.readFileSync(deployTypesPath, "utf8");
+    const deployTypesPath = path.join(root, "packages", "deploy", "types.ts");
+    if (fs.existsSync(deployTypesPath)) {
+      let content = fs.readFileSync(deployTypesPath, "utf8");
 
-            // Helper: insert text before the closing '};' or '];' for a block that starts at marker
-            function insertBeforeClosing(contentStr, marker, insertion) {
-              const start = contentStr.indexOf(marker);
-              if (start === -1) return contentStr;
-              const closeIdx = contentStr.indexOf('\n};', start);
-              if (closeIdx === -1) return contentStr;
-              return (
-                contentStr.slice(0, closeIdx) + '\n' + insertion + contentStr.slice(closeIdx)
-              );
-            }
+      // Helper: insert text before the closing '};' or '];' for a block that starts at marker
+      function insertBeforeClosing(contentStr, marker, insertion) {
+        const start = contentStr.indexOf(marker);
+        if (start === -1) return contentStr;
+        const closeIdx = contentStr.indexOf("\n};", start);
+        if (closeIdx === -1) return contentStr;
+        return (
+          contentStr.slice(0, closeIdx) +
+          "\n" +
+          insertion +
+          contentStr.slice(closeIdx)
+        );
+      }
 
-            // 1) Insert into StackType enum: place the new enum entry just before the STACK_ORDER declaration
-            if (!content.includes(`${pascalCaseName} = "${pascalCaseName}"`)) {
-              const stackOrderMarker = "export const STACK_ORDER = [";
-              const insertPos = content.indexOf(stackOrderMarker);
-              if (insertPos !== -1) {
-                // find the close brace '}' that ends the enum (search backwards from STACK_ORDER)
-                const enumClose = content.lastIndexOf('}', insertPos);
-                if (enumClose !== -1) {
-                  content =
-                    content.slice(0, enumClose) +
-                    `  ${pascalCaseName} = "${pascalCaseName}",\n` +
-                    content.slice(enumClose);
-                }
-              }
-            }
-
-            // 2) Add to STACK_ORDER array
-            if (!content.includes(`StackType.${pascalCaseName}`)) {
-              const stackOrderMarker = "export const STACK_ORDER = [";
-              const soStart = content.indexOf(stackOrderMarker);
-              if (soStart !== -1) {
-                const soClose = content.indexOf('];', soStart);
-                if (soClose !== -1) {
-                  content =
-                    content.slice(0, soClose) +
-                    `  StackType.${pascalCaseName},\n` +
-                    content.slice(soClose);
-                }
-              }
-            }
-
-            // 3) Add TEMPLATE_PATHS entry before closing of TEMPLATE_PATHS block
-            const tplMarker = "export const TEMPLATE_PATHS: Record<StackType, string> = {";
-            const tplEntry = `  [StackType.${pascalCaseName}]: join(__dirname, "templates/${longName}/cfn-template.yaml"),`;
-            if (!content.includes(`[StackType.${pascalCaseName}]`)) {
-              content = insertBeforeClosing(content, tplMarker, tplEntry);
-            }
-
-            // 4) Add TEMPLATE_RESOURCES_PATHS entry
-            const resMarker = "export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {";
-            const resEntry = `  [StackType.${pascalCaseName}]: join(__dirname, "templates/${longName}/"),`;
-            if (!content.includes(`[StackType.${pascalCaseName}]: join`)) {
-              content = insertBeforeClosing(content, resMarker, resEntry);
-            }
-
-            fs.writeFileSync(deployTypesPath, content, "utf8");
-            console.log("✅ Updated deploy/types.ts");
-            // Ensure deploy templates exist: copy from aws-example if available, else create a minimal placeholder
-            try {
-              const srcTemplates = path.join(root, "packages", "deploy", "templates", "aws-example");
-              const destTemplates = path.join(root, "packages", "deploy", "templates", longName);
-              if (!fs.existsSync(destTemplates)) {
-                if (fs.existsSync(srcTemplates)) {
-                  copyRecursive(srcTemplates, destTemplates);
-                  console.log(`✅ Copied deploy templates from aws-example to ${destTemplates}`);
-                } else {
-                  fs.mkdirSync(destTemplates, { recursive: true });
-                  const placeholder = `AWSTemplateFormatVersion: '2010-09-09'\nDescription: Placeholder template for ${projectTitle}\nResources: {}`;
-                  fs.writeFileSync(path.join(destTemplates, "cfn-template.yaml"), placeholder, "utf8");
-                  console.log(`⚠️  Created placeholder cfn-template.yaml at ${destTemplates}`);
-                }
-              }
-            } catch (copyErr) {
-              console.warn("⚠️  Failed to ensure deploy templates:", copyErr && copyErr.message ? copyErr.message : copyErr);
-            }
+      // 1) Insert into StackType enum: place the new enum entry just before the STACK_ORDER declaration
+      if (!content.includes(`${pascalCaseName} = "${pascalCaseName}"`)) {
+        const stackOrderMarker = "export const STACK_ORDER = [";
+        const insertPos = content.indexOf(stackOrderMarker);
+        if (insertPos !== -1) {
+          // find the close brace '}' that ends the enum (search backwards from STACK_ORDER)
+          const enumClose = content.lastIndexOf("}", insertPos);
+          if (enumClose !== -1) {
+            content =
+              content.slice(0, enumClose) +
+              `  ${pascalCaseName} = "${pascalCaseName}",\n` +
+              content.slice(enumClose);
           }
+        }
+      }
+
+      // 2) Add to STACK_ORDER array
+      if (!content.includes(`StackType.${pascalCaseName}`)) {
+        const stackOrderMarker = "export const STACK_ORDER = [";
+        const soStart = content.indexOf(stackOrderMarker);
+        if (soStart !== -1) {
+          const soClose = content.indexOf("];", soStart);
+          if (soClose !== -1) {
+            content =
+              content.slice(0, soClose) +
+              `  StackType.${pascalCaseName},\n` +
+              content.slice(soClose);
+          }
+        }
+      }
+
+      // 3) Add TEMPLATE_PATHS entry before closing of TEMPLATE_PATHS block
+      const tplMarker =
+        "export const TEMPLATE_PATHS: Record<StackType, string> = {";
+      const tplEntry = `  [StackType.${pascalCaseName}]: join(__dirname, "templates/${longName}/cfn-template.yaml"),`;
+      if (!content.includes(`[StackType.${pascalCaseName}]`)) {
+        content = insertBeforeClosing(content, tplMarker, tplEntry);
+      }
+
+      // 4) Add TEMPLATE_RESOURCES_PATHS entry
+      const resMarker =
+        "export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {";
+      const resEntry = `  [StackType.${pascalCaseName}]: join(__dirname, "templates/${longName}/"),`;
+      if (!content.includes(`[StackType.${pascalCaseName}]: join`)) {
+        content = insertBeforeClosing(content, resMarker, resEntry);
+      }
+
+      fs.writeFileSync(deployTypesPath, content, "utf8");
+      console.log("✅ Updated deploy/types.ts");
+      // Ensure deploy templates exist: copy from aws-example if available, else create a minimal placeholder
+      try {
+        const srcTemplates = path.join(
+          root,
+          "packages",
+          "deploy",
+          "templates",
+          "aws-example",
+        );
+        const destTemplates = path.join(
+          root,
+          "packages",
+          "deploy",
+          "templates",
+          longName,
+        );
+        if (!fs.existsSync(destTemplates)) {
+          if (fs.existsSync(srcTemplates)) {
+            copyRecursive(srcTemplates, destTemplates);
+            console.log(
+              `✅ Copied deploy templates from aws-example to ${destTemplates}`,
+            );
+          } else {
+            fs.mkdirSync(destTemplates, { recursive: true });
+            const placeholder = `AWSTemplateFormatVersion: '2010-09-09'\nDescription: Placeholder template for ${projectTitle}\nResources: {}`;
+            fs.writeFileSync(
+              path.join(destTemplates, "cfn-template.yaml"),
+              placeholder,
+              "utf8",
+            );
+            console.log(
+              `⚠️  Created placeholder cfn-template.yaml at ${destTemplates}`,
+            );
+          }
+        }
+      } catch (copyErr) {
+        console.warn(
+          "⚠️  Failed to ensure deploy templates:",
+          copyErr && copyErr.message ? copyErr.message : copyErr,
+        );
+      }
+    }
   } catch (e) {
     console.error("⚠️  Failed to update deploy types:", e.message);
     console.log(

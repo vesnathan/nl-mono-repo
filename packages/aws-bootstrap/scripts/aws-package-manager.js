@@ -168,17 +168,17 @@ function removeProjectConfigEntry(contentStr, pascal) {
   const idx = contentStr.indexOf(key);
   if (idx === -1) return contentStr;
   // start of the line that contains the key
-  let start = contentStr.lastIndexOf('\n', idx);
+  let start = contentStr.lastIndexOf("\n", idx);
   start = start === -1 ? 0 : start + 1;
   // find the first '{' after the key
-  const objStart = contentStr.indexOf('{', idx);
+  const objStart = contentStr.indexOf("{", idx);
   if (objStart === -1) return contentStr;
   let pos = objStart + 1;
   let depth = 1;
   while (pos < contentStr.length && depth > 0) {
     const ch = contentStr[pos];
-    if (ch === '{') depth++;
-    else if (ch === '}') depth--;
+    if (ch === "{") depth++;
+    else if (ch === "}") depth--;
     pos++;
   }
   if (depth !== 0) return contentStr; // malformed - bail out
@@ -770,8 +770,10 @@ async function removePackageInteractive() {
           if (typeof w !== "string") return true;
           const normalized = w.replace(/\\\\/g, "/").trim();
           if (normalized.includes(`packages/${longName}`)) return false;
-          if (normalized === frontendEntry || normalized === backendEntry) return false;
-          if (normalized === longName || normalized === inferredShortName) return false;
+          if (normalized === frontendEntry || normalized === backendEntry)
+            return false;
+          if (normalized === longName || normalized === inferredShortName)
+            return false;
           return true;
         });
       }
@@ -869,17 +871,17 @@ async function removePackageInteractive() {
         const idx = contentStr.indexOf(key);
         if (idx === -1) return contentStr;
         // start of the line that contains the key
-        let start = contentStr.lastIndexOf('\n', idx);
+        let start = contentStr.lastIndexOf("\n", idx);
         start = start === -1 ? 0 : start + 1;
         // find the first '{' after the key
-        const objStart = contentStr.indexOf('{', idx);
+        const objStart = contentStr.indexOf("{", idx);
         if (objStart === -1) return contentStr;
         let pos = objStart + 1;
         let depth = 1;
         while (pos < contentStr.length && depth > 0) {
           const ch = contentStr[pos];
-          if (ch === '{') depth++;
-          else if (ch === '}') depth--;
+          if (ch === "{") depth++;
+          else if (ch === "}") depth--;
           pos++;
         }
         if (depth !== 0) return contentStr; // malformed - bail out
@@ -1551,7 +1553,6 @@ async function main() {
     );
     if (!validateShortName(shortName)) {
       console.error(
-
         "❌ Invalid short name. Must be lowercase alphanumeric only.",
       );
       shortName = "";
@@ -1845,7 +1846,10 @@ async function main() {
       // Find the closing brace of the enum and add new entry before it
       const stackTypeEnumRegex = /(export enum StackType \{[\s\S]*?)(^\}$)/m;
       const enumMatch = content.match(stackTypeEnumRegex);
-      if (enumMatch && !enumMatch[1].includes(`${pascalCaseName} = "${pascalCaseName}"`)) {
+      if (
+        enumMatch &&
+        !enumMatch[1].includes(`${pascalCaseName} = "${pascalCaseName}"`)
+      ) {
         content = content.replace(
           stackTypeEnumRegex,
           `$1  ${pascalCaseName} = "${pascalCaseName}",\n$2`,
@@ -1854,22 +1858,29 @@ async function main() {
 
       // Add to STACK_ORDER
       // Find the closing bracket of the array and add new entry before it
-      const stackOrderRegex = /(export const STACK_ORDER: StackType\[\] = \[[\s\S]*?)(^\];$)/m;
+      const stackOrderRegex =
+        /(export const STACK_ORDER: StackType\[\] = \[[\s\S]*?)(^\];$)/m;
       const orderMatch = content.match(stackOrderRegex);
-      if (orderMatch && !orderMatch[1].includes(`StackType.${pascalCaseName}`)) {
+      if (
+        orderMatch &&
+        !orderMatch[1].includes(`StackType.${pascalCaseName}`)
+      ) {
         content = content.replace(
           stackOrderRegex,
           `$1  StackType.${pascalCaseName},\n$2`,
         );
       }
 
-          // Add template path (use normalized templateDirName)
+      // Add template path (use normalized templateDirName)
       // Find the closing }; of TEMPLATE_PATHS and add the new entry before it
-          const templatePathsRegex =
-            /(export const TEMPLATE_PATHS: Record<StackType, string> = \{[\s\S]*?)(^\};$)/m;
-          const templatePath = `join(__dirname, "templates/${templateDirName}/cfn-template.yaml")`;
+      const templatePathsRegex =
+        /(export const TEMPLATE_PATHS: Record<StackType, string> = \{[\s\S]*?)(^\};$)/m;
+      const templatePath = `join(__dirname, "templates/${templateDirName}/cfn-template.yaml")`;
       const pathsMatch = content.match(templatePathsRegex);
-      if (pathsMatch && !pathsMatch[1].includes(`[StackType.${pascalCaseName}]`)) {
+      if (
+        pathsMatch &&
+        !pathsMatch[1].includes(`[StackType.${pascalCaseName}]`)
+      ) {
         content = content.replace(
           templatePathsRegex,
           `$1  [StackType.${pascalCaseName}]: ${templatePath},\n$2`,
@@ -1882,7 +1893,10 @@ async function main() {
         /(export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = \{[\s\S]*?)(^\};$)/m;
       const resourcesPath = `join(__dirname, "templates/${templateDirName}/")`;
       const resourcesMatch = content.match(resourcesPathsRegex);
-      if (resourcesMatch && !resourcesMatch[1].includes(`[StackType.${pascalCaseName}]`)) {
+      if (
+        resourcesMatch &&
+        !resourcesMatch[1].includes(`[StackType.${pascalCaseName}]`)
+      ) {
         content = content.replace(
           resourcesPathsRegex,
           `$1  [StackType.${pascalCaseName}]: ${resourcesPath},\n$2`,
@@ -1894,21 +1908,44 @@ async function main() {
 
       // Ensure deploy templates exist: copy from aws-example if available, else create a minimal placeholder
       try {
-  const srcTemplates = path.join(root, "packages", "deploy", "templates", "aws-example");
-  const destTemplates = path.join(root, "packages", "deploy", "templates", templateDirName);
+        const srcTemplates = path.join(
+          root,
+          "packages",
+          "deploy",
+          "templates",
+          "aws-example",
+        );
+        const destTemplates = path.join(
+          root,
+          "packages",
+          "deploy",
+          "templates",
+          templateDirName,
+        );
         if (!fs.existsSync(destTemplates)) {
           if (fs.existsSync(srcTemplates)) {
             copyRecursive(srcTemplates, destTemplates);
-            console.log(`✅ Copied deploy templates from aws-example to ${destTemplates}`);
+            console.log(
+              `✅ Copied deploy templates from aws-example to ${destTemplates}`,
+            );
           } else {
             fs.mkdirSync(destTemplates, { recursive: true });
             const placeholder = `AWSTemplateFormatVersion: '2010-09-09'\nDescription: Placeholder template for ${projectTitle}\nResources: {}`;
-            fs.writeFileSync(path.join(destTemplates, "cfn-template.yaml"), placeholder, "utf8");
-            console.log(`⚠️  Created placeholder cfn-template.yaml at ${destTemplates}`);
+            fs.writeFileSync(
+              path.join(destTemplates, "cfn-template.yaml"),
+              placeholder,
+              "utf8",
+            );
+            console.log(
+              `⚠️  Created placeholder cfn-template.yaml at ${destTemplates}`,
+            );
           }
         }
       } catch (copyErr) {
-        console.warn("⚠️  Failed to ensure deploy templates:", copyErr && copyErr.message ? copyErr.message : copyErr);
+        console.warn(
+          "⚠️  Failed to ensure deploy templates:",
+          copyErr && copyErr.message ? copyErr.message : copyErr,
+        );
       }
     }
   } catch (e) {
@@ -1933,7 +1970,7 @@ async function main() {
       let content = fs.readFileSync(projectConfigPath, "utf8");
 
       // Create the new project configuration entry
-  const newProjectConfig = `\n  [StackType.${pascalCaseName}]: {\n    stackType: StackType.${pascalCaseName},\n    displayName: "${projectTitle}",\n    templateDir: "${templateDirName}",\n    packageDir: "${templateDirName}",\n    dependsOn: [StackType.Shared], // TODO: Update dependencies as needed\n    buckets: {\n      templates: "nlmonorepo-${templateDirName}-templates-{stage}",\n      frontend: "nlmonorepo-${shortName}-userfiles-{stage}",\n      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],\n    },\n    hasFrontend: true,\n    hasLambdas: true,\n    hasResolvers: true,\n  },\n`;
+      const newProjectConfig = `\n  [StackType.${pascalCaseName}]: {\n    stackType: StackType.${pascalCaseName},\n    displayName: "${projectTitle}",\n    templateDir: "${templateDirName}",\n    packageDir: "${templateDirName}",\n    dependsOn: [StackType.Shared], // TODO: Update dependencies as needed\n    buckets: {\n      templates: "nlmonorepo-${templateDirName}-templates-{stage}",\n      frontend: "nlmonorepo-${shortName}-userfiles-{stage}",\n      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],\n    },\n    hasFrontend: true,\n    hasLambdas: true,\n    hasResolvers: true,\n  },\n`;
 
       // Find the closing brace of PROJECT_CONFIGS and add the new entry before it
       // Use a greedy match to capture everything up to the final closing };

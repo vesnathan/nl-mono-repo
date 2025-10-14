@@ -185,6 +185,48 @@ export class OutputsManager {
     return output?.OutputValue || null;
   }
 
+  /**
+   * Search stored outputs for any output whose ExportName or OutputKey matches
+   * one of the provided candidate names. Returns the OutputValue of the first
+   * match or null if none found.
+   */
+  async findOutputValueByCandidates(
+    stage: string,
+    candidateNames: string[],
+  ): Promise<string | null> {
+    try {
+      const content = await readFile(this.outputsFilePath, "utf8");
+      const deploymentOutputs: DeploymentOutputs = JSON.parse(content);
+
+      if (deploymentOutputs.stage !== stage) {
+        logger.warning(
+          `Outputs file is for stage ${deploymentOutputs.stage}, but requested stage ${stage}`,
+        );
+        return null;
+      }
+
+      const stacks = deploymentOutputs.stacks || {};
+
+      for (const stackKey of Object.keys(stacks) as StackType[]) {
+        const stackOutputs = stacks[stackKey]?.outputs || [];
+        for (const out of stackOutputs) {
+          const exportName = out.ExportName || "";
+          const outputKey = out.OutputKey || "";
+          if (candidateNames.includes(exportName) || candidateNames.includes(outputKey)) {
+            return out.OutputValue || null;
+          }
+        }
+      }
+
+      return null;
+    } catch (error: unknown) {
+      logger.warning(
+        `Could not read deployment outputs for candidate search: ${(error as Error).message}`,
+      );
+      return null;
+    }
+  }
+
   async getAllOutputs(stage: string): Promise<DeploymentOutputs | null> {
     try {
       const content = await readFile(this.outputsFilePath, "utf8");
