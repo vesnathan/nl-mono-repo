@@ -74,11 +74,9 @@ Outputs:
   AWSECloudFrontDistributionId:
     Description: "ID of the CloudFront distribution"
     Value: !Ref AppCloudFrontDistribution
-    Export:
-      Name: !Sub "nlmonorepo-${AppName}-${Stage}-cloudfront-id"
+    # Export removed: top-level template will declare global export
 
   AWSECloudFrontDomainName:
     Description: "Domain name of the CloudFront distribution"
     Value: !GetAtt AppCloudFrontDistribution.DomainName
-    Export:
-      Name: !Sub "nlmonorepo-${AppName}-${Stage}-cloudfront-domain"
+    # Export removed: top-level template will declare global export

@@ -40,17 +40,14 @@ Outputs:
   AWSEBucketName:
     Description: Name of the application bucket
     Value: !Ref AWSEBucket
-    Export:
-      Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-bucket"
+    # Export removed: top-level template will declare global export
 
   AWSEBucketArn:
     Description: ARN of the application S3 bucket
     Value: !GetAtt AWSEBucket.Arn
-    Export:
-      Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-bucket-arn"
+    # Export removed: top-level template will declare global export
 
   AWSEBucketRegionalDomainName:
     Description: Regional domain name of the application S3 bucket
     Value: !GetAtt AWSEBucket.RegionalDomainName
-    Export:
-      Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-bucket-regional-domain"
+    # Export removed: top-level template will declare global export
