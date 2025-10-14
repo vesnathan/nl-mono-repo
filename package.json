@@ -10,9 +10,7 @@
     "packages/shared",
     "packages/waf",
     "packages/deploy",
-    "packages/ec2-vsc",
-    "packages/my-story-forge/frontend",
-    "packages/my-story-forge/backend"
+    "packages/ec2-vsc"
   ],
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.0.14",
