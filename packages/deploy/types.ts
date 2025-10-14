@@ -69,7 +69,6 @@ export enum StackType {
   Shared = "Shared",
   CWL = "CWL",
   AwsExample = "AwsExample",
-  MyStoryForge = "MyStoryForge",
 }
 
 export const STACK_ORDER: StackType[] = [
@@ -77,7 +76,6 @@ export const STACK_ORDER: StackType[] = [
   StackType.Shared,
   StackType.CWL,
   StackType.AwsExample,
-  StackType.MyStoryForge,
 ];
 
 export const TEMPLATE_PATHS: Record<StackType, string> = {
@@ -88,10 +86,6 @@ export const TEMPLATE_PATHS: Record<StackType, string> = {
     __dirname,
     "templates/aws-example/cfn-template.yaml",
   ),
-  [StackType.MyStoryForge]: join(
-    __dirname,
-    "templates/my-story-forge/cfn-template.yaml",
-  ),
 };
 
 export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
@@ -99,7 +93,6 @@ export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
   [StackType.Shared]: join(__dirname, "templates/shared/"),
   [StackType.CWL]: join(__dirname, "templates/cwl/"),
   [StackType.AwsExample]: join(__dirname, "templates/aws-example/"),
-  [StackType.MyStoryForge]: join(__dirname, "templates/my-story-forge/"),
 };
 
 export const getStackName = (stackType: StackType, stage: string) =>

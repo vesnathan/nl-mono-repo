@@ -120,9 +120,15 @@ Outputs:
     Value: !GetAtt AWSEDataTable.Arn
     Export:
       Name: !Sub ${AppName}-DataTableArn-${Stage}
-    DataTableName:
-      Description: "DynamoDB Data Table Name"
-      Value: !Ref AWSEDataTable
-      Export:
-        Name: !Sub "nlmonorepo-${AppName}-${Stage}-datatable-name"
+
+  DataTableName:
+    Description: "DynamoDB Data Table Name"
+    Value: !Ref AWSEDataTable
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-datatable-name"
+
+  AppSyncDynamoDBRoleArn:
+    Description: AppSync role ARN
+    Value: !GetAtt AppSyncDynamoDBRole.Arn
+    Export:
       Name: !Sub ${AppName}-AppSyncDynamoDBRoleArn-${Stage}
