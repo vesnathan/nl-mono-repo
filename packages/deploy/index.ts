@@ -25,6 +25,7 @@ import { deployCwl } from "./packages/cwl/cwl";
 import { deployAwsExample } from "./packages/aws-example/aws-example";
 import { ForceDeleteManager } from "./utils/force-delete-utils";
 import { OutputsManager } from "./outputs-manager";
+import { candidateExportNames } from "./utils/export-names";
 import {
   DependencyValidator,
   getDependencyChain,
@@ -687,11 +688,11 @@ class DeploymentManager {
       stackType === StackType.CWL ||
       stackType === StackType.AwsExample
     ) {
-      const webAclId = await this.outputsManager.getOutputValue(
-        StackType.WAF,
-        stage,
-        "WebACLId",
-      );
+      const webAclId =
+        (await this.outputsManager.findOutputValueByCandidates(
+          stage,
+          candidateExportNames(StackType.WAF, stage, "web-acl-id"),
+        )) || (await this.outputsManager.getOutputValue(StackType.WAF, stage, "WebACLId"));
       if (webAclId) {
         allParameters.push({
           ParameterKey: "WebACLId",
@@ -703,11 +704,11 @@ class DeploymentManager {
         );
       }
 
-      const webAclArn = await this.outputsManager.getOutputValue(
-        StackType.WAF,
-        stage,
-        "WebACLArn",
-      );
+      const webAclArn =
+        (await this.outputsManager.findOutputValueByCandidates(
+          stage,
+          candidateExportNames(StackType.WAF, stage, "web-acl-arn"),
+        )) || (await this.outputsManager.getOutputValue(StackType.WAF, stage, "WebACLArn"));
       if (webAclArn) {
         allParameters.push({
           ParameterKey: "WebACLArn",
@@ -721,11 +722,11 @@ class DeploymentManager {
     }
 
     if (stackType === StackType.CWL) {
-      const templateBucketName = await this.outputsManager.getOutputValue(
-        StackType.Shared,
-        stage,
-        "TemplateBucketName",
-      );
+      const templateBucketName =
+        (await this.outputsManager.findOutputValueByCandidates(
+          stage,
+          candidateExportNames(StackType.Shared, stage, "template-bucket-name"),
+        )) || (await this.outputsManager.getOutputValue(StackType.Shared, stage, "TemplateBucketName"));
       if (templateBucketName) {
         allParameters.push({
           ParameterKey: "SharedTemplateBucketName",
@@ -740,11 +741,11 @@ class DeploymentManager {
 
     if (stackType === StackType.AwsExample) {
       // Add KMS parameters from Shared stack
-      const kmsKeyId = await this.outputsManager.getOutputValue(
-        StackType.Shared,
-        stage,
-        "KMSKeyId",
-      );
+      const kmsKeyId =
+        (await this.outputsManager.findOutputValueByCandidates(
+          stage,
+          candidateExportNames(StackType.Shared, stage, "kms-key-id"),
+        )) || (await this.outputsManager.getOutputValue(StackType.Shared, stage, "KMSKeyId"));
       if (kmsKeyId) {
         allParameters.push({
           ParameterKey: "KMSKeyId",
@@ -756,11 +757,11 @@ class DeploymentManager {
         );
       }
 
-      const kmsKeyArn = await this.outputsManager.getOutputValue(
-        StackType.Shared,
-        stage,
-        "KMSKeyArn",
-      );
+      const kmsKeyArn =
+        (await this.outputsManager.findOutputValueByCandidates(
+          stage,
+          candidateExportNames(StackType.Shared, stage, "kms-key-arn"),
+        )) || (await this.outputsManager.getOutputValue(StackType.Shared, stage, "KMSKeyArn"));
       if (kmsKeyArn) {
         allParameters.push({
           ParameterKey: "KMSKeyArn",

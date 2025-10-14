@@ -29,6 +29,7 @@ import { ResolverCompiler } from "../../utils/resolver-compiler";
 import { LambdaCompiler } from "../../utils/lambda-compiler";
 import { S3BucketManager } from "../../utils/s3-bucket-manager";
 import { OutputsManager } from "../../outputs-manager";
+import { candidateExportNames } from "../../utils/export-names";
 import { addAppSyncBucketPolicy } from "../../utils/s3-resolver-validator";
 import { cleanupLogGroups } from "../../utils/loggroup-cleanup";
 import { createReadStream, readdirSync, statSync, existsSync } from "fs";
@@ -750,13 +751,26 @@ export async function deployAwsExample(
       }),
     );
 
-    const kmsKeyId = sharedStackData.Stacks?.[0]?.Outputs?.find(
+    let kmsKeyId = sharedStackData.Stacks?.[0]?.Outputs?.find(
       (output) => output.OutputKey === "KMSKeyId",
     )?.OutputValue;
 
-    const kmsKeyArn = sharedStackData.Stacks?.[0]?.Outputs?.find(
+    let kmsKeyArn = sharedStackData.Stacks?.[0]?.Outputs?.find(
       (output) => output.OutputKey === "KMSKeyArn",
     )?.OutputValue;
+
+    // Fallback: attempt to find parameterized/legacy export names in deployment outputs
+    if (!kmsKeyId || !kmsKeyArn) {
+      const outputsManager = new OutputsManager();
+      kmsKeyId =
+        kmsKeyId ||
+        (await outputsManager.findOutputValueByCandidates(options.stage, candidateExportNames(StackType.Shared, options.stage, "kms-key-id"))) ||
+        undefined;
+      kmsKeyArn =
+        kmsKeyArn ||
+        (await outputsManager.findOutputValueByCandidates(options.stage, candidateExportNames(StackType.Shared, options.stage, "kms-key-arn"))) ||
+        undefined;
+    }
 
     if (!kmsKeyId || !kmsKeyArn) {
       throw new Error("Failed to get KMS key information from shared stack");
@@ -766,16 +780,13 @@ export async function deployAwsExample(
     const outputsManager = new OutputsManager();
 
     // Get WAF Web ACL ID and ARN
-    const webAclId = await outputsManager.getOutputValue(
-      StackType.WAF,
-      options.stage,
-      "WebACLId",
-    );
-    const webAclArn = await outputsManager.getOutputValue(
-      StackType.WAF,
-      options.stage,
-      "WebACLArn",
-    );
+    const webAclId =
+      (await outputsManager.findOutputValueByCandidates(options.stage, candidateExportNames(StackType.WAF, options.stage, "web-acl-id"))) ||
+      (await outputsManager.getOutputValue(StackType.WAF, options.stage, "WebACLId"));
+
+    const webAclArn =
+      (await outputsManager.findOutputValueByCandidates(options.stage, candidateExportNames(StackType.WAF, options.stage, "web-acl-arn"))) ||
+      (await outputsManager.getOutputValue(StackType.WAF, options.stage, "WebACLArn"));
 
     if (!webAclId || !webAclArn) {
       throw new Error(

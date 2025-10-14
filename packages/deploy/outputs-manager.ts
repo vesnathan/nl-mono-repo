@@ -212,7 +212,10 @@ export class OutputsManager {
         for (const out of stackOutputs) {
           const exportName = out.ExportName || "";
           const outputKey = out.OutputKey || "";
-          if (candidateNames.includes(exportName) || candidateNames.includes(outputKey)) {
+          if (
+            candidateNames.includes(exportName) ||
+            candidateNames.includes(outputKey)
+          ) {
             return out.OutputValue || null;
           }
         }
