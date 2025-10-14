@@ -692,7 +692,12 @@ class DeploymentManager {
         (await this.outputsManager.findOutputValueByCandidates(
           stage,
           candidateExportNames(StackType.WAF, stage, "web-acl-id"),
-        )) || (await this.outputsManager.getOutputValue(StackType.WAF, stage, "WebACLId"));
+        )) ||
+        (await this.outputsManager.getOutputValue(
+          StackType.WAF,
+          stage,
+          "WebACLId",
+        ));
       if (webAclId) {
         allParameters.push({
           ParameterKey: "WebACLId",
@@ -708,7 +713,12 @@ class DeploymentManager {
         (await this.outputsManager.findOutputValueByCandidates(
           stage,
           candidateExportNames(StackType.WAF, stage, "web-acl-arn"),
-        )) || (await this.outputsManager.getOutputValue(StackType.WAF, stage, "WebACLArn"));
+        )) ||
+        (await this.outputsManager.getOutputValue(
+          StackType.WAF,
+          stage,
+          "WebACLArn",
+        ));
       if (webAclArn) {
         allParameters.push({
           ParameterKey: "WebACLArn",
@@ -726,7 +736,12 @@ class DeploymentManager {
         (await this.outputsManager.findOutputValueByCandidates(
           stage,
           candidateExportNames(StackType.Shared, stage, "template-bucket-name"),
-        )) || (await this.outputsManager.getOutputValue(StackType.Shared, stage, "TemplateBucketName"));
+        )) ||
+        (await this.outputsManager.getOutputValue(
+          StackType.Shared,
+          stage,
+          "TemplateBucketName",
+        ));
       if (templateBucketName) {
         allParameters.push({
           ParameterKey: "SharedTemplateBucketName",
@@ -745,7 +760,12 @@ class DeploymentManager {
         (await this.outputsManager.findOutputValueByCandidates(
           stage,
           candidateExportNames(StackType.Shared, stage, "kms-key-id"),
-        )) || (await this.outputsManager.getOutputValue(StackType.Shared, stage, "KMSKeyId"));
+        )) ||
+        (await this.outputsManager.getOutputValue(
+          StackType.Shared,
+          stage,
+          "KMSKeyId",
+        ));
       if (kmsKeyId) {
         allParameters.push({
           ParameterKey: "KMSKeyId",
@@ -761,7 +781,12 @@ class DeploymentManager {
         (await this.outputsManager.findOutputValueByCandidates(
           stage,
           candidateExportNames(StackType.Shared, stage, "kms-key-arn"),
-        )) || (await this.outputsManager.getOutputValue(StackType.Shared, stage, "KMSKeyArn"));
+        )) ||
+        (await this.outputsManager.getOutputValue(
+          StackType.Shared,
+          stage,
+          "KMSKeyArn",
+        ));
       if (kmsKeyArn) {
         allParameters.push({
           ParameterKey: "KMSKeyArn",

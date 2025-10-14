@@ -764,11 +764,17 @@ export async function deployAwsExample(
       const outputsManager = new OutputsManager();
       kmsKeyId =
         kmsKeyId ||
-        (await outputsManager.findOutputValueByCandidates(options.stage, candidateExportNames(StackType.Shared, options.stage, "kms-key-id"))) ||
+        (await outputsManager.findOutputValueByCandidates(
+          options.stage,
+          candidateExportNames(StackType.Shared, options.stage, "kms-key-id"),
+        )) ||
         undefined;
       kmsKeyArn =
         kmsKeyArn ||
-        (await outputsManager.findOutputValueByCandidates(options.stage, candidateExportNames(StackType.Shared, options.stage, "kms-key-arn"))) ||
+        (await outputsManager.findOutputValueByCandidates(
+          options.stage,
+          candidateExportNames(StackType.Shared, options.stage, "kms-key-arn"),
+        )) ||
         undefined;
     }
 
@@ -781,12 +787,26 @@ export async function deployAwsExample(
 
     // Get WAF Web ACL ID and ARN
     const webAclId =
-      (await outputsManager.findOutputValueByCandidates(options.stage, candidateExportNames(StackType.WAF, options.stage, "web-acl-id"))) ||
-      (await outputsManager.getOutputValue(StackType.WAF, options.stage, "WebACLId"));
+      (await outputsManager.findOutputValueByCandidates(
+        options.stage,
+        candidateExportNames(StackType.WAF, options.stage, "web-acl-id"),
+      )) ||
+      (await outputsManager.getOutputValue(
+        StackType.WAF,
+        options.stage,
+        "WebACLId",
+      ));
 
     const webAclArn =
-      (await outputsManager.findOutputValueByCandidates(options.stage, candidateExportNames(StackType.WAF, options.stage, "web-acl-arn"))) ||
-      (await outputsManager.getOutputValue(StackType.WAF, options.stage, "WebACLArn"));
+      (await outputsManager.findOutputValueByCandidates(
+        options.stage,
+        candidateExportNames(StackType.WAF, options.stage, "web-acl-arn"),
+      )) ||
+      (await outputsManager.getOutputValue(
+        StackType.WAF,
+        options.stage,
+        "WebACLArn",
+      ));
 
     if (!webAclId || !webAclArn) {
       throw new Error(

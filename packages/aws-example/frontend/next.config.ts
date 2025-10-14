@@ -27,23 +27,30 @@ const getDeploymentOutputs = () => {
       awseStack.outputs.find((o: Output) => o.OutputKey === key)?.OutputValue ||
       "";
 
-    // Fallback resolver: if the explicit AWSE keys are not found, attempt to
-    // find outputs by suffix heuristics so we can support parameterized export
-    // names like nlmonorepo-<AppName>-<Stage>-user-pool-id
-    const findBySuffix = (suffix: string) => {
-      const found = awseStack.outputs.find((o: Output) =>
-        o.OutputKey.toLowerCase().endsWith(suffix.toLowerCase()),
-      );
+    // Simple resolver: prefer ExportName matches (if present) or OutputKey suffix
+    const findOutputValue = (suffix: string) => {
+      const found = awseStack.outputs.find((o: Output) => {
+        const exportName = (o as unknown as { ExportName?: string }).ExportName;
+        if (
+          exportName &&
+          exportName.toLowerCase().endsWith(suffix.toLowerCase())
+        )
+          return true;
+        return o.OutputKey.toLowerCase().endsWith(suffix.toLowerCase());
+      });
       return found ? found.OutputValue : "";
     };
+
     const envVars = {
       NEXT_PUBLIC_USER_POOL_ID:
-        getValue("AWSEUserPoolId") || findBySuffix("user-pool-id"),
+        getValue("AWSEUserPoolId") || findOutputValue("user-pool-id"),
       NEXT_PUBLIC_USER_POOL_CLIENT_ID:
-        getValue("AWSEUserPoolClientId") || findBySuffix("user-pool-client-id"),
+        getValue("AWSEUserPoolClientId") ||
+        findOutputValue("user-pool-client-id"),
       NEXT_PUBLIC_IDENTITY_POOL_ID:
-        getValue("AWSEIdentityPoolId") || findBySuffix("identity-pool-id"),
-      NEXT_PUBLIC_GRAPHQL_URL: getValue("ApiUrl") || findBySuffix("api-url"),
+        getValue("AWSEIdentityPoolId") || findOutputValue("identity-pool-id"),
+      NEXT_PUBLIC_GRAPHQL_URL:
+        getValue("ApiUrl") || findOutputValue("api-url"),
     };
 
     // Check if any required env vars are missing
