@@ -49,8 +49,7 @@ const getDeploymentOutputs = () => {
         findOutputValue("user-pool-client-id"),
       NEXT_PUBLIC_IDENTITY_POOL_ID:
         getValue("AWSEIdentityPoolId") || findOutputValue("identity-pool-id"),
-      NEXT_PUBLIC_GRAPHQL_URL:
-        getValue("ApiUrl") || findOutputValue("api-url"),
+      NEXT_PUBLIC_GRAPHQL_URL: getValue("ApiUrl") || findOutputValue("api-url"),
     };
 
     // Check if any required env vars are missing
