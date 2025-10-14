@@ -1,5 +1,5 @@
 /**
- * AWSE Client Types - Single Source of Truth
+ *  Client Types - Single Source of Truth
  *
  * This file defines all client types used throughout the AWS Example application.
  * Any changes to client types should be made here and will automatically
@@ -18,7 +18,7 @@ export interface ClientTypeDefinition {
   description?: string;
 }
 
-export const AWSE_CLIENT_TYPES: readonly ClientTypeDefinition[] = [
+export const CLIENT_TYPES: readonly ClientTypeDefinition[] = [
   {
     id: "SiteAdmin",
     value: "SiteAdmin",
@@ -39,25 +39,25 @@ export const AWSE_CLIENT_TYPES: readonly ClientTypeDefinition[] = [
   },
 ] as const;
 
-export type AWSEClientType = (typeof AWSE_CLIENT_TYPES)[number]["value"];
+export type ClientType = (typeof CLIENT_TYPES)[number]["value"];
 
 // Helper to check if a string is a valid client type
-export const isValidAWSEClientType = (
+export const isValidClientType = (
   value: string,
-): value is AWSEClientType => {
-  return AWSE_CLIENT_TYPES.some((type) => type.value === value);
+): value is ClientType => {
+  return CLIENT_TYPES.some((type) => type.value === value);
 };
 
 // Get display name for a client type value
 export const getClientTypeDisplayName = (value: string): string => {
-  const clientType = AWSE_CLIENT_TYPES.find((type) => type.value === value);
+  const clientType = CLIENT_TYPES.find((type) => type.value === value);
   return clientType?.displayName || value;
 };
 
 // For use in Cognito group creation - extract just the values
-export const AWSE_COGNITO_GROUPS = AWSE_CLIENT_TYPES.map((type) => type.value);
+export const COGNITO_GROUPS = CLIENT_TYPES.map((type) => type.value);
 
 // For GraphQL schema generation - extract just the values
-export const AWSE_CLIENT_TYPE_ENUM_VALUES = AWSE_CLIENT_TYPES.map(
+export const CLIENT_TYPE_ENUM_VALUES = CLIENT_TYPES.map(
   (type) => type.value,
 );

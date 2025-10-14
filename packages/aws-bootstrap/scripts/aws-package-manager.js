@@ -161,6 +161,33 @@ function replaceTokensInTree(destPackagePath, replacements) {
   walk(destPackagePath);
 }
 
+// Safely remove a PROJECT_CONFIGS entry from project-config.ts by scanning
+// for the `[StackType.X]: { ... }` block and removing the balanced object.
+function removeProjectConfigEntry(contentStr, pascal) {
+  const key = `[StackType.${pascal}]:`;
+  const idx = contentStr.indexOf(key);
+  if (idx === -1) return contentStr;
+  // start of the line that contains the key
+  let start = contentStr.lastIndexOf('\n', idx);
+  start = start === -1 ? 0 : start + 1;
+  // find the first '{' after the key
+  const objStart = contentStr.indexOf('{', idx);
+  if (objStart === -1) return contentStr;
+  let pos = objStart + 1;
+  let depth = 1;
+  while (pos < contentStr.length && depth > 0) {
+    const ch = contentStr[pos];
+    if (ch === '{') depth++;
+    else if (ch === '}') depth--;
+    pos++;
+  }
+  if (depth !== 0) return contentStr; // malformed - bail out
+  // consume trailing comma/newlines
+  let end = pos;
+  while (end < contentStr.length && /[\s,]/.test(contentStr[end])) end++;
+  return contentStr.slice(0, start) + contentStr.slice(end);
+}
+
 // Sanitize component files: detect files that look like React components and
 // ensure filenames are PascalCase and update import paths inside the new
 // package so imports keep working.
@@ -732,21 +759,26 @@ async function removePackageInteractive() {
       const rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, "utf8"));
       const frontendEntry = `packages/${longName}/frontend`;
       const backendEntry = `packages/${longName}/backend`;
+      const inferredShortName = longName
+        .split("-")
+        .map((part) => part[0])
+        .join("")
+        .substring(0, 6);
       if (Array.isArray(rootPkg.workspaces)) {
         // Remove any workspace entries that reference this package directory (robust to variants)
         rootPkg.workspaces = rootPkg.workspaces.filter((w) => {
           if (typeof w !== "string") return true;
-          const normalized = w.replace(/\\\\/g, "/");
-          if (normalized.includes(`packages/${longName}/`)) return false;
-          // exact matches for older style
-          if (w === frontendEntry || w === backendEntry) return false;
+          const normalized = w.replace(/\\\\/g, "/").trim();
+          if (normalized.includes(`packages/${longName}`)) return false;
+          if (normalized === frontendEntry || normalized === backendEntry) return false;
+          if (normalized === longName || normalized === inferredShortName) return false;
           return true;
         });
       }
       // Remove dev script for this package (e.g., "dev:awse", "dev:da")
       if (rootPkg.scripts && typeof rootPkg.scripts === "object") {
-        const devScriptName = `dev:${shortName}`;
-        if (rootPkg.scripts[devScriptName]) {
+        const devScriptName = `dev:${inferredShortName}`;
+        if (rootPkg.scripts && rootPkg.scripts[devScriptName]) {
           delete rootPkg.scripts[devScriptName];
           console.log(`   Removed script: ${devScriptName}`);
         }
@@ -831,18 +863,39 @@ async function removePackageInteractive() {
       }
       // Auto-install is handled at the top-level main() via shouldAutoinstall flag.
 
-      // Remove the entire project config entry (multi-line)
-      // Match from [StackType.X]: { through the closing },
-      content = content.replace(
-        new RegExp(
-          `\\s*\\[StackType\\.${pascalCaseName}\\]:\\s*\\{[\\s\\S]*?\\},?\\n`,
-          "g",
-        ),
-        "",
-      );
+      // Safer removal: find the [StackType.X]: { ... } block and remove it by scanning braces
+      function removeProjectConfigEntry(contentStr, pascal) {
+        const key = `[StackType.${pascal}]:`;
+        const idx = contentStr.indexOf(key);
+        if (idx === -1) return contentStr;
+        // start of the line that contains the key
+        let start = contentStr.lastIndexOf('\n', idx);
+        start = start === -1 ? 0 : start + 1;
+        // find the first '{' after the key
+        const objStart = contentStr.indexOf('{', idx);
+        if (objStart === -1) return contentStr;
+        let pos = objStart + 1;
+        let depth = 1;
+        while (pos < contentStr.length && depth > 0) {
+          const ch = contentStr[pos];
+          if (ch === '{') depth++;
+          else if (ch === '}') depth--;
+          pos++;
+        }
+        if (depth !== 0) return contentStr; // malformed - bail out
+        // consume trailing comma/newlines
+        let end = pos;
+        while (end < contentStr.length && /[\s,]/.test(contentStr[end])) end++;
+        return contentStr.slice(0, start) + contentStr.slice(end);
+      }
 
-      fs.writeFileSync(projectConfigPath, content, "utf8");
-      console.log("Updated deploy/project-config.ts (best-effort)");
+      const updated = removeProjectConfigEntry(content, pascalCaseName);
+      if (updated !== content) {
+        fs.writeFileSync(projectConfigPath, updated, "utf8");
+        console.log("Updated deploy/project-config.ts (best-effort)");
+      } else {
+        console.log("No matching project-config.ts entry found (best-effort)");
+      }
     }
   } catch (e) {
     console.error("Failed to update deploy/project-config.ts:", e.message);
@@ -993,17 +1046,14 @@ function removePackageForce(longName) {
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join("");
 
-      // Remove the entire project config entry (multi-line)
-      content = content.replace(
-        new RegExp(
-          `\\s*\\[StackType\\.${pascalCaseName}\\]:\\s*\\{[\\s\\S]*?\\},?\\n`,
-          "g",
-        ),
-        "",
-      );
-
-      fs.writeFileSync(projectConfigPath, content, "utf8");
-      console.log("Updated deploy/project-config.ts (force-delete)");
+      // Remove the entire project config entry (multi-line) using the safer helper
+      const updated = removeProjectConfigEntry(content, pascalCaseName);
+      if (updated !== content) {
+        fs.writeFileSync(projectConfigPath, updated, "utf8");
+        console.log("Updated deploy/project-config.ts (force-delete)");
+      } else {
+        console.log("No matching project-config.ts entry found (force-delete)");
+      }
     }
   } catch (e) {
     console.error("Failed to update deploy/project-config.ts:", e.message);
@@ -1501,6 +1551,7 @@ async function main() {
     );
     if (!validateShortName(shortName)) {
       console.error(
+
         "❌ Invalid short name. Must be lowercase alphanumeric only.",
       );
       shortName = "";
@@ -1508,6 +1559,17 @@ async function main() {
   }
 
   const upperShortName = shortName.toUpperCase();
+
+  // Ensure we have a normalized kebab-case template directory name
+  // (in case user entered spaces or underscores). This name is used for
+  // files under packages/deploy/templates and for package directories.
+  const templateDirName = longName
+    .toLowerCase()
+    .replace(/\s+/g, "-") // spaces -> hyphen
+    .replace(/_+/g, "-") // underscores -> hyphen
+    .replace(/[^a-z0-9-]/g, "") // remove invalid chars
+    .replace(/-+/g, "-") // collapse multiple hyphens
+    .replace(/^-|-$/g, ""); // trim leading/trailing hyphens
 
   // Convert longName (kebab-case) to PascalCase for StackType enum
   // e.g., "my-awesome-app" -> "MyAwesomeApp"
@@ -1583,76 +1645,14 @@ async function main() {
 
   console.log("✅ Files copied successfully");
 
-  // Rename files that contain common placeholders in their filenames
-  console.log(
-    `\n🔄 Renaming files (placeholders → ${shortName}/${longName})...`,
-  );
-  // Perform PascalCase/uppercase filename renames first so we don't accidentally
-  // lowercase existing PascalCase component or symbol names when a later
-  // case-insensitive replace runs.
-  renameFilesWithPatterns(dest, [
-    { from: "AwsExample", to: pascalCaseName, flags: "g" },
-    { from: "AWSExample", to: pascalCaseName, flags: "g" },
-    { from: "Awse", to: capitalizedShortName, flags: "g" },
-    { from: "AWSE", to: upperShortName, flags: "g" },
-    // Lowercase / kebab-case replacements last (use word boundaries where helpful)
-    { from: "\\baws-example\\b", to: longName, flags: "gi" },
-    { from: "\\bawse\\b", to: shortName, flags: "g" },
-  ]);
-
-  console.log("✅ Files renamed successfully");
-
-  // Update package.json name fields
-  console.log(`\n📝 Updating package.json files...`);
+  // Only update package.json name fields inside the copied package.
+  // Intentionally avoid doing broad token replacements, filename renames,
+  // or component sanitization here — those were causing risky, repo-wide
+  // edits. If callers want to perform textual renames they can do so
+  // manually or via a separate opt-in tool.
+  console.log(`\n📝 Updating package.json files (names only)...`);
   updatePackageJsonNames(dest, longName, shortName);
-
   console.log("✅ package.json files updated");
-
-  // Replace tokens inside files
-  console.log(
-    `\n🔍 Replacing tokens in files (aws-example → ${longName}, awse → ${shortName})...`,
-  );
-  const replacements = [
-    // Replace hardcoded titles with project title (must be before identifier replacements)
-    {
-      from: "AWS Example Application",
-      to: `${projectTitle} Application`,
-      flags: "g",
-    },
-    { from: "AWS Example", to: projectTitle, flags: "g" },
-    // PascalCase and UPPERCASE replacements for component identifiers
-    // and exported symbols that are already PascalCase stay PascalCase.
-    { from: "AwsExample", to: pascalCaseName, flags: "g" },
-    { from: "AWSExample", to: pascalCaseName, flags: "g" },
-    { from: "Awse", to: capitalizedShortName, flags: "g" },
-    { from: "AWSE", to: upperShortName, flags: "g" },
-    // Lowercase / kebab-case replacements after. Use word boundaries to avoid
-    // touching parts of identifiers that were handled above.
-    { from: "\\baws-example\\b", to: longName, flags: "gi" },
-    { from: "\\baws_example\\b", to: longName, flags: "gi" },
-    { from: "\\bawse\\b", to: shortName, flags: "g" },
-  ];
-  replaceTokensInTree(dest, replacements);
-
-  console.log("✅ Tokens replaced successfully");
-
-  // Sanitize component filenames and update imports inside the created package
-  try {
-    sanitizeComponents(
-      dest,
-      longName,
-      shortName,
-      pascalCaseName,
-      capitalizedShortName,
-      upperShortName,
-    );
-    console.log("✅ Component sanitization complete");
-  } catch (e) {
-    console.warn(
-      "⚠️  Component sanitization failed (non-fatal):",
-      e && e.message ? e.message : e,
-    );
-  }
 
   // Add new package workspaces to root package.json (frontend/backend)
   console.log("\n🔧 Updating root package.json workspaces and scripts...");
@@ -1842,51 +1842,74 @@ async function main() {
       let content = fs.readFileSync(deployTypesPath, "utf8");
 
       // Add new stack type to enum (using PascalCase)
-      // Find the last entry in the enum (ends with ,) and insert after it
-      const stackTypeEnumRegex = /(export enum StackType \{[\s\S]*?),(\s*\})/;
-      if (!content.includes(`${pascalCaseName} = "${pascalCaseName}"`)) {
+      // Find the closing brace of the enum and add new entry before it
+      const stackTypeEnumRegex = /(export enum StackType \{[\s\S]*?)(^\}$)/m;
+      const enumMatch = content.match(stackTypeEnumRegex);
+      if (enumMatch && !enumMatch[1].includes(`${pascalCaseName} = "${pascalCaseName}"`)) {
         content = content.replace(
           stackTypeEnumRegex,
-          `$1,\n  ${pascalCaseName} = "${pascalCaseName}",$2`,
+          `$1  ${pascalCaseName} = "${pascalCaseName}",\n$2`,
         );
       }
 
       // Add to STACK_ORDER
-      // Find the last entry in the array (ends with ,) and insert after it
-      const stackOrderRegex = /(export const STACK_ORDER = \[[\s\S]*?),(\s*\])/;
-      if (!content.includes(`StackType.${pascalCaseName}`)) {
+      // Find the closing bracket of the array and add new entry before it
+      const stackOrderRegex = /(export const STACK_ORDER: StackType\[\] = \[[\s\S]*?)(^\];$)/m;
+      const orderMatch = content.match(stackOrderRegex);
+      if (orderMatch && !orderMatch[1].includes(`StackType.${pascalCaseName}`)) {
         content = content.replace(
           stackOrderRegex,
-          `$1,\n  StackType.${pascalCaseName},$2`,
+          `$1  StackType.${pascalCaseName},\n$2`,
         );
       }
 
-      // Add template path
-      // Find the last entry before the closing comment/brace
-      const templatePathsRegex =
-        /(export const TEMPLATE_PATHS: Record<StackType, string> = \{[\s\S]*?\),)(\s*\/\/[^\n]*\n\s*\})/;
-      const templatePath = `join(__dirname, "templates/${longName}/cfn-template.yaml")`;
-      if (!content.includes(`[StackType.${pascalCaseName}]`)) {
+          // Add template path (use normalized templateDirName)
+      // Find the closing }; of TEMPLATE_PATHS and add the new entry before it
+          const templatePathsRegex =
+            /(export const TEMPLATE_PATHS: Record<StackType, string> = \{[\s\S]*?)(^\};$)/m;
+          const templatePath = `join(__dirname, "templates/${templateDirName}/cfn-template.yaml")`;
+      const pathsMatch = content.match(templatePathsRegex);
+      if (pathsMatch && !pathsMatch[1].includes(`[StackType.${pascalCaseName}]`)) {
         content = content.replace(
           templatePathsRegex,
-          `$1\n  [StackType.${pascalCaseName}]: ${templatePath},$2`,
+          `$1  [StackType.${pascalCaseName}]: ${templatePath},\n$2`,
         );
       }
 
-      // Add template resources path
-      // Find the last entry before the closing comment/brace
+      // Add template resources path (use normalized templateDirName)
+      // Find the closing }; of TEMPLATE_RESOURCES_PATHS and add the new entry before it
       const resourcesPathsRegex =
-        /(export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = \{[\s\S]*?\),)(\s*\/\/[^\n]*\n\s*\})/;
-      const resourcesPath = `join(__dirname, "templates/${longName}/")`;
-      if (!content.includes(`[StackType.${pascalCaseName}]: join`)) {
+        /(export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = \{[\s\S]*?)(^\};$)/m;
+      const resourcesPath = `join(__dirname, "templates/${templateDirName}/")`;
+      const resourcesMatch = content.match(resourcesPathsRegex);
+      if (resourcesMatch && !resourcesMatch[1].includes(`[StackType.${pascalCaseName}]`)) {
         content = content.replace(
           resourcesPathsRegex,
-          `$1\n  [StackType.${pascalCaseName}]: ${resourcesPath},$2`,
+          `$1  [StackType.${pascalCaseName}]: ${resourcesPath},\n$2`,
         );
       }
 
       fs.writeFileSync(deployTypesPath, content, "utf8");
       console.log("✅ Updated deploy/types.ts");
+
+      // Ensure deploy templates exist: copy from aws-example if available, else create a minimal placeholder
+      try {
+  const srcTemplates = path.join(root, "packages", "deploy", "templates", "aws-example");
+  const destTemplates = path.join(root, "packages", "deploy", "templates", templateDirName);
+        if (!fs.existsSync(destTemplates)) {
+          if (fs.existsSync(srcTemplates)) {
+            copyRecursive(srcTemplates, destTemplates);
+            console.log(`✅ Copied deploy templates from aws-example to ${destTemplates}`);
+          } else {
+            fs.mkdirSync(destTemplates, { recursive: true });
+            const placeholder = `AWSTemplateFormatVersion: '2010-09-09'\nDescription: Placeholder template for ${projectTitle}\nResources: {}`;
+            fs.writeFileSync(path.join(destTemplates, "cfn-template.yaml"), placeholder, "utf8");
+            console.log(`⚠️  Created placeholder cfn-template.yaml at ${destTemplates}`);
+          }
+        }
+      } catch (copyErr) {
+        console.warn("⚠️  Failed to ensure deploy templates:", copyErr && copyErr.message ? copyErr.message : copyErr);
+      }
     }
   } catch (e) {
     console.error("⚠️  Failed to update deploy types:", e.message);
@@ -1910,11 +1933,12 @@ async function main() {
       let content = fs.readFileSync(projectConfigPath, "utf8");
 
       // Create the new project configuration entry
-      const newProjectConfig = `\n  [StackType.${pascalCaseName}]: {\n    stackType: StackType.${pascalCaseName},\n    displayName: "${projectTitle}",\n    templateDir: "${longName}",\n    packageDir: "${longName}",\n    dependsOn: [StackType.Shared], // TODO: Update dependencies as needed\n    buckets: {\n      templates: "nlmonorepo-${longName}-templates-{stage}",\n      frontend: "nlmonorepo-${shortName}-userfiles-{stage}",\n      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],\n    },\n    hasFrontend: true,\n    hasLambdas: true,\n    hasResolvers: true,\n  },\n`;
+  const newProjectConfig = `\n  [StackType.${pascalCaseName}]: {\n    stackType: StackType.${pascalCaseName},\n    displayName: "${projectTitle}",\n    templateDir: "${templateDirName}",\n    packageDir: "${templateDirName}",\n    dependsOn: [StackType.Shared], // TODO: Update dependencies as needed\n    buckets: {\n      templates: "nlmonorepo-${templateDirName}-templates-{stage}",\n      frontend: "nlmonorepo-${shortName}-userfiles-{stage}",\n      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],\n    },\n    hasFrontend: true,\n    hasLambdas: true,\n    hasResolvers: true,\n  },\n`;
 
-      // Find the last config entry (ends with },) and add after it
+      // Find the closing brace of PROJECT_CONFIGS and add the new entry before it
+      // Use a greedy match to capture everything up to the final closing };
       const projectConfigsRegex =
-        /(export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = \{[\s\S]*?  \},)(\s*\};)/;
+        /(export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = \{[\s\S]*)(^\};$)/m;
       if (!content.includes(`[StackType.${pascalCaseName}]:`)) {
         content = content.replace(
           projectConfigsRegex,

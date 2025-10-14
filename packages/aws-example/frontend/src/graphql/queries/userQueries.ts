@@ -1,16 +1,16 @@
 import { GraphQLResult, generateClient } from "aws-amplify/api";
-import { GetAWSEUserQuery, GetAWSEUserQueryVariables } from "@/types/gqlTypes";
+import { GetUserQuery, GetUserQueryVariables } from "@/types/gqlTypes";
 
 const amplifyGraphqlClient = generateClient();
 
 export const userQueryKeys = {
-  getAWSEUser: "getAWSEUser",
+  getUser: "getUser",
 };
 
-// getAWSEUser Query
-const getAWSEUserQueryStr = `
-    query GetAWSEUser($userId: String!) {
-      getAWSEUser(userId: $userId) {
+// getUser Query
+const getUserQueryStr = `
+    query GetUser($userId: String!) {
+      getUser(userId: $userId) {
         userId
         userAddedById
         privacyPolicy
@@ -26,15 +26,15 @@ const getAWSEUserQueryStr = `
     }
 `;
 
-export const getAWSEUserQueryKey = (userId: string) => [
-  userQueryKeys.getAWSEUser,
+export const getUserQueryKey = (userId: string) => [
+  userQueryKeys.getUser,
   userId,
 ];
 
-export const getAWSEUserQueryFn = (variables: GetAWSEUserQueryVariables) => {
+export const getUserQueryFn = (variables: GetUserQueryVariables) => {
   return amplifyGraphqlClient.graphql({
-    query: getAWSEUserQueryStr,
+    query: getUserQueryStr,
     variables,
     authMode: "userPool",
-  }) as Promise<GraphQLResult<GetAWSEUserQuery>>;
+  }) as Promise<GraphQLResult<GetUserQuery>>;
 };

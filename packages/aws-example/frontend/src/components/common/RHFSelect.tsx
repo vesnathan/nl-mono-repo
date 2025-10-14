@@ -5,12 +5,12 @@ import {
   PathValue,
   UseFormReturn,
 } from "react-hook-form";
-import { AWSESelect, AWSESelectProps } from "./AWSESelect";
+import { CustomSelect, CustomSelectPropsType } from "./CustomSelect";
 
 type RHFSelectProps<
   TValues extends FieldValues,
   TPath extends FieldPath<TValues>,
-> = Omit<AWSESelectProps, "value" | "isError" | "helperText"> & {
+> = Omit<CustomSelectPropsType, "value" | "isError" | "helperText"> & {
   form: UseFormReturn<TValues>;
   fieldPath: TPath;
   requiredMessage?: string;
@@ -28,7 +28,7 @@ export function RHFSelect<
     fieldPath,
     requiredMessage,
     customValidation,
-    ...awseSelectProps
+    ...CustomSelectProps
   } = props;
 
   return (
@@ -41,16 +41,16 @@ export function RHFSelect<
       }}
       render={({ field, fieldState }) => {
         return (
-          <AWSESelect
+          <CustomSelect
             value={field.value}
             isError={!!fieldState.error}
             helperText={fieldState.error?.message}
-            id={awseSelectProps.id ?? fieldPath}
-            testId={awseSelectProps.testId ?? fieldPath}
-            {...awseSelectProps}
+            id={CustomSelectProps.id ?? fieldPath}
+            testId={CustomSelectProps.testId ?? fieldPath}
+            {...CustomSelectProps}
             onChange={(v) => {
               field.onChange(v);
-              awseSelectProps?.onChange?.(v);
+              CustomSelectProps?.onChange?.(v);
             }}
           />
         );

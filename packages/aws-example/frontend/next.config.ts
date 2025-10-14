@@ -27,16 +27,28 @@ const getDeploymentOutputs = () => {
       awseStack.outputs.find((o: Output) => o.OutputKey === key)?.OutputValue ||
       "";
 
+    // Fallback resolver: if the explicit AWSE keys are not found, attempt to
+    // find outputs by suffix heuristics so we can support parameterized export
+    // names like nlmonorepo-<AppName>-<Stage>-user-pool-id
+    const findBySuffix = (suffix: string) => {
+      const found = awseStack.outputs.find((o: Output) =>
+        o.OutputKey.toLowerCase().endsWith(suffix.toLowerCase()),
+      );
+      return found ? found.OutputValue : "";
+    };
     const envVars = {
-      NEXT_PUBLIC_USER_POOL_ID: getValue("AWSEUserPoolId"),
-      NEXT_PUBLIC_USER_POOL_CLIENT_ID: getValue("AWSEUserPoolClientId"),
-      NEXT_PUBLIC_IDENTITY_POOL_ID: getValue("AWSEIdentityPoolId"),
-      NEXT_PUBLIC_GRAPHQL_URL: getValue("ApiUrl"),
+      NEXT_PUBLIC_USER_POOL_ID:
+        getValue("AWSEUserPoolId") || findBySuffix("user-pool-id"),
+      NEXT_PUBLIC_USER_POOL_CLIENT_ID:
+        getValue("AWSEUserPoolClientId") || findBySuffix("user-pool-client-id"),
+      NEXT_PUBLIC_IDENTITY_POOL_ID:
+        getValue("AWSEIdentityPoolId") || findBySuffix("identity-pool-id"),
+      NEXT_PUBLIC_GRAPHQL_URL: getValue("ApiUrl") || findBySuffix("api-url"),
     };
 
     // Check if any required env vars are missing
     const missingVars = Object.entries(envVars)
-      .filter(([_, value]) => !value)
+      .filter(([, value]) => !value)
       .map(([key]) => key);
 
     if (missingVars.length > 0) {
@@ -50,7 +62,7 @@ const getDeploymentOutputs = () => {
     }
 
     return envVars;
-  } catch (error) {
+  } catch {
     console.warn(
       "Could not read deployment-outputs.json. Using empty env vars for development.",
     );

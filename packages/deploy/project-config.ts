@@ -117,6 +117,22 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
     hasLambdas: true,
     hasResolvers: true,
   },
+
+  [StackType.MyStoryForge]: {
+    stackType: StackType.MyStoryForge,
+    displayName: "My Story Forge",
+    templateDir: "my-story-forge",
+    packageDir: "my-story-forge",
+    dependsOn: [StackType.Shared], // TODO: Update dependencies as needed
+    buckets: {
+      templates: "nlmonorepo-my-story-forge-templates-{stage}",
+      frontend: "nlmonorepo-msf-userfiles-{stage}",
+      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],
+    },
+    hasFrontend: true,
+    hasLambdas: true,
+    hasResolvers: true,
+  },
 };
 
 /**

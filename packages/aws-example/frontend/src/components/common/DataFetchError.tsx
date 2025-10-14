@@ -1,5 +1,5 @@
 import React from "react";
-import { AWSEButton } from "./AWSEButton";
+import { CustomButton } from "./CustomButton";
 
 interface Props {
   error: unknown;
@@ -20,7 +20,7 @@ export const DataFetchError: React.FC<Props> = ({
         {errorMessage || "An unexpected error occurred while fetching data"}
       </span>
       {retry && (
-        <AWSEButton
+        <CustomButton
           buttonText="Retry"
           onClick={retry}
           type="button"

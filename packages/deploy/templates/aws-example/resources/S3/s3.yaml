@@ -10,13 +10,16 @@ Parameters:
     Type: String
     Description: KMS Key ID for bucket encryption (optional)
     Default: ""
+  AppName:
+    Type: String
+    Description: Application short name used in resource naming (e.g., awse)
 
 Resources:
   # S3 Bucket for storing nextjs/react app
   AWSEBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "nlmonorepo-awse-userfiles-${Stage}"
+      BucketName: !Sub "nlmonorepo-${AppName}-userfiles-${Stage}"
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -34,20 +37,18 @@ Conditions:
   HasKMSKey: !Not [!Equals [!Ref KMSKeyId, ""]]
 
 Outputs:
-  AWSEBucketName:
+  BucketName:
     Value: !Ref AWSEBucket
-    Description: Name of the CloudWatchLive bucket
+    Description: Name of the application bucket
     Export:
-      Name: !Sub "awseUserFilesBucketName-${Stage}"
+      BucketName:
+        Value: !Ref AWSEBucket
+        Description: Name of the application S3 bucket
 
-  AWSEBucketArn:
-    Value: !GetAtt AWSEBucket.Arn
-    Description: ARN of the CloudWatchLive bucket
-    Export:
-      Name: !Sub "awseUserFilesBucketArn-${Stage}"
+      BucketArn:
+        Value: !GetAtt AWSEBucket.Arn
+        Description: ARN of the application S3 bucket
 
-  AWSEBucketRegionalDomainName:
-    Value: !GetAtt AWSEBucket.RegionalDomainName
-    Description: Regional domain name of the CloudWatchLive bucket
-    Export:
-      Name: !Sub "awseUserFilesBucketRegionalDomainName-${Stage}"
+      BucketRegionalDomainName:
+        Value: !GetAtt AWSEBucket.RegionalDomainName
+        Description: Regional domain name of the application S3 bucket

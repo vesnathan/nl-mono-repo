@@ -12,7 +12,7 @@ const triggerClassnames = [
   "data-[hover=true]:bg-white",
   "data-[focus=true]:border-primary-500",
   "data-[open=true]:border-primary-500",
-  // due to unable to set same border-error on AWSETextField,
+  // due to unable to set same border-error on CustomTextField,
   // comment this out for consistency
   // "data-[has-error=true]:border-error-500",
   "data-[disabled=true]:bg-neutral-100",
@@ -33,13 +33,13 @@ const ExtendedNextUISelect = extendVariants(Select, {
   },
 });
 
-export type AWSESelectOption<T extends string = string> = {
+export type CustomSelectOption<T extends string = string> = {
   id: T;
   value: React.ReactNode;
   textValue?: string;
 };
 
-export interface AWSESelectProps<T extends string = string> {
+export interface CustomSelectPropsType<T extends string = string> {
   id?: string;
   testId?: string;
 
@@ -50,7 +50,7 @@ export interface AWSESelectProps<T extends string = string> {
   isError?: boolean;
   helperText?: React.ReactNode;
 
-  options: AWSESelectOption<T>[];
+  options: CustomSelectOption<T>[];
   value?: T | number | null | undefined;
   onChange?: (value: T | "") => void;
   onFocus?: () => void;
@@ -80,7 +80,9 @@ export interface AWSESelectProps<T extends string = string> {
   isLoading?: boolean;
 }
 
-export function AWSESelect<T extends string>(props: AWSESelectProps<T>) {
+export function CustomSelect<T extends string>(
+  props: CustomSelectPropsType<T>,
+) {
   const {
     id,
     testId,

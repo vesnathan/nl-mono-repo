@@ -106,54 +106,54 @@ Resources:
 Outputs:
   ApiUrl:
     Description: AppSync API URL
-    Value: !GetAtt AppSyncStack.Outputs.AWSEAppSyncApiUrl
+    Value: !GetAtt AppSyncStack.Outputs.AppSyncApiUrl
     Export:
-      Name: !Sub nlmonorepo-awse-${Stage}-api-url
+      Name: !Sub nlmonorepo-${AppName}-${Stage}-api-url
 
   ApiId:
     Description: AppSync API ID
-    Value: !GetAtt AppSyncStack.Outputs.AWSEAppSyncApiId
+    Value: !GetAtt AppSyncStack.Outputs.AppSyncApiId
     Export:
-      Name: !Sub nlmonorepo-awse-${Stage}-api-id
+      Name: !Sub nlmonorepo-${AppName}-${Stage}-api-id
 
-  AWSEUserPoolId:
-    Description: "Cognito User Pool ID for AWSE"
+  UserPoolId:
+    Description: "Cognito User Pool ID for the application"
     Value: !GetAtt CognitoStack.Outputs.UserPoolId
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-user-pool-id"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-user-pool-id"
 
-  AWSEUserPoolClientId:
-    Description: "Cognito User Pool Client ID for AWSE"
+  UserPoolClientId:
+    Description: "Cognito User Pool Client ID for the application"
     Value: !GetAtt CognitoStack.Outputs.UserPoolClientId
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-user-pool-client-id"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-user-pool-client-id"
 
-  AWSEIdentityPoolId:
-    Description: "Cognito Identity Pool ID for AWSE"
+  IdentityPoolId:
+    Description: "Cognito Identity Pool ID for the application"
     Value: !GetAtt CognitoStack.Outputs.IdentityPoolId
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-identity-pool-id"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-identity-pool-id"
 
   WebsiteBucket:
     Description: "S3 bucket for frontend website assets"
-    Value: !GetAtt S3Stack.Outputs.AWSEBucketName
+    Value: !GetAtt S3Stack.Outputs.BucketName
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-website-bucket"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-bucket"
 
   CloudFrontDistributionId:
     Description: "CloudFront Distribution ID"
-    Value: !GetAtt CloudFrontStack.Outputs.AWSECloudFrontDistributionId
+    Value: !GetAtt CloudFrontStack.Outputs.CloudFrontDistributionId
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-cloudfront-id"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-cloudfront-id"
 
   CloudFrontDomainName:
     Description: "CloudFront Distribution Domain Name"
-    Value: !GetAtt CloudFrontStack.Outputs.AWSECloudFrontDomainName
+    Value: !GetAtt CloudFrontStack.Outputs.CloudFrontDomainName
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-cloudfront-domain"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-cloudfront-domain"
 
-  AWSEDataTableName:
+  DataTableName:
     Description: "DynamoDB Data Table Name"
-    Value: !GetAtt DynamoDbStack.Outputs.AWSEDataTableName
+    Value: !GetAtt DynamoDbStack.Outputs.DataTableName
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-datatable-name"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-datatable-name"

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AWSEButton } from "@/components/common/AWSEButton";
+import { CustomButton } from "@/components/common/CustomButton";
 
 export default function GlobalError({
   error,
@@ -14,7 +14,7 @@ export default function GlobalError({
     <div>
       <h2>Something went wrong!</h2>
       <p>{error.message}</p>
-      <AWSEButton
+      <CustomButton
         buttonText="Try again"
         onClick={() => reset()}
         type="button"

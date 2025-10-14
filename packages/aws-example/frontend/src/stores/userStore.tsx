@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { AWSEUser } from "@/types/gqlTypes";
+import { User } from "@/types/gqlTypes";
 
-const createDefaultAWSEUser = (): AWSEUser => ({
-  __typename: "AWSEUser",
+const createDefaultUser = (): User => ({
+  __typename: "User",
   userId: "",
   userEmail: "",
   userFirstName: "",
@@ -18,11 +18,11 @@ const createDefaultAWSEUser = (): AWSEUser => ({
 
 // --------------------user store-----------
 type UserStoreType = {
-  user: AWSEUser;
-  setUser: (user: AWSEUser) => void;
+  user: User;
+  setUser: (user: User) => void;
 };
 
 export const useUserStore = create<UserStoreType>((set) => ({
-  user: createDefaultAWSEUser(),
+  user: createDefaultUser(),
   setUser: (user) => set({ user }),
 }));

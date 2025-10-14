@@ -22,7 +22,7 @@ import {
 import { logger } from "./logger";
 import { REGEX } from "../../shared/constants/RegEx"; // Corrected import
 import { CWL_COGNITO_GROUPS } from "../../cloudwatchlive/backend/constants/ClientTypes";
-import { AWSE_COGNITO_GROUPS } from "../../aws-example/backend/constants/ClientTypes";
+import { COGNITO_GROUPS as AWSE_COGNITO_GROUPS } from "../../aws-example/backend/constants/ClientTypes";
 import { StackType, getStackName } from "../types";
 import { OutputsManager } from "../outputs-manager";
 
@@ -161,15 +161,18 @@ export class UserSetupManager {
       );
 
       // Try several likely export names to be resilient to small naming differences
+      // Build parameterized export names: prefer nlmonorepo-<appName>-<stage>-user-pool-id
+      const appName = this.stackType === "awse" ? "awse" : "cwl";
       const possibleExportNames: string[] =
         this.stackType === "awse"
           ? [
-              `nlmonorepo-awse-${stage}-user-pool-id`,
+              `nlmonorepo-${appName}-${stage}-user-pool-id`,
               `nlmonorepo-awsexample-${stage}-user-pool-id`,
+              `nlmonorepo-awse-${stage}-user-pool-id`,
               `nlmonorepo-shared-${stage}-user-pool-id`,
             ]
           : [
-              `nlmonorepo-cwl-${stage}-user-pool-id`,
+              `nlmonorepo-${appName}-${stage}-user-pool-id`,
               `nlmonorepo-shared-${stage}-user-pool-id`,
             ];
 
