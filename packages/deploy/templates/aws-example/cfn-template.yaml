@@ -106,6 +106,8 @@ Resources:
         UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
         SendWelcomeEmailFunctionArn: !GetAtt LambdaStack.Outputs.SendWelcomeEmailFunctionArn
         CreateCognitoUserFunctionArn: !GetAtt LambdaStack.Outputs.CreateCognitoUserFunctionArn
+        DataTableName: !GetAtt DynamoDbStack.Outputs.DataTableName
+        AppSyncDynamoDBRoleArn: !GetAtt DynamoDbStack.Outputs.AppSyncDynamoDBRoleArn
         ResolversBuildHash: !Ref ResolversBuildHash
         LogRetentionInDays: !Ref LogRetentionInDays
 

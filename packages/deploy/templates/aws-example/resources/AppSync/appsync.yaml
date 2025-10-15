@@ -9,6 +9,12 @@ Parameters:
   AppName:
     Type: String
     Description: Application Name (e.g., awse, wbc)
+  DataTableName:
+    Type: String
+    Description: DynamoDB table name for application data (passed from parent stack)
+  AppSyncDynamoDBRoleArn:
+    Type: String
+    Description: ARN of the IAM role AppSync should use to access DynamoDB (passed from parent)
   TemplateBucketName:
     Type: String
     Description: S3 bucket containing templates and resolvers
@@ -82,11 +88,9 @@ Resources:
       Name: !Sub "${AppName}MainTableDynamoDBDataSource" # Parameterized name
       Type: AMAZON_DYNAMODB
       DynamoDBConfig:
-        TableName:
-          Fn::ImportValue: !Sub "${AppName}-DataTableName-${Stage}" # Parameterized import
+        TableName: !Ref DataTableName
         AwsRegion: !Ref AWS::Region
-      ServiceRoleArn:
-        Fn::ImportValue: !Sub "${AppName}-AppSyncDynamoDBRoleArn-${Stage}" # Parameterized import
+      ServiceRoleArn: !Ref AppSyncDynamoDBRoleArn
 
   SendWelcomeEmailDataSource:
     Type: AWS::AppSync::DataSource
