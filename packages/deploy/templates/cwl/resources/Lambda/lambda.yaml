@@ -230,8 +230,7 @@ Outputs:
   SendWelcomeEmailFunctionArn:
     Value: !GetAtt SendWelcomeEmailFunction.Arn
     Description: ARN of the send welcome email Lambda function
-    Export:
-      Name: !Sub "${AppName}-SendWelcomeEmailFunctionArn-${Stage}"
+    # Export removed: top-level template will declare canonical exports
 
   SendWelcomeEmailFunctionName:
     Value: !Ref SendWelcomeEmailFunction
@@ -240,8 +239,7 @@ Outputs:
   CreateCognitoUserFunctionArn:
     Value: !GetAtt CreateCognitoUserFunction.Arn
     Description: ARN of the create Cognito user Lambda function
-    Export:
-      Name: !Sub "${AppName}-CreateCognitoUserFunctionArn-${Stage}"
+    # Export removed: top-level template will declare canonical exports
 
   CreateCognitoUserFunctionName:
     Value: !Ref CreateCognitoUserFunction

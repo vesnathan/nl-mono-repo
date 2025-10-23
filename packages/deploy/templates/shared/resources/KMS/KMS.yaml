@@ -53,10 +53,8 @@ Resources:
 Outputs:
   KMSKeyId:
     Value: !Ref cwlKMSKey
-    Export:
-      Name: !Sub shared-assets-cwlKMSKey-${Stage}
+    # Export removed: top-level template will declare canonical exports
 
   KMSKeyArn:
     Value: !GetAtt cwlKMSKey.Arn
-    Export:
-      Name: !Sub shared-assets-cwlKMSKeyArn-${Stage}
+    # Export removed: top-level template will declare canonical exports

@@ -1,0 +1,16 @@
+# Example operation to enable Amplify codegen for backend
+query GetUser($userId: String!) {
+  getUser(userId: $userId) {
+    userId
+    privacyPolicy
+    termsAndConditions
+    userAddedById
+    userCreated
+    userEmail
+    userTitle
+    userFirstName
+    userLastName
+    userPhone
+    clientType
+  }
+}

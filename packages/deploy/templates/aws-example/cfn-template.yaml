@@ -6,6 +6,10 @@ Parameters:
     Type: String
     Description: Deployment stage (e.g., dev, prod)
     AllowedPattern: ^[a-zA-Z0-9-]+$
+  AppName:
+    Type: String
+    Description: Application short name (used in export names)
+    Default: awse
   TemplateBucketName:
     Type: String
     Description: Name of the S3 bucket containing nested stack templates
@@ -37,7 +41,7 @@ Resources:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/DynamoDb/dynamoDb.yaml
       Parameters:
         Stage: !Ref Stage
-        AppName: awse
+        AppName: !Ref AppName
         KMSKeyArn: !Ref KMSKeyArn
 
   # S3 Buckets for frontend and assets
@@ -47,6 +51,7 @@ Resources:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/S3/s3.yaml
       Parameters:
         Stage: !Ref Stage
+        AppName: !Ref AppName
         KMSKeyId: !Ref KMSKeyId
 
   # Cognito Resources
@@ -56,6 +61,7 @@ Resources:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Cognito/cognito.yaml
       Parameters:
         Stage: !Ref Stage
+        AppName: !Ref AppName
 
   # CloudFront Distribution
   CloudFrontStack:
@@ -65,7 +71,7 @@ Resources:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/CloudFront/cloudfront.yaml
       Parameters:
         Stage: !Ref Stage
-        AppName: awse
+        AppName: !Ref AppName
         AppBucketName: !GetAtt S3Stack.Outputs.AWSEBucketName
         AppBucketArn: !GetAtt S3Stack.Outputs.AWSEBucketArn
         AppBucketRegionalDomainName: !GetAtt S3Stack.Outputs.AWSEBucketRegionalDomainName
@@ -78,11 +84,11 @@ Resources:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml
       Parameters:
         Stage: !Ref Stage
-        AppName: awse
-        AppCloudFrontDistributionId: !GetAtt CloudFrontStack.Outputs.AWSECloudFrontDistributionId
-        AppCloudFrontDomainName: !GetAtt CloudFrontStack.Outputs.AWSECloudFrontDomainName
+        AppName: !Ref AppName
+        AppCloudFrontDistributionId: !GetAtt CloudFrontStack.Outputs.CloudFrontDistributionId
+        AppCloudFrontDomainName: !GetAtt CloudFrontStack.Outputs.CloudFrontDomainName
         FromEmail: noreply@awsexample.com
-        AppURL: !Sub "https://${CloudFrontStack.Outputs.AWSECloudFrontDomainName}"
+        AppURL: !Sub "https://${CloudFrontStack.Outputs.CloudFrontDomainName}"
         TemplateBucketName: !Ref TemplateBucketName
         UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
         LogRetentionInDays: !Ref LogRetentionInDays
@@ -95,65 +101,67 @@ Resources:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/AppSync/appsync.yaml
       Parameters:
         Stage: !Ref Stage
-        AppName: awse
+        AppName: !Ref AppName
         TemplateBucketName: !Ref TemplateBucketName
         UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
         SendWelcomeEmailFunctionArn: !GetAtt LambdaStack.Outputs.SendWelcomeEmailFunctionArn
         CreateCognitoUserFunctionArn: !GetAtt LambdaStack.Outputs.CreateCognitoUserFunctionArn
+        DataTableName: !GetAtt DynamoDbStack.Outputs.DataTableName
+        AppSyncDynamoDBRoleArn: !GetAtt DynamoDbStack.Outputs.AppSyncDynamoDBRoleArn
         ResolversBuildHash: !Ref ResolversBuildHash
         LogRetentionInDays: !Ref LogRetentionInDays
 
 Outputs:
   ApiUrl:
     Description: AppSync API URL
-    Value: !GetAtt AppSyncStack.Outputs.AWSEAppSyncApiUrl
+    Value: !GetAtt AppSyncStack.Outputs.AppSyncApiUrl
     Export:
-      Name: !Sub nlmonorepo-awse-${Stage}-api-url
+      Name: !Sub nlmonorepo-${AppName}-${Stage}-api-url
 
   ApiId:
     Description: AppSync API ID
-    Value: !GetAtt AppSyncStack.Outputs.AWSEAppSyncApiId
+    Value: !GetAtt AppSyncStack.Outputs.AppSyncApiId
     Export:
-      Name: !Sub nlmonorepo-awse-${Stage}-api-id
+      Name: !Sub nlmonorepo-${AppName}-${Stage}-api-id
 
-  AWSEUserPoolId:
-    Description: "Cognito User Pool ID for AWSE"
+  UserPoolId:
+    Description: "Cognito User Pool ID for the application"
     Value: !GetAtt CognitoStack.Outputs.UserPoolId
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-user-pool-id"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-user-pool-id"
 
-  AWSEUserPoolClientId:
-    Description: "Cognito User Pool Client ID for AWSE"
+  UserPoolClientId:
+    Description: "Cognito User Pool Client ID for the application"
     Value: !GetAtt CognitoStack.Outputs.UserPoolClientId
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-user-pool-client-id"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-user-pool-client-id"
 
-  AWSEIdentityPoolId:
-    Description: "Cognito Identity Pool ID for AWSE"
+  IdentityPoolId:
+    Description: "Cognito Identity Pool ID for the application"
     Value: !GetAtt CognitoStack.Outputs.IdentityPoolId
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-identity-pool-id"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-identity-pool-id"
 
   WebsiteBucket:
     Description: "S3 bucket for frontend website assets"
     Value: !GetAtt S3Stack.Outputs.AWSEBucketName
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-website-bucket"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-bucket"
 
   CloudFrontDistributionId:
     Description: "CloudFront Distribution ID"
-    Value: !GetAtt CloudFrontStack.Outputs.AWSECloudFrontDistributionId
+    Value: !GetAtt CloudFrontStack.Outputs.CloudFrontDistributionId
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-cloudfront-id"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-cloudfront-id"
 
   CloudFrontDomainName:
     Description: "CloudFront Distribution Domain Name"
-    Value: !GetAtt CloudFrontStack.Outputs.AWSECloudFrontDomainName
+    Value: !GetAtt CloudFrontStack.Outputs.CloudFrontDomainName
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-cloudfront-domain"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-cloudfront-domain"
 
-  AWSEDataTableName:
+  DataTableName:
     Description: "DynamoDB Data Table Name"
-    Value: !GetAtt DynamoDbStack.Outputs.AWSEDataTableName
+    Value: !GetAtt DynamoDbStack.Outputs.DataTableName
     Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-datatable-name"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-datatable-name"

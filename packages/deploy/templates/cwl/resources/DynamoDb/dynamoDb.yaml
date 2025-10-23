@@ -113,16 +113,13 @@ Resources:
 Outputs:
   CWLDataTableName: # Output name expected by parent CWL stack
     Value: !Ref CWLDataTable
-    Export:
-      Name: !Sub ${AppName}-DataTableName-${Stage}
+    # Export removed: top-level template will declare canonical exports
 
   CWLDataTableArn: # Output name expected by parent CWL stack
     Value: !GetAtt CWLDataTable.Arn
-    Export:
-      Name: !Sub ${AppName}-DataTableArn-${Stage}
+    # Export removed: top-level template will declare canonical exports
 
   AppSyncDynamoDBRoleArn: # Added for AppSync DataSource ServiceRoleArn
     Description: ARN of the IAM role for AppSync to access DynamoDB
     Value: !GetAtt AppSyncDynamoDBRole.Arn
-    Export:
-      Name: !Sub ${AppName}-AppSyncDynamoDBRoleArn-${Stage}
+    # Export removed: top-level template will declare canonical exports

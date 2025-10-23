@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Deploy AWSE with Database Seeding
-# This script deploys the AWSE infrastructure and optionally seeds the database
+# Deploy  with Database Seeding
+# This script deploys the  infrastructure and optionally seeds the database
 
 set -e
 
@@ -12,7 +12,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🚀 AWSE Deployment with Database Seeding${NC}"
+echo -e "${BLUE}🚀  Deployment with Database Seeding${NC}"
 echo ""
 
 # Get stage from environment or parameter
@@ -28,15 +28,15 @@ echo ""
 cd "$(dirname "$0")/../../deploy"
 
 # Run the main deployment
-echo -e "${BLUE}📦 Deploying AWSE infrastructure...${NC}"
+echo -e "${BLUE}📦 Deploying  infrastructure...${NC}"
 echo ""
 
 # Assuming you have a deploy script or command
 # Adjust this based on your actual deployment method
-if [ -f "./deploy-awse.sh" ]; then
-    ./deploy-awse.sh "$STAGE"
+if [ -f "./deploy-.sh" ]; then
+    ./deploy-.sh "$STAGE"
 elif command -v tsx &> /dev/null; then
-    tsx deploy-awse-direct.ts "$STAGE"
+    tsx deploy--direct.ts "$STAGE"
 else
     echo -e "${YELLOW}⚠️  No deployment script found, skipping infrastructure deployment${NC}"
 fi
@@ -60,7 +60,7 @@ else
 fi
 
 echo ""
-echo -e "${GREEN}🎉 AWSE Deployment Complete!${NC}"
+echo -e "${GREEN}🎉  Deployment Complete!${NC}"
 echo ""
 echo -e "${BLUE}Next steps:${NC}"
 echo "  1. Test the deployment"

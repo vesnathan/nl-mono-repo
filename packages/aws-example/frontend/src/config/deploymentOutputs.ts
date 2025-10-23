@@ -30,6 +30,7 @@ export function getDeploymentOutput<T extends keyof DeploymentOutputMap>(
   // eslint-disable-next-line sonarjs/no-small-switch
   switch (outputType) {
     case "AWSE": {
+      // Use neutral NEXT_PUBLIC_* env vars (populated by next.config)
       const deploymentOutput: AWSEOutput = {
         awseUserPoolId: process.env.NEXT_PUBLIC_USER_POOL_ID || "",
         awseUserPoolClientId: process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID || "",

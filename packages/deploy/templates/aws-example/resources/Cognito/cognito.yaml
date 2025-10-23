@@ -5,6 +5,9 @@ Parameters:
   Stage:
     Type: String
     Description: Deployment stage (e.g., dev, prod)
+  AppName:
+    Type: String
+    Description: Application short name used in exported resource names
 
 Resources:
   UserPool:
@@ -71,6 +74,7 @@ Outputs:
   UserPoolId:
     Description: ID of the Cognito User Pool
     Value: !Ref UserPool
+    # Export removed: top-level template will declare global export
 
   UserPoolArn:
     Description: ARN of the Cognito User Pool
@@ -79,13 +83,14 @@ Outputs:
   UserPoolClientId:
     Description: ID of the Cognito User Pool Client
     Value: !Ref UserPoolClient
+    # Export removed: top-level template will declare global export
 
   UserPoolProviderName:
     Description: Provider name of the Cognito User Pool
     Value: !GetAtt UserPool.ProviderName
-    Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-user-pool-provider-name"
+    # Export removed: top-level template will declare canonical exports
 
   IdentityPoolId:
     Description: ID of the Cognito Identity Pool
     Value: !Ref IdentityPool
+    # Export removed: top-level template will declare global export

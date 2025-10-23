@@ -1,0 +1,234 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "AppSync Resources for the application"
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  AppName:
+    Type: String
+    Description: Application Name (e.g., tsh, wbc)
+  DataTableName:
+    Type: String
+    Description: DynamoDB table name for application data (passed from parent stack)
+  AppSyncDynamoDBRoleArn:
+    Type: String
+    Description: ARN of the IAM role AppSync should use to access DynamoDB (passed from parent)
+  TemplateBucketName:
+    Type: String
+    Description: S3 bucket containing templates and resolvers
+  ResolversBuildHash:
+    Type: String
+    Description: Optional build hash used to version resolver S3 keys (set by deploy script)
+  LogRetentionInDays:
+    Type: Number
+    Description: Number of days to retain CloudWatch Logs for AppSync and Lambda
+    Default: 14
+  UserPoolId:
+    Type: String
+    Description: Cognito User Pool ID
+  SendWelcomeEmailFunctionArn:
+    Type: String
+    Description: ARN of the Lambda function to send welcome emails
+  CreateCognitoUserFunctionArn:
+    Type: String
+    Description: ARN of the Lambda function to create Cognito users
+
+Resources:
+  AppSyncLoggingServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AppName}-appsync-logging-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub "${AppName}-appsync-logging-policy-${Stage}"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+  GraphQlApi:
+    Type: AWS::AppSync::GraphQLApi
+    Properties:
+      Name: !Sub "${AppName}-appsync-api-${Stage}"
+      AuthenticationType: AMAZON_COGNITO_USER_POOLS
+      UserPoolConfig:
+        UserPoolId: !Ref UserPoolId
+        DefaultAction: ALLOW
+        AwsRegion: ap-southeast-2
+      AdditionalAuthenticationProviders:
+        - AuthenticationType: AWS_IAM
+      LogConfig:
+        CloudWatchLogsRoleArn: !GetAtt AppSyncLoggingServiceRole.Arn
+        FieldLogLevel: ALL
+        ExcludeVerboseContent: false
+
+  GraphQlSchema:
+    Type: AWS::AppSync::GraphQLSchema
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      DefinitionS3Location: !Sub "s3://${TemplateBucketName}/schema.graphql"
+
+  MainTableDataSource: # Renamed from UsersTableDataSource for generality
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}MainTableDynamoDBDataSource" # Parameterized name
+      Type: AMAZON_DYNAMODB
+      DynamoDBConfig:
+        TableName: !Ref DataTableName
+        AwsRegion: !Ref AWS::Region
+      ServiceRoleArn: !Ref AppSyncDynamoDBRoleArn
+
+  SendWelcomeEmailDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}SendWelcomeEmailLambdaDataSource"
+      Type: AWS_LAMBDA
+      LambdaConfig:
+        LambdaFunctionArn: !Ref SendWelcomeEmailFunctionArn
+      ServiceRoleArn: !GetAtt AppSyncLambdaInvokeRole.Arn
+
+  CreateCognitoUserDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}CreateCognitoUserLambdaDataSource"
+      Type: AWS_LAMBDA
+      LambdaConfig:
+        LambdaFunctionArn: !Ref CreateCognitoUserFunctionArn
+      ServiceRoleArn: !GetAtt AppSyncLambdaInvokeRole.Arn
+
+  AppSyncLambdaInvokeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AppName}-appsync-lambda-invoke-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub "${AppName}-appsync-lambda-invoke-policy-${Stage}"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !Ref SendWelcomeEmailFunctionArn
+                  - !Ref CreateCognitoUserFunctionArn
+
+  # Resolvers - Assuming resolver field names (e.g., getUser) remain fixed in the schema for now
+  # If these also need to change based on AppName, the schema and resolver configs would need more significant updates.
+  GetUserResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      TypeName: Query
+      FieldName: getUser # This might need to be generic if schema changes
+      DataSourceName: !GetAtt MainTableDataSource.Name # Updated to MainTableDataSource
+      Kind: UNIT
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Queries/Query.getUser.js"
+
+  CreateUserResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      TypeName: Mutation
+      FieldName: createUser # This might need to be generic if schema changes
+      Kind: PIPELINE
+      PipelineConfig:
+        Functions:
+          - !GetAtt CreateCognitoUserFunction.FunctionId
+          - !GetAtt CreateUserDynamoDBFunction.FunctionId
+          - !GetAtt SendWelcomeEmailFunction.FunctionId
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      Code: |
+        export function request(ctx) {
+          return {};
+        }
+        export function response(ctx) {
+          return ctx.prev.result;
+        }
+
+  CreateCognitoUserFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}CreateCognitoUserFunction"
+      DataSourceName: !GetAtt CreateCognitoUserDataSource.Name
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.createCognitoUser.js"
+
+  CreateUserDynamoDBFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}CreateUserDynamoDBFunction"
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Mutations/Mutation.createUser.js"
+
+  SendWelcomeEmailFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}SendWelcomeEmailFunction"
+      DataSourceName: !GetAtt SendWelcomeEmailDataSource.Name
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Functions/Function.sendWelcomeEmail.js"
+
+  # Explicit AppSync LogGroup so we can control retention
+  # DeletionPolicy: Delete ensures LogGroup is removed when stack is deleted
+  AppSyncApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/appsync/apis/${GraphQlApi.ApiId}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+Outputs:
+  AppSyncApiUrl:
+    Value: !GetAtt GraphQlApi.GraphQLUrl
+    Description: "GraphQL URL for the AppSync API"
+
+  AppSyncRealtimeUrl:
+    Value: !GetAtt GraphQlApi.RealtimeUrl
+    Description: "Realtime URL for the AppSync API"
+
+  AppSyncApiId:
+    Value: !GetAtt GraphQlApi.ApiId
+    Description: "API ID for the AppSync API"
+
+  AppSyncLogGroupName:
+    Description: Name of the AppSync CloudWatch LogGroup
+    Value: !Sub "/aws/appsync/apis/${GraphQlApi.ApiId}"

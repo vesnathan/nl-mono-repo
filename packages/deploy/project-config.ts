@@ -45,6 +45,9 @@ export interface ProjectConfig {
 
   // Whether this project has AppSync resolvers
   hasResolvers?: boolean;
+
+  // Whether this project requires admin user creation in Cognito
+  requiresAdminUser?: boolean;
 }
 
 /**
@@ -101,6 +104,7 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
     hasFrontend: true,
     hasLambdas: true,
     hasResolvers: true,
+    requiresAdminUser: true,
   },
   [StackType.AwsExample]: {
     stackType: StackType.AwsExample,
@@ -111,6 +115,23 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
     buckets: {
       templates: "nlmonorepo-awsexample-templates-{stage}",
       frontend: "nlmonorepo-awsexample-frontend-{stage}",
+      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],
+    },
+    hasFrontend: true,
+    hasLambdas: true,
+    hasResolvers: true,
+    requiresAdminUser: true,
+  },
+
+  [StackType.TheStoryHub]: {
+    stackType: StackType.TheStoryHub,
+    displayName: "The Story Hub",
+    templateDir: "the-story-hub",
+    packageDir: "the-story-hub",
+    dependsOn: [StackType.WAF, StackType.Shared],
+    buckets: {
+      templates: "nlmonorepo-the-story-hub-templates-{stage}",
+      frontend: "nlmonorepo-tsh-userfiles-{stage}",
       additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],
     },
     hasFrontend: true,
@@ -165,7 +186,7 @@ export function getProjectBuckets(
   }
 
   // Remove duplicates
-  return [...new Set(buckets)];
+  return Array.from(new Set(buckets));
 }
 
 /**

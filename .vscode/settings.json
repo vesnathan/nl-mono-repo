@@ -10,13 +10,18 @@
         { "path": "packages/cloudwatchlive", "color": "blue",  "symbol": "🧪" },
         { "path": "packages/cloudwatchlive/frontend", "color": "blue",  "symbol": "🧪" },
         { "path": "packages//cloudwatchlive/backend", "color": "blue",  "symbol": "🧪" },
-        { "path": "packages/waf", "color": "yellow" },
-        { "path": "packages/shared", "color": "custom1" },
-        { "path": "packages/aws-example", "color": "custom2" },
-        { "path": "packages/newapp2", "color": "custom3" },
-        { "path": "packages/aws-bootstrap", "color": "custom4" },
-        { "path": "packages/deploy", "color": "custom5" }
-
+        { "path": "packages/waf", "color": "yellow", "symbol": "🛡️" },
+        { "path": "packages/waf/frontend", "color": "yellow", "symbol": "🛡️" },
+        { "path": "packages/waf/backend", "color": "yellow", "symbol": "🛡️" },
+        { "path": "packages/aws-example", "color": "green",  "symbol": "🌎" },
+        { "path": "packages/aws-example/frontend", "color": "green",  "symbol": "🌎" },
+        { "path": "packages/aws-example/backend", "color": "green",  "symbol": "🌎" },
+        { "path": "packages/shared-aws-assets",  "color": "#FF8800",  "symbol": "📦" },
+        { "path": "packages/shared-aws-assets/frontend",  "color": "#FF8800",  "symbol": "📦" },
+        { "path": "packages/shared-aws-assets/backend",  "color": "#FF8800",  "symbol": "📦" },
+        { "path": "packages/shared",  "color": "#00AAFF",  "symbol": "🔗" },
+        { "path": "packages/shared/frontend",  "color": "#00AAFF",  "symbol": "🔗" },
+        { "path": "packages/shared/backend",  "color": "#00AAFF",  "symbol": "🔗" }
     ],
     "eslint.workingDirectories": [{ "mode": "auto" }],
     // "search.exclude": {
