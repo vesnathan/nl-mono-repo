@@ -15,10 +15,10 @@ Following the pattern: `resolvers/{domain}/{QueryOrMutation}/{Type}.{operationNa
 ## Phase 1: Foundation & Data Models
 
 ### Prompt 1: Project Setup & Shared Types
-```
+
 I'm building a collaborative story branching platform (like GitHub for stories).
 
-Tech stack:
+**Tech stack:**
 - Next.js 15 (App Router)
 - React 19
 - AWS AppSync (GraphQL API with Cognito auth)
@@ -83,7 +83,7 @@ Create a monorepo structure with:
      AGE_RATINGS.some(r => r.id === value);
    ```
 
-   2. **ContentWarnings.ts** - Warning tag constants:
+2. **ContentWarnings.ts** - Warning tag constants:
    ```typescript
    export const CONTENT_WARNINGS = [
      'Sexual Content',
@@ -94,7 +94,7 @@ Create a monorepo structure with:
    ] as const;
    ```
 
-   3. **Genres.ts** - Story genre constants:
+3. **Genres.ts** - Story genre constants:
    ```typescript
    export const STORY_GENRES = [
      'Fantasy',
@@ -107,7 +107,8 @@ Create a monorepo structure with:
 
 **DO NOT create Zod schemas in backend** - those belong in frontend for form validation only.
 **DO NOT manually define Story, User, etc. types** - these come from GraphQL schema code generation.
-```
+
+---
 
 ### Prompt 2: DynamoDB Table Design
 ```
