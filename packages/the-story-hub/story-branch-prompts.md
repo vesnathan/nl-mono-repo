@@ -83,7 +83,7 @@ Create a monorepo structure with:
      AGE_RATINGS.some(r => r.id === value);
    ```
 
-2. **ContentWarnings.ts** - Warning tag constants:
+   2. **ContentWarnings.ts** - Warning tag constants:
    ```typescript
    export const CONTENT_WARNINGS = [
      'Sexual Content',
@@ -94,7 +94,7 @@ Create a monorepo structure with:
    ] as const;
    ```
 
-3. **Genres.ts** - Story genre constants:
+   3. **Genres.ts** - Story genre constants:
    ```typescript
    export const STORY_GENRES = [
      'Fantasy',
