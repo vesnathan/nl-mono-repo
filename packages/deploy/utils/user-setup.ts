@@ -64,7 +64,7 @@ const STACK_TYPE_CONFIG: Record<StackTypeForUser, StackTypeConfig> = {
     outputKey: "UserPoolId",
     adminGroup: "SiteAdmin",
     usesSimpleSchema: true,
-  }
+  },
 };
 
 export interface UserSetupOptions {

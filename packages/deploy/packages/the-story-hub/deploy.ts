@@ -228,7 +228,10 @@ export async function deployTheStoryHub(
   // Build GraphQL schema and types (always needed)
   try {
     logger.info("📦 Building GraphQL schema and types...");
-    const frontendPath = path.join(__dirname, "../../../the-story-hub/frontend");
+    const frontendPath = path.join(
+      __dirname,
+      "../../../the-story-hub/frontend",
+    );
 
     // Run build-gql to generate combined_schema.graphql and gqlTypes.ts
     logger.debug(`Running: yarn build-gql in ${frontendPath}`);

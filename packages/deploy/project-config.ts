@@ -123,28 +123,6 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
     requiresAdminUser: true,
   },
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   [StackType.TheStoryHub]: {
     stackType: StackType.TheStoryHub,
     displayName: "The Story Hub",

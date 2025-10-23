@@ -4,19 +4,19 @@
  * This replaces fragile regex manipulation with proper AST parsing
  */
 
-const ts = require('typescript');
-const fs = require('fs');
+const ts = require("typescript");
+const fs = require("fs");
 
 /**
  * Add an entry to a TypeScript enum
  */
 function addToEnum(filePath, enumName, entryName, entryValue) {
-  const sourceText = fs.readFileSync(filePath, 'utf8');
+  const sourceText = fs.readFileSync(filePath, "utf8");
   const sourceFile = ts.createSourceFile(
     filePath,
     sourceText,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let enumNode = null;
@@ -34,7 +34,7 @@ function addToEnum(filePath, enumName, entryName, entryValue) {
 
   // Check if entry already exists
   const exists = enumNode.members.some(
-    member => ts.isEnumMember(member) && member.name.text === entryName
+    (member) => ts.isEnumMember(member) && member.name.text === entryName,
   );
 
   if (exists) return false;
@@ -45,7 +45,10 @@ function addToEnum(filePath, enumName, entryName, entryValue) {
 
   // Find the position of the closing brace
   let closingBracePos = enumNode.getEnd() - 1;
-  while (closingBracePos > lastMemberEnd && sourceText[closingBracePos] !== '}') {
+  while (
+    closingBracePos > lastMemberEnd &&
+    sourceText[closingBracePos] !== "}"
+  ) {
     closingBracePos--;
   }
 
@@ -54,20 +57,21 @@ function addToEnum(filePath, enumName, entryName, entryValue) {
   while (checkPos < closingBracePos && /\s/.test(sourceText[checkPos])) {
     checkPos++;
   }
-  const needsComma = sourceText[checkPos] !== ',';
+  const needsComma = sourceText[checkPos] !== ",";
 
   // Build the new member with proper indentation
   const indent = getIndentation(sourceText, lastMember.getStart());
-  const newMember = `${needsComma ? ',' : ''}\n${indent}${entryName} = "${entryValue}",`;
+  const newMember = `${needsComma ? "," : ""}\n${indent}${entryName} = "${entryValue}",`;
 
   // Insert before the closing brace
   const newText =
     sourceText.slice(0, lastMemberEnd) +
     newMember +
     sourceText.slice(lastMemberEnd, closingBracePos) +
-    '\n' + sourceText.slice(closingBracePos);
+    "\n" +
+    sourceText.slice(closingBracePos);
 
-  fs.writeFileSync(filePath, newText, 'utf8');
+  fs.writeFileSync(filePath, newText, "utf8");
   return true;
 }
 
@@ -75,12 +79,12 @@ function addToEnum(filePath, enumName, entryName, entryValue) {
  * Add an entry to a TypeScript array constant
  */
 function addToArray(filePath, arrayName, newEntry) {
-  const sourceText = fs.readFileSync(filePath, 'utf8');
+  const sourceText = fs.readFileSync(filePath, "utf8");
   const sourceFile = ts.createSourceFile(
     filePath,
     sourceText,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let arrayNode = null;
@@ -110,8 +114,8 @@ function addToArray(filePath, arrayName, newEntry) {
   if (!arrayNode) return false;
 
   // Check if entry already exists
-  const exists = arrayNode.elements.some(
-    elem => sourceText.substring(elem.getStart(), elem.getEnd()).includes(newEntry)
+  const exists = arrayNode.elements.some((elem) =>
+    sourceText.substring(elem.getStart(), elem.getEnd()).includes(newEntry),
   );
 
   if (exists) return false;
@@ -121,7 +125,10 @@ function addToArray(filePath, arrayName, newEntry) {
   const lastElementEnd = lastElement.getEnd();
 
   let closingBracketPos = arrayNode.getEnd() - 1;
-  while (closingBracketPos > lastElementEnd && sourceText[closingBracketPos] !== ']') {
+  while (
+    closingBracketPos > lastElementEnd &&
+    sourceText[closingBracketPos] !== "]"
+  ) {
     closingBracketPos--;
   }
 
@@ -130,20 +137,21 @@ function addToArray(filePath, arrayName, newEntry) {
   while (checkPos < closingBracketPos && /\s/.test(sourceText[checkPos])) {
     checkPos++;
   }
-  const needsComma = sourceText[checkPos] !== ',';
+  const needsComma = sourceText[checkPos] !== ",";
 
   // Build the new element with proper indentation
   const indent = getIndentation(sourceText, lastElement.getStart());
-  const newElement = `${needsComma ? ',' : ''}\n${indent}${newEntry},`;
+  const newElement = `${needsComma ? "," : ""}\n${indent}${newEntry},`;
 
   // Insert before the closing bracket
   const newText =
     sourceText.slice(0, lastElementEnd) +
     newElement +
     sourceText.slice(lastElementEnd, closingBracketPos) +
-    '\n' + sourceText.slice(closingBracketPos);
+    "\n" +
+    sourceText.slice(closingBracketPos);
 
-  fs.writeFileSync(filePath, newText, 'utf8');
+  fs.writeFileSync(filePath, newText, "utf8");
   return true;
 }
 
@@ -151,12 +159,12 @@ function addToArray(filePath, arrayName, newEntry) {
  * Add an entry to a TypeScript Record/object literal
  */
 function addToRecord(filePath, recordName, key, value) {
-  const sourceText = fs.readFileSync(filePath, 'utf8');
+  const sourceText = fs.readFileSync(filePath, "utf8");
   const sourceFile = ts.createSourceFile(
     filePath,
     sourceText,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let objNode = null;
@@ -186,8 +194,8 @@ function addToRecord(filePath, recordName, key, value) {
   if (!objNode) return false;
 
   // Check if key already exists
-  const exists = objNode.properties.some(
-    prop => sourceText.substring(prop.getStart(), prop.getEnd()).includes(key)
+  const exists = objNode.properties.some((prop) =>
+    sourceText.substring(prop.getStart(), prop.getEnd()).includes(key),
   );
 
   if (exists) return false;
@@ -197,7 +205,7 @@ function addToRecord(filePath, recordName, key, value) {
   const lastPropEnd = lastProp.getEnd();
 
   let closingBracePos = objNode.getEnd() - 1;
-  while (closingBracePos > lastPropEnd && sourceText[closingBracePos] !== '}') {
+  while (closingBracePos > lastPropEnd && sourceText[closingBracePos] !== "}") {
     closingBracePos--;
   }
 
@@ -206,20 +214,21 @@ function addToRecord(filePath, recordName, key, value) {
   while (checkPos < closingBracePos && /\s/.test(sourceText[checkPos])) {
     checkPos++;
   }
-  const needsComma = sourceText[checkPos] !== ',';
+  const needsComma = sourceText[checkPos] !== ",";
 
   // Build the new property with proper indentation
   const indent = getIndentation(sourceText, lastProp.getStart());
-  const newProp = `${needsComma ? ',' : ''}\n${indent}${key}: ${value},`;
+  const newProp = `${needsComma ? "," : ""}\n${indent}${key}: ${value},`;
 
   // Insert before the closing brace
   const newText =
     sourceText.slice(0, lastPropEnd) +
     newProp +
     sourceText.slice(lastPropEnd, closingBracePos) +
-    '\n' + sourceText.slice(closingBracePos);
+    "\n" +
+    sourceText.slice(closingBracePos);
 
-  fs.writeFileSync(filePath, newText, 'utf8');
+  fs.writeFileSync(filePath, newText, "utf8");
   return true;
 }
 
@@ -227,10 +236,14 @@ function addToRecord(filePath, recordName, key, value) {
  * Add an else-if block to the deployStack method
  */
 function addDeployHandler(filePath, stackTypeName, handlerFunctionName) {
-  const sourceText = fs.readFileSync(filePath, 'utf8');
+  const sourceText = fs.readFileSync(filePath, "utf8");
 
   // Check if handler call already exists
-  if (sourceText.includes(`deploy${handlerFunctionName}(deploymentOptionsWithRegion)`)) {
+  if (
+    sourceText.includes(
+      `deploy${handlerFunctionName}(deploymentOptionsWithRegion)`,
+    )
+  ) {
     return false;
   }
 
@@ -238,7 +251,7 @@ function addDeployHandler(filePath, stackTypeName, handlerFunctionName) {
     filePath,
     sourceText,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let lastElseIf = null;
@@ -249,7 +262,7 @@ function addDeployHandler(filePath, stackTypeName, handlerFunctionName) {
       ts.isMethodDeclaration(node) &&
       node.name &&
       ts.isIdentifier(node.name) &&
-      node.name.text === 'deployStack' &&
+      node.name.text === "deployStack" &&
       node.body
     ) {
       // Find the last "else if (stackType === StackType.XXX)" block
@@ -259,7 +272,9 @@ function addDeployHandler(filePath, stackTypeName, handlerFunctionName) {
           if (
             stmt.expression &&
             ts.isBinaryExpression(stmt.expression) &&
-            sourceText.substring(stmt.expression.getStart(), stmt.expression.getEnd()).includes('stackType === StackType.')
+            sourceText
+              .substring(stmt.expression.getStart(), stmt.expression.getEnd())
+              .includes("stackType === StackType.")
           ) {
             lastElseIf = stmt;
           }
@@ -295,15 +310,16 @@ function addDeployHandler(filePath, stackTypeName, handlerFunctionName) {
   const thenEnd = lastElseIf.thenStatement.getEnd();
 
   // Insert new else-if block
-  const indent = '      ';
+  const indent = "      ";
   const newBlock = ` else if (stackType === StackType.${stackTypeName}) {
         // Deploy ${stackTypeName} stack
         await deploy${handlerFunctionName}(deploymentOptionsWithRegion);
       }`;
 
-  const newText = sourceText.slice(0, thenEnd) + newBlock + sourceText.slice(thenEnd);
+  const newText =
+    sourceText.slice(0, thenEnd) + newBlock + sourceText.slice(thenEnd);
 
-  fs.writeFileSync(filePath, newText, 'utf8');
+  fs.writeFileSync(filePath, newText, "utf8");
   return true;
 }
 
@@ -319,7 +335,7 @@ function addDeployHandler(filePath, stackTypeName, handlerFunctionName) {
  * @returns {boolean} - True if added, false if already exists
  */
 function addImport(filePath, importName, importPath, alias = null) {
-  const sourceText = fs.readFileSync(filePath, 'utf8');
+  const sourceText = fs.readFileSync(filePath, "utf8");
 
   // Check if import already exists
   if (sourceText.includes(`from "${importPath}"`)) {
@@ -330,7 +346,7 @@ function addImport(filePath, importName, importPath, alias = null) {
     filePath,
     sourceText,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let lastImportEnd = 0;
@@ -345,12 +361,13 @@ function addImport(filePath, importName, importPath, alias = null) {
   visit(sourceFile);
 
   if (lastImportEnd > 0) {
-    const importSpec = alias
-      ? `${importName} as ${alias}`
-      : importName;
+    const importSpec = alias ? `${importName} as ${alias}` : importName;
     const newImport = `\nimport { ${importSpec} } from "${importPath}";`;
-    const newText = sourceText.slice(0, lastImportEnd) + newImport + sourceText.slice(lastImportEnd);
-    fs.writeFileSync(filePath, newText, 'utf8');
+    const newText =
+      sourceText.slice(0, lastImportEnd) +
+      newImport +
+      sourceText.slice(lastImportEnd);
+    fs.writeFileSync(filePath, newText, "utf8");
     return true;
   }
 
@@ -362,12 +379,16 @@ function addImport(filePath, importName, importPath, alias = null) {
  */
 function getIndentation(text, pos) {
   let lineStart = pos;
-  while (lineStart > 0 && text[lineStart - 1] !== '\n') {
+  while (lineStart > 0 && text[lineStart - 1] !== "\n") {
     lineStart--;
   }
 
-  let indent = '';
-  for (let i = lineStart; i < text.length && (text[i] === ' ' || text[i] === '\t'); i++) {
+  let indent = "";
+  for (
+    let i = lineStart;
+    i < text.length && (text[i] === " " || text[i] === "\t");
+    i++
+  ) {
     indent += text[i];
   }
 
@@ -378,12 +399,12 @@ function getIndentation(text, pos) {
  * Remove an entry from a TypeScript enum
  */
 function removeFromEnum(filePath, enumName, entryName) {
-  const sourceText = fs.readFileSync(filePath, 'utf8');
+  const sourceText = fs.readFileSync(filePath, "utf8");
   const sourceFile = ts.createSourceFile(
     filePath,
     sourceText,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let enumNode = null;
@@ -393,7 +414,7 @@ function removeFromEnum(filePath, enumName, entryName) {
     if (ts.isEnumDeclaration(node) && node.name.text === enumName) {
       enumNode = node;
       targetMember = node.members.find(
-        member => ts.isEnumMember(member) && member.name.text === entryName
+        (member) => ts.isEnumMember(member) && member.name.text === entryName,
       );
     }
     ts.forEachChild(node, visit);
@@ -409,22 +430,22 @@ function removeFromEnum(filePath, enumName, entryName) {
 
   // Find line start
   let lineStart = memberStart;
-  while (lineStart > 0 && sourceText[lineStart - 1] !== '\n') {
+  while (lineStart > 0 && sourceText[lineStart - 1] !== "\n") {
     lineStart--;
   }
 
   // Find line end (including comma and newline)
   let lineEnd = memberEnd;
-  while (lineEnd < sourceText.length && sourceText[lineEnd] !== '\n') {
+  while (lineEnd < sourceText.length && sourceText[lineEnd] !== "\n") {
     lineEnd++;
   }
-  if (lineEnd < sourceText.length && sourceText[lineEnd] === '\n') {
+  if (lineEnd < sourceText.length && sourceText[lineEnd] === "\n") {
     lineEnd++; // Include the newline
   }
 
   const newText = sourceText.slice(0, lineStart) + sourceText.slice(lineEnd);
 
-  fs.writeFileSync(filePath, newText, 'utf8');
+  fs.writeFileSync(filePath, newText, "utf8");
   return true;
 }
 
@@ -432,12 +453,12 @@ function removeFromEnum(filePath, enumName, entryName) {
  * Remove an entry from a TypeScript array
  */
 function removeFromArray(filePath, arrayName, entryPattern) {
-  const sourceText = fs.readFileSync(filePath, 'utf8');
+  const sourceText = fs.readFileSync(filePath, "utf8");
   const sourceFile = ts.createSourceFile(
     filePath,
     sourceText,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let arrayNode = null;
@@ -457,8 +478,10 @@ function removeFromArray(filePath, arrayName, entryPattern) {
         ts.isArrayLiteralExpression(decl.initializer)
       ) {
         arrayNode = decl.initializer;
-        targetElement = arrayNode.elements.find(
-          elem => sourceText.substring(elem.getStart(), elem.getEnd()).includes(entryPattern)
+        targetElement = arrayNode.elements.find((elem) =>
+          sourceText
+            .substring(elem.getStart(), elem.getEnd())
+            .includes(entryPattern),
         );
       }
     }
@@ -475,21 +498,21 @@ function removeFromArray(filePath, arrayName, entryPattern) {
   const elemEnd = targetElement.getEnd();
 
   let lineStart = elemStart;
-  while (lineStart > 0 && sourceText[lineStart - 1] !== '\n') {
+  while (lineStart > 0 && sourceText[lineStart - 1] !== "\n") {
     lineStart--;
   }
 
   let lineEnd = elemEnd;
-  while (lineEnd < sourceText.length && sourceText[lineEnd] !== '\n') {
+  while (lineEnd < sourceText.length && sourceText[lineEnd] !== "\n") {
     lineEnd++;
   }
-  if (lineEnd < sourceText.length && sourceText[lineEnd] === '\n') {
+  if (lineEnd < sourceText.length && sourceText[lineEnd] === "\n") {
     lineEnd++;
   }
 
   const newText = sourceText.slice(0, lineStart) + sourceText.slice(lineEnd);
 
-  fs.writeFileSync(filePath, newText, 'utf8');
+  fs.writeFileSync(filePath, newText, "utf8");
   return true;
 }
 
@@ -497,12 +520,12 @@ function removeFromArray(filePath, arrayName, entryPattern) {
  * Remove an entry from a TypeScript Record/object literal
  */
 function removeFromRecord(filePath, recordName, keyPattern) {
-  const sourceText = fs.readFileSync(filePath, 'utf8');
+  const sourceText = fs.readFileSync(filePath, "utf8");
   const sourceFile = ts.createSourceFile(
     filePath,
     sourceText,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let objNode = null;
@@ -522,8 +545,10 @@ function removeFromRecord(filePath, recordName, keyPattern) {
         ts.isObjectLiteralExpression(decl.initializer)
       ) {
         objNode = decl.initializer;
-        targetProp = objNode.properties.find(
-          prop => sourceText.substring(prop.getStart(), prop.getEnd()).includes(keyPattern)
+        targetProp = objNode.properties.find((prop) =>
+          sourceText
+            .substring(prop.getStart(), prop.getEnd())
+            .includes(keyPattern),
         );
       }
     }
@@ -541,7 +566,7 @@ function removeFromRecord(filePath, recordName, keyPattern) {
 
   // Find line start
   let lineStart = propStart;
-  while (lineStart > 0 && sourceText[lineStart - 1] !== '\n') {
+  while (lineStart > 0 && sourceText[lineStart - 1] !== "\n") {
     lineStart--;
   }
 
@@ -549,7 +574,7 @@ function removeFromRecord(filePath, recordName, keyPattern) {
   let lineEnd = propEnd;
   // Skip past any trailing comma
   while (lineEnd < sourceText.length && /[,\s]/.test(sourceText[lineEnd])) {
-    if (sourceText[lineEnd] === '\n') {
+    if (sourceText[lineEnd] === "\n") {
       lineEnd++;
       break; // Stop after the first newline after the comma
     }
@@ -558,7 +583,7 @@ function removeFromRecord(filePath, recordName, keyPattern) {
 
   const newText = sourceText.slice(0, lineStart) + sourceText.slice(lineEnd);
 
-  fs.writeFileSync(filePath, newText, 'utf8');
+  fs.writeFileSync(filePath, newText, "utf8");
   return true;
 }
 
@@ -566,7 +591,7 @@ function removeFromRecord(filePath, recordName, keyPattern) {
  * Add a string literal to a union type (e.g., "tsh" to "cwl" | "awse")
  */
 function addToUnionType(filePath, typeName, newLiteral) {
-  const sourceText = fs.readFileSync(filePath, 'utf8');
+  const sourceText = fs.readFileSync(filePath, "utf8");
 
   // Check if literal already exists in the type
   const literalPattern = `"${newLiteral}"`;
@@ -578,7 +603,7 @@ function addToUnionType(filePath, typeName, newLiteral) {
     filePath,
     sourceText,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let typeNode = null;
@@ -602,9 +627,12 @@ function addToUnionType(filePath, typeName, newLiteral) {
 
   // Insert the new literal after the last one
   const literalToAdd = ` | "${newLiteral}"`;
-  const newText = sourceText.slice(0, lastTypeEnd) + literalToAdd + sourceText.slice(lastTypeEnd);
+  const newText =
+    sourceText.slice(0, lastTypeEnd) +
+    literalToAdd +
+    sourceText.slice(lastTypeEnd);
 
-  fs.writeFileSync(filePath, newText, 'utf8');
+  fs.writeFileSync(filePath, newText, "utf8");
   return true;
 }
 
@@ -612,7 +640,7 @@ function addToUnionType(filePath, typeName, newLiteral) {
  * Remove a string literal from a union type
  */
 function removeFromUnionType(filePath, typeName, literalToRemove) {
-  const sourceText = fs.readFileSync(filePath, 'utf8');
+  const sourceText = fs.readFileSync(filePath, "utf8");
 
   // Check if literal exists
   const literalPattern = `"${literalToRemove}"`;
@@ -624,7 +652,7 @@ function removeFromUnionType(filePath, typeName, literalToRemove) {
     filePath,
     sourceText,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let typeNode = null;
@@ -643,7 +671,7 @@ function removeFromUnionType(filePath, typeName, literalToRemove) {
   }
 
   // Find the literal type to remove
-  const targetType = typeNode.type.types.find(t => {
+  const targetType = typeNode.type.types.find((t) => {
     const typeText = sourceText.substring(t.getStart(), t.getEnd());
     return typeText.includes(literalToRemove);
   });
@@ -660,7 +688,7 @@ function removeFromUnionType(filePath, typeName, literalToRemove) {
   while (checkPos >= 0 && /\s/.test(sourceText[checkPos])) {
     checkPos--;
   }
-  if (checkPos >= 0 && sourceText[checkPos] === '|') {
+  if (checkPos >= 0 && sourceText[checkPos] === "|") {
     // Remove the " | " before
     removeStart = checkPos;
     checkPos--;
@@ -674,19 +702,21 @@ function removeFromUnionType(filePath, typeName, literalToRemove) {
     while (afterPos < sourceText.length && /\s/.test(sourceText[afterPos])) {
       afterPos++;
     }
-    if (afterPos < sourceText.length && sourceText[afterPos] === '|') {
+    if (afterPos < sourceText.length && sourceText[afterPos] === "|") {
       afterPos++;
       while (afterPos < sourceText.length && /\s/.test(sourceText[afterPos])) {
         afterPos++;
       }
-      const newText = sourceText.slice(0, targetStart) + sourceText.slice(afterPos);
-      fs.writeFileSync(filePath, newText, 'utf8');
+      const newText =
+        sourceText.slice(0, targetStart) + sourceText.slice(afterPos);
+      fs.writeFileSync(filePath, newText, "utf8");
       return true;
     }
   }
 
-  const newText = sourceText.slice(0, removeStart) + sourceText.slice(targetEnd);
-  fs.writeFileSync(filePath, newText, 'utf8');
+  const newText =
+    sourceText.slice(0, removeStart) + sourceText.slice(targetEnd);
+  fs.writeFileSync(filePath, newText, "utf8");
   return true;
 }
 
@@ -695,7 +725,7 @@ function removeFromUnionType(filePath, typeName, literalToRemove) {
  * Looks for pattern: if (stack === "all" || stack === StackType.X || ...)
  */
 function addToAdminEmailCondition(filePath, stackTypeName) {
-  const sourceText = fs.readFileSync(filePath, 'utf8');
+  const sourceText = fs.readFileSync(filePath, "utf8");
 
   // Check if already exists
   if (sourceText.includes(`stack === StackType.${stackTypeName}`)) {
@@ -706,7 +736,7 @@ function addToAdminEmailCondition(filePath, stackTypeName) {
     filePath,
     sourceText,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let targetIfStatement = null;
@@ -716,10 +746,16 @@ function addToAdminEmailCondition(filePath, stackTypeName) {
     if (ts.isIfStatement(node)) {
       const ifText = sourceText.substring(node.getStart(), node.getEnd());
       // Look for the specific pattern with "adminEmail" variable declaration nearby
-      if (ifText.includes('stack === "all"') && ifText.includes('stack === StackType.')) {
+      if (
+        ifText.includes('stack === "all"') &&
+        ifText.includes("stack === StackType.")
+      ) {
         // Verify this is the right if statement by checking context
-        const beforeText = sourceText.substring(Math.max(0, node.getStart() - 200), node.getStart());
-        if (beforeText.includes('adminEmail')) {
+        const beforeText = sourceText.substring(
+          Math.max(0, node.getStart() - 200),
+          node.getStart(),
+        );
+        if (beforeText.includes("adminEmail")) {
           targetIfStatement = node;
         }
       }
@@ -736,8 +772,10 @@ function addToAdminEmailCondition(filePath, stackTypeName) {
   while (ts.isBinaryExpression(lastCondition) && lastCondition.right) {
     if (lastCondition.operatorToken.kind === ts.SyntaxKind.BarBarToken) {
       // This is an || operator, check if there's more
-      if (ts.isBinaryExpression(lastCondition.right) &&
-          lastCondition.right.operatorToken.kind === ts.SyntaxKind.BarBarToken) {
+      if (
+        ts.isBinaryExpression(lastCondition.right) &&
+        lastCondition.right.operatorToken.kind === ts.SyntaxKind.BarBarToken
+      ) {
         lastCondition = lastCondition.right;
       } else {
         // This is the last ||, add after the right side
@@ -750,9 +788,10 @@ function addToAdminEmailCondition(filePath, stackTypeName) {
 
   const insertPos = lastCondition.getEnd();
   const newCondition = ` ||\n            stack === StackType.${stackTypeName}`;
-  const newText = sourceText.slice(0, insertPos) + newCondition + sourceText.slice(insertPos);
+  const newText =
+    sourceText.slice(0, insertPos) + newCondition + sourceText.slice(insertPos);
 
-  fs.writeFileSync(filePath, newText, 'utf8');
+  fs.writeFileSync(filePath, newText, "utf8");
   return true;
 }
 
@@ -760,7 +799,7 @@ function addToAdminEmailCondition(filePath, stackTypeName) {
  * Remove a StackType condition from the admin email if statement
  */
 function removeFromAdminEmailCondition(filePath, stackTypeName) {
-  const sourceText = fs.readFileSync(filePath, 'utf8');
+  const sourceText = fs.readFileSync(filePath, "utf8");
 
   // Check if exists
   if (!sourceText.includes(`stack === StackType.${stackTypeName}`)) {
@@ -770,18 +809,24 @@ function removeFromAdminEmailCondition(filePath, stackTypeName) {
   // Use regex to remove the condition and the preceding ||
   const patterns = [
     // Pattern: || stack === StackType.TheStoryHub (with possible newlines and whitespace)
-    new RegExp(`\\s*\\|\\|\\s*\\n?\\s*stack === StackType\\.${stackTypeName}`, 'g'),
+    new RegExp(
+      `\\s*\\|\\|\\s*\\n?\\s*stack === StackType\\.${stackTypeName}`,
+      "g",
+    ),
     // Pattern: stack === StackType.TheStoryHub || (if it's not the last one)
-    new RegExp(`stack === StackType\\.${stackTypeName}\\s*\\|\\|\\s*\\n?\\s*`, 'g'),
+    new RegExp(
+      `stack === StackType\\.${stackTypeName}\\s*\\|\\|\\s*\\n?\\s*`,
+      "g",
+    ),
   ];
 
   let newText = sourceText;
   for (const pattern of patterns) {
-    newText = newText.replace(pattern, '');
+    newText = newText.replace(pattern, "");
   }
 
   if (newText !== sourceText) {
-    fs.writeFileSync(filePath, newText, 'utf8');
+    fs.writeFileSync(filePath, newText, "utf8");
     return true;
   }
 
@@ -977,7 +1022,7 @@ function removeFromObjectLiteral(filePath, objectName, propertyKey) {
  */
 function addToSwitchStatement(filePath, functionName, caseValue, returnValue) {
   try {
-    const sourceText = fs.readFileSync(filePath, 'utf8');
+    const sourceText = fs.readFileSync(filePath, "utf8");
 
     // Check if case already exists
     if (sourceText.includes(`case ${caseValue}:`)) {
@@ -988,7 +1033,7 @@ function addToSwitchStatement(filePath, functionName, caseValue, returnValue) {
       filePath,
       sourceText,
       ts.ScriptTarget.Latest,
-      true
+      true,
     );
 
     let switchStatement = null;
@@ -1021,28 +1066,31 @@ function addToSwitchStatement(filePath, functionName, caseValue, returnValue) {
     visit(sourceFile);
 
     if (!switchStatement) {
-      console.error(`Could not find switch statement in function: ${functionName}`);
+      console.error(
+        `Could not find switch statement in function: ${functionName}`,
+      );
       return false;
     }
 
     // Find the default case
-    const defaultClause = switchStatement.caseBlock.clauses.find(c =>
-      ts.isDefaultClause(c)
+    const defaultClause = switchStatement.caseBlock.clauses.find((c) =>
+      ts.isDefaultClause(c),
     );
 
     if (!defaultClause) {
-      console.error('Could not find default clause in switch statement');
+      console.error("Could not find default clause in switch statement");
       return false;
     }
 
     // Insert new case before default
     const insertPos = defaultClause.getFullStart();
-    const indent = '    '; // 4 spaces
+    const indent = "    "; // 4 spaces
     const newCase = `${indent}case ${caseValue}:\n${indent}  return ${returnValue};\n`;
 
-    const newText = sourceText.slice(0, insertPos) + newCase + sourceText.slice(insertPos);
+    const newText =
+      sourceText.slice(0, insertPos) + newCase + sourceText.slice(insertPos);
 
-    fs.writeFileSync(filePath, newText, 'utf8');
+    fs.writeFileSync(filePath, newText, "utf8");
     return true;
   } catch (error) {
     console.error(`Error adding to switch statement: ${error.message}`);
@@ -1059,7 +1107,7 @@ function addToSwitchStatement(filePath, functionName, caseValue, returnValue) {
  */
 function removeFromSwitchStatement(filePath, functionName, caseValue) {
   try {
-    const sourceText = fs.readFileSync(filePath, 'utf8');
+    const sourceText = fs.readFileSync(filePath, "utf8");
 
     // Check if case exists
     if (!sourceText.includes(`case ${caseValue}:`)) {
@@ -1068,17 +1116,17 @@ function removeFromSwitchStatement(filePath, functionName, caseValue) {
 
     // Use regex to remove the case (including the return statement)
     const casePattern = new RegExp(
-      `\\s*case ${caseValue.replace(/\./g, '\\.')}:\\s*\\n\\s*return [^;]+;\\s*\\n`,
-      'g'
+      `\\s*case ${caseValue.replace(/\./g, "\\.")}:\\s*\\n\\s*return [^;]+;\\s*\\n`,
+      "g",
     );
 
-    const newText = sourceText.replace(casePattern, '');
+    const newText = sourceText.replace(casePattern, "");
 
     if (newText === sourceText) {
       return false;
     }
 
-    fs.writeFileSync(filePath, newText, 'utf8');
+    fs.writeFileSync(filePath, newText, "utf8");
     return true;
   } catch (error) {
     console.error(`Error removing from switch statement: ${error.message}`);
@@ -1095,7 +1143,7 @@ function removeFromSwitchStatement(filePath, functionName, caseValue) {
  */
 function addToDeployRegistry(filePath, stackTypeName, handlerName) {
   try {
-    const sourceText = fs.readFileSync(filePath, 'utf8');
+    const sourceText = fs.readFileSync(filePath, "utf8");
 
     // Check if already registered
     if (sourceText.includes(`[StackType.${stackTypeName}]:`)) {
@@ -1107,14 +1155,14 @@ function addToDeployRegistry(filePath, stackTypeName, handlerName) {
     const match = sourceText.match(registryPattern);
 
     if (!match) {
-      console.error('Could not find DEPLOY_HANDLERS object');
+      console.error("Could not find DEPLOY_HANDLERS object");
       return false;
     }
 
     // Find the last entry before the closing brace
-    const lastCommaIndex = match[0].lastIndexOf(',');
+    const lastCommaIndex = match[0].lastIndexOf(",");
     if (lastCommaIndex === -1) {
-      console.error('Could not find insertion point in DEPLOY_HANDLERS');
+      console.error("Could not find insertion point in DEPLOY_HANDLERS");
       return false;
     }
 
@@ -1122,9 +1170,10 @@ function addToDeployRegistry(filePath, stackTypeName, handlerName) {
     const insertPos = match.index + lastCommaIndex + 1;
     const newEntry = `\n  [StackType.${stackTypeName}]: ${handlerName},`;
 
-    const newText = sourceText.slice(0, insertPos) + newEntry + sourceText.slice(insertPos);
+    const newText =
+      sourceText.slice(0, insertPos) + newEntry + sourceText.slice(insertPos);
 
-    fs.writeFileSync(filePath, newText, 'utf8');
+    fs.writeFileSync(filePath, newText, "utf8");
     return true;
   } catch (error) {
     console.error(`Error adding to deploy registry: ${error.message}`);
@@ -1140,7 +1189,7 @@ function addToDeployRegistry(filePath, stackTypeName, handlerName) {
  */
 function removeFromDeployRegistry(filePath, stackTypeName) {
   try {
-    const sourceText = fs.readFileSync(filePath, 'utf8');
+    const sourceText = fs.readFileSync(filePath, "utf8");
 
     // Check if exists
     if (!sourceText.includes(`[StackType.${stackTypeName}]:`)) {
@@ -1148,14 +1197,17 @@ function removeFromDeployRegistry(filePath, stackTypeName) {
     }
 
     // Remove the line
-    const pattern = new RegExp(`\\s*\\[StackType\\.${stackTypeName}\\]:[^,]+,?\\s*\\n`, 'g');
-    const newText = sourceText.replace(pattern, '');
+    const pattern = new RegExp(
+      `\\s*\\[StackType\\.${stackTypeName}\\]:[^,]+,?\\s*\\n`,
+      "g",
+    );
+    const newText = sourceText.replace(pattern, "");
 
     if (newText === sourceText) {
       return false;
     }
 
-    fs.writeFileSync(filePath, newText, 'utf8');
+    fs.writeFileSync(filePath, newText, "utf8");
     return true;
   } catch (error) {
     console.error(`Error removing from deploy registry: ${error.message}`);

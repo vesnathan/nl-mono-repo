@@ -46,18 +46,9 @@ export const STACK_ORDER: StackType[] = [
 ];
 
 export const TEMPLATE_PATHS: Record<StackType, string> = {
-  [StackType.WAF]: join(
-    __dirname,
-    "templates/waf/cfn-template.yaml",
-  ),
-  [StackType.Shared]: join(
-    __dirname,
-    "templates/shared/cfn-template.yaml",
-  ),
-  [StackType.CWL]: join(
-    __dirname,
-    "templates/cwl/cfn-template.yaml",
-  ),
+  [StackType.WAF]: join(__dirname, "templates/waf/cfn-template.yaml"),
+  [StackType.Shared]: join(__dirname, "templates/shared/cfn-template.yaml"),
+  [StackType.CWL]: join(__dirname, "templates/cwl/cfn-template.yaml"),
   [StackType.AwsExample]: join(
     __dirname,
     "templates/aws-example/cfn-template.yaml",

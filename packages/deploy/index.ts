@@ -996,7 +996,8 @@ async function main() {
 
           // Ask about frontend build for stacks that have frontends
           let skipFrontendBuild = false;
-          const stackConfig = stack !== "all" ? getProjectConfig(stack as StackType) : null;
+          const stackConfig =
+            stack !== "all" ? getProjectConfig(stack as StackType) : null;
           if (stack === "all" || stackConfig?.hasFrontend) {
             const { buildFrontend } = await inquirer.prompt([
               {

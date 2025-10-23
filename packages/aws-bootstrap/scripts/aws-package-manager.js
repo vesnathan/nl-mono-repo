@@ -856,7 +856,12 @@ async function removePackageInteractive() {
 
   // Remove deploy handler from deploy-registry.ts
   try {
-    const deployRegistryPath = path.join(root, "packages", "deploy", "deploy-registry.ts");
+    const deployRegistryPath = path.join(
+      root,
+      "packages",
+      "deploy",
+      "deploy-registry.ts",
+    );
     if (fs.existsSync(deployRegistryPath)) {
       const pascalCaseName = longName
         .split("-")
@@ -866,23 +871,29 @@ async function removePackageInteractive() {
       // Remove from DEPLOY_HANDLERS registry
       const registryRemoved = astHelpers.removeFromDeployRegistry(
         deployRegistryPath,
-        pascalCaseName
+        pascalCaseName,
       );
       if (registryRemoved) {
-        console.log(`✅ Removed ${pascalCaseName} from DEPLOY_HANDLERS registry`);
+        console.log(
+          `✅ Removed ${pascalCaseName} from DEPLOY_HANDLERS registry`,
+        );
       } else {
-        console.log(`ℹ️  ${pascalCaseName} not found in DEPLOY_HANDLERS registry`);
+        console.log(
+          `ℹ️  ${pascalCaseName} not found in DEPLOY_HANDLERS registry`,
+        );
       }
 
       // Remove import statement
       let content = fs.readFileSync(deployRegistryPath, "utf8");
       const importRegex = new RegExp(
         `import\\s+\\{[^}]*deploy${pascalCaseName}[^}]*\\}\\s+from\\s+["']\\./packages/[^"']+/deploy["'];?\\s*\\n?`,
-        "g"
+        "g",
       );
       content = content.replace(importRegex, "");
       fs.writeFileSync(deployRegistryPath, content, "utf8");
-      console.log(`✅ Removed import for deploy${pascalCaseName} from deploy-registry.ts`);
+      console.log(
+        `✅ Removed import for deploy${pascalCaseName} from deploy-registry.ts`,
+      );
     }
   } catch (e) {
     console.error("Failed to update deploy-registry.ts:", e.message);
@@ -901,14 +912,14 @@ async function removePackageInteractive() {
       // Remove import statement (match various import formats)
       const importRegex = new RegExp(
         `import\\s+\\{[^}]*deploy${pascalCaseName}[^}]*\\}\\s+from\\s+["']\\./packages/${longName}/[^"']+["'];?\\s*\\n?`,
-        "g"
+        "g",
       );
       content = content.replace(importRegex, "");
 
       // Remove deploy handler call in deployStack (match the entire else-if block)
       const deployCallRegex = new RegExp(
         `\\s*\\} else if \\(stackType === StackType\\.${pascalCaseName}\\) \\{[^}]*await deploy${pascalCaseName}\\([^)]*\\);[^}]*`,
-        "g"
+        "g",
       );
       content = content.replace(deployCallRegex, "");
 
@@ -916,17 +927,19 @@ async function removePackageInteractive() {
       // Pattern: "stackType === StackType.TheStoryForge ||" or "|| stackType === StackType.TheStoryForge"
       const paramRefRegex1 = new RegExp(
         `\\s*stackType === StackType\\.${pascalCaseName}\\s*\\|\\|`,
-        "g"
+        "g",
       );
       const paramRefRegex2 = new RegExp(
         `\\|\\|\\s*stackType === StackType\\.${pascalCaseName}`,
-        "g"
+        "g",
       );
       content = content.replace(paramRefRegex1, "");
       content = content.replace(paramRefRegex2, "");
 
       fs.writeFileSync(deployIndexPath, content, "utf8");
-      console.log("Updated deploy/index.ts (removed import, handler call, and parameter references)");
+      console.log(
+        "Updated deploy/index.ts (removed import, handler call, and parameter references)",
+      );
     }
   } catch (e) {
     console.error("Failed to update deploy/index.ts:", e.message);
@@ -983,7 +996,10 @@ async function removePackageInteractive() {
         .join("");
 
       // Use simple regeneration approach
-      const removed = typesManager.removeStackType(deployTypesPath, pascalCaseName);
+      const removed = typesManager.removeStackType(
+        deployTypesPath,
+        pascalCaseName,
+      );
 
       if (removed) {
         console.log("Updated deploy/types.ts");
@@ -1073,7 +1089,13 @@ async function removePackageInteractive() {
 
   // Remove short name from StackTypeForUser union type
   try {
-    const userSetupPath = path.join(root, "packages", "deploy", "utils", "user-setup.ts");
+    const userSetupPath = path.join(
+      root,
+      "packages",
+      "deploy",
+      "utils",
+      "user-setup.ts",
+    );
     if (fs.existsSync(userSetupPath)) {
       // Derive the short name from long name (same logic as in creation)
       const shortName = longName
@@ -1082,23 +1104,41 @@ async function removePackageInteractive() {
         .join("")
         .substring(0, 6);
 
-      const removed = astHelpers.removeFromUnionType(userSetupPath, 'StackTypeForUser', shortName);
+      const removed = astHelpers.removeFromUnionType(
+        userSetupPath,
+        "StackTypeForUser",
+        shortName,
+      );
       if (removed) {
-        console.log(`✅ Removed "${shortName}" from StackTypeForUser type in user-setup.ts`);
+        console.log(
+          `✅ Removed "${shortName}" from StackTypeForUser type in user-setup.ts`,
+        );
       } else {
         console.log(`ℹ️  "${shortName}" not found in StackTypeForUser type`);
       }
 
       // Remove configuration from STACK_TYPE_CONFIG
-      const configRemoved = astHelpers.removeFromObjectLiteral(userSetupPath, 'STACK_TYPE_CONFIG', shortName);
+      const configRemoved = astHelpers.removeFromObjectLiteral(
+        userSetupPath,
+        "STACK_TYPE_CONFIG",
+        shortName,
+      );
       if (configRemoved) {
-        console.log(`✅ Removed "${shortName}" from STACK_TYPE_CONFIG in user-setup.ts`);
+        console.log(
+          `✅ Removed "${shortName}" from STACK_TYPE_CONFIG in user-setup.ts`,
+        );
       } else {
         console.log(`ℹ️  "${shortName}" not found in STACK_TYPE_CONFIG`);
       }
 
       // Remove from getAppNameForStackType switch statement
-      const stackUtilsPath = path.join(root, "packages", "deploy", "utils", "stack-utils.ts");
+      const stackUtilsPath = path.join(
+        root,
+        "packages",
+        "deploy",
+        "utils",
+        "stack-utils.ts",
+      );
       if (fs.existsSync(stackUtilsPath)) {
         const pascalCaseName = longName
           .split("-")
@@ -1106,13 +1146,17 @@ async function removePackageInteractive() {
           .join("");
         const switchRemoved = astHelpers.removeFromSwitchStatement(
           stackUtilsPath,
-          'getAppNameForStackType',
-          `StackType.${pascalCaseName}`
+          "getAppNameForStackType",
+          `StackType.${pascalCaseName}`,
         );
         if (switchRemoved) {
-          console.log(`✅ Removed ${pascalCaseName} from getAppNameForStackType in stack-utils.ts`);
+          console.log(
+            `✅ Removed ${pascalCaseName} from getAppNameForStackType in stack-utils.ts`,
+          );
         } else {
-          console.log(`ℹ️  ${pascalCaseName} not found in getAppNameForStackType`);
+          console.log(
+            `ℹ️  ${pascalCaseName} not found in getAppNameForStackType`,
+          );
         }
       }
 
@@ -1121,16 +1165,21 @@ async function removePackageInteractive() {
       let content = fs.readFileSync(userSetupPath, "utf8");
       const importRegex = new RegExp(
         `import\\s+\\{[^}]*${cognitoGroupsAlias}[^}]*\\}\\s+from\\s+["'][^"']+["'];?\\s*\\n?`,
-        "g"
+        "g",
       );
       const updatedContent = content.replace(importRegex, "");
       if (updatedContent !== content) {
         fs.writeFileSync(userSetupPath, updatedContent, "utf8");
-        console.log(`✅ Removed import for ${cognitoGroupsAlias} from user-setup.ts`);
+        console.log(
+          `✅ Removed import for ${cognitoGroupsAlias} from user-setup.ts`,
+        );
       }
     }
   } catch (e) {
-    console.error("Failed to update StackTypeForUser in user-setup.ts:", e.message);
+    console.error(
+      "Failed to update StackTypeForUser in user-setup.ts:",
+      e.message,
+    );
   }
 
   // Remove from admin email prompt condition in deploy/index.ts
@@ -1141,11 +1190,18 @@ async function removePackageInteractive() {
         .split("-")
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join("");
-      const removed = astHelpers.removeFromAdminEmailCondition(deployIndexPath, pascalCaseName);
+      const removed = astHelpers.removeFromAdminEmailCondition(
+        deployIndexPath,
+        pascalCaseName,
+      );
       if (removed) {
-        console.log(`✅ Removed ${pascalCaseName} from admin email prompt condition in index.ts`);
+        console.log(
+          `✅ Removed ${pascalCaseName} from admin email prompt condition in index.ts`,
+        );
       } else {
-        console.log(`ℹ️  ${pascalCaseName} not found in admin email prompt condition`);
+        console.log(
+          `ℹ️  ${pascalCaseName} not found in admin email prompt condition`,
+        );
       }
     }
   } catch (e) {
@@ -1229,7 +1285,9 @@ function removePackageForce(longName) {
     );
     if (fs.existsSync(deployPkgDir)) {
       fs.rmSync(deployPkgDir, { recursive: true, force: true });
-      console.log(`Deleted deploy handler directory ${deployPkgDir} (force-delete)`);
+      console.log(
+        `Deleted deploy handler directory ${deployPkgDir} (force-delete)`,
+      );
     }
   } catch (e) {
     console.error(
@@ -1240,7 +1298,12 @@ function removePackageForce(longName) {
 
   // Remove deploy handler from deploy-registry.ts
   try {
-    const deployRegistryPath = path.join(root, "packages", "deploy", "deploy-registry.ts");
+    const deployRegistryPath = path.join(
+      root,
+      "packages",
+      "deploy",
+      "deploy-registry.ts",
+    );
     if (fs.existsSync(deployRegistryPath)) {
       const pascalCaseName = longName
         .split("-")
@@ -1250,23 +1313,29 @@ function removePackageForce(longName) {
       // Remove from DEPLOY_HANDLERS registry
       const registryRemoved = astHelpers.removeFromDeployRegistry(
         deployRegistryPath,
-        pascalCaseName
+        pascalCaseName,
       );
       if (registryRemoved) {
-        console.log(`✅ Removed ${pascalCaseName} from DEPLOY_HANDLERS registry`);
+        console.log(
+          `✅ Removed ${pascalCaseName} from DEPLOY_HANDLERS registry`,
+        );
       } else {
-        console.log(`ℹ️  ${pascalCaseName} not found in DEPLOY_HANDLERS registry`);
+        console.log(
+          `ℹ️  ${pascalCaseName} not found in DEPLOY_HANDLERS registry`,
+        );
       }
 
       // Remove import statement
       let content = fs.readFileSync(deployRegistryPath, "utf8");
       const importRegex = new RegExp(
         `import\\s+\\{[^}]*deploy${pascalCaseName}[^}]*\\}\\s+from\\s+["']\\./packages/${longName}/[^"']+["'];?\\s*\\n?`,
-        "g"
+        "g",
       );
       content = content.replace(importRegex, "");
       fs.writeFileSync(deployRegistryPath, content, "utf8");
-      console.log(`✅ Removed import for deploy${pascalCaseName} from deploy-registry.ts`);
+      console.log(
+        `✅ Removed import for deploy${pascalCaseName} from deploy-registry.ts`,
+      );
     }
   } catch (e) {
     console.error("Failed to update deploy-registry.ts:", e.message);
@@ -1321,15 +1390,25 @@ function removePackageForce(longName) {
         .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
         .join("");
 
-      const removed = astHelpers.removeFromAdminEmailCondition(deployIndexPath, pascalCaseName);
+      const removed = astHelpers.removeFromAdminEmailCondition(
+        deployIndexPath,
+        pascalCaseName,
+      );
       if (removed) {
-        console.log(`✅ Removed ${pascalCaseName} from admin email prompt condition in index.ts`);
+        console.log(
+          `✅ Removed ${pascalCaseName} from admin email prompt condition in index.ts`,
+        );
       } else {
-        console.log(`ℹ️  ${pascalCaseName} not found in admin email prompt condition`);
+        console.log(
+          `ℹ️  ${pascalCaseName} not found in admin email prompt condition`,
+        );
       }
     }
   } catch (e) {
-    console.error("Failed to remove from admin email condition in index.ts:", e.message);
+    console.error(
+      "Failed to remove from admin email condition in index.ts:",
+      e.message,
+    );
   }
 
   // Remove deploy/types.ts entries (AFTER removing all references)
@@ -1342,7 +1421,10 @@ function removePackageForce(longName) {
         .join("");
 
       // Use simple regeneration approach
-      const removed = typesManager.removeStackType(deployTypesPath, pascalCaseName);
+      const removed = typesManager.removeStackType(
+        deployTypesPath,
+        pascalCaseName,
+      );
 
       if (removed) {
         console.log("Updated deploy/types.ts (force-delete)");
@@ -1384,7 +1466,13 @@ function removePackageForce(longName) {
 
   // Remove short name from StackTypeForUser union type
   try {
-    const userSetupPath = path.join(root, "packages", "deploy", "utils", "user-setup.ts");
+    const userSetupPath = path.join(
+      root,
+      "packages",
+      "deploy",
+      "utils",
+      "user-setup.ts",
+    );
     if (fs.existsSync(userSetupPath)) {
       // Derive the short name from long name (same logic as in creation)
       const shortName = longName
@@ -1393,23 +1481,41 @@ function removePackageForce(longName) {
         .join("")
         .toLowerCase();
 
-      const removed = astHelpers.removeFromUnionType(userSetupPath, 'StackTypeForUser', shortName);
+      const removed = astHelpers.removeFromUnionType(
+        userSetupPath,
+        "StackTypeForUser",
+        shortName,
+      );
       if (removed) {
-        console.log(`Removed "${shortName}" from StackTypeForUser type in user-setup.ts`);
+        console.log(
+          `Removed "${shortName}" from StackTypeForUser type in user-setup.ts`,
+        );
       } else {
         console.log(`ℹ️  "${shortName}" not found in StackTypeForUser type`);
       }
 
       // Remove from STACK_TYPE_CONFIG
-      const configRemoved = astHelpers.removeFromObjectLiteral(userSetupPath, 'STACK_TYPE_CONFIG', shortName);
+      const configRemoved = astHelpers.removeFromObjectLiteral(
+        userSetupPath,
+        "STACK_TYPE_CONFIG",
+        shortName,
+      );
       if (configRemoved) {
-        console.log(`✅ Removed "${shortName}" from STACK_TYPE_CONFIG in user-setup.ts`);
+        console.log(
+          `✅ Removed "${shortName}" from STACK_TYPE_CONFIG in user-setup.ts`,
+        );
       } else {
         console.log(`ℹ️  "${shortName}" not found in STACK_TYPE_CONFIG`);
       }
 
       // Remove from getAppNameForStackType switch statement
-      const stackUtilsPath = path.join(root, "packages", "deploy", "utils", "stack-utils.ts");
+      const stackUtilsPath = path.join(
+        root,
+        "packages",
+        "deploy",
+        "utils",
+        "stack-utils.ts",
+      );
       if (fs.existsSync(stackUtilsPath)) {
         const pascalCaseName = longName
           .split("-")
@@ -1418,13 +1524,17 @@ function removePackageForce(longName) {
 
         const switchRemoved = astHelpers.removeFromSwitchStatement(
           stackUtilsPath,
-          'getAppNameForStackType',
-          `StackType.${pascalCaseName}`
+          "getAppNameForStackType",
+          `StackType.${pascalCaseName}`,
         );
         if (switchRemoved) {
-          console.log(`✅ Removed ${pascalCaseName} from getAppNameForStackType in stack-utils.ts`);
+          console.log(
+            `✅ Removed ${pascalCaseName} from getAppNameForStackType in stack-utils.ts`,
+          );
         } else {
-          console.log(`ℹ️  ${pascalCaseName} not found in getAppNameForStackType`);
+          console.log(
+            `ℹ️  ${pascalCaseName} not found in getAppNameForStackType`,
+          );
         }
       }
 
@@ -1433,16 +1543,21 @@ function removePackageForce(longName) {
       let content = fs.readFileSync(userSetupPath, "utf8");
       const importRegex = new RegExp(
         `import\\s+\\{[^}]*${cognitoGroupsAlias}[^}]*\\}\\s+from\\s+["'][^"']+["'];?\\s*\\n?`,
-        "g"
+        "g",
       );
       const updatedContent = content.replace(importRegex, "");
       if (updatedContent !== content) {
         fs.writeFileSync(userSetupPath, updatedContent, "utf8");
-        console.log(`✅ Removed import for ${cognitoGroupsAlias} from user-setup.ts`);
+        console.log(
+          `✅ Removed import for ${cognitoGroupsAlias} from user-setup.ts`,
+        );
       }
     }
   } catch (e) {
-    console.error("Failed to update StackTypeForUser in user-setup.ts:", e.message);
+    console.error(
+      "Failed to update StackTypeForUser in user-setup.ts:",
+      e.message,
+    );
   }
 
   console.log(`Force-delete cleanup for ${longName} finished.`);
@@ -1974,7 +2089,9 @@ async function main() {
   console.log(`\n📝 Performing comprehensive token replacement...`);
   console.log(`   Replacing all occurrences of:`);
   console.log(`   - "aws-example" → "${longName}"`);
-  console.log(`   - "AWS_EXAMPLE" → "${longName.toUpperCase().replace(/-/g, "_")}"`);
+  console.log(
+    `   - "AWS_EXAMPLE" → "${longName.toUpperCase().replace(/-/g, "_")}"`,
+  );
   console.log(`   - "AwsExample" → "${pascalCaseName}"`);
   console.log(`   - "awse" → "${shortName}"`);
   console.log(`   - "AWSE" → "${upperShortName}"`);
@@ -1984,7 +2101,11 @@ async function main() {
     // Long name replacements (kebab-case)
     { from: "aws-example", to: longName, flags: "g" },
     // Underscore version for env vars and constants
-    { from: "AWS_EXAMPLE", to: longName.toUpperCase().replace(/-/g, "_"), flags: "g" },
+    {
+      from: "AWS_EXAMPLE",
+      to: longName.toUpperCase().replace(/-/g, "_"),
+      flags: "g",
+    },
     { from: "aws_example", to: longName.replace(/-/g, "_"), flags: "g" },
     // PascalCase for types, components, classes
     { from: "AwsExample", to: pascalCaseName, flags: "g" },
@@ -2006,7 +2127,9 @@ async function main() {
   console.log(`\n🔍 Verifying token replacement...`);
   const verificationIssues = verifyTokenReplacement(dest, longName);
   if (verificationIssues.length > 0) {
-    console.warn(`⚠️  Found ${verificationIssues.length} file(s) with remaining template references:`);
+    console.warn(
+      `⚠️  Found ${verificationIssues.length} file(s) with remaining template references:`,
+    );
     // Group by file for better readability
     const byFile = {};
     for (const issue of verificationIssues) {
@@ -2015,11 +2138,15 @@ async function main() {
     }
     Object.entries(byFile).forEach(([file, issues]) => {
       console.warn(`   ${file}:`);
-      issues.forEach(issue => {
-        console.warn(`     - ${issue.token} (lines: ${issue.lines.join(', ')})`);
+      issues.forEach((issue) => {
+        console.warn(
+          `     - ${issue.token} (lines: ${issue.lines.join(", ")})`,
+        );
       });
     });
-    console.warn(`\n   ⚠️  Please review and manually fix these references before deployment.`);
+    console.warn(
+      `\n   ⚠️  Please review and manually fix these references before deployment.`,
+    );
   } else {
     console.log("✅ All template references successfully replaced");
   }
@@ -2172,12 +2299,27 @@ async function main() {
   // Auto-register deploy handler (always runs - copy handler and insert into deploy/index.ts)
   console.log("\n🔁 Auto-registering deploy handler for new package...");
   try {
-    const deploySrc = path.join(root, "packages", "deploy", "packages", "aws-example", "deploy.ts");
-    const deployDestDir = path.join(root, "packages", "deploy", "packages", templateDirName);
+    const deploySrc = path.join(
+      root,
+      "packages",
+      "deploy",
+      "packages",
+      "aws-example",
+      "deploy.ts",
+    );
+    const deployDestDir = path.join(
+      root,
+      "packages",
+      "deploy",
+      "packages",
+      templateDirName,
+    );
     const deployDest = path.join(deployDestDir, `deploy.ts`);
 
     if (!fs.existsSync(deploySrc)) {
-      console.warn(`⚠️  Deploy handler template not found at ${deploySrc}; skipping autoregister`);
+      console.warn(
+        `⚠️  Deploy handler template not found at ${deploySrc}; skipping autoregister`,
+      );
     } else {
       fs.mkdirSync(deployDestDir, { recursive: true });
       // Copy file contents and perform comprehensive token replacements
@@ -2186,7 +2328,10 @@ async function main() {
       // Replace all occurrences matching our comprehensive token replacement patterns
       // Order matters: replace uppercase/capitalized versions BEFORE lowercase
       content = content.replace(/aws-example/g, longName);
-      content = content.replace(/AWS_EXAMPLE/g, longName.toUpperCase().replace(/-/g, "_"));
+      content = content.replace(
+        /AWS_EXAMPLE/g,
+        longName.toUpperCase().replace(/-/g, "_"),
+      );
       content = content.replace(/aws_example/g, longName.replace(/-/g, "_"));
       content = content.replace(/AwsExample/g, pascalCaseName);
       content = content.replace(/awsExample/g, camelCaseName);
@@ -2194,22 +2339,29 @@ async function main() {
       content = content.replace(/Awse/g, capitalizedShortName);
       // Match awse followed by lowercase (compounds) OR at word boundary (standalone)
       content = content.replace(/awse(?=[a-z]|\b)/g, shortName);
-      
+
       // Write the new deploy handler
       fs.writeFileSync(deployDest, content, "utf8");
       console.log(`✅ Copied deploy handler to ${deployDest}`);
 
       // Register deploy handler in deploy-registry.ts
-      const deployRegistryPath = path.join(root, "packages", "deploy", "deploy-registry.ts");
+      const deployRegistryPath = path.join(
+        root,
+        "packages",
+        "deploy",
+        "deploy-registry.ts",
+      );
       if (fs.existsSync(deployRegistryPath)) {
         // Add import for deploy function
         const importAdded = astHelpers.addImport(
           deployRegistryPath,
           `deploy${pascalCaseName}`,
-          `./packages/${templateDirName}/deploy`
+          `./packages/${templateDirName}/deploy`,
         );
         if (importAdded) {
-          console.log(`✅ Added import for deploy${pascalCaseName} in deploy-registry.ts`);
+          console.log(
+            `✅ Added import for deploy${pascalCaseName} in deploy-registry.ts`,
+          );
         } else {
           console.log(`ℹ️  Import for deploy${pascalCaseName} already exists`);
         }
@@ -2218,86 +2370,144 @@ async function main() {
         const registryAdded = astHelpers.addToDeployRegistry(
           deployRegistryPath,
           pascalCaseName,
-          `deploy${pascalCaseName}`
+          `deploy${pascalCaseName}`,
         );
         if (registryAdded) {
           console.log(`✅ Added ${pascalCaseName} to DEPLOY_HANDLERS registry`);
         } else {
-          console.log(`ℹ️  ${pascalCaseName} already in DEPLOY_HANDLERS registry`);
+          console.log(
+            `ℹ️  ${pascalCaseName} already in DEPLOY_HANDLERS registry`,
+          );
         }
       } else {
-        console.warn(`⚠️  Could not find ${deployRegistryPath}; please add deploy handler manually.`);
+        console.warn(
+          `⚠️  Could not find ${deployRegistryPath}; please add deploy handler manually.`,
+        );
       }
 
       // Add short name to StackTypeForUser union type
-        const userSetupPath = path.join(root, "packages", "deploy", "utils", "user-setup.ts");
-        if (fs.existsSync(userSetupPath)) {
-          const added = astHelpers.addToUnionType(userSetupPath, 'StackTypeForUser', shortName);
-          if (added) {
-            console.log(`✅ Added "${shortName}" to StackTypeForUser type in user-setup.ts`);
-          } else {
-            console.log(`ℹ️  "${shortName}" already exists in StackTypeForUser type`);
-          }
-
-          // Add import for COGNITO_GROUPS
-          const cognitoGroupsAlias = `${shortName.toUpperCase()}_COGNITO_GROUPS`;
-          const packagePath = `../../${longName}/backend/constants/ClientTypes`;
-          const importAdded = astHelpers.addImport(userSetupPath, 'COGNITO_GROUPS', packagePath, cognitoGroupsAlias);
-          if (importAdded) {
-            console.log(`✅ Added import for ${cognitoGroupsAlias} in user-setup.ts`);
-          } else {
-            console.log(`ℹ️  Import for ${cognitoGroupsAlias} already exists`);
-          }
-
-          // Add configuration to STACK_TYPE_CONFIG
-          const configValue = {
-            stackTypeEnum: pascalCaseName,
-            cognitoGroupsImport: cognitoGroupsAlias,
-            outputKey: "UserPoolId", // Default output key
-            adminGroup: "SiteAdmin", // Default admin group (same as AWSE/TSH)
-            usesSimpleSchema: true, // Default to simple schema (same as AWSE/TSH)
-          };
-          const configAdded = astHelpers.addToObjectLiteral(userSetupPath, 'STACK_TYPE_CONFIG', shortName, configValue);
-          if (configAdded) {
-            console.log(`✅ Added "${shortName}" configuration to STACK_TYPE_CONFIG in user-setup.ts`);
-          } else {
-            console.log(`ℹ️  "${shortName}" configuration already exists in STACK_TYPE_CONFIG`);
-          }
-
-          // Add case to getAppNameForStackType switch statement
-          const stackUtilsPath = path.join(root, "packages", "deploy", "utils", "stack-utils.ts");
-          if (fs.existsSync(stackUtilsPath)) {
-            const switchAdded = astHelpers.addToSwitchStatement(
-              stackUtilsPath,
-              'getAppNameForStackType',
-              `StackType.${pascalCaseName}`,
-              `"${shortName}"`
-            );
-            if (switchAdded) {
-              console.log(`✅ Added ${pascalCaseName} case to getAppNameForStackType in stack-utils.ts`);
-            } else {
-              console.log(`ℹ️  ${pascalCaseName} case already exists in getAppNameForStackType`);
-            }
-          }
+      const userSetupPath = path.join(
+        root,
+        "packages",
+        "deploy",
+        "utils",
+        "user-setup.ts",
+      );
+      if (fs.existsSync(userSetupPath)) {
+        const added = astHelpers.addToUnionType(
+          userSetupPath,
+          "StackTypeForUser",
+          shortName,
+        );
+        if (added) {
+          console.log(
+            `✅ Added "${shortName}" to StackTypeForUser type in user-setup.ts`,
+          );
         } else {
-          console.warn(`⚠️  Could not find ${userSetupPath}; please add "${shortName}" to StackTypeForUser manually.`);
+          console.log(
+            `ℹ️  "${shortName}" already exists in StackTypeForUser type`,
+          );
         }
+
+        // Add import for COGNITO_GROUPS
+        const cognitoGroupsAlias = `${shortName.toUpperCase()}_COGNITO_GROUPS`;
+        const packagePath = `../../${longName}/backend/constants/ClientTypes`;
+        const importAdded = astHelpers.addImport(
+          userSetupPath,
+          "COGNITO_GROUPS",
+          packagePath,
+          cognitoGroupsAlias,
+        );
+        if (importAdded) {
+          console.log(
+            `✅ Added import for ${cognitoGroupsAlias} in user-setup.ts`,
+          );
+        } else {
+          console.log(`ℹ️  Import for ${cognitoGroupsAlias} already exists`);
+        }
+
+        // Add configuration to STACK_TYPE_CONFIG
+        const configValue = {
+          stackTypeEnum: pascalCaseName,
+          cognitoGroupsImport: cognitoGroupsAlias,
+          outputKey: "UserPoolId", // Default output key
+          adminGroup: "SiteAdmin", // Default admin group (same as AWSE/TSH)
+          usesSimpleSchema: true, // Default to simple schema (same as AWSE/TSH)
+        };
+        const configAdded = astHelpers.addToObjectLiteral(
+          userSetupPath,
+          "STACK_TYPE_CONFIG",
+          shortName,
+          configValue,
+        );
+        if (configAdded) {
+          console.log(
+            `✅ Added "${shortName}" configuration to STACK_TYPE_CONFIG in user-setup.ts`,
+          );
+        } else {
+          console.log(
+            `ℹ️  "${shortName}" configuration already exists in STACK_TYPE_CONFIG`,
+          );
+        }
+
+        // Add case to getAppNameForStackType switch statement
+        const stackUtilsPath = path.join(
+          root,
+          "packages",
+          "deploy",
+          "utils",
+          "stack-utils.ts",
+        );
+        if (fs.existsSync(stackUtilsPath)) {
+          const switchAdded = astHelpers.addToSwitchStatement(
+            stackUtilsPath,
+            "getAppNameForStackType",
+            `StackType.${pascalCaseName}`,
+            `"${shortName}"`,
+          );
+          if (switchAdded) {
+            console.log(
+              `✅ Added ${pascalCaseName} case to getAppNameForStackType in stack-utils.ts`,
+            );
+          } else {
+            console.log(
+              `ℹ️  ${pascalCaseName} case already exists in getAppNameForStackType`,
+            );
+          }
+        }
+      } else {
+        console.warn(
+          `⚠️  Could not find ${userSetupPath}; please add "${shortName}" to StackTypeForUser manually.`,
+        );
+      }
 
       // Add stack to admin email prompt condition
       const deployIndexPath = path.join(root, "packages", "deploy", "index.ts");
       if (fs.existsSync(deployIndexPath)) {
-        const added = astHelpers.addToAdminEmailCondition(deployIndexPath, pascalCaseName);
+        const added = astHelpers.addToAdminEmailCondition(
+          deployIndexPath,
+          pascalCaseName,
+        );
         if (added) {
-          console.log(`✅ Added ${pascalCaseName} to admin email prompt condition in index.ts`);
+          console.log(
+            `✅ Added ${pascalCaseName} to admin email prompt condition in index.ts`,
+          );
         } else {
-          console.log(`ℹ️  ${pascalCaseName} already in admin email prompt condition`);
+          console.log(
+            `ℹ️  ${pascalCaseName} already in admin email prompt condition`,
+          );
         }
       } else {
-        console.warn(`⚠️  Could not find ${deployIndexPath}; please register the deploy handler manually.`);
+        console.warn(
+          `⚠️  Could not find ${deployIndexPath}; please register the deploy handler manually.`,
+        );
       }
     }
   } catch (err) {
-    console.warn("⚠️  Autoregister deploy step failed (non-fatal):", err && err.message ? err.message : err);
+    console.warn(
+      "⚠️  Autoregister deploy step failed (non-fatal):",
+      err && err.message ? err.message : err,
+    );
   }
 
   // Add new package workspaces to root package.json (frontend/backend)

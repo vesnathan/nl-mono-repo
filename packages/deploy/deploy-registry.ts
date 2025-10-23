@@ -33,7 +33,8 @@ const DEPLOY_HANDLERS: Record<StackType, DeployHandler> = {
   [StackType.Shared]: deployShared,
   [StackType.CWL]: deployCwl,
   [StackType.AwsExample]: deployAwsExample,
-  [StackType.TheStoryHub]: deployTheStoryHub,};
+  [StackType.TheStoryHub]: deployTheStoryHub,
+};
 
 /**
  * Get the deploy handler for a given stack type
@@ -44,7 +45,9 @@ const DEPLOY_HANDLERS: Record<StackType, DeployHandler> = {
 export function getDeployHandler(stackType: StackType): DeployHandler {
   const handler = DEPLOY_HANDLERS[stackType];
   if (!handler) {
-    throw new Error(`No deploy handler registered for stack type: ${stackType}`);
+    throw new Error(
+      `No deploy handler registered for stack type: ${stackType}`,
+    );
   }
   return handler;
 }
@@ -57,7 +60,10 @@ export function getDeployHandler(stackType: StackType): DeployHandler {
  * @param stackType - The stack type
  * @param handler - The deploy handler function
  */
-export function registerDeployHandler(stackType: StackType, handler: DeployHandler): void {
+export function registerDeployHandler(
+  stackType: StackType,
+  handler: DeployHandler,
+): void {
   DEPLOY_HANDLERS[stackType] = handler;
 }
 
