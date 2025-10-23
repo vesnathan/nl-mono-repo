@@ -70,40 +70,40 @@ Create a monorepo structure with:
 **NOTE:** Types will be auto-generated from GraphQL schema. In backend/constants/, create only:
 
 1. **ContentRatings.ts** - Age rating constants and helpers (similar to ClientTypes.ts pattern in aws-example):
-```typescript
-export const AGE_RATINGS = [
-  { id: 'G', displayName: 'General', description: 'Suitable for all ages' },
-  { id: 'T', displayName: 'Teen (13+)', description: 'Ages 13+' },
-  { id: 'M', displayName: 'Mature (16+)', description: 'Ages 16+' },
-  { id: 'ADULT_18_PLUS', displayName: 'Adult (18+)', description: 'Ages 18+' },
-] as const;
+   ```typescript
+   export const AGE_RATINGS = [
+     { id: 'G', displayName: 'General', description: 'Suitable for all ages' },
+     { id: 'T', displayName: 'Teen (13+)', description: 'Ages 13+' },
+     { id: 'M', displayName: 'Mature (16+)', description: 'Ages 16+' },
+     { id: 'ADULT_18_PLUS', displayName: 'Adult (18+)', description: 'Ages 18+' },
+   ] as const;
 
-export type AgeRating = typeof AGE_RATINGS[number]['id'];
-export const isValidAgeRating = (value: string): value is AgeRating =>
-  AGE_RATINGS.some(r => r.id === value);
-```
+   export type AgeRating = typeof AGE_RATINGS[number]['id'];
+   export const isValidAgeRating = (value: string): value is AgeRating =>
+     AGE_RATINGS.some(r => r.id === value);
+   ```
 
 2. **ContentWarnings.ts** - Warning tag constants:
-```typescript
-export const CONTENT_WARNINGS = [
-  'Sexual Content',
-  'Violence/Gore',
-  'Death',
-  'Self-Harm/Suicide',
-  // ... etc
-] as const;
-```
+   ```typescript
+   export const CONTENT_WARNINGS = [
+     'Sexual Content',
+     'Violence/Gore',
+     'Death',
+     'Self-Harm/Suicide',
+     // ... etc
+   ] as const;
+   ```
 
 3. **Genres.ts** - Story genre constants:
-```typescript
-export const STORY_GENRES = [
-  'Fantasy',
-  'Sci-Fi',
-  'Romance',
-  'Horror',
-  // ... etc
-] as const;
-```
+   ```typescript
+   export const STORY_GENRES = [
+     'Fantasy',
+     'Sci-Fi',
+     'Romance',
+     'Horror',
+     // ... etc
+   ] as const;
+   ```
 
 **DO NOT create Zod schemas in backend** - those belong in frontend for form validation only.
 **DO NOT manually define Story, User, etc. types** - these come from GraphQL schema code generation.
