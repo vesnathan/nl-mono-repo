@@ -84,19 +84,24 @@ function assertRequiredDeploymentEnvs(envs) {
     "NEXT_PUBLIC_GRAPHQL_URL",
   ];
   const missing = required.filter((k) => !envs[k]);
-  if (missing.length > 0 && process.env.NODE_ENV !== "development") {
+  // Skip validation during lint or in development
+  const isLinting = process.env.npm_lifecycle_event === "lint" || process.argv.includes("lint");
+  if (missing.length > 0 && process.env.NODE_ENV !== "development" && !isLinting) {
     throw new Error(
       `Missing required deployment envs for TSH in non-development: ${missing.join(", ")}. Ensure the TheStoryHub stack is deployed or set the NEXT_PUBLIC_* env vars.`,
     );
   }
 }
 
-// Assert required NEXT_PUBLIC_* envs in non-dev
-try {
-  assertRequiredDeploymentEnvs(deploymentEnvs);
-} catch (e) {
-  // rethrow so build fails in CI/non-dev when envs are missing
-  throw e;
+// Assert required NEXT_PUBLIC_* envs in non-dev (skip during lint)
+const isLinting = process.env.npm_lifecycle_event === "lint" || process.argv.includes("lint");
+if (!isLinting) {
+  try {
+    assertRequiredDeploymentEnvs(deploymentEnvs);
+  } catch (e) {
+    // rethrow so build fails in CI/non-dev when envs are missing
+    throw e;
+  }
 }
 
 module.exports = {
