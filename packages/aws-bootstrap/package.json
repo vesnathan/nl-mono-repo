@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "AWS bootstrap helper to create packages from the cloudwatchlive sample",
-  "main": "scripts/create-template.js",
+  "main": "scripts/aws-package-manager.js",
   "scripts": {
-    "create": "node scripts/create-template.js"
+    "create": "node scripts/aws-package-manager.js create",
+    "delete": "node scripts/aws-package-manager.js delete"
   },
   "keywords": [
     "template",

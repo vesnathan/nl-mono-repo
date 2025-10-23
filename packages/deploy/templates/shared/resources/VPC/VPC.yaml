@@ -174,35 +174,28 @@ Outputs:
   VPCID:
     Value: !Ref SharedVPC
     Description: VPC ID
-    Export:
-      Name: !Sub shared-assets-vpc-id-${Stage}
+    # Export removed: top-level template will declare canonical exports
 
   cwlSecurityGroupFromSharedVPCId:
     Value: !GetAtt cwlSecurityGroupFromSharedVPC.GroupId
-    Export:
-      Name: !Sub shared-assets-cwlSecurityGroupFromSharedVPCId-${Stage}
+    # Export removed: top-level template will declare canonical exports
 
   cwlSecurityGroupFromSharedVPC:
     Value: !Ref cwlSecurityGroupFromSharedVPC
-    Export:
-      Name: !Sub shared-assets-cwlSecurityGroupFromSharedVPC-${Stage}
+    # Export removed: top-level template will declare canonical exports
 
   SharedSubnet1Id:
     Value: !Ref SharedSubnet1
-    Export:
-      Name: !Sub shared-assets-sharedSubnet1-${Stage}
+    # Export removed: top-level template will declare canonical exports
 
   SharedSubnet2Id:
     Value: !Ref SharedSubnet2
-    Export:
-      Name: !Sub shared-assets-sharedSubnet2-${Stage}
+    # Export removed: top-level template will declare canonical exports
 
   PrivateSubnet1Id:
     Value: !Ref PrivateSubnet1
-    Export:
-      Name: !Sub shared-assets-privateSubnet1-${Stage}
+    # Export removed: top-level template will declare canonical exports
 
   PrivateSubnet2Id:
     Value: !Ref PrivateSubnet2
-    Export:
-      Name: !Sub shared-assets-privateSubnet2-${Stage}
+    # Export removed: top-level template will declare canonical exports

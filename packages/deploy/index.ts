@@ -20,9 +20,7 @@ import {
   getTemplateBody,
   ForceDeleteOptions,
 } from "./types";
-import { deployShared } from "./packages/shared/shared";
-import { deployCwl } from "./packages/cwl/cwl";
-import { deployAwsExample } from "./packages/aws-example/aws-example";
+import { getDeployHandler } from "./deploy-registry";
 import { ForceDeleteManager } from "./utils/force-delete-utils";
 import { OutputsManager } from "./outputs-manager";
 import { candidateExportNames } from "./utils/export-names";
@@ -382,18 +380,10 @@ class DeploymentManager {
           stackType,
           deploymentOptionsWithRegion,
         );
-      } else if (stackType === StackType.Shared) {
-        // Corrected: deployShared expects only options
-        await deployShared(deploymentOptionsWithRegion);
-      } else if (stackType === StackType.CWL) {
-        // Corrected: deployCwl expects only options
-        await deployCwl(deploymentOptionsWithRegion);
-      } else if (stackType === StackType.AwsExample) {
-        // Deploy AWS Example stack
-        await deployAwsExample(deploymentOptionsWithRegion);
       } else {
-        // Fallback to deployStackInternal for other types if any, or could throw error
-        await this.deployStackInternal(stackType, deploymentOptionsWithRegion);
+        // Use the deploy registry to get the appropriate handler
+        const deployHandler = getDeployHandler(stackType);
+        await deployHandler(deploymentOptionsWithRegion);
       }
 
       await this.outputsManager.saveStackOutputs(
@@ -683,11 +673,9 @@ class DeploymentManager {
       });
     }
 
-    if (
-      stackType === StackType.Shared ||
-      stackType === StackType.CWL ||
-      stackType === StackType.AwsExample
-    ) {
+    // Add WebACL parameters if stack depends on WAF
+    const config = getProjectConfig(stackType);
+    if (config.dependsOn?.includes(StackType.WAF)) {
       const webAclId =
         (await this.outputsManager.findOutputValueByCandidates(
           stage,
@@ -754,7 +742,8 @@ class DeploymentManager {
       }
     }
 
-    if (stackType === StackType.AwsExample) {
+    // Add KMS parameters if stack depends on Shared (which provides KMS)
+    if (config.dependsOn?.includes(StackType.Shared)) {
       // Add KMS parameters from Shared stack
       const kmsKeyId =
         (await this.outputsManager.findOutputValueByCandidates(
@@ -986,7 +975,8 @@ async function main() {
           if (
             stack === "all" ||
             stack === StackType.CWL ||
-            stack === StackType.AwsExample
+            stack === StackType.AwsExample ||
+            stack === StackType.TheStoryHub
           ) {
             const { needsAdmin } = await inquirer.prompt([
               {
@@ -1004,9 +994,10 @@ async function main() {
             }
           }
 
-          // Ask about frontend build for CWL deployments
+          // Ask about frontend build for stacks that have frontends
           let skipFrontendBuild = false;
-          if (stack === "all" || stack === StackType.CWL) {
+          const stackConfig = stack !== "all" ? getProjectConfig(stack as StackType) : null;
+          if (stack === "all" || stackConfig?.hasFrontend) {
             const { buildFrontend } = await inquirer.prompt([
               {
                 type: "confirm",

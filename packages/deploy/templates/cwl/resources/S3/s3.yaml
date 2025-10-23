@@ -37,17 +37,14 @@ Outputs:
   CWLBucketName:
     Value: !Ref CWLBucket
     Description: Name of the CloudWatchLive bucket
-    Export:
-      Name: !Sub "cwlUserFilesBucketName-${Stage}"
+    # Export removed: top-level template will declare canonical exports
 
   CWLBucketArn:
     Value: !GetAtt CWLBucket.Arn
     Description: ARN of the CloudWatchLive bucket
-    Export:
-      Name: !Sub "cwlUserFilesBucketArn-${Stage}"
+    # Export removed: top-level template will declare canonical exports
 
   CWLBucketRegionalDomainName:
     Value: !GetAtt CWLBucket.RegionalDomainName
     Description: Regional domain name of the CloudWatchLive bucket
-    Export:
-      Name: !Sub "cwlUserFilesBucketRegionalDomainName-${Stage}"
+    # Export removed: top-level template will declare canonical exports

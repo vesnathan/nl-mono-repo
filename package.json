@@ -10,7 +10,9 @@
     "packages/shared",
     "packages/waf",
     "packages/deploy",
-    "packages/ec2-vsc"
+    "packages/ec2-vsc",
+    "packages/the-story-hub/frontend",
+    "packages/the-story-hub/backend"
   ],
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.0.14",
@@ -70,6 +72,6 @@
     "test": "lerna run test --stream",
     "dev:cwl": "yarn workspace cwlfrontend dev:local",
     "dev:awse": "yarn workspace awsefrontend dev:local",
-    "dev:msf": "yarn workspace msffrontend dev:local"
+    "dev:tsh": "yarn workspace tshfrontend dev:local"
   }
 }

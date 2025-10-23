@@ -38,6 +38,17 @@ yarn dev:codespaces
 
 The development server will start on [http://localhost:3000](http://localhost:3000).
 
+### Local dev mocks
+
+For frontend-only development without a deployed backend, the AwsExample frontend includes lightweight local dev mocks. In development the app can load mock users via the helper:
+
+```ts
+import { loadMockUsers } from './src/devMocks';
+const users = await loadMockUsers();
+```
+
+These mocks live under `src/dev-mocks` and the loader returns an empty array outside of NODE_ENV=development.
+
 ### Environment Configuration
 
 The frontend automatically reads configuration from the deployed AWS infrastructure:

@@ -11,7 +11,8 @@ export function getAppNameForStackType(stackType: StackType): string {
     case StackType.CWL:
       return "cwl";
     case StackType.WAF:
-      return "waf";
+      return "waf";    case StackType.TheStoryHub:
+      return "tsh";
     default:
       return "shared";
   }

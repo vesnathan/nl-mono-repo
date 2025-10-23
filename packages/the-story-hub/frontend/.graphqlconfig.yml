@@ -1,0 +1,19 @@
+projects:
+  app:
+    schemaPath: ../backend/combined_schema.graphql
+    includes:
+      - src/graphql/**/*.ts
+      - src/graphql/**/*.tsx
+    excludes:
+      - ./amplify/**
+      - src/types/gqlTypes.ts
+      - src/graphql/gqlTypes.ts
+    extensions:
+      amplify:
+        codeGenTarget: typescript
+        generatedFileName: src/types/gqlTypes.ts
+        frontend: javascript
+        framework: react
+extensions:
+  amplify:
+    version: 3

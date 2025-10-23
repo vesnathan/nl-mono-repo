@@ -39,7 +39,28 @@ const getDeploymentOutputs = () => {
   }
 };
 
+// Fail loudly in non-development when required NEXT_PUBLIC vars are missing
+const assertRequiredDeploymentEnvs = (
+  envs: Record<string, string | undefined>,
+) => {
+  const required = [
+    "NEXT_PUBLIC_USER_POOL_ID",
+    "NEXT_PUBLIC_USER_POOL_CLIENT_ID",
+    "NEXT_PUBLIC_IDENTITY_POOL_ID",
+    "NEXT_PUBLIC_GRAPHQL_URL",
+  ];
+  const missing = required.filter((k) => !envs[k] || envs[k] === "");
+  if (missing.length > 0 && process.env.NODE_ENV !== "development") {
+    throw new Error(
+      `Missing required deployment envs for CWL in non-development: ${missing.join(", ")}. Ensure the CWL stack is deployed or set the NEXT_PUBLIC_* env vars.`,
+    );
+  }
+};
+
 const deploymentEnvs = getDeploymentOutputs();
+
+// Assert required NEXT_PUBLIC_* envs in non-development
+assertRequiredDeploymentEnvs(deploymentEnvs);
 
 const nextConfig = {
   env: {

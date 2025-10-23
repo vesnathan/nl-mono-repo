@@ -85,10 +85,10 @@ Resources:
       Parameters:
         Stage: !Ref Stage
         AppName: !Ref AppName
-        AppCloudFrontDistributionId: !GetAtt CloudFrontStack.Outputs.AWSECloudFrontDistributionId
-        AppCloudFrontDomainName: !GetAtt CloudFrontStack.Outputs.AWSECloudFrontDomainName
+        AppCloudFrontDistributionId: !GetAtt CloudFrontStack.Outputs.CloudFrontDistributionId
+        AppCloudFrontDomainName: !GetAtt CloudFrontStack.Outputs.CloudFrontDomainName
         FromEmail: noreply@awsexample.com
-        AppURL: !Sub "https://${CloudFrontStack.Outputs.AWSECloudFrontDomainName}"
+        AppURL: !Sub "https://${CloudFrontStack.Outputs.CloudFrontDomainName}"
         TemplateBucketName: !Ref TemplateBucketName
         UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
         LogRetentionInDays: !Ref LogRetentionInDays

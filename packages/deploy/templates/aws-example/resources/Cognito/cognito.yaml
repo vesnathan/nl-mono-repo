@@ -88,8 +88,7 @@ Outputs:
   UserPoolProviderName:
     Description: Provider name of the Cognito User Pool
     Value: !GetAtt UserPool.ProviderName
-    Export:
-      Name: !Sub "nlmonorepo-awse-${Stage}-user-pool-provider-name"
+    # Export removed: top-level template will declare canonical exports
 
   IdentityPoolId:
     Description: ID of the Cognito Identity Pool

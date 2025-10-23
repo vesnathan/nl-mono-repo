@@ -7,13 +7,15 @@ function getDeploymentOutputs() {
     const raw = readFileSync(p, "utf8");
     const parsed = JSON.parse(raw);
 
-    const outputs = Object.values(parsed.stacks || {})
-      .flatMap((s) => s.outputs || [])
-      .map((o) => ({
-        key: o.OutputKey,
-        value: o.OutputValue,
-        exportName: o.ExportName,
-      }));
+    // Only use outputs from the AwsExample stack to avoid accidental cross-app picks
+    const awseStack = parsed.stacks && parsed.stacks.AwsExample;
+    if (!awseStack || !Array.isArray(awseStack.outputs)) return {};
+
+    const outputs = awseStack.outputs.map((o) => ({
+      key: o.OutputKey,
+      value: o.OutputValue,
+      exportName: o.ExportName,
+    }));
 
     // Helper: produce prioritized candidate export names for this app
     const appName = "awse"; // short app identifier for aws-example
@@ -72,6 +74,30 @@ function getDeploymentOutputs() {
 }
 
 const deploymentEnvs = getDeploymentOutputs();
+
+// Fail loudly in non-development when required NEXT_PUBLIC vars are missing
+function assertRequiredDeploymentEnvs(envs) {
+  const required = [
+    "NEXT_PUBLIC_USER_POOL_ID",
+    "NEXT_PUBLIC_USER_POOL_CLIENT_ID",
+    "NEXT_PUBLIC_IDENTITY_POOL_ID",
+    "NEXT_PUBLIC_GRAPHQL_URL",
+  ];
+  const missing = required.filter((k) => !envs[k]);
+  if (missing.length > 0 && process.env.NODE_ENV !== "development") {
+    throw new Error(
+      `Missing required deployment envs for AWSE in non-development: ${missing.join(", ")}. Ensure the AwsExample stack is deployed or set the NEXT_PUBLIC_* env vars.`,
+    );
+  }
+}
+
+// Assert required NEXT_PUBLIC_* envs in non-dev
+try {
+  assertRequiredDeploymentEnvs(deploymentEnvs);
+} catch (e) {
+  // rethrow so build fails in CI/non-dev when envs are missing
+  throw e;
+}
 
 module.exports = {
   env: {

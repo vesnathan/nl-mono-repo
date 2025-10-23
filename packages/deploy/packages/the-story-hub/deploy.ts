@@ -5,8 +5,6 @@ import {
   CreateStackCommand,
   UpdateStackCommand,
   DescribeStacksCommand,
-  DescribeStackResourcesCommand,
-  DeleteStackCommand,
 } from "@aws-sdk/client-cloudformation";
 import {
   S3,
@@ -14,11 +12,8 @@ import {
   DeleteObjectsCommand,
   PutObjectCommand,
   _Object,
-  HeadBucketCommand,
-  CreateBucketCommand,
   PutPublicAccessBlockCommand,
   PutBucketVersioningCommand,
-  Tag,
 } from "@aws-sdk/client-s3";
 import {
   DeploymentOptions,
@@ -30,23 +25,18 @@ import {
 } from "../../types";
 import { logger } from "../../utils/logger";
 import { IamManager } from "../../utils/iam-manager";
-import { AwsUtils } from "../../utils/aws-utils";
-import { FrontendDeploymentManager } from "../../utils/frontend-deployment";
 import { ResolverCompiler } from "../../utils/resolver-compiler";
 import { LambdaCompiler } from "../../utils/lambda-compiler";
-import { SESEmailVerifier } from "../../utils/ses-email-verifier";
 import { S3BucketManager } from "../../utils/s3-bucket-manager";
-import {
-  addAppSyncBucketPolicy,
-  verifyResolversAccessible,
-} from "../../utils/s3-resolver-validator";
-import { ForceDeleteManager } from "../../utils/force-delete-utils";
 import { OutputsManager } from "../../outputs-manager";
 import { candidateExportNames } from "../../utils/export-names";
+import { seedDB } from "../../utils/seed-db";
+import { addAppSyncBucketPolicy } from "../../utils/s3-resolver-validator";
 import { cleanupLogGroups } from "../../utils/loggroup-cleanup";
 import { createReadStream, readdirSync, statSync, existsSync } from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
+import { UserSetupManager } from "../../utils/user-setup";
 
 const findYamlFiles = (dir: string): string[] => {
   const files = readdirSync(dir);
@@ -109,240 +99,6 @@ function findTypeScriptFiles(dir: string): string[] {
   return files;
 }
 
-// Helper function to handle stuck stack resources
-async function handleStuckStackResources(stackName: string): Promise<void> {
-  logger.debug(
-    `Attempting manual cleanup of stuck resources in stack: ${stackName}`,
-  );
-
-  try {
-    const cfn = new CloudFormationClient({ region: "ap-southeast-2" });
-
-    // List all stack resources to find stuck ones
-    const response = await cfn.send(
-      new DescribeStackResourcesCommand({ StackName: stackName }),
-    );
-    const StackResources = response.StackResources;
-
-    if (StackResources) {
-      for (const resource of StackResources) {
-        if (
-          resource.ResourceStatus === "DELETE_FAILED" &&
-          resource.ResourceType === "AWS::IAM::Role"
-        ) {
-          logger.debug(
-            `Found stuck IAM role: ${resource.LogicalResourceId} (${resource.PhysicalResourceId})`,
-          );
-
-          // Try to manually delete the IAM role
-          if (resource.PhysicalResourceId) {
-            await cleanupIAMRole(resource.PhysicalResourceId);
-          }
-        }
-
-        if (
-          resource.ResourceStatus === "DELETE_FAILED" &&
-          resource.ResourceType === "AWS::CloudFormation::Stack"
-        ) {
-          logger.debug(
-            `Found stuck nested stack: ${resource.LogicalResourceId} (${resource.PhysicalResourceId})`,
-          );
-
-          // Try to force delete the nested stack
-          if (resource.PhysicalResourceId) {
-            await cleanupNestedStack(resource.PhysicalResourceId);
-          }
-        }
-      }
-    }
-
-    // Wait a bit for AWS to process the manual cleanup
-    await new Promise((resolve) => setTimeout(resolve, 15000));
-  } catch (error: any) {
-    logger.warning(`Manual resource cleanup failed: ${error.message}`);
-  }
-}
-
-// Helper function to cleanup IAM roles
-async function cleanupIAMRole(roleArn: string): Promise<void> {
-  try {
-    const {
-      IAMClient,
-      DetachRolePolicyCommand,
-      ListAttachedRolePoliciesCommand,
-      DeleteRoleCommand,
-    } = await import("@aws-sdk/client-iam");
-    const iam = new IAMClient({ region: "ap-southeast-2" });
-
-    // Extract role name from ARN
-    const roleName = roleArn.split("/").pop();
-    if (!roleName) {
-      logger.warning(`Could not extract role name from ARN: ${roleArn}`);
-      return;
-    }
-
-    logger.debug(`Attempting to cleanup IAM role: ${roleName}`);
-
-    // First, detach all policies
-    const { AttachedPolicies } = await iam.send(
-      new ListAttachedRolePoliciesCommand({ RoleName: roleName }),
-    );
-
-    if (AttachedPolicies) {
-      for (const policy of AttachedPolicies) {
-        if (policy.PolicyArn) {
-          logger.debug(
-            `Detaching policy ${policy.PolicyArn} from role ${roleName}`,
-          );
-          await iam.send(
-            new DetachRolePolicyCommand({
-              RoleName: roleName,
-              PolicyArn: policy.PolicyArn,
-            }),
-          );
-        }
-      }
-    }
-
-    // Then delete the role
-    logger.debug(`Deleting IAM role: ${roleName}`);
-    await iam.send(new DeleteRoleCommand({ RoleName: roleName }));
-    logger.success(`Successfully deleted IAM role: ${roleName}`);
-  } catch (error: any) {
-    logger.warning(`Failed to cleanup IAM role ${roleArn}: ${error.message}`);
-  }
-}
-
-// Helper function to cleanup nested stacks
-async function cleanupNestedStack(stackArn: string): Promise<void> {
-  try {
-    const cfn = new CloudFormationClient({ region: "ap-southeast-2" });
-
-    // Extract the actual stack name from the ARN
-    // ARN format: arn:aws:cloudformation:region:account:stack/stack-name/uuid
-    const arnParts = stackArn.split("/");
-    if (arnParts.length < 2) {
-      logger.warning(`Invalid stack ARN format: ${stackArn}`);
-      return;
-    }
-
-    const fullStackName = arnParts[1]; // This is the complete stack name
-    logger.debug(`Attempting to force delete nested stack: ${fullStackName}`);
-
-    // Try direct deletion first
-    try {
-      await cfn.send(new DeleteStackCommand({ StackName: fullStackName }));
-      logger.debug(`Initiated deletion of nested stack: ${fullStackName}`);
-
-      // Wait for deletion to complete
-      await waitForStackDeletion(cfn, fullStackName);
-      logger.success(`Successfully cleaned up nested stack: ${fullStackName}`);
-    } catch (deleteError: any) {
-      logger.warning(
-        `Direct deletion failed for ${fullStackName}: ${deleteError.message}`,
-      );
-
-      // Try force deletion as fallback
-      const forceDeleteManager = new ForceDeleteManager("ap-southeast-2");
-      await forceDeleteManager.forceDeleteStack(
-        fullStackName,
-        StackType.CWL,
-        "dev",
-      );
-      logger.success(`Force deleted nested stack: ${fullStackName}`);
-    }
-  } catch (error: any) {
-    logger.warning(
-      `Failed to cleanup nested stack ${stackArn}: ${error.message}`,
-    );
-  }
-}
-
-// Helper function to wait for stack deletion
-async function waitForStackDeletion(
-  cfn: CloudFormationClient,
-  stackName: string,
-): Promise<void> {
-  const maxAttempts = 120; // Increased from 30 to 120 (20 minutes)
-  const delay = 10000; // 10 seconds
-
-  // Spinner and timer setup
-  const startTime = Date.now();
-  let stopSpinner: (() => void) | null = null;
-  let lastMsg = "";
-  const getElapsed = () => {
-    const ms = Date.now() - startTime;
-    const s = Math.floor(ms / 1000) % 60;
-    const m = Math.floor(ms / 60000);
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  };
-
-  for (let i = 0; i < maxAttempts; i++) {
-    try {
-      const response = await cfn.send(
-        new DescribeStacksCommand({ StackName: stackName }),
-      );
-      const stack = response.Stacks?.[0];
-
-      if (!stack) {
-        if (stopSpinner) stopSpinner();
-        logger.success(
-          `Stack ${stackName} no longer exists - deletion complete`,
-        );
-        return;
-      }
-
-      const status = stack.StackStatus;
-      if (status === "DELETE_COMPLETE") {
-        if (stopSpinner) stopSpinner();
-        logger.success(`Stack ${stackName} deletion completed successfully`);
-        return;
-      }
-
-      if (status === "DELETE_FAILED") {
-        if (stopSpinner) stopSpinner();
-        throw new Error(
-          `Stack ${stackName} deletion failed with status: ${status}`,
-        );
-      }
-
-      // Show spinner and timer
-      const msg = `Waiting for stack ${stackName} to delete... Current status: ${status} (${i + 1}/${maxAttempts}) [${getElapsed()}]`;
-      if (!stopSpinner) {
-        stopSpinner = logger.infoWithSpinner(msg);
-        lastMsg = msg;
-      } else if (msg !== lastMsg && stopSpinner) {
-        stopSpinner();
-        stopSpinner = logger.infoWithSpinner(msg);
-        lastMsg = msg;
-      }
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    } catch (error: any) {
-      if (
-        error.name === "ValidationError" &&
-        error.message.includes("does not exist")
-      ) {
-        if (stopSpinner) stopSpinner();
-        logger.success(
-          `Stack ${stackName} no longer exists - deletion complete`,
-        );
-        return;
-      }
-
-      if (i === maxAttempts - 1) {
-        if (stopSpinner) stopSpinner();
-        throw error;
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-  }
-
-  throw new Error(
-    `Timeout waiting for stack ${stackName} deletion after ${(maxAttempts * delay) / 1000} seconds`,
-  );
-}
-
 // Helper function to wait for stack creation or update to complete
 async function waitForStackCompletion(
   cfn: CloudFormationClient,
@@ -399,23 +155,6 @@ async function waitForStackCompletion(
         );
         return;
       }
-
-      if (failureStatuses.includes(status)) {
-        throw new Error(
-          `Stack ${stackName} ${operation.toLowerCase()} failed with status: ${status}`,
-        );
-      }
-
-      if (inProgressStatuses.includes(status)) {
-        logger.debug(
-          `Waiting for ${stackName} ${operation.toLowerCase()}... Status: ${status} (${i + 1}/${maxAttempts}) - ${Math.round(((i + 1) / maxAttempts) * 100)}% complete`,
-        );
-      } else {
-        logger.debug(
-          `Stack ${stackName} status: ${status} (${i + 1}/${maxAttempts})`,
-        );
-      }
-
       await new Promise((resolve) => setTimeout(resolve, delay));
     } catch (error: any) {
       if (i === maxAttempts - 1) {
@@ -434,15 +173,17 @@ async function waitForStackCompletion(
   );
 }
 
-export async function deployCwl(options: DeploymentOptions): Promise<void> {
-  const stackName = getStackName(StackType.CWL, options.stage);
+export async function deployTheStoryHub(
+  options: DeploymentOptions,
+): Promise<void> {
+  const stackName = getStackName(StackType.TheStoryHub, options.stage);
   const templateBucketName = getTemplateBucketName(
-    StackType.CWL,
+    StackType.TheStoryHub,
     options.stage,
   );
 
   const stopSpinner = logger.infoWithSpinner(
-    "Starting CloudWatch Live stack deployment in ap-southeast-2",
+    "Starting AWS Example stack deployment in ap-southeast-2",
   );
 
   const region = options.region || process.env.AWS_REGION || "ap-southeast-2";
@@ -487,10 +228,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
   // Build GraphQL schema and types (always needed)
   try {
     logger.info("📦 Building GraphQL schema and types...");
-    const frontendPath = path.join(
-      __dirname,
-      "../../../cloudwatchlive/frontend",
-    );
+    const frontendPath = path.join(__dirname, "../../../the-story-hub/frontend");
 
     // Run build-gql to generate combined_schema.graphql and gqlTypes.ts
     logger.debug(`Running: yarn build-gql in ${frontendPath}`);
@@ -541,19 +279,18 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
 
   // Initialize remaining clients
   const s3 = new S3({ region });
-  const awsUtils = new AwsUtils(region);
   // Will be set after resolver compilation; passed to CloudFormation as a parameter
   let resolversBuildHash: string | undefined = undefined;
 
   // Set up IAM role
-  const iamManager = new IamManager(region); // Pass region string to IamManager
+  const iamManager = new IamManager(region);
   const roleArn = await iamManager.setupRole(
-    StackType.CWL,
+    StackType.TheStoryHub,
     options.stage,
     templateBucketName,
   );
   if (!roleArn) {
-    throw new Error("Failed to setup role for CloudWatch Live");
+    throw new Error("Failed to setup role for AWS Example");
   }
 
   // Wait for IAM role to propagate
@@ -647,7 +384,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         new PutObjectCommand({
           Bucket: templateBucketName,
           Key: mainTemplateS3Key,
-          Body: createReadStream(TEMPLATE_PATHS[StackType.CWL]),
+          Body: createReadStream(TEMPLATE_PATHS[StackType.TheStoryHub]),
           ContentType: "application/x-yaml",
         }),
       );
@@ -698,11 +435,11 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     // Upload nested stack templates
     if (options.debugMode) {
       logger.debug(
-        `Looking for templates in: ${TEMPLATE_RESOURCES_PATHS[StackType.CWL]}`,
+        `Looking for templates in: ${TEMPLATE_RESOURCES_PATHS[StackType.TheStoryHub]}`,
       );
     }
     const templateFiles = findYamlFiles(
-      TEMPLATE_RESOURCES_PATHS[StackType.CWL],
+      TEMPLATE_RESOURCES_PATHS[StackType.TheStoryHub],
     );
     if (options.debugMode) {
       logger.debug(`Found ${templateFiles.length} template files`);
@@ -710,7 +447,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
 
     if (templateFiles.length === 0) {
       throw new Error(
-        `No template files found in ${TEMPLATE_RESOURCES_PATHS[StackType.CWL]}`,
+        `No template files found in ${TEMPLATE_RESOURCES_PATHS[StackType.TheStoryHub]}`,
       );
     }
 
@@ -720,7 +457,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
 
     for (const file of templateFiles) {
       const relativePath = path.relative(
-        TEMPLATE_RESOURCES_PATHS[StackType.CWL],
+        TEMPLATE_RESOURCES_PATHS[StackType.TheStoryHub],
         file,
       );
       const key = relativePath.replace(/\\/g, "/"); // Ensure forward slashes for S3
@@ -756,7 +493,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       );
 
       // Check if AppSync template was uploaded, as it's crucial for resolvers
-      const appSyncTemplateKey = "resources/AppSync/appSync.yaml";
+      const appSyncTemplateKey = "resources/AppSync/appsync.yaml";
       if (failedUploads.includes(appSyncTemplateKey)) {
         throw new Error(
           `Failed to upload critical AppSync template: ${appSyncTemplateKey}`,
@@ -772,7 +509,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     logger.debug("Uploading GraphQL schema file...");
     const schemaPath = path.join(
       __dirname,
-      "../../../cloudwatchlive/backend/combined_schema.graphql",
+      "../../../the-story-hub/backend/combined_schema.graphql",
     );
 
     if (existsSync(schemaPath)) {
@@ -798,23 +535,6 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       throw new Error(`GraphQL schema file not found at ${schemaPath}`);
     }
 
-    // Verify SES email address before deploying Lambda function
-    logger.info("Checking SES email verification...");
-    const fromEmail = "vesnathan+admin@gmail.com"; // Default from email address
-    const sesVerifier = new SESEmailVerifier({
-      region: region,
-      emailAddress: fromEmail,
-    });
-
-    const isEmailVerified = await sesVerifier.ensureEmailVerified();
-    if (!isEmailVerified) {
-      logger.warning(
-        "\n⚠️  Email verification required. Continuing with deployment, but emails will fail until verified.\n",
-      );
-      // Don't throw error - allow deployment to continue
-      // The Lambda will fail when trying to send emails, but the stack will deploy
-    }
-
     // Compile Lambda functions
     if (options.debugMode) {
       logger.debug("Compiling Lambda functions...");
@@ -822,11 +542,16 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
 
     const lambdaSourceDir = path.join(
       __dirname,
-      "../../../cloudwatchlive/backend/lambda",
+      "../../../the-story-hub/backend/lambda",
     );
+    // Use a repo-local cache for generated Lambda artifacts to avoid committing them
     const lambdaOutputDir = path.join(
       __dirname,
-      "../../templates/cwl/functions",
+      "../../../..",
+      ".cache",
+      "deploy",
+      "the-story-hub",
+      "functions",
     );
 
     logger.info(`Looking for Lambda functions in: ${lambdaSourceDir}`);
@@ -886,7 +611,7 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
 
     const resolverDir = path.join(
       __dirname,
-      "../../../cloudwatchlive/backend/resolvers",
+      "../../../the-story-hub/backend/resolvers",
     );
 
     logger.info(`Looking for resolvers in: ${resolverDir}`);
@@ -930,10 +655,10 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         logger.error(errorMsg);
         throw new Error(errorMsg);
       } else {
-        // Define constants directory path for CWL
+        // Define constants directory path for the-story-hub
         const constantsDir = path.join(
           __dirname,
-          "../../../cloudwatchlive/backend/constants",
+          "../../../the-story-hub/backend/constants",
         );
 
         const resolverCompiler = new ResolverCompiler({
@@ -1002,34 +727,6 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
             }
           }
 
-          // Second verification: Use the S3BucketManager to verify specific resolvers
-          // Check for the resolvers we need in the schema
-          const keyResolvers = [
-            `resolvers/${options.stage}/${resolversBuildHash}/users/Queries/Query.getCWLUser.js`,
-            `resolvers/${options.stage}/${resolversBuildHash}/users/Mutations/Mutation.createCWLUser.js`,
-          ];
-
-          const missingResolvers: string[] = [];
-
-          for (const resolverKey of keyResolvers) {
-            const exists = await s3BucketManager.objectExists(
-              templateBucketName,
-              resolverKey,
-            );
-            if (!exists) {
-              missingResolvers.push(resolverKey);
-              logger.warning(`Critical resolver missing: ${resolverKey}`);
-            } else {
-              logger.debug(`Verified critical resolver exists: ${resolverKey}`);
-            }
-          }
-
-          if (missingResolvers.length > 0) {
-            throw new Error(
-              `Missing critical resolvers: ${missingResolvers.join(", ")}. Deployment will likely fail.`,
-            );
-          }
-
           if (resolverCount === 0) {
             throw new Error(
               "No resolvers were uploaded to S3. Deployment will fail.",
@@ -1055,13 +752,32 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       }),
     );
 
-    const kmsKeyId = sharedStackData.Stacks?.[0]?.Outputs?.find(
+    let kmsKeyId = sharedStackData.Stacks?.[0]?.Outputs?.find(
       (output) => output.OutputKey === "KMSKeyId",
     )?.OutputValue;
 
-    const kmsKeyArn = sharedStackData.Stacks?.[0]?.Outputs?.find(
+    let kmsKeyArn = sharedStackData.Stacks?.[0]?.Outputs?.find(
       (output) => output.OutputKey === "KMSKeyArn",
     )?.OutputValue;
+
+    // Fallback: attempt to find parameterized/legacy export names in deployment outputs
+    if (!kmsKeyId || !kmsKeyArn) {
+      const outputsManager = new OutputsManager();
+      kmsKeyId =
+        kmsKeyId ||
+        (await outputsManager.findOutputValueByCandidates(
+          options.stage,
+          candidateExportNames(StackType.Shared, options.stage, "kms-key-id"),
+        )) ||
+        undefined;
+      kmsKeyArn =
+        kmsKeyArn ||
+        (await outputsManager.findOutputValueByCandidates(
+          options.stage,
+          candidateExportNames(StackType.Shared, options.stage, "kms-key-arn"),
+        )) ||
+        undefined;
+    }
 
     if (!kmsKeyId || !kmsKeyArn) {
       throw new Error("Failed to get KMS key information from shared stack");
@@ -1071,16 +787,27 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
     const outputsManager = new OutputsManager();
 
     // Get WAF Web ACL ID and ARN
-    const webAclId = await outputsManager.getOutputValue(
-      StackType.WAF,
-      options.stage,
-      "WebACLId",
-    );
-    const webAclArn = await outputsManager.getOutputValue(
-      StackType.WAF,
-      options.stage,
-      "WebACLArn",
-    );
+    const webAclId =
+      (await outputsManager.findOutputValueByCandidates(
+        options.stage,
+        candidateExportNames(StackType.WAF, options.stage, "web-acl-id"),
+      )) ||
+      (await outputsManager.getOutputValue(
+        StackType.WAF,
+        options.stage,
+        "WebACLId",
+      ));
+
+    const webAclArn =
+      (await outputsManager.findOutputValueByCandidates(
+        options.stage,
+        candidateExportNames(StackType.WAF, options.stage, "web-acl-arn"),
+      )) ||
+      (await outputsManager.getOutputValue(
+        StackType.WAF,
+        options.stage,
+        "WebACLArn",
+      ));
 
     if (!webAclId || !webAclArn) {
       throw new Error(
@@ -1113,12 +840,44 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
       ParameterValue: resolversBuildHash,
     });
 
+    // Log the parameters we will pass to CloudFormation for debugging
     try {
+      logger.debug(
+        `Computed CloudFormation parameters for TheStoryHub: ${JSON.stringify(
+          stackParams,
+          null,
+          2,
+        )}`,
+      );
+
+      // Validate required parameters to fail fast with a clear message if anything is missing
+      const requiredKeys = [
+        "Stage",
+        "TemplateBucketName",
+        "KMSKeyId",
+        "KMSKeyArn",
+        "WebACLId",
+        "WebACLArn",
+      ];
+
+      const missing = requiredKeys.filter(
+        (k) =>
+          !stackParams.some((p) => p.ParameterKey === k && p.ParameterValue),
+      );
+
+      if (missing.length > 0) {
+        throw new Error(
+          `Missing required CloudFormation parameters for TheStoryHub: ${missing.join(", ")}. Computed parameters: ${JSON.stringify(
+            stackParams,
+          )}`,
+        );
+      }
+
       // Clean up any orphaned LogGroups before deployment
       await cleanupLogGroups({
-        appName: "cwl",
+        appName: "tsh",
         stage: options.stage,
-        region: options.region || process.env.AWS_REGION || "ap-southeast-2",
+        region: region,
       });
 
       // Check if the stack exists
@@ -1184,55 +943,85 @@ export async function deployCwl(options: DeploymentOptions): Promise<void> {
         `CloudFormation stack ${stackName} deployed/updated successfully`,
       );
 
-      // Always run the user seed shell script after stack deployment
+      // Run seeding and admin-user creation for AWS Example (if possible)
       try {
-        // Programmatic seeding: prefer using central seedDB util so per-package
-        // seeders are discovered via appName.
-        logger.info("🌱 Seeding users into DynamoDB (programmatic seeder)...");
-        const outputsManagerForSeed = new OutputsManager();
-        const candidates = candidateExportNames(
-          StackType.CWL,
-          options.stage,
-          "datatable-name",
+        const repoRoot = path.join(__dirname, "../../../../");
+        logger.info(
+          "🌱 Seeding TSH users into DynamoDB (shell script, with AWS env)...",
         );
 
-        let tableName =
-          (await outputsManagerForSeed.findOutputValueByCandidates(
-            options.stage,
-            candidates,
-          )) || `nlmonorepo-shared-usertable-${options.stage}`;
-
         try {
-          const regionToUse =
-            options.region || process.env.AWS_REGION || "ap-southeast-2";
-          // Import seedDB from deploy utils
-          const { seedDB } = await import("../../utils/seed-db");
-          await seedDB({
-            region: regionToUse,
-            tableName,
-            stage: options.stage,
-            appName: "cloudwatchlive",
-            skipConfirmation: true,
-            numCompanies: 5,
-            adminsPerCompany: 3,
-            staffPerAdmin: 5,
-          });
-          logger.success("✓ User table seeded successfully");
-        } catch (seedError: any) {
-          logger.error(
-            `User seeding failed: ${seedError instanceof Error ? seedError.message : seedError}`,
+          // Programmatic seeding: prefer parameterized deployment outputs lookup
+          const outputsManagerForSeed = new OutputsManager();
+          const candidates = candidateExportNames(
+            StackType.TheStoryHub,
+            options.stage,
+            "datatable-name",
           );
-          if (seedError.stdout) {
-            logger.error(`[Seeder stdout]:\n${seedError.stdout}`);
+
+          let tableName =
+            (await outputsManagerForSeed.findOutputValueByCandidates(
+              options.stage,
+              candidates,
+            )) || `nlmonorepo-tsh-datatable-${options.stage}`;
+
+          logger.info(
+            "🌱 Seeding TSH users into DynamoDB (programmatic seeder)...",
+          );
+
+          try {
+            await seedDB({
+              region,
+              tableName,
+              stage: options.stage,
+              appName: "the-story-hub",
+              skipConfirmation: true,
+            });
+            logger.success("✓ TSH user table seeded successfully");
+          } catch (seedError: any) {
+            logger.error(
+              `TSH user seeding failed: ${seedError instanceof Error ? seedError.message : seedError}`,
+            );
+            // keep previous behavior: do not throw here - admin creation may still be desirable
           }
-          if (seedError.stderr) {
-            logger.error(`[Seeder stderr]:\n${seedError.stderr}`);
-          }
-          throw seedError;
+        } catch (seedOuterErr: any) {
+          logger.error(
+            `TSH seeding orchestration failed: ${seedOuterErr instanceof Error ? seedOuterErr.message : seedOuterErr}`,
+          );
         }
-      } catch (seedError) {
-        // Already logged above
-        throw seedError;
+
+        // Attempt to create admin user in Cognito (if admin email provided or set in env)
+        try {
+          const region =
+            options.region || process.env.AWS_REGION || "ap-southeast-2";
+          const adminEmail = options.adminEmail || process.env.ADMIN_EMAIL;
+          if (!adminEmail) {
+            logger.info(
+              "No admin email provided (options.adminEmail or ADMIN_EMAIL). Skipping Cognito admin creation.",
+            );
+          } else {
+            logger.info(
+              `👤 Creating Cognito admin user for TSH: ${adminEmail}`,
+            );
+            const userManager = new UserSetupManager(region, "tsh");
+            await userManager.createAdminUser({
+              stage: options.stage,
+              adminEmail,
+              region,
+              stackType: "tsh",
+            });
+            logger.success("✓ Cognito admin user created for TSH");
+          }
+        } catch (userError: any) {
+          logger.error(
+            `TSH Cognito admin creation failed: ${userError instanceof Error ? userError.message : userError}`,
+          );
+          // don't throw to avoid failing the entire deploy; surface error to logs
+        }
+      } catch (err) {
+        logger.error(
+          `TSH post-deploy tasks failed: ${err instanceof Error ? err.message : err}`,
+        );
       }
     } catch (cfnError: any) {
       logger.error(`CloudFormation deployment failed: ${cfnError.message}`);

@@ -27,8 +27,45 @@ import { StackType, getStackName } from "../types";
 import { OutputsManager } from "../outputs-manager";
 import { candidateExportNames } from "../utils/export-names";
 import { getAppNameForStackType } from "../utils/stack-utils";
+import { COGNITO_GROUPS as TSH_COGNITO_GROUPS } from "../../the-story-hub/backend/constants/ClientTypes";
 
-export type StackTypeForUser = "cwl" | "awse";
+// NOTE: Add your stack's short name here when bootstrapping a new package
+// This type is used for Cognito user setup - add the short name (e.g., "tsf" for The Story Forge)
+export type StackTypeForUser = "cwl" | "awse" | "tsh";
+
+// STACK_TYPE_CONFIG: Configuration mapping for user setup per stack type
+// When bootstrapping a new package, add an entry here with the stack's configuration
+interface StackTypeConfig {
+  stackTypeEnum: StackType;
+  cognitoGroups: string[];
+  outputKey: string;
+  adminGroup: string;
+  usesSimpleSchema: boolean; // true for AWSE/TSH schema (no org), false for CWL schema (with org)
+}
+
+const STACK_TYPE_CONFIG: Record<StackTypeForUser, StackTypeConfig> = {
+  cwl: {
+    stackTypeEnum: StackType.CWL,
+    cognitoGroups: CWL_COGNITO_GROUPS,
+    outputKey: "CWLUserPoolId",
+    adminGroup: "SuperAdmin",
+    usesSimpleSchema: false,
+  },
+  awse: {
+    stackTypeEnum: StackType.AwsExample,
+    cognitoGroups: AWSE_COGNITO_GROUPS,
+    outputKey: "AWSEUserPoolId",
+    adminGroup: "SiteAdmin",
+    usesSimpleSchema: true,
+  },
+  tsh: {
+    stackTypeEnum: StackType.TheStoryHub,
+    cognitoGroups: TSH_COGNITO_GROUPS,
+    outputKey: "UserPoolId",
+    adminGroup: "SiteAdmin",
+    usesSimpleSchema: true,
+  }
+};
 
 export interface UserSetupOptions {
   stage: string;
@@ -61,6 +98,31 @@ export class UserSetupManager {
     this.cloudFormationClient = new CloudFormationClient({ region });
   }
 
+  /**
+   * Gets configuration for the current stack type
+   */
+  private getConfig(): StackTypeConfig {
+    const config = STACK_TYPE_CONFIG[this.stackType];
+    if (!config) {
+      throw new Error(`Unknown stack type: ${this.stackType}`);
+    }
+    return config;
+  }
+
+  /**
+   * Maps short stack type to full StackType enum
+   */
+  private getStackTypeEnum(): StackType {
+    return this.getConfig().stackTypeEnum;
+  }
+
+  /**
+   * Gets the appropriate Cognito groups for the current stack type
+   */
+  private getCognitoGroups(): string[] {
+    return this.getConfig().cognitoGroups;
+  }
+
   async createAdminUser(options: UserSetupOptions): Promise<void> {
     const { stage, adminEmail, stackType } = options;
 
@@ -82,9 +144,7 @@ export class UserSetupManager {
     await this.ensureCognitoGroups(userPoolId, stage);
 
     // Get user table name based on stack type
-    const appNameForTable = getAppNameForStackType(
-      this.stackType === "awse" ? StackType.AwsExample : StackType.CWL,
-    );
+    const appNameForTable = getAppNameForStackType(this.getStackTypeEnum());
     const tableName = `nlmonorepo-${appNameForTable}-datatable-${stage}`;
     await this.verifyTableExists(tableName);
 
@@ -111,18 +171,14 @@ export class UserSetupManager {
     try {
       // Determine stack name and output key based on stack type
       // Resolve full CloudFormation stack name using shared helper so naming is consistent
-      const stackName =
-        this.stackType === "awse"
-          ? getStackName(StackType.AwsExample, stage)
-          : getStackName(StackType.CWL, stage);
-      const outputKey =
-        this.stackType === "awse" ? "AWSEUserPoolId" : "CWLUserPoolId";
+      const config = this.getConfig();
+      const targetStackType = config.stackTypeEnum;
+      const stackName = getStackName(targetStackType, stage);
+      const outputKey = config.outputKey;
 
       // First, try to read locally-saved deployment outputs (faster and avoids AWS calls when available)
       try {
         const outputsManager = new OutputsManager();
-        const targetStackType =
-          this.stackType === "awse" ? StackType.AwsExample : StackType.CWL;
         const candidates = candidateExportNames(
           targetStackType,
           stage,
@@ -169,8 +225,6 @@ export class UserSetupManager {
       );
 
       // Build candidate export names and prefer parameterized names, then legacy
-      const targetStackType =
-        this.stackType === "awse" ? StackType.AwsExample : StackType.CWL;
       const candidates = candidateExportNames(
         targetStackType,
         stage,
@@ -203,8 +257,7 @@ export class UserSetupManager {
     logger.debug("Checking Cognito user groups...");
 
     // Use the single source of truth for client types based on stack type
-    const requiredGroups =
-      this.stackType === "awse" ? AWSE_COGNITO_GROUPS : CWL_COGNITO_GROUPS;
+    const requiredGroups = this.getCognitoGroups();
 
     try {
       const listGroupsResponse = await this.cognitoClient.send(
@@ -342,8 +395,7 @@ export class UserSetupManager {
       logger.success("Set permanent password for user");
 
       // Add user to admin group (varies by stack type)
-      const adminGroupName =
-        this.stackType === "awse" ? "SiteAdmin" : "SuperAdmin";
+      const adminGroupName = this.getConfig().adminGroup;
       logger.debug(`Adding user to ${adminGroupName} group...`);
       await this.cognitoClient.send(
         new AdminAddUserToGroupCommand({
@@ -404,8 +456,8 @@ export class UserSetupManager {
 
       let userItem: any;
 
-      if (this.stackType === "awse") {
-        // AWSE schema - simpler, no organization
+      if (this.getConfig().usesSimpleSchema) {
+        // AWSE/TSH schema - simpler, no organization
         userItem = {
           PK: { S: `USER#${cognitoUserId}` },
           SK: { S: `PROFILE#${cognitoUserId}` },

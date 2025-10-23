@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { config } from "dotenv";
-import { deployCwl } from "./packages/cwl/cwl";
+import { deployCwl } from "./packages/cwl/deploy";
 import { logger } from "./utils/logger";
 
 // Load environment variables
