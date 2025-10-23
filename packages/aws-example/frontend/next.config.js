@@ -85,8 +85,13 @@ function assertRequiredDeploymentEnvs(envs) {
   ];
   const missing = required.filter((k) => !envs[k]);
   // Skip validation during lint or in development
-  const isLinting = process.env.npm_lifecycle_event === "lint" || process.argv.includes("lint");
-  if (missing.length > 0 && process.env.NODE_ENV !== "development" && !isLinting) {
+  const isLinting =
+    process.env.npm_lifecycle_event === "lint" || process.argv.includes("lint");
+  if (
+    missing.length > 0 &&
+    process.env.NODE_ENV !== "development" &&
+    !isLinting
+  ) {
     throw new Error(
       `Missing required deployment envs for AWSE in non-development: ${missing.join(", ")}. Ensure the AwsExample stack is deployed or set the NEXT_PUBLIC_* env vars.`,
     );
@@ -94,7 +99,8 @@ function assertRequiredDeploymentEnvs(envs) {
 }
 
 // Assert required NEXT_PUBLIC_* envs in non-dev (skip during lint)
-const isLinting = process.env.npm_lifecycle_event === "lint" || process.argv.includes("lint");
+const isLinting =
+  process.env.npm_lifecycle_event === "lint" || process.argv.includes("lint");
 if (!isLinting) {
   try {
     assertRequiredDeploymentEnvs(deploymentEnvs);
