@@ -1,0 +1,16 @@
+# Base Schema - Defines root Query, Mutation, and Subscription types
+
+type Query {
+  # Placeholder - actual queries defined in extending files
+  _empty: String
+}
+
+type Mutation {
+  # Placeholder - actual mutations defined in extending files
+  _empty: String
+}
+
+type Subscription {
+  # Placeholder - actual subscriptions defined in extending files
+  _empty: String
+}

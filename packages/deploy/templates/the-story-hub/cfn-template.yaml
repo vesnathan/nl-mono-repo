@@ -9,7 +9,7 @@ Parameters:
   AppName:
     Type: String
     Description: Application short name (used in export names)
-    Default: tsh
+    Default: thestoryhub
   TemplateBucketName:
     Type: String
     Description: Name of the S3 bucket containing nested stack templates

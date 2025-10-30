@@ -8,10 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { DataFetchError } from "@/components/common/DataFetchError";
 import { useRouter } from "next/navigation";
 import { FC, PropsWithChildren, useEffect } from "react";
-import {
-  getUserQueryFn,
-  getUserQueryKey,
-} from "../graphql/queries/userQueries";
+import { getUserProfileAPI } from "@/lib/api/users";
 
 // using @heroui Progress component directly
 
@@ -23,16 +20,14 @@ export const UserStoreSetup: FC<Props> = ({ userId, children }) => {
   const setUser = useUserStore((state) => state.setUser);
   const router = useRouter();
 
-  const queryKey = getUserQueryKey(userId);
-
   const { data, error, isPending } = useQuery({
     retry: false,
-    queryFn: () => getUserQueryFn({ userId }),
-    queryKey,
+    queryKey: ["user", userId],
+    queryFn: () => getUserProfileAPI(userId),
   });
 
-  // Extract the user data
-  const User = data?.data?.getUser;
+  // Extract the user data - API returns the user directly
+  const User = data;
 
   // Set user in store when GraphQL data is available
   // The resolver already handles Cognito group to clientType mapping

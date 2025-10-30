@@ -1,0 +1,65 @@
+# Real-time Subscriptions
+
+extend type Subscription {
+  onNewNotification(userId: ID!): Notification
+    @aws_subscribe(mutations: ["createNotification"])
+
+  onNewBranch(storyId: ID!): ChapterNode
+    @aws_subscribe(mutations: ["createBranch"])
+}
+
+# Notification Types
+
+type Notification @aws_cognito_user_pools {
+  notificationId: ID!
+  userId: ID!
+  type: NotificationType!
+  message: String!
+  read: Boolean!
+  relatedStoryId: ID
+  relatedNodeId: ID
+  relatedUserId: ID
+  createdAt: String!
+}
+
+enum NotificationType {
+  NEW_BRANCH
+  VOTE_RECEIVED
+  BADGE_AWARDED
+  AUTHOR_RESPONSE
+}
+
+input CreateNotificationInput {
+  userId: ID!
+  type: NotificationType!
+  message: String!
+  relatedStoryId: ID
+  relatedNodeId: ID
+  relatedUserId: ID
+}
+
+# Notification Queries and Mutations
+
+extend type Query {
+  getUserNotifications(userId: ID!, limit: Int, nextToken: String): NotificationConnection
+    @aws_cognito_user_pools
+
+  getUnreadCount(userId: ID!): Int!
+    @aws_cognito_user_pools
+}
+
+extend type Mutation {
+  createNotification(input: CreateNotificationInput!): Notification
+    @aws_cognito_user_pools
+
+  markNotificationAsRead(notificationId: ID!): Notification
+    @aws_cognito_user_pools
+
+  markAllNotificationsAsRead(userId: ID!): Boolean!
+    @aws_cognito_user_pools
+}
+
+type NotificationConnection {
+  items: [Notification!]!
+  nextToken: String
+}

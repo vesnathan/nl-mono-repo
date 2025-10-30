@@ -5,6 +5,7 @@ import {
   CreateStackCommand,
   UpdateStackCommand,
   DescribeStacksCommand,
+  DescribeStackEventsCommand,
 } from "@aws-sdk/client-cloudformation";
 import {
   S3,
@@ -23,7 +24,7 @@ import {
   getTemplateBucketName,
   TEMPLATE_PATHS,
 } from "../../types";
-import { logger } from "../../utils/logger";
+import { logger, setLogFile, closeLogFile } from "../../utils/logger";
 import { IamManager } from "../../utils/iam-manager";
 import { ResolverCompiler } from "../../utils/resolver-compiler";
 import { LambdaCompiler } from "../../utils/lambda-compiler";
@@ -34,6 +35,7 @@ import { seedDB } from "../../utils/seed-db";
 import { addAppSyncBucketPolicy } from "../../utils/s3-resolver-validator";
 import { cleanupLogGroups } from "../../utils/loggroup-cleanup";
 import { createReadStream, readdirSync, statSync, existsSync } from "fs";
+import { rm } from "fs/promises";
 import * as path from "path";
 import { execSync } from "child_process";
 import { UserSetupManager } from "../../utils/user-setup";
@@ -130,6 +132,65 @@ async function waitForStackCompletion(
           "UPDATE_ROLLBACK_IN_PROGRESS",
         ];
 
+  // Track event IDs we've already logged to avoid duplicates
+  const loggedEventIds = new Set<string>();
+  // Track nested stacks we've discovered
+  const nestedStacks = new Set<string>();
+
+  // Helper function to fetch and log events from a stack (including nested stacks)
+  const fetchStackEvents = async (targetStackName: string, isNested: boolean = false) => {
+    try {
+      const eventsResponse = await cfn.send(
+        new DescribeStackEventsCommand({ StackName: targetStackName }),
+      );
+
+      if (eventsResponse.StackEvents) {
+        // Events come newest first, reverse to show chronologically
+        const newEvents = eventsResponse.StackEvents
+          .filter(event => event.EventId && !loggedEventIds.has(event.EventId))
+          .reverse();
+
+        for (const event of newEvents) {
+          if (event.EventId) {
+            loggedEventIds.add(event.EventId);
+
+            const timestamp = event.Timestamp?.toISOString() || 'unknown';
+            const resourceType = event.ResourceType || 'Unknown';
+            const logicalId = event.LogicalResourceId || 'Unknown';
+            const resourceStatus = event.ResourceStatus || 'Unknown';
+            const statusReason = event.ResourceStatusReason || '';
+
+            // Track nested stacks for recursive event fetching
+            if (resourceType === 'AWS::CloudFormation::Stack' && event.PhysicalResourceId) {
+              const nestedStackId = event.PhysicalResourceId;
+              if (!nestedStacks.has(nestedStackId)) {
+                nestedStacks.add(nestedStackId);
+                logger.debug(`Discovered nested stack: ${logicalId} (${nestedStackId})`);
+              }
+            }
+
+            // Add prefix for nested stack events
+            const prefix = isNested ? `[NESTED:${targetStackName.split('/')[1] || targetStackName}] ` : '';
+
+            // Log based on status
+            if (resourceStatus.includes('FAILED')) {
+              logger.error(`[CFN] ${prefix}${timestamp} | ${resourceType} | ${logicalId} | ${resourceStatus} | ${statusReason}`);
+            } else if (resourceStatus.includes('COMPLETE')) {
+              logger.success(`[CFN] ${prefix}${timestamp} | ${resourceType} | ${logicalId} | ${resourceStatus}`);
+            } else {
+              logger.info(`[CFN] ${prefix}${timestamp} | ${resourceType} | ${logicalId} | ${resourceStatus}`);
+            }
+          }
+        }
+      }
+    } catch (eventsError: any) {
+      // Don't warn for nested stacks that might have been deleted
+      if (!isNested) {
+        logger.warning(`Failed to fetch CloudFormation events from ${targetStackName}: ${eventsError.message}`);
+      }
+    }
+  };
+
   for (let i = 0; i < maxAttempts; i++) {
     try {
       const response = await cfn.send(
@@ -147,6 +208,14 @@ async function waitForStackCompletion(
 
       if (!status) {
         throw new Error(`Stack ${stackName} status is undefined`);
+      }
+
+      // Fetch and log CloudFormation events from main stack
+      await fetchStackEvents(stackName, false);
+
+      // Fetch events from all discovered nested stacks
+      for (const nestedStackId of nestedStacks) {
+        await fetchStackEvents(nestedStackId, true);
       }
 
       if (status === successStatus) {
@@ -176,6 +245,9 @@ async function waitForStackCompletion(
 export async function deployTheStoryHub(
   options: DeploymentOptions,
 ): Promise<void> {
+  // Cache is cleared at the main() entry point in index.ts
+  // Logging is set up in the deploy menu in index.ts
+
   const stackName = getStackName(StackType.TheStoryHub, options.stage);
   const templateBucketName = getTemplateBucketName(
     StackType.TheStoryHub,
@@ -574,6 +646,9 @@ export async function deployTheStoryHub(
       });
 
       try {
+        // Clean up previous Lambda cache before compilation
+        await lambdaCompiler.clean();
+
         await lambdaCompiler.compileLambdaFunctions();
         logger.success("✓ Lambda functions compiled and uploaded successfully");
       } catch (error: any) {
@@ -790,31 +865,44 @@ export async function deployTheStoryHub(
     const outputsManager = new OutputsManager();
 
     // Get WAF Web ACL ID and ARN
-    const webAclId =
-      (await outputsManager.findOutputValueByCandidates(
-        options.stage,
-        candidateExportNames(StackType.WAF, options.stage, "web-acl-id"),
-      )) ||
-      (await outputsManager.getOutputValue(
-        StackType.WAF,
-        options.stage,
-        "WebACLId",
-      ));
+    // WAF parameters - optional if skipWAF is enabled
+    let webAclId = "NONE";
+    let webAclArn = "NONE";
 
-    const webAclArn =
-      (await outputsManager.findOutputValueByCandidates(
-        options.stage,
-        candidateExportNames(StackType.WAF, options.stage, "web-acl-arn"),
-      )) ||
-      (await outputsManager.getOutputValue(
-        StackType.WAF,
-        options.stage,
-        "WebACLArn",
-      ));
+    if (!options.skipWAF) {
+      const foundWebAclId =
+        (await outputsManager.findOutputValueByCandidates(
+          options.stage,
+          candidateExportNames(StackType.WAF, options.stage, "web-acl-id"),
+        )) ||
+        (await outputsManager.getOutputValue(
+          StackType.WAF,
+          options.stage,
+          "WebACLId",
+        ));
 
-    if (!webAclId || !webAclArn) {
-      throw new Error(
-        "Failed to get WAF Web ACL information from WAF stack outputs",
+      const foundWebAclArn =
+        (await outputsManager.findOutputValueByCandidates(
+          options.stage,
+          candidateExportNames(StackType.WAF, options.stage, "web-acl-arn"),
+        )) ||
+        (await outputsManager.getOutputValue(
+          StackType.WAF,
+          options.stage,
+          "WebACLArn",
+        ));
+
+      if (!foundWebAclId || !foundWebAclArn) {
+        throw new Error(
+          "Failed to get WAF Web ACL information from WAF stack outputs",
+        );
+      }
+
+      webAclId = foundWebAclId;
+      webAclArn = foundWebAclArn;
+    } else {
+      logger.info(
+        "Skipping WAF parameter lookup (skipWAF enabled) - using placeholder values",
       );
     }
 
@@ -859,9 +947,12 @@ export async function deployTheStoryHub(
         "TemplateBucketName",
         "KMSKeyId",
         "KMSKeyArn",
-        "WebACLId",
-        "WebACLArn",
       ];
+
+      // WAF parameters are only required if skipWAF is false
+      if (!options.skipWAF) {
+        requiredKeys.push("WebACLId", "WebACLArn");
+      }
 
       const missing = requiredKeys.filter(
         (k) =>
@@ -924,15 +1015,21 @@ export async function deployTheStoryHub(
         stopUpdateSpinner();
       } else {
         logger.info("Creating new CloudFormation stack...");
-        await cfn.send(
-          new CreateStackCommand({
-            StackName: stackName,
-            TemplateURL: stackTemplateUrl,
-            Parameters: stackParams,
-            Capabilities: [Capability.CAPABILITY_NAMED_IAM],
-            RoleARN: roleArn,
-          }),
-        );
+        const createCommand: any = {
+          StackName: stackName,
+          TemplateURL: stackTemplateUrl,
+          Parameters: stackParams,
+          Capabilities: [Capability.CAPABILITY_NAMED_IAM],
+          RoleARN: roleArn,
+        };
+
+        // Add DisableRollback if option is set (default: false)
+        if (options.disableRollback) {
+          createCommand.DisableRollback = true;
+          logger.info("DisableRollback is enabled - stack will not rollback on failure");
+        }
+
+        await cfn.send(new CreateStackCommand(createCommand));
 
         // Wait for creation to complete
         const stopCreateSpinner = logger.infoWithSpinner(
@@ -966,7 +1063,13 @@ export async function deployTheStoryHub(
             (await outputsManagerForSeed.findOutputValueByCandidates(
               options.stage,
               candidates,
-            )) || `nlmonorepo-tsh-datatable-${options.stage}`;
+            )) ||
+            (await outputsManagerForSeed.getOutputValue(
+              StackType.TheStoryHub,
+              options.stage,
+              "DataTableName",
+            )) ||
+            `nlmonorepo-thestoryhub-datatable-${options.stage}`;
 
           logger.info(
             "🌱 Seeding TSH users into DynamoDB (programmatic seeder)...",
@@ -1035,5 +1138,6 @@ export async function deployTheStoryHub(
     throw error;
   } finally {
     stopSpinner();
+    closeLogFile();
   }
 }

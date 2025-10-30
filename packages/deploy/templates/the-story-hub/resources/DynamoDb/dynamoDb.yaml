@@ -71,19 +71,30 @@ Resources:
                   - kms:GenerateDataKey
                 Resource: !Ref KMSKeyArn
 
-  TSHDataTable: # Single-table design for users and other entities
+  # Single-table design for story branching platform
+  # Access Patterns:
+  # 1. Get Story by ID: PK=STORY#{storyId}, SK=METADATA
+  # 2. Get all Chapters for Story: PK=STORY#{storyId}, SK begins_with CHAPTER#
+  # 3. Get User Profile: PK=USER#{userId}, SK=PROFILE#{userId}
+  # 4. Get User's Stories: GSI1PK=USER#{userId}, GSI1SK begins_with STORY#
+  # 5. Get User's Branches: GSI1PK=USER#{userId}, GSI1SK begins_with BRANCH#
+  # 6. Get Bookmark: PK=USER#{userId}, SK=BOOKMARK#{storyId}
+  # 7. Get Notifications: PK=USER#{userId}, SK begins_with NOTIFICATION#
+  # 8. Get Child Branches: PK=CHAPTER#{parentNodeId}, SK begins_with CHILD#
+  # 9. Browse/Discover Stories: GSI1PK=STORY_LIST, GSI1SK={timestamp}#{storyId}
+  TSHDataTable:
     Type: AWS::DynamoDB::Table
     DependsOn: DynamoDBRole
     Properties:
       TableName: !Sub "nlmonorepo-${AppName}-datatable-${Stage}"
       AttributeDefinitions:
-        - AttributeName: "PK" # Partition key for single-table design
+        - AttributeName: "PK"
           AttributeType: "S"
-        - AttributeName: "SK" # Sort key for single-table design
+        - AttributeName: "SK"
           AttributeType: "S"
-        - AttributeName: "GSI1PK" # GSI1 partition key for alternate access patterns
+        - AttributeName: "GSI1PK"
           AttributeType: "S"
-        - AttributeName: "GSI1SK" # GSI1 sort key for alternate access patterns
+        - AttributeName: "GSI1SK"
           AttributeType: "S"
       BillingMode: PAY_PER_REQUEST
       KeySchema:
@@ -100,15 +111,17 @@ Resources:
               KeyType: "RANGE"
           Projection:
             ProjectionType: "ALL"
-      Tags:
-        - Key: Name
-          Value: !Sub "${AppName} DataTable"
       SSESpecification:
         SSEEnabled: true
-        SSEType: KMS
+        SSEType: "KMS"
         KMSMasterKeyId: !Ref KMSKeyArn
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
       StreamSpecification:
-        StreamViewType: NEW_AND_OLD_IMAGES # Adjust as needed
+        StreamViewType: NEW_AND_OLD_IMAGES
+      Tags:
+        - Key: "Name"
+          Value: !Sub "nlmonorepo-${AppName}-datatable-${Stage}"
 
 Outputs:
   TSHDataTableName: # Output name expected by parent TSH stack

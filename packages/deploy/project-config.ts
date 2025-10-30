@@ -130,8 +130,8 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
     packageDir: "the-story-hub",
     dependsOn: [StackType.WAF, StackType.Shared],
     buckets: {
-      templates: "nlmonorepo-the-story-hub-templates-{stage}",
-      frontend: "nlmonorepo-tsh-userfiles-{stage}",
+      templates: "nlmonorepo-thestoryhub-templates-{stage}",
+      frontend: "nlmonorepo-thestoryhub-userfiles-{stage}",
       additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],
     },
     hasFrontend: true,

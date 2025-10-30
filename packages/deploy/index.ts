@@ -7,6 +7,7 @@ import {
   logger,
   setDebugMode as setLoggerDebugMode,
   resetDebugMode,
+  setLogFile,
 } from "./utils/logger"; // Import resetDebugMode
 import { AwsUtils } from "./utils/aws-utils";
 import { FrontendDeploymentManager } from "./utils/frontend-deployment";
@@ -47,6 +48,7 @@ import { REGEX } from "../shared/constants/RegEx"; // Corrected import
 import { execSync } from "child_process"; // Import execSync
 import path from "path"; // Import path
 import { readdirSync } from "fs";
+import { rm } from "fs/promises";
 
 // Load environment variables from mono-repo root
 config({ path: path.resolve(__dirname, "../../.env") });
@@ -79,6 +81,22 @@ class DeploymentManager {
 
   async runForceDelete(options: ForceDeleteOptions): Promise<void> {
     const { stackType, stage, region } = options;
+
+    // Set up logging for force delete operations
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const stackTypeStr = getProjectConfig(stackType).packageDir || stackType.toLowerCase();
+    const logFilePath = path.join(
+      __dirname,
+      "../..",
+      ".cache",
+      "deploy",
+      stackTypeStr,
+      "logs",
+      `force-delete-${timestamp}.log`,
+    );
+    setLogFile(logFilePath);
+    logger.info(`📝 Force delete logs: ${logFilePath}`);
+
     // WAF is always in us-east-1
     const effectiveRegion =
       stackType === StackType.WAF ? "us-east-1" : region || this.region;
@@ -331,17 +349,27 @@ class DeploymentManager {
     try {
       // Check if dependencies are satisfied
       const dependenciesValid =
-        await this.dependencyValidator.validateDependencies(stackType, stage);
+        await this.dependencyValidator.validateDependencies(
+          stackType,
+          stage,
+          options.skipWAF || false,
+        );
 
       if (!dependenciesValid) {
         // Get the full dependency chain for this stack
         const dependencyChain = getDependencyChain(stackType);
+
+        // Filter out WAF if skipWAF is enabled
+        const filteredChain = options.skipWAF
+          ? dependencyChain.filter((s) => s !== StackType.WAF)
+          : dependencyChain;
+
         logger.info(
-          `Auto-deploying missing dependencies for ${stackType}: ${dependencyChain.filter((s) => s !== stackType).join(", ")}`,
+          `Auto-deploying missing dependencies for ${stackType}: ${filteredChain.filter((s) => s !== stackType).join(", ")}`,
         );
 
         // Deploy each dependency that's not already deployed
-        for (const depStack of dependencyChain) {
+        for (const depStack of filteredChain) {
           // Skip the target stack itself
           if (depStack === stackType) continue;
 
@@ -879,6 +907,16 @@ class DeploymentManager {
 
 // --- Commander Program Setup ---
 async function main() {
+  // FIRST: Clear entire .cache directory before anything else
+  const cacheDir = path.join(__dirname, "../..", ".cache", "deploy");
+  try {
+    await rm(cacheDir, { recursive: true, force: true });
+    console.log(`🧹 Cleared cache directory: ${cacheDir}`);
+  } catch (error: any) {
+    // If cache doesn't exist, that's fine
+    console.log(`Cache directory didn't exist or couldn't be cleared: ${error.message}`);
+  }
+
   // Ensure debug mode is completely reset at startup
   resetDebugMode();
 
@@ -953,6 +991,23 @@ async function main() {
             return;
           }
 
+          // Set up logging for this deployment operation
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          const stackTypeStr = stack === "all"
+            ? "all-stacks"
+            : (getProjectConfig(stack as StackType).packageDir || (stack as string).toLowerCase());
+          const logFilePath = path.join(
+            __dirname,
+            "../..",
+            ".cache",
+            "deploy",
+            stackTypeStr,
+            "logs",
+            `deployment-${timestamp}.log`,
+          );
+          setLogFile(logFilePath);
+          logger.info(`📝 Deployment logs: ${logFilePath}`);
+
           const { deploymentType } = await inquirer.prompt([
             {
               type: "list",
@@ -1011,12 +1066,40 @@ async function main() {
             skipFrontendBuild = !buildFrontend;
           }
 
+          // Ask about rollback behavior for new stack creation
+          const { disableRollback } = await inquirer.prompt([
+            {
+              type: "confirm",
+              name: "disableRollback",
+              message:
+                "Disable automatic rollback on stack creation failure? (Useful for debugging deployment errors)",
+              default: false,
+            },
+          ]);
+
+          // Ask about skipping WAF (expensive for dev environments)
+          let skipWAF = false;
+          if (stage === "dev" && (stack === "all" || stack === StackType.TheStoryHub || stack === StackType.CWL)) {
+            const { skipWAFPrompt } = await inquirer.prompt([
+              {
+                type: "confirm",
+                name: "skipWAFPrompt",
+                message:
+                  "Skip WAF deployment? (WAF is expensive, recommended to skip for dev environments)",
+                default: true,
+              },
+            ]);
+            skipWAF = skipWAFPrompt;
+          }
+
           const options: DeploymentOptions = {
             stage,
             adminEmail,
             skipUserCreation: !adminEmail,
             autoDeleteFailedStacks: true,
             skipFrontendBuild,
+            disableRollback,
+            skipWAF,
           };
 
           const deployAction = async (stackToDeploy: StackType | "all") => {

@@ -1,0 +1,62 @@
+# Story Type Definitions
+
+enum AgeRating {
+  G
+  T
+  M
+  ADULT_18_PLUS
+}
+
+type StoryStats {
+  totalBranches: Int!
+  totalReads: Int!
+  rating: Float
+}
+
+type Story @aws_cognito_user_pools {
+  storyId: ID!
+  authorId: String!
+  title: String!
+  synopsis: String!
+  genre: [String!]!
+  ageRating: AgeRating!
+  contentWarnings: [String!]!
+  ratingExplanation: String
+  stats: StoryStats!
+  featured: Boolean!
+  createdAt: String!
+  coverImageUrl: String
+}
+
+input CreateStoryInput {
+  title: String!
+  synopsis: String!
+  genre: [String!]!
+  ageRating: AgeRating!
+  contentWarnings: [String!]!
+  ratingExplanation: String
+  coverImageUrl: String
+}
+
+input UpdateStoryInput {
+  storyId: ID!
+  title: String
+  synopsis: String
+  genre: [String!]
+  ageRating: AgeRating
+  contentWarnings: [String!]
+  featured: Boolean
+  coverImageUrl: String
+}
+
+input StoryFilter {
+  genre: String
+  ageRating: AgeRating
+  minRating: Float
+  featured: Boolean
+}
+
+type StoryConnection {
+  items: [Story!]!
+  nextToken: String
+}

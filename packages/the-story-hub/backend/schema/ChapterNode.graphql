@@ -1,0 +1,65 @@
+# Chapter/Branch Type Definitions
+
+type ChapterStats {
+  reads: Int!
+  upvotes: Int!
+  downvotes: Int!
+  childBranches: Int!
+}
+
+type ChapterBadges {
+  matchesVision: Boolean!
+  authorApproved: Boolean!
+}
+
+type ChapterNode @aws_cognito_user_pools {
+  nodeId: ID!
+  storyId: ID!
+  parentNodeId: ID
+  authorId: String!
+  content: String!
+  branchDescription: String
+  paragraphIndex: Int
+  chapterNumber: Int!
+  createdAt: String!
+  editableUntil: String!
+  stats: ChapterStats!
+  badges: ChapterBadges!
+}
+
+input CreateChapterInput {
+  storyId: ID!
+  content: String!
+  chapterNumber: Int!
+}
+
+input CreateBranchInput {
+  parentNodeId: ID!
+  paragraphIndex: Int
+  branchDescription: String!
+  content: String!
+  ratingFlag: Boolean
+}
+
+input UpdateChapterInput {
+  storyId: ID!
+  nodeId: ID!
+  content: String
+  branchDescription: String
+}
+
+enum VoteType {
+  UP
+  DOWN
+}
+
+enum BadgeType {
+  MATCHES_VISION
+  AUTHOR_APPROVED
+}
+
+input AwardBadgeInput {
+  storyId: ID!
+  nodeId: ID!
+  badgeType: BadgeType!
+}

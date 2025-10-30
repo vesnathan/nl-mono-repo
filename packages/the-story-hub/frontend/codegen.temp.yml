@@ -1,4 +1,4 @@
-schema: "/home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo-agent-1/packages/the-story-hub/backend/combined_schema.graphql"
+schema: "/home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo/packages/the-story-hub/backend/combined_schema.graphql"
 generates:
   ./src/types/gqlTypes.ts:
     plugins:

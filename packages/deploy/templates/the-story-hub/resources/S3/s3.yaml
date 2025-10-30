@@ -18,6 +18,8 @@ Resources:
   # S3 Bucket for storing nextjs/react app
   TSHBucket:
     Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       BucketName: !Sub "nlmonorepo-${AppName}-userfiles-${Stage}"
       PublicAccessBlockConfiguration:

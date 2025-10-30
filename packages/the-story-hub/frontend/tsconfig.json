@@ -32,7 +32,8 @@
       "@/stores/*": ["./src/stores/*"],
       "@/SVGR/*": ["./src/SVGR/*"],
       "@/graphQL/*": ["./src/graphQL/*"],
-      "@shared/*": ["../../shared/*"]
+      "@shared/*": ["../../shared/*"],
+      "@tsh/backend/*": ["../backend/*"]
     }
   },
   "include": [

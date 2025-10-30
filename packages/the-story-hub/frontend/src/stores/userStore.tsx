@@ -4,16 +4,18 @@ import { User } from "@/types/gqlTypes";
 const createDefaultUser = (): User => ({
   __typename: "User",
   userId: "",
-  userEmail: "",
-  userFirstName: "",
-  userLastName: "",
-  userCreated: "",
-  privacyPolicy: false,
-  termsAndConditions: false,
-  userAddedById: "",
+  username: "",
+  email: "",
+  bio: "",
+  stats: {
+    __typename: "UserStats",
+    storiesCreated: 0,
+    branchesContributed: 0,
+    totalUpvotes: 0,
+  },
+  patreonSupporter: false,
   clientType: [],
-  userTitle: "",
-  userPhone: "",
+  createdAt: "",
 });
 
 // --------------------user store-----------

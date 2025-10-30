@@ -1,16 +1,6 @@
-# This file defines the Query and Mutation operations for the AppSync API
-# Type definitions (User, ClientType, UserInput) come from shared types
+# User Queries and Mutations
 
-type Mutation {
-  # Creates a new User
-  createUser(input: UserInput!): User
+extend type Query {
+  getUserProfile(userId: ID!): User
+    @aws_cognito_user_pools
 }
-
-type Query {
-  # Retrieves a User by their ID (Cognito Sub)
-  getUser(userId: String!): User
-    @aws_cognito_user_pools # Directive for AppSync authorization
-
-}
-
-

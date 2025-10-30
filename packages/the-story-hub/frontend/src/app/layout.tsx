@@ -7,9 +7,10 @@ import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 import { Amplify } from "aws-amplify";
 import { NextUIProvider } from "@nextui-org/react";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { useLogoutFn } from "@/hooks/useLogoutFn";
 import { GlobalMessage } from "@/components/common/GlobalMessage";
+import { QueryProvider } from "@/providers/QueryProvider";
+import { Navbar } from "@/components/layout/Navbar";
 import { AMPLIFY_CONFIG } from "../config/amplifyConfig";
 import "./globals.css";
 
@@ -29,30 +30,19 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     pathname === "/" ||
     pathname === "/login" ||
     pathname === "/login/" ||
-    // Allow public access to individual event pages (some events are free)
-    pathname?.startsWith("/event") ||
-    // Public discover pages (listing of events) should be accessible without login
-    pathname?.startsWith("/discover");
+    // Allow public access to browse stories
+    pathname?.startsWith("/browse") ||
+    // Allow public access to read stories
+    pathname?.startsWith("/story");
 
   return (
     <html lang="en" data-theme="lemonade">
       <head>
-        <title>AWS Example</title>
-        <meta name="description" content="AWS Example Application" />
+        <title>The Story Hub</title>
+        <meta name="description" content="Collaborative branching storytelling platform" />
       </head>
       <body>
-        <QueryClientProvider
-          client={
-            new QueryClient({
-              defaultOptions: {
-                queries: {
-                  retry: false,
-                  refetchOnWindowFocus: false,
-                },
-              },
-            })
-          }
-        >
+        <QueryProvider>
           <NextUIProvider>
             <GlobalMessage />
             {isUnprotectedPage ? (
@@ -65,7 +55,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </RequireAuth>
             )}
           </NextUIProvider>
-        </QueryClientProvider>
+        </QueryProvider>
       </body>
     </html>
   );
