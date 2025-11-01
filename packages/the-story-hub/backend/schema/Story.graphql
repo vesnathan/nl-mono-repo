@@ -2,20 +2,22 @@
 
 enum AgeRating {
   G
-  T
+  PG
+  PG_13
   M
   ADULT_18_PLUS
 }
 
-type StoryStats {
+type StoryStats @aws_iam @aws_cognito_user_pools {
   totalBranches: Int!
   totalReads: Int!
   rating: Float
 }
 
-type Story @aws_cognito_user_pools {
+type Story @aws_iam @aws_cognito_user_pools {
   storyId: ID!
   authorId: String!
+  authorName: String!
   title: String!
   synopsis: String!
   genre: [String!]!
@@ -26,6 +28,9 @@ type Story @aws_cognito_user_pools {
   featured: Boolean!
   createdAt: String!
   coverImageUrl: String
+  rootChapterId: String
+  aiCreated: Boolean!
+  allowAI: Boolean!
 }
 
 input CreateStoryInput {
@@ -36,6 +41,8 @@ input CreateStoryInput {
   contentWarnings: [String!]!
   ratingExplanation: String
   coverImageUrl: String
+  aiCreated: Boolean
+  allowAI: Boolean
 }
 
 input UpdateStoryInput {
@@ -47,6 +54,7 @@ input UpdateStoryInput {
   contentWarnings: [String!]
   featured: Boolean
   coverImageUrl: String
+  allowAI: Boolean
 }
 
 input StoryFilter {
@@ -56,7 +64,7 @@ input StoryFilter {
   featured: Boolean
 }
 
-type StoryConnection {
+type StoryConnection @aws_iam @aws_cognito_user_pools {
   items: [Story!]!
   nextToken: String
 }

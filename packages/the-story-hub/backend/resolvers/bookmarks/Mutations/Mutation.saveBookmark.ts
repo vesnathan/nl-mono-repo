@@ -14,7 +14,9 @@ export function request(ctx: CTX) {
   const identity = ctx.identity as AppSyncIdentityCognito;
   const now = util.time.nowISO8601();
 
-  console.log(`Saving bookmark for user ${identity.username}, story ${input.storyId}`);
+  console.log(
+    `Saving bookmark for user ${identity.username}, story ${input.storyId}`,
+  );
 
   return {
     operation: "PutItem",

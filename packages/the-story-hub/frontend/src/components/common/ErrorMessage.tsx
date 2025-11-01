@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Card, CardBody, Button } from '@nextui-org/react';
+import { Card, CardBody, Button } from "@nextui-org/react";
 
 interface ErrorMessageProps {
   title?: string;
@@ -8,10 +8,10 @@ interface ErrorMessageProps {
   retry?: () => void;
 }
 
-export function ErrorMessage({ 
-  title = 'Error', 
-  message, 
-  retry 
+export function ErrorMessage({
+  title = "Error",
+  message,
+  retry,
 }: ErrorMessageProps) {
   return (
     <Card className="max-w-md mx-auto">

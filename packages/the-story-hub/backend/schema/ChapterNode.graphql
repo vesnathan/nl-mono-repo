@@ -1,26 +1,34 @@
 # Chapter/Branch Type Definitions
 
-type ChapterStats {
+# Import AgeRating from Story schema
+# enum AgeRating is defined in Story.graphql
+
+type ChapterStats @aws_iam @aws_cognito_user_pools {
   reads: Int!
   upvotes: Int!
   downvotes: Int!
   childBranches: Int!
 }
 
-type ChapterBadges {
+type ChapterBadges @aws_iam @aws_cognito_user_pools {
   matchesVision: Boolean!
   authorApproved: Boolean!
 }
 
-type ChapterNode @aws_cognito_user_pools {
+type ChapterNode @aws_iam @aws_cognito_user_pools {
   nodeId: ID!
   storyId: ID!
   parentNodeId: ID
   authorId: String!
+  authorName: String!
   content: String!
   branchDescription: String
   paragraphIndex: Int
   chapterNumber: Int!
+  aiCreated: Boolean
+  ageRating: AgeRating
+  contentWarnings: [String!]
+  maxChildAgeRating: AgeRating
   createdAt: String!
   editableUntil: String!
   stats: ChapterStats!
@@ -38,7 +46,9 @@ input CreateBranchInput {
   paragraphIndex: Int
   branchDescription: String!
   content: String!
-  ratingFlag: Boolean
+  aiCreated: Boolean
+  ageRating: AgeRating
+  contentWarnings: [String!]
 }
 
 input UpdateChapterInput {

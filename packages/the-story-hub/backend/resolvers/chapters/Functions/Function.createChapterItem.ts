@@ -18,9 +18,12 @@ export function request(ctx: CTX) {
   const nowEpochMillis = util.time.nowEpochMilliSeconds();
   // Add 1 hour (3600000 ms) to current time for editableUntil
   const editableUntilEpoch = nowEpochMillis + 3600000;
-  const editableUntil = util.time.epochMilliSecondsToISO8601(editableUntilEpoch);
+  const editableUntil =
+    util.time.epochMilliSecondsToISO8601(editableUntilEpoch);
 
-  console.log(`Creating chapter for story ${input.storyId} by user: ${identity.username}`);
+  console.log(
+    `Creating chapter for story ${input.storyId} by user: ${identity.username}`,
+  );
 
   return {
     operation: "PutItem",
@@ -56,12 +59,17 @@ export function request(ctx: CTX) {
   };
 }
 
-export function response(ctx: CTX): ChapterNode {
+export function response(ctx: CTX) {
   if (ctx.error) {
     console.error("Error creating chapter:", ctx.error);
     return util.error(ctx.error.message, ctx.error.type);
   }
 
   console.log("Chapter created successfully:", ctx.result);
-  return ctx.result as ChapterNode;
+
+  // Pass chapter data to next function
+  return {
+    chapter: ctx.result,
+    isFirstChapter: ctx.args.input.chapterNumber === 1,
+  };
 }

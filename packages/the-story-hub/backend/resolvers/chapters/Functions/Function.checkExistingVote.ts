@@ -18,7 +18,9 @@ export function request(ctx: CTX) {
   const { nodeId } = ctx.args;
   const identity = ctx.identity as AppSyncIdentityCognito;
 
-  console.log(`Checking if user ${identity.username} has already voted on chapter ${nodeId}`);
+  console.log(
+    `Checking if user ${identity.username} has already voted on chapter ${nodeId}`,
+  );
 
   return {
     operation: "GetItem",
@@ -41,7 +43,7 @@ export function response(ctx: CTX) {
     // User has already voted
     return util.error(
       "You have already voted on this chapter",
-      "DuplicateVote"
+      "DuplicateVote",
     );
   }
 

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { Button } from '@nextui-org/react';
+import { Button } from "@nextui-org/react";
 
 interface EmptyStateProps {
   icon?: string;
@@ -11,7 +11,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  icon = '📭',
+  icon = "📭",
   title,
   description,
   actionLabel,

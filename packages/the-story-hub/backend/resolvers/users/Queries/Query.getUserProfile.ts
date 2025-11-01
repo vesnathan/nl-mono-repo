@@ -7,10 +7,7 @@ export function request(ctx: CTX) {
   const { userId } = ctx.args;
 
   if (!userId) {
-    return util.error(
-      "User ID is required",
-      "ValidationException"
-    );
+    return util.error("User ID is required", "ValidationException");
   }
 
   console.log(`Getting user profile for userId: ${userId}`);

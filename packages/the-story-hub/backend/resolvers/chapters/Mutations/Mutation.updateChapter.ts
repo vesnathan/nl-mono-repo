@@ -33,10 +33,7 @@ export function request(ctx: CTX) {
   }
 
   if (updateExpression.length === 0) {
-    return util.error(
-      "No fields to update",
-      "ValidationException"
-    );
+    return util.error("No fields to update", "ValidationException");
   }
 
   return {
@@ -66,7 +63,7 @@ export function response(ctx: CTX): ChapterNode {
     if (ctx.error.type === "ConditionalCheckFailedException") {
       return util.error(
         "Unauthorized: Edit window expired or you are not the author",
-        "Unauthorized"
+        "Unauthorized",
       );
     }
     console.error("Error updating chapter:", ctx.error);

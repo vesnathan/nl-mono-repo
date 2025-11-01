@@ -30,6 +30,7 @@ import {
   getDependencyChain,
 } from "./dependency-validator";
 import { getProjectConfig } from "./project-config";
+import { seedDB } from "./utils/seed-db";
 import {
   CloudFormationClient,
   CreateStackCommand,
@@ -83,8 +84,9 @@ class DeploymentManager {
     const { stackType, stage, region } = options;
 
     // Set up logging for force delete operations
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const stackTypeStr = getProjectConfig(stackType).packageDir || stackType.toLowerCase();
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const stackTypeStr =
+      getProjectConfig(stackType).packageDir || stackType.toLowerCase();
     const logFilePath = path.join(
       __dirname,
       "../..",
@@ -914,7 +916,9 @@ async function main() {
     console.log(`🧹 Cleared cache directory: ${cacheDir}`);
   } catch (error: any) {
     // If cache doesn't exist, that's fine
-    console.log(`Cache directory didn't exist or couldn't be cleared: ${error.message}`);
+    console.log(
+      `Cache directory didn't exist or couldn't be cleared: ${error.message}`,
+    );
   }
 
   // Ensure debug mode is completely reset at startup
@@ -992,10 +996,12 @@ async function main() {
           }
 
           // Set up logging for this deployment operation
-          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-          const stackTypeStr = stack === "all"
-            ? "all-stacks"
-            : (getProjectConfig(stack as StackType).packageDir || (stack as string).toLowerCase());
+          const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+          const stackTypeStr =
+            stack === "all"
+              ? "all-stacks"
+              : getProjectConfig(stack as StackType).packageDir ||
+                (stack as string).toLowerCase();
           const logFilePath = path.join(
             __dirname,
             "../..",
@@ -1079,7 +1085,12 @@ async function main() {
 
           // Ask about skipping WAF (expensive for dev environments)
           let skipWAF = false;
-          if (stage === "dev" && (stack === "all" || stack === StackType.TheStoryHub || stack === StackType.CWL)) {
+          if (
+            stage === "dev" &&
+            (stack === "all" ||
+              stack === StackType.TheStoryHub ||
+              stack === StackType.CWL)
+          ) {
             const { skipWAFPrompt } = await inquirer.prompt([
               {
                 type: "confirm",
@@ -1218,6 +1229,85 @@ async function main() {
           }
         };
 
+        const reseedMenu = async () => {
+          logger.menu("\n" + "=".repeat(40));
+          logger.menu("Reseed Database");
+          logger.menu("=".repeat(40));
+
+          const { appName } = await inquirer.prompt([
+            {
+              type: "list",
+              name: "appName",
+              message: "Select application to reseed:",
+              choices: [
+                { name: "The Story Hub", value: "the-story-hub" },
+                { name: "CloudWatch Live", value: "cloudwatchlive" },
+                new inquirer.Separator(),
+                { name: "<- Go Back", value: "back" },
+              ],
+            },
+          ]);
+
+          if (appName === "back") {
+            return;
+          }
+
+          const region = process.env.AWS_REGION || "ap-southeast-2";
+
+          logger.info(`🌱 Reseeding ${appName} database for stage: ${stage}`);
+
+          // Get table name
+          const outputsManager = new OutputsManager();
+          let stackType: StackType;
+
+          if (appName === "the-story-hub") {
+            stackType = StackType.TheStoryHub;
+          } else if (appName === "cloudwatchlive") {
+            stackType = StackType.CWL;
+          } else {
+            throw new Error(`Unknown app: ${appName}`);
+          }
+
+          const candidates = candidateExportNames(
+            stackType,
+            stage,
+            "DataTableName",
+          );
+
+          let tableName =
+            (await outputsManager.findOutputValueByCandidates(
+              stage,
+              candidates,
+            )) ||
+            (await outputsManager.getOutputValue(
+              stackType,
+              stage,
+              "DataTableName",
+            ));
+
+          if (!tableName) {
+            // Fallback to default naming
+            const appNameForTable = appName.replace(/-/g, "");
+            tableName = `nlmonorepo-${appNameForTable}-datatable-${stage}`;
+            logger.warning(
+              `Could not find table name in outputs, using fallback: ${tableName}`,
+            );
+          }
+
+          logger.info(`📊 Target table: ${tableName}`);
+
+          // Run seeding
+          await seedDB({
+            region,
+            tableName,
+            stage,
+            appName,
+            skipConfirmation: false, // Require confirmation for manual reseed
+          });
+
+          logger.success(`✅ Successfully reseeded ${appName} database`);
+        };
+
         const mainMenu = async () => {
           let continueMenu = true;
 
@@ -1234,6 +1324,7 @@ async function main() {
                 choices: [
                   { name: "Deploy or Update Stacks", value: "deploy" },
                   { name: "Remove Stacks", value: "remove" },
+                  { name: "Reseed Database", value: "reseed" },
                   new inquirer.Separator(),
                   { name: "Exit", value: "exit" },
                 ],
@@ -1253,6 +1344,12 @@ async function main() {
                 logger.menu("Returning to main menu...");
                 logger.menu("-".repeat(30));
                 break;
+              case "reseed":
+                await reseedMenu();
+                logger.menu("\n" + "-".repeat(30));
+                logger.menu("Returning to main menu...");
+                logger.menu("-".repeat(30));
+                break;
               case "exit":
                 logger.info("Exiting deployment tool.");
                 continueMenu = false;
@@ -1265,6 +1362,97 @@ async function main() {
       } catch (error: unknown) {
         logger.error(
           `An unexpected error occurred: ${(error as Error).message}`,
+        );
+        process.exit(1);
+      }
+    });
+
+  program
+    .command("reseed")
+    .description("Reseed the database for a specific package")
+    .option("-a, --app <app>", "Application name (e.g., the-story-hub)")
+    .option("-s, --stage <stage>", "Stage (e.g., dev, prod)")
+    .option("-r, --region <region>", "AWS region")
+    .action(async (cmdOptions) => {
+      try {
+        const { app, stage: cmdStage, region: cmdRegion } = cmdOptions;
+
+        // Get stage and region
+        const stage = cmdStage || process.env.STAGE || "dev";
+        const region = cmdRegion || process.env.AWS_REGION || "ap-southeast-2";
+
+        // Prompt for app if not provided
+        let appName = app;
+        if (!appName) {
+          const answers = await inquirer.prompt([
+            {
+              type: "list",
+              name: "appName",
+              message: "Select application to reseed:",
+              choices: [
+                { name: "The Story Hub", value: "the-story-hub" },
+                { name: "CloudWatch Live", value: "cloudwatchlive" },
+              ],
+            },
+          ]);
+          appName = answers.appName;
+        }
+
+        logger.info(`🌱 Reseeding ${appName} database for stage: ${stage}`);
+
+        // Get table name
+        const outputsManager = new OutputsManager();
+        let stackType: StackType;
+
+        if (appName === "the-story-hub") {
+          stackType = StackType.TheStoryHub;
+        } else if (appName === "cloudwatchlive") {
+          stackType = StackType.CWL;
+        } else {
+          throw new Error(`Unknown app: ${appName}`);
+        }
+
+        const candidates = candidateExportNames(
+          stackType,
+          stage,
+          "DataTableName",
+        );
+
+        let tableName =
+          (await outputsManager.findOutputValueByCandidates(
+            stage,
+            candidates,
+          )) ||
+          (await outputsManager.getOutputValue(
+            stackType,
+            stage,
+            "DataTableName",
+          ));
+
+        if (!tableName) {
+          // Fallback to default naming
+          const appNameForTable = appName.replace(/-/g, "");
+          tableName = `nlmonorepo-${appNameForTable}-datatable-${stage}`;
+          logger.warning(
+            `Could not find table name in outputs, using fallback: ${tableName}`,
+          );
+        }
+
+        logger.info(`📊 Target table: ${tableName}`);
+
+        // Run seeding
+        await seedDB({
+          region,
+          tableName,
+          stage,
+          appName,
+          skipConfirmation: false, // Require confirmation for manual reseed
+        });
+
+        logger.success(`✅ Successfully reseeded ${appName} database`);
+      } catch (error: unknown) {
+        logger.error(
+          `Reseed failed: ${(error as Error).message}`,
         );
         process.exit(1);
       }

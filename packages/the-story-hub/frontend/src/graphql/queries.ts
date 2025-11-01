@@ -22,12 +22,14 @@ export const getBookmark = /* GraphQL */ `query GetBookmark($storyId: ID!) {
   APITypes.GetBookmarkQueryVariables,
   APITypes.GetBookmarkQuery
 >;
-export const getChapter = /* GraphQL */ `query GetChapter($storyId: ID!, $nodeId: ID!) {
+export const getChapter =
+  /* GraphQL */ `query GetChapter($storyId: ID!, $nodeId: ID!) {
   getChapter(storyId: $storyId, nodeId: $nodeId) {
     nodeId
     storyId
     parentNodeId
     authorId
+    authorName
     content
     branchDescription
     paragraphIndex
@@ -50,19 +52,24 @@ export const getChapter = /* GraphQL */ `query GetChapter($storyId: ID!, $nodeId
   }
 }
 ` as GeneratedQuery<
-  APITypes.GetChapterQueryVariables,
-  APITypes.GetChapterQuery
->;
-export const listBranches = /* GraphQL */ `query ListBranches($storyId: ID!, $nodeId: ID!) {
+    APITypes.GetChapterQueryVariables,
+    APITypes.GetChapterQuery
+  >;
+export const listBranches =
+  /* GraphQL */ `query ListBranches($storyId: ID!, $nodeId: ID!) {
   listBranches(storyId: $storyId, nodeId: $nodeId) {
     nodeId
     storyId
     parentNodeId
     authorId
+    authorName
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -81,13 +88,14 @@ export const listBranches = /* GraphQL */ `query ListBranches($storyId: ID!, $no
   }
 }
 ` as GeneratedQuery<
-  APITypes.ListBranchesQueryVariables,
-  APITypes.ListBranchesQuery
->;
+    APITypes.ListBranchesQueryVariables,
+    APITypes.ListBranchesQuery
+  >;
 export const getStory = /* GraphQL */ `query GetStory($storyId: ID!) {
   getStory(storyId: $storyId) {
     storyId
     authorId
+    authorName
     title
     synopsis
     genre
@@ -103,15 +111,20 @@ export const getStory = /* GraphQL */ `query GetStory($storyId: ID!) {
     featured
     createdAt
     coverImageUrl
+    rootChapterId
+    aiCreated
+    allowAI
     __typename
   }
 }
 ` as GeneratedQuery<APITypes.GetStoryQueryVariables, APITypes.GetStoryQuery>;
-export const listStories = /* GraphQL */ `query ListStories($filter: StoryFilter, $limit: Int, $nextToken: String) {
+export const listStories =
+  /* GraphQL */ `query ListStories($filter: StoryFilter, $limit: Int, $nextToken: String) {
   listStories(filter: $filter, limit: $limit, nextToken: $nextToken) {
     items {
       storyId
       authorId
+      authorName
       title
       synopsis
       genre
@@ -127,6 +140,8 @@ export const listStories = /* GraphQL */ `query ListStories($filter: StoryFilter
       featured
       createdAt
       coverImageUrl
+      aiCreated
+      allowAI
       __typename
     }
     nextToken
@@ -134,9 +149,9 @@ export const listStories = /* GraphQL */ `query ListStories($filter: StoryFilter
   }
 }
 ` as GeneratedQuery<
-  APITypes.ListStoriesQueryVariables,
-  APITypes.ListStoriesQuery
->;
+    APITypes.ListStoriesQueryVariables,
+    APITypes.ListStoriesQuery
+  >;
 export const getStoryTree = /* GraphQL */ `query GetStoryTree($storyId: ID!) {
   getStoryTree(storyId: $storyId) {
     rootNode {
@@ -223,7 +238,8 @@ export const getStoryTree = /* GraphQL */ `query GetStoryTree($storyId: ID!) {
   APITypes.GetStoryTreeQueryVariables,
   APITypes.GetStoryTreeQuery
 >;
-export const getReadingPath = /* GraphQL */ `query GetReadingPath($storyId: ID!, $nodePath: [ID!]!) {
+export const getReadingPath =
+  /* GraphQL */ `query GetReadingPath($storyId: ID!, $nodePath: [ID!]!) {
   getReadingPath(storyId: $storyId, nodePath: $nodePath) {
     nodeId
     storyId
@@ -251,10 +267,11 @@ export const getReadingPath = /* GraphQL */ `query GetReadingPath($storyId: ID!,
   }
 }
 ` as GeneratedQuery<
-  APITypes.GetReadingPathQueryVariables,
-  APITypes.GetReadingPathQuery
->;
-export const getUserNotifications = /* GraphQL */ `query GetUserNotifications($userId: ID!, $limit: Int, $nextToken: String) {
+    APITypes.GetReadingPathQueryVariables,
+    APITypes.GetReadingPathQuery
+  >;
+export const getUserNotifications =
+  /* GraphQL */ `query GetUserNotifications($userId: ID!, $limit: Int, $nextToken: String) {
   getUserNotifications(userId: $userId, limit: $limit, nextToken: $nextToken) {
     items {
       notificationId
@@ -273,17 +290,19 @@ export const getUserNotifications = /* GraphQL */ `query GetUserNotifications($u
   }
 }
 ` as GeneratedQuery<
-  APITypes.GetUserNotificationsQueryVariables,
-  APITypes.GetUserNotificationsQuery
->;
-export const getUnreadCount = /* GraphQL */ `query GetUnreadCount($userId: ID!) {
+    APITypes.GetUserNotificationsQueryVariables,
+    APITypes.GetUserNotificationsQuery
+  >;
+export const getUnreadCount =
+  /* GraphQL */ `query GetUnreadCount($userId: ID!) {
   getUnreadCount(userId: $userId)
 }
 ` as GeneratedQuery<
-  APITypes.GetUnreadCountQueryVariables,
-  APITypes.GetUnreadCountQuery
->;
-export const getUserProfile = /* GraphQL */ `query GetUserProfile($userId: ID!) {
+    APITypes.GetUnreadCountQueryVariables,
+    APITypes.GetUnreadCountQuery
+  >;
+export const getUserProfile =
+  /* GraphQL */ `query GetUserProfile($userId: ID!) {
   getUserProfile(userId: $userId) {
     userId
     username
@@ -302,6 +321,6 @@ export const getUserProfile = /* GraphQL */ `query GetUserProfile($userId: ID!) 
   }
 }
 ` as GeneratedQuery<
-  APITypes.GetUserProfileQueryVariables,
-  APITypes.GetUserProfileQuery
->;
+    APITypes.GetUserProfileQueryVariables,
+    APITypes.GetUserProfileQuery
+  >;

@@ -10,7 +10,9 @@ export function request(ctx: any) {
   const storyId = ctx.args.storyId;
   const nodePath = ctx.args.nodePath;
 
-  console.log(`Getting reading path for story ${storyId}, path length: ${nodePath.length}`);
+  console.log(
+    `Getting reading path for story ${storyId}, path length: ${nodePath.length}`,
+  );
 
   // Query all chapters for this story, then filter in response
   return {

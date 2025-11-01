@@ -32,10 +32,7 @@ export function request(ctx: CTX) {
     // Validate genres
     for (const genre of input.genre) {
       if (!isValidGenre(genre)) {
-        return util.error(
-          `Invalid genre: ${genre}`,
-          "ValidationException"
-        );
+        return util.error(`Invalid genre: ${genre}`, "ValidationException");
       }
     }
     updateExpression.push("#genre = :genre");
@@ -47,7 +44,7 @@ export function request(ctx: CTX) {
     if (!isValidAgeRating(input.ageRating)) {
       return util.error(
         `Invalid age rating: ${input.ageRating}`,
-        "ValidationException"
+        "ValidationException",
       );
     }
     // TODO: Add logic to ensure ageRating can only increase
@@ -62,7 +59,7 @@ export function request(ctx: CTX) {
       if (!isValidContentWarning(warning)) {
         return util.error(
           `Invalid content warning: ${warning}`,
-          "ValidationException"
+          "ValidationException",
         );
       }
     }
@@ -83,11 +80,14 @@ export function request(ctx: CTX) {
     expressionValues[":featured"] = input.featured;
   }
 
+  if (input.allowAI !== undefined) {
+    updateExpression.push("#allowAI = :allowAI");
+    expressionNames["#allowAI"] = "allowAI";
+    expressionValues[":allowAI"] = input.allowAI;
+  }
+
   if (updateExpression.length === 0) {
-    return util.error(
-      "No fields to update",
-      "ValidationException"
-    );
+    return util.error("No fields to update", "ValidationException");
   }
 
   return {
@@ -116,7 +116,7 @@ export function response(ctx: CTX): Story {
     if (ctx.error.type === "ConditionalCheckFailedException") {
       return util.error(
         "Unauthorized: Only the story author can update",
-        "Unauthorized"
+        "Unauthorized",
       );
     }
     console.error("Error updating story:", ctx.error);

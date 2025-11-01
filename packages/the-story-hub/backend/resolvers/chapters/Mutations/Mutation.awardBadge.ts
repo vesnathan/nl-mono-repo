@@ -13,14 +13,17 @@ export function request(ctx: CTX) {
   const { input } = ctx.args;
   const identity = ctx.identity as AppSyncIdentityCognito;
 
-  console.log(`User ${identity.username} awarding ${input.badgeType} badge to chapter ${input.nodeId}`);
+  console.log(
+    `User ${identity.username} awarding ${input.badgeType} badge to chapter ${input.nodeId}`,
+  );
 
   // TODO: Verify user is story author or has permission to award badges
   // This would require fetching the story first in a pipeline resolver
 
-  const badgeField = input.badgeType === BadgeType.MATCHES_VISION
-    ? "matchesVision"
-    : "authorApproved";
+  const badgeField =
+    input.badgeType === BadgeType.MATCHES_VISION
+      ? "matchesVision"
+      : "authorApproved";
 
   return {
     operation: "UpdateItem",

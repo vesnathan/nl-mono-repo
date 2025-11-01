@@ -11,7 +11,9 @@ export function request(ctx: CTX) {
     return util.error("storyId is required", "ValidationException");
   }
 
-  console.log(`Getting bookmark for user ${identity.username}, story ${storyId}`);
+  console.log(
+    `Getting bookmark for user ${identity.username}, story ${storyId}`,
+  );
 
   return {
     operation: "GetItem",

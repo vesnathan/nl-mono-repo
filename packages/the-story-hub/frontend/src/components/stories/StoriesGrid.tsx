@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { StoryCard } from './StoryCard';
-import type { Story } from '@/types/gqlTypes';
+import { StoryCard } from "./StoryCard";
+import type { Story } from "@/types/gqlTypes";
 
 interface StoriesGridProps {
   stories: Story[];
@@ -12,15 +12,15 @@ interface StoriesGridProps {
 export function StoriesGrid({
   stories,
   loading = false,
-  emptyMessage = 'No stories found'
+  emptyMessage = "No stories found",
 }: StoriesGridProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-            className="h-[400px] bg-default-100 rounded-lg animate-pulse"
+            className="h-[200px] bg-gray-800 border border-gray-700 animate-pulse"
           />
         ))}
       </div>
@@ -37,7 +37,7 @@ export function StoriesGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       {stories.map((story, index) => (
         <StoryCard key={story.storyId} story={story} index={index} />
       ))}

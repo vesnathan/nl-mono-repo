@@ -8,7 +8,9 @@ export function request(ctx: CTX) {
   const notificationId = util.autoId();
   const now = util.time.nowISO8601();
 
-  console.log(`Creating notification for user ${input.userId} of type ${input.type}`);
+  console.log(
+    `Creating notification for user ${input.userId} of type ${input.type}`,
+  );
 
   const item = {
     PK: `USER#${input.userId}`,

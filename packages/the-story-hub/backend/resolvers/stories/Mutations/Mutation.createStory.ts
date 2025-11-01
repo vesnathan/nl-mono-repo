@@ -1,16 +1,16 @@
 import { util, Context, AppSyncIdentityCognito } from "@aws-appsync/utils";
 import { Story, CreateStoryInput } from "gqlTypes";
-import { AGE_RATINGS, isValidAgeRating } from "../../../constants/ContentRatings";
+import {
+  AGE_RATINGS,
+  isValidAgeRating,
+} from "../../../constants/ContentRatings";
 import { STORY_GENRES, isValidGenre } from "../../../constants/Genres";
-import { CONTENT_WARNINGS, isValidContentWarning } from "../../../constants/ContentWarnings";
+import {
+  CONTENT_WARNINGS,
+  isValidContentWarning,
+} from "../../../constants/ContentWarnings";
 
-type CTX = Context<
-  { input: CreateStoryInput },
-  object,
-  object,
-  object,
-  Story
->;
+type CTX = Context<{ input: CreateStoryInput }, object, object, object, Story>;
 
 export function request(ctx: CTX) {
   const { input } = ctx.args;
@@ -25,8 +25,8 @@ export function request(ctx: CTX) {
   // Validate ageRating using constants
   if (!isValidAgeRating(input.ageRating)) {
     return util.error(
-      `Invalid age rating: ${input.ageRating}. Valid options: ${AGE_RATINGS.map(r => r.id).join(', ')}`,
-      "ValidationException"
+      `Invalid age rating: ${input.ageRating}. Valid options: ${AGE_RATINGS.map((r) => r.id).join(", ")}`,
+      "ValidationException",
     );
   }
 
@@ -34,8 +34,8 @@ export function request(ctx: CTX) {
   for (const genre of input.genre) {
     if (!isValidGenre(genre)) {
       return util.error(
-        `Invalid genre: ${genre}. Valid options: ${STORY_GENRES.join(', ')}`,
-        "ValidationException"
+        `Invalid genre: ${genre}. Valid options: ${STORY_GENRES.join(", ")}`,
+        "ValidationException",
       );
     }
   }
@@ -44,8 +44,8 @@ export function request(ctx: CTX) {
   for (const warning of input.contentWarnings) {
     if (!isValidContentWarning(warning)) {
       return util.error(
-        `Invalid content warning: ${warning}. Valid options: ${CONTENT_WARNINGS.join(', ')}`,
-        "ValidationException"
+        `Invalid content warning: ${warning}. Valid options: ${CONTENT_WARNINGS.join(", ")}`,
+        "ValidationException",
       );
     }
   }
@@ -59,6 +59,7 @@ export function request(ctx: CTX) {
     attributeValues: util.dynamodb.toMapValues({
       storyId,
       authorId: identity.username,
+      authorName: identity.username, // Use username as display name for now
       title: input.title,
       synopsis: input.synopsis,
       genre: input.genre,
@@ -67,6 +68,8 @@ export function request(ctx: CTX) {
       ratingExplanation: input.ratingExplanation,
       coverImageUrl: input.coverImageUrl,
       rootNodeId: null, // Will be set when first chapter is created
+      aiCreated: input.aiCreated !== undefined ? input.aiCreated : false,
+      allowAI: input.allowAI !== undefined ? input.allowAI : true,
       stats: {
         totalBranches: 0,
         totalReads: 0,
@@ -75,8 +78,8 @@ export function request(ctx: CTX) {
       featured: false,
       createdAt: now,
       // For browse/discover queries
-      GSI1PK: "STORY_LIST",
-      GSI1SK: `${now}#${storyId}`,
+      GSI1PK: "STORY",
+      GSI1SK: `STORY#${storyId}`,
     }),
   };
 }

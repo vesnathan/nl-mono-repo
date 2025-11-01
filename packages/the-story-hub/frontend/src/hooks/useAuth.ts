@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth';
+import { useState, useEffect } from "react";
+import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
 
 export interface AuthStatus {
   isAuthenticated: boolean;

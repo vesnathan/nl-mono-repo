@@ -8,7 +8,8 @@ type GeneratedSubscription<InputType, OutputType> = string & {
   __generatedSubscriptionOutput: OutputType;
 };
 
-export const onNewNotification = /* GraphQL */ `subscription OnNewNotification($userId: ID!) {
+export const onNewNotification =
+  /* GraphQL */ `subscription OnNewNotification($userId: ID!) {
   onNewNotification(userId: $userId) {
     notificationId
     userId
@@ -23,10 +24,11 @@ export const onNewNotification = /* GraphQL */ `subscription OnNewNotification($
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnNewNotificationSubscriptionVariables,
-  APITypes.OnNewNotificationSubscription
->;
-export const onNewBranch = /* GraphQL */ `subscription OnNewBranch($storyId: ID!) {
+    APITypes.OnNewNotificationSubscriptionVariables,
+    APITypes.OnNewNotificationSubscription
+  >;
+export const onNewBranch =
+  /* GraphQL */ `subscription OnNewBranch($storyId: ID!) {
   onNewBranch(storyId: $storyId) {
     nodeId
     storyId
@@ -54,6 +56,6 @@ export const onNewBranch = /* GraphQL */ `subscription OnNewBranch($storyId: ID!
   }
 }
 ` as GeneratedSubscription<
-  APITypes.OnNewBranchSubscriptionVariables,
-  APITypes.OnNewBranchSubscription
->;
+    APITypes.OnNewBranchSubscriptionVariables,
+    APITypes.OnNewBranchSubscription
+  >;

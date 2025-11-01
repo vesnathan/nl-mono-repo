@@ -2,7 +2,11 @@ import { util, Context } from "@aws-appsync/utils";
 import { StoryConnection, StoryFilter } from "gqlTypes";
 
 type CTX = Context<
-  { filter?: StoryFilter | null; limit?: number | null; nextToken?: string | null },
+  {
+    filter?: StoryFilter | null;
+    limit?: number | null;
+    nextToken?: string | null;
+  },
   object,
   object,
   object,
@@ -44,34 +48,42 @@ export function response(ctx: CTX): StoryConnection {
 
   if (filter?.genre) {
     filteredItems = filteredItems.filter((item: any) =>
-      item.genre?.includes(filter.genre)
+      item.genre?.includes(filter.genre),
     );
   }
 
   if (filter?.ageRating) {
-    filteredItems = filteredItems.filter((item: any) =>
-      item.ageRating === filter.ageRating
+    filteredItems = filteredItems.filter(
+      (item: any) => item.ageRating === filter.ageRating,
     );
   }
 
   if (filter?.featured !== undefined && filter?.featured !== null) {
-    filteredItems = filteredItems.filter((item: any) =>
-      item.featured === filter.featured
+    filteredItems = filteredItems.filter(
+      (item: any) => item.featured === filter.featured,
     );
   }
 
   if (filter?.minRating !== undefined && filter?.minRating !== null) {
     const minRating = filter.minRating;
-    filteredItems = filteredItems.filter((item: any) =>
-      item.stats?.rating >= minRating
+    filteredItems = filteredItems.filter(
+      (item: any) => item.stats?.rating >= minRating,
     );
   }
 
-  console.log(`Returning ${filteredItems.length} stories`);
+  // Map rootNodeId to rootChapterId for frontend compatibility
+  // Add authorName fallback for existing stories that don't have it
+  const mappedItems = filteredItems.map((item: any) => ({
+    ...item,
+    rootChapterId: item.rootNodeId || item.rootChapterId,
+    authorName: item.authorName || item.authorId, // Fallback to authorId if authorName not set
+  }));
+
+  console.log(`Returning ${mappedItems.length} stories`);
 
   return {
     __typename: "StoryConnection",
-    items: filteredItems,
+    items: mappedItems,
     nextToken,
   };
 }

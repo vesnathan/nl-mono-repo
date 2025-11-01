@@ -1,7 +1,13 @@
 import { util, Context } from "@aws-appsync/utils";
 import { ChapterNode } from "gqlTypes";
 
-type CTX = Context<{ storyId: string; nodeId: string }, object, object, object, ChapterNode>;
+type CTX = Context<
+  { storyId: string; nodeId: string },
+  object,
+  object,
+  object,
+  ChapterNode
+>;
 
 export function request(ctx: CTX) {
   const { storyId, nodeId } = ctx.args;

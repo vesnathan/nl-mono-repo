@@ -33,6 +33,16 @@ export function response(ctx: CTX): Story | null {
     return null;
   }
 
+  // Map rootNodeId to rootChapterId for frontend compatibility
+  if (item.rootNodeId) {
+    item.rootChapterId = item.rootNodeId;
+  }
+
+  // Add authorName fallback for existing stories that don't have it
+  if (!item.authorName && item.authorId) {
+    item.authorName = item.authorId;
+  }
+
   console.log("Story fetched successfully:", item);
   return item as Story;
 }

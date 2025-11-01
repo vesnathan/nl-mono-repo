@@ -13,12 +13,10 @@ const tailwindConfig = {
     extend: {
       colors: {
         // Story Hub brand colors from logo
-        'brand-purple': '#3B1D5A',
-        'brand-brown': '#885E3C',
-        'brand-green': '#6BBF59',
-        'brand-orange': '#F28C28',
-        'brand-blue': '#40A6FF',
-        'brand-beige': '#F5EFE6',
+        "brand-dark": "#21271C",      // Dark grey/green background
+        "brand-purple": "#422F9F",    // Primary purple
+        "brand-blue": "#2162BF",      // Secondary blue
+        "brand-orange": "#F28C28",    // Accent orange (from old logo)
       },
     },
   },
@@ -27,70 +25,80 @@ const tailwindConfig = {
       themes: {
         light: {
           colors: {
-            background: "#F5EFE6", // Light beige/parchment
-            foreground: "#3B1D5A", // Deep purple for text
+            background: "#FFFFFF",
+            foreground: "#21271C",
             primary: {
-              50: "#f5f0ff",
-              100: "#ede5ff",
-              200: "#dccfff",
-              300: "#c3adff",
-              400: "#a280ff",
-              500: "#8454ff",
-              600: "#7233f7",
-              700: "#6320e3",
-              800: "#531bbf",
-              900: "#3B1D5A", // Deep purple - main brand color
-              DEFAULT: "#3B1D5A",
+              50: "#f0ebff",
+              100: "#ddd1ff",
+              200: "#c7b4ff",
+              300: "#a88dff",
+              400: "#8864ff",
+              500: "#6a3fff",
+              600: "#422F9F", // Brand purple
+              700: "#3a2885",
+              800: "#31206b",
+              900: "#281950",
+              DEFAULT: "#422F9F",
               foreground: "#FFFFFF",
             },
             secondary: {
-              50: "#fff7ed",
-              100: "#ffedd5",
-              200: "#fed7aa",
-              300: "#fdba74",
-              400: "#fb923c",
-              500: "#F28C28", // Bright orange
-              600: "#ea580c",
-              700: "#c2410c",
-              800: "#9a3412",
-              900: "#7c2d12",
-              DEFAULT: "#F28C28",
+              50: "#e6f1ff",
+              100: "#c2ddff",
+              200: "#99c7ff",
+              300: "#6bb0ff",
+              400: "#469aff",
+              500: "#2162BF", // Brand blue
+              600: "#1c54a3",
+              700: "#174587",
+              800: "#12366b",
+              900: "#0d284f",
+              DEFAULT: "#2162BF",
               foreground: "#FFFFFF",
             },
             success: {
-              DEFAULT: "#6BBF59", // Fresh green
+              DEFAULT: "#F28C28",
               foreground: "#FFFFFF",
             },
-            focus: "#40A6FF", // Sky blue
+            focus: "#2162BF",
           },
         },
         dark: {
           colors: {
-            background: "#1a1a1a",
-            foreground: "#F5EFE6",
+            background: "#21271C",
+            foreground: "#FFFFFF",
             primary: {
-              50: "#f5f0ff",
-              100: "#ede5ff",
-              200: "#dccfff",
-              300: "#c3adff",
-              400: "#a280ff",
-              500: "#8454ff",
-              600: "#7233f7",
-              700: "#6320e3",
-              800: "#531bbf",
-              900: "#3B1D5A",
-              DEFAULT: "#7233f7",
+              50: "#f0ebff",
+              100: "#ddd1ff",
+              200: "#c7b4ff",
+              300: "#a88dff",
+              400: "#8864ff",
+              500: "#6a3fff",
+              600: "#422F9F",
+              700: "#3a2885",
+              800: "#31206b",
+              900: "#281950",
+              DEFAULT: "#422F9F",
               foreground: "#FFFFFF",
             },
             secondary: {
-              DEFAULT: "#F28C28",
+              50: "#e6f1ff",
+              100: "#c2ddff",
+              200: "#99c7ff",
+              300: "#6bb0ff",
+              400: "#469aff",
+              500: "#2162BF",
+              600: "#1c54a3",
+              700: "#174587",
+              800: "#12366b",
+              900: "#0d284f",
+              DEFAULT: "#2162BF",
               foreground: "#FFFFFF",
             },
             success: {
-              DEFAULT: "#6BBF59",
+              DEFAULT: "#F28C28",
               foreground: "#FFFFFF",
             },
-            focus: "#40A6FF",
+            focus: "#2162BF",
           },
         },
       },

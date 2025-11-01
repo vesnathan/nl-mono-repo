@@ -6,7 +6,11 @@
 import { util, Context, AppSyncIdentityCognito } from "@aws-appsync/utils";
 import { ChapterNode, CreateBranchInput } from "gqlTypes";
 
-type PrevResult = { storyId: string; parentChapterNumber: number; parentNode: any };
+type PrevResult = {
+  storyId: string;
+  parentChapterNumber: number;
+  parentNode: any;
+};
 
 type CTX = Context<
   { input: CreateBranchInput },
@@ -28,9 +32,12 @@ export function request(ctx: CTX) {
   const nowEpochMillis = util.time.nowEpochMilliSeconds();
   // Add 1 hour (3600000 ms) to current time for editableUntil
   const editableUntilEpoch = nowEpochMillis + 3600000;
-  const editableUntil = util.time.epochMilliSecondsToISO8601(editableUntilEpoch);
+  const editableUntil =
+    util.time.epochMilliSecondsToISO8601(editableUntilEpoch);
 
-  console.log(`Creating branch from node ${input.parentNodeId} in story ${storyId} by user: ${identity.username}`);
+  console.log(
+    `Creating branch from node ${input.parentNodeId} in story ${storyId} by user: ${identity.username}`,
+  );
 
   const item = {
     PK: `STORY#${storyId}`,
@@ -41,6 +48,7 @@ export function request(ctx: CTX) {
     storyId,
     parentNodeId: input.parentNodeId,
     authorId: identity.username,
+    authorName: identity.username, // Will be replaced with screen name from user profile
     content: input.content,
     branchDescription: input.branchDescription,
     paragraphIndex: input.paragraphIndex || null,

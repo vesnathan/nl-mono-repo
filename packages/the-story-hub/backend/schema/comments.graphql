@@ -1,0 +1,69 @@
+# Comment Queries and Mutations
+
+extend type Query {
+  # Get all top-level comments for a chapter/branch
+  listComments(
+    storyId: ID!
+    nodeId: ID!
+    sortBy: CommentSortBy
+    limit: Int
+    nextToken: String
+  ): CommentConnection
+    @aws_iam
+    @aws_cognito_user_pools
+
+  # Get a specific comment with its replies
+  getComment(
+    storyId: ID!
+    nodeId: ID!
+    commentId: ID!
+    includeReplies: Boolean
+  ): Comment
+    @aws_iam
+    @aws_cognito_user_pools
+
+  # Get replies to a specific comment
+  listReplies(
+    storyId: ID!
+    nodeId: ID!
+    parentCommentId: ID!
+    limit: Int
+    nextToken: String
+  ): CommentConnection
+    @aws_iam
+    @aws_cognito_user_pools
+}
+
+extend type Mutation {
+  # Create a new comment or reply
+  createComment(input: CreateCommentInput!): Comment
+    @aws_cognito_user_pools
+
+  # Update a comment
+  updateComment(input: UpdateCommentInput!): Comment
+    @aws_cognito_user_pools
+
+  # Delete a comment
+  deleteComment(input: DeleteCommentInput!): DeleteCommentResponse
+    @aws_cognito_user_pools
+
+  # Vote on a comment
+  voteOnComment(
+    storyId: ID!
+    nodeId: ID!
+    commentId: ID!
+    voteType: CommentVoteType!
+  ): Comment
+    @aws_cognito_user_pools
+}
+
+type CommentConnection {
+  items: [Comment!]!
+  nextToken: String
+  total: Int
+}
+
+type DeleteCommentResponse {
+  success: Boolean!
+  message: String
+}

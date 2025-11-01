@@ -8,7 +8,8 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
-export const saveBookmark = /* GraphQL */ `mutation SaveBookmark($input: SaveBookmarkInput!) {
+export const saveBookmark =
+  /* GraphQL */ `mutation SaveBookmark($input: SaveBookmarkInput!) {
   saveBookmark(input: $input) {
     userId
     storyId
@@ -19,10 +20,11 @@ export const saveBookmark = /* GraphQL */ `mutation SaveBookmark($input: SaveBoo
   }
 }
 ` as GeneratedMutation<
-  APITypes.SaveBookmarkMutationVariables,
-  APITypes.SaveBookmarkMutation
->;
-export const createChapter = /* GraphQL */ `mutation CreateChapter($input: CreateChapterInput!) {
+    APITypes.SaveBookmarkMutationVariables,
+    APITypes.SaveBookmarkMutation
+  >;
+export const createChapter =
+  /* GraphQL */ `mutation CreateChapter($input: CreateChapterInput!) {
   createChapter(input: $input) {
     nodeId
     storyId
@@ -50,10 +52,11 @@ export const createChapter = /* GraphQL */ `mutation CreateChapter($input: Creat
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateChapterMutationVariables,
-  APITypes.CreateChapterMutation
->;
-export const createBranch = /* GraphQL */ `mutation CreateBranch($input: CreateBranchInput!) {
+    APITypes.CreateChapterMutationVariables,
+    APITypes.CreateChapterMutation
+  >;
+export const createBranch =
+  /* GraphQL */ `mutation CreateBranch($input: CreateBranchInput!) {
   createBranch(input: $input) {
     nodeId
     storyId
@@ -81,10 +84,11 @@ export const createBranch = /* GraphQL */ `mutation CreateBranch($input: CreateB
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateBranchMutationVariables,
-  APITypes.CreateBranchMutation
->;
-export const updateChapter = /* GraphQL */ `mutation UpdateChapter($input: UpdateChapterInput!) {
+    APITypes.CreateBranchMutationVariables,
+    APITypes.CreateBranchMutation
+  >;
+export const updateChapter =
+  /* GraphQL */ `mutation UpdateChapter($input: UpdateChapterInput!) {
   updateChapter(input: $input) {
     nodeId
     storyId
@@ -112,10 +116,11 @@ export const updateChapter = /* GraphQL */ `mutation UpdateChapter($input: Updat
   }
 }
 ` as GeneratedMutation<
-  APITypes.UpdateChapterMutationVariables,
-  APITypes.UpdateChapterMutation
->;
-export const voteOnChapter = /* GraphQL */ `mutation VoteOnChapter($storyId: ID!, $nodeId: ID!, $voteType: VoteType!) {
+    APITypes.UpdateChapterMutationVariables,
+    APITypes.UpdateChapterMutation
+  >;
+export const voteOnChapter =
+  /* GraphQL */ `mutation VoteOnChapter($storyId: ID!, $nodeId: ID!, $voteType: VoteType!) {
   voteOnChapter(storyId: $storyId, nodeId: $nodeId, voteType: $voteType) {
     nodeId
     storyId
@@ -143,10 +148,11 @@ export const voteOnChapter = /* GraphQL */ `mutation VoteOnChapter($storyId: ID!
   }
 }
 ` as GeneratedMutation<
-  APITypes.VoteOnChapterMutationVariables,
-  APITypes.VoteOnChapterMutation
->;
-export const awardBadge = /* GraphQL */ `mutation AwardBadge($input: AwardBadgeInput!) {
+    APITypes.VoteOnChapterMutationVariables,
+    APITypes.VoteOnChapterMutation
+  >;
+export const awardBadge =
+  /* GraphQL */ `mutation AwardBadge($input: AwardBadgeInput!) {
   awardBadge(input: $input) {
     nodeId
     storyId
@@ -174,10 +180,11 @@ export const awardBadge = /* GraphQL */ `mutation AwardBadge($input: AwardBadgeI
   }
 }
 ` as GeneratedMutation<
-  APITypes.AwardBadgeMutationVariables,
-  APITypes.AwardBadgeMutation
->;
-export const createStory = /* GraphQL */ `mutation CreateStory($input: CreateStoryInput!) {
+    APITypes.AwardBadgeMutationVariables,
+    APITypes.AwardBadgeMutation
+  >;
+export const createStory =
+  /* GraphQL */ `mutation CreateStory($input: CreateStoryInput!) {
   createStory(input: $input) {
     storyId
     authorId
@@ -200,10 +207,11 @@ export const createStory = /* GraphQL */ `mutation CreateStory($input: CreateSto
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateStoryMutationVariables,
-  APITypes.CreateStoryMutation
->;
-export const updateStory = /* GraphQL */ `mutation UpdateStory($input: UpdateStoryInput!) {
+    APITypes.CreateStoryMutationVariables,
+    APITypes.CreateStoryMutation
+  >;
+export const updateStory =
+  /* GraphQL */ `mutation UpdateStory($input: UpdateStoryInput!) {
   updateStory(input: $input) {
     storyId
     authorId
@@ -226,10 +234,11 @@ export const updateStory = /* GraphQL */ `mutation UpdateStory($input: UpdateSto
   }
 }
 ` as GeneratedMutation<
-  APITypes.UpdateStoryMutationVariables,
-  APITypes.UpdateStoryMutation
->;
-export const createNotification = /* GraphQL */ `mutation CreateNotification($input: CreateNotificationInput!) {
+    APITypes.UpdateStoryMutationVariables,
+    APITypes.UpdateStoryMutation
+  >;
+export const createNotification =
+  /* GraphQL */ `mutation CreateNotification($input: CreateNotificationInput!) {
   createNotification(input: $input) {
     notificationId
     userId
@@ -244,10 +253,11 @@ export const createNotification = /* GraphQL */ `mutation CreateNotification($in
   }
 }
 ` as GeneratedMutation<
-  APITypes.CreateNotificationMutationVariables,
-  APITypes.CreateNotificationMutation
->;
-export const markNotificationAsRead = /* GraphQL */ `mutation MarkNotificationAsRead($notificationId: ID!) {
+    APITypes.CreateNotificationMutationVariables,
+    APITypes.CreateNotificationMutation
+  >;
+export const markNotificationAsRead =
+  /* GraphQL */ `mutation MarkNotificationAsRead($notificationId: ID!) {
   markNotificationAsRead(notificationId: $notificationId) {
     notificationId
     userId
@@ -262,13 +272,14 @@ export const markNotificationAsRead = /* GraphQL */ `mutation MarkNotificationAs
   }
 }
 ` as GeneratedMutation<
-  APITypes.MarkNotificationAsReadMutationVariables,
-  APITypes.MarkNotificationAsReadMutation
->;
-export const markAllNotificationsAsRead = /* GraphQL */ `mutation MarkAllNotificationsAsRead($userId: ID!) {
+    APITypes.MarkNotificationAsReadMutationVariables,
+    APITypes.MarkNotificationAsReadMutation
+  >;
+export const markAllNotificationsAsRead =
+  /* GraphQL */ `mutation MarkAllNotificationsAsRead($userId: ID!) {
   markAllNotificationsAsRead(userId: $userId)
 }
 ` as GeneratedMutation<
-  APITypes.MarkAllNotificationsAsReadMutationVariables,
-  APITypes.MarkAllNotificationsAsReadMutation
->;
+    APITypes.MarkAllNotificationsAsReadMutationVariables,
+    APITypes.MarkAllNotificationsAsReadMutation
+  >;

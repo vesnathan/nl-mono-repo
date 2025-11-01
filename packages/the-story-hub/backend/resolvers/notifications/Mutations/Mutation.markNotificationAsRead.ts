@@ -15,7 +15,9 @@ export function request(ctx: CTX) {
   const identity = ctx.identity as any;
   const userId = identity.username;
 
-  console.log(`Marking notification ${notificationId} as read for user ${userId}`);
+  console.log(
+    `Marking notification ${notificationId} as read for user ${userId}`,
+  );
 
   return {
     operation: "UpdateItem",

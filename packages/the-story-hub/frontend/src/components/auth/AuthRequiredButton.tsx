@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, ReactNode } from 'react';
-import { Button, ButtonProps, Tooltip } from '@nextui-org/react';
-import { useAuth } from '@/hooks/useAuth';
-import { LoginModal } from './LoginModal';
+import { useState, ReactNode } from "react";
+import { Button, ButtonProps, Tooltip } from "@nextui-org/react";
+import { useAuth } from "@/hooks/useAuth";
+import { LoginModal } from "./LoginModal";
 
-interface AuthRequiredButtonProps extends Omit<ButtonProps, 'onPress'> {
+interface AuthRequiredButtonProps extends Omit<ButtonProps, "onPress"> {
   onPress?: () => void;
   actionDescription: string;
   children: ReactNode;

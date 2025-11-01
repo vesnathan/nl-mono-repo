@@ -49,7 +49,7 @@ export function response(ctx: CTX) {
   if (items.length === 0) {
     return util.error(
       `Parent node not found: ${ctx.args.input.parentNodeId}`,
-      "ParentNodeNotFound"
+      "ParentNodeNotFound",
     );
   }
 

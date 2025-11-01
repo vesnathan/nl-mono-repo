@@ -11,8 +11,13 @@ export type CreateChapterFormData = z.infer<typeof CreateChapterFormSchema>;
 export const CreateBranchFormSchema = z.object({
   parentNodeId: z.string(),
   paragraphIndex: z.number().int().min(0).optional(),
-  branchDescription: z.string().min(10, "Branch description must be at least 10 characters").max(200),
-  content: z.string().min(100, "Branch content must be at least 100 characters"),
+  branchDescription: z
+    .string()
+    .min(10, "Branch description must be at least 10 characters")
+    .max(200),
+  content: z
+    .string()
+    .min(100, "Branch content must be at least 100 characters"),
   ratingFlag: z.boolean().optional(),
 });
 

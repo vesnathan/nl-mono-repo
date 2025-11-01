@@ -10,7 +10,9 @@ export function request(ctx: any) {
   const storyId = ctx.prev.result.storyId;
 
   const isUpvote = voteType === VoteType.UP;
-  const expression = isUpvote ? "ADD stats.upvotes :inc" : "ADD stats.downvotes :inc";
+  const expression = isUpvote
+    ? "ADD stats.upvotes :inc"
+    : "ADD stats.downvotes :inc";
 
   return {
     operation: "UpdateItem",

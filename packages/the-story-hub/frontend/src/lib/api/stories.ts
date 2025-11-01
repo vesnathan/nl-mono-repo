@@ -1,6 +1,12 @@
-import { client } from '@/lib/amplify';
-import { createStory, updateStory } from '@/graphql/mutations';
-import { getStory, listStories, getStoryTree, getReadingPath } from '@/graphql/queries';
+/* eslint-disable no-underscore-dangle */
+import { client } from "@/lib/amplify";
+import { createStory, updateStory } from "@/graphql/mutations";
+import {
+  getStory,
+  listStories,
+  getStoryTree,
+  getReadingPath,
+} from "@/graphql/queries";
 import type {
   Story,
   CreateStoryInput,
@@ -9,14 +15,14 @@ import type {
   StoryConnection,
   TreeData,
   ChapterNode,
-} from '@/types/gqlTypes';
+} from "@/types/gqlTypes";
 
 export async function createStoryAPI(input: CreateStoryInput): Promise<Story> {
   const result = await client.graphql({
     query: createStory,
     variables: { input },
   });
-  return result.data.createStory;
+  return result.data.createStory as unknown as Story;
 }
 
 export async function updateStoryAPI(input: UpdateStoryInput): Promise<Story> {
@@ -24,7 +30,7 @@ export async function updateStoryAPI(input: UpdateStoryInput): Promise<Story> {
     query: updateStory,
     variables: { input },
   });
-  return result.data.updateStory;
+  return result.data.updateStory as unknown as Story;
 }
 
 export async function getStoryAPI(storyId: string): Promise<Story | null> {
@@ -32,22 +38,24 @@ export async function getStoryAPI(storyId: string): Promise<Story | null> {
     query: getStory,
     variables: { storyId },
   });
-  return result.data.getStory ?? null;
+  return (result.data.getStory ?? null) as unknown as Story | null;
 }
 
 export async function listStoriesAPI(
   filter?: StoryFilter,
   limit?: number,
-  nextToken?: string
+  nextToken?: string,
 ): Promise<StoryConnection> {
   const result = await client.graphql({
     query: listStories,
     variables: { filter, limit, nextToken },
   });
-  return result.data.listStories;
+  return result.data.listStories as unknown as StoryConnection;
 }
 
-export async function getStoryTreeAPI(storyId: string): Promise<TreeData | null> {
+export async function getStoryTreeAPI(
+  storyId: string,
+): Promise<TreeData | null> {
   const result = await client.graphql({
     query: getStoryTree,
     variables: { storyId },
@@ -57,7 +65,7 @@ export async function getStoryTreeAPI(storyId: string): Promise<TreeData | null>
 
 export async function getReadingPathAPI(
   storyId: string,
-  nodePath: string[]
+  nodePath: string[],
 ): Promise<ChapterNode[]> {
   const result = await client.graphql({
     query: getReadingPath,

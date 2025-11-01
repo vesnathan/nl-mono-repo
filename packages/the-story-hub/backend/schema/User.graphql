@@ -7,13 +7,13 @@ enum ClientType {
   UnauthenticatedUser
 }
 
-type UserStats {
+type UserStats @aws_iam @aws_cognito_user_pools {
   storiesCreated: Int!
   branchesContributed: Int!
   totalUpvotes: Int!
 }
 
-type User @aws_cognito_user_pools {
+type User @aws_iam @aws_cognito_user_pools {
   userId: ID!
   username: String!
   email: String!

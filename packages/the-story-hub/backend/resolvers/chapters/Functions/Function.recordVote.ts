@@ -19,7 +19,9 @@ export function request(ctx: CTX) {
   const identity = ctx.identity as AppSyncIdentityCognito;
   const now = util.time.nowISO8601();
 
-  console.log(`Recording ${voteType} vote from user ${identity.username} on chapter ${nodeId}`);
+  console.log(
+    `Recording ${voteType} vote from user ${identity.username} on chapter ${nodeId}`,
+  );
 
   return {
     operation: "PutItem",

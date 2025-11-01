@@ -13,7 +13,7 @@ export function getAppNameForStackType(stackType: StackType): string {
     case StackType.WAF:
       return "waf";
     case StackType.TheStoryHub:
-      return "tsh";
+      return "thestoryhub";
     default:
       return "shared";
   }

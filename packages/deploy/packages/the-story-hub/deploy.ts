@@ -138,7 +138,10 @@ async function waitForStackCompletion(
   const nestedStacks = new Set<string>();
 
   // Helper function to fetch and log events from a stack (including nested stacks)
-  const fetchStackEvents = async (targetStackName: string, isNested: boolean = false) => {
+  const fetchStackEvents = async (
+    targetStackName: string,
+    isNested: boolean = false,
+  ) => {
     try {
       const eventsResponse = await cfn.send(
         new DescribeStackEventsCommand({ StackName: targetStackName }),
@@ -146,39 +149,52 @@ async function waitForStackCompletion(
 
       if (eventsResponse.StackEvents) {
         // Events come newest first, reverse to show chronologically
-        const newEvents = eventsResponse.StackEvents
-          .filter(event => event.EventId && !loggedEventIds.has(event.EventId))
-          .reverse();
+        const newEvents = eventsResponse.StackEvents.filter(
+          (event) => event.EventId && !loggedEventIds.has(event.EventId),
+        ).reverse();
 
         for (const event of newEvents) {
           if (event.EventId) {
             loggedEventIds.add(event.EventId);
 
-            const timestamp = event.Timestamp?.toISOString() || 'unknown';
-            const resourceType = event.ResourceType || 'Unknown';
-            const logicalId = event.LogicalResourceId || 'Unknown';
-            const resourceStatus = event.ResourceStatus || 'Unknown';
-            const statusReason = event.ResourceStatusReason || '';
+            const timestamp = event.Timestamp?.toISOString() || "unknown";
+            const resourceType = event.ResourceType || "Unknown";
+            const logicalId = event.LogicalResourceId || "Unknown";
+            const resourceStatus = event.ResourceStatus || "Unknown";
+            const statusReason = event.ResourceStatusReason || "";
 
             // Track nested stacks for recursive event fetching
-            if (resourceType === 'AWS::CloudFormation::Stack' && event.PhysicalResourceId) {
+            if (
+              resourceType === "AWS::CloudFormation::Stack" &&
+              event.PhysicalResourceId
+            ) {
               const nestedStackId = event.PhysicalResourceId;
               if (!nestedStacks.has(nestedStackId)) {
                 nestedStacks.add(nestedStackId);
-                logger.debug(`Discovered nested stack: ${logicalId} (${nestedStackId})`);
+                logger.debug(
+                  `Discovered nested stack: ${logicalId} (${nestedStackId})`,
+                );
               }
             }
 
             // Add prefix for nested stack events
-            const prefix = isNested ? `[NESTED:${targetStackName.split('/')[1] || targetStackName}] ` : '';
+            const prefix = isNested
+              ? `[NESTED:${targetStackName.split("/")[1] || targetStackName}] `
+              : "";
 
             // Log based on status
-            if (resourceStatus.includes('FAILED')) {
-              logger.error(`[CFN] ${prefix}${timestamp} | ${resourceType} | ${logicalId} | ${resourceStatus} | ${statusReason}`);
-            } else if (resourceStatus.includes('COMPLETE')) {
-              logger.success(`[CFN] ${prefix}${timestamp} | ${resourceType} | ${logicalId} | ${resourceStatus}`);
+            if (resourceStatus.includes("FAILED")) {
+              logger.error(
+                `[CFN] ${prefix}${timestamp} | ${resourceType} | ${logicalId} | ${resourceStatus} | ${statusReason}`,
+              );
+            } else if (resourceStatus.includes("COMPLETE")) {
+              logger.success(
+                `[CFN] ${prefix}${timestamp} | ${resourceType} | ${logicalId} | ${resourceStatus}`,
+              );
             } else {
-              logger.info(`[CFN] ${prefix}${timestamp} | ${resourceType} | ${logicalId} | ${resourceStatus}`);
+              logger.info(
+                `[CFN] ${prefix}${timestamp} | ${resourceType} | ${logicalId} | ${resourceStatus}`,
+              );
             }
           }
         }
@@ -186,7 +202,9 @@ async function waitForStackCompletion(
     } catch (eventsError: any) {
       // Don't warn for nested stacks that might have been deleted
       if (!isNested) {
-        logger.warning(`Failed to fetch CloudFormation events from ${targetStackName}: ${eventsError.message}`);
+        logger.warning(
+          `Failed to fetch CloudFormation events from ${targetStackName}: ${eventsError.message}`,
+        );
       }
     }
   };
@@ -1026,7 +1044,9 @@ export async function deployTheStoryHub(
         // Add DisableRollback if option is set (default: false)
         if (options.disableRollback) {
           createCommand.DisableRollback = true;
-          logger.info("DisableRollback is enabled - stack will not rollback on failure");
+          logger.info(
+            "DisableRollback is enabled - stack will not rollback on failure",
+          );
         }
 
         await cfn.send(new CreateStackCommand(createCommand));
