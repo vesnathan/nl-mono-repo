@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { STORY_GENRES } from "@tsh/backend/constants/Genres";
 import { CONTENT_WARNINGS } from "@tsh/backend/constants/ContentWarnings";
-import type { AgeRating } from "./gqlTypes";
 
 // Import age ratings for validation
 const AGE_RATING_VALUES = [

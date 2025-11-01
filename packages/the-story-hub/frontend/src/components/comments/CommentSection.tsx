@@ -3,19 +3,15 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Select, SelectItem } from "@nextui-org/react";
-import { CommentThread } from "./CommentThread";
-import { CommentForm } from "./CommentForm";
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { ErrorMessage } from "@/components/common/ErrorMessage";
 import {
   listCommentsAPI,
-  listRepliesAPI,
   createCommentAPI,
   updateCommentAPI,
   deleteCommentAPI,
   voteOnCommentAPI,
 } from "@/lib/api/comments";
-import { Comment } from "@/types/CommentSchemas";
+import { CommentThread } from "./CommentThread";
+import { CommentForm } from "./CommentForm";
 
 interface CommentSectionProps {
   storyId: string;
@@ -39,7 +35,6 @@ export function CommentSection({
     data: commentsData,
     isLoading,
     error,
-    refetch,
   } = useQuery({
     queryKey: ["comments", storyId, nodeId, sortBy],
     queryFn: () => listCommentsAPI(storyId, nodeId, sortBy),
@@ -151,7 +146,15 @@ export function CommentSection({
             size="sm"
             className="w-48"
             selectedKeys={[sortBy]}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) =>
+              setSortBy(
+                e.target.value as
+                  | "NEWEST"
+                  | "OLDEST"
+                  | "MOST_UPVOTED"
+                  | "MOST_REPLIES",
+              )
+            }
             classNames={{
               trigger: "bg-gray-800 border-gray-700",
               value: "text-white",

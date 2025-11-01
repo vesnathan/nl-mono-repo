@@ -18,7 +18,15 @@ export default function BrowsePage() {
 
   const { data, isLoading, error, refetch } = useStories({
     genre: selectedGenres.length > 0 ? selectedGenres[0] : undefined,
-    ageRating: selectedAgeRatings.length > 0 ? (selectedAgeRatings[0] as "GENERAL" | "TEEN_13_PLUS" | "MATURE_16_PLUS" | "ADULT_18_PLUS" | null) : undefined,
+    ageRating:
+      selectedAgeRatings.length > 0
+        ? (selectedAgeRatings[0] as
+            | "GENERAL"
+            | "TEEN_13_PLUS"
+            | "MATURE_16_PLUS"
+            | "ADULT_18_PLUS"
+            | null)
+        : undefined,
   });
 
   // Client-side search filtering

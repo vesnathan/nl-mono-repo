@@ -285,10 +285,9 @@ function ChapterSection({
                             {(branch.ageRating || story.ageRating) ===
                             "ADULT_18_PLUS"
                               ? "18+"
-                              : String(branch.ageRating || story.ageRating).replace(
-                                  /_/g,
-                                  "-",
-                                )}
+                              : String(
+                                  branch.ageRating || story.ageRating,
+                                ).replace(/_/g, "-")}
                           </Chip>
                         )}
                         {branch.maxChildAgeRating &&
