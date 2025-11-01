@@ -204,7 +204,7 @@ export async function listCommentsAPI(
   nodeId: string,
   sortBy?: CommentSortBy,
   limit?: number,
-  nextToken?: string
+  nextToken?: string,
 ): Promise<CommentConnection> {
   const response = await client.graphql({
     query: LIST_COMMENTS,
@@ -226,7 +226,7 @@ export async function listRepliesAPI(
   nodeId: string,
   parentCommentId: string,
   limit?: number,
-  nextToken?: string
+  nextToken?: string,
 ): Promise<CommentConnection> {
   const response = await client.graphql({
     query: LIST_REPLIES,
@@ -247,7 +247,7 @@ export async function getCommentAPI(
   storyId: string,
   nodeId: string,
   commentId: string,
-  includeReplies?: boolean
+  includeReplies?: boolean,
 ): Promise<Comment> {
   const response = await client.graphql({
     query: GET_COMMENT,
@@ -267,7 +267,7 @@ export async function createCommentAPI(
   storyId: string,
   nodeId: string,
   content: string,
-  parentCommentId?: string
+  parentCommentId?: string,
 ): Promise<Comment> {
   const response = await client.graphql({
     query: CREATE_COMMENT,
@@ -288,7 +288,7 @@ export async function updateCommentAPI(
   storyId: string,
   nodeId: string,
   commentId: string,
-  content: string
+  content: string,
 ): Promise<Comment> {
   const response = await client.graphql({
     query: UPDATE_COMMENT,
@@ -308,7 +308,7 @@ export async function updateCommentAPI(
 export async function deleteCommentAPI(
   storyId: string,
   nodeId: string,
-  commentId: string
+  commentId: string,
 ): Promise<{ success: boolean; message?: string }> {
   const response = await client.graphql({
     query: DELETE_COMMENT,
@@ -328,7 +328,7 @@ export async function voteOnCommentAPI(
   storyId: string,
   nodeId: string,
   commentId: string,
-  voteType: CommentVoteType
+  voteType: CommentVoteType,
 ): Promise<Comment> {
   const response = await client.graphql({
     query: VOTE_ON_COMMENT,

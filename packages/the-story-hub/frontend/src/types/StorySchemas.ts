@@ -1,8 +1,15 @@
 import { z } from "zod";
-import { AgeRating } from "./gqlTypes";
-import { AGE_RATINGS } from "@tsh/backend/constants/ContentRatings";
 import { STORY_GENRES } from "@tsh/backend/constants/Genres";
 import { CONTENT_WARNINGS } from "@tsh/backend/constants/ContentWarnings";
+import type { AgeRating } from "./gqlTypes";
+
+// Import age ratings for validation
+const AGE_RATING_VALUES = [
+  "GENERAL",
+  "TEEN_13_PLUS",
+  "MATURE_16_PLUS",
+  "ADULT_18_PLUS",
+] as const;
 
 export const CreateStoryFormSchema = z.object({
   title: z
@@ -16,7 +23,7 @@ export const CreateStoryFormSchema = z.object({
   genre: z
     .array(z.enum(STORY_GENRES as unknown as [string, ...string[]]))
     .min(1, "Select at least one genre"),
-  ageRating: z.nativeEnum(AgeRating),
+  ageRating: z.enum(AGE_RATING_VALUES),
   contentWarnings: z.array(
     z.enum(CONTENT_WARNINGS as unknown as [string, ...string[]]),
   ),
@@ -38,7 +45,7 @@ export const UpdateStoryFormSchema = z.object({
   genre: z
     .array(z.enum(STORY_GENRES as unknown as [string, ...string[]]))
     .optional(),
-  ageRating: z.nativeEnum(AgeRating).optional(),
+  ageRating: z.enum(AGE_RATING_VALUES).optional(),
   contentWarnings: z
     .array(z.enum(CONTENT_WARNINGS as unknown as [string, ...string[]]))
     .optional(),

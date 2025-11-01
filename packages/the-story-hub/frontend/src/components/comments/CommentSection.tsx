@@ -23,8 +23,14 @@ interface CommentSectionProps {
   currentUserId?: string;
 }
 
-export function CommentSection({ storyId, nodeId, currentUserId }: CommentSectionProps) {
-  const [sortBy, setSortBy] = useState<"NEWEST" | "OLDEST" | "MOST_UPVOTED" | "MOST_REPLIES">("NEWEST");
+export function CommentSection({
+  storyId,
+  nodeId,
+  currentUserId,
+}: CommentSectionProps) {
+  const [sortBy, setSortBy] = useState<
+    "NEWEST" | "OLDEST" | "MOST_UPVOTED" | "MOST_REPLIES"
+  >("NEWEST");
   const [showCommentForm, setShowCommentForm] = useState(false);
   const queryClient = useQueryClient();
 
@@ -46,34 +52,53 @@ export function CommentSection({ storyId, nodeId, currentUserId }: CommentSectio
     mutationFn: (input: { content: string; parentCommentId?: string }) =>
       createCommentAPI(storyId, nodeId, input.content, input.parentCommentId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments", storyId, nodeId] });
+      queryClient.invalidateQueries({
+        queryKey: ["comments", storyId, nodeId],
+      });
       setShowCommentForm(false);
     },
   });
 
   // Update comment mutation
   const updateCommentMutation = useMutation({
-    mutationFn: ({ commentId, content }: { commentId: string; content: string }) =>
-      updateCommentAPI(storyId, nodeId, commentId, content),
+    mutationFn: ({
+      commentId,
+      content,
+    }: {
+      commentId: string;
+      content: string;
+    }) => updateCommentAPI(storyId, nodeId, commentId, content),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments", storyId, nodeId] });
+      queryClient.invalidateQueries({
+        queryKey: ["comments", storyId, nodeId],
+      });
     },
   });
 
   // Delete comment mutation
   const deleteCommentMutation = useMutation({
-    mutationFn: (commentId: string) => deleteCommentAPI(storyId, nodeId, commentId),
+    mutationFn: (commentId: string) =>
+      deleteCommentAPI(storyId, nodeId, commentId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments", storyId, nodeId] });
+      queryClient.invalidateQueries({
+        queryKey: ["comments", storyId, nodeId],
+      });
     },
   });
 
   // Vote mutation
   const voteMutation = useMutation({
-    mutationFn: ({ commentId, voteType }: { commentId: string; voteType: "UPVOTE" | "DOWNVOTE" }) =>
-      voteOnCommentAPI(storyId, nodeId, commentId, voteType),
+    mutationFn: ({
+      commentId,
+      voteType,
+    }: {
+      commentId: string;
+      voteType: "UPVOTE" | "DOWNVOTE";
+    }) => voteOnCommentAPI(storyId, nodeId, commentId, voteType),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments", storyId, nodeId] });
+      queryClient.invalidateQueries({
+        queryKey: ["comments", storyId, nodeId],
+      });
     },
   });
 
@@ -93,7 +118,10 @@ export function CommentSection({ storyId, nodeId, currentUserId }: CommentSectio
     await deleteCommentMutation.mutateAsync(commentId);
   };
 
-  const handleVote = async (commentId: string, voteType: "UPVOTE" | "DOWNVOTE") => {
+  const handleVote = async (
+    commentId: string,
+    voteType: "UPVOTE" | "DOWNVOTE",
+  ) => {
     await voteMutation.mutateAsync({ commentId, voteType });
   };
 
@@ -129,10 +157,18 @@ export function CommentSection({ storyId, nodeId, currentUserId }: CommentSectio
               value: "text-white",
             }}
           >
-            <SelectItem key="NEWEST" value="NEWEST">Newest</SelectItem>
-            <SelectItem key="OLDEST" value="OLDEST">Oldest</SelectItem>
-            <SelectItem key="MOST_UPVOTED" value="MOST_UPVOTED">Most Upvoted</SelectItem>
-            <SelectItem key="MOST_REPLIES" value="MOST_REPLIES">Most Replies</SelectItem>
+            <SelectItem key="NEWEST" value="NEWEST">
+              Newest
+            </SelectItem>
+            <SelectItem key="OLDEST" value="OLDEST">
+              Oldest
+            </SelectItem>
+            <SelectItem key="MOST_UPVOTED" value="MOST_UPVOTED">
+              Most Upvoted
+            </SelectItem>
+            <SelectItem key="MOST_REPLIES" value="MOST_REPLIES">
+              Most Replies
+            </SelectItem>
           </Select>
           {currentUserId && (
             <Button
@@ -140,7 +176,7 @@ export function CommentSection({ storyId, nodeId, currentUserId }: CommentSectio
               size="sm"
               onClick={() => setShowCommentForm(!showCommentForm)}
             >
-              {showCommentForm ? 'Cancel' : 'Add Comment'}
+              {showCommentForm ? "Cancel" : "Add Comment"}
             </Button>
           )}
         </div>

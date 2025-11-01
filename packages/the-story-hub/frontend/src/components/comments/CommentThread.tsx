@@ -13,7 +13,10 @@ interface CommentThreadProps {
   onReply?: (commentId: string, content: string) => Promise<void>;
   onEdit?: (commentId: string, content: string) => Promise<void>;
   onDelete?: (commentId: string) => Promise<void>;
-  onVote?: (commentId: string, voteType: "UPVOTE" | "DOWNVOTE") => Promise<void>;
+  onVote?: (
+    commentId: string,
+    voteType: "UPVOTE" | "DOWNVOTE",
+  ) => Promise<void>;
   currentUserId?: string;
 }
 
@@ -81,7 +84,9 @@ export function CommentThread({
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-white">{comment.authorName}</span>
+              <span className="font-semibold text-white">
+                {comment.authorName}
+              </span>
               <span className="text-xs text-gray-400">
                 {new Date(comment.createdAt).toLocaleDateString()}
               </span>
@@ -116,7 +121,9 @@ export function CommentThread({
                 </div>
               </div>
             ) : (
-              <p className={`mt-2 text-gray-300 whitespace-pre-wrap ${isDeleted ? 'italic text-gray-500' : ''}`}>
+              <p
+                className={`mt-2 text-gray-300 whitespace-pre-wrap ${isDeleted ? "italic text-gray-500" : ""}`}
+              >
                 {comment.content}
               </p>
             )}
@@ -177,7 +184,8 @@ export function CommentThread({
                 {/* Reply count */}
                 {hasReplies && (
                   <span className="text-gray-400 text-xs">
-                    {comment.stats.replyCount} {comment.stats.replyCount === 1 ? 'reply' : 'replies'}
+                    {comment.stats.replyCount}{" "}
+                    {comment.stats.replyCount === 1 ? "reply" : "replies"}
                   </span>
                 )}
               </div>
@@ -206,7 +214,8 @@ export function CommentThread({
               key="replies"
               title={
                 <span className="text-sm text-gray-400">
-                  {showReplies ? 'Hide' : 'Show'} {comment.stats.replyCount} {comment.stats.replyCount === 1 ? 'reply' : 'replies'}
+                  {showReplies ? "Hide" : "Show"} {comment.stats.replyCount}{" "}
+                  {comment.stats.replyCount === 1 ? "reply" : "replies"}
                 </span>
               }
               onPress={() => setShowReplies(!showReplies)}

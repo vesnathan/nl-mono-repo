@@ -14,11 +14,7 @@ export function useAuth(): AuthStatus {
     isLoading: true,
   });
 
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  async function checkAuthStatus() {
+  const checkAuthStatus = async () => {
     try {
       const [session, user] = await Promise.all([
         fetchAuthSession(),
@@ -31,13 +27,18 @@ export function useAuth(): AuthStatus {
         userId: user?.userId,
         username: user?.username,
       });
-    } catch (error) {
+    } catch {
       setAuthStatus({
         isAuthenticated: false,
         isLoading: false,
       });
     }
-  }
+  };
+
+  useEffect(() => {
+    checkAuthStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return authStatus;
 }

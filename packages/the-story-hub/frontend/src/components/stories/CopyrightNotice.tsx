@@ -30,7 +30,9 @@ export default function CopyrightNotice({
             </p>
           )}
           <p className="text-sm text-gray-700 mb-3">
-            Each contributor retains copyright to their contributions. By contributing, authors grant The Story Hub a non-exclusive license to display and distribute their work under{" "}
+            Each contributor retains copyright to their contributions. By
+            contributing, authors grant The Story Hub a non-exclusive license to
+            display and distribute their work under{" "}
             <Link
               href="https://creativecommons.org/licenses/by-nc-nd/4.0/"
               target="_blank"
@@ -74,7 +76,13 @@ export default function CopyrightNotice({
       {/* Community Guidelines */}
       <div className="mt-4 pt-4 border-t border-gray-300">
         <p className="text-xs text-gray-700">
-          <strong>Please respect our community:</strong> This platform is built by writers, for writers. Commercial scraping, unauthorized republication, or use of human-authored content for AI training violates both the spirit of our community and the CC license terms. AI-created content on this platform may be used for AI training purposes. If you'd like to use any content commercially, please contact the individual authors directly.
+          <strong>Please respect our community:</strong> This platform is built
+          by writers, for writers. Commercial scraping, unauthorized
+          republication, or use of human-authored content for AI training
+          violates both the spirit of our community and the CC license terms.
+          AI-created content on this platform may be used for AI training
+          purposes. If you'd like to use any content commercially, please
+          contact the individual authors directly.
         </p>
       </div>
     </div>

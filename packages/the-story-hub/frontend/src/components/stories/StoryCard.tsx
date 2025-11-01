@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Chip,
-  Button,
-  Tooltip,
-} from "@nextui-org/react";
+import { Card, Chip, Button, Tooltip } from "@nextui-org/react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import type { Story } from "@/types/gqlTypes";
@@ -33,7 +25,11 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
           {story.aiCreated && (
             <div className="absolute top-2 right-2 z-10">
               <Tooltip content="This story was created with AI assistance">
-                <Chip size="sm" variant="solid" className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold">
+                <Chip
+                  size="sm"
+                  variant="solid"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold"
+                >
                   🤖 AI
                 </Chip>
               </Tooltip>
@@ -55,7 +51,9 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
           <div className="flex flex-col flex-grow min-w-0 gap-2">
             {/* Title and Author */}
             <div>
-              <h3 className="text-lg font-bold line-clamp-2 text-white">{story.title}</h3>
+              <h3 className="text-lg font-bold line-clamp-2 text-white">
+                {story.title}
+              </h3>
               <p className="text-xs text-gray-400">by {story.authorName}</p>
             </div>
 

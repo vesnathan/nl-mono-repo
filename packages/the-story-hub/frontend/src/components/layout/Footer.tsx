@@ -22,7 +22,8 @@ export default function Footer() {
               <span className="ml-2 text-lg font-semibold">The Story Hub</span>
             </Link>
             <p className="text-gray-400 text-sm">
-              Collaborative storytelling platform where imagination branches into infinite possibilities.
+              Collaborative storytelling platform where imagination branches
+              into infinite possibilities.
             </p>
           </div>
 
@@ -31,17 +32,26 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Legal</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/legal/terms" className="text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/legal/terms"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link href="/legal/privacy" className="text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/legal/privacy"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/legal/copyright" className="text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/legal/copyright"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   Copyright & Licensing
                 </Link>
               </li>
@@ -53,17 +63,26 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Community</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/browse" className="text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/browse"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   Browse Stories
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/about"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/support" className="text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/support"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
                   Support Us
                 </Link>
               </li>
@@ -94,8 +113,13 @@ export default function Footer() {
         <div className="border-t border-gray-700 pt-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-gray-400 text-sm">
-              <div>© {currentYear} The Story Hub and Contributors. All Rights Reserved.</div>
-              <div className="text-xs mt-1">Platform © {currentYear} Nathan Loudon</div>
+              <div>
+                © {currentYear} The Story Hub and Contributors. All Rights
+                Reserved.
+              </div>
+              <div className="text-xs mt-1">
+                Platform © {currentYear} Nathan Loudon
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <Link
@@ -117,7 +141,8 @@ export default function Footer() {
         {/* Anti-Scraping Notice */}
         <div className="mt-6 text-center">
           <p className="text-gray-500 text-xs">
-            Automated scraping, crawling, or harvesting of content is strictly prohibited and violates our Terms of Service.
+            Automated scraping, crawling, or harvesting of content is strictly
+            prohibited and violates our Terms of Service.
           </p>
         </div>
       </div>

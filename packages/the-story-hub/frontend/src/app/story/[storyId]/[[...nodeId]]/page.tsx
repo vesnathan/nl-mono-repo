@@ -7,7 +7,13 @@ import { getChapterAPI, listBranchesAPI } from "@/lib/api/chapters";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import Link from "next/link";
-import { Button, Chip, Accordion, AccordionItem, Tooltip } from "@nextui-org/react";
+import {
+  Button,
+  Chip,
+  Accordion,
+  AccordionItem,
+  Tooltip,
+} from "@nextui-org/react";
 import { useState } from "react";
 import { StoryMetadataChips } from "@/components/stories/StoryMetadataChips";
 import { CommentSection } from "@/components/comments/CommentSection";
@@ -15,7 +21,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { listCommentsAPI } from "@/lib/api/comments";
 
 // Component to display branch comment count
-function BranchCommentButton({ storyId, nodeId, isExpanded, onClick }: { storyId: string, nodeId: string, isExpanded: boolean, onClick: (e: React.MouseEvent) => void }) {
+function BranchCommentButton({
+  storyId,
+  nodeId,
+  isExpanded,
+  onClick,
+}: {
+  storyId: string;
+  nodeId: string;
+  isExpanded: boolean;
+  onClick: (e: React.MouseEvent) => void;
+}) {
   const { data: commentData } = useQuery({
     queryKey: ["comments", storyId, nodeId, "NEWEST"],
     queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", 1),
@@ -24,21 +40,41 @@ function BranchCommentButton({ storyId, nodeId, isExpanded, onClick }: { storyId
 
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={`hover:text-white transition-colors ${isExpanded ? 'text-white font-semibold' : ''}`}
+      className={`hover:text-white transition-colors ${isExpanded ? "text-white font-semibold" : ""}`}
       title="View discussion"
     >
-      💬 Discussion ({commentData?.total || 0}) {isExpanded ? '▲' : '▼'}
+      💬 Discussion ({commentData?.total || 0}) {isExpanded ? "▲" : "▼"}
     </button>
   );
 }
 
+interface StoryData {
+  ageRating?: string;
+  [key: string]: unknown;
+}
+
 // Recursive component to render a chapter and its branches
-function ChapterSection({ storyId, nodeId, story, isRoot = false, currentUserId }: { storyId: string, nodeId: string, story: any, isRoot?: boolean, currentUserId?: string }) {
+function ChapterSection({
+  storyId,
+  nodeId,
+  story,
+  isRoot = false,
+  currentUserId,
+}: {
+  storyId: string;
+  nodeId: string;
+  story: StoryData;
+  isRoot?: boolean;
+  currentUserId?: string;
+}) {
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
   const [shouldFetchBranches, setShouldFetchBranches] = useState(isRoot); // Only fetch for root initially
-  const [expandedBranchComments, setExpandedBranchComments] = useState<string | null>(null); // Track which branch's comments are expanded
+  const [expandedBranchComments, setExpandedBranchComments] = useState<
+    string | null
+  >(null); // Track which branch's comments are expanded
   const [showMainComments, setShowMainComments] = useState(false); // Track if main chapter comments are expanded
 
   // Fetch the chapter content
@@ -63,11 +99,14 @@ function ChapterSection({ storyId, nodeId, story, isRoot = false, currentUserId 
   });
 
   // Determine community favourite
-  const communityFavouriteId = branches && branches.length > 0
-    ? branches.reduce((max, branch) =>
-        (branch.stats?.upvotes || 0) > (max.stats?.upvotes || 0) ? branch : max
-      ).nodeId
-    : null;
+  const communityFavouriteId =
+    branches && branches.length > 0
+      ? branches.reduce((max, branch) =>
+          (branch.stats?.upvotes || 0) > (max.stats?.upvotes || 0)
+            ? branch
+            : max,
+        ).nodeId
+      : null;
 
   const handleBranchSelect = (branchId: string) => {
     setSelectedBranchId(branchId);
@@ -76,11 +115,12 @@ function ChapterSection({ storyId, nodeId, story, isRoot = false, currentUserId 
     setTimeout(() => {
       const element = document.getElementById(`chapter-${branchId}`);
       if (element) {
-        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+        const elementPosition =
+          element.getBoundingClientRect().top + window.pageYOffset;
         const offsetPosition = elementPosition - 50; // Offset for navbar
         window.scrollTo({
           top: offsetPosition,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
       }
     }, 300);
@@ -94,7 +134,10 @@ function ChapterSection({ storyId, nodeId, story, isRoot = false, currentUserId 
     <>
       {/* Chapter content */}
       {chapter && (
-        <div id={`chapter-${nodeId}`} className="bg-gray-900 border border-gray-700 p-8 mb-6">
+        <div
+          id={`chapter-${nodeId}`}
+          className="bg-gray-900 border border-gray-700 p-8 mb-6"
+        >
           <div className="prose prose-invert prose-lg max-w-none">
             <div className="text-gray-100 whitespace-pre-wrap leading-relaxed">
               {chapter.content}
@@ -104,10 +147,12 @@ function ChapterSection({ storyId, nodeId, story, isRoot = false, currentUserId 
           {/* Expandable comment section for main chapter */}
           <div className="mt-6 pt-6 border-t border-gray-700">
             <button
+              type="button"
               onClick={() => setShowMainComments(!showMainComments)}
-              className={`text-lg font-semibold hover:text-white transition-colors ${showMainComments ? 'text-white' : 'text-gray-400'}`}
+              className={`text-lg font-semibold hover:text-white transition-colors ${showMainComments ? "text-white" : "text-gray-400"}`}
             >
-              💬 Discussion ({mainCommentData?.total || 0}) {showMainComments ? '▲' : '▼'}
+              💬 Discussion ({mainCommentData?.total || 0}){" "}
+              {showMainComments ? "▲" : "▼"}
             </button>
 
             {showMainComments && (
@@ -140,7 +185,11 @@ function ChapterSection({ storyId, nodeId, story, isRoot = false, currentUserId 
           >
             <AccordionItem
               key="branches"
-              title={<h2 className="text-2xl font-bold text-white">Choose Your Path</h2>}
+              title={
+                <h2 className="text-2xl font-bold text-white">
+                  Choose Your Path
+                </h2>
+              }
               className="px-8"
             >
               <div className="space-y-3 pb-4">
@@ -148,6 +197,14 @@ function ChapterSection({ storyId, nodeId, story, isRoot = false, currentUserId 
                   <div
                     key={branch.nodeId}
                     onClick={() => handleBranchSelect(branch.nodeId)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleBranchSelect(branch.nodeId);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
                     className="bg-gray-800 border border-gray-700 p-4 hover:bg-gray-750 transition-colors cursor-pointer relative"
                   >
                     {/* AI Badge - Top Right */}
@@ -162,21 +219,32 @@ function ChapterSection({ storyId, nodeId, story, isRoot = false, currentUserId 
                     )}
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <h3 className="text-lg font-semibold text-white">
-                        {branch.branchDescription || `Chapter ${branch.chapterNumber}`}
+                        {branch.branchDescription ||
+                          `Chapter ${branch.chapterNumber}`}
                       </h3>
                       <div className="flex gap-2 flex-shrink-0">
-                        {branch.nodeId === communityFavouriteId && (branch.stats?.upvotes || 0) > 0 && (
-                          <span className="px-2 py-1 text-xs bg-green-600 text-white rounded whitespace-nowrap" title="Most upvoted by the community">
-                            ♥ Community Favourite
-                          </span>
-                        )}
+                        {branch.nodeId === communityFavouriteId &&
+                          (branch.stats?.upvotes || 0) > 0 && (
+                            <span
+                              className="px-2 py-1 text-xs bg-green-600 text-white rounded whitespace-nowrap"
+                              title="Most upvoted by the community"
+                            >
+                              ♥ Community Favourite
+                            </span>
+                          )}
                         {branch.badges?.authorApproved && (
-                          <span className="px-2 py-1 text-xs bg-purple-600 text-white rounded whitespace-nowrap" title="Approved by original poster">
+                          <span
+                            className="px-2 py-1 text-xs bg-purple-600 text-white rounded whitespace-nowrap"
+                            title="Approved by original poster"
+                          >
                             ✓ OP Approved
                           </span>
                         )}
                         {branch.badges?.matchesVision && (
-                          <span className="px-2 py-1 text-xs bg-blue-600 text-white rounded whitespace-nowrap" title="Matches the story's vision">
+                          <span
+                            className="px-2 py-1 text-xs bg-blue-600 text-white rounded whitespace-nowrap"
+                            title="Matches the story's vision"
+                          >
                             ★ Matches OP Vision
                           </span>
                         )}
@@ -200,33 +268,69 @@ function ChapterSection({ storyId, nodeId, story, isRoot = false, currentUserId 
                           onClick={(e) => {
                             e.stopPropagation();
                             setExpandedBranchComments(
-                              expandedBranchComments === branch.nodeId ? null : branch.nodeId
+                              expandedBranchComments === branch.nodeId
+                                ? null
+                                : branch.nodeId,
                             );
                           }}
                         />
                       </div>
                       <div className="flex items-center gap-2">
                         {(branch.ageRating || story.ageRating) && (
-                          <Chip size="sm" variant="flat" className="bg-[#F28C28] text-white px-3">
-                            {(branch.ageRating || story.ageRating) === 'ADULT_18_PLUS' ? '18+' : (branch.ageRating || story.ageRating).replace(/_/g, "-")}
+                          <Chip
+                            size="sm"
+                            variant="flat"
+                            className="bg-[#F28C28] text-white px-3"
+                          >
+                            {(branch.ageRating || story.ageRating) ===
+                            "ADULT_18_PLUS"
+                              ? "18+"
+                              : String(branch.ageRating || story.ageRating).replace(
+                                  /_/g,
+                                  "-",
+                                )}
                           </Chip>
                         )}
-                        {branch.maxChildAgeRating && branch.maxChildAgeRating !== (branch.ageRating || story.ageRating) && (
-                          <Chip size="sm" variant="flat" className="bg-red-600 text-white" title="Contains child branches with higher age rating">
-                            ⚠️ Contains {branch.maxChildAgeRating.replace(/_/g, "-")} content
-                          </Chip>
-                        )}
-                        {branch.contentWarnings && branch.contentWarnings.length > 0 && (
-                          <Chip size="sm" variant="flat" color="warning" title={branch.contentWarnings.join(", ")}>
-                            ⚠️ Warnings
-                          </Chip>
-                        )}
+                        {branch.maxChildAgeRating &&
+                          branch.maxChildAgeRating !==
+                            (branch.ageRating || story.ageRating) && (
+                            <Chip
+                              size="sm"
+                              variant="flat"
+                              className="bg-red-600 text-white"
+                              title="Contains child branches with higher age rating"
+                            >
+                              ⚠️ Contains{" "}
+                              {branch.maxChildAgeRating.replace(/_/g, "-")}{" "}
+                              content
+                            </Chip>
+                          )}
+                        {branch.contentWarnings &&
+                          branch.contentWarnings.length > 0 && (
+                            <Chip
+                              size="sm"
+                              variant="flat"
+                              color="warning"
+                              title={branch.contentWarnings.join(", ")}
+                            >
+                              ⚠️ Warnings
+                            </Chip>
+                          )}
                       </div>
                     </div>
 
                     {/* Expanded comments section for this branch */}
                     {expandedBranchComments === branch.nodeId && (
-                      <div className="mt-4 pt-4 border-t border-gray-700" onClick={(e) => e.stopPropagation()}>
+                      <div
+                        className="mt-4 pt-4 border-t border-gray-700"
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.stopPropagation();
+                          }
+                        }}
+                        role="presentation"
+                      >
                         <CommentSection
                           storyId={storyId}
                           nodeId={branch.nodeId}
@@ -242,8 +346,13 @@ function ChapterSection({ storyId, nodeId, story, isRoot = false, currentUserId 
         </div>
       ) : (
         <div className="bg-gray-900 border border-gray-700 p-8 mb-6 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">End of This Path</h2>
-          <p className="text-gray-400 mb-6">This story branch hasn't been continued yet. Be the first to write what happens next!</p>
+          <h2 className="text-2xl font-bold text-white mb-4">
+            End of This Path
+          </h2>
+          <p className="text-gray-400 mb-6">
+            This story branch hasn't been continued yet. Be the first to write
+            what happens next!
+          </p>
           <Button color="primary" size="lg" className="bg-brand-purple">
             Continue the Story
           </Button>
@@ -268,7 +377,12 @@ export default function StoryDetailPage() {
   const storyId = (params?.storyId as string) || "";
   const { userId } = useAuth();
 
-  const { data: story, isLoading: storyLoading, error: storyError, refetch } = useStory(storyId);
+  const {
+    data: story,
+    isLoading: storyLoading,
+    error: storyError,
+    refetch,
+  } = useStory(storyId);
 
   const isLoading = storyLoading;
   const error = storyError;
@@ -285,10 +399,7 @@ export default function StoryDetailPage() {
     return (
       <div className="min-h-screen bg-[#1a1a1a] flex items-center justify-center">
         <div className="max-w-2xl mx-auto px-4">
-          <ErrorMessage
-            message="Failed to load story"
-            retry={refetch}
-          />
+          <ErrorMessage message="Failed to load story" retry={refetch} />
           <div className="text-center mt-6">
             <Link href="/browse">
               <Button className="bg-brand-purple text-white">
@@ -376,7 +487,12 @@ export default function StoryDetailPage() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {story.contentWarnings.map((warning) => (
-                    <Chip key={warning} size="sm" variant="flat" color="warning">
+                    <Chip
+                      key={warning}
+                      size="sm"
+                      variant="flat"
+                      color="warning"
+                    >
                       {warning}
                     </Chip>
                   ))}
@@ -396,7 +512,9 @@ export default function StoryDetailPage() {
             />
           ) : (
             <div className="bg-gray-900 border border-gray-700 p-8 mb-6">
-              <p className="text-gray-400">This story doesn't have any chapters yet.</p>
+              <p className="text-gray-400">
+                This story doesn't have any chapters yet.
+              </p>
             </div>
           )}
         </div>

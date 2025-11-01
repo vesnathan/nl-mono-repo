@@ -18,10 +18,7 @@ export default function BrowsePage() {
 
   const { data, isLoading, error, refetch } = useStories({
     genre: selectedGenres.length > 0 ? selectedGenres[0] : undefined,
-    ageRating:
-      selectedAgeRatings.length > 0
-        ? (selectedAgeRatings[0] as any)
-        : undefined,
+    ageRating: selectedAgeRatings.length > 0 ? (selectedAgeRatings[0] as "GENERAL" | "TEEN_13_PLUS" | "MATURE_16_PLUS" | "ADULT_18_PLUS" | null) : undefined,
   });
 
   // Client-side search filtering
@@ -50,7 +47,8 @@ export default function BrowsePage() {
                   Browse Stories
                 </h1>
                 <p className="text-xl text-white drop-shadow-lg leading-relaxed">
-                  Explore our collection of collaborative stories across all genres
+                  Explore our collection of collaborative stories across all
+                  genres
                 </p>
               </div>
             </div>
@@ -93,7 +91,9 @@ export default function BrowsePage() {
               {/* Filters Sidebar */}
               <aside>
                 <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 sticky top-24">
-                  <h2 className="text-2xl font-bold mb-6 text-white">Filters</h2>
+                  <h2 className="text-2xl font-bold mb-6 text-white">
+                    Filters
+                  </h2>
                   <StoryFilters
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
@@ -108,13 +108,17 @@ export default function BrowsePage() {
               {/* Stories Grid */}
               <main>
                 {error ? (
-                  <ErrorMessage message="Failed to load stories" retry={refetch} />
+                  <ErrorMessage
+                    message="Failed to load stories"
+                    retry={refetch}
+                  />
                 ) : isLoading ? (
                   <LoadingSpinner label="Loading stories..." />
                 ) : (
                   <>
                     <div className="mb-6 text-gray-400 text-lg">
-                      Found {filteredStories?.length || 0} {filteredStories?.length === 1 ? 'story' : 'stories'}
+                      Found {filteredStories?.length || 0}{" "}
+                      {filteredStories?.length === 1 ? "story" : "stories"}
                     </div>
                     <StoriesGrid
                       stories={filteredStories || []}

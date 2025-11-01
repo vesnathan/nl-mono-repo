@@ -1,6 +1,6 @@
 "use client";
 
-import { Input, Select, SelectItem, Chip } from "@nextui-org/react";
+import { Input, Chip } from "@nextui-org/react";
 import { STORY_GENRES } from "@tsh/backend/constants/Genres";
 import { AGE_RATINGS } from "@tsh/backend/constants/ContentRatings";
 
@@ -48,12 +48,15 @@ export function StoryFilters({
         size="lg"
         classNames={{
           input: "text-base bg-gray-800 text-white",
-          inputWrapper: "h-12 bg-gray-800 border-gray-600 hover:border-gray-500",
+          inputWrapper:
+            "h-12 bg-gray-800 border-gray-600 hover:border-gray-500",
         }}
       />
 
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Genres</h3>
+        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
+          Genres
+        </h3>
         <div className="flex flex-wrap gap-2">
           {STORY_GENRES.map((genre) => (
             <Chip
@@ -74,7 +77,9 @@ export function StoryFilters({
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Age Rating</h3>
+        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
+          Age Rating
+        </h3>
         <div className="flex flex-wrap gap-2">
           {AGE_RATINGS.map((rating) => (
             <Chip
@@ -102,6 +107,7 @@ export function StoryFilters({
         selectedAgeRatings.length > 0 ||
         searchTerm) && (
         <button
+          type="button"
           onClick={() => {
             onSearchChange("");
             onGenresChange([]);

@@ -11,6 +11,7 @@ export const CommentStatsSchema = z.object({
 export type CommentStats = z.infer<typeof CommentStatsSchema>;
 
 // Comment Schema
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const CommentSchema: z.ZodType<any> = z.lazy(() =>
   z.object({
     commentId: z.string().uuid(),
@@ -28,7 +29,7 @@ export const CommentSchema: z.ZodType<any> = z.lazy(() =>
     stats: CommentStatsSchema.optional(),
     replies: z.array(CommentSchema).optional(),
     replyCount: z.number().int().min(0).optional(),
-  })
+  }),
 );
 
 export type Comment = z.infer<typeof CommentSchema>;
@@ -73,5 +74,10 @@ export type DeleteCommentInput = z.infer<typeof DeleteCommentInputSchema>;
 export const CommentVoteType = z.enum(["UPVOTE", "DOWNVOTE", "REMOVE_VOTE"]);
 export type CommentVoteType = z.infer<typeof CommentVoteType>;
 
-export const CommentSortBy = z.enum(["NEWEST", "OLDEST", "MOST_UPVOTED", "MOST_REPLIES"]);
+export const CommentSortBy = z.enum([
+  "NEWEST",
+  "OLDEST",
+  "MOST_UPVOTED",
+  "MOST_REPLIES",
+]);
 export type CommentSortBy = z.infer<typeof CommentSortBy>;
