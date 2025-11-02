@@ -35,7 +35,9 @@ export function request(ctx: CTX) {
   const maxLimit = limit || 20;
   const sort = sortBy || "NEWEST";
 
-  console.log(`Listing comments for story ${storyId}, node ${nodeId}, sortBy: ${sort}`);
+  console.log(
+    `Listing comments for story ${storyId}, node ${nodeId}, sortBy: ${sort}`,
+  );
 
   // Determine sort order
   let scanIndexForward = false; // Default: newest first
@@ -53,7 +55,8 @@ export function request(ctx: CTX) {
       }),
     },
     filter: {
-      expression: "attribute_not_exists(parentCommentId) OR attribute_type(parentCommentId, :nullType)",
+      expression:
+        "attribute_not_exists(parentCommentId) OR attribute_type(parentCommentId, :nullType)",
       expressionValues: util.dynamodb.toMapValues({
         ":nullType": "NULL",
       }),

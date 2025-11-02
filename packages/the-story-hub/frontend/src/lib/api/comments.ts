@@ -318,7 +318,9 @@ export async function listCommentsAPI(
       }
     }
 
-    console.log(`Calculated total activity (top-level + nested): ${totalActivity}`);
+    console.log(
+      `Calculated total activity (top-level + nested): ${totalActivity}`,
+    );
 
     return {
       ...result,

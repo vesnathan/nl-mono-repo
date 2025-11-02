@@ -1,9 +1,14 @@
-import { DynamoDBClient, ScanCommand, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  ScanCommand,
+  DeleteItemCommand,
+} from "@aws-sdk/client-dynamodb";
 import { execSync } from "child_process";
 
 // Configuration
 const REGION = process.env.AWS_REGION || "ap-southeast-2";
-const TABLE_NAME = process.env.TABLE_NAME || "nlmonorepo-thestoryhub-datatable-dev";
+const TABLE_NAME =
+  process.env.TABLE_NAME || "nlmonorepo-thestoryhub-datatable-dev";
 
 const ddbClient = new DynamoDBClient({ region: REGION });
 
@@ -28,13 +33,15 @@ async function clearTable() {
     if (scanResult.Items && scanResult.Items.length > 0) {
       // Delete items in batches
       for (const item of scanResult.Items) {
-        await ddbClient.send(new DeleteItemCommand({
-          TableName: TABLE_NAME,
-          Key: {
-            PK: item.PK,
-            SK: item.SK,
-          },
-        }));
+        await ddbClient.send(
+          new DeleteItemCommand({
+            TableName: TABLE_NAME,
+            Key: {
+              PK: item.PK,
+              SK: item.SK,
+            },
+          }),
+        );
         itemsDeleted++;
         if (itemsDeleted % 10 === 0) {
           process.stdout.write(`\r   Deleted ${itemsDeleted} items...`);

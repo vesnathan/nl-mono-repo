@@ -33,7 +33,7 @@ export function response(ctx: CTX): boolean | null {
     return null;
   }
 
-    // TODO: Remove 'as any' once proper User type is available
+  // TODO: Remove 'as any' once proper User type is available
   const user = ctx.result as any;
   return user?.patreonSupporter ?? false;
 }

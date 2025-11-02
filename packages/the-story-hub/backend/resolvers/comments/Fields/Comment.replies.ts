@@ -27,7 +27,9 @@ export function request(ctx: CTX) {
   const parent = ctx.source as any;
   const { commentId, storyId, nodeId } = parent || {};
 
-  console.log(`Resolving replies for comment ${commentId}, depth: ${parent?.depth}`);
+  console.log(
+    `Resolving replies for comment ${commentId}, depth: ${parent?.depth}`,
+  );
 
   // Query for direct replies to this comment
   return {
@@ -59,7 +61,9 @@ export function response(ctx: CTX): Comment[] {
   // TODO: Fix type - ctx.result should have proper type
   const items = (ctx.result as any).items || [];
   // TODO: Fix type - ctx.source should be properly typed as Comment
-  console.log(`Fetched ${items.length} replies for comment ${(ctx.source as any)?.commentId}`);
+  console.log(
+    `Fetched ${items.length} replies for comment ${(ctx.source as any)?.commentId}`,
+  );
 
   return items;
 }

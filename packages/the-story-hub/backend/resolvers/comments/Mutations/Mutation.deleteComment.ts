@@ -48,7 +48,8 @@ export function request(ctx: CTX) {
       SK: `COMMENT#${commentId}`,
     }),
     update: {
-      expression: "SET content = :deleted, updatedAt = :updatedAt, #deleted = :true",
+      expression:
+        "SET content = :deleted, updatedAt = :updatedAt, #deleted = :true",
       expressionNames: {
         "#deleted": "deleted",
       },
@@ -70,7 +71,10 @@ export function request(ctx: CTX) {
 export function response(ctx: CTX): DeleteCommentResponse {
   if (ctx.error) {
     if (ctx.error.type === "DynamoDB:ConditionalCheckFailedException") {
-      return util.error("You can only delete your own comments", "Unauthorized");
+      return util.error(
+        "You can only delete your own comments",
+        "Unauthorized",
+      );
     }
     console.error("Error deleting comment:", ctx.error);
     return util.error(ctx.error.message, ctx.error.type);

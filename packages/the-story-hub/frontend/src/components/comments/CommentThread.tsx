@@ -244,17 +244,26 @@ export function CommentThread({
                 ))}
 
                 {/* Show "Load More Replies" if there are more than displayed */}
-                {comment.stats && comment.replies && comment.stats.totalReplyCount > comment.replies.length && (
-                  <div className="text-center pt-2">
-                    <Button
-                      size="sm"
-                      variant="light"
-                      className="text-gray-400 hover:text-white"
-                    >
-                      Load {comment.stats.totalReplyCount - comment.replies.length} more {comment.stats.totalReplyCount - comment.replies.length === 1 ? 'reply' : 'replies'}
-                    </Button>
-                  </div>
-                )}
+                {comment.stats &&
+                  comment.replies &&
+                  comment.stats.totalReplyCount > comment.replies.length && (
+                    <div className="text-center pt-2">
+                      <Button
+                        size="sm"
+                        variant="light"
+                        className="text-gray-400 hover:text-white"
+                      >
+                        Load{" "}
+                        {comment.stats.totalReplyCount - comment.replies.length}{" "}
+                        more{" "}
+                        {comment.stats.totalReplyCount -
+                          comment.replies.length ===
+                        1
+                          ? "reply"
+                          : "replies"}
+                      </Button>
+                    </div>
+                  )}
               </div>
             </AccordionItem>
           </Accordion>

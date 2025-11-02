@@ -40,7 +40,8 @@ export function CommentSection({
     refetch,
   } = useQuery({
     queryKey: ["comments", storyId, nodeId, sortBy, nextToken],
-    queryFn: () => listCommentsAPI(storyId, nodeId, sortBy, 20, nextToken || undefined),
+    queryFn: () =>
+      listCommentsAPI(storyId, nodeId, sortBy, 20, nextToken || undefined),
     retry: 1, // Only retry once
     retryDelay: 1000,
   });
@@ -82,7 +83,7 @@ export function CommentSection({
 
       if (nextToken && allComments.length > 0) {
         console.log("APPENDING new comments to existing list");
-        setAllComments(prev => [...prev, ...commentsData.items]);
+        setAllComments((prev) => [...prev, ...commentsData.items]);
       } else {
         console.log("REPLACING all comments with new data");
         setAllComments(commentsData.items);
@@ -243,10 +244,18 @@ export function CommentSection({
             <SelectItem key="OLDEST" value="OLDEST" className="text-white">
               Oldest
             </SelectItem>
-            <SelectItem key="MOST_UPVOTED" value="MOST_UPVOTED" className="text-white">
+            <SelectItem
+              key="MOST_UPVOTED"
+              value="MOST_UPVOTED"
+              className="text-white"
+            >
               Most Upvoted
             </SelectItem>
-            <SelectItem key="MOST_REPLIES" value="MOST_REPLIES" className="text-white">
+            <SelectItem
+              key="MOST_REPLIES"
+              value="MOST_REPLIES"
+              className="text-white"
+            >
               Most Replies
             </SelectItem>
           </Select>

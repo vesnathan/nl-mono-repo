@@ -41,7 +41,10 @@ export function extractUserBadgeFields(userItem: any): UserBadgeFields {
  * @param userIds Array of user IDs to fetch
  * @param tableName The DynamoDB table name
  */
-export function batchGetUserBadgeFieldsRequest(userIds: string[], tableName: string) {
+export function batchGetUserBadgeFieldsRequest(
+  userIds: string[],
+  tableName: string,
+) {
   const keys = userIds.map((userId) => ({
     PK: { S: `USER#${userId}` },
     SK: { S: `PROFILE#${userId}` },
@@ -65,7 +68,7 @@ export function batchGetUserBadgeFieldsRequest(userIds: string[], tableName: str
  */
 export function processBatchUserBadges(
   batchResult: any,
-  tableName: string
+  tableName: string,
 ): Record<string, UserBadgeFields> {
   const userBadges: Record<string, UserBadgeFields> = {};
 

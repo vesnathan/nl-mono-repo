@@ -42,7 +42,8 @@ export function request(ctx: CTX) {
       SK: `COMMENT#${commentId}`,
     }),
     update: {
-      expression: "SET content = :content, updatedAt = :updatedAt, edited = :edited",
+      expression:
+        "SET content = :content, updatedAt = :updatedAt, edited = :edited",
       expressionValues: util.dynamodb.toMapValues({
         ":content": content,
         ":updatedAt": now,

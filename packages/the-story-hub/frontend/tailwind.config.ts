@@ -13,10 +13,10 @@ const tailwindConfig = {
     extend: {
       colors: {
         // Story Hub brand colors from logo
-        "brand-dark": "#21271C",      // Dark grey/green background
-        "brand-purple": "#422F9F",    // Primary purple
-        "brand-blue": "#2162BF",      // Secondary blue
-        "brand-orange": "#F28C28",    // Accent orange (from old logo)
+        "brand-dark": "#21271C", // Dark grey/green background
+        "brand-purple": "#422F9F", // Primary purple
+        "brand-blue": "#2162BF", // Secondary blue
+        "brand-orange": "#F28C28", // Accent orange (from old logo)
       },
     },
   },

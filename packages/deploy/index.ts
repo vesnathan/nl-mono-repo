@@ -1451,9 +1451,7 @@ async function main() {
 
         logger.success(`✅ Successfully reseeded ${appName} database`);
       } catch (error: unknown) {
-        logger.error(
-          `Reseed failed: ${(error as Error).message}`,
-        );
+        logger.error(`Reseed failed: ${(error as Error).message}`);
         process.exit(1);
       }
     });

@@ -185,7 +185,9 @@ function ChapterSection({
         sortedBranches.length === 1 ? (
           // Auto-display single branch without accordion
           <div className="bg-gray-900 border border-gray-700 mb-6 p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Continue Reading</h2>
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Continue Reading
+            </h2>
             <div className="space-y-3 pb-4">
               {sortedBranches.map((branch) => (
                 <div
@@ -254,7 +256,9 @@ function ChapterSection({
                       <div className="flex items-center gap-1">
                         <span>👤 by {branch.authorName}</span>
                         {branch.authorOGSupporter && <OGBadge size="sm" />}
-                        {branch.authorPatreonSupporter && <PatreonBadge size="sm" />}
+                        {branch.authorPatreonSupporter && (
+                          <PatreonBadge size="sm" />
+                        )}
                       </div>
                       <span>👍 {branch.stats?.upvotes || 0}</span>
                       <span>👎 {branch.stats?.downvotes || 0}</span>
@@ -332,176 +336,180 @@ function ChapterSection({
                 className="px-8"
               >
                 <div className="space-y-3 pb-4">
-                {sortedBranches.map((branch) => (
-                  <div
-                    key={branch.nodeId}
-                    onClick={() => handleBranchSelect(branch.nodeId)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        handleBranchSelect(branch.nodeId);
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    className="bg-gray-800 border border-gray-700 p-4 hover:bg-gray-750 transition-colors cursor-pointer relative"
-                  >
-                    {/* AI Badge - Top Right */}
-                    {branch.aiCreated && (
-                      <div className="absolute top-2 right-2">
-                        <Tooltip content="This branch was created with AI assistance">
-                          <span className="px-2 py-1 text-xs bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded font-semibold">
-                            🤖 AI
-                          </span>
-                        </Tooltip>
-                      </div>
-                    )}
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3 className="text-lg font-semibold text-white">
-                        {branch.branchDescription ||
-                          `Chapter ${branch.chapterNumber}`}
-                      </h3>
-                      <div className="flex gap-2 flex-shrink-0">
-                        {branch.nodeId === communityFavouriteId &&
-                          (branch.stats?.upvotes || 0) > 0 && (
+                  {sortedBranches.map((branch) => (
+                    <div
+                      key={branch.nodeId}
+                      onClick={() => handleBranchSelect(branch.nodeId)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleBranchSelect(branch.nodeId);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      className="bg-gray-800 border border-gray-700 p-4 hover:bg-gray-750 transition-colors cursor-pointer relative"
+                    >
+                      {/* AI Badge - Top Right */}
+                      {branch.aiCreated && (
+                        <div className="absolute top-2 right-2">
+                          <Tooltip content="This branch was created with AI assistance">
+                            <span className="px-2 py-1 text-xs bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded font-semibold">
+                              🤖 AI
+                            </span>
+                          </Tooltip>
+                        </div>
+                      )}
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <h3 className="text-lg font-semibold text-white">
+                          {branch.branchDescription ||
+                            `Chapter ${branch.chapterNumber}`}
+                        </h3>
+                        <div className="flex gap-2 flex-shrink-0">
+                          {branch.nodeId === communityFavouriteId &&
+                            (branch.stats?.upvotes || 0) > 0 && (
+                              <span
+                                className="px-2 py-1 text-xs bg-green-600 text-white rounded whitespace-nowrap"
+                                title="Most upvoted by the community"
+                              >
+                                ♥ Community Favourite
+                              </span>
+                            )}
+                          {branch.badges?.authorApproved && (
                             <span
-                              className="px-2 py-1 text-xs bg-green-600 text-white rounded whitespace-nowrap"
-                              title="Most upvoted by the community"
+                              className="px-2 py-1 text-xs bg-purple-600 text-white rounded whitespace-nowrap"
+                              title="Approved by original poster"
                             >
-                              ♥ Community Favourite
+                              ✓ OP Approved
                             </span>
                           )}
-                        {branch.badges?.authorApproved && (
-                          <span
-                            className="px-2 py-1 text-xs bg-purple-600 text-white rounded whitespace-nowrap"
-                            title="Approved by original poster"
-                          >
-                            ✓ OP Approved
-                          </span>
-                        )}
-                        {branch.badges?.matchesVision && (
-                          <span
-                            className="px-2 py-1 text-xs bg-blue-600 text-white rounded whitespace-nowrap"
-                            title="Approved by original poster"
-                          >
-                            ★ OP Approved
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {branch.content && (
-                      <p className="text-gray-300 text-sm mb-3 line-clamp-2">
-                        {branch.content.substring(0, 150)}...
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <div className="flex items-center gap-4 text-sm text-gray-400">
-                        <div className="flex items-center gap-1">
-                          <span>👤 by {branch.authorName}</span>
-                          {branch.authorOGSupporter && <OGBadge size="sm" />}
-                          {branch.authorPatreonSupporter && <PatreonBadge size="sm" />}
+                          {branch.badges?.matchesVision && (
+                            <span
+                              className="px-2 py-1 text-xs bg-blue-600 text-white rounded whitespace-nowrap"
+                              title="Approved by original poster"
+                            >
+                              ★ OP Approved
+                            </span>
+                          )}
                         </div>
-                        <span>👍 {branch.stats?.upvotes || 0}</span>
-                        <span>👎 {branch.stats?.downvotes || 0}</span>
-                        <span>🌿 {branch.stats?.childBranches || 0}</span>
-                        <BranchCommentButton
-                          storyId={storyId}
-                          nodeId={branch.nodeId}
-                          isExpanded={expandedBranchComments === branch.nodeId}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setExpandedBranchComments(
+                      </div>
+                      {branch.content && (
+                        <p className="text-gray-300 text-sm mb-3 line-clamp-2">
+                          {branch.content.substring(0, 150)}...
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-4 text-sm text-gray-400">
+                          <div className="flex items-center gap-1">
+                            <span>👤 by {branch.authorName}</span>
+                            {branch.authorOGSupporter && <OGBadge size="sm" />}
+                            {branch.authorPatreonSupporter && (
+                              <PatreonBadge size="sm" />
+                            )}
+                          </div>
+                          <span>👍 {branch.stats?.upvotes || 0}</span>
+                          <span>👎 {branch.stats?.downvotes || 0}</span>
+                          <span>🌿 {branch.stats?.childBranches || 0}</span>
+                          <BranchCommentButton
+                            storyId={storyId}
+                            nodeId={branch.nodeId}
+                            isExpanded={
                               expandedBranchComments === branch.nodeId
-                                ? null
-                                : branch.nodeId,
-                            );
+                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedBranchComments(
+                                expandedBranchComments === branch.nodeId
+                                  ? null
+                                  : branch.nodeId,
+                              );
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {(branch.ageRating || story.ageRating) && (
+                            <Chip
+                              size="sm"
+                              variant="flat"
+                              className="bg-[#F28C28] text-white px-3"
+                            >
+                              {(branch.ageRating || story.ageRating) ===
+                              "ADULT_18_PLUS"
+                                ? "18+"
+                                : String(
+                                    branch.ageRating || story.ageRating,
+                                  ).replace(/_/g, "-")}
+                            </Chip>
+                          )}
+                          {branch.maxChildAgeRating &&
+                            branch.maxChildAgeRating !==
+                              (branch.ageRating || story.ageRating) && (
+                              <Chip
+                                size="sm"
+                                variant="flat"
+                                className="bg-red-600 text-white"
+                                title="Contains child branches with higher age rating"
+                              >
+                                ⚠️ Contains{" "}
+                                {branch.maxChildAgeRating.replace(/_/g, "-")}{" "}
+                                content
+                              </Chip>
+                            )}
+                          {branch.contentWarnings &&
+                            branch.contentWarnings.length > 0 && (
+                              <Chip
+                                size="sm"
+                                variant="flat"
+                                color="warning"
+                                title={branch.contentWarnings.join(", ")}
+                              >
+                                ⚠️ Warnings
+                              </Chip>
+                            )}
+                        </div>
+                      </div>
+
+                      {/* Expanded comments section for this branch */}
+                      {expandedBranchComments === branch.nodeId && (
+                        <div
+                          className="mt-4 pt-4 border-t border-gray-700"
+                          onClick={(e) => e.stopPropagation()}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.stopPropagation();
+                            }
                           }}
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {(branch.ageRating || story.ageRating) && (
-                          <Chip
-                            size="sm"
-                            variant="flat"
-                            className="bg-[#F28C28] text-white px-3"
-                          >
-                            {(branch.ageRating || story.ageRating) ===
-                            "ADULT_18_PLUS"
-                              ? "18+"
-                              : String(
-                                  branch.ageRating || story.ageRating,
-                                ).replace(/_/g, "-")}
-                          </Chip>
-                        )}
-                        {branch.maxChildAgeRating &&
-                          branch.maxChildAgeRating !==
-                            (branch.ageRating || story.ageRating) && (
-                            <Chip
-                              size="sm"
-                              variant="flat"
-                              className="bg-red-600 text-white"
-                              title="Contains child branches with higher age rating"
-                            >
-                              ⚠️ Contains{" "}
-                              {branch.maxChildAgeRating.replace(/_/g, "-")}{" "}
-                              content
-                            </Chip>
-                          )}
-                        {branch.contentWarnings &&
-                          branch.contentWarnings.length > 0 && (
-                            <Chip
-                              size="sm"
-                              variant="flat"
-                              color="warning"
-                              title={branch.contentWarnings.join(", ")}
-                            >
-                              ⚠️ Warnings
-                            </Chip>
-                          )}
-                      </div>
+                          role="presentation"
+                        >
+                          <CommentSection
+                            storyId={storyId}
+                            nodeId={branch.nodeId}
+                            currentUserId={currentUserId}
+                          />
+                        </div>
+                      )}
                     </div>
+                  ))}
+                </div>
 
-                    {/* Expanded comments section for this branch */}
-                    {expandedBranchComments === branch.nodeId && (
-                      <div
-                        className="mt-4 pt-4 border-t border-gray-700"
-                        onClick={(e) => e.stopPropagation()}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.stopPropagation();
-                          }
-                        }}
-                        role="presentation"
-                      >
-                        <CommentSection
-                          storyId={storyId}
-                          nodeId={branch.nodeId}
-                          currentUserId={currentUserId}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Add Branch Button */}
-              <div className="pt-4 pb-2 border-t border-gray-700">
-                <AuthRequiredButton
-                  color="secondary"
-                  variant="flat"
-                  className="w-full"
-                  actionDescription="add a new branch to this story"
-                  onPress={() => {
-                    // TODO: Navigate to branch creation page
-                    console.log("Add branch clicked for node:", nodeId);
-                  }}
-                >
-                  + Add Your Own Branch
-                </AuthRequiredButton>
-              </div>
-            </AccordionItem>
-          </Accordion>
-        </div>
+                {/* Add Branch Button */}
+                <div className="pt-4 pb-2 border-t border-gray-700">
+                  <AuthRequiredButton
+                    color="secondary"
+                    variant="flat"
+                    className="w-full"
+                    actionDescription="add a new branch to this story"
+                    onPress={() => {
+                      // TODO: Navigate to branch creation page
+                      console.log("Add branch clicked for node:", nodeId);
+                    }}
+                  >
+                    + Add Your Own Branch
+                  </AuthRequiredButton>
+                </div>
+              </AccordionItem>
+            </Accordion>
+          </div>
         )
       ) : (
         <div className="bg-gray-900 border border-gray-700 p-8 mb-6 text-center">

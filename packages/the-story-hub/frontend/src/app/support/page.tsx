@@ -127,7 +127,10 @@ export default function SupportUsPage() {
           </h2>
           <ul className="space-y-3">
             {universalBenefits.map((benefit, i) => (
-              <li key={i} className="flex items-center justify-center text-gray-300">
+              <li
+                key={i}
+                className="flex items-center justify-center text-gray-300"
+              >
                 <span className="text-purple-400 mr-3 text-lg">✓</span>
                 <span className="text-lg">{benefit}</span>
               </li>

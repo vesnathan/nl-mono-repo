@@ -6,7 +6,13 @@ import Image from "next/image";
 import { StoriesGrid } from "@/components/stories/StoriesGrid";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
-import { useFeaturedStories, useTrendingStories, useFantasyStories, useSciFiStories, useMysteryStories } from "@/hooks/useStories";
+import {
+  useFeaturedStories,
+  useTrendingStories,
+  useFantasyStories,
+  useSciFiStories,
+  useMysteryStories,
+} from "@/hooks/useStories";
 
 import ParallaxGap from "@/components/layout/ParallaxGap";
 import ParallaxSection from "@/components/layout/ParallaxSection";

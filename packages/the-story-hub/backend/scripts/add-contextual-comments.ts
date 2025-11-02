@@ -1,9 +1,14 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  PutCommand,
+  ScanCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { v4 as uuidv4 } from "uuid";
 
 const REGION = process.env.AWS_REGION || "ap-southeast-2";
-const TABLE_NAME = process.env.TABLE_NAME || "nlmonorepo-thestoryhub-datatable-dev";
+const TABLE_NAME =
+  process.env.TABLE_NAME || "nlmonorepo-thestoryhub-datatable-dev";
 
 const client = new DynamoDBClient({ region: REGION });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -17,13 +22,15 @@ async function getUsers() {
       ExpressionAttributeValues: {
         ":pk": "USER#",
       },
-    })
+    }),
   );
 
-  return result.Items?.map(u => ({
-    userId: u.userId,
-    username: u.username,
-  })) || [];
+  return (
+    result.Items?.map((u) => ({
+      userId: u.userId,
+      username: u.username,
+    })) || []
+  );
 }
 
 // Transcendence story comments - contextual to the sci-fi theme
@@ -32,16 +39,27 @@ const transcendenceComments = [
     nodeId: "59ef2644-3f47-4709-9074-126f57999458", // Root node
     comments: [
       {
-        content: "The concept of a 4.4 billion year old message is absolutely mind-blowing. Hard sci-fi at its finest!",
+        content:
+          "The concept of a 4.4 billion year old message is absolutely mind-blowing. Hard sci-fi at its finest!",
         replies: [
-          { content: "Right? The zircon crystal detail shows real research went into this." },
-          { content: "I love that it's not aliens but Earth's FIRST civilization. That twist!" },
+          {
+            content:
+              "Right? The zircon crystal detail shows real research went into this.",
+          },
+          {
+            content:
+              "I love that it's not aliens but Earth's FIRST civilization. That twist!",
+          },
         ],
       },
       {
-        content: "Alice's internal conflict feels so real. Any scientist would be terrified and thrilled at the same time.",
+        content:
+          "Alice's internal conflict feels so real. Any scientist would be terrified and thrilled at the same time.",
         replies: [
-          { content: "The 'once she made this call, no turning back' moment gave me chills." },
+          {
+            content:
+              "The 'once she made this call, no turning back' moment gave me chills.",
+          },
         ],
       },
     ],
@@ -50,10 +68,16 @@ const transcendenceComments = [
     nodeId: "c9545626-c029-4aee-ad41-da4591a6f32e", // Consult Scientific Community
     comments: [
       {
-        content: "Smart choice! Scientific verification is crucial for something this monumental.",
+        content:
+          "Smart choice! Scientific verification is crucial for something this monumental.",
         replies: [
-          { content: "Agreed. One person can't handle a discovery that rewrites human history." },
-          { content: "Plus it protects her from accusations of fraud later on." },
+          {
+            content:
+              "Agreed. One person can't handle a discovery that rewrites human history.",
+          },
+          {
+            content: "Plus it protects her from accusations of fraud later on.",
+          },
         ],
       },
     ],
@@ -62,15 +86,23 @@ const transcendenceComments = [
     nodeId: "8b934c84-17bb-4d6f-bd25-c5df5bfb5c4f", // Decrypt Immediately
     comments: [
       {
-        content: "The quantum computing angle is perfect. This is what MIT's labs are actually working on!",
+        content:
+          "The quantum computing angle is perfect. This is what MIT's labs are actually working on!",
         replies: [
-          { content: "I know right? The technical accuracy makes it so immersive." },
+          {
+            content:
+              "I know right? The technical accuracy makes it so immersive.",
+          },
         ],
       },
       {
-        content: "Alice's urgency vs Marcus's caution creates great tension. Both have valid points.",
+        content:
+          "Alice's urgency vs Marcus's caution creates great tension. Both have valid points.",
         replies: [
-          { content: "That's what makes this choice so compelling - no obvious 'right' answer." },
+          {
+            content:
+              "That's what makes this choice so compelling - no obvious 'right' answer.",
+          },
         ],
       },
     ],
@@ -89,7 +121,9 @@ async function main() {
   const storyId = "7c7a2acf-e115-49b4-bf79-8915bd39c2cc"; // Transcendence
 
   for (const node of transcendenceComments) {
-    console.log(`📝 Adding comments for node ${node.nodeId.substring(0, 8)}...`);
+    console.log(
+      `📝 Adding comments for node ${node.nodeId.substring(0, 8)}...`,
+    );
 
     for (const commentData of node.comments) {
       // Create top-level comment
@@ -125,10 +159,12 @@ async function main() {
         new PutCommand({
           TableName: TABLE_NAME,
           Item: comment,
-        })
+        }),
       );
 
-      console.log(`  ✅ Created comment: "${commentData.content.substring(0, 50)}..."`);
+      console.log(
+        `  ✅ Created comment: "${commentData.content.substring(0, 50)}..."`,
+      );
 
       // Create replies
       for (const replyData of commentData.replies || []) {
@@ -164,7 +200,7 @@ async function main() {
           new PutCommand({
             TableName: TABLE_NAME,
             Item: reply,
-          })
+          }),
         );
 
         console.log(`    ↳ Reply: "${replyData.content.substring(0, 50)}..."`);

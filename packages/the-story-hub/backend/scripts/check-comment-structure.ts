@@ -18,7 +18,7 @@ async function checkComments() {
         ":pk": `STORY#${storyId}#NODE#${nodeId}`,
         ":sk": "COMMENT#",
       },
-    })
+    }),
   );
 
   console.log("Total comments on root node:", result.Items?.length);
@@ -28,17 +28,21 @@ async function checkComments() {
     console.log({
       commentId: item.commentId.substring(0, 8),
       depth: item.depth,
-      parentCommentId: item.parentCommentId ? item.parentCommentId.substring(0, 8) : "NULL",
+      parentCommentId: item.parentCommentId
+        ? item.parentCommentId.substring(0, 8)
+        : "NULL",
       topLevel,
       content: item.content.substring(0, 60) + "...",
     });
   });
 
   const topLevelCount = result.Items?.filter(
-    (item: any) => !item.parentCommentId || item.parentCommentId === null
+    (item: any) => !item.parentCommentId || item.parentCommentId === null,
   ).length;
   console.log(`\nTop-level comments: ${topLevelCount}`);
-  console.log(`Reply comments: ${(result.Items?.length || 0) - (topLevelCount || 0)}`);
+  console.log(
+    `Reply comments: ${(result.Items?.length || 0) - (topLevelCount || 0)}`,
+  );
 }
 
 checkComments().catch(console.error);

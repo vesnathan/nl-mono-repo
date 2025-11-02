@@ -39,7 +39,8 @@ export function response(ctx: CTX) {
   ctx.stash.userBadges = {
     patreonSupporter: user?.patreonSupporter ?? false,
     ogSupporter: user?.ogSupporter ?? false,
-    screenName: user?.userScreenName ?? (ctx.identity as AppSyncIdentityCognito).username,
+    screenName:
+      user?.userScreenName ?? (ctx.identity as AppSyncIdentityCognito).username,
   };
 
   console.log("User badges fetched:", ctx.stash.userBadges);

@@ -1,10 +1,15 @@
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  PutCommand,
+  QueryCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { v4 as uuidv4 } from "uuid";
 
 // Configuration
 const REGION = process.env.AWS_REGION || "ap-southeast-2";
-const TABLE_NAME = process.env.TABLE_NAME || "nlmonorepo-thestoryhub-datatable-dev";
+const TABLE_NAME =
+  process.env.TABLE_NAME || "nlmonorepo-thestoryhub-datatable-dev";
 
 // Initialize DynamoDB client
 const ddbClient = new DynamoDBClient({ region: REGION });
@@ -20,7 +25,7 @@ async function getAllStories() {
       ExpressionAttributeValues: {
         ":pk": "STORY",
       },
-    })
+    }),
   );
   return result.Items || [];
 }
@@ -35,7 +40,7 @@ async function getChaptersForStory(storyId: string) {
         ":pk": `STORY#${storyId}`,
         ":sk": "CHAPTER#",
       },
-    })
+    }),
   );
   return result.Items || [];
 }
@@ -49,7 +54,7 @@ async function getAllUsers() {
       ExpressionAttributeValues: {
         ":pk": { S: "USER#" },
       },
-    })
+    }),
   );
 
   const items = result.Items || [];
@@ -101,7 +106,7 @@ async function insertItem(item: any): Promise<void> {
     new PutCommand({
       TableName: TABLE_NAME,
       Item: item,
-    })
+    }),
   );
 }
 
@@ -154,7 +159,8 @@ async function addBranches() {
       const firstLevelBranches: any[] = [];
 
       for (let i = 0; i < firstLevelBranchCount; i++) {
-        const branchAuthor = otherUsers[Math.floor(Math.random() * otherUsers.length)];
+        const branchAuthor =
+          otherUsers[Math.floor(Math.random() * otherUsers.length)];
 
         const branchChapter = createBranchChapter(
           storyId,
@@ -181,7 +187,8 @@ async function addBranches() {
         const childBranchCount = Math.floor(Math.random() * 2) + 1;
 
         for (let j = 0; j < childBranchCount; j++) {
-          const branchAuthor = otherUsers[Math.floor(Math.random() * otherUsers.length)];
+          const branchAuthor =
+            otherUsers[Math.floor(Math.random() * otherUsers.length)];
 
           const branchChapter = createBranchChapter(
             storyId,
@@ -203,7 +210,8 @@ async function addBranches() {
       // Add 1 deeper nested branch to demonstrate tree depth
       if (childBranches.length > 0) {
         const parentBranch = childBranches[0];
-        const branchAuthor = otherUsers[Math.floor(Math.random() * otherUsers.length)];
+        const branchAuthor =
+          otherUsers[Math.floor(Math.random() * otherUsers.length)];
 
         const branchChapter = createBranchChapter(
           storyId,
