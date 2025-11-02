@@ -2,6 +2,7 @@ import { z } from "zod";
 
 // Comment Stats Schema
 export const CommentStatsSchema = z.object({
+  __typename: z.literal("CommentStats").optional(),
   upvotes: z.number().int().min(0).default(0),
   downvotes: z.number().int().min(0).default(0),
   replyCount: z.number().int().min(0).default(0),
@@ -14,21 +15,24 @@ export type CommentStats = z.infer<typeof CommentStatsSchema>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const CommentSchema: z.ZodType<any> = z.lazy(() =>
   z.object({
+    __typename: z.literal("Comment").optional(),
     commentId: z.string().uuid(),
     storyId: z.string().uuid(),
     nodeId: z.string().uuid(),
     authorId: z.string(),
     authorName: z.string(),
+    authorPatreonSupporter: z.boolean().nullable().optional().default(false),
+    authorOGSupporter: z.boolean().nullable().optional().default(false),
     content: z.string(),
     parentCommentId: z.string().uuid().nullable().optional(),
     depth: z.number().int().min(0).default(0),
-    createdAt: z.string().datetime(),
-    updatedAt: z.string().datetime(),
+    createdAt: z.string(), // Accept any datetime string format
+    updatedAt: z.string(), // Accept any datetime string format
     edited: z.boolean().default(false),
     deleted: z.boolean().optional().default(false),
     stats: CommentStatsSchema.optional(),
     replies: z.array(CommentSchema).optional(),
-    replyCount: z.number().int().min(0).optional(),
+    replyCount: z.number().int().min(0).nullable().optional(),
   }),
 );
 
@@ -36,6 +40,7 @@ export type Comment = z.infer<typeof CommentSchema>;
 
 // Comment Connection Schema
 export const CommentConnectionSchema = z.object({
+  __typename: z.literal("CommentConnection").optional(),
   items: z.array(CommentSchema),
   nextToken: z.string().nullable().optional(),
   total: z.number().int().min(0),

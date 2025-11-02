@@ -18,7 +18,10 @@ import { useState } from "react";
 import { StoryMetadataChips } from "@/components/stories/StoryMetadataChips";
 import { CommentSection } from "@/components/comments/CommentSection";
 import { useAuth } from "@/hooks/useAuth";
+import { AuthRequiredButton } from "@/components/auth/AuthRequiredButton";
 import { listCommentsAPI } from "@/lib/api/comments";
+import { PatreonBadge } from "@/components/common/PatreonBadge";
+import { OGBadge } from "@/components/common/OGBadge";
 
 // Component to display branch comment count
 function BranchCommentButton({
@@ -108,6 +111,15 @@ function ChapterSection({
         ).nodeId
       : null;
 
+  // Sort branches to put OP Approved first
+  const sortedBranches = branches
+    ? [...branches].sort((a, b) => {
+        if (a.badges?.matchesVision && !b.badges?.matchesVision) return -1;
+        if (!a.badges?.matchesVision && b.badges?.matchesVision) return 1;
+        return 0;
+      })
+    : [];
+
   const handleBranchSelect = (branchId: string) => {
     setSelectedBranchId(branchId);
     setIsAccordionOpen(false);
@@ -169,31 +181,158 @@ function ChapterSection({
       )}
 
       {/* Branch options in accordion OR Continue Story button */}
-      {branches && branches.length > 0 ? (
-        <div className="bg-gray-900 border border-gray-700 mb-6">
-          <Accordion
-            selectedKeys={isAccordionOpen ? ["branches"] : []}
-            onSelectionChange={(keys) => {
-              const keysArray = Array.from(keys);
-              const isOpening = keysArray.includes("branches");
-              setIsAccordionOpen(isOpening);
-              // Trigger branch fetching when accordion opens
-              if (isOpening && !shouldFetchBranches) {
-                setShouldFetchBranches(true);
-              }
-            }}
-          >
-            <AccordionItem
-              key="branches"
-              title={
-                <h2 className="text-2xl font-bold text-white">
-                  Choose Your Path
-                </h2>
-              }
-              className="px-8"
+      {sortedBranches && sortedBranches.length > 0 ? (
+        sortedBranches.length === 1 ? (
+          // Auto-display single branch without accordion
+          <div className="bg-gray-900 border border-gray-700 mb-6 p-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Continue Reading</h2>
+            <div className="space-y-3 pb-4">
+              {sortedBranches.map((branch) => (
+                <div
+                  key={branch.nodeId}
+                  onClick={() => handleBranchSelect(branch.nodeId)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleBranchSelect(branch.nodeId);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  className="bg-gray-800 border border-gray-700 p-4 hover:bg-gray-750 transition-colors cursor-pointer relative"
+                >
+                  {/* AI Badge - Top Right */}
+                  {branch.aiCreated && (
+                    <div className="absolute top-2 right-2">
+                      <Tooltip content="This branch was created with AI assistance">
+                        <span className="px-2 py-1 text-xs bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded font-semibold">
+                          🤖 AI
+                        </span>
+                      </Tooltip>
+                    </div>
+                  )}
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="text-lg font-semibold text-white">
+                      {branch.branchDescription ||
+                        `Chapter ${branch.chapterNumber}`}
+                    </h3>
+                    <div className="flex gap-2 flex-shrink-0">
+                      {branch.nodeId === communityFavouriteId &&
+                        (branch.stats?.upvotes || 0) > 0 && (
+                          <span
+                            className="px-2 py-1 text-xs bg-green-600 text-white rounded whitespace-nowrap"
+                            title="Most upvoted by the community"
+                          >
+                            ♥ Community Favourite
+                          </span>
+                        )}
+                      {branch.badges?.authorApproved && (
+                        <span
+                          className="px-2 py-1 text-xs bg-purple-600 text-white rounded whitespace-nowrap"
+                          title="Approved by original poster"
+                        >
+                          ✓ OP Approved
+                        </span>
+                      )}
+                      {branch.badges?.matchesVision && (
+                        <span
+                          className="px-2 py-1 text-xs bg-blue-600 text-white rounded whitespace-nowrap"
+                          title="Approved by original poster"
+                        >
+                          ★ OP Approved
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {branch.content && (
+                    <p className="text-gray-300 text-sm mb-3 line-clamp-2">
+                      {branch.content.substring(0, 150)}...
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-4 text-sm text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <span>👤 by {branch.authorName}</span>
+                        {branch.authorOGSupporter && <OGBadge size="sm" />}
+                        {branch.authorPatreonSupporter && <PatreonBadge size="sm" />}
+                      </div>
+                      <span>👍 {branch.stats?.upvotes || 0}</span>
+                      <span>👎 {branch.stats?.downvotes || 0}</span>
+                      <span>🌿 {branch.stats?.childBranches || 0}</span>
+                      <BranchCommentButton
+                        storyId={storyId}
+                        nodeId={branch.nodeId}
+                        isExpanded={expandedBranchComments === branch.nodeId}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedBranchComments(
+                            expandedBranchComments === branch.nodeId
+                              ? null
+                              : branch.nodeId,
+                          );
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Branch Comments Section */}
+                  {expandedBranchComments === branch.nodeId && (
+                    <div
+                      className="mt-4 pt-4 border-t border-gray-700"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <CommentSection
+                        storyId={storyId}
+                        nodeId={branch.nodeId}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Add Branch Button for single branch view */}
+            <div className="border-t border-gray-700 pt-4">
+              <AuthRequiredButton
+                color="secondary"
+                variant="flat"
+                className="w-full"
+                actionDescription="add a new branch to this story"
+                onPress={() => {
+                  // TODO: Navigate to branch creation page
+                  console.log("Add branch clicked for node:", nodeId);
+                }}
+              >
+                + Add Your Own Branch
+              </AuthRequiredButton>
+            </div>
+          </div>
+        ) : (
+          // Multiple branches - show in accordion
+          <div className="bg-gray-900 border border-gray-700 mb-6">
+            <Accordion
+              selectedKeys={isAccordionOpen ? ["branches"] : []}
+              onSelectionChange={(keys) => {
+                const keysArray = Array.from(keys);
+                const isOpening = keysArray.includes("branches");
+                setIsAccordionOpen(isOpening);
+                // Trigger branch fetching when accordion opens
+                if (isOpening && !shouldFetchBranches) {
+                  setShouldFetchBranches(true);
+                }
+              }}
             >
-              <div className="space-y-3 pb-4">
-                {branches.map((branch) => (
+              <AccordionItem
+                key="branches"
+                title={
+                  <h2 className="text-2xl font-bold text-white">
+                    Choose Your Path
+                  </h2>
+                }
+                className="px-8"
+              >
+                <div className="space-y-3 pb-4">
+                {sortedBranches.map((branch) => (
                   <div
                     key={branch.nodeId}
                     onClick={() => handleBranchSelect(branch.nodeId)}
@@ -243,9 +382,9 @@ function ChapterSection({
                         {branch.badges?.matchesVision && (
                           <span
                             className="px-2 py-1 text-xs bg-blue-600 text-white rounded whitespace-nowrap"
-                            title="Matches the story's vision"
+                            title="Approved by original poster"
                           >
-                            ★ Matches OP Vision
+                            ★ OP Approved
                           </span>
                         )}
                       </div>
@@ -257,7 +396,11 @@ function ChapterSection({
                     )}
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div className="flex items-center gap-4 text-sm text-gray-400">
-                        <span>👤 by {branch.authorName}</span>
+                        <div className="flex items-center gap-1">
+                          <span>👤 by {branch.authorName}</span>
+                          {branch.authorOGSupporter && <OGBadge size="sm" />}
+                          {branch.authorPatreonSupporter && <PatreonBadge size="sm" />}
+                        </div>
                         <span>👍 {branch.stats?.upvotes || 0}</span>
                         <span>👎 {branch.stats?.downvotes || 0}</span>
                         <span>🌿 {branch.stats?.childBranches || 0}</span>
@@ -340,9 +483,26 @@ function ChapterSection({
                   </div>
                 ))}
               </div>
+
+              {/* Add Branch Button */}
+              <div className="pt-4 pb-2 border-t border-gray-700">
+                <AuthRequiredButton
+                  color="secondary"
+                  variant="flat"
+                  className="w-full"
+                  actionDescription="add a new branch to this story"
+                  onPress={() => {
+                    // TODO: Navigate to branch creation page
+                    console.log("Add branch clicked for node:", nodeId);
+                  }}
+                >
+                  + Add Your Own Branch
+                </AuthRequiredButton>
+              </div>
             </AccordionItem>
           </Accordion>
         </div>
+        )
       ) : (
         <div className="bg-gray-900 border border-gray-700 p-8 mb-6 text-center">
           <h2 className="text-2xl font-bold text-white mb-4">
@@ -352,9 +512,18 @@ function ChapterSection({
             This story branch hasn't been continued yet. Be the first to write
             what happens next!
           </p>
-          <Button color="primary" size="lg" className="bg-brand-purple">
+          <AuthRequiredButton
+            color="primary"
+            size="lg"
+            className="bg-brand-purple"
+            actionDescription="continue this story"
+            onPress={() => {
+              // TODO: Navigate to branch creation page
+              console.log("Continue story clicked for node:", nodeId);
+            }}
+          >
             Continue the Story
-          </Button>
+          </AuthRequiredButton>
         </div>
       )}
 
@@ -444,9 +613,11 @@ export default function StoryDetailPage() {
                   {story.title}
                 </h1>
 
-                <p className="text-lg text-gray-400 mb-4">
-                  by {story.authorName}
-                </p>
+                <div className="flex items-center gap-2 text-lg text-gray-400 mb-4">
+                  <span>by {story.authorName}</span>
+                  {story.authorOGSupporter && <OGBadge size="sm" />}
+                  {story.authorPatreonSupporter && <PatreonBadge size="sm" />}
+                </div>
 
                 {/* Story metadata */}
                 <div className="flex flex-wrap gap-2 mb-4">

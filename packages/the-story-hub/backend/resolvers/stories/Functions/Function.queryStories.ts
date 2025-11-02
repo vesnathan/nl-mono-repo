@@ -40,7 +40,8 @@ export function response(ctx: CTX) {
     return util.error(ctx.error.message, ctx.error.type);
   }
 
-  const { items = [], nextToken } = ctx.result;
+  // TODO: Fix type - ctx.result should have proper DynamoDB result type
+  const { items = [], nextToken } = ctx.result as any;
 
   // Filter by genre/ageRating/featured if provided
   let filteredItems = items;
@@ -85,8 +86,9 @@ export function response(ctx: CTX) {
   console.log(`Queried ${mappedItems.length} stories`);
 
   // Store stories and nextToken in stash for next function
-  ctx.stash.stories = mappedItems;
-  ctx.stash.nextToken = nextToken;
+  // TODO: Fix type - ctx.stash should be properly typed
+  (ctx.stash as any).stories = mappedItems;
+  (ctx.stash as any).nextToken = nextToken;
 
   return mappedItems;
 }

@@ -57,13 +57,18 @@ extend type Mutation {
     @aws_cognito_user_pools
 }
 
-type CommentConnection {
+type CommentConnection
+  @aws_iam
+  @aws_cognito_user_pools
+{
   items: [Comment!]!
   nextToken: String
   total: Int
 }
 
-type DeleteCommentResponse {
+type DeleteCommentResponse
+  @aws_cognito_user_pools
+{
   success: Boolean!
   message: String
 }

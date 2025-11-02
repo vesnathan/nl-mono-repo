@@ -73,6 +73,7 @@ export function request(ctx: CTX) {
       stats: {
         totalBranches: 0,
         totalReads: 0,
+        totalComments: 0,
         rating: null,
       },
       featured: false,

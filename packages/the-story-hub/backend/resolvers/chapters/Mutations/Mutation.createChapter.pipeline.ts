@@ -10,7 +10,8 @@ export function request(ctx: CTX) {
 
 // After function - returns the created chapter
 export function response(ctx: CTX): ChapterNode {
-  const chapter = ctx.prev.result;
+  // TODO: Fix type - ctx.prev.result should be typed properly
+  const chapter = (ctx.prev as any).result;
 
   console.log(`Pipeline returning created chapter: ${chapter.nodeId}`);
 

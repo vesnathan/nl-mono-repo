@@ -10,8 +10,10 @@ export function request(ctx: CTX) {
 
 // After function - formats final response and adds missing fields
 export function response(ctx: CTX): StoryConnection {
-  const stories = ctx.prev.result || [];
-  const nextToken = ctx.stash.nextToken;
+  // TODO: Fix type - ctx.prev.result should be properly typed
+  const stories = (ctx.prev as any).result || [];
+  // TODO: Fix type - ctx.stash should be properly typed
+  const nextToken = (ctx.stash as any).nextToken;
 
   // Map rootNodeId to rootChapterId for frontend compatibility
   // Add authorName fallback for existing stories that don't have it

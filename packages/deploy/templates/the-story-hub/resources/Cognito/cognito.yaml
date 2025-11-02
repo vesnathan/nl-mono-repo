@@ -104,6 +104,10 @@ Resources:
                   - !Sub "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/*/types/Query/fields/getStoryTree"
                   - !Sub "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/*/types/Query/fields/getReadingPath"
                   - !Sub "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/*/types/Query/fields/getUserProfile"
+                  # Comment read queries
+                  - !Sub "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/*/types/Query/fields/listComments"
+                  - !Sub "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/*/types/Query/fields/getComment"
+                  - !Sub "arn:aws:appsync:${AWS::Region}:${AWS::AccountId}:apis/*/types/Query/fields/listReplies"
 
 Outputs:
   UserPoolId:

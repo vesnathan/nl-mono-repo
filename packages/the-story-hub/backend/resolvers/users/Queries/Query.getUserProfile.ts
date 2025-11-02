@@ -61,6 +61,7 @@ export function response(ctx: CTX): User | null {
     bio: item.bio,
     stats: item.stats,
     patreonSupporter: item.patreonSupporter || false,
+    ogSupporter: item.ogSupporter || false,
     clientType,
     createdAt: item.createdAt,
   };

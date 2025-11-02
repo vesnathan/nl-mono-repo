@@ -44,6 +44,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           name="description"
           content="Collaborative branching storytelling platform"
         />
+        <link rel="icon" href="/images/logo-small.png" />
       </head>
       <body>
         <QueryProvider>

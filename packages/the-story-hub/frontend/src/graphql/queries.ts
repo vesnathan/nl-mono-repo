@@ -105,6 +105,7 @@ export const getStory = /* GraphQL */ `query GetStory($storyId: ID!) {
     stats {
       totalBranches
       totalReads
+      totalComments
       rating
       __typename
     }
@@ -134,6 +135,7 @@ export const listStories =
       stats {
         totalBranches
         totalReads
+        totalComments
         rating
         __typename
       }

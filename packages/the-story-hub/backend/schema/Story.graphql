@@ -11,6 +11,7 @@ enum AgeRating {
 type StoryStats @aws_iam @aws_cognito_user_pools {
   totalBranches: Int!
   totalReads: Int!
+  totalComments: Int!
   rating: Float
 }
 
@@ -18,6 +19,8 @@ type Story @aws_iam @aws_cognito_user_pools {
   storyId: ID!
   authorId: String!
   authorName: String!
+  authorPatreonSupporter: Boolean  # Whether the author is a Patreon supporter
+  authorOGSupporter: Boolean  # Whether the author is an original/early supporter
   title: String!
   synopsis: String!
   genre: [String!]!

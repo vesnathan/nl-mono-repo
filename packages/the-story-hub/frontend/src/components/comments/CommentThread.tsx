@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Button, Avatar, Accordion, AccordionItem } from "@nextui-org/react";
 import { Comment } from "@/types/CommentSchemas";
 import { CommentForm } from "./CommentForm";
+import { PatreonBadge } from "@/components/common/PatreonBadge";
+import { OGBadge } from "@/components/common/OGBadge";
 
 interface CommentThreadProps {
   comment: Comment;
@@ -38,7 +40,7 @@ export function CommentThread({
 
   const isAuthor = currentUserId === comment.authorId;
   const isDeleted = comment.content === "[deleted]";
-  const hasReplies = (comment.stats?.replyCount || 0) > 0;
+  const hasReplies = (comment.replies?.length || 0) > 0;
 
   const handleReply = async (content: string) => {
     if (onReply) {
@@ -87,6 +89,8 @@ export function CommentThread({
               <span className="font-semibold text-white">
                 {comment.authorName}
               </span>
+              {comment.authorOGSupporter && <OGBadge size="sm" />}
+              {comment.authorPatreonSupporter && <PatreonBadge size="sm" />}
               <span className="text-xs text-gray-400">
                 {new Date(comment.createdAt).toLocaleDateString()}
               </span>
@@ -136,7 +140,7 @@ export function CommentThread({
                   <Button
                     size="sm"
                     variant="light"
-                    className="min-w-0 px-2"
+                    className="min-w-0 px-2 text-white"
                     onClick={() => handleVote("UPVOTE")}
                   >
                     👍 {comment.stats?.upvotes || 0}
@@ -144,7 +148,7 @@ export function CommentThread({
                   <Button
                     size="sm"
                     variant="light"
-                    className="min-w-0 px-2"
+                    className="min-w-0 px-2 text-white"
                     onClick={() => handleVote("DOWNVOTE")}
                   >
                     👎 {comment.stats?.downvotes || 0}
@@ -152,13 +156,16 @@ export function CommentThread({
                 </div>
 
                 {/* Reply button */}
-                <Button
-                  size="sm"
-                  variant="light"
-                  onClick={() => setIsReplying(!isReplying)}
-                >
-                  Reply
-                </Button>
+                {currentUserId && (
+                  <Button
+                    size="sm"
+                    variant="light"
+                    className="text-white"
+                    onClick={() => setIsReplying(!isReplying)}
+                  >
+                    Reply
+                  </Button>
+                )}
 
                 {/* Edit/Delete for author */}
                 {isAuthor && (
@@ -184,8 +191,8 @@ export function CommentThread({
                 {/* Reply count */}
                 {hasReplies && (
                   <span className="text-gray-400 text-xs">
-                    {comment.stats.replyCount}{" "}
-                    {comment.stats.replyCount === 1 ? "reply" : "replies"}
+                    {comment.replies.length}{" "}
+                    {comment.replies.length === 1 ? "reply" : "replies"}
                   </span>
                 )}
               </div>
@@ -214,8 +221,8 @@ export function CommentThread({
               key="replies"
               title={
                 <span className="text-sm text-gray-400">
-                  {showReplies ? "Hide" : "Show"} {comment.stats.replyCount}{" "}
-                  {comment.stats.replyCount === 1 ? "reply" : "replies"}
+                  {showReplies ? "Hide" : "Show"} {comment.replies.length}{" "}
+                  {comment.replies.length === 1 ? "reply" : "replies"}
                 </span>
               }
               onPress={() => setShowReplies(!showReplies)}
@@ -235,6 +242,19 @@ export function CommentThread({
                     currentUserId={currentUserId}
                   />
                 ))}
+
+                {/* Show "Load More Replies" if there are more than displayed */}
+                {comment.stats && comment.replies && comment.stats.totalReplyCount > comment.replies.length && (
+                  <div className="text-center pt-2">
+                    <Button
+                      size="sm"
+                      variant="light"
+                      className="text-gray-400 hover:text-white"
+                    >
+                      Load {comment.stats.totalReplyCount - comment.replies.length} more {comment.stats.totalReplyCount - comment.replies.length === 1 ? 'reply' : 'replies'}
+                    </Button>
+                  </div>
+                )}
               </div>
             </AccordionItem>
           </Accordion>

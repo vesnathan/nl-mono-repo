@@ -27,7 +27,8 @@ export function response(ctx: CTX): Story | null {
     return util.error(ctx.error.message, ctx.error.type);
   }
 
-  const item = ctx.result;
+  // TODO: Fix type - ctx.result should have proper DynamoDB result type
+  const item = ctx.result as any;
 
   if (!item) {
     return null;

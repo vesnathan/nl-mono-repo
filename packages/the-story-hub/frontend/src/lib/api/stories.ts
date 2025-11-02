@@ -7,12 +7,16 @@ import {
   getStoryTree,
   getReadingPath,
 } from "@/graphql/queries";
+import {
+  StorySchema,
+  StoryConnectionSchema,
+  type Story,
+  type StoryConnection,
+} from "@/types/StorySchemas";
 import type {
-  Story,
   CreateStoryInput,
   UpdateStoryInput,
   StoryFilter,
-  StoryConnection,
   TreeData,
   ChapterNode,
 } from "@/types/gqlTypes";
@@ -22,7 +26,9 @@ export async function createStoryAPI(input: CreateStoryInput): Promise<Story> {
     query: createStory,
     variables: { input },
   });
-  return result.data.createStory as unknown as Story;
+
+  // Validate response with Zod
+  return StorySchema.parse(result.data.createStory);
 }
 
 export async function updateStoryAPI(input: UpdateStoryInput): Promise<Story> {
@@ -30,7 +36,9 @@ export async function updateStoryAPI(input: UpdateStoryInput): Promise<Story> {
     query: updateStory,
     variables: { input },
   });
-  return result.data.updateStory as unknown as Story;
+
+  // Validate response with Zod
+  return StorySchema.parse(result.data.updateStory);
 }
 
 export async function getStoryAPI(storyId: string): Promise<Story | null> {
@@ -38,7 +46,13 @@ export async function getStoryAPI(storyId: string): Promise<Story | null> {
     query: getStory,
     variables: { storyId },
   });
-  return (result.data.getStory ?? null) as unknown as Story | null;
+
+  if (!result.data.getStory) {
+    return null;
+  }
+
+  // Validate response with Zod
+  return StorySchema.parse(result.data.getStory);
 }
 
 export async function listStoriesAPI(
@@ -50,7 +64,9 @@ export async function listStoriesAPI(
     query: listStories,
     variables: { filter, limit, nextToken },
   });
-  return result.data.listStories as unknown as StoryConnection;
+
+  // Validate response with Zod
+  return StoryConnectionSchema.parse(result.data.listStories);
 }
 
 export async function getStoryTreeAPI(

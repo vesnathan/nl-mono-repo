@@ -1,10 +1,21 @@
 "use client";
 
-import { Card, Chip, Button, Tooltip } from "@nextui-org/react";
+import {
+  Card,
+  Chip,
+  Button,
+  Tooltip,
+  Modal,
+  ModalContent,
+  ModalBody,
+  useDisclosure,
+} from "@nextui-org/react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import type { Story } from "@/types/gqlTypes";
 import { StoryMetadataChips } from "./StoryMetadataChips";
+import { PatreonBadge } from "@/components/common/PatreonBadge";
+import { OGBadge } from "@/components/common/OGBadge";
 
 interface StoryCardProps {
   story: Story;
@@ -12,6 +23,8 @@ interface StoryCardProps {
 }
 
 export function StoryCard({ story, index = 0 }: StoryCardProps) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -38,7 +51,11 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
 
           {/* Cover Image - Left Side */}
           {story.coverImageUrl && (
-            <div className="w-32 h-full flex-shrink-0 relative overflow-hidden">
+            <div
+              className="w-32 h-full flex-shrink-0 relative overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={onOpen}
+              title="Click to enlarge"
+            >
               <img
                 src={story.coverImageUrl}
                 alt={story.title}
@@ -54,13 +71,23 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
               <h3 className="text-lg font-bold line-clamp-2 text-white">
                 {story.title}
               </h3>
-              <p className="text-xs text-gray-400">by {story.authorName}</p>
+              <div className="flex items-center gap-1">
+                <p className="text-xs text-gray-400">by {story.authorName}</p>
+                {story.authorOGSupporter && <OGBadge size="sm" />}
+                {story.authorPatreonSupporter && <PatreonBadge size="sm" />}
+              </div>
             </div>
 
             {/* Synopsis */}
-            <p className="text-sm text-gray-300 line-clamp-2">
-              {story.synopsis}
-            </p>
+            <Tooltip
+              content={story.synopsis}
+              className="max-w-md"
+              closeDelay={100}
+            >
+              <p className="text-sm text-gray-300 line-clamp-2 cursor-help">
+                {story.synopsis}
+              </p>
+            </Tooltip>
 
             {/* Tags */}
             <div className="flex flex-wrap gap-1">
@@ -80,6 +107,7 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
               <div className="flex gap-3 text-xs text-gray-400">
                 <span>📖 {story.stats.totalReads}</span>
                 <span>🌿 {story.stats.totalBranches}</span>
+                <span>💬 {story.stats.totalComments}</span>
                 {story.stats.rating && (
                   <span>⭐ {story.stats.rating.toFixed(1)}</span>
                 )}
@@ -93,6 +121,29 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
           </div>
         </div>
       </Card>
+
+      {/* Image Modal */}
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        size="3xl"
+        classNames={{
+          base: "bg-black/90",
+          closeButton: "text-white hover:bg-white/20",
+        }}
+      >
+        <ModalContent>
+          <ModalBody className="p-0">
+            {story.coverImageUrl && (
+              <img
+                src={story.coverImageUrl}
+                alt={story.title}
+                className="w-full h-auto max-h-[80vh] object-contain"
+              />
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </motion.div>
   );
 }

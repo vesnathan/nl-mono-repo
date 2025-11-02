@@ -1,11 +1,16 @@
 # Comment type definition
 
-type Comment {
+type Comment
+  @aws_iam
+  @aws_cognito_user_pools
+{
   commentId: ID!
   storyId: ID!
   nodeId: ID!
   authorId: ID!
   authorName: String!
+  authorPatreonSupporter: Boolean  # Whether the author is a Patreon supporter
+  authorOGSupporter: Boolean  # Whether the author is an original/early supporter
   content: String!
   parentCommentId: ID  # null for top-level comments, set for replies
   depth: Int!  # 0 for top-level, 1 for first reply, 2 for reply to reply, etc.
@@ -19,7 +24,10 @@ type Comment {
   replyCount: Int  # Total count of direct replies
 }
 
-type CommentStats {
+type CommentStats
+  @aws_iam
+  @aws_cognito_user_pools
+{
   upvotes: Int!
   downvotes: Int!
   replyCount: Int!  # Direct reply count

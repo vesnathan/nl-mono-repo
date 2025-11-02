@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, Select, SelectItem } from "@nextui-org/react";
 import {
@@ -28,6 +28,8 @@ export function CommentSection({
     "NEWEST" | "OLDEST" | "MOST_UPVOTED" | "MOST_REPLIES"
   >("NEWEST");
   const [showCommentForm, setShowCommentForm] = useState(false);
+  const [allComments, setAllComments] = useState<any[]>([]);
+  const [nextToken, setNextToken] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   // Fetch top-level comments
@@ -35,12 +37,75 @@ export function CommentSection({
     data: commentsData,
     isLoading,
     error,
+    refetch,
   } = useQuery({
-    queryKey: ["comments", storyId, nodeId, sortBy],
-    queryFn: () => listCommentsAPI(storyId, nodeId, sortBy),
+    queryKey: ["comments", storyId, nodeId, sortBy, nextToken],
+    queryFn: () => listCommentsAPI(storyId, nodeId, sortBy, 20, nextToken || undefined),
     retry: 1, // Only retry once
     retryDelay: 1000,
   });
+
+  // Update allComments when new data arrives
+  useEffect(() => {
+    console.log("===== COMMENTS DATA UPDATE =====");
+    console.log("commentsData:", JSON.stringify(commentsData, null, 2));
+    console.log("nextToken:", nextToken);
+    console.log("allComments.length:", allComments.length);
+    console.log("commentsData?.items?.length:", commentsData?.items?.length);
+    console.log("commentsData?.total:", commentsData?.total);
+    console.log("commentsData?.nextToken:", commentsData?.nextToken);
+
+    if (commentsData?.items) {
+      console.log("Processing comments data...");
+
+      // Log each comment and its replies
+      commentsData.items.forEach((comment, idx) => {
+        console.log(`Comment ${idx}:`, {
+          commentId: comment.commentId,
+          content: comment.content?.substring(0, 50),
+          replyCount: comment.stats?.replyCount,
+          repliesLength: comment.replies?.length,
+          hasReplies: !!comment.replies,
+        });
+
+        if (comment.replies) {
+          comment.replies.forEach((reply, replyIdx) => {
+            console.log(`  Reply ${replyIdx}:`, {
+              commentId: reply.commentId,
+              content: reply.content?.substring(0, 50),
+              depth: reply.depth,
+              nestedRepliesLength: reply.replies?.length,
+            });
+          });
+        }
+      });
+
+      if (nextToken && allComments.length > 0) {
+        console.log("APPENDING new comments to existing list");
+        setAllComments(prev => [...prev, ...commentsData.items]);
+      } else {
+        console.log("REPLACING all comments with new data");
+        setAllComments(commentsData.items);
+      }
+    } else {
+      console.log("No commentsData.items to process");
+    }
+    console.log("================================\n");
+  }, [commentsData]);
+
+  // Reset when sort changes
+  const handleSortChange = (newSort: typeof sortBy) => {
+    setSortBy(newSort);
+    setNextToken(null);
+    setAllComments([]);
+  };
+
+  // Load more comments
+  const loadMoreComments = () => {
+    if (commentsData?.nextToken) {
+      setNextToken(commentsData.nextToken);
+    }
+  };
 
   // Create comment mutation
   const createCommentMutation = useMutation({
@@ -120,8 +185,8 @@ export function CommentSection({
     await voteMutation.mutateAsync({ commentId, voteType });
   };
 
-  // Show loading state
-  if (isLoading) {
+  // Show loading state (only on initial load)
+  if (isLoading && allComments.length === 0) {
     return (
       <div className="bg-gray-900 border border-gray-700 p-6 rounded-lg">
         <div className="text-center text-gray-400">Loading discussion...</div>
@@ -129,9 +194,18 @@ export function CommentSection({
     );
   }
 
-  // Show empty state even on error so users know comments exist
-  const comments = commentsData?.items || [];
+  // Use allComments for display
+  const comments = allComments;
   const hasError = !!error;
+  const hasMore = !!commentsData?.nextToken;
+
+  console.log("===== RENDER STATE =====");
+  console.log("Rendering with comments.length:", comments.length);
+  console.log("hasError:", hasError);
+  console.log("hasMore:", hasMore);
+  console.log("isLoading:", isLoading);
+  console.log("Total from API:", commentsData?.total);
+  console.log("========================\n");
 
   return (
     <div className="bg-gray-900 border border-gray-700 p-6 rounded-lg">
@@ -147,7 +221,7 @@ export function CommentSection({
             className="w-48"
             selectedKeys={[sortBy]}
             onChange={(e) =>
-              setSortBy(
+              handleSortChange(
                 e.target.value as
                   | "NEWEST"
                   | "OLDEST"
@@ -158,18 +232,21 @@ export function CommentSection({
             classNames={{
               trigger: "bg-gray-800 border-gray-700",
               value: "text-white",
+              label: "text-white",
+              popoverContent: "bg-gray-800",
+              listbox: "bg-gray-800",
             }}
           >
-            <SelectItem key="NEWEST" value="NEWEST">
+            <SelectItem key="NEWEST" value="NEWEST" className="text-white">
               Newest
             </SelectItem>
-            <SelectItem key="OLDEST" value="OLDEST">
+            <SelectItem key="OLDEST" value="OLDEST" className="text-white">
               Oldest
             </SelectItem>
-            <SelectItem key="MOST_UPVOTED" value="MOST_UPVOTED">
+            <SelectItem key="MOST_UPVOTED" value="MOST_UPVOTED" className="text-white">
               Most Upvoted
             </SelectItem>
-            <SelectItem key="MOST_REPLIES" value="MOST_REPLIES">
+            <SelectItem key="MOST_REPLIES" value="MOST_REPLIES" className="text-white">
               Most Replies
             </SelectItem>
           </Select>
@@ -215,21 +292,38 @@ export function CommentSection({
           No comments yet. Be the first to share your thoughts!
         </div>
       ) : !hasError ? (
-        <div className="space-y-4">
-          {comments.map((comment) => (
-            <CommentThread
-              key={comment.commentId}
-              comment={comment}
-              storyId={storyId}
-              nodeId={nodeId}
-              onReply={handleReply}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onVote={handleVote}
-              currentUserId={currentUserId}
-            />
-          ))}
-        </div>
+        <>
+          <div className="space-y-4">
+            {comments.map((comment) => (
+              <CommentThread
+                key={comment.commentId}
+                comment={comment}
+                storyId={storyId}
+                nodeId={nodeId}
+                onReply={handleReply}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onVote={handleVote}
+                currentUserId={currentUserId}
+              />
+            ))}
+          </div>
+
+          {/* Load More Button */}
+          {hasMore && (
+            <div className="mt-6 text-center">
+              <Button
+                color="primary"
+                variant="flat"
+                onClick={loadMoreComments}
+                isLoading={isLoading}
+                disabled={isLoading}
+              >
+                {isLoading ? "Loading..." : "Load Previous Comments"}
+              </Button>
+            </div>
+          )}
+        </>
       ) : null}
     </div>
   );

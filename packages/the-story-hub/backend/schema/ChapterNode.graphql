@@ -21,6 +21,8 @@ type ChapterNode @aws_iam @aws_cognito_user_pools {
   parentNodeId: ID
   authorId: String!
   authorName: String!
+  authorPatreonSupporter: Boolean  # Whether the author is a Patreon supporter
+  authorOGSupporter: Boolean  # Whether the author is an original/early supporter
   content: String!
   branchDescription: String
   paragraphIndex: Int

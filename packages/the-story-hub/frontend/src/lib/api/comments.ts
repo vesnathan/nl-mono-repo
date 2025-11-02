@@ -1,9 +1,11 @@
 import { client } from "@/lib/amplify";
 import {
-  Comment,
-  CommentConnection,
-  CommentSortBy,
-  CommentVoteType,
+  CommentSchema,
+  CommentConnectionSchema,
+  type Comment,
+  type CommentConnection,
+  type CommentSortBy,
+  type CommentVoteType,
 } from "@/types/CommentSchemas";
 
 // GraphQL Queries
@@ -28,13 +30,14 @@ const LIST_COMMENTS = /* GraphQL */ `
         nodeId
         authorId
         authorName
+        authorPatreonSupporter
+        authorOGSupporter
         content
         parentCommentId
         depth
         createdAt
         updatedAt
         edited
-        deleted
         stats {
           upvotes
           downvotes
@@ -42,6 +45,48 @@ const LIST_COMMENTS = /* GraphQL */ `
           totalReplyCount
         }
         replyCount
+        replies {
+          commentId
+          storyId
+          nodeId
+          authorId
+          authorName
+          authorPatreonSupporter
+          authorOGSupporter
+          content
+          parentCommentId
+          depth
+          createdAt
+          updatedAt
+          edited
+          stats {
+            upvotes
+            downvotes
+            replyCount
+            totalReplyCount
+          }
+          replies {
+            commentId
+            storyId
+            nodeId
+            authorId
+            authorName
+            authorPatreonSupporter
+            authorOGSupporter
+            content
+            parentCommentId
+            depth
+            createdAt
+            updatedAt
+            edited
+            stats {
+              upvotes
+              downvotes
+              replyCount
+              totalReplyCount
+            }
+          }
+        }
       }
       nextToken
       total
@@ -70,13 +115,14 @@ const LIST_REPLIES = /* GraphQL */ `
         nodeId
         authorId
         authorName
+        authorPatreonSupporter
+        authorOGSupporter
         content
         parentCommentId
         depth
         createdAt
         updatedAt
         edited
-        deleted
         stats {
           upvotes
           downvotes
@@ -108,13 +154,14 @@ const GET_COMMENT = /* GraphQL */ `
       nodeId
       authorId
       authorName
+      authorPatreonSupporter
+      authorOGSupporter
       content
       parentCommentId
       depth
       createdAt
       updatedAt
       edited
-      deleted
       stats {
         upvotes
         downvotes
@@ -140,6 +187,8 @@ const CREATE_COMMENT = /* GraphQL */ `
       nodeId
       authorId
       authorName
+      authorPatreonSupporter
+      authorOGSupporter
       content
       parentCommentId
       depth
@@ -160,9 +209,22 @@ const UPDATE_COMMENT = /* GraphQL */ `
   mutation UpdateComment($input: UpdateCommentInput!) {
     updateComment(input: $input) {
       commentId
+      storyId
+      nodeId
+      authorId
+      authorName
       content
+      parentCommentId
+      depth
+      createdAt
       updatedAt
       edited
+      stats {
+        upvotes
+        downvotes
+        replyCount
+        totalReplyCount
+      }
     }
   }
 `;
@@ -190,9 +252,21 @@ const VOTE_ON_COMMENT = /* GraphQL */ `
       voteType: $voteType
     ) {
       commentId
+      storyId
+      nodeId
+      authorId
+      authorName
+      content
+      parentCommentId
+      depth
+      createdAt
+      updatedAt
+      edited
       stats {
         upvotes
         downvotes
+        replyCount
+        totalReplyCount
       }
     }
   }
@@ -203,9 +277,18 @@ export async function listCommentsAPI(
   storyId: string,
   nodeId: string,
   sortBy?: CommentSortBy,
-  limit?: number,
+  limit: number = 20, // Default to 20 comments for better performance
   nextToken?: string,
 ): Promise<CommentConnection> {
+  console.log("===== API CALL: listCommentsAPI =====");
+  console.log("Request params:", {
+    storyId,
+    nodeId,
+    sortBy,
+    limit,
+    nextToken,
+  });
+
   const response = await client.graphql({
     query: LIST_COMMENTS,
     variables: {
@@ -215,10 +298,38 @@ export async function listCommentsAPI(
       limit,
       nextToken,
     },
-    authMode: "iam", // Use IAM for public access (unauthenticated users)
+    // No authMode specified - uses default (Cognito with guest access)
   });
 
-  return response.data.listComments as CommentConnection;
+  console.log("Response:", JSON.stringify(response.data.listComments, null, 2));
+  console.log("=====================================\n");
+
+  // Validate response with Zod
+  try {
+    const result = CommentConnectionSchema.parse(response.data.listComments);
+
+    // Calculate total using stats.totalReplyCount from backend
+    // Each top-level comment counts as 1, plus all its nested replies from stats
+    let totalActivity = 0;
+    for (const comment of result.items) {
+      totalActivity += 1; // Count the comment itself
+      if (comment.stats?.totalReplyCount) {
+        totalActivity += comment.stats.totalReplyCount; // Add all nested replies
+      }
+    }
+
+    console.log(`Calculated total activity (top-level + nested): ${totalActivity}`);
+
+    return {
+      ...result,
+      total: totalActivity, // Override with accurate count including all nested
+    };
+  } catch (error) {
+    console.error("===== ZOD VALIDATION ERROR =====");
+    console.error("Error:", error);
+    console.error("================================\n");
+    throw error;
+  }
 }
 
 export async function listRepliesAPI(
@@ -237,10 +348,11 @@ export async function listRepliesAPI(
       limit,
       nextToken,
     },
-    authMode: "iam", // Use IAM for public access (unauthenticated users)
+    // No authMode specified - uses default (Cognito with guest access)
   });
 
-  return response.data.listReplies as CommentConnection;
+  // Validate response with Zod
+  return CommentConnectionSchema.parse(response.data.listReplies);
 }
 
 export async function getCommentAPI(
@@ -257,10 +369,11 @@ export async function getCommentAPI(
       commentId,
       includeReplies,
     },
-    authMode: "iam", // Use IAM for public access (unauthenticated users)
+    // No authMode specified - uses default (Cognito with guest access)
   });
 
-  return response.data.getComment as Comment;
+  // Validate response with Zod
+  return CommentSchema.parse(response.data.getComment);
 }
 
 export async function createCommentAPI(
@@ -281,7 +394,8 @@ export async function createCommentAPI(
     },
   });
 
-  return response.data.createComment as Comment;
+  // Validate response with Zod
+  return CommentSchema.parse(response.data.createComment);
 }
 
 export async function updateCommentAPI(
@@ -302,7 +416,8 @@ export async function updateCommentAPI(
     },
   });
 
-  return response.data.updateComment as Comment;
+  // Validate response with Zod
+  return CommentSchema.parse(response.data.updateComment);
 }
 
 export async function deleteCommentAPI(
@@ -340,5 +455,6 @@ export async function voteOnCommentAPI(
     },
   });
 
-  return response.data.voteOnComment as Comment;
+  // Validate response with Zod
+  return CommentSchema.parse(response.data.voteOnComment);
 }

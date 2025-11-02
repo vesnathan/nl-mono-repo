@@ -53,15 +53,24 @@ export function request(ctx: CTX) {
       }),
     },
     filter: {
-      expression: "attribute_not_exists(parentCommentId)",
+      expression: "attribute_not_exists(parentCommentId) OR attribute_type(parentCommentId, :nullType)",
+      expressionValues: util.dynamodb.toMapValues({
+        ":nullType": "NULL",
+      }),
     },
     limit: maxLimit,
     scanIndexForward,
+    select: "ALL_ATTRIBUTES",
   };
 
   if (nextToken) {
     requestObj.nextToken = nextToken;
   }
+
+  // Store query params in stash for count query
+  // TODO: Fix type - ctx.stash should be properly typed
+  (ctx.stash as any).storyId = storyId;
+  (ctx.stash as any).nodeId = nodeId;
 
   return requestObj;
 }
@@ -72,12 +81,14 @@ export function response(ctx: CTX): CommentConnection {
     return util.error(ctx.error.message, ctx.error.type);
   }
 
-  const items = ctx.result.items || [];
-  console.log(`Found ${items.length} top-level comments`);
+  // TODO: Fix type - ctx.result should have proper DynamoDB result type
+  const result = ctx.result as any;
+  const items = result.items || [];
+  console.log(`Found ${items.length} top-level comments (page size)`);
 
   return {
     items: items,
-    nextToken: ctx.result.nextToken || null,
-    total: items.length,
+    nextToken: result.nextToken || null,
+    total: items.length, // Just return top-level count for now
   };
 }

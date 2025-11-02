@@ -35,3 +35,24 @@ export function useTrendingStories(limit: number = 8) {
     },
   });
 }
+
+export function useFantasyStories(limit: number = 8) {
+  return useQuery({
+    queryKey: ["stories", "fantasy", limit],
+    queryFn: () => listStoriesAPI({ genre: "Fantasy" }, limit),
+  });
+}
+
+export function useSciFiStories(limit: number = 8) {
+  return useQuery({
+    queryKey: ["stories", "scifi", limit],
+    queryFn: () => listStoriesAPI({ genre: "Sci-Fi" }, limit),
+  });
+}
+
+export function useMysteryStories(limit: number = 8) {
+  return useQuery({
+    queryKey: ["stories", "mystery", limit],
+    queryFn: () => listStoriesAPI({ genre: "Mystery" }, limit),
+  });
+}

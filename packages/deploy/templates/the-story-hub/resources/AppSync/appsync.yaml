@@ -478,6 +478,48 @@ Resources:
         RuntimeVersion: 1.0.0
       CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/comments/Mutations/Mutation.voteOnComment.js"
 
+  # Field resolver for nested replies
+  CommentRepliesResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      TypeName: Comment
+      FieldName: replies
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Kind: UNIT
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/comments/Fields/Comment.replies.js"
+
+  # Field resolver for Comment.authorPatreonSupporter
+  CommentAuthorPatreonSupporterResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      TypeName: Comment
+      FieldName: authorPatreonSupporter
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Kind: UNIT
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/comments/Fields/Comment.authorPatreonSupporter.js"
+
+  # Field resolver for Comment.authorOGSupporter
+  CommentAuthorOGSupporterResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      TypeName: Comment
+      FieldName: authorOGSupporter
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Kind: UNIT
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/comments/Fields/Comment.authorOGSupporter.js"
+
   # List Stories Pipeline Functions
   QueryStoriesFunction:
     Type: AWS::AppSync::FunctionConfiguration

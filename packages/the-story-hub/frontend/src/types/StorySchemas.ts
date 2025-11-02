@@ -1,14 +1,10 @@
 import { z } from "zod";
 import { STORY_GENRES } from "@tsh/backend/constants/Genres";
 import { CONTENT_WARNINGS } from "@tsh/backend/constants/ContentWarnings";
+import { AgeRating } from "./gqlTypes";
 
-// Import age ratings for validation
-const AGE_RATING_VALUES = [
-  "GENERAL",
-  "TEEN_13_PLUS",
-  "MATURE_16_PLUS",
-  "ADULT_18_PLUS",
-] as const;
+// Source of truth for age ratings is the GraphQL AgeRating enum
+const AGE_RATING_VALUES = Object.values(AgeRating);
 
 export const CreateStoryFormSchema = z.object({
   title: z
@@ -54,3 +50,46 @@ export const UpdateStoryFormSchema = z.object({
 });
 
 export type UpdateStoryFormData = z.infer<typeof UpdateStoryFormSchema>;
+
+// Response Schemas for API validation
+export const StoryStatsSchema = z.object({
+  __typename: z.literal("StoryStats").optional(),
+  totalBranches: z.number().int().min(0).default(0),
+  totalReads: z.number().int().min(0).default(0),
+  totalComments: z.number().int().min(0).default(0),
+  rating: z.number().min(0).max(5).nullable().optional(),
+});
+
+export type StoryStats = z.infer<typeof StoryStatsSchema>;
+
+export const StorySchema = z.object({
+  __typename: z.literal("Story").optional(),
+  storyId: z.string().uuid(),
+  authorId: z.string(),
+  authorName: z.string(),
+  authorPatreonSupporter: z.boolean().nullable().optional().default(false),
+  authorOGSupporter: z.boolean().nullable().optional().default(false),
+  title: z.string(),
+  synopsis: z.string(),
+  genre: z.array(z.string()),
+  ageRating: z.enum(AGE_RATING_VALUES), // Validate against GraphQL AgeRating enum
+  contentWarnings: z.array(z.string()),
+  ratingExplanation: z.string().nullable().optional(),
+  stats: StoryStatsSchema,
+  featured: z.boolean().default(false),
+  createdAt: z.string(), // Accept any datetime string
+  coverImageUrl: z.string().nullable().optional(),
+  rootChapterId: z.string().nullable().optional(), // Make UUID check optional
+  aiCreated: z.boolean().default(false),
+  allowAI: z.boolean().default(false),
+});
+
+export type Story = z.infer<typeof StorySchema>;
+
+export const StoryConnectionSchema = z.object({
+  __typename: z.literal("StoryConnection").optional(),
+  items: z.array(StorySchema),
+  nextToken: z.string().nullable().optional(),
+});
+
+export type StoryConnection = z.infer<typeof StoryConnectionSchema>;

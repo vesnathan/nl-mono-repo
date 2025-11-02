@@ -48,13 +48,15 @@ function getAdminUser() {
 // Simple seed data - test users and stories
 const SEED_DATA = {
   users: [
-    getAdminUser(),
+    { ...getAdminUser(), patreonSupporter: true, ogSupporter: true }, // Admin is OG supporter
     {
       firstName: "Bob",
       lastName: "User",
       email: "bob.user@example.com",
       title: "Mr",
       screenName: "CyberScribe",
+      patreonSupporter: true,
+      ogSupporter: true, // Bob is OG supporter
     },
     {
       firstName: "Charlie",
@@ -62,6 +64,8 @@ const SEED_DATA = {
       email: "charlie.smith@example.com",
       title: "Mr",
       screenName: "MysteryWriter",
+      patreonSupporter: true,
+      ogSupporter: false, // Charlie is Patreon but not OG
     },
     {
       firstName: "Diana",
@@ -69,6 +73,8 @@ const SEED_DATA = {
       email: "diana.jones@example.com",
       title: "Ms",
       screenName: "DragonQuill",
+      patreonSupporter: false,
+      ogSupporter: false, // Diana is regular user
     },
   ],
   stories: [
@@ -180,6 +186,33 @@ const SEED_DATA = {
         },
       ],
     },
+    {
+      title: "Transcendence",
+      synopsis:
+        "Dr. Alice Chen discovers an impossible code embedded in a 4.4-billion-year-old zircon crystal—a message from Earth's first technological civilization. They achieved immortality by merging into dark energy itself, but lost everything that made existence meaningful. Now they offer humanity a choice: salvation through their hard-won knowledge, or transcendence at the cost of our souls.",
+      genre: ["Sci-Fi", "Thriller"],
+      ageRating: "M",
+      contentWarnings: ["Violence"],
+      coverImage: "/images/covers/transcendence.png",
+      featured: true,
+      authorEmail: ADMIN_EMAIL,
+      rootChapterContent:
+        "The zircon crystal sat in its containment field like a fragment of frozen time, its red-brown surface catching the lab's fluorescent lights in ways that seemed almost alive. Dr. Alice Chen adjusted her electron microscope for the hundredth time, convinced she was seeing things.\n\nShe wasn't.\n\n\"Run the scan again,\" she said to her graduate student, Marcus. Her voice was steady, but her hands trembled slightly as she made notes. Twenty years of studying Earth's oldest materials, and she'd never seen anything like this.\n\n\"Dr. Chen,\" Marcus said carefully, \"the pattern's holding. Fourth scan, same results. The atomic arrangement in this section of the crystal... it's not natural.\"\n\nAlice knew. She'd known since the first scan, but confirmation was a different beast than suspicion. The Jack Hills zircon crystals were the oldest solid materials ever found on Earth—4.4 billion years old, formed when the planet was still molten and barely cooling. They were geological time capsules, windows into an Earth that existed before oceans, before atmosphere, before life.\n\nThey shouldn't contain patterns.\n\n\"It's a code,\" Alice said quietly. She looked up at Marcus, saw her own mixture of wonder and terror reflected in his face. \"Someone encoded information into this crystal. At the atomic level. Four billion years ago.\"\n\n\"That's impossible,\" Marcus whispered. \"Earth was barely habitable four billion years ago. No atmosphere to speak of, constant volcanic activity, meteor bombardment—\"\n\n\"And yet.\" Alice gestured to the screen where the pattern glowed in false color. It was elegant, precise, mathematical. \"We need to decrypt it.\"\n\n\"Dr. Chen, we should publish this first. Verify with other labs. This is—\"\n\n\"Too important to risk someone else publishing first?\" Alice smiled without humor. \"No, Marcus. This is too important to announce before we understand what it says. Because if we're right, if this really is a message... then we're not the first intelligent life on this planet. We're the second.\"\n\nShe reached for her phone, then hesitated. Once she made this call, once she brought in the quantum computing team, there would be no turning back. Her career, her reputation, everything she'd built would hinge on what they found in that crystal.\n\nOutside the lab window, the sun was setting over the Western Australian desert, painting the ancient hills gold and crimson. Hills that had watched the Earth cool and solidify, that had seen the first rains fall, the first oceans form.\n\nHills that had kept a secret for four billion years.\n\nAlice made the call.",
+      branches: [
+        {
+          description: "Decrypt Immediately",
+          content: "Three days later, Alice stood in the quantum computing facility at MIT, watching lines of code scroll across displays that cost more than her entire research budget. Dr. Sarah Kim, the quantum physicist she'd recruited, looked exhausted but exhilarated.\n\n\"The pattern's not just a code,\" Sarah explained, gesturing at the holographic display. \"It's a quantum key. Whoever wrote this knew that only a civilization with quantum computing capability could read it. It's a filter. A test.\"\n\n\"A test for what?\"\n\n\"For technological maturity. For being ready.\" Sarah's hands flew across the interface. \"I think I've got the decryption algorithm. Alice, are you sure you want to do this?\"\n\nAlice thought about the warnings from her colleagues. The career suicide of pursuing something so wild. The skepticism she'd face if this turned out to be nothing. And she thought about the pattern in the crystal, perfect and precise and utterly impossible.\n\n\"Do it.\"\n\nThe quantum computer hummed. Data streamed across the screens faster than Alice could process. And then, suddenly, it stopped. A single message appeared, rendered in a mathematical language that transcended words:\n\n'HELLO, CHILDREN OF THE SECOND EARTH. WE HAVE BEEN WAITING.'\n\nThe lab went dark. Not just the lights—everything. Every electronic device, every computer, every screen. Then they came back on, but different. Changed. Every display showed the same thing: complex equations, scientific diagrams, data Alice didn't recognize but somehow felt was fundamentally important.\n\nSarah stared at her quantum computer's output. \"Alice,\" she whispered. \"It's communicating. Not just through the crystal—through the universe itself. Through dark energy fluctuations. It's everywhere. It's been everywhere. And we just... woke it up.\"",
+        },
+        {
+          description: "Consult the Scientific Community",
+          content: "Alice presented her findings at a closed session during the International Geological Congress in Paris. She'd invited only the most respected names in archaeology, geology, and physics. People whose word carried weight. People who could either validate her discovery or destroy her career with a single dismissive comment.\n\nThe presentation took two hours. She showed them the scans, the mathematical analysis, the probability calculations that ruled out natural formation. When she finished, the room was silent.\n\nDr. James Morrison, Nobel laureate in physics, was the first to speak. \"Dr. Chen, you're asking us to believe that an advanced civilization existed on Earth four billion years ago. Before single-celled life. Before the oceans fully formed. Where's the rest of the evidence? The cities, the technology, the artifacts?\"\n\n\"Gone,\" Alice said. \"Four billion years of plate tectonics, erosion, geological recycling. Earth's surface has been completely replaced dozens of times over. These zircons are the only thing old enough to survive because they're nearly indestructible. They're the only evidence because they're the only thing that could be evidence.\"\n\n\"Convenient,\" someone muttered.\n\nBut Dr. Yuki Tanaka, the quantum information theorist, leaned forward. \"May I see the pattern again?\" She studied the display, her expression growing more troubled. \"Dr. Chen, have you attempted to decrypt this?\"\n\n\"Not yet. I wanted verification first.\"\n\n\"Don't.\" Tanaka's voice was sharp. \"Not until we understand what we're dealing with. This pattern—it's not just information storage. It's a quantum state. Observing it, measuring it, decrypting it... that could collapse it into a specific state. Change it. Or activate it.\"\n\nThe room erupted in argument. Some scientists demanded Alice hand over the crystal for independent study. Others wanted the research shut down entirely. And in the chaos, Alice's phone buzzed.\n\nIt was a text from Marcus, still back at the lab: \"Dr. Chen, the crystal is glowing. I didn't touch anything. It just started glowing. What do I do?\"\n\nAlice looked up at the arguing scientists, then back at her phone. The crystal was thousands of miles away. There was no way it could respond to what was happening here.\n\nUnless it was quantum-entangled with something. Observing this discussion. Listening.\n\nAnother text: \"It's getting brighter. The containment field is fluctuating. Should I evacuate?\"\n\nAlice stood. \"I have to go. Now.\"",
+        },
+        {
+          description: "Keep It Secret",
+          content: "Alice made a decision that went against every instinct she'd developed as a scientist. She told no one. Not her university. Not her colleagues. Not even Marcus—she sent him home and worked alone in the lab, studying the crystal and its impossible pattern in isolation.\n\nFor three weeks, she documented everything. Ran every test she could think of. Tried to find a natural explanation, any explanation, that didn't require rewriting human understanding of Earth's history.\n\nThere was none.\n\nOn the twenty-second day, she received a visitor. The man didn't give his name, just showed her credentials that identified him as working for a government agency she'd never heard of. He wore a bland suit and had the kind of face you'd forget five minutes after seeing it.\n\n\"Dr. Chen,\" he said pleasantly, settling into the chair across from her desk. \"We've been monitoring unusual quantum fluctuations emanating from this facility for the past two weeks. They match a signature we've been tracking for seven years across multiple research institutions worldwide.\"\n\nAlice's mouth went dry. \"I don't know what you're talking about.\"\n\n\"The zircon crystal from Jack Hills. The code. We know about it, Dr. Chen. We've always known. The question is: what are you planning to do with that knowledge?\"\n\n\"How long?\" Alice demanded. \"How long have you known?\"\n\nThe man smiled without warmth. \"We didn't know. We suspected. Four other research teams have found similar patterns in ancient materials over the past decade. All were quietly discouraged from publishing. All eventually stopped their research.\" He leaned forward. \"You're the first who kept digging. The first who got close to decryption. And that makes you very dangerous.\"\n\nHe stood, straightening his jacket. \"You have a choice, Dr. Chen. Abandon this research, accept a generous grant for other work, and live a long, successful career. Or continue, and force us to take more... permanent measures.\"\n\nAfter he left, Alice sat alone in her lab, staring at the crystal. It seemed to pulse with an inner light that couldn't possibly be real.\n\nHer phone buzzed. A text from an unknown number: 'Don't let them silence this. Humanity deserves to know. We can help you. Check your email.'\n\nThe email contained encryption codes and instructions for a dark web communication channel. And a name: The Prometheus Initiative.\n\nAlice had a choice to make. And she had perhaps an hour to make it.",
+        },
+      ],
+    },
   ],
 };
 
@@ -197,6 +230,8 @@ interface TSHUserDB {
   termsAndConditions: boolean;
   userAddedById: string;
   userCreated: string;
+  patreonSupporter: boolean;
+  ogSupporter: boolean;
   GSI1PK?: string;
   GSI1SK?: string;
 }
@@ -237,6 +272,8 @@ function createUser(superAdminUserId: string, userData: any): TSHUserDB {
     termsAndConditions: true,
     userAddedById: superAdminUserId,
     userCreated: new Date().toISOString(),
+    patreonSupporter: userData.patreonSupporter ?? false,
+    ogSupporter: userData.ogSupporter ?? false,
     GSI1PK: `USER#${userId}`,
     GSI1SK: `USER#${userId}`,
   };
@@ -295,6 +332,7 @@ function createStory(authorId: string, authorScreenName: string, storyData: any)
     stats: {
       totalReads: Math.floor(Math.random() * 1000) + 50,
       totalBranches: 0,
+      totalComments: 0,
       totalChapters: 1,
       rating: 4.5, // Rename from averageRating to match schema
       ratingCount: Math.floor(Math.random() * 50) + 10,
@@ -417,6 +455,180 @@ function createComment(
       totalReplyCount: 0,
     },
   };
+}
+
+// Generate contextual comments based on branch content
+function generateContextualComments(content: string, description: string = ""): {
+  topLevel: string[];
+  replies: string[];
+  deepReplies: string[];
+} {
+  const lowerContent = content.toLowerCase();
+  const lowerDesc = description.toLowerCase();
+
+  // Extract key themes from the content - Fantasy (Enchanted Forest)
+  const hasDryad = lowerContent.includes("dryad");
+  const hasOak = lowerContent.includes("oak") || lowerDesc.includes("oak");
+  const hasShadows = lowerContent.includes("shadow") || lowerDesc.includes("shadow");
+  const hasFox = lowerContent.includes("fox");
+  const hasLostCity = lowerContent.includes("lost city");
+  const hasMemories = lowerContent.includes("memor");
+  const hasSinging = lowerContent.includes("sing");
+  const hasPath = lowerContent.includes("path");
+  const hasWild = lowerContent.includes("wild") || lowerContent.includes("untamed");
+
+  // Cyberpunk (Cyber Nexus)
+  const hasCyber = lowerContent.includes("cyber") || lowerContent.includes("net") || lowerContent.includes("digital");
+  const hasAI = lowerContent.includes(" ai ") || lowerContent.includes("artificial intelligence");
+  const hasUpload = lowerContent.includes("upload") || lowerContent.includes("consciousness");
+  const hasCorporate = lowerContent.includes("corporate") || lowerContent.includes("megacorp");
+
+  // Mystery (Blackwood Manor)
+  const hasMurder = lowerContent.includes("murder") || lowerContent.includes("death") || lowerContent.includes("body");
+  const hasClue = lowerContent.includes("clue") || lowerContent.includes("evidence") || lowerContent.includes("suspect");
+  const hasManor = lowerContent.includes("manor") || lowerContent.includes("blackwood") || lowerContent.includes("estate");
+  const hasInvestigation = lowerContent.includes("investigat") || lowerContent.includes("detective") || lowerContent.includes("alibi");
+
+  // Romance (Love in the Time of Dragons)
+  const hasDragon = lowerContent.includes("dragon") || lowerContent.includes("shapeshifter");
+  const hasRomance = lowerContent.includes("love") || lowerContent.includes("heart") || lowerContent.includes("kiss");
+  const hasBaker = lowerContent.includes("baker") || lowerContent.includes("bread") || lowerContent.includes("pastry");
+  const hasMagic = lowerContent.includes("magic") || lowerContent.includes("spell");
+
+  // Sci-Fi (Transcendence)
+  const hasTranscend = lowerContent.includes("transcend") || lowerContent.includes("immortal");
+  const hasQuantum = lowerContent.includes("quantum") || lowerContent.includes("physics");
+  const hasCrystal = lowerContent.includes("crystal") || lowerContent.includes("zircon");
+  const hasScientist = lowerContent.includes("alice") || lowerContent.includes("chen") || lowerContent.includes("scientist");
+
+  const topLevel: string[] = [];
+  const replies: string[] = [];
+  const deepReplies: string[] = [];
+
+  // Generate contextual top-level comments - Fantasy
+  if (hasDryad || hasSinging) {
+    topLevel.push("The Dryad's introduction is haunting! I love how mysterious and otherworldly she feels.");
+    topLevel.push("That singing description gave me chills. You really captured the inhuman beauty of it.");
+    replies.push("Right? The black water detail adds such an eerie atmosphere.");
+    replies.push("I agree! The 'daughter of the Academy' line has me so curious about Elara's background.");
+    deepReplies.push("Same! I'm wondering what the Dryad knows that Elara doesn't.");
+  } else if (hasOak || hasMemories) {
+    topLevel.push("Wow, the tree consciousness concept is incredible! I love how you described the merging of identities.");
+    topLevel.push("The symbols growing from inside the tree is such a creative detail. Great world-building!");
+    replies.push("Yes! The 'Guardian's daughter' reveal is a perfect hook. I need to know more!");
+    replies.push("The way memories flood through her... beautifully written. I could feel the disorientation.");
+    deepReplies.push("Exactly! And the fact she doesn't remember why - that's the real mystery here.");
+  } else if (hasFox || hasLostCity || hasWild) {
+    topLevel.push("A talking fox! I wasn't expecting that but I love it. The personality comes through so well.");
+    topLevel.push("The Lost City reveal is amazing! Going off the beaten path really paid off for Elara.");
+    replies.push("I know right? 'Most people die trying that route' - such a casual flex from the fox!");
+    replies.push("The floating temple ruins are such a cool visual. I can picture it perfectly.");
+    deepReplies.push("The fox is definitely going to be a fan favorite character. Such wit!");
+  } else if (hasShadows || hasPath) {
+    topLevel.push("The atmosphere here is perfect - that transition from light to shadow is beautifully done.");
+    topLevel.push("Love the description of the living tunnel formed by the branches. So immersive!");
+    replies.push("The luminescent leaves casting everything in silver and green - gorgeous imagery.");
+    replies.push("I'm hooked by that mysterious singing. Can't wait to see where this leads.");
+    deepReplies.push("The pacing is just right too. Building tension without rushing.");
+  }
+  // Cyberpunk comments
+  else if (hasCyber || hasAI) {
+    topLevel.push("The digital consciousness concept is fascinating! Love how you're exploring what it means to be human in a virtual world.");
+    topLevel.push("The description of the neural interface connection gave me chills. So visceral and immediate.");
+    replies.push("Right? The way sensory data floods in - that's exactly how it would feel!");
+    replies.push("The ethical implications here are huge. Can a digital copy truly be 'you'?");
+    deepReplies.push("That's the core question, isn't it? Identity and continuity of consciousness.");
+  } else if (hasUpload || hasCorporate) {
+    topLevel.push("The corporate dystopia vibes are perfect. You can feel the megacorp's control over every aspect of life.");
+    topLevel.push("Uploading consciousness as a product... that's both brilliant and terrifying world-building.");
+    replies.push("The fact they can revoke your immortality if you don't pay - that's such a dark twist.");
+    replies.push("I love how the tech is presented as salvation but it's really just another form of control.");
+    deepReplies.push("Cyberpunk at its best - cool tech masking disturbing social commentary.");
+  }
+  // Mystery comments
+  else if (hasMurder || hasClue) {
+    topLevel.push("The body discovery scene is perfectly paced. Just enough detail to be chilling without being gratuitous.");
+    topLevel.push("That clue about the muddy footprints - brilliant red herring or genuine evidence? I can't tell!");
+    replies.push("I'm leaning toward red herring. The timing doesn't quite add up with the doctor's testimony.");
+    replies.push("But what about the missing key? That has to connect somehow!");
+    deepReplies.push("Unless the key WAS returned... and the killer is trying to make us think it wasn't.");
+  } else if (hasManor || hasInvestigation) {
+    topLevel.push("The atmosphere in Blackwood Manor is oppressive. Those descriptions of the portraits watching you - *chef's kiss*");
+    topLevel.push("Love how you're dropping clues without making them obvious. The inheritance angle is suspicious.");
+    replies.push("Right? And the way the sister reacted when asked about the will... definitely hiding something.");
+    replies.push("The butler's alibi is too convenient. Nobody has THAT perfect a timeline memorized.");
+    deepReplies.push("Classic mystery misdirection - the most suspicious person is usually innocent. But which one?");
+  }
+  // Romance comments
+  else if (hasDragon || hasRomance) {
+    topLevel.push("A dragon who shapeshifts into human form to buy pastries? That's adorably wholesome!");
+    topLevel.push("The romantic tension here is perfect. You can feel the connection building naturally.");
+    replies.push("I know! The way they keep finding excuses to talk... my heart can't take it.");
+    replies.push("But what happens when she finds out he's a dragon? That's going to be SUCH a good scene.");
+    deepReplies.push("The eventual reveal is going to be epic. I hope she's more intrigued than terrified!");
+  } else if (hasBaker || hasMagic) {
+    topLevel.push("The magical baking is such a creative twist! Love that her pastries literally have enchantments baked in.");
+    topLevel.push("The description of bread that tastes like childhood memories - that's beautiful and slightly heartbreaking.");
+    replies.push("Yes! Using food as a medium for magic is brilliant. It's intimate and personal.");
+    replies.push("I wonder if that's how she'll eventually win him over? Through his stomach AND his heart?");
+    deepReplies.push("The way to a dragon's heart is definitely through magically enhanced cinnamon rolls!");
+  }
+  // Sci-Fi (Transcendence) comments
+  else if (hasTranscend || hasQuantum) {
+    topLevel.push("The quantum immortality theory here is mind-bending! Love the hard sci-fi approach.");
+    topLevel.push("The way you explain the physics without info-dumping is masterful. I'm learning AND entertained.");
+    replies.push("Right? The concept that consciousness might naturally quantum tunnel to surviving timelines...");
+    replies.push("This is the kind of sci-fi that makes you question reality. In the best way.");
+    deepReplies.push("If this is true, every version of us that could survive does survive. That's both comforting and terrifying.");
+  } else if (hasCrystal || hasScientist) {
+    topLevel.push("A 4.4 billion year old message in zircon crystals? That's HARD sci-fi perfection!");
+    topLevel.push("Dr. Chen's character is so well-written. You can feel her excitement and fear in equal measure.");
+    replies.push("The implications of a previous civilization on Earth are staggering. What happened to them?");
+    replies.push("I love that it's not aliens - it's US. Or what came before us. That's a brilliant twist.");
+    deepReplies.push("The question isn't just 'how did they achieve immortality' but 'what went wrong that we forgot?'");
+  }
+  else {
+    // Varied fallbacks with unique perspectives
+    const fallbacks = [
+      {
+        topLevel: ["The pacing in this section is perfect. Each sentence builds on the last.", "I had to reread this twice - there's so much packed into these paragraphs!"],
+        replies: ["I noticed that too! The way tension builds without feeling rushed.", "Same here. Every word earns its place."],
+        deepReplies: ["It's that attention to detail that sets this apart from other collaborative stories."]
+      },
+      {
+        topLevel: ["The character voice here is incredibly strong. You can really feel the personality.", "This dialogue feels so natural - like overhearing a real conversation."],
+        replies: ["Yes! The subtext underneath what's being said is brilliant.", "Agreed. The character motivations are crystal clear without being spelled out."],
+        deepReplies: ["That's what makes interactive fiction work - when readers connect with the characters."]
+      },
+      {
+        topLevel: ["I love how this choice opens up so many possibilities for the story!", "Interesting direction! I didn't see this coming but it makes perfect sense."],
+        replies: ["Right? It's unexpected but totally earned by what came before.", "This is why branching narratives are so exciting - genuine surprise moments."],
+        deepReplies: ["Can't wait to see where the other branches go from here!"]
+      },
+      {
+        topLevel: ["The world-building details here are exceptional. I can picture every element.", "Love how you wove in backstory without info-dumping. So smooth!"],
+        replies: ["The environmental storytelling is top-tier. You can tell thought went into this.", "Exactly - show don't tell done right."],
+        deepReplies: ["This is the kind of writing that makes me want to contribute a branch myself!"]
+      }
+    ];
+
+    const set = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+    topLevel.push(...set.topLevel);
+    replies.push(...set.replies);
+    deepReplies.push(...set.deepReplies);
+  }
+
+  // Add some variety to replies
+  if (replies.length < 2) {
+    replies.push("Well said! I noticed that too on my second read-through.");
+    replies.push("That's what I love about this story - every detail matters.");
+  }
+
+  if (deepReplies.length === 0) {
+    deepReplies.push("Thanks! Great minds think alike!");
+  }
+
+  return { topLevel, replies, deepReplies };
 }
 
 // Insert item
@@ -630,49 +842,67 @@ async function seedDatabase() {
       }
 
       // Add comments to chapters - MINIMAL and FAST
-      console.log(`  💬 Generating comments for chapters...`);
+      console.log(`  💬 Generating contextual comments for chapters...`);
       const allUsers = Array.from(userIdMap.entries());
       const allComments: any[] = [];
 
+      // Build a map of nodeIds to their chapter content/description for contextual comments
+      const nodeContentMap = new Map<string, { content: string; description?: string }>();
+      nodeContentMap.set(rootNodeId, { content: storyData.rootChapterContent });
+
+      // Map first-level branches
+      if (storyData.branches) {
+        storyData.branches.forEach((branch, idx) => {
+          if (idx < chapterNodeIds.length - 1) {
+            nodeContentMap.set(chapterNodeIds[idx + 1], {
+              content: branch.content,
+              description: branch.description
+            });
+          }
+        });
+      }
+
       for (const nodeId of chapterNodeIds) {
-        // Add 2-3 top-level comments per chapter
-        const numTopLevelComments = Math.floor(Math.random() * 2) + 2; // 2-3 comments
+        const nodeInfo = nodeContentMap.get(nodeId);
+        const content = nodeInfo?.content || "";
+        const description = nodeInfo?.description || "";
+
+        // Generate contextual comments based on the branch content
+        const contextualComments = generateContextualComments(content, description);
+
+        // Ensure at least one comment with at least one reply per branch
+        const numTopLevelComments = Math.max(1, Math.floor(Math.random() * 2) + 1); // 1-2 comments minimum
 
         for (let i = 0; i < numTopLevelComments; i++) {
           const [email, userId] = allUsers[Math.floor(Math.random() * allUsers.length)];
           const screenName = userScreenNameMap.get(email) || "Anonymous";
 
-          const commentTexts = [
-            "Great chapter!",
-            "Love this direction!",
-            "Well written!",
-            "Can't wait for more!",
-          ];
-
+          const commentText = contextualComments.topLevel[i % contextualComments.topLevel.length];
           const comment = createComment(
             storyId,
             nodeId,
             userId,
             screenName,
-            commentTexts[Math.floor(Math.random() * commentTexts.length)],
+            commentText,
           );
 
           allComments.push(comment);
           commentCount++;
 
-          // Add 1-2 replies to this comment
-          const numReplies = Math.floor(Math.random() * 2) + 1; // 1-2 replies
+          // Ensure at least 1 reply per comment (can be up to 2)
+          const numReplies = Math.max(1, Math.floor(Math.random() * 2) + 1); // 1-2 replies, minimum 1
 
           for (let j = 0; j < numReplies; j++) {
             const [replyEmail, replyUserId] = allUsers[Math.floor(Math.random() * allUsers.length)];
             const replyScreenName = userScreenNameMap.get(replyEmail) || "Anonymous";
 
+            const replyText = contextualComments.replies[j % contextualComments.replies.length];
             const reply = createComment(
               storyId,
               nodeId,
               replyUserId,
               replyScreenName,
-              "I agree!",
+              replyText,
               comment.commentId,
               1,
             );
@@ -680,17 +910,18 @@ async function seedDatabase() {
             allComments.push(reply);
             commentCount++;
 
-            // 50% chance to add ONE reply to reply
+            // 50% chance to add ONE deep reply to first reply only
             if (Math.random() > 0.5 && j === 0) {
               const [deepReplyEmail, deepReplyUserId] = allUsers[Math.floor(Math.random() * allUsers.length)];
               const deepReplyScreenName = userScreenNameMap.get(deepReplyEmail) || "Anonymous";
 
+              const deepReplyText = contextualComments.deepReplies[0];
               const deepReply = createComment(
                 storyId,
                 nodeId,
                 deepReplyUserId,
                 deepReplyScreenName,
-                "Thanks!",
+                deepReplyText,
                 reply.commentId,
                 2,
               );
@@ -708,16 +939,17 @@ async function seedDatabase() {
         await batchInsertItems(allComments, "Comments");
       }
 
-      // Update story with total branches count
-      if (totalBranches > 0) {
+      // Update story with total branches and comments count
+      if (totalBranches > 0 || commentCount > 0) {
         story.stats.totalBranches = totalBranches;
+        story.stats.totalComments = commentCount;
         await docClient.send(
           new PutCommand({
             TableName: TABLE_NAME,
             Item: story,
           }),
         );
-        console.log(`  ✅ Updated story with ${totalBranches} total branches`);
+        console.log(`  ✅ Updated story with ${totalBranches} total branches and ${commentCount} total comments`);
       }
 
       console.log("");
