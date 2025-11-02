@@ -1,0 +1,91 @@
+import { client } from "@/lib/amplify";
+import {
+  createChapter,
+  createBranch,
+  updateChapter,
+  voteOnChapter,
+  awardBadge,
+} from "@/graphql/mutations";
+import { getChapter, listBranches } from "@/graphql/queries";
+import type {
+  ChapterNode,
+  CreateChapterInput,
+  CreateBranchInput,
+  UpdateChapterInput,
+  VoteType,
+  AwardBadgeInput,
+} from "@/types/gqlTypes";
+
+export async function createChapterAPI(
+  input: CreateChapterInput,
+): Promise<ChapterNode> {
+  const result = await client.graphql({
+    query: createChapter,
+    variables: { input },
+  });
+  return result.data.createChapter;
+}
+
+export async function createBranchAPI(
+  input: CreateBranchInput,
+): Promise<ChapterNode> {
+  const result = await client.graphql({
+    query: createBranch,
+    variables: { input },
+  });
+  return result.data.createBranch;
+}
+
+export async function updateChapterAPI(
+  input: UpdateChapterInput,
+): Promise<ChapterNode> {
+  const result = await client.graphql({
+    query: updateChapter,
+    variables: { input },
+  });
+  return result.data.updateChapter;
+}
+
+export async function voteOnChapterAPI(
+  storyId: string,
+  nodeId: string,
+  voteType: VoteType,
+): Promise<ChapterNode> {
+  const result = await client.graphql({
+    query: voteOnChapter,
+    variables: { storyId, nodeId, voteType },
+  });
+  return result.data.voteOnChapter;
+}
+
+export async function awardBadgeAPI(
+  input: AwardBadgeInput,
+): Promise<ChapterNode> {
+  const result = await client.graphql({
+    query: awardBadge,
+    variables: { input },
+  });
+  return result.data.awardBadge;
+}
+
+export async function getChapterAPI(
+  storyId: string,
+  nodeId: string,
+): Promise<ChapterNode | null> {
+  const result = await client.graphql({
+    query: getChapter,
+    variables: { storyId, nodeId },
+  });
+  return result.data.getChapter ?? null;
+}
+
+export async function listBranchesAPI(
+  storyId: string,
+  nodeId: string,
+): Promise<ChapterNode[]> {
+  const result = await client.graphql({
+    query: listBranches,
+    variables: { storyId, nodeId },
+  });
+  return result.data.listBranches;
+}

@@ -1,0 +1,43 @@
+# Story Queries and Mutations
+
+extend type Query {
+  getStory(storyId: ID!): Story
+    @aws_iam
+    @aws_cognito_user_pools
+
+  listStories(filter: StoryFilter, limit: Int, nextToken: String): StoryConnection
+    @aws_iam
+    @aws_cognito_user_pools
+
+  getStoryTree(storyId: ID!): TreeData
+    @aws_iam
+    @aws_cognito_user_pools
+
+  getReadingPath(storyId: ID!, nodePath: [ID!]!): [ChapterNode!]!
+    @aws_iam
+    @aws_cognito_user_pools
+}
+
+extend type Mutation {
+  createStory(input: CreateStoryInput!): Story
+    @aws_cognito_user_pools
+
+  updateStory(input: UpdateStoryInput!): Story
+    @aws_cognito_user_pools
+}
+
+# Tree visualization data structure
+type TreeData @aws_iam @aws_cognito_user_pools {
+  rootNode: TreeNode!
+  totalNodes: Int!
+}
+
+type TreeNode @aws_iam @aws_cognito_user_pools {
+  nodeId: ID!
+  title: String!
+  description: String
+  stats: ChapterStats!
+  badges: ChapterBadges!
+  authorId: String!
+  children: [TreeNode!]!
+}

@@ -16,7 +16,7 @@ export const AMPLIFY_CONFIG: ResourcesConfig = {
     GraphQL: {
       endpoint: DEPLOYMENT_OUTPUT.awseGraphQLUrl,
       region: AWS_REGION,
-      defaultAuthMode: "userPool",
+      defaultAuthMode: "identityPool",
     },
   },
 };

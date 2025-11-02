@@ -141,9 +141,32 @@ export async function seedDB(options: SeedDBOptions): Promise<void> {
   }
 
   return new Promise((resolve, reject) => {
+    let stdout = "";
+    let stderr = "";
+
     const tsxProcess = spawn("tsx", args, {
       env: runEnv,
-      stdio: "inherit",
+      stdio: ["inherit", "pipe", "pipe"],
+    });
+
+    // Capture and log stdout
+    tsxProcess.stdout?.on("data", (data) => {
+      const text = data.toString();
+      stdout += text;
+      // Also log to console in real-time
+      process.stdout.write(text);
+      // Log to our logger
+      logger.info(text.trim());
+    });
+
+    // Capture and log stderr
+    tsxProcess.stderr?.on("data", (data) => {
+      const text = data.toString();
+      stderr += text;
+      // Also log to console in real-time
+      process.stderr.write(text);
+      // Log to our logger
+      logger.error(text.trim());
     });
 
     tsxProcess.on("close", (code) => {
@@ -152,7 +175,17 @@ export async function seedDB(options: SeedDBOptions): Promise<void> {
         resolve();
       } else {
         logger.error(`❌ Seed process exited with code ${code}`);
-        reject(new Error(`Seed process failed with code ${code}`));
+        if (stderr) {
+          logger.error(`Stderr output: ${stderr}`);
+        }
+        if (stdout) {
+          logger.debug(`Stdout output: ${stdout}`);
+        }
+        reject(
+          new Error(
+            `Seed process failed with code ${code}${stderr ? ": " + stderr.slice(0, 200) : ""}`,
+          ),
+        );
       }
     });
 

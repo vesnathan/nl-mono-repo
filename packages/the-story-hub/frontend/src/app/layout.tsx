@@ -7,9 +7,11 @@ import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 import { Amplify } from "aws-amplify";
 import { NextUIProvider } from "@nextui-org/react";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { useLogoutFn } from "@/hooks/useLogoutFn";
 import { GlobalMessage } from "@/components/common/GlobalMessage";
+import { QueryProvider } from "@/providers/QueryProvider";
+import { Navbar } from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { AMPLIFY_CONFIG } from "../config/amplifyConfig";
 import "./globals.css";
 
@@ -25,47 +27,48 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     handleLogout,
   });
 
-  const isUnprotectedPage =
-    pathname === "/" ||
-    pathname === "/login" ||
-    pathname === "/login/" ||
-    // Allow public access to individual event pages (some events are free)
-    pathname?.startsWith("/event") ||
-    // Public discover pages (listing of events) should be accessible without login
-    pathname?.startsWith("/discover");
+  // Define protected pages that require authentication
+  // All other pages are public by default
+  const isProtectedPage =
+    pathname?.startsWith("/profile") ||
+    pathname?.startsWith("/settings") ||
+    pathname?.startsWith("/dashboard");
+
+  const isUnprotectedPage = !isProtectedPage;
 
   return (
     <html lang="en" data-theme="lemonade">
       <head>
-        <title>AWS Example</title>
-        <meta name="description" content="AWS Example Application" />
+        <title>The Story Hub</title>
+        <meta
+          name="description"
+          content="Collaborative branching storytelling platform"
+        />
+        <link rel="icon" href="/images/logo-small.png" />
       </head>
       <body>
-        <QueryClientProvider
-          client={
-            new QueryClient({
-              defaultOptions: {
-                queries: {
-                  retry: false,
-                  refetchOnWindowFocus: false,
-                },
-              },
-            })
-          }
-        >
+        <QueryProvider>
           <NextUIProvider>
             <GlobalMessage />
             {isUnprotectedPage ? (
-              <div>{children}</div>
+              <div className="flex flex-col min-h-screen">
+                <Navbar />
+                <main className="flex-grow">{children}</main>
+                <Footer />
+              </div>
             ) : (
               <RequireAuth>
                 <RequireMFA>
-                  <main>{children}</main>
+                  <div className="flex flex-col min-h-screen">
+                    <Navbar />
+                    <main className="flex-grow">{children}</main>
+                    <Footer />
+                  </div>
                 </RequireMFA>
               </RequireAuth>
             )}
           </NextUIProvider>
-        </QueryClientProvider>
+        </QueryProvider>
       </body>
     </html>
   );

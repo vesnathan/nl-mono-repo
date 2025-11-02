@@ -21,6 +21,8 @@ export interface DeploymentOptions {
   skipUserCreation?: boolean;
   roleArn?: string;
   tags?: { [key: string]: string };
+  disableRollback?: boolean;
+  skipWAF?: boolean; // Skip WAF dependency (useful for dev to save costs)
 }
 
 export interface ForceDeleteOptions {

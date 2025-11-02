@@ -5,10 +5,19 @@ import { mergeGraphqlFiles } from "shared/scripts/mergeGraphqlFiles";
 
 const buildGql = async () => {
   // Merge package-local schema files into the combined schema used for codegen
-  mergeGraphqlFiles({
-    INPUT_DIRS: [path.resolve("../backend/schema")],
-    OUTPUT_FILE_PATH: path.resolve("../backend/combined_schema.graphql"),
-  });
+  // Use custom merge script that consolidates 'extend type' declarations for AppSync compatibility
+  const mergeSchemaScript = path.resolve(
+    "../backend/scripts/merge-schema-for-appsync.ts",
+  );
+  try {
+    await execCommandAsPromise(
+      `npx ts-node -P ../../../tsconfig.node.json ${mergeSchemaScript}`,
+      { captureStdOut: false },
+    );
+  } catch (err) {
+    console.error("Schema merge failed:", err);
+    throw err;
+  }
 
   const schemaPath = path.resolve("../backend/combined_schema.graphql");
   const amplifyTypesCmd = `npx amplify codegen types --schema ${schemaPath} --debug`;

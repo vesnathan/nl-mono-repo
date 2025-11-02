@@ -41,8 +41,17 @@ export class DependencyValidator {
   async validateDependencies(
     stackType: StackType,
     stage: string,
+    skipWAF: boolean = false,
   ): Promise<boolean> {
-    const dependencies = this.dependencies[stackType];
+    let dependencies = this.dependencies[stackType];
+
+    // If skipWAF is enabled, filter out WAF from dependencies
+    if (skipWAF) {
+      dependencies = dependencies.filter((dep) => dep !== StackType.WAF);
+      if (this.dependencies[stackType].includes(StackType.WAF)) {
+        logger.info(`Skipping WAF dependency check (skipWAF enabled)`);
+      }
+    }
 
     if (dependencies.length === 0) {
       logger.info(`Stack ${stackType} has no dependencies`);

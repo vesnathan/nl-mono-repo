@@ -3,9 +3,14 @@ import * as fsPromises from "fs/promises";
 import * as fs from "fs-extra"; // Changed to fs-extra for better file system operations
 import * as path from "path";
 import * as os from "os"; // Added import
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  ListObjectsV2Command,
+  DeleteObjectsCommand,
+} from "@aws-sdk/client-s3";
 import * as crypto from "crypto";
-import { logger } from "./logger"; // Corrected import
+import { logger, setLogFile, closeLogFile } from "./logger"; // Import logger utilities
 import * as esbuild from "esbuild"; // Added import for esbuild
 
 // Assuming these types are defined elsewhere or should be defined
@@ -68,10 +73,23 @@ class ResolverCompiler {
     this.constantsDir = options.constantsDir; // Initialize constantsDir
 
     // buildDir is a temporary directory for the entire compilation process of this instance.
-    // It will be created by setupBuildDirectory and cleaned up by cleanupBuildDirectory.
+    // It will be created by setupBuildDirectory and cleaned up at start of each deploy.
+    // Use .cache directory inside monorepo to keep build artifacts
+    // __dirname is /packages/deploy/utils, so go up 3 levels to get to monorepo root
+    const monorepoRoot = path.join(__dirname, "..", "..", "..");
+    const parts = this.baseResolverDir.split(path.sep);
+    const pkgIndex = parts.indexOf("packages");
+    const appName =
+      pkgIndex >= 0 && pkgIndex + 1 < parts.length
+        ? parts[pkgIndex + 1]
+        : "unknown";
+    // Use consistent resolvers directory (no timestamp) so it gets cleaned each deploy
     this.buildDir = path.join(
-      os.tmpdir(),
-      `nl_resolver_build_${this.stage}_${Date.now()}`,
+      monorepoRoot,
+      ".cache",
+      "deploy",
+      appName,
+      "resolvers",
     );
   }
 
@@ -252,7 +270,7 @@ class ResolverCompiler {
     const tsconfigContent = {
       compilerOptions: {
         target: "ES2020",
-        module: "ESNext",
+        module: "CommonJS", // AppSync requires CommonJS, not ESNext
         moduleResolution: "node",
         esModuleInterop: true,
         strict: true,
@@ -370,7 +388,144 @@ class ResolverCompiler {
     logger.debug(`Cleaned up temp compile directory: ${tempCompileDir}`);
   }
 
+  /**
+   * Cleans up old resolver deployments from S3, keeping only the most recent ones
+   * @param keepCount Number of recent deployments to keep (default: 5)
+   */
+  private async cleanupOldS3Resolvers(keepCount: number = 5): Promise<void> {
+    try {
+      logger.debug(
+        `Checking for old resolver deployments to clean up in S3...`,
+      );
+
+      // List all objects under the resolver prefix for this stage
+      const prefix = path.posix.join(this.s3KeyPrefix, this.stage) + "/";
+
+      const listCommand = new ListObjectsV2Command({
+        Bucket: this.s3BucketName,
+        Prefix: prefix,
+        Delimiter: "/",
+      });
+
+      const response = await this.s3Client.send(listCommand);
+
+      if (!response.CommonPrefixes || response.CommonPrefixes.length === 0) {
+        logger.debug(`No previous resolver deployments found in S3`);
+        return;
+      }
+
+      // Extract hash directories
+      const hashDirs: { prefix: string; hash: string }[] = [];
+      for (const commonPrefix of response.CommonPrefixes) {
+        if (commonPrefix.Prefix) {
+          const hash = commonPrefix.Prefix.replace(prefix, "").replace("/", "");
+          if (hash) {
+            hashDirs.push({ prefix: commonPrefix.Prefix, hash });
+          }
+        }
+      }
+
+      // Sort by hash (most recent first based on timestamp of creation)
+      // We'll need to check the last modified time of objects to sort properly
+      const hashDirsWithTime: {
+        prefix: string;
+        hash: string;
+        lastModified: Date;
+      }[] = [];
+
+      for (const hashDir of hashDirs) {
+        // Get one object from this hash directory to check its timestamp
+        const listObjectsCommand = new ListObjectsV2Command({
+          Bucket: this.s3BucketName,
+          Prefix: hashDir.prefix,
+          MaxKeys: 1,
+        });
+
+        const objectsResponse = await this.s3Client.send(listObjectsCommand);
+        if (objectsResponse.Contents && objectsResponse.Contents.length > 0) {
+          const lastModified =
+            objectsResponse.Contents[0].LastModified || new Date(0);
+          hashDirsWithTime.push({ ...hashDir, lastModified });
+        }
+      }
+
+      // Sort by last modified time (newest first)
+      hashDirsWithTime.sort(
+        (a, b) => b.lastModified.getTime() - a.lastModified.getTime(),
+      );
+
+      // Determine which deployments to delete (keep the most recent keepCount)
+      const deploymentsToDelete = hashDirsWithTime.slice(keepCount);
+
+      if (deploymentsToDelete.length === 0) {
+        logger.debug(
+          `Found ${hashDirsWithTime.length} resolver deployment(s), keeping all (limit: ${keepCount})`,
+        );
+        return;
+      }
+
+      logger.info(
+        `Found ${hashDirsWithTime.length} resolver deployments. Keeping ${Math.min(keepCount, hashDirsWithTime.length)}, deleting ${deploymentsToDelete.length} old deployment(s)...`,
+      );
+
+      // Delete old deployments
+      for (const deployment of deploymentsToDelete) {
+        await this.deleteS3Prefix(deployment.prefix);
+        logger.success(`✓ Deleted old resolver deployment: ${deployment.hash}`);
+      }
+
+      logger.success(
+        `Cleaned up ${deploymentsToDelete.length} old resolver deployment(s) from S3`,
+      );
+    } catch (error: any) {
+      logger.warning(
+        `Failed to cleanup old S3 resolvers (continuing): ${error.message}`,
+      );
+    }
+  }
+
+  /**
+   * Deletes all objects under a given S3 prefix
+   */
+  private async deleteS3Prefix(prefix: string): Promise<void> {
+    let continuationToken: string | undefined;
+
+    do {
+      const listCommand = new ListObjectsV2Command({
+        Bucket: this.s3BucketName,
+        Prefix: prefix,
+        ContinuationToken: continuationToken,
+      });
+
+      const response = await this.s3Client.send(listCommand);
+
+      if (response.Contents && response.Contents.length > 0) {
+        const objectsToDelete = response.Contents.map((obj) => ({
+          Key: obj.Key!,
+        }));
+
+        const deleteCommand = new DeleteObjectsCommand({
+          Bucket: this.s3BucketName,
+          Delete: {
+            Objects: objectsToDelete,
+            Quiet: true,
+          },
+        });
+
+        await this.s3Client.send(deleteCommand);
+        logger.debug(
+          `Deleted ${objectsToDelete.length} objects from ${prefix}`,
+        );
+      }
+
+      continuationToken = response.NextContinuationToken;
+    } while (continuationToken);
+  }
+
   public async compileAndUploadResolvers(): Promise<string> {
+    const appName = this.getAppName();
+    const monorepoRoot = path.join(__dirname, "..", "..", "..", "..");
+
     const stopSpinner = logger.infoWithSpinner(
       "Starting resolver compilation and upload...",
     );
@@ -384,8 +539,6 @@ class ResolverCompiler {
     const totalFiles = this.resolverFiles.length;
     logger.debug(`Processing ${totalFiles} resolver files...`); // Essential log
 
-    const appName = this.getAppName();
-    const monorepoRoot = path.join(__dirname, "..", "..", "..", "..");
     // Save compiled resolver files into a repo-local cache directory (not tracked):
     // .cache/deploy/<app>/resolvers
     const localSavePathBaseForApp = path.join(
@@ -395,6 +548,43 @@ class ResolverCompiler {
       appName,
       "resolvers",
     );
+
+    // Clean up previous deployment cache before compilation
+    // This includes both resolvers and shared lib files
+    const deploymentCacheBaseForApp = path.join(
+      monorepoRoot,
+      ".cache",
+      "deploy",
+      appName,
+    );
+
+    try {
+      if (fs.existsSync(deploymentCacheBaseForApp)) {
+        logger.debug(
+          `Cleaning up previous deployment cache (except logs): ${deploymentCacheBaseForApp}`,
+        );
+
+        // Remove resolvers and lib directories but keep log files
+        const resolversDir = path.join(deploymentCacheBaseForApp, "resolvers");
+        const libDir = path.join(deploymentCacheBaseForApp, "lib");
+
+        if (fs.existsSync(resolversDir)) {
+          await fsPromises.rm(resolversDir, { recursive: true, force: true });
+          logger.debug("Cleaned resolvers directory");
+        }
+        if (fs.existsSync(libDir)) {
+          await fsPromises.rm(libDir, { recursive: true, force: true });
+          logger.debug("Cleaned lib directory");
+        }
+
+        logger.debug("Previous deployment cache cleaned (logs preserved)");
+      }
+    } catch (error: any) {
+      logger.warning(
+        `Failed to clean deployment cache (continuing): ${error.message}`,
+      );
+    }
+
     logger.debug(
       `Compiled resolvers will be saved to: ${localSavePathBaseForApp}`,
     );
@@ -415,6 +605,7 @@ class ResolverCompiler {
       logger.debug(
         `[${index + 1}/${totalFiles}] Processing resolver: ${resolverFileRelativePath}...`,
       ); // Essential log
+
       const resolverAbsolutePath = path.join(
         this.baseResolverDir,
         resolverFileRelativePath,
@@ -438,6 +629,7 @@ class ResolverCompiler {
           resolverFileRelativePath.replace(".ts", ".js"),
         );
         await this.saveCompiledFileLocally(localSavePath, compiledJsContent);
+
         // Do NOT upload to the non-hashed S3 path here. We'll compute a build hash
         // and upload the canonical files under the hashed prefix so CloudFormation
         // references stable, versioned assets only.
@@ -447,6 +639,9 @@ class ResolverCompiler {
       } catch (error: any) {
         const errorMsg = `Failed to compile or upload resolver ${resolverFileRelativePath}: ${error.message}`;
         logger.error(errorMsg);
+        if (error.stack) {
+          logger.debug(`Stack trace: ${error.stack}`);
+        }
         failedResolvers.push({
           file: resolverFileRelativePath,
           error: error.message,
@@ -512,6 +707,7 @@ class ResolverCompiler {
     logger.success(
       `   ✓ Successfully compiled: ${compiledFilesRelative.length} resolvers (will be uploaded under hashed prefix)`,
     );
+
     if (failedResolvers.length > 0) {
       logger.error(
         `   ✗ Failed to upload: ${failedResolvers.length} resolvers`,
@@ -528,13 +724,18 @@ class ResolverCompiler {
       logger.error(
         `Failed to upload ${failedHashedUploads.length} hashed resolvers:`,
       );
-      failedHashedUploads.forEach(({ file, error }) =>
-        logger.error(`  - ${file}: ${error}`),
-      );
+      failedHashedUploads.forEach(({ file, error }) => {
+        logger.error(`  - ${file}: ${error}`);
+      });
       throw new Error(`Failed to upload some hashed resolver files.`);
     }
 
     logger.success("✓ All resolvers compiled and uploaded successfully.\n");
+    logger.info(`Build hash: ${buildHash}`);
+
+    // Clean up old resolver deployments from S3 (keep last 5)
+    await this.cleanupOldS3Resolvers(5);
+
     // await this.cleanupBuildDirectory(); // Cleanup buildDir after all operations
 
     return buildHash;
@@ -722,7 +923,7 @@ class ResolverCompiler {
     const tsConfig = {
       compilerOptions: {
         target: "es2020",
-        module: "esnext",
+        module: "commonjs", // AppSync requires CommonJS, not esnext
         moduleResolution: "node",
         esModuleInterop: true,
         forceConsistentCasingInFileNames: true,
@@ -736,7 +937,8 @@ class ResolverCompiler {
           // Ensure paths here correctly point to files copied into this.buildDir
         },
       },
-      include: ["**/*.ts"],
+      files: [],
+      include: [],
       exclude: ["node_modules", "dist"],
     };
     await fsPromises.writeFile(
@@ -757,33 +959,40 @@ class ResolverCompiler {
 
     let codeToCompile = originalResolverSourceCode;
 
-    // Check for 'gqlTypes' import and replace with proper path (both exact match and relative path)
-    const gqlTypesImportRegex1 =
-      /import\s+\{([^}]*)\}\s+from\s+['\"]gqlTypes['\"];?\s*\n?/g;
-    const gqlTypesImportRegex2 =
-      /import\s+\{([^}]*)\}\s+from\s+['\"][^'"]*\/types\/gqlTypes['\"];?\s*\n?/g;
+    // Check for 'gqlTypes' import and inline enum definitions
+    // AppSync doesn't support ES6 imports, so we must inline the runtime values (enums)
+    const gqlTypesImportRegex =
+      /import\s+\{([^}]*)\}\s+from\s+(['"])(gqlTypes|[^'"]*\/types\/gqlTypes)\2;?\s*\n?/g;
 
-    const hasGqlTypesImport =
-      gqlTypesImportRegex1.test(originalResolverSourceCode) ||
-      gqlTypesImportRegex2.test(originalResolverSourceCode);
+    let gqlTypesMatch;
+    const importedGqlTypes = new Set<string>();
+    let gqlTypesInlined = false; // Track if we inlined gqlTypes
 
-    if (hasGqlTypesImport) {
+    // Find all gqlTypes imports and collect what's being imported
+    while (
+      (gqlTypesMatch = gqlTypesImportRegex.exec(originalResolverSourceCode)) !==
+      null
+    ) {
+      const importedItems = gqlTypesMatch[1]
+        .split(",")
+        .map((item: string) => item.trim());
+      importedItems.forEach((item: string) => {
+        // Remove any type-only imports or aliases
+        const cleanItem = item
+          .replace(/^type\s+/, "")
+          .split(/\s+as\s+/)[0]
+          .trim();
+        if (cleanItem) importedGqlTypes.add(cleanItem);
+      });
+    }
+
+    if (importedGqlTypes.size > 0) {
+      gqlTypesInlined = true;
       logger.debug(
-        `Found import from 'gqlTypes' in ${resolverFileName}. Replacing with proper path.`,
-      );
-
-      // Replace both types of imports with a relative path to the generated types
-      codeToCompile = codeToCompile.replace(
-        gqlTypesImportRegex1,
-        `import { $1 } from './gqlTypes.js';\n`,
-      );
-      codeToCompile = codeToCompile.replace(
-        gqlTypesImportRegex2,
-        `import { $1 } from './gqlTypes.js';\n`,
+        `Found gqlTypes imports in ${resolverFileName}: ${Array.from(importedGqlTypes).join(", ")}`,
       );
 
       // Read gqlTypes.ts from the app's frontend or backend generated types
-      // Prefer frontend generated types, then backend, then fall back to the old cloudwatchlive path
       const appNameForTypes = this.getAppName();
       const candidatePaths = [
         path.resolve(
@@ -804,16 +1013,7 @@ class ResolverCompiler {
         }
       }
 
-      const targetGqlTypesPath = path.join(this.buildDir, "gqlTypes.ts");
-
-      if (gqlTypesSourcePath) {
-        await fsPromises.copyFile(gqlTypesSourcePath, targetGqlTypesPath);
-        logger.debug(
-          `Copied gqlTypes.ts to build directory for ${resolverFileName} from ${gqlTypesSourcePath}.`,
-        );
-      } else {
-        // Fail hard when app-specific gqlTypes.ts is missing to avoid silently
-        // falling back to another app's types (which can produce invalid bundles).
+      if (!gqlTypesSourcePath) {
         logger.error(
           `gqlTypes.ts not found for app '${appNameForTypes}'. Checked: ${candidatePaths.join(", ")}`,
         );
@@ -821,64 +1021,146 @@ class ResolverCompiler {
           `gqlTypes.ts not found for app '${appNameForTypes}'. Please generate GraphQL types for this app before deploying.`,
         );
       }
+
+      // Read gqlTypes and inline ALL type definitions to avoid dependency issues
+      // Types that reference other types need all dependencies available
+      const gqlTypesContent = await fsPromises.readFile(
+        gqlTypesSourcePath,
+        "utf-8",
+      );
+
+      // Remove all export keywords and any imports from the gqlTypes file
+      let inlinedContent = "// Inlined ALL types from gqlTypes.ts\n";
+      inlinedContent += gqlTypesContent
+        .replace(/^import\s+.*from\s+['"].*['"];?\s*$/gm, "") // Remove imports
+        .replace(/^export\s+/gm, "") // Remove export keywords
+        .trim();
+
+      inlinedContent += "\n";
+
+      logger.debug(
+        `Inlined entire gqlTypes file for ${resolverFileName} (${importedGqlTypes.size} items imported)`,
+      );
+
+      // Replace all gqlTypes imports with the inlined content
+      gqlTypesImportRegex.lastIndex = 0; // Reset regex
+      codeToCompile = codeToCompile.replace(
+        gqlTypesImportRegex,
+        inlinedContent,
+      );
+
+      // Make sure we only inline once if there are duplicate imports
+      codeToCompile = codeToCompile.replace(
+        new RegExp(inlinedContent.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"),
+        (match, offset, string) => {
+          return string.indexOf(match) === offset ? match : "";
+        },
+      );
     } else {
       logger.debug(
         `No import from 'gqlTypes' found in ${resolverFileName}. Compiling as is.`,
       );
     }
 
-    // Check for constants imports and replace with proper paths
-    const constantsImportRegex =
-      /import\s+\{([^}]*)\}\s+from\s+['\"][^'"]*\/constants\/([^'"]*)['\"];?\s*\n?/g;
-    let constantsMatch;
-    while (
-      (constantsMatch = constantsImportRegex.exec(
-        originalResolverSourceCode,
-      )) !== null
-    ) {
-      const importedItems = constantsMatch[1];
-      const constantsFile = constantsMatch[2];
-      const fullImportStatement = constantsMatch[0];
+    // Remove @aws-appsync/utils imports - they cause deployment failures
+    // Even though AWS docs show imports, AppSync seems to have issues with them
+    // We'll remove imports and declare util as global instead
+    codeToCompile = codeToCompile.replace(
+      /import\s*{\s*[^}]*\s*}\s*from\s*["']@aws-appsync\/utils["'];?\s*/g,
+      "",
+    );
+    codeToCompile = codeToCompile.replace(
+      /import\s*.*\s*from\s*["']@aws-appsync\/utils["'];?\s*/g,
+      "",
+    );
 
-      logger.debug(
-        `Found constants import in ${resolverFileName}: ${fullImportStatement.trim()}`,
-      );
+    // Add global declarations for AppSync runtime
+    const appsyncGlobals = `// AppSync runtime globals (provided by AppSync, declared for TypeScript)
+declare const util: any;
+type Context<TArguments = any, TSource = any, TStash = any, TResult = any, TReturns = any> = any;
+type AppSyncIdentityCognito = any;
+type AppSyncIdentityIAM = any;
+type AppSyncIdentityOIDC = any;
+type AppSyncIdentityLambda = any;
 
-      // Replace the import with a local path
-      codeToCompile = codeToCompile.replace(
-        fullImportStatement,
-        `import { ${importedItems} } from './${constantsFile}.js';\n`,
-      );
+`;
+    codeToCompile = appsyncGlobals + codeToCompile;
+    logger.debug(
+      `Removed @aws-appsync/utils imports and added global type declarations for ${resolverFileName}`,
+    );
 
-      // Copy the constants file to the build directory
-      if (!this.constantsDir) {
-        logger.error(
-          `Constants directory not provided for ${resolverFileName}. Please specify constantsDir in ResolverCompilerOptions.`,
-        );
-        throw new Error(
-          `constantsDir must be specified in ResolverCompilerOptions to locate constants file: ${constantsFile}`,
-        );
-      }
+    // Check for constants imports and inline them
+    // AppSync doesn't support ES6 imports, so we must inline the entire file content
+    // Note: Constants are separate from gqlTypes, so we always need to inline them
+    {
+      const constantsImportRegex =
+        /import\s+\{([^}]*)\}\s+from\s+['\"][^'"]*\/constants\/([^'"]*)['\"];?\s*\n?/g;
+      let constantsMatch;
+      const inlinedConstants = new Set<string>(); // Track which constants we've already inlined
 
-      const constantsSourcePath = path.join(
-        this.constantsDir,
-        `${constantsFile}.ts`,
-      );
-      const targetConstantsPath = path.join(
-        this.buildDir,
-        `${constantsFile}.ts`,
-      );
+      while (
+        (constantsMatch = constantsImportRegex.exec(
+          originalResolverSourceCode,
+        )) !== null
+      ) {
+        const constantsFile = constantsMatch[2];
+        const fullImportStatement = constantsMatch[0];
 
-      if (fs.existsSync(constantsSourcePath)) {
-        await fsPromises.copyFile(constantsSourcePath, targetConstantsPath);
+        if (inlinedConstants.has(constantsFile)) {
+          // Just remove the duplicate import
+          codeToCompile = codeToCompile.replace(fullImportStatement, "");
+          continue;
+        }
+
         logger.debug(
-          `Copied ${constantsFile}.ts to build directory for ${resolverFileName}.`,
+          `Found constants import in ${resolverFileName}: ${fullImportStatement.trim()}`,
         );
-      } else {
-        logger.error(
-          `Constants file not found at ${constantsSourcePath} for ${resolverFileName}.`,
+
+        if (!this.constantsDir) {
+          logger.error(
+            `Constants directory not provided for ${resolverFileName}. Please specify constantsDir in ResolverCompilerOptions.`,
+          );
+          throw new Error(
+            `constantsDir must be specified in ResolverCompilerOptions to locate constants file: ${constantsFile}`,
+          );
+        }
+
+        const constantsSourcePath = path.join(
+          this.constantsDir,
+          `${constantsFile}.ts`,
         );
-        throw new Error(`Constants file not found: ${constantsSourcePath}`);
+
+        if (fs.existsSync(constantsSourcePath)) {
+          // Read the constants file and inline its contents
+          let constantsContent = await fsPromises.readFile(
+            constantsSourcePath,
+            "utf-8",
+          );
+
+          // Remove any export keywords since we're inlining
+          constantsContent = constantsContent.replace(/^export\s+/gm, "");
+
+          // Only remove specific type aliases that conflict with gqlTypes enums
+          // Currently only AgeRating is defined as an enum in gqlTypes
+          constantsContent = constantsContent.replace(
+            /^type\s+AgeRating\s*=\s*.*$/gm,
+            "// Type removed (AgeRating enum already in gqlTypes)",
+          );
+
+          // Replace the import statement with the inlined content
+          codeToCompile = codeToCompile.replace(
+            fullImportStatement,
+            `// Inlined from ${constantsFile}.ts\n${constantsContent}\n`,
+          );
+
+          inlinedConstants.add(constantsFile);
+          logger.debug(`Inlined ${constantsFile}.ts into ${resolverFileName}.`);
+        } else {
+          logger.error(
+            `Constants file not found at ${constantsSourcePath} for ${resolverFileName}.`,
+          );
+          throw new Error(`Constants file not found: ${constantsSourcePath}`);
+        }
       }
     }
 
@@ -890,73 +1172,56 @@ class ResolverCompiler {
 
     // Dependencies are installed once in setupBuildDirectory.
 
-    // Plugin to remove @aws-appsync/utils import since AppSync provides util as a global
-    const buildDir = this.buildDir; // Capture in closure for plugin
-    const removeAppSyncImportPlugin: esbuild.Plugin = {
-      name: "remove-appsync-import",
-      setup(build) {
-        build.onEnd(async () => {
-          const outfile = path.join(
-            buildDir,
-            "dist",
-            resolverFileName.replace(".ts", ".js"),
-          );
-          try {
-            let content = await fsPromises.readFile(outfile, "utf-8");
-            // Remove import statement for @aws-appsync/utils
-            content = content.replace(
-              /import\s*{\s*util\s*}\s*from\s*["']@aws-appsync\/utils["'];?\s*/g,
-              "",
-            );
-            // Remove any other imports from @aws-appsync/utils
-            content = content.replace(
-              /import\s*.*\s*from\s*["']@aws-appsync\/utils["'];?\s*/g,
-              "",
-            );
-            await fsPromises.writeFile(outfile, content, "utf-8");
-            logger.debug(`Removed @aws-appsync/utils import from ${outfile}`);
-          } catch (error: any) {
-            logger.warning(
-              `Failed to remove @aws-appsync/utils import: ${error.message}`,
-            );
-          }
-        });
-      },
-    };
-
-    const esbuildConfig: esbuild.BuildOptions = {
-      // Added type annotation
-      entryPoints: [tempResolverPath],
-      bundle: true,
-      outfile: path.join(
-        this.buildDir,
-        "dist",
-        resolverFileName.replace(".ts", ".js"),
-      ),
-      platform: "node",
-      format: "esm",
-      target: "es2020",
-      sourcemap: false,
-      minify: false,
-      tsconfig: path.join(this.buildDir, "tsconfig.json"),
-      external: ["@aws-appsync/utils"],
-      plugins: [removeAppSyncImportPlugin],
-      logLevel: this.debugMode ? "info" : "silent", // Conditional logLevel
-    };
+    // Use TypeScript compiler directly instead of esbuild to avoid module helpers
+    const outfile = path.join(
+      this.buildDir,
+      "dist",
+      resolverFileName.replace(".ts", ".js"),
+    );
 
     try {
-      logger.debug(`Running esbuild for ${resolverFileName}...`); // Essential log
-      await esbuild.build(esbuildConfig);
-      logger.success(`esbuild completed for ${resolverFileName}.`); // Essential log
+      logger.debug(`Compiling ${resolverFileName} with tsc...`);
 
-      const compiledJsPath = esbuildConfig.outfile;
+      // Ensure dist directory exists
+      const distDir = path.join(this.buildDir, "dist");
+      await fsPromises.mkdir(distDir, { recursive: true });
+
+      // Run TypeScript compiler
+      const { exec } = await import("child_process");
+      const { promisify } = await import("util");
+      const execAsync = promisify(exec);
+
+      // AppSync needs ES6 exports - compile directly to dist folder
+      // Added --moduleResolution node to resolve @aws-appsync/utils from node_modules
+      // Use --skipDefaultLibCheck to avoid tsconfig.json issues
+      await execAsync(
+        `npx tsc "${tempResolverPath}" --outDir "${distDir}" --target ES2020 --module ES6 --moduleResolution node --removeComments --skipLibCheck --skipDefaultLibCheck`,
+        { cwd: this.buildDir },
+      );
+
+      logger.debug(`TypeScript compilation completed for ${resolverFileName}`);
+
+      // Post-process the compiled file
+      let content = await fsPromises.readFile(outfile, "utf-8");
+
+      logger.debug(
+        `Post-processing compiled resolver for AppSync compatibility...`,
+      );
+
+      // AppSync expects ES6 exports (export function request) with imports removed
+      // The @aws-appsync/utils imports need to be removed since util is provided as a global
+
+      await fsPromises.writeFile(outfile, content, "utf-8");
+      logger.debug(`Transformed to AppSync-compatible format`);
+      logger.success(`Compilation completed for ${resolverFileName}.`); // Essential log
+
+      const compiledJsPath = outfile;
       if (!compiledJsPath) {
-        // Add this check
         logger.error(
-          `esbuildConfig.outfile is undefined after build for ${resolverFileName}. This should not happen if 'write: true'.`,
+          `Output path is undefined after compilation for ${resolverFileName}.`,
         );
         throw new Error(
-          `esbuild output path is undefined for ${resolverFileName}`,
+          `Compilation output path is undefined for ${resolverFileName}`,
         );
       }
 
@@ -984,10 +1249,13 @@ class ResolverCompiler {
       logger.error(
         `TypeScript compilation failed for ${resolverAbsolutePath}: ${error.message}`,
       );
-      if (this.debugMode && error.stdout)
+      // Always log stdout/stderr to help debug compilation failures
+      if (error.stdout) {
         logger.error(`Compilation stdout:\n${error.stdout.toString()}`);
-      if (this.debugMode && error.stderr)
+      }
+      if (error.stderr) {
         logger.error(`Compilation stderr:\n${error.stderr.toString()}`);
+      }
       // Log contents of tempBuildDir for debugging if in debug mode
       if (this.debugMode) {
         try {

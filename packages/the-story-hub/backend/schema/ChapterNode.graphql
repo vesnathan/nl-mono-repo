@@ -1,0 +1,77 @@
+# Chapter/Branch Type Definitions
+
+# Import AgeRating from Story schema
+# enum AgeRating is defined in Story.graphql
+
+type ChapterStats @aws_iam @aws_cognito_user_pools {
+  reads: Int!
+  upvotes: Int!
+  downvotes: Int!
+  childBranches: Int!
+}
+
+type ChapterBadges @aws_iam @aws_cognito_user_pools {
+  matchesVision: Boolean!
+  authorApproved: Boolean!
+}
+
+type ChapterNode @aws_iam @aws_cognito_user_pools {
+  nodeId: ID!
+  storyId: ID!
+  parentNodeId: ID
+  authorId: String!
+  authorName: String!
+  authorPatreonSupporter: Boolean  # Whether the author is a Patreon supporter
+  authorOGSupporter: Boolean  # Whether the author is an original/early supporter
+  content: String!
+  branchDescription: String
+  paragraphIndex: Int
+  chapterNumber: Int!
+  aiCreated: Boolean
+  ageRating: AgeRating
+  contentWarnings: [String!]
+  maxChildAgeRating: AgeRating
+  createdAt: String!
+  editableUntil: String!
+  stats: ChapterStats!
+  badges: ChapterBadges!
+}
+
+input CreateChapterInput {
+  storyId: ID!
+  content: String!
+  chapterNumber: Int!
+}
+
+input CreateBranchInput {
+  parentNodeId: ID!
+  paragraphIndex: Int
+  branchDescription: String!
+  content: String!
+  aiCreated: Boolean
+  ageRating: AgeRating
+  contentWarnings: [String!]
+}
+
+input UpdateChapterInput {
+  storyId: ID!
+  nodeId: ID!
+  content: String
+  branchDescription: String
+}
+
+enum VoteType {
+  UP
+  DOWN
+}
+
+enum BadgeType {
+  MATCHES_VISION
+  AUTHOR_APPROVED
+}
+
+input AwardBadgeInput {
+  storyId: ID!
+  nodeId: ID!
+  badgeType: BadgeType!
+}

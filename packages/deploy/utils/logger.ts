@@ -1,7 +1,13 @@
 import chalk from "chalk";
+import * as fs from "fs";
+import * as path from "path";
 
 // Ensure debug mode starts as false
 let isDebugModeEnabled = false;
+
+// Log file path - can be set externally
+let logFilePath: string | null = null;
+let logFileStream: fs.WriteStream | null = null;
 
 // Helper function to get formatted timestamp in local timezone
 const getTimestamp = (): string => {
@@ -12,6 +18,19 @@ const getTimestamp = (): string => {
   const seconds = now.getSeconds().toString().padStart(2, "0");
   const ms = now.getMilliseconds().toString().padStart(3, "0");
   return `${hours}:${minutes}:${seconds}.${ms}`;
+};
+
+// Helper function to get ISO timestamp for log files
+const getISOTimestamp = (): string => {
+  return new Date().toISOString();
+};
+
+// Helper function to write to log file
+const writeToLogFile = (level: string, message: string): void => {
+  if (logFileStream) {
+    const logEntry = `[${getISOTimestamp()}] [${level}] ${message}\n`;
+    logFileStream.write(logEntry);
+  }
 };
 
 // Spinner animation frames - classic cursor style
@@ -51,8 +70,12 @@ const createSpinner = (message: string): (() => void) => {
 
 export const logger = {
   // Always shown - for essential information, warnings, errors, and UI elements
-  menu: (message: string) => console.log(message), // Plain output for menu/UI elements
+  menu: (message: string) => {
+    writeToLogFile("MENU", message);
+    console.log(message);
+  }, // Plain output for menu/UI elements
   success: (message: string) => {
+    writeToLogFile("SUCCESS", message);
     // If spinner is running, clear it first
     if (spinnerInterval) {
       clearInterval(spinnerInterval);
@@ -63,6 +86,7 @@ export const logger = {
     console.log(timestamp, chalk.green("[SUCCESS]"), message);
   },
   warning: (message: string) => {
+    writeToLogFile("WARNING", message);
     // If spinner is running, clear it first
     if (spinnerInterval) {
       clearInterval(spinnerInterval);
@@ -73,6 +97,7 @@ export const logger = {
     console.log(timestamp, chalk.yellow("[WARNING]"), message);
   },
   error: (message: string) => {
+    writeToLogFile("ERROR", message);
     // If spinner is running, clear it first
     if (spinnerInterval) {
       clearInterval(spinnerInterval);
@@ -83,6 +108,7 @@ export const logger = {
     console.log(timestamp, chalk.red("[ERROR]"), message);
   },
   info: (message: string) => {
+    writeToLogFile("INFO", message);
     // If spinner is running, clear it first
     if (spinnerInterval) {
       clearInterval(spinnerInterval);
@@ -95,11 +121,13 @@ export const logger = {
 
   // Animated info message with spinner
   infoWithSpinner: (message: string): (() => void) => {
+    writeToLogFile("INFO", message + " (spinner)");
     return createSpinner(message);
   },
 
   // Only shown in debug mode - for detailed debug messages
   debug: (message: string) => {
+    writeToLogFile("DEBUG", message);
     if (isDebugModeEnabled) {
       // If spinner is running, clear it first
       if (spinnerInterval) {
@@ -126,4 +154,54 @@ export const getDebugMode = (): boolean => {
 
 export const resetDebugMode = (): void => {
   isDebugModeEnabled = false;
+};
+
+/**
+ * Sets the log file path and opens a write stream
+ * All subsequent log calls will be written to this file
+ */
+export const setLogFile = (filePath: string): void => {
+  // Close existing stream if any
+  if (logFileStream) {
+    logFileStream.end();
+  }
+
+  logFilePath = filePath;
+
+  // Ensure directory exists
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  // Open write stream
+  logFileStream = fs.createWriteStream(filePath, { flags: "a" });
+
+  // Write header
+  const separator = "=".repeat(80);
+  logFileStream.write(`\n${separator}\n`);
+  logFileStream.write(`[${getISOTimestamp()}] Deployment started\n`);
+  logFileStream.write(`${separator}\n`);
+};
+
+/**
+ * Closes the log file stream
+ */
+export const closeLogFile = (): void => {
+  if (logFileStream) {
+    const separator = "=".repeat(80);
+    logFileStream.write(`${separator}\n`);
+    logFileStream.write(`[${getISOTimestamp()}] Deployment completed\n`);
+    logFileStream.write(`${separator}\n\n`);
+    logFileStream.end();
+    logFileStream = null;
+  }
+  logFilePath = null;
+};
+
+/**
+ * Gets the current log file path
+ */
+export const getLogFilePath = (): string | null => {
+  return logFilePath;
 };

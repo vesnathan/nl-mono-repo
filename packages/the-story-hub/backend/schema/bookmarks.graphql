@@ -1,0 +1,25 @@
+# Bookmark Type and Operations
+
+type Bookmark @aws_cognito_user_pools {
+  userId: ID!
+  storyId: ID!
+  currentNodeId: ID!
+  breadcrumbs: [String!]!
+  lastRead: String!
+}
+
+input SaveBookmarkInput {
+  storyId: ID!
+  currentNodeId: ID!
+  breadcrumbs: [String!]!
+}
+
+extend type Query {
+  getBookmark(storyId: ID!): Bookmark
+    @aws_cognito_user_pools
+}
+
+extend type Mutation {
+  saveBookmark(input: SaveBookmarkInput!): Bookmark
+    @aws_cognito_user_pools
+}

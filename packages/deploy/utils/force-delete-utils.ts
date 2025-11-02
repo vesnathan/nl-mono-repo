@@ -60,6 +60,8 @@ export class ForceDeleteManager {
           // AWS Example specific outputs
           "AWSEBucketName",
           "WebsiteBucket",
+          // The Story Hub specific outputs
+          "TSHBucketName",
         ];
 
         stack.Outputs.forEach((output: Output) => {

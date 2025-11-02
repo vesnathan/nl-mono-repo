@@ -1,0 +1,73 @@
+# Story Type Definitions
+
+enum AgeRating {
+  G
+  PG
+  PG_13
+  M
+  ADULT_18_PLUS
+}
+
+type StoryStats @aws_iam @aws_cognito_user_pools {
+  totalBranches: Int!
+  totalReads: Int!
+  totalComments: Int!
+  rating: Float
+}
+
+type Story @aws_iam @aws_cognito_user_pools {
+  storyId: ID!
+  authorId: String!
+  authorName: String!
+  authorPatreonSupporter: Boolean  # Whether the author is a Patreon supporter
+  authorOGSupporter: Boolean  # Whether the author is an original/early supporter
+  title: String!
+  synopsis: String!
+  genre: [String!]!
+  ageRating: AgeRating!
+  contentWarnings: [String!]!
+  ratingExplanation: String
+  stats: StoryStats!
+  featured: Boolean!
+  createdAt: String!
+  coverImageUrl: String
+  rootChapterId: String
+  aiCreated: Boolean!
+  allowAI: Boolean!
+}
+
+input CreateStoryInput {
+  title: String!
+  synopsis: String!
+  genre: [String!]!
+  ageRating: AgeRating!
+  contentWarnings: [String!]!
+  ratingExplanation: String
+  coverImageUrl: String
+  aiCreated: Boolean
+  allowAI: Boolean
+}
+
+input UpdateStoryInput {
+  storyId: ID!
+  title: String
+  synopsis: String
+  genre: [String!]
+  ageRating: AgeRating
+  contentWarnings: [String!]
+  featured: Boolean
+  coverImageUrl: String
+  allowAI: Boolean
+}
+
+input StoryFilter {
+  genre: String
+  ageRating: AgeRating
+  minRating: Float
+  featured: Boolean
+}
+
+type StoryConnection @aws_iam @aws_cognito_user_pools {
+  items: [Story!]!
+  nextToken: String
+}

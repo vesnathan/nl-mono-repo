@@ -1,0 +1,69 @@
+# Comment type definition
+
+type Comment
+  @aws_iam
+  @aws_cognito_user_pools
+{
+  commentId: ID!
+  storyId: ID!
+  nodeId: ID!
+  authorId: ID!
+  authorName: String!
+  authorPatreonSupporter: Boolean  # Whether the author is a Patreon supporter
+  authorOGSupporter: Boolean  # Whether the author is an original/early supporter
+  content: String!
+  parentCommentId: ID  # null for top-level comments, set for replies
+  depth: Int!  # 0 for top-level, 1 for first reply, 2 for reply to reply, etc.
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+  edited: Boolean
+  stats: CommentStats
+
+  # Nested fields
+  replies: [Comment!]  # For fetching nested replies
+  replyCount: Int  # Total count of direct replies
+}
+
+type CommentStats
+  @aws_iam
+  @aws_cognito_user_pools
+{
+  upvotes: Int!
+  downvotes: Int!
+  replyCount: Int!  # Direct reply count
+  totalReplyCount: Int!  # Total nested reply count (all descendants)
+}
+
+# Input types
+input CreateCommentInput {
+  storyId: ID!
+  nodeId: ID!
+  content: String!
+  parentCommentId: ID  # null for top-level, set for replies
+}
+
+input UpdateCommentInput {
+  commentId: ID!
+  storyId: ID!
+  nodeId: ID!
+  content: String!
+}
+
+input DeleteCommentInput {
+  commentId: ID!
+  storyId: ID!
+  nodeId: ID!
+}
+
+enum CommentVoteType {
+  UPVOTE
+  DOWNVOTE
+  REMOVE_VOTE
+}
+
+enum CommentSortBy {
+  NEWEST
+  OLDEST
+  MOST_UPVOTED
+  MOST_REPLIES
+}
