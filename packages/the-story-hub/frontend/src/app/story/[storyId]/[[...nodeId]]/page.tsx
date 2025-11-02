@@ -641,6 +641,7 @@ export default function StoryDetailPage() {
                 <div className="flex gap-4 text-sm text-gray-400">
                   <span>📖 {story.stats.totalReads} reads</span>
                   <span>🌿 {story.stats.totalBranches} branches</span>
+                  <span>💬 {story.stats.totalComments} comments</span>
                   {story.stats.rating && (
                     <span>⭐ {story.stats.rating.toFixed(1)}</span>
                   )}
@@ -680,10 +681,10 @@ export default function StoryDetailPage() {
           </div>
 
           {/* Recursive chapter rendering starting from root */}
-          {story.rootChapterId ? (
+          {story.rootNodeId ? (
             <ChapterSection
               storyId={storyId}
-              nodeId={story.rootChapterId}
+              nodeId={story.rootNodeId}
               story={story}
               isRoot={true}
               currentUserId={userId}

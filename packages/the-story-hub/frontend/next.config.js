@@ -113,6 +113,7 @@ if (!isLinting) {
 module.exports = {
   env: {
     NEXT_PUBLIC_ENVIRONMENT: process.env.NEXT_PUBLIC_ENVIRONMENT,
+    NEXT_PUBLIC_USE_LOCAL_DATA: process.env.NEXT_PUBLIC_USE_LOCAL_DATA || "false",
     ...deploymentEnvs,
   },
   eslint: { ignoreDuringBuilds: true },

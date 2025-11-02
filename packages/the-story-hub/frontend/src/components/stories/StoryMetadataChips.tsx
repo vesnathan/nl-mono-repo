@@ -72,7 +72,11 @@ export function StoryMetadataChips({
         </Tooltip>
       ))}
       <Tooltip content={getAgeRatingTooltip(ageRating)}>
-        <Chip size="sm" variant="flat" className="bg-[#F28C28] text-white px-3">
+        <Chip
+          size="sm"
+          variant="flat"
+          className="bg-[#F28C28] text-white font-semibold px-3"
+        >
           {ageRating === "ADULT_18_PLUS" ? "18+" : ageRating.replace(/_/g, "-")}
         </Chip>
       </Tooltip>
