@@ -940,6 +940,24 @@ async function seedDatabase() {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
+    // Create site settings
+    console.log("");
+    console.log(`⚙️  Creating site settings...`);
+    const siteSettings = {
+      PK: "SETTINGS#SITE",
+      SK: "CONFIG#GLOBAL",
+      grantOGBadgeToPatreonSupporters: false, // Default: OFF
+      updatedAt: new Date().toISOString(),
+      updatedBy: superAdminUserId,
+    };
+    await docClient.send(
+      new PutCommand({
+        TableName: TABLE_NAME,
+        Item: siteSettings,
+      }),
+    );
+    console.log(`   ✅ Site settings created`);
+
     console.log("");
     console.log(
       `📚 Creating ${SEED_DATA.stories.length} stories with branches...`,

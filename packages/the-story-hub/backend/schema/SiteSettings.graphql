@@ -1,0 +1,34 @@
+# Site Settings Type Definitions
+# Extensible settings system for site-wide configuration
+
+type SiteSettings @aws_iam @aws_cognito_user_pools {
+  # Badge Settings
+  grantOGBadgeToPatreonSupporters: Boolean!
+
+  # Future settings can be added here:
+  # maintenanceMode: Boolean
+  # allowNewUserRegistration: Boolean
+  # featuredStoryIds: [ID!]
+  # maxStoriesPerUser: Int
+  # etc.
+
+  updatedAt: String!
+  updatedBy: String  # userId of admin who last updated
+}
+
+input UpdateSiteSettingsInput {
+  # Badge Settings
+  grantOGBadgeToPatreonSupporters: Boolean
+
+  # Future settings can be added here
+}
+
+extend type Query {
+  getSiteSettings: SiteSettings! @aws_iam @aws_cognito_user_pools
+}
+
+extend type Mutation {
+  updateSiteSettings(input: UpdateSiteSettingsInput!): SiteSettings!
+    @aws_iam
+    @aws_cognito_user_pools(cognito_groups: ["SiteAdmin"])
+}
