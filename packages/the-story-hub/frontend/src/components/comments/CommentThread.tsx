@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button, Avatar, Accordion, AccordionItem } from "@nextui-org/react";
 import { Comment } from "@/types/CommentSchemas";
 import { AuthorBadge } from "@/components/common/AuthorBadge";
@@ -27,7 +27,7 @@ interface CommentThreadProps {
   storyAuthorId?: string;
 }
 
-export function CommentThread({
+export const CommentThread = React.memo(function CommentThread({
   comment,
   storyId,
   nodeId,
@@ -292,4 +292,4 @@ export function CommentThread({
       )}
     </div>
   );
-}
+});
