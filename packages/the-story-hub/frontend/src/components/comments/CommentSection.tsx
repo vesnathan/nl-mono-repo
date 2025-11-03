@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button, Select, SelectItem } from "@nextui-org/react";
+import { Button } from "@nextui-org/react";
 import {
   listCommentsAPI,
   createCommentAPI,
@@ -17,12 +17,14 @@ interface CommentSectionProps {
   storyId: string;
   nodeId: string;
   currentUserId?: string;
+  storyAuthorId?: string;
 }
 
 export function CommentSection({
   storyId,
   nodeId,
   currentUserId,
+  storyAuthorId,
 }: CommentSectionProps) {
   const [sortBy, setSortBy] = useState<
     "NEWEST" | "OLDEST" | "MOST_UPVOTED" | "MOST_REPLIES"
@@ -30,6 +32,7 @@ export function CommentSection({
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [allComments, setAllComments] = useState<any[]>([]);
   const [nextToken, setNextToken] = useState<string | null>(null);
+  const [totalAvailable, setTotalAvailable] = useState<number>(0);
   const queryClient = useQueryClient();
 
   // Fetch top-level comments
@@ -82,11 +85,16 @@ export function CommentSection({
       });
 
       if (nextToken && allComments.length > 0) {
-        console.log("APPENDING new comments to existing list");
-        setAllComments((prev) => [...prev, ...commentsData.items]);
+        console.log("PREPENDING older comments to top of list");
+        setAllComments((prev) => [...commentsData.items, ...prev]);
       } else {
         console.log("REPLACING all comments with new data");
         setAllComments(commentsData.items);
+      }
+
+      // Update total available count
+      if (commentsData.total !== undefined) {
+        setTotalAvailable(commentsData.total);
       }
     } else {
       console.log("No commentsData.items to process");
@@ -99,6 +107,7 @@ export function CommentSection({
     setSortBy(newSort);
     setNextToken(null);
     setAllComments([]);
+    setTotalAvailable(0);
   };
 
   // Load more comments
@@ -199,11 +208,29 @@ export function CommentSection({
   const comments = allComments;
   const hasError = !!error;
   const hasMore = !!commentsData?.nextToken;
+  const hasPreviousComments = allComments.length < totalAvailable;
+
+  // Count total replies recursively
+  const countReplies = (comment: any): number => {
+    let count = 0;
+    if (comment.replies && comment.replies.length > 0) {
+      count += comment.replies.length;
+      comment.replies.forEach((reply: any) => {
+        count += countReplies(reply);
+      });
+    }
+    return count;
+  };
+
+  const totalReplies = comments.reduce((sum, comment) => sum + countReplies(comment), 0);
 
   console.log("===== RENDER STATE =====");
   console.log("Rendering with comments.length:", comments.length);
   console.log("hasError:", hasError);
   console.log("hasMore:", hasMore);
+  console.log("hasPreviousComments:", hasPreviousComments);
+  console.log("totalAvailable:", totalAvailable);
+  console.log("totalReplies:", totalReplies);
   console.log("isLoading:", isLoading);
   console.log("Total from API:", commentsData?.total);
   console.log("========================\n");
@@ -216,49 +243,6 @@ export function CommentSection({
           Discussion ({commentsData?.total || 0})
         </h3>
         <div className="flex items-center gap-3">
-          <Select
-            label="Sort by"
-            size="sm"
-            className="w-48"
-            selectedKeys={[sortBy]}
-            onChange={(e) =>
-              handleSortChange(
-                e.target.value as
-                  | "NEWEST"
-                  | "OLDEST"
-                  | "MOST_UPVOTED"
-                  | "MOST_REPLIES",
-              )
-            }
-            classNames={{
-              trigger: "bg-gray-800 border-gray-700",
-              value: "text-white",
-              label: "text-white",
-              popoverContent: "bg-gray-800",
-              listbox: "bg-gray-800",
-            }}
-          >
-            <SelectItem key="NEWEST" value="NEWEST" className="text-white">
-              Newest
-            </SelectItem>
-            <SelectItem key="OLDEST" value="OLDEST" className="text-white">
-              Oldest
-            </SelectItem>
-            <SelectItem
-              key="MOST_UPVOTED"
-              value="MOST_UPVOTED"
-              className="text-white"
-            >
-              Most Upvoted
-            </SelectItem>
-            <SelectItem
-              key="MOST_REPLIES"
-              value="MOST_REPLIES"
-              className="text-white"
-            >
-              Most Replies
-            </SelectItem>
-          </Select>
           {currentUserId && (
             <Button
               color="primary"
@@ -302,6 +286,27 @@ export function CommentSection({
         </div>
       ) : !hasError ? (
         <>
+          {/* Load Previous Comments Button - Top */}
+          {hasPreviousComments && hasMore && (
+            <div className="mb-4 text-center">
+              <Button
+                color="primary"
+                variant="flat"
+                onClick={loadMoreComments}
+                isLoading={isLoading}
+                disabled={isLoading}
+              >
+                {isLoading ? "Loading..." : "Load Previous Comments"}
+              </Button>
+            </div>
+          )}
+
+          {/* Showing comments text */}
+          <div className="mb-4 text-center text-sm text-gray-400">
+            Showing {comments.length} of {totalAvailable} comment{totalAvailable === 1 ? "" : "s"}
+            {totalReplies > 0 && ` (${totalReplies} ${totalReplies === 1 ? "reply" : "replies"})`}
+          </div>
+
           <div className="space-y-4">
             {comments.map((comment) => (
               <CommentThread
@@ -314,24 +319,10 @@ export function CommentSection({
                 onDelete={handleDelete}
                 onVote={handleVote}
                 currentUserId={currentUserId}
+                storyAuthorId={storyAuthorId}
               />
             ))}
           </div>
-
-          {/* Load More Button */}
-          {hasMore && (
-            <div className="mt-6 text-center">
-              <Button
-                color="primary"
-                variant="flat"
-                onClick={loadMoreComments}
-                isLoading={isLoading}
-                disabled={isLoading}
-              >
-                {isLoading ? "Loading..." : "Load Previous Comments"}
-              </Button>
-            </div>
-          )}
         </>
       ) : null}
     </div>

@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Button, Avatar, Accordion, AccordionItem } from "@nextui-org/react";
 import { Comment } from "@/types/CommentSchemas";
 import { CommentForm } from "./CommentForm";
+import { CommentThreadModal } from "./CommentThreadModal";
 import { PatreonBadge } from "@/components/common/PatreonBadge";
 import { OGBadge } from "@/components/common/OGBadge";
+import { AuthorBadge } from "@/components/common/AuthorBadge";
 
 interface CommentThreadProps {
   comment: Comment;
@@ -20,6 +22,8 @@ interface CommentThreadProps {
     voteType: "UPVOTE" | "DOWNVOTE",
   ) => Promise<void>;
   currentUserId?: string;
+  isInModal?: boolean;
+  storyAuthorId?: string;
 }
 
 export function CommentThread({
@@ -32,15 +36,19 @@ export function CommentThread({
   onDelete,
   onVote,
   currentUserId,
+  isInModal = false,
+  storyAuthorId,
 }: CommentThreadProps) {
   const [isReplying, setIsReplying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
 
   const isAuthor = currentUserId === comment.authorId;
   const isDeleted = comment.content === "[deleted]";
   const hasReplies = (comment.replies?.length || 0) > 0;
+  const isStoryAuthor = storyAuthorId && comment.authorId === storyAuthorId;
 
   const handleReply = async (content: string) => {
     if (onReply) {
@@ -89,6 +97,7 @@ export function CommentThread({
               <span className="font-semibold text-white">
                 {comment.authorName}
               </span>
+              {isStoryAuthor && <AuthorBadge size="sm" />}
               {comment.authorOGSupporter && <OGBadge size="sm" />}
               {comment.authorPatreonSupporter && <PatreonBadge size="sm" />}
               <span className="text-xs text-gray-400">
@@ -167,6 +176,18 @@ export function CommentThread({
                   </Button>
                 )}
 
+                {/* View Thread button - only show if has replies and not in modal */}
+                {hasReplies && !isInModal && (
+                  <Button
+                    size="sm"
+                    variant="light"
+                    className="text-white"
+                    onClick={() => setShowModal(true)}
+                  >
+                    View Thread
+                  </Button>
+                )}
+
                 {/* Edit/Delete for author */}
                 {isAuthor && (
                   <>
@@ -240,34 +261,30 @@ export function CommentThread({
                     onDelete={onDelete}
                     onVote={onVote}
                     currentUserId={currentUserId}
+                    isInModal={isInModal}
+                    storyAuthorId={storyAuthorId}
                   />
                 ))}
-
-                {/* Show "Load More Replies" if there are more than displayed */}
-                {comment.stats &&
-                  comment.replies &&
-                  comment.stats.totalReplyCount > comment.replies.length && (
-                    <div className="text-center pt-2">
-                      <Button
-                        size="sm"
-                        variant="light"
-                        className="text-gray-400 hover:text-white"
-                      >
-                        Load{" "}
-                        {comment.stats.totalReplyCount - comment.replies.length}{" "}
-                        more{" "}
-                        {comment.stats.totalReplyCount -
-                          comment.replies.length ===
-                        1
-                          ? "reply"
-                          : "replies"}
-                      </Button>
-                    </div>
-                  )}
               </div>
             </AccordionItem>
           </Accordion>
         </div>
+      )}
+
+      {/* Comment Thread Modal */}
+      {showModal && onReply && onEdit && onDelete && onVote && (
+        <CommentThreadModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          comment={comment}
+          storyId={storyId}
+          nodeId={nodeId}
+          onReply={onReply}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onVote={onVote}
+          currentUserId={currentUserId}
+        />
       )}
     </div>
   );

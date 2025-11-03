@@ -359,12 +359,17 @@ export async function listCommentsAPI(
     console.error("Error:", error);
     console.error("==================================================\n");
     setUsingLocalData();
-    const comments = getCommentsForNode(storyId, nodeId);
-    return {
-      items: comments as Comment[],
-      nextToken: null,
-      total: comments.length,
-    };
+    const result = getCommentsForNode(storyId, nodeId, {
+      limit,
+      nextToken,
+      sortBy,
+    });
+    console.log("Fallback to local data result:", {
+      itemsCount: result.items.length,
+      total: result.total,
+      nextToken: result.nextToken,
+    });
+    return result as CommentConnection;
   }
 }
 
