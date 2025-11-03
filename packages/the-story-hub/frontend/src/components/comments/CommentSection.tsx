@@ -182,7 +182,6 @@ export function CommentSection({
     0,
   );
 
-
   return (
     <div className="bg-gray-900 border border-gray-700 p-6 rounded-lg">
       {/* Header */}

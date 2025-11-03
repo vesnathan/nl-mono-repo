@@ -280,7 +280,7 @@ function ChapterSection({
                       className="mt-4 pt-4 border-t border-gray-700"
                       onClick={(e) => e.stopPropagation()}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
+                        if (e.key === "Enter" || e.key === " ") {
                           e.stopPropagation();
                         }
                       }}
