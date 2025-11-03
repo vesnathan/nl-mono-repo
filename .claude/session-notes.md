@@ -152,3 +152,70 @@
 - Update this file with significant changes, decisions, and pending work
 - User prefers concise, technical communication
 - Focus on facts and problem-solving over validation
+
+---
+
+## Pending Work / Action Items
+
+### Authentication Features
+
+**Social Login Setup (feature/social-login branch)**
+- Status: Code complete, committed locally, needs push and OAuth configuration
+- Files modified:
+  - `packages/the-story-hub/frontend/src/components/auth/LoginModal.tsx` - Added Google, Facebook, Apple login buttons
+  - Uses AWS Amplify `signInWithRedirect` for federated authentication
+- Remaining tasks:
+  1. User needs to push branch: `git push -u origin feature/social-login`
+  2. Configure OAuth providers in AWS Cognito User Pool (`ap-southeast-2_jQhmdcfFd`):
+     - Google: Get Client ID/Secret from Google Cloud Console
+     - Facebook: Get App ID/Secret from Facebook Developers
+     - Apple: Get Service ID/Key from Apple Developer
+     - Add redirect URI for each: `https://nlmonorepo-tsh-userpool-dev.auth.ap-southeast-2.amazoncognito.com/oauth2/idpresponse`
+  3. Configure App Client settings in Cognito for OAuth flow
+  4. Test each provider after configuration
+- AWS Console link: `https://ap-southeast-2.console.aws.amazon.com/cognito/v2/idp/user-pools/ap-southeast-2_jQhmdcfFd/app-integration`
+
+**Auth Context Performance Optimization (feature/login-modal branch)**
+- Completed: Optimized AuthContext with useMemo to prevent unnecessary re-renders
+- Completed: Wrapped CommentThread with React.memo
+- Merged to main via PR #83
+
+### Branch Protection Policy
+
+**Dev → Main Workflow Enforcement**
+- Status: Files created but not committed
+- Files ready to commit:
+  - `.github/workflows/enforce_branch_policy.yml` - GitHub Action to enforce only dev/develop can merge to main
+  - `.github/CODEOWNERS` - Require approval from @vesnathan
+  - `.github/BRANCH_POLICY.md` - Documentation
+- Remaining tasks:
+  1. Create `dev` branch from `main`: `git checkout main && git checkout -b dev && git push -u origin dev`
+  2. Commit branch policy files to `main`
+  3. Configure GitHub branch protection rules at: `https://github.com/vesnathan/nl-mono-repo/settings/branches`
+     - Add rule for `main` branch
+     - Require PR reviews (1+ approval)
+     - Require status check: `check-source-branch`
+     - Require branches up to date
+     - Do not allow bypassing
+  4. Set `dev` as default branch for feature development
+
+---
+
+## Recent Changes (Current Session)
+
+### Social Login Implementation
+- Added social authentication to LoginModal with Google, Facebook, and Apple providers
+- UI includes brand logos, "Or continue with" divider, consistent dark theme styling
+- All social buttons disabled during email/password login for better UX
+
+### Performance Optimization
+- Refactored AuthContext to use individual state values instead of single object
+- Added useMemo to prevent context value recreation on every render
+- Wrapped CommentThread component with React.memo to prevent unnecessary re-renders
+- Result: Only auth-dependent components re-render on login/logout, not entire component tree
+
+### Branch Strategy Setup
+- Created GitHub Action workflow to enforce branch policy
+- Created CODEOWNERS file for required approvals
+- Documented branch strategy in BRANCH_POLICY.md
+- Workflow will automatically fail PRs to main that don't come from dev/develop
