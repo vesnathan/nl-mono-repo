@@ -103,6 +103,57 @@ When frontend requests nested replies:
 
 ## Technical Architecture Notes
 
+### Adding New GraphQL Queries, Mutations, and Subscriptions
+
+**IMPORTANT**: When adding new GraphQL operations, follow this exact process:
+
+1. **Define the GraphQL Schema** in `packages/the-story-hub/backend/schema/`:
+   - Create a new `.graphql` file or add to existing one
+   - Define types, inputs, queries, mutations
+   - Use `extend type Query/Mutation/Subscription` for new operations
+
+2. **Create Backend Resolvers** in `packages/the-story-hub/backend/resolvers/`:
+   - Follow pattern: `<domain>/<type>/<Type>.<operationName>.ts`
+   - Import types from `gqlTypes` (e.g., `import { MyType } from "gqlTypes"`)
+   - This is the standard pattern - don't define types inline!
+
+3. **Register Resolver in AppSync Config** at `packages/deploy/templates/the-story-hub/resources/AppSync/appsync.yaml`:
+   - Add `AWS::AppSync::Resolver` or `AWS::AppSync::FunctionConfiguration` resource
+   - Without this, resolver won't be deployed!
+
+4. **Define Frontend GraphQL Operations** in `packages/the-story-hub/frontend/src/graphql/`:
+   - Create a new file (e.g., `settings.ts`) or add to existing
+   - Define operations as template strings with `/* GraphQL */` comment
+   - Example:
+     ```typescript
+     export const getMyData = /* GraphQL */ `
+       query GetMyData($id: ID!) {
+         getMyData(id: $id) {
+           field1
+           field2
+         }
+       }
+     `;
+     ```
+
+5. **Generate TypeScript Types**:
+   - Run `yarn build-gql` in the frontend package
+   - This merges schemas, generates `gqlTypes.ts` with ALL types
+   - Amplify codegen scans `src/graphql/**/*.ts` for operations
+   - Types are generated in `src/types/gqlTypes.ts`
+
+6. **Create Frontend API Functions** in `packages/the-story-hub/frontend/src/lib/api/`:
+   - Import the GraphQL operation from step 4
+   - Import generated types from `@/types/gqlTypes`
+   - Create Zod schemas in `src/types/` for validation if needed
+   - Use `client.graphql()` to execute operations
+
+**Common Mistakes to Avoid**:
+- ❌ Defining GraphQL operations inline in API files (Amplify codegen won't see them)
+- ❌ Forgetting to run `yarn build-gql` after schema changes
+- ❌ Not registering resolvers in `appsync.yaml`
+- ❌ Defining types inline in backend resolvers instead of using `gqlTypes`
+
 ### AppSync Resolvers
 - Located in: `packages/the-story-hub/backend/resolvers/`
 - Structure: `<domain>/<type>/<Type>.<fieldName>.ts`
