@@ -296,13 +296,18 @@ export async function listCommentsAPI(
 
   // Use local data if enabled
   if (shouldUseLocalData()) {
-    console.log("Using local data");
-    const comments = getCommentsForNode(storyId, nodeId);
-    return {
-      items: comments as Comment[],
-      nextToken: null,
-      total: comments.length,
-    };
+    console.log("Using local data with pagination");
+    const result = getCommentsForNode(storyId, nodeId, {
+      limit,
+      nextToken,
+      sortBy,
+    });
+    console.log("Local data result:", {
+      itemsCount: result.items.length,
+      total: result.total,
+      nextToken: result.nextToken,
+    });
+    return result as CommentConnection;
   }
 
   try {

@@ -56,11 +56,97 @@ export function getAllStories() {
   return LOCAL_DATA.stories;
 }
 
-// Get comments for a node
-export function getCommentsForNode(storyId: string, nodeId: string) {
-  return LOCAL_DATA.comments.filter(
-    (c) => c.storyId === storyId && c.nodeId === nodeId,
+// Get comments for a node with pagination support
+export function getCommentsForNode(
+  storyId: string,
+  nodeId: string,
+  options?: {
+    limit?: number;
+    nextToken?: string;
+    sortBy?: "NEWEST" | "OLDEST" | "MOST_UPVOTED" | "MOST_REPLIES";
+  },
+) {
+  // Get all top-level comments for this node (depth 0, no parent)
+  let comments = LOCAL_DATA.comments.filter(
+    (c) =>
+      c.storyId === storyId &&
+      c.nodeId === nodeId &&
+      c.depth === 0 &&
+      !c.parentCommentId,
   );
+
+  // Sort comments
+  const sortBy = options?.sortBy || "NEWEST";
+  switch (sortBy) {
+    case "NEWEST":
+      comments.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+      break;
+    case "OLDEST":
+      comments.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+      break;
+    case "MOST_UPVOTED":
+      comments.sort((a, b) => (b.stats?.upvotes || 0) - (a.stats?.upvotes || 0));
+      break;
+    case "MOST_REPLIES":
+      comments.sort(
+        (a, b) =>
+          (b.stats?.totalReplyCount || 0) - (a.stats?.totalReplyCount || 0),
+      );
+      break;
+  }
+
+  // Add nested replies to each comment
+  const commentsWithReplies = comments.map((comment) => ({
+    ...comment,
+    replies: getRepliesForComment(storyId, nodeId, comment.commentId),
+  }));
+
+  // Handle pagination
+  const limit = options?.limit || 20;
+  const startIndex = options?.nextToken ? parseInt(options.nextToken) : 0;
+  const endIndex = startIndex + limit;
+
+  const paginatedComments = commentsWithReplies.slice(startIndex, endIndex);
+  const hasMore = endIndex < commentsWithReplies.length;
+  const nextToken = hasMore ? endIndex.toString() : null;
+
+  return {
+    items: paginatedComments,
+    nextToken,
+    total: commentsWithReplies.length,
+  };
+}
+
+// Get replies for a comment (recursively includes nested replies)
+function getRepliesForComment(
+  storyId: string,
+  nodeId: string,
+  parentCommentId: string,
+) {
+  const replies = LOCAL_DATA.comments.filter(
+    (c) =>
+      c.storyId === storyId &&
+      c.nodeId === nodeId &&
+      c.parentCommentId === parentCommentId,
+  );
+
+  // Sort replies by creation time (oldest first for threaded display)
+  replies.sort(
+    (a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
+
+  // Recursively get nested replies
+  return replies.map((reply) => ({
+    ...reply,
+    replies: getRepliesForComment(storyId, nodeId, reply.commentId),
+  }));
 }
 
 // Get node by ID
