@@ -10,11 +10,11 @@ import { authSignOut } from "shared/functions/authSignOut";
 
 export function Navbar() {
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, refresh } = useAuth();
 
   const handleLogout = async () => {
     await authSignOut();
-    window.location.reload();
+    await refresh();
   };
 
   return (
@@ -64,6 +64,7 @@ export function Navbar() {
       <LoginModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={refresh}
       />
     </>
   );

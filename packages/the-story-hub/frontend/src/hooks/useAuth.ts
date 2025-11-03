@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
 
 export interface AuthStatus {
@@ -6,39 +6,54 @@ export interface AuthStatus {
   isLoading: boolean;
   userId?: string;
   username?: string;
+  refresh: () => Promise<void>;
 }
 
 export function useAuth(): AuthStatus {
   const [authStatus, setAuthStatus] = useState<AuthStatus>({
     isAuthenticated: false,
     isLoading: true,
+    userId: undefined,
+    username: undefined,
+    refresh: async () => {},
   });
 
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = useCallback(async () => {
     try {
       const [session, user] = await Promise.all([
         fetchAuthSession(),
         getCurrentUser().catch(() => null),
       ]);
 
-      setAuthStatus({
+      setAuthStatus((prev) => ({
+        ...prev,
         isAuthenticated: session.tokens !== undefined && user !== null,
         isLoading: false,
         userId: user?.userId,
         username: user?.username,
-      });
+      }));
     } catch {
-      setAuthStatus({
+      setAuthStatus((prev) => ({
+        ...prev,
         isAuthenticated: false,
         isLoading: false,
-      });
+        userId: undefined,
+        username: undefined,
+      }));
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkAuthStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [checkAuthStatus]);
+
+  // Add refresh function to auth status
+  useEffect(() => {
+    setAuthStatus((prev) => ({
+      ...prev,
+      refresh: checkAuthStatus,
+    }));
+  }, [checkAuthStatus]);
 
   return authStatus;
 }

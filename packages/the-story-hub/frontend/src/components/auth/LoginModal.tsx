@@ -18,20 +18,22 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   actionDescription?: string;
+  onLoginSuccess?: () => void;
 }
 
 export function LoginModal({
   isOpen,
   onClose,
   actionDescription = "perform this action",
+  onLoginSuccess,
 }: LoginModalProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const loginController = useLoginController({
     onLoginSuccess: () => {
       onClose();
-      // Reload the page to refresh auth state
-      window.location.reload();
+      // Call the optional callback instead of reloading
+      onLoginSuccess?.();
     },
     captureUnknownError: (err: Error) => {
       console.error(err);
