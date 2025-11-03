@@ -1,18 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { isUsingLocalData } from "@/lib/local-data";
+import { shouldUseLocalData } from "@/lib/local-data";
 
 export function LocalDataBanner() {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    // Check periodically if we're using local data
-    const checkInterval = setInterval(() => {
-      setShowBanner(isUsingLocalData());
-    }, 500);
-
-    return () => clearInterval(checkInterval);
+    // Check once on mount if we're using local data
+    setShowBanner(shouldUseLocalData());
   }, []);
 
   if (!showBanner) {
