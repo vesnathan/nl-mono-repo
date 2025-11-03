@@ -10,6 +10,7 @@ import { NextUIProvider } from "@nextui-org/react";
 import { useLogoutFn } from "@/hooks/useLogoutFn";
 import { GlobalMessage } from "@/components/common/GlobalMessage";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { LocalDataBanner } from "@/components/LocalDataBanner";
@@ -51,26 +52,28 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <QueryProvider>
           <NextUIProvider>
-            <LocalDataBanner />
-            <LocalDataToggle />
-            <GlobalMessage />
-            {isUnprotectedPage ? (
-              <div className="flex flex-col min-h-screen">
-                <Navbar />
-                <main className="flex-grow">{children}</main>
-                <Footer />
-              </div>
-            ) : (
-              <RequireAuth>
-                <RequireMFA>
-                  <div className="flex flex-col min-h-screen">
-                    <Navbar />
-                    <main className="flex-grow">{children}</main>
-                    <Footer />
-                  </div>
-                </RequireMFA>
-              </RequireAuth>
-            )}
+            <AuthProvider>
+              <LocalDataBanner />
+              <LocalDataToggle />
+              <GlobalMessage />
+              {isUnprotectedPage ? (
+                <div className="flex flex-col min-h-screen">
+                  <Navbar />
+                  <main className="flex-grow">{children}</main>
+                  <Footer />
+                </div>
+              ) : (
+                <RequireAuth>
+                  <RequireMFA>
+                    <div className="flex flex-col min-h-screen">
+                      <Navbar />
+                      <main className="flex-grow">{children}</main>
+                      <Footer />
+                    </div>
+                  </RequireMFA>
+                </RequireAuth>
+              )}
+            </AuthProvider>
           </NextUIProvider>
         </QueryProvider>
       </body>
