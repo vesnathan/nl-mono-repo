@@ -1,0 +1,7 @@
+# CODEOWNERS file
+# These owners will be the default owners for everything in the repo
+# Require approval for changes to main branch
+
+# Protect main branch - require review from repo owner
+# Replace @vesnathan with your GitHub username if different
+* @vesnathan
