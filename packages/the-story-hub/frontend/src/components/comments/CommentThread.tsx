@@ -67,6 +67,7 @@ export function CommentThread({
   };
 
   const handleDelete = async () => {
+    // eslint-disable-next-line no-alert
     if (
       onDelete &&
       window.confirm("Are you sure you want to delete this comment?")

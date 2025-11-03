@@ -10,7 +10,7 @@ import {
 import {
   shouldUseLocalData,
   getCommentsForNode,
-  setUsingLocalData,
+  setUseLocalData,
 } from "@/lib/local-data";
 
 // GraphQL Queries
@@ -336,7 +336,7 @@ export async function listCommentsAPI(
       total: totalActivity, // Total includes all nested replies in response
     };
   } catch {
-    setUsingLocalData();
+    setUseLocalData(true);
     const result = getCommentsForNode(storyId, nodeId, {
       limit,
       nextToken,
