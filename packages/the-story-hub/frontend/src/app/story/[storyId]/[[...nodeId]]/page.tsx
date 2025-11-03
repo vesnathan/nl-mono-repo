@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/cognitive-complexity */
+
 "use client";
 
 import { useParams } from "next/navigation";
@@ -37,7 +39,7 @@ function BranchCommentButton({
 }) {
   const { data: commentData } = useQuery({
     queryKey: ["comments", storyId, nodeId, "NEWEST"],
-    queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", 1),
+    queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", "1"),
     enabled: !!nodeId,
   });
 
@@ -99,7 +101,7 @@ function ChapterSection({
   // Fetch comment count for main chapter
   const { data: mainCommentData } = useQuery({
     queryKey: ["comments", storyId, nodeId, "NEWEST"],
-    queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", 1),
+    queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", "1"),
     enabled: !!nodeId,
   });
 
