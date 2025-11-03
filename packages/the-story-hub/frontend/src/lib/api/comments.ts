@@ -277,35 +277,32 @@ const VOTE_ON_COMMENT = /* GraphQL */ `
   }
 `;
 
+// Helper function to recursively count all comments in the fetched response
+function countAllComments(comment: Comment): number {
+  let count = 1; // Count this comment
+  if (comment.replies && comment.replies.length > 0) {
+    count += comment.replies.reduce(
+      (sum, reply) => sum + countAllComments(reply),
+      0,
+    );
+  }
+  return count;
+}
+
 // API Functions
 export async function listCommentsAPI(
   storyId: string,
   nodeId: string,
   sortBy?: CommentSortBy,
-  limit: number = 20, // Default to 20 comments for better performance
   nextToken?: string,
+  limit = 20, // Default to 20 comments for better performance
 ): Promise<CommentConnection> {
-  console.log("===== API CALL: listCommentsAPI =====");
-  console.log("Request params:", {
-    storyId,
-    nodeId,
-    sortBy,
-    limit,
-    nextToken,
-  });
-
   // Use local data if enabled
   if (shouldUseLocalData()) {
-    console.log("Using local data with pagination");
     const result = getCommentsForNode(storyId, nodeId, {
       limit,
       nextToken,
       sortBy,
-    });
-    console.log("Local data result:", {
-      itemsCount: result.items.length,
-      total: result.total,
-      nextToken: result.nextToken,
     });
     return result as CommentConnection;
   }
@@ -323,54 +320,25 @@ export async function listCommentsAPI(
       // No authMode specified - uses default (Cognito with guest access)
     });
 
-    console.log(
-      "Response:",
-      JSON.stringify(response.data.listComments, null, 2),
-    );
-    console.log("=====================================\n");
-
     // Validate response with Zod
     const result = CommentConnectionSchema.parse(response.data.listComments);
 
-    // Recursively count all comments in the fetched response
-    function countAllComments(comment: Comment): number {
-      let count = 1; // Count this comment
-      if (comment.replies && comment.replies.length > 0) {
-        for (const reply of comment.replies) {
-          count += countAllComments(reply);
-        }
-      }
-      return count;
-    }
-
     // Calculate total by recursively counting all fetched comments and replies
-    let totalActivity = 0;
-    for (const comment of result.items) {
-      totalActivity += countAllComments(comment);
-    }
-
-    console.log(
-      `Calculated total activity (recursively counted from response): ${totalActivity}`,
+    const totalActivity = result.items.reduce(
+      (sum, comment) => sum + countAllComments(comment),
+      0,
     );
 
     return {
       ...result,
       total: totalActivity, // Total includes all nested replies in response
     };
-  } catch (error) {
-    console.error("===== API ERROR - Falling back to local data =====");
-    console.error("Error:", error);
-    console.error("==================================================\n");
+  } catch {
     setUsingLocalData();
     const result = getCommentsForNode(storyId, nodeId, {
       limit,
       nextToken,
       sortBy,
-    });
-    console.log("Fallback to local data result:", {
-      itemsCount: result.items.length,
-      total: result.total,
-      nextToken: result.nextToken,
     });
     return result as CommentConnection;
   }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@nextui-org/react";
+import type { Comment } from "@/types/CommentSchemas";
 import {
   listCommentsAPI,
   createCommentAPI,
@@ -12,7 +13,6 @@ import {
 } from "@/lib/api/comments";
 import { CommentThread } from "./CommentThread";
 import { CommentForm } from "./CommentForm";
-import type { Comment } from "@/types/CommentSchemas";
 
 interface CommentSectionProps {
   storyId: string;
@@ -27,7 +27,7 @@ export function CommentSection({
   currentUserId,
   storyAuthorId,
 }: CommentSectionProps) {
-  const [sortBy, setSortBy] = useState<
+  const [sortBy] = useState<
     "NEWEST" | "OLDEST" | "MOST_UPVOTED" | "MOST_REPLIES"
   >("NEWEST");
   const [showCommentForm, setShowCommentForm] = useState(false);
@@ -51,29 +51,7 @@ export function CommentSection({
 
   // Update allComments when new data arrives
   useEffect(() => {
-
     if (commentsData?.items) {
-
-      // Log each comment and its replies
-      commentsData.items.forEach((comment, idx) => {
-          commentId: comment.commentId,
-          content: comment.content?.substring(0, 50),
-          replyCount: comment.stats?.replyCount,
-          repliesLength: comment.replies?.length,
-          hasReplies: !!comment.replies,
-        });
-
-        if (comment.replies) {
-          comment.replies.forEach((reply, replyIdx) => {
-              commentId: reply.commentId,
-              content: reply.content?.substring(0, 50),
-              depth: reply.depth,
-              nestedRepliesLength: reply.replies?.length,
-            });
-          });
-        }
-      });
-
       if (nextToken && allComments.length > 0) {
         setAllComments((prev) => [...commentsData.items, ...prev]);
       } else {
@@ -84,9 +62,8 @@ export function CommentSection({
       if (commentsData.total !== undefined) {
         setTotalAvailable(commentsData.total);
       }
-    } else {
     }
-  }, [commentsData]);
+  }, [commentsData, nextToken, allComments.length]);
 
   // Load more comments
   const loadMoreComments = () => {

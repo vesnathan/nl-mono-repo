@@ -126,9 +126,9 @@ export default function SupportUsPage() {
             Our first Patrons Receive
           </h2>
           <ul className="space-y-3">
-            {universalBenefits.map((benefit, i) => (
+            {universalBenefits.map((benefit) => (
               <li
-                key={i}
+                key={benefit}
                 className="flex items-center justify-center text-gray-300"
               >
                 <span className="text-purple-400 mr-3 text-lg">✓</span>
@@ -140,8 +140,8 @@ export default function SupportUsPage() {
 
         {/* Tier Cards */}
         <div className="grid md:grid-cols-3 gap-6 mb-12 items-stretch">
-          {tiers.map((tier, index) => (
-            <div key={index} className="relative">
+          {tiers.map((tier) => (
+            <div key={tier.name} className="relative">
               {tier.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
                   <Chip color="secondary" variant="solid" size="sm">
@@ -167,9 +167,9 @@ export default function SupportUsPage() {
                 </CardHeader>
                 <CardBody className="flex flex-col flex-grow">
                   <ul className="space-y-3 mb-6 flex-grow">
-                    {tier.benefits.map((benefit, i) => (
+                    {tier.benefits.map((benefit) => (
                       <li
-                        key={i}
+                        key={benefit}
                         className={`flex items-start text-gray-300 ${
                           benefit.startsWith("All ") ? "font-semibold" : ""
                         }`}

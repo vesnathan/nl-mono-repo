@@ -1,8 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React from "react";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
-import { useRouter } from "next/navigation";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorMessage } from "./ErrorMessage";
 
@@ -40,5 +40,5 @@ export const RequireAdmin: React.FC<Props> = ({ children }) => {
     );
   }
 
-  return <>{children}</>;
+  return children;
 };

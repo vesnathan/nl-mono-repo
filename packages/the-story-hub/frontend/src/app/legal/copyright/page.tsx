@@ -32,9 +32,8 @@ export default function CopyrightPage() {
               All content on The Story Hub is protected by copyright law and is
               licensed under the
               <strong>
-                {" "}
-                Creative Commons Attribution-NonCommercial-NoDerivatives 4.0
-                International License (CC BY-NC-ND 4.0)
+                &nbpsp; Creative Commons Attribution-NonCommercial-NoDerivatives
+                4.0 International License (CC BY-NC-ND 4.0)
               </strong>
               .
             </p>

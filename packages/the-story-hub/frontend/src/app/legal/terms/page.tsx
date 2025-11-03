@@ -43,7 +43,7 @@ export default function TermsOfService() {
             <p>
               All content published on The Story Hub, including stories,
               chapters, and branches, is protected by copyright and is licensed
-              under the{" "}
+              under the&nbsp;
               <strong>
                 Creative Commons Attribution-NonCommercial-NoDerivatives 4.0
                 International License (CC BY-NC-ND 4.0)
@@ -144,7 +144,7 @@ export default function TermsOfService() {
               </li>
               <li>
                 You warrant that you have the right to submit the content and it
-                doesn&rsquo;t infringe on others' rights
+                doesn&apos;t infringe on others&apos; rights
               </li>
               <li>
                 You agree not to submit content that is illegal, harmful, or
@@ -179,7 +179,7 @@ export default function TermsOfService() {
               <li>Harass, abuse, or harm other users</li>
               <li>Post spam, malware, or malicious content</li>
               <li>Impersonate others or misrepresent your affiliation</li>
-              <li>Interfere with or disrupt the Platform's operation</li>
+              <li>Interfere with or disrupt the Platform&apos;s operation</li>
               <li>
                 Attempt to gain unauthorized access to systems or accounts
               </li>
@@ -268,9 +268,9 @@ export default function TermsOfService() {
             <p className="text-gray-800">
               <strong>
                 Automated scraping is illegal and will be prosecuted.
-              </strong>{" "}
-              We actively monitor for scraping activity and will take immediate
-              legal action against violators.
+              </strong>
+              &nbsp; We actively monitor for scraping activity and will take
+              immediate legal action against violators.
             </p>
           </section>
         </div>
