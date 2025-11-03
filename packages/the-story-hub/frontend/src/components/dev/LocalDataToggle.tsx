@@ -12,13 +12,14 @@ export function LocalDataToggle() {
     setIsLocal(shouldUseLocalData());
   }, []);
 
-  // Only show in dev stage
-  if (process.env.NEXT_PUBLIC_STAGE !== "dev") {
+  // Don't render until mounted (avoid hydration mismatch)
+  if (!mounted) {
     return null;
   }
 
-  // Don't render until mounted (avoid hydration mismatch)
-  if (!mounted) {
+  // Only show in dev stage or when STAGE is not set (local development)
+  const stage = process.env.NEXT_PUBLIC_STAGE;
+  if (stage && stage !== "dev") {
     return null;
   }
 
