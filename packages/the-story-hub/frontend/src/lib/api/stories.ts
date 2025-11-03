@@ -84,7 +84,7 @@ export async function listStoriesAPI(
 
     // Apply genre filter if provided
     if (filter?.genre) {
-      stories = stories.filter((story) => story.genre?.includes(filter.genre!));
+      stories = stories.filter((story) => (story.genre as string[])?.includes(filter.genre!));
     }
 
     // Apply limit if provided
@@ -92,10 +92,11 @@ export async function listStoriesAPI(
       stories = stories.slice(0, limit);
     }
 
+    // Cast to mutable Story[] type
     return {
-      items: stories as Story[],
+      items: stories.map(s => ({ ...s, genre: [...(s.genre as readonly string[])] })) as unknown as Story[],
       nextToken: null,
-      total: stories.length,
+      __typename: "StoryConnection" as const,
     };
   }
 
@@ -114,7 +115,7 @@ export async function listStoriesAPI(
 
     // Apply genre filter if provided
     if (filter?.genre) {
-      stories = stories.filter((story) => story.genre?.includes(filter.genre!));
+      stories = stories.filter((story) => (story.genre as string[])?.includes(filter.genre!));
     }
 
     // Apply limit if provided
@@ -122,10 +123,11 @@ export async function listStoriesAPI(
       stories = stories.slice(0, limit);
     }
 
+    // Cast to mutable Story[] type
     return {
-      items: stories as Story[],
+      items: stories.map(s => ({ ...s, genre: [...(s.genre as readonly string[])] })) as unknown as Story[],
       nextToken: null,
-      total: stories.length,
+      __typename: "StoryConnection" as const,
     };
   }
 }
@@ -148,5 +150,5 @@ export async function getReadingPathAPI(
     query: getReadingPath,
     variables: { storyId, nodePath },
   });
-  return result.data.getReadingPath;
+  return (result as { data: { getReadingPath: ChapterNode[] } }).data.getReadingPath;
 }

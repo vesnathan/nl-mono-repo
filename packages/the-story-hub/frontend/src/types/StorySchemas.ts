@@ -4,7 +4,7 @@ import { CONTENT_WARNINGS } from "@tsh/backend/constants/ContentWarnings";
 import { AgeRating } from "./gqlTypes";
 
 // Source of truth for age ratings is the GraphQL AgeRating enum
-const AGE_RATING_VALUES = Object.values(AgeRating);
+const AGE_RATING_VALUES = Object.values(AgeRating) as [string, ...string[]];
 
 export const CreateStoryFormSchema = z.object({
   title: z
