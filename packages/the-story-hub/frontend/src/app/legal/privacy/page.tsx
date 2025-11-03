@@ -28,10 +28,10 @@ export default function PrivacyPolicy() {
               1. Introduction
             </h2>
             <p>
-              The Story Hub ("we," "our," or "us") respects your privacy and is
-              committed to protecting your personal data. This Privacy Policy
-              explains how we collect, use, and protect your information when
-              you use our Platform.
+              The Story Hub (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;)
+              respects your privacy and is committed to protecting your personal
+              data. This Privacy Policy explains how we collect, use, and
+              protect your information when you use our Platform.
             </p>
           </section>
 
@@ -220,7 +220,7 @@ export default function PrivacyPolicy() {
 
           <section>
             <h2 className="text-2xl font-semibold text-[#21271C] mt-8 mb-4">
-              8. Children's Privacy
+              8. Children&apos;s Privacy
             </h2>
             <p>
               The Story Hub is not intended for users under 13 years of age. We
@@ -299,8 +299,8 @@ export default function PrivacyPolicy() {
             </h3>
             <p className="text-gray-800">
               We are committed to protecting your privacy and handling your data
-              responsibly. If you have any concerns, please don't hesitate to
-              reach out to us.
+              responsibly. If you have any concerns, please don&rsquo;t hesitate
+              to reach out to us.
             </p>
           </section>
         </div>

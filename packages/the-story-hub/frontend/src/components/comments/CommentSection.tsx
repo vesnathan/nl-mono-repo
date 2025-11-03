@@ -12,6 +12,7 @@ import {
 } from "@/lib/api/comments";
 import { CommentThread } from "./CommentThread";
 import { CommentForm } from "./CommentForm";
+import type { Comment } from "@/types/CommentSchemas";
 
 interface CommentSectionProps {
   storyId: string;
@@ -30,7 +31,7 @@ export function CommentSection({
     "NEWEST" | "OLDEST" | "MOST_UPVOTED" | "MOST_REPLIES"
   >("NEWEST");
   const [showCommentForm, setShowCommentForm] = useState(false);
-  const [allComments, setAllComments] = useState<any[]>([]);
+  const [allComments, setAllComments] = useState<Comment[]>([]);
   const [nextToken, setNextToken] = useState<string | null>(null);
   const [totalAvailable, setTotalAvailable] = useState<number>(0);
   const queryClient = useQueryClient();
@@ -40,7 +41,6 @@ export function CommentSection({
     data: commentsData,
     isLoading,
     error,
-    refetch,
   } = useQuery({
     queryKey: ["comments", storyId, nodeId, sortBy, nextToken],
     queryFn: () =>
@@ -51,20 +51,11 @@ export function CommentSection({
 
   // Update allComments when new data arrives
   useEffect(() => {
-    console.log("===== COMMENTS DATA UPDATE =====");
-    console.log("commentsData:", JSON.stringify(commentsData, null, 2));
-    console.log("nextToken:", nextToken);
-    console.log("allComments.length:", allComments.length);
-    console.log("commentsData?.items?.length:", commentsData?.items?.length);
-    console.log("commentsData?.total:", commentsData?.total);
-    console.log("commentsData?.nextToken:", commentsData?.nextToken);
 
     if (commentsData?.items) {
-      console.log("Processing comments data...");
 
       // Log each comment and its replies
       commentsData.items.forEach((comment, idx) => {
-        console.log(`Comment ${idx}:`, {
           commentId: comment.commentId,
           content: comment.content?.substring(0, 50),
           replyCount: comment.stats?.replyCount,
@@ -74,7 +65,6 @@ export function CommentSection({
 
         if (comment.replies) {
           comment.replies.forEach((reply, replyIdx) => {
-            console.log(`  Reply ${replyIdx}:`, {
               commentId: reply.commentId,
               content: reply.content?.substring(0, 50),
               depth: reply.depth,
@@ -85,10 +75,8 @@ export function CommentSection({
       });
 
       if (nextToken && allComments.length > 0) {
-        console.log("PREPENDING older comments to top of list");
         setAllComments((prev) => [...commentsData.items, ...prev]);
       } else {
-        console.log("REPLACING all comments with new data");
         setAllComments(commentsData.items);
       }
 
@@ -97,18 +85,8 @@ export function CommentSection({
         setTotalAvailable(commentsData.total);
       }
     } else {
-      console.log("No commentsData.items to process");
     }
-    console.log("================================\n");
   }, [commentsData]);
-
-  // Reset when sort changes
-  const handleSortChange = (newSort: typeof sortBy) => {
-    setSortBy(newSort);
-    setNextToken(null);
-    setAllComments([]);
-    setTotalAvailable(0);
-  };
 
   // Load more comments
   const loadMoreComments = () => {
@@ -211,11 +189,11 @@ export function CommentSection({
   const hasPreviousComments = allComments.length < totalAvailable;
 
   // Count total replies recursively
-  const countReplies = (comment: any): number => {
+  const countReplies = (comment: Comment): number => {
     let count = 0;
     if (comment.replies && comment.replies.length > 0) {
       count += comment.replies.length;
-      comment.replies.forEach((reply: any) => {
+      comment.replies.forEach((reply: Comment) => {
         count += countReplies(reply);
       });
     }
@@ -227,16 +205,6 @@ export function CommentSection({
     0,
   );
 
-  console.log("===== RENDER STATE =====");
-  console.log("Rendering with comments.length:", comments.length);
-  console.log("hasError:", hasError);
-  console.log("hasMore:", hasMore);
-  console.log("hasPreviousComments:", hasPreviousComments);
-  console.log("totalAvailable:", totalAvailable);
-  console.log("totalReplies:", totalReplies);
-  console.log("isLoading:", isLoading);
-  console.log("Total from API:", commentsData?.total);
-  console.log("========================\n");
 
   return (
     <div className="bg-gray-900 border border-gray-700 p-6 rounded-lg">

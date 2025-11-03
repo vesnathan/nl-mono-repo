@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unescaped-entities */
+
 "use client";
 
 import Link from "next/link";
@@ -28,9 +30,9 @@ export default function TermsOfService() {
               1. Acceptance of Terms
             </h2>
             <p>
-              By accessing or using The Story Hub ("the Platform"), you agree to
-              be bound by these Terms of Service. If you do not agree to these
-              terms, please do not use the Platform.
+              By accessing or using The Story Hub (&quot;the Platform&quot;),
+              you agree to be bound by these Terms of Service. If you do not
+              agree to these terms, please do not use the Platform.
             </p>
           </section>
 
@@ -142,7 +144,7 @@ export default function TermsOfService() {
               </li>
               <li>
                 You warrant that you have the right to submit the content and it
-                doesn't infringe on others' rights
+                doesn&rsquo;t infringe on others' rights
               </li>
               <li>
                 You agree not to submit content that is illegal, harmful, or
@@ -204,8 +206,8 @@ export default function TermsOfService() {
               8. Disclaimer of Warranties
             </h2>
             <p>
-              THE PLATFORM IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND.
-              We do not guarantee:
+              THE PLATFORM IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTIES OF
+              ANY KIND. We do not guarantee:
             </p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Uninterrupted or error-free operation</li>

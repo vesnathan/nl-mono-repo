@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { Button, Avatar, Accordion, AccordionItem } from "@nextui-org/react";
 import { Comment } from "@/types/CommentSchemas";
+import { AuthorBadge } from "@/components/common/AuthorBadge";
+import { OGBadge } from "@/components/common/OGBadge";
+import { PatreonBadge } from "@/components/common/PatreonBadge";
 import { CommentForm } from "./CommentForm";
 import { CommentThreadModal } from "./CommentThreadModal";
-import { PatreonBadge } from "@/components/common/PatreonBadge";
-import { OGBadge } from "@/components/common/OGBadge";
-import { AuthorBadge } from "@/components/common/AuthorBadge";
 
 interface CommentThreadProps {
   comment: Comment;
@@ -66,7 +66,10 @@ export function CommentThread({
   };
 
   const handleDelete = async () => {
-    if (onDelete && confirm("Are you sure you want to delete this comment?")) {
+    if (
+      onDelete &&
+      window.confirm("Are you sure you want to delete this comment?")
+    ) {
       await onDelete(comment.commentId);
     }
   };
@@ -115,7 +118,6 @@ export function CommentThread({
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
                   className="w-full bg-gray-900 text-white border border-gray-600 rounded p-2 min-h-[80px]"
-                  autoFocus
                 />
                 <div className="flex gap-2 mt-2">
                   <Button size="sm" color="primary" onClick={handleEdit}>

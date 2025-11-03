@@ -6,10 +6,7 @@ import Image from "next/image";
 import { StoriesGrid } from "@/components/stories/StoriesGrid";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
-import {
-  useFeaturedStories,
-  useTrendingStories,
-} from "@/hooks/useStories";
+import { useFeaturedStories, useTrendingStories } from "@/hooks/useStories";
 import { GenreSection } from "@/components/home/GenreSection";
 import { getHomePageGenres } from "@/constants/genres";
 
@@ -239,7 +236,14 @@ export default function HomePage() {
       {homePageGenres.map((genre, index) => {
         // Alternate between ParallaxSection (dark) and GenreSection (which uses ParallaxSection internally)
         // For visual variety, we'll just use GenreSection with alternating backgrounds
-        const backgrounds = ["#1a1a1a", "#2a2a2a", "#1a1a1a", "#252525", "#1a1a1a", "#222222"];
+        const backgrounds = [
+          "#1a1a1a",
+          "#2a2a2a",
+          "#1a1a1a",
+          "#252525",
+          "#1a1a1a",
+          "#222222",
+        ];
         return (
           <GenreSection
             key={genre}

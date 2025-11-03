@@ -231,9 +231,9 @@ export default function SupportUsPage() {
                 How do I access the Discord?
               </h3>
               <p>
-                Once you become a patron, you'll receive a Discord invite link
-                via Patreon. This gives you access to patron-only channels and
-                direct communication with the development team.
+                Once you become a patron, you&apos;ll receive a Discord invite
+                link via Patreon. This gives you access to patron-only channels
+                and direct communication with the development team.
               </p>
             </div>
             <div>

@@ -279,6 +279,13 @@ function ChapterSection({
                     <div
                       className="mt-4 pt-4 border-t border-gray-700"
                       onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.stopPropagation();
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
                     >
                       <CommentSection
                         storyId={storyId}
@@ -301,7 +308,6 @@ function ChapterSection({
                 actionDescription="add a new branch to this story"
                 onPress={() => {
                   // TODO: Navigate to branch creation page
-                  console.log("Add branch clicked for node:", nodeId);
                 }}
               >
                 + Add Your Own Branch
@@ -491,7 +497,6 @@ function ChapterSection({
                     actionDescription="add a new branch to this story"
                     onPress={() => {
                       // TODO: Navigate to branch creation page
-                      console.log("Add branch clicked for node:", nodeId);
                     }}
                   >
                     + Add Your Own Branch
@@ -517,7 +522,6 @@ function ChapterSection({
             actionDescription="continue this story"
             onPress={() => {
               // TODO: Navigate to branch creation page
-              console.log("Continue story clicked for node:", nodeId);
             }}
           >
             Continue the Story
@@ -677,7 +681,7 @@ export default function StoryDetailPage() {
               storyId={storyId}
               nodeId={story.rootNodeId}
               story={story}
-              isRoot={true}
+              isRoot
               currentUserId={userId}
               storyAuthorId={story.authorId}
             />

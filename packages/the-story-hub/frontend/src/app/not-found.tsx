@@ -25,7 +25,7 @@ export default function NotFound() {
         <div className="text-xl text-gray-400 mb-8 max-w-lg mx-auto space-y-2 italic">
           <p>You searched for a page, but got a glitch,</p>
           <p>Took a wrong turn at that narrative switch.</p>
-          <p>This chapter's blank, the plot's gone astray,</p>
+          <p>This chapter&apos;s blank, the plot&apos;s gone astray,</p>
           <p>Time to branch back and find your way!</p>
         </div>
 
