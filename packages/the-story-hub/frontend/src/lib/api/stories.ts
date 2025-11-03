@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+import { z } from "zod";
 import { client } from "@/lib/amplify";
 import { createStory, updateStory } from "@/graphql/mutations";
 import {
@@ -10,15 +11,17 @@ import {
 import {
   StorySchema,
   StoryConnectionSchema,
+  TreeDataSchema,
+  ChapterNodeSchema,
   type Story,
   type StoryConnection,
-} from "@/types/StorySchemas";
+  type TreeData,
+  type ChapterNode,
+} from "@/types/ValidationSchemas";
 import type {
   CreateStoryInput,
   UpdateStoryInput,
   StoryFilter,
-  TreeData,
-  ChapterNode,
 } from "@/types/gqlTypes";
 import {
   shouldUseLocalData,
@@ -84,7 +87,7 @@ export async function listStoriesAPI(
 
     // Apply genre filter if provided
     if (filter?.genre) {
-      stories = stories.filter((story) => (story.genre as string[])?.includes(filter.genre!));
+      stories = stories.filter((story) => (story.genre as unknown as string[])?.includes(filter.genre!));
     }
 
     // Apply limit if provided
@@ -94,7 +97,7 @@ export async function listStoriesAPI(
 
     // Cast to mutable Story[] type
     return {
-      items: stories.map(s => ({ ...s, genre: [...(s.genre as readonly string[])] })) as unknown as Story[],
+      items: stories.map(s => ({ ...s, genre: [...(s.genre as unknown as readonly string[])] })) as unknown as Story[],
       nextToken: null,
       __typename: "StoryConnection" as const,
     };
@@ -115,7 +118,7 @@ export async function listStoriesAPI(
 
     // Apply genre filter if provided
     if (filter?.genre) {
-      stories = stories.filter((story) => (story.genre as string[])?.includes(filter.genre!));
+      stories = stories.filter((story) => (story.genre as unknown as string[])?.includes(filter.genre!));
     }
 
     // Apply limit if provided
@@ -125,7 +128,7 @@ export async function listStoriesAPI(
 
     // Cast to mutable Story[] type
     return {
-      items: stories.map(s => ({ ...s, genre: [...(s.genre as readonly string[])] })) as unknown as Story[],
+      items: stories.map(s => ({ ...s, genre: [...(s.genre as unknown as readonly string[])] })) as unknown as Story[],
       nextToken: null,
       __typename: "StoryConnection" as const,
     };
@@ -139,7 +142,8 @@ export async function getStoryTreeAPI(
     query: getStoryTree,
     variables: { storyId },
   });
-  return (result.data.getStoryTree as TreeData) ?? null;
+  if (!result.data.getStoryTree) return null;
+  return TreeDataSchema.parse(result.data.getStoryTree);
 }
 
 export async function getReadingPathAPI(
@@ -150,5 +154,7 @@ export async function getReadingPathAPI(
     query: getReadingPath,
     variables: { storyId, nodePath },
   });
-  return (result as { data: { getReadingPath: ChapterNode[] } }).data.getReadingPath;
+  return z.array(ChapterNodeSchema).parse(
+    (result as { data: { getReadingPath: unknown } }).data.getReadingPath
+  );
 }

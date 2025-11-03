@@ -16,6 +16,7 @@ export const LOCAL_DATA = {
   users: SEED_USERS,
   stories: SEED_STORIES.map((story) => ({
     ...story,
+    __typename: "Story" as const,
     // Map to frontend format if needed
   })),
   nodes: SEED_NODES.reduce(

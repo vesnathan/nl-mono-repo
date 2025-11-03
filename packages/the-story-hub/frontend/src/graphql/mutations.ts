@@ -30,10 +30,17 @@ export const createChapter =
     storyId
     parentNodeId
     authorId
+    authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -61,10 +68,17 @@ export const createBranch =
     storyId
     parentNodeId
     authorId
+    authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -92,10 +106,17 @@ export const updateChapter =
     storyId
     parentNodeId
     authorId
+    authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -123,10 +144,17 @@ export const voteOnChapter =
     storyId
     parentNodeId
     authorId
+    authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -154,10 +182,17 @@ export const awardBadge =
     storyId
     parentNodeId
     authorId
+    authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {

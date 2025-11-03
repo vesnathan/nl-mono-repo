@@ -30,10 +30,16 @@ export const getChapter =
     parentNodeId
     authorId
     authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -62,10 +68,13 @@ export const listBranches =
     parentNodeId
     authorId
     authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
     ageRating
     contentWarnings
     maxChildAgeRating
@@ -94,6 +103,8 @@ export const getStory = /* GraphQL */ `query GetStory($storyId: ID!) {
     storyId
     authorId
     authorName
+    authorPatreonSupporter
+    authorOGSupporter
     title
     synopsis
     genre
@@ -124,6 +135,8 @@ export const listStories =
       storyId
       authorId
       authorName
+      authorPatreonSupporter
+      authorOGSupporter
       title
       synopsis
       genre
@@ -241,10 +254,17 @@ export const getReadingPath =
     storyId
     parentNodeId
     authorId
+    authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -310,6 +330,7 @@ export const getUserProfile =
       __typename
     }
     patreonSupporter
+    ogSupporter
     clientType
     createdAt
     __typename
