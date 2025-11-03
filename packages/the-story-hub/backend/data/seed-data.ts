@@ -2046,3 +2046,12 @@ export const SEED_COMMENTS = [
     },
   },
 ] as const;
+
+// Site Settings
+export const SEED_SITE_SETTINGS = {
+  PK: "SETTINGS#SITE",
+  SK: "CONFIG#GLOBAL",
+  grantOGBadgeToPatreonSupporters: false, // Default: OFF - admins can turn on to grant OG badges to new Patreon supporters
+  updatedAt: "2024-01-15T00:00:00Z",
+  updatedBy: USER_IDS.ADMIN,
+} as const;
