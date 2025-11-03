@@ -29,22 +29,34 @@ export const LOCAL_DATA = {
   comments: SEED_COMMENTS,
 };
 
-// Track if we're using local data (either forced or fallback)
-let usingLocalData = false;
+const LOCAL_STORAGE_KEY = "tsh-use-local-data";
 
-// Set flag that we're using local data
-export function setUsingLocalData() {
-  usingLocalData = true;
+// Get the saved preference from localStorage
+function getLocalDataPreference(): boolean {
+  if (typeof window === "undefined") return false;
+  const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+  return saved === "true";
 }
 
-// Check if we should use local data
+// Check if we should use local data (from env or localStorage)
 export function shouldUseLocalData(): boolean {
-  return process.env.NEXT_PUBLIC_USE_LOCAL_DATA === "true";
+  return (
+    process.env.NEXT_PUBLIC_USE_LOCAL_DATA === "true" ||
+    getLocalDataPreference()
+  );
 }
 
-// Check if we're currently using local data (forced or fallback)
-export function isUsingLocalData(): boolean {
-  return process.env.NEXT_PUBLIC_USE_LOCAL_DATA === "true" || usingLocalData;
+// Set local data preference (saves to localStorage)
+export function setUseLocalData(enabled: boolean) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(LOCAL_STORAGE_KEY, String(enabled));
+}
+
+// Toggle local data mode
+export function toggleLocalData(): boolean {
+  const newValue = !shouldUseLocalData();
+  setUseLocalData(newValue);
+  return newValue;
 }
 
 // Get story by ID
