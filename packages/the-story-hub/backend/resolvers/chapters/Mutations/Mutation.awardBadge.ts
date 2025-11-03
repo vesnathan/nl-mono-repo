@@ -20,10 +20,7 @@ export function request(ctx: CTX) {
   // TODO: Verify user is story author or has permission to award badges
   // This would require fetching the story first in a pipeline resolver
 
-  const badgeField =
-    input.badgeType === BadgeType.MATCHES_VISION
-      ? "matchesVision"
-      : "authorApproved";
+  const badgeField = "authorApproved";
 
   return {
     operation: "UpdateItem",

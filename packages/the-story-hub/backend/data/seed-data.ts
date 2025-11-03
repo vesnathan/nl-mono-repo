@@ -508,7 +508,6 @@ export const SEED_NODES = [
       childBranches: 3,
     },
     badges: {
-      matchesVision: false,
       authorApproved: false,
     },
   },
@@ -531,7 +530,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: true,
     },
   },
@@ -554,7 +552,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: false,
     },
   },
@@ -577,7 +574,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: true,
     },
   },
@@ -602,7 +598,6 @@ export const SEED_NODES = [
       childBranches: 3,
     },
     badges: {
-      matchesVision: false,
       authorApproved: false,
     },
   },
@@ -625,7 +620,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: true,
     },
   },
@@ -648,7 +642,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: true,
     },
   },
@@ -671,7 +664,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: false,
     },
   },
@@ -696,7 +688,6 @@ export const SEED_NODES = [
       childBranches: 3,
     },
     badges: {
-      matchesVision: false,
       authorApproved: false,
     },
   },
@@ -719,7 +710,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: true,
     },
   },
@@ -742,7 +732,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: true,
     },
   },
@@ -765,7 +754,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: false,
     },
   },
@@ -790,7 +778,6 @@ export const SEED_NODES = [
       childBranches: 3,
     },
     badges: {
-      matchesVision: false,
       authorApproved: false,
     },
   },
@@ -813,7 +800,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: true,
     },
   },
@@ -836,7 +822,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: true,
     },
   },
@@ -859,7 +844,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: false,
     },
   },
@@ -884,7 +868,6 @@ export const SEED_NODES = [
       childBranches: 3,
     },
     badges: {
-      matchesVision: false,
       authorApproved: false,
     },
   },
@@ -907,7 +890,6 @@ export const SEED_NODES = [
       childBranches: 1,
     },
     badges: {
-      matchesVision: true,
       authorApproved: true,
     },
   },
@@ -930,7 +912,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: true,
     },
   },
@@ -953,7 +934,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: true,
     },
   },
@@ -976,7 +956,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: false,
     },
   },

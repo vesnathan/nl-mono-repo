@@ -62,7 +62,6 @@ export function request(ctx: CTX) {
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: false,
     },
   };

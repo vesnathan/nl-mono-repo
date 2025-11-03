@@ -44,7 +44,6 @@ export const getChapter =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -80,7 +79,6 @@ export const listBranches =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -168,7 +166,6 @@ export const getStoryTree = /* GraphQL */ `query GetStoryTree($storyId: ID!) {
         __typename
       }
       badges {
-        matchesVision
         authorApproved
         __typename
       }
@@ -185,7 +182,6 @@ export const getStoryTree = /* GraphQL */ `query GetStoryTree($storyId: ID!) {
           __typename
         }
         badges {
-          matchesVision
           authorApproved
           __typename
         }
@@ -202,7 +198,6 @@ export const getStoryTree = /* GraphQL */ `query GetStoryTree($storyId: ID!) {
             __typename
           }
           badges {
-            matchesVision
             authorApproved
             __typename
           }
@@ -219,7 +214,6 @@ export const getStoryTree = /* GraphQL */ `query GetStoryTree($storyId: ID!) {
               __typename
             }
             badges {
-              matchesVision
               authorApproved
               __typename
             }
@@ -261,7 +255,6 @@ export const getReadingPath =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }

@@ -44,7 +44,6 @@ export const createChapter =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -76,7 +75,6 @@ export const createBranch =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -108,7 +106,6 @@ export const updateChapter =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -140,7 +137,6 @@ export const voteOnChapter =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -172,7 +168,6 @@ export const awardBadge =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }

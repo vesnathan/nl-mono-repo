@@ -390,7 +390,6 @@ function createStory(
       childBranches: 0, // Renamed from branchCount
     },
     badges: {
-      matchesVision: false,
       authorApproved: false,
     },
   };
@@ -437,7 +436,6 @@ function createBranchChapter(
       childBranches: 0,
     },
     badges: {
-      matchesVision: Math.random() > 0.7, // 30% chance
       authorApproved: Math.random() > 0.8, // 20% chance
     },
   };

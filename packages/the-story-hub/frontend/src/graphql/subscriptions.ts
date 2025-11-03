@@ -48,7 +48,6 @@ export const onNewBranch =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }

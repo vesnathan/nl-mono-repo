@@ -11,7 +11,6 @@ type ChapterStats @aws_iam @aws_cognito_user_pools {
 }
 
 type ChapterBadges @aws_iam @aws_cognito_user_pools {
-  matchesVision: Boolean!
   authorApproved: Boolean!
 }
 
@@ -66,7 +65,6 @@ enum VoteType {
 }
 
 enum BadgeType {
-  MATCHES_VISION
   AUTHOR_APPROVED
 }
 

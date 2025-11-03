@@ -116,8 +116,8 @@ function ChapterSection({
   // Sort branches to put OP Approved first
   const sortedBranches = branches
     ? [...branches].sort((a, b) => {
-        if (a.badges?.matchesVision && !b.badges?.matchesVision) return -1;
-        if (!a.badges?.matchesVision && b.badges?.matchesVision) return 1;
+        if (a.badges?.authorApproved && !b.badges?.authorApproved) return -1;
+        if (!a.badges?.authorApproved && b.badges?.authorApproved) return 1;
         return 0;
       })
     : [];
@@ -237,14 +237,6 @@ function ChapterSection({
                           title="Approved by original poster"
                         >
                           ✓ OP Approved
-                        </span>
-                      )}
-                      {branch.badges?.matchesVision && (
-                        <span
-                          className="px-2 py-1 text-xs bg-blue-600 text-white rounded whitespace-nowrap"
-                          title="Approved by original poster"
-                        >
-                          ★ OP Approved
                         </span>
                       )}
                     </div>
@@ -386,14 +378,6 @@ function ChapterSection({
                               title="Approved by original poster"
                             >
                               ✓ OP Approved
-                            </span>
-                          )}
-                          {branch.badges?.matchesVision && (
-                            <span
-                              className="px-2 py-1 text-xs bg-blue-600 text-white rounded whitespace-nowrap"
-                              title="Approved by original poster"
-                            >
-                              ★ OP Approved
                             </span>
                           )}
                         </div>
