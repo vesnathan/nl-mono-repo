@@ -31,6 +31,7 @@ export type Story = GQLStory; // Use GraphQL type directly
 ```
 
 **Benefits:**
+
 - ✅ **Runtime validation** - Zod validates API responses at runtime
 - ✅ **Compile-time type safety** - TypeScript ensures schema matches GraphQL types
 - ✅ **Single source of truth** - GraphQL types drive TypeScript types
@@ -41,6 +42,7 @@ export type Story = GQLStory; // Use GraphQL type directly
 All API functions use Zod schemas to parse GraphQL responses:
 
 #### Example: chapters.ts
+
 ```typescript
 export async function createChapterAPI(
   input: CreateChapterInput,
@@ -54,6 +56,7 @@ export async function createChapterAPI(
 ```
 
 #### Example: stories.ts
+
 ```typescript
 export async function listStoriesAPI(
   filter?: StoryFilter,
@@ -83,6 +86,7 @@ These files re-export response validation schemas from `ValidationSchemas.ts` fo
 
 1. **Check if GraphQL type exists** in `/src/types/gqlTypes.ts`
 2. **Create Zod schema** in `/src/types/ValidationSchemas.ts`:
+
    ```typescript
    export const YourTypeSchema: z.ZodType<GQLYourType> = z.object({
      __typename: z.literal("YourType"),
@@ -91,7 +95,9 @@ These files re-export response validation schemas from `ValidationSchemas.ts` fo
 
    export type YourType = GQLYourType;
    ```
+
 3. **Use schema in API function**:
+
    ```typescript
    import { YourTypeSchema, type YourType } from "@/types/ValidationSchemas";
 
@@ -128,18 +134,18 @@ export const TreeNodeSchema: z.ZodType<GQLTreeNode> = z.lazy(() =>
     __typename: z.literal("TreeNode"),
     // ... fields
     children: z.array(TreeNodeSchema), // Recursive!
-  })
+  }),
 );
 ```
 
 ## Validation Locations
 
-| API Module | Validation Applied | Schema Location |
-|------------|-------------------|-----------------|
-| `/lib/api/chapters.ts` | ✅ All endpoints | `ValidationSchemas.ts` |
-| `/lib/api/stories.ts` | ✅ All endpoints | `ValidationSchemas.ts` |
-| `/lib/api/users.ts` | ✅ All endpoints | `ValidationSchemas.ts` |
-| `/lib/api/comments.ts` | ✅ All endpoints | `CommentSchemas.ts` |
+| API Module             | Validation Applied | Schema Location        |
+| ---------------------- | ------------------ | ---------------------- |
+| `/lib/api/chapters.ts` | ✅ All endpoints   | `ValidationSchemas.ts` |
+| `/lib/api/stories.ts`  | ✅ All endpoints   | `ValidationSchemas.ts` |
+| `/lib/api/users.ts`    | ✅ All endpoints   | `ValidationSchemas.ts` |
+| `/lib/api/comments.ts` | ✅ All endpoints   | `CommentSchemas.ts`    |
 
 ## Error Handling
 

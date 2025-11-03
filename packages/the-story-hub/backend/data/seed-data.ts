@@ -501,6 +501,8 @@ export const SEED_NODES = [
     branchDescription: null,
     paragraphIndex: null,
     parentNodeId: null,
+    createdAt: "2024-01-15T10:00:00Z",
+    editableUntil: "2024-01-16T10:00:00Z",
     stats: {
       reads: 1234,
       upvotes: 89,
@@ -523,6 +525,8 @@ export const SEED_NODES = [
     branchDescription: "The Path of Shadows",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.ENCHANTED_FOREST_ROOT,
+    createdAt: "2024-01-17T14:00:00.000Z",
+    editableUntil: "2024-01-18T14:00:00.000Z",
     stats: {
       reads: 456,
       upvotes: 42,
@@ -545,6 +549,8 @@ export const SEED_NODES = [
     branchDescription: "The Ancient Oak",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.ENCHANTED_FOREST_ROOT,
+    createdAt: "2024-01-17T16:00:00.000Z",
+    editableUntil: "2024-01-18T16:00:00.000Z",
     stats: {
       reads: 389,
       upvotes: 51,
@@ -567,6 +573,8 @@ export const SEED_NODES = [
     branchDescription: "Into the Wild",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.ENCHANTED_FOREST_ROOT,
+    createdAt: "2024-01-17T19:00:00.000Z",
+    editableUntil: "2024-01-18T19:00:00.000Z",
     stats: {
       reads: 389,
       upvotes: 47,
@@ -591,6 +599,8 @@ export const SEED_NODES = [
     branchDescription: null,
     paragraphIndex: null,
     parentNodeId: null,
+    createdAt: "2024-01-17T21:00:00.000Z",
+    editableUntil: "2024-01-18T21:00:00.000Z",
     stats: {
       reads: 892,
       upvotes: 67,
@@ -613,6 +623,8 @@ export const SEED_NODES = [
     branchDescription: "Trust the Message",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.CYBER_NEXUS_ROOT,
+    createdAt: "2024-01-17T23:00:00.000Z",
+    editableUntil: "2024-01-18T23:00:00.000Z",
     stats: {
       reads: 312,
       upvotes: 38,
@@ -635,6 +647,8 @@ export const SEED_NODES = [
     branchDescription: "Report to the Team",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.CYBER_NEXUS_ROOT,
+    createdAt: "2024-01-18T01:00:00.000Z",
+    editableUntil: "2024-01-19T01:00:00.000Z",
     stats: {
       reads: 289,
       upvotes: 34,
@@ -657,6 +671,8 @@ export const SEED_NODES = [
     branchDescription: "Go Dark",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.CYBER_NEXUS_ROOT,
+    createdAt: "2024-01-18T04:00:00.000Z",
+    editableUntil: "2024-01-19T04:00:00.000Z",
     stats: {
       reads: 291,
       upvotes: 41,
@@ -681,6 +697,8 @@ export const SEED_NODES = [
     branchDescription: null,
     paragraphIndex: null,
     parentNodeId: null,
+    createdAt: "2024-01-18T06:00:00.000Z",
+    editableUntil: "2024-01-19T06:00:00.000Z",
     stats: {
       reads: 567,
       upvotes: 45,
@@ -703,6 +721,8 @@ export const SEED_NODES = [
     branchDescription: "Examine the Study",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.BLACKWOOD_MANOR_ROOT,
+    createdAt: "2024-01-18T08:00:00.000Z",
+    editableUntil: "2024-01-19T08:00:00.000Z",
     stats: {
       reads: 234,
       upvotes: 28,
@@ -725,6 +745,8 @@ export const SEED_NODES = [
     branchDescription: "Interview the Guests",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.BLACKWOOD_MANOR_ROOT,
+    createdAt: "2024-01-18T10:00:00.000Z",
+    editableUntil: "2024-01-19T10:00:00.000Z",
     stats: {
       reads: 198,
       upvotes: 31,
@@ -747,6 +769,8 @@ export const SEED_NODES = [
     branchDescription: "Search the Grounds",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.BLACKWOOD_MANOR_ROOT,
+    createdAt: "2024-01-18T13:00:00.000Z",
+    editableUntil: "2024-01-19T13:00:00.000Z",
     stats: {
       reads: 135,
       upvotes: 26,
@@ -771,6 +795,8 @@ export const SEED_NODES = [
     branchDescription: null,
     paragraphIndex: null,
     parentNodeId: null,
+    createdAt: "2024-01-18T15:00:00.000Z",
+    editableUntil: "2024-01-19T15:00:00.000Z",
     stats: {
       reads: 423,
       upvotes: 38,
@@ -793,6 +819,8 @@ export const SEED_NODES = [
     branchDescription: "Listen to Their Story",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.LOVE_DRAGONS_ROOT,
+    createdAt: "2024-01-18T17:00:00.000Z",
+    editableUntil: "2024-01-19T17:00:00.000Z",
     stats: {
       reads: 178,
       upvotes: 24,
@@ -815,6 +843,8 @@ export const SEED_NODES = [
     branchDescription: "Call for Help",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.LOVE_DRAGONS_ROOT,
+    createdAt: "2024-01-18T19:00:00.000Z",
+    editableUntil: "2024-01-19T19:00:00.000Z",
     stats: {
       reads: 142,
       upvotes: 19,
@@ -837,6 +867,8 @@ export const SEED_NODES = [
     branchDescription: "Keep It Professional",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.LOVE_DRAGONS_ROOT,
+    createdAt: "2024-01-18T22:00:00.000Z",
+    editableUntil: "2024-01-19T22:00:00.000Z",
     stats: {
       reads: 103,
       upvotes: 22,
@@ -861,6 +893,8 @@ export const SEED_NODES = [
     branchDescription: null,
     paragraphIndex: null,
     parentNodeId: null,
+    createdAt: "2024-01-19T00:00:00.000Z",
+    editableUntil: "2024-01-20T00:00:00.000Z",
     stats: {
       reads: 756,
       upvotes: 72,
@@ -883,6 +917,8 @@ export const SEED_NODES = [
     branchDescription: "Decrypt Immediately",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.TRANSCENDENCE_ROOT,
+    createdAt: "2024-01-19T02:00:00.000Z",
+    editableUntil: "2024-01-20T02:00:00.000Z",
     stats: {
       reads: 289,
       upvotes: 36,
@@ -927,6 +963,8 @@ export const SEED_NODES = [
     branchDescription: "Consult the Scientific Community",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.TRANSCENDENCE_ROOT,
+    createdAt: "2024-01-19T07:00:00.000Z",
+    editableUntil: "2024-01-20T07:00:00.000Z",
     stats: {
       reads: 251,
       upvotes: 42,
@@ -949,6 +987,8 @@ export const SEED_NODES = [
     branchDescription: "Keep It Secret",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.TRANSCENDENCE_ROOT,
+    createdAt: "2024-01-19T09:00:00.000Z",
+    editableUntil: "2024-01-20T09:00:00.000Z",
     stats: {
       reads: 216,
       upvotes: 39,

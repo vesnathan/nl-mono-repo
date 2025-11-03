@@ -40,7 +40,7 @@ function BranchCommentButton({
 }) {
   const { data: commentData } = useQuery({
     queryKey: ["comments", storyId, nodeId, "NEWEST"],
-    queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", "1"),
+    queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", undefined, 1),
     enabled: !!nodeId,
   });
 
@@ -102,7 +102,7 @@ function ChapterSection({
   // Fetch comment count for main chapter
   const { data: mainCommentData } = useQuery({
     queryKey: ["comments", storyId, nodeId, "NEWEST"],
-    queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", "1"),
+    queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", undefined, 1),
     enabled: !!nodeId,
   });
 
@@ -604,13 +604,15 @@ export default function StoryDetailPage() {
             <div className="flex flex-col md:flex-row gap-6">
               {/* Cover Image */}
               {story.coverImageUrl && (
-                <Image
-                  src={story.coverImageUrl}
-                  alt={story.title}
-                  width={192} // Replace with the actual width of the image
-                  height={288} // Replace with the actual height of the image
-                  className="w-full h-full object-cover rounded"
-                />
+                <div className="flex-shrink-0">
+                  <Image
+                    src={story.coverImageUrl}
+                    alt={story.title}
+                    width={192}
+                    height={288}
+                    className="w-48 h-72 object-cover rounded shadow-lg"
+                  />
+                </div>
               )}
 
               {/* Story Info */}

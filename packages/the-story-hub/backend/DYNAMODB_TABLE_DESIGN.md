@@ -7,14 +7,17 @@ This document describes the single-table design pattern used for the Story Hub a
 **Table Name**: `nlmonorepo-tsh-datatable-{Stage}`
 
 **Primary Key**:
+
 - `PK` (Partition Key) - String
 - `SK` (Sort Key) - String
 
 **Global Secondary Index (GSI1)**:
+
 - `GSI1PK` (Partition Key) - String
 - `GSI1SK` (Sort Key) - String
 
 **Features**:
+
 - Billing Mode: PAY_PER_REQUEST
 - Encryption: KMS (from Shared Stack)
 - Point-in-Time Recovery: Enabled
@@ -23,6 +26,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ## Access Patterns
 
 ### 1. Get Story by ID
+
 ```typescript
 {
   KeyConditionExpression: "PK = :pk AND SK = :sk",
@@ -34,6 +38,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### 2. Get all Chapters for a Story
+
 ```typescript
 {
   KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
@@ -45,6 +50,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### 3. Get User Profile
+
 ```typescript
 {
   KeyConditionExpression: "PK = :pk AND SK = :sk",
@@ -56,6 +62,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### 4. Get User's Stories (created by user)
+
 ```typescript
 {
   IndexName: "GSI1",
@@ -68,6 +75,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### 5. Get User's Branches (contributed by user)
+
 ```typescript
 {
   IndexName: "GSI1",
@@ -80,6 +88,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### 6. Get Bookmark
+
 ```typescript
 {
   KeyConditionExpression: "PK = :pk AND SK = :sk",
@@ -91,6 +100,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### 7. Get User's Notifications
+
 ```typescript
 {
   KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
@@ -104,6 +114,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### 8. Get Child Branches of a Chapter
+
 ```typescript
 {
   KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
@@ -115,6 +126,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### 9. Browse/Discover Stories (chronological)
+
 ```typescript
 {
   IndexName: "GSI1",
@@ -130,6 +142,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ## Entity Patterns
 
 ### Story Entity
+
 ```typescript
 {
   PK: "STORY#{storyId}",
@@ -160,6 +173,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### Chapter Node Entity
+
 ```typescript
 {
   PK: "STORY#{storyId}",
@@ -190,6 +204,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### User Entity
+
 ```typescript
 {
   PK: "USER#{userId}",
@@ -213,6 +228,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### Bookmark Entity
+
 ```typescript
 {
   PK: "USER#{userId}",
@@ -228,6 +244,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### Vote Entity
+
 ```typescript
 {
   PK: "USER#{userId}",
@@ -243,6 +260,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### Notification Entity
+
 ```typescript
 {
   PK: "USER#{userId}",
@@ -265,6 +283,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```
 
 ### Child Relationship Entity (for efficient child queries)
+
 ```typescript
 {
   PK: "CHAPTER#{parentNodeId}",
@@ -283,14 +302,18 @@ This document describes the single-table design pattern used for the Story Hub a
 ## Best Practices
 
 ### 1. Composite Sort Keys
+
 Use composite sort keys for efficient sorting:
+
 ```typescript
-GSI1SK: "{timestamp}#{id}" // Sorts by time, breaks ties with ID
-SK: "NOTIFICATION#{timestamp}#{notificationId}"
+GSI1SK: "{timestamp}#{id}"; // Sorts by time, breaks ties with ID
+SK: "NOTIFICATION#{timestamp}#{notificationId}";
 ```
 
 ### 2. Denormalization
+
 Store frequently accessed data redundantly to minimize queries:
+
 ```typescript
 // Store author name in chapter to avoid user lookup
 {
@@ -300,7 +323,9 @@ Store frequently accessed data redundantly to minimize queries:
 ```
 
 ### 3. Pagination
+
 Always use pagination for large result sets:
+
 ```typescript
 {
   Limit: 20,
@@ -309,7 +334,9 @@ Always use pagination for large result sets:
 ```
 
 ### 4. Atomic Counters
+
 Use atomic updates for counters:
+
 ```typescript
 {
   UpdateExpression: "ADD stats.reads :incr",
@@ -320,7 +347,9 @@ Use atomic updates for counters:
 ```
 
 ### 5. Conditional Writes
+
 Prevent concurrent modification issues:
+
 ```typescript
 {
   ConditionExpression: "attribute_not_exists(PK) OR version = :oldVersion",

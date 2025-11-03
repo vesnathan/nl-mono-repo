@@ -1,7 +1,5 @@
 # User Queries and Mutations
 
 extend type Query {
-  getUserProfile(userId: ID!): User
-    @aws_iam
-    @aws_cognito_user_pools
+  getUserProfile(userId: ID!): User @aws_iam @aws_cognito_user_pools
 }

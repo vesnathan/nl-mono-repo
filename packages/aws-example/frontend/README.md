@@ -43,7 +43,7 @@ The development server will start on [http://localhost:3000](http://localhost:30
 For frontend-only development without a deployed backend, the AwsExample frontend includes lightweight local dev mocks. In development the app can load mock users via the helper:
 
 ```ts
-import { loadMockUsers } from './src/devMocks';
+import { loadMockUsers } from "./src/devMocks";
 const users = await loadMockUsers();
 ```
 

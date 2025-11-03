@@ -30,6 +30,7 @@ yarn deploy
 The bootstrap creates a **complete full-stack application** with:
 
 ### 📁 Package Structure
+
 ```
 packages/
 ├── my-cool-app/
@@ -54,27 +55,33 @@ packages/
 The bootstrap **automatically updates 10 files** without any manual intervention:
 
 1. **`deploy/deploy-registry.ts`**
+
    - Adds import for your deploy handler
    - Registers handler in `DEPLOY_HANDLERS`
 
 2. **`deploy/types.ts`**
+
    - Adds `MyCoolApp` to `StackType` enum
    - Adds to `STACK_ORDER` array
    - Adds template paths
 
 3. **`deploy/project-config.ts`**
+
    - Adds complete project configuration
    - Sets dependencies, bucket names, feature flags
 
 4. **`deploy/utils/user-setup.ts`**
+
    - Adds `"mca"` to `StackTypeForUser` type
    - Adds Cognito groups import
    - Adds entry to `STACK_TYPE_CONFIG`
 
 5. **`deploy/utils/stack-utils.ts`**
+
    - Adds case to `getAppNameForStackType()` switch
 
 6. **`deploy/index.ts`**
+
    - Adds to admin email prompt condition
 
 7. **Root `package.json`**
@@ -82,7 +89,8 @@ The bootstrap **automatically updates 10 files** without any manual intervention
    - Adds `dev:mca` script
 
 8-10. **CloudFormation Templates**
-   - All template files get token-replaced with your app name
+
+- All template files get token-replaced with your app name
 
 ## What You Get Out of the Box
 
@@ -139,10 +147,12 @@ yarn deploy
 ## Dependencies
 
 Your new package automatically depends on:
+
 - **WAF** - Web Application Firewall (provides WebACL)
 - **Shared** - Shared resources (provides KMS, VPC, etc.)
 
 The deploy system automatically:
+
 - Detects missing dependencies
 - Deploys them in correct order
 - Passes outputs as parameters
@@ -209,6 +219,7 @@ The bootstrap uses **AST (Abstract Syntax Tree) manipulation** to automatically 
 6. **Conditional Logic** - Adds to if-statement conditions
 
 All updates are:
+
 - ✅ Type-safe (TypeScript compilation verified)
 - ✅ Reversible (DELETE removes everything)
 - ✅ No manual code changes needed

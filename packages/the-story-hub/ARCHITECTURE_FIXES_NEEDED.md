@@ -7,12 +7,15 @@
 #### **Prompt 1 (Lines 18-53) - Project Setup & Shared Types**
 
 **Issues:**
+
 1. Line 24: Says "AWS Lambda (serverless)" - misleading, should clarify AppSync resolvers vs Lambda
 2. Line 36: Says "Lambda function handlers and shared TypeScript types/Zod schemas"
 
 **Fixes Needed:**
+
 ```markdown
 Tech stack:
+
 - Next.js 15 (App Router)
 - React 19
 - AWS AppSync (GraphQL API)
@@ -28,6 +31,7 @@ Tech stack:
 - Tailwind CSS
 
 Create a monorepo structure with:
+
 1. the-story-hub/frontend - Next.js application
 2. the-story-hub/backend - AppSync resolvers, Lambda functions, and shared TypeScript types/Zod schemas
    - backend/resolvers/ - AppSync Pipeline Resolvers (TypeScript)
@@ -44,18 +48,22 @@ In the-story-hub/backend/constants, create Zod schemas for:
 #### **Prompt 3.5 (Lines 111-154) - GraphQL Schema Definition**
 
 **Issues:**
+
 1. Line 114: Says "Place in: the-story-hub/backend/schema.graphql (or split into multiple files)"
 2. Missing information about build process
 3. Missing information about schema upload to S3
 
 **Fixes Needed:**
+
 ```markdown
 ### Prompt 3.5: GraphQL Schema Definition
 ```
+
 Create the GraphQL schema for AppSync API.
 Place schema files in: **the-story-hub/backend/schema/** directory
 
 Following the aws-example pattern:
+
 - Split schema into multiple .graphql files by domain
 - Example structure:
   - backend/schema/Story.graphql (type definitions)
@@ -66,6 +74,7 @@ Following the aws-example pattern:
   - backend/schema/users.graphql
 
 **Build Process:**
+
 - The frontend build script (yarn build-gql) merges all .graphql files into combined_schema.graphql
 - This combined schema is uploaded to S3 during deployment
 - AppSync CloudFormation template references: s3://${TemplateBucketName}/schema.graphql
@@ -74,6 +83,7 @@ Following the aws-example pattern:
 **Schema Structure:**
 
 **Types (in Story.graphql):**
+
 ```graphql
 enum AgeRating {
   G
@@ -125,10 +135,15 @@ input UpdateStoryInput {
 [Continue with all other types...]
 
 **Queries and Mutations (in stories.graphql):**
+
 ```graphql
 type Query {
   getStory(storyId: ID!): Story @aws_cognito_user_pools
-  listStories(filter: StoryFilter, limit: Int, nextToken: String): StoryConnection @aws_cognito_user_pools
+  listStories(
+    filter: StoryFilter
+    limit: Int
+    nextToken: String
+  ): StoryConnection @aws_cognito_user_pools
   # ... other queries
 }
 
@@ -140,6 +155,7 @@ type Mutation {
 ```
 
 **Subscriptions:**
+
 ```graphql
 type Subscription {
   onNewNotification(userId: ID!): Notification
@@ -150,10 +166,13 @@ type Subscription {
 ```
 
 Use proper GraphQL directives:
+
 - @aws_cognito_user_pools for authenticated operations
 - @aws_iam for internal/admin operations
 - @aws_subscribe for subscriptions
+
 ```
+
 ```
 
 ### **Phase 2: Backend GraphQL Resolvers**
@@ -164,8 +183,10 @@ Use proper GraphQL directives:
 Prompts don't explain how resolvers are compiled and deployed
 
 **Fix Needed - Add to each resolver prompt:**
-```markdown
+
+````markdown
 **Resolver Structure:**
+
 - Each resolver has two exports: `request()` and `response()`
 - Request function: prepares DynamoDB operation or Lambda invocation
 - Response function: transforms the result
@@ -173,12 +194,14 @@ Prompts don't explain how resolvers are compiled and deployed
 - Types imported from frontend: `import { TypeName } from "gqlTypes"`
 
 **Build Process:**
+
 - Resolvers are compiled from TypeScript to JavaScript
 - Uploaded to S3 bucket during deployment
 - AppSync CloudFormation template creates resolver resources pointing to S3 locations
 - Each resolver needs a corresponding entry in the AppSync CFN template
 
 **Example Resolver Pattern:**
+
 ```typescript
 import { util, Context, AppSyncIdentityCognito } from "@aws-appsync/utils";
 import { Story, CreateStoryInput } from "gqlTypes";
@@ -210,7 +233,9 @@ export function response(ctx: CTX): Story {
   return ctx.result;
 }
 ```
-```
+````
+
+````
 
 ### **Phase 3: Frontend Application**
 
@@ -247,16 +272,16 @@ Amplify.configure({
 });
 
 export const client = generateClient();
-```
+````
 
 **Using the GraphQL Client:**
 
 ```typescript
 // lib/api/stories.ts
-import { client } from '@/lib/amplify';
-import { createStory } from '@/graphql/mutations';
-import { getStory, listStories } from '@/graphql/queries';
-import type { CreateStoryInput, Story } from '@/types/gqlTypes';
+import { client } from "@/lib/amplify";
+import { createStory } from "@/graphql/mutations";
+import { getStory, listStories } from "@/graphql/queries";
+import type { CreateStoryInput, Story } from "@/types/gqlTypes";
 
 export async function createStoryAPI(input: CreateStoryInput): Promise<Story> {
   const result = await client.graphql({
@@ -278,11 +303,13 @@ export async function getStoryAPI(storyId: string): Promise<Story> {
 **GraphQL Query/Mutation Definitions:**
 
 Create graphql/ directory with operations:
+
 - graphql/queries.ts
 - graphql/mutations.ts
 - graphql/subscriptions.ts
 
 Example:
+
 ```typescript
 // graphql/mutations.ts
 export const createStory = /* GraphQL */ `
@@ -302,7 +329,8 @@ export const createStory = /* GraphQL */ `
 ```
 
 Note: The build-gql script generates TypeScript types in src/types/gqlTypes.ts from your GraphQL schema.
-```
+
+````
 
 ### **Missing Sections Needed**
 
@@ -328,7 +356,7 @@ Set up GraphQL code generation for the frontend:
     "build-gql": "ts-node -TP ../../../tsconfig.node.json ./scripts/buildGql.ts"
   }
 }
-```
+````
 
 3. **Run before development**:
    - yarn build-gql must run after any schema changes
@@ -336,7 +364,8 @@ Set up GraphQL code generation for the frontend:
    - Import types: `import { Story, User } from '@/types/gqlTypes'`
 
 Follow the exact pattern from aws-example/frontend/scripts/buildGql.ts
-```
+
+````
 
 #### **2. Deployment Configuration**
 
@@ -364,16 +393,19 @@ Configure the Story Hub project in deploy/project-config.ts:
   hasResolvers: true,
   requiresAdminUser: true,
 },
-```
+````
 
 **Deployment Order:**
+
 1. WAF Stack (us-east-1, provides CloudFront WAF)
 2. Shared Stack (provides VPC, KMS, common resources)
 3. The Story Hub Stack (your application)
 
 **Deploy Commands:**
+
 - Deploy all: `yarn deploy --stack the-story-hub --stage dev`
 - Deploy dependencies automatically handled
+
 ```
 
 ## Summary of Changes Needed
@@ -388,3 +420,4 @@ Configure the Story Hub project in deploy/project-config.ts:
 8. **Fix all REST endpoint references** - Already done ✓
 9. **Add AppSync-specific patterns** - @aws_cognito_user_pools directives, ctx.identity usage
 10. **Add subscription patterns** - Real-time updates via AppSync subscriptions
+```

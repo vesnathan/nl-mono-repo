@@ -3,6 +3,7 @@
 ## Important: Infrastructure Overview
 
 This monorepo uses:
+
 - **AppSync GraphQL API** (not REST/API Gateway) for all backend operations
 - **AppSync Pipeline Resolvers** with TypeScript (not traditional Lambda handlers)
 - **WAF Stack** (required dependency, deployed to us-east-1)
@@ -19,6 +20,7 @@ Following the pattern: `resolvers/{domain}/{QueryOrMutation}/{Type}.{operationNa
 I'm building a collaborative story branching platform (like GitHub for stories).
 
 **Tech stack:**
+
 - Next.js 15 (App Router)
 - React 19
 - AWS AppSync (GraphQL API with Cognito auth)
@@ -34,6 +36,7 @@ I'm building a collaborative story branching platform (like GitHub for stories).
 - Tailwind CSS
 
 **IMPORTANT ARCHITECTURE NOTES:**
+
 - This monorepo uses AppSync GraphQL API, not REST API Gateway
 - Backend logic is in AppSync Pipeline Resolvers (TypeScript request/response functions)
 - Lambda functions are ONLY used for:
@@ -44,18 +47,22 @@ I'm building a collaborative story branching platform (like GitHub for stories).
 - Zod is used ONLY in frontend for form validation
 
 Create a monorepo structure with:
+
 1. **the-story-hub/frontend** - Next.js application
+
    - src/types/gqlTypes.ts (auto-generated from GraphQL schema)
-   - src/types/*Schemas.ts (Zod validation schemas for forms)
+   - src/types/\*Schemas.ts (Zod validation schemas for forms)
    - scripts/buildGql.ts (GraphQL code generation script)
 
 2. **the-story-hub/backend** - AppSync resolvers, Lambda functions, GraphQL schema
-   - backend/schema/ - GraphQL schema files (*.graphql)
+
+   - backend/schema/ - GraphQL schema files (\*.graphql)
    - backend/resolvers/ - AppSync Pipeline Resolvers (TypeScript)
    - backend/lambda/ - Lambda functions (S3 triggers, etc.)
    - backend/constants/ - Shared constants (not Zod schemas)
 
 3. **deploy/templates/the-story-hub** - CloudFormation templates
+
    - cfn-template.yaml (main stack)
    - resources/AppSync/appsync.yaml
    - resources/DynamoDb/dynamoDb.yaml
@@ -70,26 +77,32 @@ Create a monorepo structure with:
 **NOTE:** Types will be auto-generated from GraphQL schema. In backend/constants/, create only:
 
 1. **ContentRatings.ts** - Age rating constants and helpers (similar to ClientTypes.ts pattern in aws-example):
+
    ```typescript
    export const AGE_RATINGS = [
-     { id: 'G', displayName: 'General', description: 'Suitable for all ages' },
-     { id: 'T', displayName: 'Teen (13+)', description: 'Ages 13+' },
-     { id: 'M', displayName: 'Mature (16+)', description: 'Ages 16+' },
-     { id: 'ADULT_18_PLUS', displayName: 'Adult (18+)', description: 'Ages 18+' },
+     { id: "G", displayName: "General", description: "Suitable for all ages" },
+     { id: "T", displayName: "Teen (13+)", description: "Ages 13+" },
+     { id: "M", displayName: "Mature (16+)", description: "Ages 16+" },
+     {
+       id: "ADULT_18_PLUS",
+       displayName: "Adult (18+)",
+       description: "Ages 18+",
+     },
    ] as const;
 
-   export type AgeRating = typeof AGE_RATINGS[number]['id'];
+   export type AgeRating = (typeof AGE_RATINGS)[number]["id"];
    export const isValidAgeRating = (value: string): value is AgeRating =>
-     AGE_RATINGS.some(r => r.id === value);
+     AGE_RATINGS.some((r) => r.id === value);
    ```
 
 2. **ContentWarnings.ts** - Warning tag constants:
+
    ```typescript
    export const CONTENT_WARNINGS = [
-     'Sexual Content',
-     'Violence/Gore',
-     'Death',
-     'Self-Harm/Suicide',
+     "Sexual Content",
+     "Violence/Gore",
+     "Death",
+     "Self-Harm/Suicide",
      // ... etc
    ] as const;
    ```
@@ -97,10 +110,10 @@ Create a monorepo structure with:
 3. **Genres.ts** - Story genre constants:
    ```typescript
    export const STORY_GENRES = [
-     'Fantasy',
-     'Sci-Fi',
-     'Romance',
-     'Horror',
+     "Fantasy",
+     "Sci-Fi",
+     "Romance",
+     "Horror",
      // ... etc
    ] as const;
    ```
@@ -111,7 +124,8 @@ Create a monorepo structure with:
 ---
 
 ### Prompt 2: DynamoDB Table Design
-```
+
+````
 Design a DynamoDB **single-table design** for the story branching platform.
 
 Following aws-example pattern (see deploy/templates/aws-example/resources/DynamoDb/dynamoDb.yaml):
@@ -188,13 +202,14 @@ PK: "USER#{userId}"
 SK: "NOTIFICATION#{timestamp}#{notificationId}"
 GSI1PK: "NOTIFICATION#{notificationId}"
 GSI1SK: "USER#{userId}"
-```
+````
 
 **CloudFormation Template Structure:**
 
 Place in: deploy/templates/the-story-hub/resources/DynamoDb/dynamoDb.yaml
 
 Follow this pattern (from aws-example):
+
 ```yaml
 Resources:
   # IAM Role for AppSync to access DynamoDB
@@ -293,14 +308,18 @@ Outputs:
 ```
 
 **Important:**
+
 - Use KMSKeyArn parameter passed from parent stack (which gets it from Shared stack)
 - Enable Point-in-Time Recovery for production
 - Enable DynamoDB Streams for future EventBridge integration
 - Use composite sort keys for efficient queries
+
 ```
+
 ```
 
 ### Prompt 3: AWS Infrastructure Setup
+
 ```
 Create CloudFormation templates in deploy/templates/the-story-hub/ for the infrastructure:
 
@@ -325,7 +344,8 @@ Main template: deploy/templates/the-story-hub/cfn-template.yaml
 ```
 
 ### ✅ PHASE 1 VERIFICATION - Infrastructure & Schema Test
-```
+
+````
 **STOP AND TEST before proceeding to Phase 2**
 
 **1. Verify CloudFormation Templates:**
@@ -335,9 +355,10 @@ cd packages/deploy/templates/the-story-hub
 aws cloudformation validate-template --template-body file://cfn-template.yaml
 aws cloudformation validate-template --template-body file://resources/DynamoDb/dynamoDb.yaml
 aws cloudformation validate-template --template-body file://resources/AppSync/appsync.yaml
-```
+````
 
 **2. Verify GraphQL Schema:**
+
 ```bash
 # Run build-gql to merge schemas and generate types
 cd packages/the-story-hub/frontend
@@ -349,6 +370,7 @@ yarn build-gql
 ```
 
 **3. Test GraphQL Schema is Valid:**
+
 ```bash
 # Install graphql-schema-linter if not present
 npm install -g graphql-schema-linter
@@ -358,6 +380,7 @@ graphql-schema-linter packages/the-story-hub/backend/combined_schema.graphql
 ```
 
 **4. Verify Constants:**
+
 ```bash
 # Check constants compile
 cd packages/the-story-hub/backend
@@ -370,6 +393,7 @@ node -e "const { AGE_RATINGS } = require('./constants/ContentRatings'); console.
 ```
 
 **5. Deploy Infrastructure (Optional for dev environment):**
+
 ```bash
 cd packages/deploy
 yarn deploy --stack the-story-hub --stage dev
@@ -387,6 +411,7 @@ yarn deploy --stack the-story-hub --stage dev
 ```
 
 **6. Manual DynamoDB Table Inspection:**
+
 ```bash
 # List tables
 aws dynamodb list-tables --region ap-southeast-2 | grep tsh-datatable
@@ -404,6 +429,7 @@ aws dynamodb describe-table \
 ```
 
 **7. Test AppSync API (if deployed):**
+
 ```bash
 # Get AppSync URL from CloudFormation outputs
 aws cloudformation describe-stacks \
@@ -425,6 +451,7 @@ aws cloudformation describe-stacks \
 ✅ (If deployed) AppSync API is accessible
 
 **If any test fails, fix before proceeding to Phase 2!**
+
 ```
 
 ---
@@ -433,11 +460,13 @@ aws cloudformation describe-stacks \
 
 ### Prompt 3.5: GraphQL Schema Definition
 ```
+
 Create the GraphQL schema for AppSync API.
 
 **CRITICAL:** Place schema files in `the-story-hub/backend/schema/` directory as **multiple .graphql files**
 
 Following aws-example pattern (see packages/aws-example/backend/schema/):
+
 - Split schema into separate files by domain
 - Type definitions go in files like `Story.graphql`, `User.graphql`
 - Query/Mutation operations go in files like `stories.graphql`, `users.graphql`
@@ -446,6 +475,7 @@ Following aws-example pattern (see packages/aws-example/backend/schema/):
 - AppSync CloudFormation references: `s3://${TemplateBucketName}/schema.graphql`
 
 **Build Process Flow:**
+
 1. Create individual .graphql files in backend/schema/
 2. Run `yarn build-gql` (in frontend) → merges all .graphql files
 3. Generates `backend/combined_schema.graphql`
@@ -454,6 +484,7 @@ Following aws-example pattern (see packages/aws-example/backend/schema/):
 6. AppSync loads schema from S3
 
 **File: backend/schema/Story.graphql**
+
 ```graphql
 # Story Type Definitions
 
@@ -520,6 +551,7 @@ type StoryConnection {
 ```
 
 **File: backend/schema/ChapterNode.graphql**
+
 ```graphql
 # Chapter/Branch Type Definitions
 
@@ -588,6 +620,7 @@ input AwardBadgeInput {
 ```
 
 **File: backend/schema/User.graphql**
+
 ```graphql
 # User Type Definitions
 
@@ -617,29 +650,29 @@ type User @aws_cognito_user_pools {
 ```
 
 **File: backend/schema/stories.graphql**
+
 ```graphql
 # Story Queries and Mutations
 
 type Query {
-  getStory(storyId: ID!): Story
-    @aws_cognito_user_pools
+  getStory(storyId: ID!): Story @aws_cognito_user_pools
 
-  listStories(filter: StoryFilter, limit: Int, nextToken: String): StoryConnection
-    @aws_cognito_user_pools
+  listStories(
+    filter: StoryFilter
+    limit: Int
+    nextToken: String
+  ): StoryConnection @aws_cognito_user_pools
 
-  getStoryTree(storyId: ID!): TreeData
-    @aws_cognito_user_pools
+  getStoryTree(storyId: ID!): TreeData @aws_cognito_user_pools
 
   getReadingPath(storyId: ID!, nodePath: [ID!]!): [ChapterNode!]!
     @aws_cognito_user_pools
 }
 
 type Mutation {
-  createStory(input: CreateStoryInput!): Story
-    @aws_cognito_user_pools
+  createStory(input: CreateStoryInput!): Story @aws_cognito_user_pools
 
-  updateStory(input: UpdateStoryInput!): Story
-    @aws_cognito_user_pools
+  updateStory(input: UpdateStoryInput!): Story @aws_cognito_user_pools
 }
 
 # Tree visualization data structure
@@ -660,46 +693,42 @@ type TreeNode {
 ```
 
 **File: backend/schema/chapters.graphql**
+
 ```graphql
 # Chapter/Branch Queries and Mutations
 
 type Query {
-  getChapter(nodeId: ID!): ChapterNode
-    @aws_cognito_user_pools
+  getChapter(nodeId: ID!): ChapterNode @aws_cognito_user_pools
 
-  listBranches(nodeId: ID!): [ChapterNode!]!
-    @aws_cognito_user_pools
+  listBranches(nodeId: ID!): [ChapterNode!]! @aws_cognito_user_pools
 }
 
 type Mutation {
-  createChapter(input: CreateChapterInput!): ChapterNode
-    @aws_cognito_user_pools
+  createChapter(input: CreateChapterInput!): ChapterNode @aws_cognito_user_pools
 
-  createBranch(input: CreateBranchInput!): ChapterNode
-    @aws_cognito_user_pools
+  createBranch(input: CreateBranchInput!): ChapterNode @aws_cognito_user_pools
 
-  updateChapter(input: UpdateChapterInput!): ChapterNode
-    @aws_cognito_user_pools
+  updateChapter(input: UpdateChapterInput!): ChapterNode @aws_cognito_user_pools
 
   voteOnChapter(nodeId: ID!, voteType: VoteType!): ChapterNode
     @aws_cognito_user_pools
 
-  awardBadge(input: AwardBadgeInput!): ChapterNode
-    @aws_cognito_user_pools
+  awardBadge(input: AwardBadgeInput!): ChapterNode @aws_cognito_user_pools
 }
 ```
 
 **File: backend/schema/users.graphql**
+
 ```graphql
 # User Queries and Mutations
 
 type Query {
-  getUserProfile(userId: ID!): User
-    @aws_cognito_user_pools
+  getUserProfile(userId: ID!): User @aws_cognito_user_pools
 }
 ```
 
 **File: backend/schema/bookmarks.graphql**
+
 ```graphql
 # Bookmark Type and Operations
 
@@ -718,17 +747,16 @@ input SaveBookmarkInput {
 }
 
 type Query {
-  getBookmark(storyId: ID!): Bookmark
-    @aws_cognito_user_pools
+  getBookmark(storyId: ID!): Bookmark @aws_cognito_user_pools
 }
 
 type Mutation {
-  saveBookmark(input: SaveBookmarkInput!): Bookmark
-    @aws_cognito_user_pools
+  saveBookmark(input: SaveBookmarkInput!): Bookmark @aws_cognito_user_pools
 }
 ```
 
 **File: backend/schema/subscriptions.graphql**
+
 ```graphql
 # Real-time Subscriptions
 
@@ -752,23 +780,28 @@ type Notification @aws_cognito_user_pools {
 ```
 
 **Important AppSync Directives:**
+
 - `@aws_cognito_user_pools` - Requires Cognito authentication
 - `@aws_iam` - Allows IAM-based access (for internal Lambda calls)
 - `@aws_subscribe(mutations: [...])` - Defines subscription triggers
 
 **TypeScript Type Generation:**
 After creating these schema files, `yarn build-gql` will:
+
 1. Merge them into combined_schema.graphql
 2. Generate frontend/src/types/gqlTypes.ts with all types
 3. Import in resolvers: `import { Story, CreateStoryInput } from "gqlTypes"`
+
 ```
 
 ### Prompt 4: Story CRUD Operations
 ```
+
 Create AppSync Pipeline Resolvers in TypeScript for story operations.
 
 **CRITICAL RESOLVER ARCHITECTURE:**
 Following aws-example pattern (see packages/aws-example/backend/resolvers/):
+
 - Each resolver is a TypeScript file with TWO exports: `request()` and `response()`
 - Request function: Prepares DynamoDB operation (PutItem, GetItem, Query, UpdateItem)
 - Response function: Transforms DynamoDB result to GraphQL type
@@ -776,6 +809,7 @@ Following aws-example pattern (see packages/aws-example/backend/resolvers/):
 - Import AppSync utilities: `import { util, Context, AppSyncIdentityCognito } from "@aws-appsync/utils"`
 
 **Resolver File Structure:**
+
 ```
 backend/resolvers/stories/
   ├── Mutations/
@@ -787,17 +821,18 @@ backend/resolvers/stories/
 ```
 
 **RESOLVER PATTERN EXAMPLE - Mutation.createStory.ts:**
+
 ```typescript
 import { util, Context, AppSyncIdentityCognito } from "@aws-appsync/utils";
 import { Story, CreateStoryInput, CreateStoryMutation } from "gqlTypes";
 
 // Context type for this resolver
 type CTX = Context<
-  { input: CreateStoryInput },  // Args
-  object,                        // Source
-  object,                        // PrevResult
-  object,                        // Info
-  Story                          // Result
+  { input: CreateStoryInput }, // Args
+  object, // Source
+  object, // PrevResult
+  object, // Info
+  Story // Result
 >;
 
 export function request(ctx: CTX) {
@@ -849,6 +884,7 @@ export function response(ctx: CTX): Story {
 ```
 
 **RESOLVER PATTERN EXAMPLE - Query.getStory.ts:**
+
 ```typescript
 import { util, Context, AppSyncIdentityCognito } from "@aws-appsync/utils";
 import { Story, GetStoryQueryVariables } from "gqlTypes";
@@ -889,12 +925,10 @@ export function response(ctx: CTX): Story {
 ```
 
 **RESOLVER PATTERN EXAMPLE - Query.listStories.ts:**
+
 ```typescript
 import { util, Context } from "@aws-appsync/utils";
-import {
-  ListStoriesQueryVariables,
-  StoryConnection
-} from "gqlTypes";
+import { ListStoriesQueryVariables, StoryConnection } from "gqlTypes";
 
 type CTX = Context<
   ListStoriesQueryVariables,
@@ -936,7 +970,7 @@ export function response(ctx: CTX): StoryConnection {
   let filteredItems = items;
   if (ctx.args.filter?.genre) {
     filteredItems = items.filter((item: any) =>
-      item.genre?.includes(ctx.args.filter.genre)
+      item.genre?.includes(ctx.args.filter.genre),
     );
   }
 
@@ -948,6 +982,7 @@ export function response(ctx: CTX): StoryConnection {
 ```
 
 **RESOLVER PATTERN EXAMPLE - Mutation.updateStory.ts:**
+
 ```typescript
 import { util, Context, AppSyncIdentityCognito } from "@aws-appsync/utils";
 import { Story, UpdateStoryInput } from "gqlTypes";
@@ -1009,7 +1044,10 @@ export function request(ctx: CTX) {
 export function response(ctx: CTX): Story {
   if (ctx.error) {
     if (ctx.error.type === "ConditionalCheckFailedException") {
-      util.error("Unauthorized: Only the story author can update", "Unauthorized");
+      util.error(
+        "Unauthorized: Only the story author can update",
+        "Unauthorized",
+      );
     }
     util.error(ctx.error.message, ctx.error.type);
   }
@@ -1019,6 +1057,7 @@ export function response(ctx: CTX): Story {
 ```
 
 **BUILD AND DEPLOYMENT PROCESS:**
+
 1. Write resolvers in TypeScript in backend/resolvers/
 2. Deploy script compiles TypeScript → JavaScript
 3. JavaScript resolvers uploaded to S3
@@ -1026,6 +1065,7 @@ export function response(ctx: CTX): Story {
 5. Each resolver resource references S3 location
 
 **CloudFormation Resolver Resource Example:**
+
 ```yaml
 # In deploy/templates/the-story-hub/resources/AppSync/appsync.yaml
 
@@ -1044,15 +1084,19 @@ CreateStoryResolver:
 ```
 
 **IMPORTANT NOTES:**
+
 - NO Zod validation in resolvers - GraphQL schema handles input validation
 - Use DynamoDB atomic counters for stats: `ADD #reads :inc`
 - Error handling with util.error() throws GraphQL errors
 - All console.log() output goes to CloudWatch Logs
 - Types are imported from "gqlTypes" (module alias in tsconfig)
+
 ```
+
 ```
 
 ### Prompt 5: Chapter/Branch Operations
+
 ```
 Create AppSync resolvers for chapter and branching operations.
 Place in: the-story-hub/backend/resolvers/chapters/
@@ -1061,16 +1105,18 @@ Place in: the-story-hub/backend/resolvers/chapters/
 
 **Resolver Files to Create:**
 ```
+
 backend/resolvers/chapters/
-  ├── Mutations/
-  │   ├── Mutation.createChapter.ts
-  │   ├── Mutation.createBranch.ts
-  │   ├── Mutation.updateChapter.ts
-  │   └── Mutation.voteOnChapter.ts
-  └── Queries/
-      ├── Query.getChapter.ts
-      └── Query.listBranches.ts
-```
+├── Mutations/
+│ ├── Mutation.createChapter.ts
+│ ├── Mutation.createBranch.ts
+│ ├── Mutation.updateChapter.ts
+│ └── Mutation.voteOnChapter.ts
+└── Queries/
+├── Query.getChapter.ts
+└── Query.listBranches.ts
+
+````
 
 **Key Implementation Details:**
 
@@ -1122,68 +1168,83 @@ return {
     }),
   },
 };
-```
+````
 
 Reference Prompt 4 for complete resolver pattern examples.
+
 ```
 
 ### Prompt 6: Reading Path & Tree Data
 ```
+
 Create AppSync resolvers for reading flow. **Follow Prompt 4 pattern**.
 Place in: the-story-hub/backend/resolvers/reading/
 
 **Query.getStoryTree.ts:**
+
 - Query all chapters: PK = `STORY#{storyId}`, SK begins_with `CHAPTER#`
 - In response function, build tree structure recursively
 - Return TreeData with rootNode and totalNodes
 
 **Query.getReadingPath.ts:**
+
 - Use DynamoDB BatchGetItem to fetch multiple chapters efficiently
 - Map nodePath array to keys: `{ PK: STORY#{storyId}, SK: CHAPTER#{nodeId} }`
 - Return ordered array matching nodePath order
 
 **Mutation.saveBookmark.ts:**
+
 - PutItem with PK: `USER#{userId}`, SK: `BOOKMARK#{storyId}`
 - Include currentNodeId, breadcrumbs array, lastRead timestamp
 
 **Query.getBookmark.ts:**
+
 - GetItem with PK: `USER#{userId}`, SK: `BOOKMARK#{storyId}`
 - Return bookmark or null if not found
+
 ```
 
 ### Prompt 7: User & Social Features
 ```
+
 Create AppSync resolvers. **Follow Prompt 4 pattern**.
 Place in: backend/resolvers/users/ and backend/resolvers/social/
 
 **Query.getUserProfile.ts:**
+
 - GetItem: PK = `USER#{userId}`, SK = `PROFILE#{userId}`
 - Optional: Query GSI1 to get user's stories/branches count
 
 **Mutation.awardBadge.ts:**
+
 - Authorization check in request():
   - Get story to verify authorId = ctx.identity.username
   - Use conditional UpdateItem
 - UpdateItem chapter node with badge: `SET badges.{badgeType} = :true`
 
 **Query.listNotifications.ts:**
+
 - Query: PK = `USER#{userId}`, SK begins_with `NOTIFICATION#`
 - Filter by read/unread in response function
 - Return paginated results with nextToken
 
 (voteOnChapter covered in Prompt 5)
+
 ```
 
 ### Prompt 8: Image Upload
 ```
+
 Create AppSync resolvers and Lambda functions for image management.
 
 **Mutation.getPresignedUploadUrl.ts** (AppSync Resolver calling Lambda):
+
 - Use Lambda Function data source (not direct DynamoDB)
 - Lambda generates presigned S3 URL with AWS SDK
 - Return: { uploadUrl, imageId, fields }
 
 **Lambda Function: backend/lambda/generatePresignedUrl.ts:**
+
 ```typescript
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -1208,22 +1269,27 @@ export const handler = async (event: any) => {
 ```
 
 **Lambda Function: backend/lambda/processImage.ts** (S3 Trigger):
+
 - Triggered by S3 event on PUT
 - Use Sharp to resize/optimize
 - Generate WebP version
 - Store metadata in DynamoDB: PK = `IMAGE#{imageId}`, SK = `METADATA`
 
 **Mutation.deleteImage.ts:**
+
 - Check authorization: Get image metadata, verify userId = ctx.identity.username
 - Call Lambda to delete from S3
 - DeleteItem from DynamoDB
+
 ```
 
 ### ✅ PHASE 2 VERIFICATION - Resolver & Database Test
 ```
+
 **STOP AND TEST before proceeding to Phase 3**
 
 **1. Compile All Resolvers:**
+
 ```bash
 cd packages/the-story-hub/backend
 npx tsc --noEmit resolvers/**/*.ts
@@ -1235,6 +1301,7 @@ npx tsc --noEmit resolvers/**/*.ts
 **2. Create Database Seeding Script:**
 
 **backend/scripts/seed-db.ts:**
+
 ```typescript
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
@@ -1282,7 +1349,8 @@ async function seedDatabase() {
       storyId: "story-1",
       authorId: "test-user-1",
       title: "The Enchanted Forest Chronicles",
-      synopsis: "A magical forest where every path leads to a different adventure. What will you discover?",
+      synopsis:
+        "A magical forest where every path leads to a different adventure. What will you discover?",
       genre: ["Fantasy", "Adventure"],
       ageRating: "T",
       contentWarnings: [],
@@ -1298,7 +1366,8 @@ async function seedDatabase() {
       storyId: "story-2",
       authorId: "test-user-2",
       title: "Cyberpunk Decisions",
-      synopsis: "In a neon-lit future, your choices shape the fate of Neo-Tokyo.",
+      synopsis:
+        "In a neon-lit future, your choices shape the fate of Neo-Tokyo.",
       genre: ["Sci-Fi", "Cyberpunk"],
       ageRating: "M",
       contentWarnings: ["Violence/Gore"],
@@ -1319,7 +1388,8 @@ async function seedDatabase() {
       storyId: "story-1",
       parentNodeId: null,
       authorId: "test-user-1",
-      content: "You step into the enchanted forest, sunlight filtering through ancient trees. Two paths diverge before you: one leads deeper into darkness, the other towards a shimmering glade.",
+      content:
+        "You step into the enchanted forest, sunlight filtering through ancient trees. Two paths diverge before you: one leads deeper into darkness, the other towards a shimmering glade.",
       branchDescription: null,
       chapterNumber: 1,
       createdAt: "2025-01-01T10:05:00Z",
@@ -1336,7 +1406,8 @@ async function seedDatabase() {
       storyId: "story-1",
       parentNodeId: "chapter-1-1",
       authorId: "test-user-2",
-      content: "You choose the dark path. Strange whispers echo through the trees, and glowing eyes watch from the shadows...",
+      content:
+        "You choose the dark path. Strange whispers echo through the trees, and glowing eyes watch from the shadows...",
       branchDescription: "Take the dark path",
       chapterNumber: 2,
       createdAt: "2025-01-02T09:00:00Z",
@@ -1355,12 +1426,16 @@ async function seedDatabase() {
   }
 
   for (const story of stories) {
-    await docClient.send(new PutCommand({ TableName: TABLE_NAME, Item: story }));
+    await docClient.send(
+      new PutCommand({ TableName: TABLE_NAME, Item: story }),
+    );
     console.log(`✅ Created story: ${story.title}`);
   }
 
   for (const chapter of chapters) {
-    await docClient.send(new PutCommand({ TableName: TABLE_NAME, Item: chapter }));
+    await docClient.send(
+      new PutCommand({ TableName: TABLE_NAME, Item: chapter }),
+    );
     console.log(`✅ Created chapter: ${chapter.nodeId}`);
   }
 
@@ -1371,6 +1446,7 @@ seedDatabase().catch(console.error);
 ```
 
 **Run seeding:**
+
 ```bash
 cd packages/the-story-hub/backend
 TABLE_NAME=nlmonorepo-tsh-datatable-dev \
@@ -1379,46 +1455,47 @@ TABLE_NAME=nlmonorepo-tsh-datatable-dev \
 
 **3. Test Resolvers with Jest:**
 
-**backend/resolvers/__tests__/Query.getStory.test.ts:**
-```typescript
-import { request, response } from '../stories/Queries/Query.getStory';
-import { util } from '@aws-appsync/utils';
+**backend/resolvers/**tests**/Query.getStory.test.ts:**
 
-describe('Query.getStory', () => {
-  it('should create correct GetItem request', () => {
+```typescript
+import { request, response } from "../stories/Queries/Query.getStory";
+import { util } from "@aws-appsync/utils";
+
+describe("Query.getStory", () => {
+  it("should create correct GetItem request", () => {
     const ctx = {
-      args: { storyId: 'story-1' },
+      args: { storyId: "story-1" },
       identity: {},
     } as any;
 
     const result = request(ctx);
 
-    expect(result.operation).toBe('GetItem');
+    expect(result.operation).toBe("GetItem");
     expect(result.key).toEqual({
-      PK: { S: 'STORY#story-1' },
-      SK: { S: 'METADATA' },
+      PK: { S: "STORY#story-1" },
+      SK: { S: "METADATA" },
     });
   });
 
-  it('should return story from response', () => {
+  it("should return story from response", () => {
     const ctx = {
       result: {
-        storyId: 'story-1',
-        title: 'Test Story',
-        authorId: 'user-1',
+        storyId: "story-1",
+        title: "Test Story",
+        authorId: "user-1",
       },
       error: null,
     } as any;
 
     const result = response(ctx);
 
-    expect(result.storyId).toBe('story-1');
-    expect(result.title).toBe('Test Story');
+    expect(result.storyId).toBe("story-1");
+    expect(result.title).toBe("Test Story");
   });
 
-  it('should throw error if story not found', () => {
+  it("should throw error if story not found", () => {
     const ctx = {
-      args: { storyId: 'nonexistent' },
+      args: { storyId: "nonexistent" },
       result: null,
       error: null,
     } as any;
@@ -1429,6 +1506,7 @@ describe('Query.getStory', () => {
 ```
 
 **Run resolver tests:**
+
 ```bash
 cd packages/the-story-hub/backend
 yarn test resolvers/
@@ -1438,6 +1516,7 @@ yarn test --coverage resolvers/
 ```
 
 **4. Deploy Resolvers:**
+
 ```bash
 cd packages/deploy
 yarn deploy --stack the-story-hub --stage dev
@@ -1447,6 +1526,7 @@ yarn deploy --stack the-story-hub --stage dev
 ```
 
 **5. Test Resolvers via AppSync Console:**
+
 ```bash
 # AWS Console → AppSync → Your API → Queries
 
@@ -1482,6 +1562,7 @@ query ListStories {
 ```
 
 **6. Test with AWS CLI:**
+
 ```bash
 # Get AppSync API details
 APPSYNC_URL=$(aws cloudformation describe-stacks \
@@ -1507,11 +1588,13 @@ aws cognito-idp admin-create-user \
 ✅ listStories returns both seeded stories
 
 **Common Issues:**
+
 - ❌ "Cannot find module 'gqlTypes'" → Run `yarn build-gql` first
 - ❌ "AccessDeniedException" → Check AppSync IAM roles in DynamoDB template
 - ❌ "Table not found" → Verify table name in environment variables
 
 **If any test fails, fix resolvers before proceeding to Phase 3!**
+
 ```
 
 ---
@@ -1520,33 +1603,38 @@ aws cognito-idp admin-create-user \
 
 ### Prompt 9: Next.js App Structure & Routing + Amplify GraphQL Client Setup
 ```
+
 Set up Next.js 15 App Router structure in the-story-hub/frontend.
 
 **CRITICAL: AWS Amplify GraphQL Client Configuration**
 
 **1. Create lib/amplify.ts:**
+
 ```typescript
-import { Amplify } from 'aws-amplify';
-import { generateClient } from 'aws-amplify/api';
+import { Amplify } from "aws-amplify";
+import { generateClient } from "aws-amplify/api";
 
 // Configure Amplify (call this once in app/layout.tsx)
 export function configureAmplify() {
-  Amplify.configure({
-    API: {
-      GraphQL: {
-        endpoint: process.env.NEXT_PUBLIC_APPSYNC_URL!,
-        region: process.env.NEXT_PUBLIC_AWS_REGION!,
-        defaultAuthMode: 'userPool',
+  Amplify.configure(
+    {
+      API: {
+        GraphQL: {
+          endpoint: process.env.NEXT_PUBLIC_APPSYNC_URL!,
+          region: process.env.NEXT_PUBLIC_AWS_REGION!,
+          defaultAuthMode: "userPool",
+        },
+      },
+      Auth: {
+        Cognito: {
+          userPoolId: process.env.NEXT_PUBLIC_USER_POOL_ID!,
+          userPoolClientId: process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID!,
+          region: process.env.NEXT_PUBLIC_AWS_REGION!,
+        },
       },
     },
-    Auth: {
-      Cognito: {
-        userPoolId: process.env.NEXT_PUBLIC_USER_POOL_ID!,
-        userPoolClientId: process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID!,
-        region: process.env.NEXT_PUBLIC_AWS_REGION!,
-      },
-    },
-  }, { ssr: true });
+    { ssr: true },
+  );
 }
 
 // Generate GraphQL client
@@ -1556,6 +1644,7 @@ export const client = generateClient();
 **2. Create graphql/ directory with operations:**
 
 **graphql/mutations.ts:**
+
 ```typescript
 export const createStory = /* GraphQL */ `
   mutation CreateStory($input: CreateStoryInput!) {
@@ -1594,6 +1683,7 @@ export const createBranch = /* GraphQL */ `
 ```
 
 **graphql/queries.ts:**
+
 ```typescript
 export const getStory = /* GraphQL */ `
   query GetStory($storyId: ID!) {
@@ -1640,17 +1730,18 @@ export const listStories = /* GraphQL */ `
 **3. Create lib/api/ with typed wrappers:**
 
 **lib/api/stories.ts:**
+
 ```typescript
-import { client } from '@/lib/amplify';
-import { createStory, updateStory } from '@/graphql/mutations';
-import { getStory, listStories } from '@/graphql/queries';
+import { client } from "@/lib/amplify";
+import { createStory, updateStory } from "@/graphql/mutations";
+import { getStory, listStories } from "@/graphql/queries";
 import type {
   Story,
   CreateStoryInput,
   UpdateStoryInput,
   StoryFilter,
   StoryConnection,
-} from '@/types/gqlTypes';
+} from "@/types/gqlTypes";
 
 export async function createStoryAPI(input: CreateStoryInput): Promise<Story> {
   const result = await client.graphql({
@@ -1671,7 +1762,7 @@ export async function getStoryAPI(storyId: string): Promise<Story | null> {
 export async function listStoriesAPI(
   filter?: StoryFilter,
   limit?: number,
-  nextToken?: string
+  nextToken?: string,
 ): Promise<StoryConnection> {
   const result = await client.graphql({
     query: listStories,
@@ -1682,6 +1773,7 @@ export async function listStoriesAPI(
 ```
 
 **4. Configure app/layout.tsx:**
+
 ```typescript
 import { configureAmplify } from '@/lib/amplify';
 
@@ -1704,6 +1796,7 @@ export default function RootLayout({ children }: { children: React.Node }) {
 **5. Create Zod schemas for form validation** (frontend/src/types/):
 
 **types/StorySchemas.ts:**
+
 ```typescript
 import { z } from "zod";
 import { AgeRating } from "./gqlTypes";
@@ -1715,13 +1808,16 @@ export const CreateStoryFormSchema = z.object({
   ageRating: z.nativeEnum(AgeRating),
   contentWarnings: z.array(z.string()),
   ratingExplanation: z.string().optional(),
-  chapterContent: z.string().min(500, "Chapter must be at least 500 characters"),
+  chapterContent: z
+    .string()
+    .min(500, "Chapter must be at least 500 characters"),
 });
 
 export type CreateStoryFormData = z.infer<typeof CreateStoryFormSchema>;
 ```
 
 **Route Structure:**
+
 1. **app/(auth)/login** - Login with Amplify Auth
 2. **app/(auth)/signup** - Signup
 3. **app/page.tsx** - Landing (calls listStoriesAPI)
@@ -1733,6 +1829,7 @@ export type CreateStoryFormData = z.infer<typeof CreateStoryFormSchema>;
 9. **app/profile/[userId]/page.tsx** - User profile
 
 **Environment Variables (.env.local):**
+
 ```
 NEXT_PUBLIC_APPSYNC_URL=https://xxx.appsync-api.ap-southeast-2.amazonaws.com/graphql
 NEXT_PUBLIC_USER_POOL_ID=ap-southeast-2_xxxxx
@@ -1741,30 +1838,34 @@ NEXT_PUBLIC_AWS_REGION=ap-southeast-2
 ```
 
 **IMPORTANT:**
+
 - Types from src/types/gqlTypes.ts are auto-generated by `yarn build-gql`
 - GraphQL operations use template literal syntax for codegen
 - Amplify client handles authentication automatically
 - Use TanStack Query to wrap API calls for caching/refetching
+
 ```
 
 ### Prompt 10: Landing Page & Browse
 ```
+
 Build the landing page (app/page.tsx) with NextUI components.
 
 **Data Fetching with TanStack Query:**
+
 ```typescript
-'use client';
-import { useQuery } from '@tanstack/react-query';
-import { listStoriesAPI } from '@/lib/api/stories';
+"use client";
+import { useQuery } from "@tanstack/react-query";
+import { listStoriesAPI } from "@/lib/api/stories";
 
 export default function LandingPage() {
   const { data: featuredStories } = useQuery({
-    queryKey: ['stories', 'featured'],
+    queryKey: ["stories", "featured"],
     queryFn: () => listStoriesAPI({ featured: true }, 6),
   });
 
   const { data: trendingStories } = useQuery({
-    queryKey: ['stories', 'trending'],
+    queryKey: ["stories", "trending"],
     queryFn: () => listStoriesAPI({}, 6), // Sort by reads in resolver
   });
 
@@ -1773,18 +1874,22 @@ export default function LandingPage() {
 ```
 
 Requirements:
+
 - Hero section with catchy tagline
 - Grid sections using listStoriesAPI with different filters
 - Story cards with cover, title, author, genre tags, stats
 - Mobile responsive with Framer Motion animations
 - Use NextUI Card, Button, Chip components
+
 ```
 
 ### Prompt 11: Story Creation Flow
 ```
+
 Create the story creation page (app/story/create/page.tsx):
 
 Form with react-hook-form + Zod validation:
+
 1. Story title (required, 3-200 chars)
 2. Synopsis (required, 50-2000 chars) - textarea with character count
 3. Genre selection (multi-select, at least 1 required)
@@ -1794,6 +1899,7 @@ Form with react-hook-form + Zod validation:
 7. Chapter 1 content (required, 500+ chars) - rich text editor
 
 Features:
+
 - Real-time character counts
 - Preview mode (show how it will look)
 - Save as draft (localStorage for now)
@@ -1806,13 +1912,14 @@ Use NextUI Input, Textarea, Select components.
 Style with Tailwind for clean form layout.
 
 **Form Submission with GraphQL mutations:**
+
 ```typescript
-import { useMutation } from '@tanstack/react-query';
-import { createStoryAPI } from '@/lib/api/stories';
-import { createChapterAPI } from '@/lib/api/chapters';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { CreateStoryFormSchema } from '@/types/StorySchemas';
+import { useMutation } from "@tanstack/react-query";
+import { createStoryAPI } from "@/lib/api/stories";
+import { createChapterAPI } from "@/lib/api/chapters";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CreateStoryFormSchema } from "@/types/StorySchemas";
 
 const { mutateAsync: createStory } = useMutation({
   mutationFn: createStoryAPI,
@@ -1822,9 +1929,9 @@ const onSubmit = async (data: CreateStoryFormData) => {
   // 1. Upload cover image (if provided)
   if (data.coverImage) {
     const { uploadUrl } = await getPresignedUploadUrlAPI({
-      imageType: 'story-cover',
+      imageType: "story-cover",
     });
-    await fetch(uploadUrl, { method: 'PUT', body: data.coverImage });
+    await fetch(uploadUrl, { method: "PUT", body: data.coverImage });
   }
 
   // 2. Create story
@@ -1849,18 +1956,22 @@ const onSubmit = async (data: CreateStoryFormData) => {
 ```
 
 Use Zod for validation, AWS Amplify GraphQL client for API calls.
+
 ```
 
 ### Prompt 12: Tree Visualization Component
 ```
+
 Create a TreeVisualization component using React Flow (reactflow):
 
 **Install dependencies:**
+
 ```bash
 yarn add reactflow
 ```
 
 **Requirements:**
+
 - Fetch tree data from getStoryTree GraphQL query
 - Transform tree data into React Flow nodes and edges format
 - Display interactive node-based graph showing:
@@ -2013,12 +2124,12 @@ yarn add dagre @types/dagre
 ```
 
 ```typescript
-import dagre from 'dagre';
+import dagre from "dagre";
 
 function getLayoutedElements(nodes: Node[], edges: Edge[]) {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
-  dagreGraph.setGraph({ rankdir: 'TB' }); // Top to Bottom
+  dagreGraph.setGraph({ rankdir: "TB" }); // Top to Bottom
 
   nodes.forEach((node) => {
     dagreGraph.setNode(node.id, { width: 200, height: 100 });
@@ -2046,25 +2157,30 @@ function getLayoutedElements(nodes: Node[], edges: Edge[]) {
 ```
 
 **Styling:**
+
 - Dark mode friendly (use Tailwind dark: classes)
 - Smooth animations (React Flow has built-in)
 - Legend explaining colors/badges
 - Mobile: Use `fitView` and responsive controls
 
 **React Flow advantages:**
+
 - Built-in zoom/pan controls
 - Node interaction out of the box
 - Great performance with large graphs
 - Mobile-friendly
 - Custom node components (full React)
 - Active community and examples
+
 ```
 
 ### Prompt 13: Reading View
 ```
+
 Create the reading view component (app/story/[storyId]/read/[[...nodePath]]/page.tsx):
 
 Requirements:
+
 - Clean, distraction-free reading interface
 - Typography optimized for long-form reading (appropriate font, line height, max-width)
 - Show current chapter content
@@ -2088,24 +2204,29 @@ Requirements:
 - Author attribution footer showing all contributors in current path
 
 Use:
+
 - NextUI for UI components
 - Framer Motion for smooth transitions between chapters
 - TanStack Query for data fetching with prefetching next chapter
 - Zustand for managing reading state (current position, breadcrumbs)
 
 Mobile optimized with bottom navigation.
+
 ```
 
 ### Prompt 14: Branch Selector Component
 ```
+
 Create a BranchSelector component that displays when reader hits a branch point:
 
 Props:
+
 - parentNodeId: string
 - branches: Array<{nodeId, authorId, description, stats}>
 - onSelect: (nodeId) => void
 
 UI:
+
 - Modal or inline section (based on screen size)
 - Title: "The story branches here - choose your path"
 - Display each branch as a card:
@@ -2120,24 +2241,29 @@ UI:
 - "View all paths in tree" link to visualization
 
 Styling:
+
 - Cards with hover effects
 - Clear visual hierarchy
 - Badges prominently displayed
 - Author's vision branches highlighted with gold accent
 
 Use Framer Motion for card entrance animations.
+
 ```
 
 ### Prompt 15: Branch Creation Form
 ```
+
 Create branch creation page (app/story/[storyId]/branch/[nodeId]/page.tsx):
 
 Show context:
+
 - Display the parent node content (last few paragraphs)
 - If branching mid-chapter, highlight the specific paragraph
 - Show branch point visually
 
 Form with validation:
+
 1. Branch description (required, 50-200 chars)
    - Helper text: "Describe where your branch takes the story"
    - Character count
@@ -2151,17 +2277,20 @@ Form with validation:
 3. Preview mode toggle
 
 Warnings/Info:
+
 - "You can edit this for 1 hour after posting"
 - "Branching from: [Author Name]'s Chapter X"
 - "This will create a new storyline"
 
 Actions:
+
 - Save draft (localStorage)
 - Preview (show formatted text)
 - Submit branch
 - Cancel (with unsaved changes warning)
 
 After submission:
+
 - Call createBranch GraphQL mutation
 - Show success message
 - Option to:
@@ -2172,14 +2301,17 @@ After submission:
 
 Use react-hook-form with Zod validation.
 Include loading states and error handling.
+
 ```
 
 ### Prompt 16: User Profile Page
 ```
+
 Create user profile page (app/profile/[userId]/page.tsx):
 
 Layout:
 **Header Section:**
+
 - Avatar (editable if own profile)
 - Username
 - Bio (editable if own profile)
@@ -2192,16 +2324,18 @@ Layout:
 - Follow/Message buttons (if viewing other's profile)
 
 **Tabs:**
+
 1. **Stories Created**
    - Grid of story cards they originated
    - Link to each story
-   
 2. **Branches Contributed**
+
    - List of all their branch contributions
    - Group by story
    - Show: story title, their branch description, stats, link to read
 
 3. **Bookmarks** (only visible to self)
+
    - Stories they're currently reading
    - Shows current position
    - "Continue reading" CTA
@@ -2211,24 +2345,29 @@ Layout:
    - Shows writing frequency
 
 Edit Profile (if own profile):
+
 - Modal with form for username, bio, avatar upload
 - Validation and character limits
 
 Use NextUI Tabs, Card, Avatar components.
 Responsive grid layout.
+
 ```
 
 ### Prompt 17: Search & Discovery
 ```
+
 Create browse/search page (app/browse/page.tsx):
 
 Features:
 **Search Bar:**
+
 - Full-text search across titles, synopses
 - Search as you type with debounce
 - Clear search button
 
 **Filters (sidebar or top on mobile):**
+
 - Genre (multi-select checkboxes)
 - Completion status: Ongoing / Completed / Abandoned
 - Branch count range slider
@@ -2242,36 +2381,44 @@ Features:
   - Most reads
 
 **Results Grid:**
+
 - Story cards with all info
 - Pagination or infinite scroll
 - Show count: "Showing X of Y stories"
 - Empty state if no results
 
 **Saved Filters:**
+
 - Allow users to save filter combinations
 - Quick access to "My saved searches"
 
 **Featured Collections:**
+
 - Curated lists: "Staff Picks", "Best Sci-Fi", "Most Collaborative"
 
 Mobile:
+
 - Filters in drawer/modal
 - Stack cards vertically
 
 Use TanStack Query for data fetching with proper cache management.
 URL state for filters (can share filtered URLs).
+
 ```
 
 ### Prompt 18: Authentication & Protected Routes
 ```
+
 Set up AWS Amplify Auth integration:
 
 **Auth Configuration:**
+
 - Configure Amplify with Cognito User Pool
 - Set up auth context provider
 - Create useAuth hook for accessing user state
 
 **Login Page (app/(auth)/login/page.tsx):**
+
 - Email + password form
 - "Remember me" checkbox
 - "Forgot password" link
@@ -2280,6 +2427,7 @@ Set up AWS Amplify Auth integration:
 - Redirect to previous page after login
 
 **Signup Page (app/(auth)/signup/page.tsx):**
+
 - Email, username, password fields
 - Password strength indicator
 - Terms acceptance checkbox
@@ -2287,13 +2435,15 @@ Set up AWS Amplify Auth integration:
 - Redirect to onboarding/profile setup
 
 **Protected Routes:**
+
 - Middleware to check auth for:
   - /story/create
-  - /story/[id]/branch/*
+  - /story/[id]/branch/\*
   - /profile (own profile edit)
 - Redirect to login with return URL
 
 **User Menu (in navbar):**
+
 - Avatar dropdown with:
   - View profile
   - My stories
@@ -2303,13 +2453,16 @@ Set up AWS Amplify Auth integration:
 
 Use NextUI components for forms.
 Handle loading and error states properly.
+
 ```
 
 ### ✅ PHASE 3 VERIFICATION - Frontend Integration Test
 ```
+
 **STOP AND TEST before proceeding to Phase 4**
 
 **1. Build and Compile Frontend:**
+
 ```bash
 cd packages/the-story-hub/frontend
 
@@ -2326,6 +2479,7 @@ yarn build
 ```
 
 **2. Run Frontend Locally:**
+
 ```bash
 # Start dev server
 yarn dev
@@ -2335,17 +2489,18 @@ yarn dev
 
 **3. Test Amplify Configuration:**
 
-**Create test file: frontend/src/__tests__/amplify.test.ts:**
-```typescript
-import { client } from '@/lib/amplify';
-import { listStories } from '@/graphql/queries';
+**Create test file: frontend/src/**tests**/amplify.test.ts:**
 
-describe('Amplify GraphQL Client', () => {
-  it('should be configured correctly', () => {
+```typescript
+import { client } from "@/lib/amplify";
+import { listStories } from "@/graphql/queries";
+
+describe("Amplify GraphQL Client", () => {
+  it("should be configured correctly", () => {
     expect(client).toBeDefined();
   });
 
-  it('should have GraphQL endpoint configured', () => {
+  it("should have GraphQL endpoint configured", () => {
     expect(process.env.NEXT_PUBLIC_APPSYNC_URL).toBeDefined();
   });
 });
@@ -2353,43 +2508,43 @@ describe('Amplify GraphQL Client', () => {
 
 **4. Test API Wrappers with Jest:**
 
-**frontend/src/__tests__/api/stories.test.ts:**
+**frontend/src/**tests**/api/stories.test.ts:**
+
 ```typescript
-import { listStoriesAPI, getStoryAPI } from '@/lib/api/stories';
+import { listStoriesAPI, getStoryAPI } from "@/lib/api/stories";
 
 // Mock the GraphQL client
-jest.mock('@/lib/amplify', () => ({
+jest.mock("@/lib/amplify", () => ({
   client: {
     graphql: jest.fn(),
   },
 }));
 
-describe('Stories API', () => {
-  it('should call listStories query', async () => {
+describe("Stories API", () => {
+  it("should call listStories query", async () => {
     const mockData = {
       data: {
         listStories: {
-          items: [
-            { storyId: 'story-1', title: 'Test Story' },
-          ],
+          items: [{ storyId: "story-1", title: "Test Story" }],
           nextToken: null,
         },
       },
     };
 
-    const { client } = require('@/lib/amplify');
+    const { client } = require("@/lib/amplify");
     client.graphql.mockResolvedValue(mockData);
 
     const result = await listStoriesAPI({ featured: true }, 10);
 
     expect(client.graphql).toHaveBeenCalled();
     expect(result.items).toHaveLength(1);
-    expect(result.items[0].title).toBe('Test Story');
+    expect(result.items[0].title).toBe("Test Story");
   });
 });
 ```
 
 **Run frontend tests:**
+
 ```bash
 yarn test
 
@@ -2400,18 +2555,21 @@ yarn test --coverage
 **5. Manual End-to-End Testing:**
 
 **Test Landing Page:**
+
 - ✅ Visit http://localhost:3000
 - ✅ See "The Enchanted Forest Chronicles" and "Cyberpunk Decisions" (seeded data)
 - ✅ Click on a story card → navigates to story page
 - ✅ Check browser console for no errors
 
 **Test Story Page:**
+
 - ✅ Visit http://localhost:3000/story/story-1
 - ✅ See story title, synopsis, stats
 - ✅ See tree visualization (if implemented)
 - ✅ "Start Reading" button works
 
 **Test Authentication:**
+
 - ✅ Click "Login" → redirects to login page
 - ✅ Enter test credentials
 - ✅ Successfully logs in
@@ -2419,6 +2577,7 @@ yarn test --coverage
 - ✅ Can access protected routes
 
 **Test Story Creation (Authenticated):**
+
 - ✅ Navigate to /story/create
 - ✅ Fill out form with valid data
 - ✅ Submit → creates story in database
@@ -2428,62 +2587,72 @@ yarn test --coverage
 **6. Integration Test with Real Backend:**
 
 **Install Playwright:**
+
 ```bash
 yarn create playwright
 # Select: TypeScript, tests folder, GitHub Actions workflow
 ```
 
 **Create E2E test: tests/e2e/story-flow.spec.ts:**
-```typescript
-import { test, expect } from '@playwright/test';
 
-test.describe('Story Creation Flow', () => {
+```typescript
+import { test, expect } from "@playwright/test";
+
+test.describe("Story Creation Flow", () => {
   test.beforeEach(async ({ page }) => {
     // Login as test user
-    await page.goto('/login');
-    await page.fill('[name="email"]', 'testuser1@example.com');
-    await page.fill('[name="password"]', 'TestPass123!');
+    await page.goto("/login");
+    await page.fill('[name="email"]', "testuser1@example.com");
+    await page.fill('[name="password"]', "TestPass123!");
     await page.click('button[type="submit"]');
 
     // Wait for redirect
-    await page.waitForURL('**/');
+    await page.waitForURL("**/");
   });
 
-  test('should create a new story', async ({ page }) => {
-    await page.goto('/story/create');
+  test("should create a new story", async ({ page }) => {
+    await page.goto("/story/create");
 
     // Fill form
-    await page.fill('[name="title"]', 'My Test Story');
-    await page.fill('[name="synopsis"]', 'A'.repeat(100)); // Min 50 chars
+    await page.fill('[name="title"]', "My Test Story");
+    await page.fill('[name="synopsis"]', "A".repeat(100)); // Min 50 chars
     await page.click('[name="genre"]');
-    await page.click('text=Fantasy');
-    await page.selectOption('[name="ageRating"]', 'T');
-    await page.fill('[name="chapterContent"]', 'Once upon a time...'.repeat(50));
+    await page.click("text=Fantasy");
+    await page.selectOption('[name="ageRating"]', "T");
+    await page.fill(
+      '[name="chapterContent"]',
+      "Once upon a time...".repeat(50),
+    );
 
     // Submit
     await page.click('button[type="submit"]');
 
     // Verify redirect
     await expect(page).toHaveURL(/\/story\//);
-    await expect(page.locator('text=My Test Story')).toBeVisible();
+    await expect(page.locator("text=My Test Story")).toBeVisible();
   });
 
-  test('should list stories on landing page', async ({ page }) => {
-    await page.goto('/');
+  test("should list stories on landing page", async ({ page }) => {
+    await page.goto("/");
 
-    await expect(page.locator('text=The Enchanted Forest Chronicles')).toBeVisible();
-    await expect(page.locator('text=Cyberpunk Decisions')).toBeVisible();
+    await expect(
+      page.locator("text=The Enchanted Forest Chronicles"),
+    ).toBeVisible();
+    await expect(page.locator("text=Cyberpunk Decisions")).toBeVisible();
   });
 
-  test('should read a story', async ({ page }) => {
-    await page.goto('/story/story-1/read');
+  test("should read a story", async ({ page }) => {
+    await page.goto("/story/story-1/read");
 
-    await expect(page.locator('text=You step into the enchanted forest')).toBeVisible();
+    await expect(
+      page.locator("text=You step into the enchanted forest"),
+    ).toBeVisible();
   });
 });
 ```
 
 **Run Playwright tests:**
+
 ```bash
 # Interactive UI mode
 yarn playwright test --ui
@@ -2501,6 +2670,7 @@ yarn playwright test --project=webkit
 ```
 
 **7. Network Request Verification:**
+
 - Open browser DevTools → Network tab
 - Visit landing page
 - ✅ Verify GraphQL request to AppSync API
@@ -2509,6 +2679,7 @@ yarn playwright test --project=webkit
 - ✅ No 401/403 errors
 
 **8. Performance Check:**
+
 ```bash
 # Install Lighthouse CLI
 npm install -g lighthouse
@@ -2524,7 +2695,8 @@ lighthouse http://localhost:3000 --view
 
 **9. Component Testing with React Testing Library:**
 
-**frontend/src/__tests__/components/StoryCard.test.tsx:**
+**frontend/src/**tests**/components/StoryCard.test.tsx:**
+
 ```typescript
 import { render, screen } from '@testing-library/react';
 import StoryCard from '@/components/StoryCard';
@@ -2575,6 +2747,7 @@ describe('StoryCard', () => {
 ✅ Component tests pass
 
 **Common Issues:**
+
 - ❌ "Module not found: gqlTypes" → Run `yarn build-gql`
 - ❌ "Network error" → Check .env.local has correct APPSYNC_URL
 - ❌ "Unauthorized" → Verify Cognito credentials
@@ -2582,6 +2755,7 @@ describe('StoryCard', () => {
 - ❌ Hydration errors → Check server/client rendering consistency
 
 **Debug Commands:**
+
 ```bash
 # Check environment variables
 yarn env | grep NEXT_PUBLIC
@@ -2597,6 +2771,7 @@ cat src/types/gqlTypes.ts | grep "export type Story"
 ```
 
 **If all tests pass, proceed to Phase 4!**
+
 ```
 
 ---
@@ -2605,9 +2780,11 @@ cat src/types/gqlTypes.ts | grep "export type Story"
 
 ### Prompt 19: Notifications System
 ```
+
 Build in-app notifications system:
 
 **Notification Component (in navbar):**
+
 - Bell icon with unread count badge
 - Dropdown showing recent notifications
 - Types of notifications:
@@ -2618,6 +2795,7 @@ Build in-app notifications system:
   - New branch on story you're following
 
 **Notification Item:**
+
 - Icon based on type
 - Message text
 - Time ago
@@ -2626,16 +2804,19 @@ Build in-app notifications system:
 - Delete option
 
 **Notification Settings Page:**
+
 - Email notification preferences
 - Push notification opt-in (future)
 - Frequency settings (instant, daily digest, weekly)
 
 **Backend Integration:**
+
 - Poll listNotifications GraphQL query every X seconds when active
 - AppSync Real-Time Subscriptions for instant updates (use GraphQL subscriptions)
 - Subscribe to: onNewNotification(userId: ID!)
 
 **Notification Center Page:**
+
 - Full list of all notifications
 - Filter by type
 - Mark all as read
@@ -2643,13 +2824,16 @@ Build in-app notifications system:
 
 Use Zustand for notification state management.
 Show toast for new notifications while user is active.
+
 ```
 
 ### Prompt 20: Responsive Design & Mobile Optimization
 ```
+
 Ensure the entire platform is fully responsive and mobile-optimized:
 
 **Breakpoints:**
+
 - Mobile: < 640px
 - Tablet: 640px - 1024px
 - Desktop: > 1024px
@@ -2657,22 +2841,26 @@ Ensure the entire platform is fully responsive and mobile-optimized:
 **Mobile-Specific Adaptations:**
 
 1. **Navigation:**
+
    - Hamburger menu instead of full nav
    - Bottom tab bar for main sections
    - Sticky header with search
 
 2. **Tree Visualization:**
+
    - Switch to vertical list/timeline view
    - Collapsible branches
    - Simplified stats display
 
 3. **Reading View:**
+
    - Full-width content (no sidebars)
    - Floating action button for branch creation
    - Swipe gestures for prev/next chapter
    - Bottom sheet for branch selection
 
 4. **Forms:**
+
    - Stack inputs vertically
    - Larger touch targets (min 44px)
    - Native keyboard support
@@ -2683,24 +2871,29 @@ Ensure the entire platform is fully responsive and mobile-optimized:
    - 3-4 columns on desktop
 
 **Performance:**
+
 - Lazy load images
 - Virtualize long lists
 - Code splitting by route
 - Optimize bundle size
 
 **Touch Interactions:**
+
 - Swipe to navigate chapters
 - Pull to refresh on lists
 - Long-press for context menus
 
 Test on real devices and use Chrome DevTools mobile emulation.
+
 ```
 
 ### Prompt 21: Analytics & Monitoring
 ```
+
 Add analytics and monitoring using Sentry (already in dependencies):
 
 **Frontend (Sentry):**
+
 - Initialize Sentry in app/layout.tsx
 - Track errors and performance
 - Custom events:
@@ -2711,6 +2904,7 @@ Add analytics and monitoring using Sentry (already in dependencies):
   - Search performed
 
 **Backend (CloudWatch + Sentry):**
+
 - Lambda function logging
 - Custom metrics:
   - API latency
@@ -2723,6 +2917,7 @@ Add analytics and monitoring using Sentry (already in dependencies):
   - Failed Lambda executions
 
 **User Analytics:**
+
 - Track without PII:
   - Popular stories
   - Most branched points
@@ -2731,6 +2926,7 @@ Add analytics and monitoring using Sentry (already in dependencies):
   - Feature usage
 
 **Dashboard Page (admin only):**
+
 - Display key metrics
 - Charts using Recharts or similar
 - Real-time stats
@@ -2738,13 +2934,16 @@ Add analytics and monitoring using Sentry (already in dependencies):
 - Content growth (stories, branches per day)
 
 Respect privacy - make analytics opt-out in settings.
+
 ```
 
 ### Prompt 22: Admin Features
 ```
+
 Create admin dashboard and moderation tools:
 
 **Admin Dashboard (app/admin/page.tsx):**
+
 - Only accessible to admin users (check Cognito groups)
 - Key metrics:
   - Total users, stories, branches
@@ -2754,6 +2953,7 @@ Create admin dashboard and moderation tools:
   - API costs estimate
 
 **Content Moderation:**
+
 - Flagged content queue
 - User reports
 - Quick actions:
@@ -2763,11 +2963,13 @@ Create admin dashboard and moderation tools:
   - Feature story
 
 **Story Management:**
+
 - Mark stories as featured
 - Edit any story (with audit log)
 - Bulk operations
 
 **User Management:**
+
 - View all users
 - Search by email/username
 - Grant/revoke admin
@@ -2775,21 +2977,25 @@ Create admin dashboard and moderation tools:
 - View user activity
 
 **System Settings:**
+
 - Toggle features on/off
 - Set announcement banner
 - Update featured collections
 - Manage genre list
 
 Add audit logging for all admin actions to DynamoDB.
+
 ```
 
 ### Prompt 23: Testing & Documentation
 ```
+
 Set up testing infrastructure and documentation:
 
 **Testing:**
 
 1. **Backend Unit Tests (Jest):**
+
    - Test AppSync resolvers (request/response functions)
    - Test Lambda handlers
    - Mock DynamoDB calls
@@ -2797,60 +3003,65 @@ Set up testing infrastructure and documentation:
    - Target 80%+ coverage
 
 2. **Frontend Unit Tests (Jest + React Testing Library):**
+
    - Test components in isolation
    - Test hooks
    - Test utility functions
    - Mock API calls
 
 3. **Integration Tests:**
+
    - Test GraphQL API endpoints end-to-end
    - Test auth flows (Cognito)
    - Test data persistence (DynamoDB)
 
 4. **E2E Tests (Playwright):**
    **Install Playwright:**
+
    ```bash
    yarn create playwright
    # Select: TypeScript, tests folder, GitHub Actions workflow
    ```
 
    **Configure playwright.config.ts for multi-browser testing:**
+
    ```typescript
-   import { defineConfig, devices } from '@playwright/test';
+   import { defineConfig, devices } from "@playwright/test";
 
    export default defineConfig({
-     testDir: './tests/e2e',
+     testDir: "./tests/e2e",
      fullyParallel: true,
      forbidOnly: !!process.env.CI,
      retries: process.env.CI ? 2 : 0,
      workers: process.env.CI ? 1 : undefined,
-     reporter: 'html',
+     reporter: "html",
      use: {
-       baseURL: 'http://localhost:3000',
-       trace: 'on-first-retry',
+       baseURL: "http://localhost:3000",
+       trace: "on-first-retry",
      },
      projects: [
        {
-         name: 'chromium',
-         use: { ...devices['Desktop Chrome'] },
+         name: "chromium",
+         use: { ...devices["Desktop Chrome"] },
        },
        {
-         name: 'firefox',
-         use: { ...devices['Desktop Firefox'] },
+         name: "firefox",
+         use: { ...devices["Desktop Firefox"] },
        },
        {
-         name: 'webkit',
-         use: { ...devices['Desktop Safari'] },
+         name: "webkit",
+         use: { ...devices["Desktop Safari"] },
        },
        {
-         name: 'mobile',
-         use: { ...devices['iPhone 13'] },
+         name: "mobile",
+         use: { ...devices["iPhone 13"] },
        },
      ],
    });
    ```
 
    **Critical user flows to test:**
+
    - Sign up → Create story → Read → Branch
    - Search → Read → Bookmark
    - User profile journey
@@ -2860,6 +3071,7 @@ Set up testing infrastructure and documentation:
 **Documentation:**
 
 1. **README.md:**
+
    - Project overview
    - Setup instructions
    - Environment variables
@@ -2867,18 +3079,21 @@ Set up testing infrastructure and documentation:
    - Deployment process
 
 2. **API Documentation:**
+
    - OpenAPI/Swagger spec
    - All endpoints documented
    - Request/response examples
    - Error codes
 
 3. **Contributing Guide:**
+
    - Code style
    - Git workflow
    - PR process
    - Testing requirements
 
 4. **User Guide (in-app):**
+
    - How to create stories
    - How to branch
    - How to navigate trees
@@ -2889,13 +3104,16 @@ Set up testing infrastructure and documentation:
    - Data flow diagrams
    - Infrastructure diagram
    - Tech stack decisions
+
 ```
 
 ### Prompt 24: Deployment & CI/CD
 ```
+
 Set up deployment pipeline:
 
 **Development Environment:**
+
 - Local development with:
   - AWS SAM CLI for Lambda testing
   - DynamoDB Local
@@ -2903,24 +3121,29 @@ Set up deployment pipeline:
 - Environment variables in .env.local
 
 **Staging Environment:**
+
 - Separate AWS account or isolated resources
 - Deploy on every merge to `develop` branch
 - Run integration tests
 - Test data seeding
 
 **Production Environment:**
+
 - Deploy on merge to `main` branch
 - Blue-green deployment for zero downtime
 - Automated rollback on errors
 
 **GitHub Actions (or similar CI/CD):**
+
 1. **On PR:**
+
    - Run linter (ESLint)
    - Run tests
    - Build check
    - Type check
 
 2. **On merge to develop:**
+
    - Deploy to staging
    - Run E2E tests
    - Notify team
@@ -2933,42 +3156,50 @@ Set up deployment pipeline:
    - Notify team
 
 **Monitoring Post-Deployment:**
+
 - Check error rates spike
 - Verify health checks pass
 - Monitor performance metrics
 
 **Rollback Plan:**
+
 - Keep last 3 versions
 - One-click rollback script
 - Database migration reversibility
 
 Create deployment scripts and document the process.
+
 ```
 
 ### Prompt 25: Performance Optimization
 ```
+
 Optimize platform performance:
 
 **Frontend Optimization:**
 
 1. **Code Splitting:**
+
    - Route-based splitting (already handled by Next.js)
    - Component lazy loading for heavy components (tree viz, editor)
    - Dynamic imports for modals and drawers
 
 2. **Image Optimization:**
+
    - Use Next.js Image component
    - Serve WebP with fallbacks
    - Lazy load images below fold
    - Responsive images (srcset)
 
 3. **Data Fetching:**
+
    - Implement proper caching with TanStack Query
    - Prefetch next chapter while reading
    - Optimistic updates for votes/bookmarks
    - Pagination for long lists
 
 4. **Bundle Size:**
+
    - Analyze with Next.js bundle analyzer
    - Tree-shake unused code
    - Use lighter alternatives where possible
@@ -2983,18 +3214,21 @@ Optimize platform performance:
 **Backend Optimization:**
 
 1. **DynamoDB:**
+
    - Use query instead of scan
    - Implement proper indexes
    - Batch operations where possible
    - Use DynamoDB Streams for async updates
 
 2. **Lambda:**
+
    - Optimize cold starts (minimize dependencies)
    - Increase memory if needed
    - Use Lambda layers for shared code
    - Connection pooling for external services
 
 3. **Caching:**
+
    - CloudFront for static assets and frontend
    - AppSync caching for GraphQL queries (configure TTL)
    - In-memory caching in Lambda functions (global scope)
@@ -3006,13 +3240,15 @@ Optimize platform performance:
    - Compression (gzip)
 
 **Monitoring:**
+
 - Set up Lighthouse CI
 - Track Core Web Vitals
 - Monitor Time to Interactive
 - Set performance budgets
 
 Create performance testing suite and run regularly.
-```
+
+````
 
 ---
 
@@ -3039,9 +3275,10 @@ subscription OnNewNotification {
 }
 
 # Then trigger a notification (upvote, branch, etc.) and verify it appears in real-time
-```
+````
 
 **Test Notification Queries:**
+
 ```bash
 # Test notification listing
 query ListNotifications {
@@ -3066,6 +3303,7 @@ mutation MarkNotificationRead {
 ```
 
 **Frontend Notification Tests:**
+
 ```typescript
 // tests/components/NotificationBell.test.tsx
 import { render, screen, waitFor } from '@testing-library/react';
@@ -3091,6 +3329,7 @@ describe('NotificationBell', () => {
 ### 2. Responsive Design Verification
 
 **Test All Breakpoints:**
+
 ```bash
 # Configure playwright.config.ts with multiple devices
 # Then run tests across all viewports
@@ -3100,60 +3339,67 @@ npx playwright test --project=desktop
 ```
 
 **playwright.config.ts device configuration:**
+
 ```typescript
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   projects: [
     {
-      name: 'mobile',
-      use: { ...devices['iPhone 13'] },
+      name: "mobile",
+      use: { ...devices["iPhone 13"] },
     },
     {
-      name: 'tablet',
-      use: { ...devices['iPad Pro'] },
+      name: "tablet",
+      use: { ...devices["iPad Pro"] },
     },
     {
-      name: 'desktop',
-      use: { ...devices['Desktop Chrome'] },
+      name: "desktop",
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
 });
 ```
 
 **Mobile-Specific E2E Tests:**
+
 ```typescript
 // tests/e2e/mobile-navigation.spec.ts
-import { test, expect, devices } from '@playwright/test';
+import { test, expect, devices } from "@playwright/test";
 
-test.use(devices['iPhone 13']);
+test.use(devices["iPhone 13"]);
 
-test.describe('Mobile Navigation', () => {
-  test('should show hamburger menu on mobile', async ({ page }) => {
-    await page.goto('/');
+test.describe("Mobile Navigation", () => {
+  test("should show hamburger menu on mobile", async ({ page }) => {
+    await page.goto("/");
 
     await expect(page.locator('[data-testid="hamburger-menu"]')).toBeVisible();
     await expect(page.locator('[data-testid="desktop-nav"]')).not.toBeVisible();
   });
 
-  test('should navigate story tree with swipe gestures', async ({ page }) => {
-    await page.goto('/story/story-1/read');
+  test("should navigate story tree with swipe gestures", async ({ page }) => {
+    await page.goto("/story/story-1/read");
 
     // Simulate swipe
-    await page.locator('[data-testid="chapter-content"]').dispatchEvent('swiperight');
+    await page
+      .locator('[data-testid="chapter-content"]')
+      .dispatchEvent("swiperight");
     await expect(page).toHaveURL(/\/previous/);
   });
 
-  test('should switch to list view on mobile tree viz', async ({ page }) => {
-    await page.goto('/story/story-1/tree');
+  test("should switch to list view on mobile tree viz", async ({ page }) => {
+    await page.goto("/story/story-1/tree");
 
     await page.click('[data-testid="tree-view-toggle"]');
-    await expect(page.locator('[data-testid="timeline-list-view"]')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="timeline-list-view"]'),
+    ).toBeVisible();
   });
 });
 ```
 
 **Visual Regression Testing:**
+
 ```bash
 # Playwright has built-in screenshot comparison
 # Or use Percy/Chromatic for visual testing
@@ -3165,27 +3411,29 @@ npx playwright test                      # Compare against baselines
 ```
 
 **tests/e2e/visual-regression.spec.ts:**
-```typescript
-import { test, expect, devices } from '@playwright/test';
 
-test('captures story card on mobile', async ({ page }) => {
-  await page.goto('/browse', {
-    ...devices['iPhone 13'],
+```typescript
+import { test, expect, devices } from "@playwright/test";
+
+test("captures story card on mobile", async ({ page }) => {
+  await page.goto("/browse", {
+    ...devices["iPhone 13"],
   });
 
-  await expect(page).toHaveScreenshot('story-card-mobile.png');
+  await expect(page).toHaveScreenshot("story-card-mobile.png");
 });
 
-test('captures tree visualization on tablet', async ({ page }) => {
-  await page.goto('/story/story-1/tree', {
-    ...devices['iPad Pro'],
+test("captures tree visualization on tablet", async ({ page }) => {
+  await page.goto("/story/story-1/tree", {
+    ...devices["iPad Pro"],
   });
 
-  await expect(page).toHaveScreenshot('tree-view-tablet.png');
+  await expect(page).toHaveScreenshot("tree-view-tablet.png");
 });
 ```
 
 **Or use Percy with Playwright:**
+
 ```bash
 npm install --save-dev @percy/playwright
 
@@ -3202,27 +3450,29 @@ test('visual regression with Percy', async ({ page }) => {
 ### 3. Analytics & Monitoring Verification
 
 **Verify Sentry Integration:**
+
 ```typescript
 // Test error tracking
 // pages/api/test-error.ts (remove after testing)
 export default function handler(req, res) {
-  throw new Error('Test Sentry error tracking');
+  throw new Error("Test Sentry error tracking");
 }
 
 // Visit /api/test-error and verify error appears in Sentry dashboard
 ```
 
 **Test Custom Events:**
+
 ```typescript
 // lib/analytics.ts
-import * as Sentry from '@sentry/nextjs';
+import * as Sentry from "@sentry/nextjs";
 
 export function trackStoryCreated(storyId: string) {
   Sentry.addBreadcrumb({
-    category: 'story',
-    message: 'Story created',
+    category: "story",
+    message: "Story created",
     data: { storyId },
-    level: 'info',
+    level: "info",
   });
 }
 
@@ -3230,6 +3480,7 @@ export function trackStoryCreated(storyId: string) {
 ```
 
 **CloudWatch Metrics Testing:**
+
 ```bash
 # Check Lambda logs
 aws logs tail /aws/lambda/TheStoryHub-ImageProcessor --follow
@@ -3250,30 +3501,31 @@ aws cloudwatch describe-alarms --alarm-names TheStoryHub-HighErrorRate
 ### 4. Admin Features Testing
 
 **Test Admin Dashboard Access Control:**
+
 ```typescript
 // tests/e2e/admin.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Admin Dashboard', () => {
-  test('should deny access to non-admin users', async ({ page }) => {
+test.describe("Admin Dashboard", () => {
+  test("should deny access to non-admin users", async ({ page }) => {
     // Login as regular user
-    await page.goto('/login');
-    await page.fill('[name="email"]', 'regular-user@example.com');
-    await page.fill('[name="password"]', 'password123');
+    await page.goto("/login");
+    await page.fill('[name="email"]', "regular-user@example.com");
+    await page.fill('[name="password"]', "password123");
     await page.click('button[type="submit"]');
 
-    await page.goto('/admin');
+    await page.goto("/admin");
     await expect(page).toHaveURL(/\/unauthorized/);
   });
 
-  test('should allow access to admin users', async ({ page }) => {
+  test("should allow access to admin users", async ({ page }) => {
     // Login as admin
-    await page.goto('/login');
-    await page.fill('[name="email"]', 'admin@example.com');
-    await page.fill('[name="password"]', 'admin123');
+    await page.goto("/login");
+    await page.fill('[name="email"]', "admin@example.com");
+    await page.fill('[name="password"]', "admin123");
     await page.click('button[type="submit"]');
 
-    await page.goto('/admin');
+    await page.goto("/admin");
     await expect(page.locator('[data-testid="admin-dashboard"]')).toBeVisible();
     await expect(page.locator('[data-testid="user-count"]')).toBeVisible();
   });
@@ -3281,33 +3533,38 @@ test.describe('Admin Dashboard', () => {
 ```
 
 **Test Content Moderation:**
+
 ```typescript
-test.describe('Content Moderation', () => {
+test.describe("Content Moderation", () => {
   test.beforeEach(async ({ page }) => {
     // Login as admin
-    await page.goto('/login');
-    await page.fill('[name="email"]', 'admin@example.com');
-    await page.fill('[name="password"]', 'admin123');
+    await page.goto("/login");
+    await page.fill('[name="email"]', "admin@example.com");
+    await page.fill('[name="password"]', "admin123");
     await page.click('button[type="submit"]');
   });
 
-  test('should hide flagged content', async ({ page }) => {
-    await page.goto('/admin/moderation');
+  test("should hide flagged content", async ({ page }) => {
+    await page.goto("/admin/moderation");
 
     const flaggedItem = page.locator('[data-testid="flagged-item-1"]');
     await flaggedItem.locator('[data-testid="hide-button"]').click();
 
-    await expect(page.locator('text=Content hidden successfully')).toBeVisible();
+    await expect(
+      page.locator("text=Content hidden successfully"),
+    ).toBeVisible();
   });
 
-  test('should feature stories', async ({ page }) => {
-    await page.goto('/admin/stories');
+  test("should feature stories", async ({ page }) => {
+    await page.goto("/admin/stories");
 
     const story = page.locator('[data-testid="story-story-1"]');
     await story.locator('[data-testid="feature-toggle"]').click();
 
-    await page.goto('/');
-    await expect(page.locator('[data-testid="featured-stories"]')).toContainText('Story Title');
+    await page.goto("/");
+    await expect(
+      page.locator('[data-testid="featured-stories"]'),
+    ).toContainText("Story Title");
   });
 });
 ```
@@ -3315,6 +3572,7 @@ test.describe('Content Moderation', () => {
 ### 5. Performance Testing
 
 **Lighthouse CI Testing:**
+
 ```bash
 # Install Lighthouse CI
 npm install -g @lhci/cli
@@ -3350,6 +3608,7 @@ lhci autorun
 ```
 
 **Load Testing with Artillery:**
+
 ```bash
 # Install Artillery
 npm install -g artillery
@@ -3396,6 +3655,7 @@ artillery run artillery-config.yml
 ```
 
 **Bundle Size Analysis:**
+
 ```bash
 # Analyze bundle size
 ANALYZE=true yarn build
@@ -3413,6 +3673,7 @@ ls -lh .next/static/chunks/*.js
 ### 6. Deployment Pipeline Testing
 
 **Test CI/CD Pipeline:**
+
 ```bash
 # Create a test branch and PR
 git checkout -b test/ci-cd-verification
@@ -3430,6 +3691,7 @@ git push origin test/ci-cd-verification
 ```
 
 **Verify Staging Deployment:**
+
 ```bash
 # Deploy to staging
 yarn deploy:staging
@@ -3453,58 +3715,72 @@ curl -X POST https://staging-api.thestoryhub.example.com/graphql \
 ### 7. Integration Testing Checklist
 
 **Complete User Flows:**
+
 ```typescript
 // tests/e2e/complete-user-journey.spec.ts
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Complete User Journey', () => {
-  test('should complete full user lifecycle', async ({ page }) => {
+test.describe("Complete User Journey", () => {
+  test("should complete full user lifecycle", async ({ page }) => {
     // Sign up
-    await page.goto('/signup');
-    await page.fill('[name="email"]', 'newuser@example.com');
-    await page.fill('[name="password"]', 'SecurePass123!');
+    await page.goto("/signup");
+    await page.fill('[name="email"]', "newuser@example.com");
+    await page.fill('[name="password"]', "SecurePass123!");
     await page.click('[type="submit"]');
 
     // Verify email (mock)
-    await expect(page.locator('text=Check your email')).toBeVisible();
+    await expect(page.locator("text=Check your email")).toBeVisible();
 
     // Create story
-    await page.goto('/story/create');
-    await page.fill('[name="title"]', 'My First Story');
-    await page.fill('[name="synopsis"]', 'This is a test story synopsis that is at least 50 characters long to meet requirements.');
-    await page.selectOption('[name="genre"]', 'Fantasy');
-    await page.selectOption('[name="ageRating"]', 'T');
-    await page.fill('[name="chapterContent"]', 'Chapter 1 content goes here. '.repeat(50));
+    await page.goto("/story/create");
+    await page.fill('[name="title"]', "My First Story");
+    await page.fill(
+      '[name="synopsis"]',
+      "This is a test story synopsis that is at least 50 characters long to meet requirements.",
+    );
+    await page.selectOption('[name="genre"]', "Fantasy");
+    await page.selectOption('[name="ageRating"]', "T");
+    await page.fill(
+      '[name="chapterContent"]',
+      "Chapter 1 content goes here. ".repeat(50),
+    );
     await page.click('[type="submit"]');
 
     // Verify story created
     await expect(page).toHaveURL(/\/story\//);
-    await expect(page.locator('text=My First Story')).toBeVisible();
+    await expect(page.locator("text=My First Story")).toBeVisible();
 
     // Read and branch
     await page.click('[data-testid="read-button"]');
     await page.click('[data-testid="paragraph-3"]');
     await page.click('[data-testid="create-branch"]');
-    await page.fill('[name="branchDescription"]', 'An alternative path');
-    await page.fill('[name="content"]', 'Alternative content here. '.repeat(50));
+    await page.fill('[name="branchDescription"]', "An alternative path");
+    await page.fill(
+      '[name="content"]',
+      "Alternative content here. ".repeat(50),
+    );
     await page.click('[type="submit"]');
 
     // Verify branch created
-    await expect(page.locator('text=Branch created successfully')).toBeVisible();
+    await expect(
+      page.locator("text=Branch created successfully"),
+    ).toBeVisible();
 
     // View tree
     await page.click('[data-testid="tree-view-button"]');
-    await expect(page.locator('[data-testid="tree-visualization"]')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="tree-visualization"]'),
+    ).toBeVisible();
 
     // Bookmark story
     await page.click('[data-testid="bookmark-button"]');
-    await expect(page.locator('text=Bookmarked')).toBeVisible();
+    await expect(page.locator("text=Bookmarked")).toBeVisible();
 
     // Check profile
     await page.click('[data-testid="user-menu"]');
     await page.click('[data-testid="profile-link"]');
-    await expect(page.locator('text=Stories Created: 1')).toBeVisible();
-    await expect(page.locator('text=Branches Contributed: 1')).toBeVisible();
+    await expect(page.locator("text=Stories Created: 1")).toBeVisible();
+    await expect(page.locator("text=Branches Contributed: 1")).toBeVisible();
   });
 });
 ```
@@ -3514,6 +3790,7 @@ test.describe('Complete User Journey', () => {
 Before proceeding to Phase 5, manually verify:
 
 **Notifications:**
+
 - [ ] Real-time notifications appear without refresh
 - [ ] Notification bell shows correct unread count
 - [ ] Mark as read works correctly
@@ -3521,6 +3798,7 @@ Before proceeding to Phase 5, manually verify:
 - [ ] Email notifications sent (if enabled)
 
 **Responsive Design:**
+
 - [ ] Mobile navigation works smoothly
 - [ ] Tree visualization adapts to mobile (list/timeline view)
 - [ ] Forms are usable on small screens
@@ -3529,6 +3807,7 @@ Before proceeding to Phase 5, manually verify:
 - [ ] No horizontal scrolling on mobile
 
 **Analytics:**
+
 - [ ] Sentry captures errors correctly
 - [ ] Custom events tracked
 - [ ] CloudWatch shows Lambda metrics
@@ -3536,6 +3815,7 @@ Before proceeding to Phase 5, manually verify:
 - [ ] User analytics opt-out works
 
 **Admin Features:**
+
 - [ ] Admin access restricted to admin users
 - [ ] Content moderation queue works
 - [ ] Feature story toggle works
@@ -3543,6 +3823,7 @@ Before proceeding to Phase 5, manually verify:
 - [ ] Audit log records admin actions
 
 **Performance:**
+
 - [ ] Lighthouse scores > 90 in all categories
 - [ ] Page load time < 3 seconds
 - [ ] Tree renders with 100+ nodes smoothly
@@ -3550,6 +3831,7 @@ Before proceeding to Phase 5, manually verify:
 - [ ] No memory leaks during navigation
 
 **Deployment:**
+
 - [ ] CI/CD pipeline runs on PR
 - [ ] Staging deployment successful
 - [ ] Environment variables configured
@@ -3559,6 +3841,7 @@ Before proceeding to Phase 5, manually verify:
 ### 9. Security Testing
 
 **Security Checklist:**
+
 ```bash
 # Run security audit
 npm audit
@@ -3584,6 +3867,7 @@ done
 ```
 
 **Expected Security Results:**
+
 - ✅ No critical npm vulnerabilities
 - ✅ Authentication required for protected routes
 - ✅ Authorization enforced (users can't modify others' content)
@@ -3597,16 +3881,19 @@ done
 **Common Issues:**
 
 1. **Notifications not appearing in real-time:**
+
    - Check WebSocket connection in browser DevTools
    - Verify AppSync subscription configuration
    - Check Cognito auth token validity
 
 2. **Mobile layout breaking:**
+
    - Verify Tailwind breakpoints
    - Check for fixed widths instead of responsive units
    - Test on real devices, not just emulator
 
 3. **Performance issues:**
+
    - Check bundle size with analyzer
    - Verify lazy loading configured
    - Check for unnecessary re-renders (React DevTools Profiler)
@@ -3626,6 +3913,7 @@ done
 ## Phase 5: Launch Preparation
 
 ### Prompt 26: Beta Testing & Feedback Loop
+
 ```
 Prepare for beta launch:
 
@@ -3672,7 +3960,8 @@ Create a beta tester leaderboard to gamify participation.
 ```
 
 ### Prompt 26.5: Age Rating & Content Warnings
-```
+
+````
 Implement age rating and content warning system:
 
 **Age Rating System:**
@@ -3804,22 +4093,27 @@ type ChapterNode = {
     status: 'pending' | 'approved' | 'rejected';
   };
 };
-```
+````
 
 Create clear rating guidelines document with examples.
+
 ```
 
 ### Prompt 27: Content Moderation & Safety
 ```
+
 Implement content moderation and safety features:
 
 **Automated Moderation:**
+
 1. Content filters:
+
    - Profanity filter (with severity levels)
    - Spam detection (repeated content, links)
    - NSFW content detection (flag for age rating review)
 
 2. Rate limiting:
+
    - Max stories per user per day (prevent spam)
    - Max branches per user per hour
    - Max edits in timeframe
@@ -3830,6 +4124,7 @@ Implement content moderation and safety features:
    - Mass upvoting patterns
 
 **User Reporting:**
+
 - Report buttons on stories and branches
 - Report reasons:
   - Spam
@@ -3841,12 +4136,14 @@ Implement content moderation and safety features:
 - Report queue for moderators
 
 **Moderation Tools:**
+
 - Review queue with priority sorting
 - Quick actions: approve, hide, delete, ban, adjust age rating
 - Notes and communication with reporters
 - Appeal process for content removal
 
 **Community Guidelines:**
+
 - Clear rules page
 - Examples of acceptable/unacceptable content
 - Consequences for violations
@@ -3854,6 +4151,7 @@ Implement content moderation and safety features:
 - Specific section on age ratings and content warnings
 
 **Age Rating Moderation:**
+
 - Queue for flagged rating increases
 - Review reported mis-ratings
 - Automatic detection of mature keywords without 18+ rating
@@ -3861,6 +4159,7 @@ Implement content moderation and safety features:
 - Tools to quickly scan through content
 
 **User Safety:**
+
 - Block user feature
 - Private profiles option (future)
 - Content warnings system ✅
@@ -3868,6 +4167,7 @@ Implement content moderation and safety features:
 - Parental controls (future)
 
 **Legal Compliance:**
+
 - DMCA takedown process
 - Copyright infringement reporting
 - Terms of Service (including age requirements)
@@ -3877,13 +4177,16 @@ Implement content moderation and safety features:
 - Age-restricted content regulations by jurisdiction
 
 Consult with legal counsel before launch, especially regarding age-gated content.
+
 ```
 
 ### Prompt 28: Patreon Integration & Monetization
 ```
+
 Implement Patreon integration and supporter features:
 
 **Patreon OAuth Integration:**
+
 1. Patreon app setup
 2. OAuth flow:
    - Connect Patreon account button in profile
@@ -3892,6 +4195,7 @@ Implement Patreon integration and supporter features:
    - Store supporter status in User table
 
 **Supporter Benefits:**
+
 - Ad-free experience
 - Supporter badge on profile and contributions
 - Featured supporter section
@@ -3901,6 +4205,7 @@ Implement Patreon integration and supporter features:
 - Priority support
 
 **Webhook Handling:**
+
 - Listen for pledge events:
   - New pledge
   - Updated pledge
@@ -3909,13 +4214,16 @@ Implement Patreon integration and supporter features:
 - Send welcome email to new supporters
 
 **Alternative Monetization (Phase 2):**
+
 1. Non-intrusive ads for free users:
+
    - Between chapters (natural pause point)
    - On browse pages (sidebar/bottom)
    - Branch selection screens
    - Never mid-paragraph or disruptive
 
 2. Tipping System:
+
    - Readers can tip story authors
    - Readers can tip branch contributors
    - Platform takes 10-15% fee
@@ -3929,13 +4237,15 @@ Implement Patreon integration and supporter features:
    - Collaboration tools (co-writing)
 
 **Donation Campaigns:**
+
 - Wikipedia-style banner (1-2x per year)
 - Show funding goal and progress
 - Transparency about costs
 - Supporter wall of fame
 
 Create clear pricing page explaining all tiers and features.
-```
+
+````
 
 ---
 
@@ -3987,36 +4297,40 @@ test.describe('Beta Invite System', () => {
     await expect(page.locator('[data-testid="beta-user-count"]')).toContainText('/ 500');
   });
 });
-```
+````
 
 **Test Onboarding Flow:**
+
 ```typescript
-test.describe('Beta User Onboarding', () => {
-  test('should show welcome tutorial for new beta users', async ({ page }) => {
+test.describe("Beta User Onboarding", () => {
+  test("should show welcome tutorial for new beta users", async ({ page }) => {
     // Signup with beta code
-    await page.goto('/signup');
-    await page.fill('[name="email"]', 'newbeta@example.com');
-    await page.fill('[name="inviteCode"]', 'beta-code-123');
-    await page.fill('[name="password"]', 'SecurePass123!');
+    await page.goto("/signup");
+    await page.fill('[name="email"]', "newbeta@example.com");
+    await page.fill('[name="inviteCode"]', "beta-code-123");
+    await page.fill('[name="password"]', "SecurePass123!");
     await page.click('[type="submit"]');
 
     // Should see tutorial
     await expect(page.locator('[data-testid="tutorial-modal"]')).toBeVisible();
-    await expect(page.locator('text=Welcome to Story Hub Beta!')).toBeVisible();
+    await expect(page.locator("text=Welcome to Story Hub Beta!")).toBeVisible();
 
     // Step through tutorial
     await page.click('[data-testid="tutorial-next"]');
-    await expect(page.locator('text=Create your first story')).toBeVisible();
+    await expect(page.locator("text=Create your first story")).toBeVisible();
     await page.click('[data-testid="tutorial-next"]');
-    await expect(page.locator('text=Branch from others')).toBeVisible();
+    await expect(page.locator("text=Branch from others")).toBeVisible();
 
     await page.click('[data-testid="tutorial-finish"]');
-    await expect(page.locator('[data-testid="tutorial-modal"]')).not.toBeVisible();
+    await expect(
+      page.locator('[data-testid="tutorial-modal"]'),
+    ).not.toBeVisible();
   });
 });
 ```
 
 **Test Feedback Collection:**
+
 ```bash
 # Test in-app feedback button
 # Manual test: Click feedback button and submit feedback
@@ -4030,57 +4344,60 @@ test.describe('Beta User Onboarding', () => {
 ### 2. Age Rating & Content Warning Testing
 
 **Test Age Rating System:**
+
 ```typescript
 // cypress/e2e/age-ratings.cy.ts
-describe('Age Rating System', () => {
-  it('should require age rating during story creation', () => {
-    cy.login('user@example.com');
-    cy.visit('/story/create');
+describe("Age Rating System", () => {
+  it("should require age rating during story creation", () => {
+    cy.login("user@example.com");
+    cy.visit("/story/create");
 
-    cy.get('[name="title"]').type('Test Story');
-    cy.get('[name="synopsis"]').type('A test synopsis that is at least 50 characters long.');
+    cy.get('[name="title"]').type("Test Story");
+    cy.get('[name="synopsis"]').type(
+      "A test synopsis that is at least 50 characters long.",
+    );
     // Don't select age rating
     cy.get('[type="submit"]').click();
 
-    cy.contains('Age rating is required');
+    cy.contains("Age rating is required");
   });
 
-  it('should show age rating descriptions', () => {
-    cy.visit('/story/create');
+  it("should show age rating descriptions", () => {
+    cy.visit("/story/create");
     cy.get('[data-testid="age-rating-select"]').click();
 
-    cy.contains('General (G)');
-    cy.contains('Suitable for all ages');
-    cy.contains('Adult (18+)');
-    cy.contains('explicit sexual content');
+    cy.contains("General (G)");
+    cy.contains("Suitable for all ages");
+    cy.contains("Adult (18+)");
+    cy.contains("explicit sexual content");
   });
 
-  it('should gate 18+ content with age verification', () => {
+  it("should gate 18+ content with age verification", () => {
     // Create 18+ story
     cy.createStory({
-      title: 'Adult Story',
-      ageRating: 'ADULT_18_PLUS',
-      contentWarnings: ['Sexual Content', 'Violence/Gore'],
+      title: "Adult Story",
+      ageRating: "ADULT_18_PLUS",
+      contentWarnings: ["Sexual Content", "Violence/Gore"],
     });
 
     // Log out and visit as new user
     cy.logout();
-    cy.signup('younguser@example.com');
-    cy.visit('/story/adult-story-id');
+    cy.signup("younguser@example.com");
+    cy.visit("/story/adult-story-id");
 
     // Should show age gate
-    cy.get('[data-testid="age-gate-modal"]').should('be.visible');
-    cy.contains('This story is rated 18+');
+    cy.get('[data-testid="age-gate-modal"]').should("be.visible");
+    cy.contains("This story is rated 18+");
     cy.get('[data-testid="age-confirmation"]').check();
     cy.get('[data-testid="enter-story"]').click();
 
     // Now can view content
-    cy.contains('Adult Story');
+    cy.contains("Adult Story");
   });
 
-  it('should allow flagging branch for rating increase', () => {
-    cy.login('contributor@example.com');
-    cy.visit('/story/story-1/read');
+  it("should allow flagging branch for rating increase", () => {
+    cy.login("contributor@example.com");
+    cy.visit("/story/story-1/read");
 
     // Create branch with mature content
     cy.get('[data-testid="paragraph-3"]').click();
@@ -4088,47 +4405,53 @@ describe('Age Rating System', () => {
 
     // Flag for rating increase
     cy.get('[data-testid="flag-rating-increase"]').check();
-    cy.get('[data-testid="suggested-rating"]').select('M');
-    cy.get('[data-testid="rating-reason"]').type('Contains strong language and violence');
+    cy.get('[data-testid="suggested-rating"]').select("M");
+    cy.get('[data-testid="rating-reason"]').type(
+      "Contains strong language and violence",
+    );
 
-    cy.get('[name="content"]').type('Branch content here. '.repeat(50));
+    cy.get('[name="content"]').type("Branch content here. ".repeat(50));
     cy.get('[type="submit"]').click();
 
     // Original author should get notification
-    cy.login('original-author@example.com');
+    cy.login("original-author@example.com");
     cy.get('[data-testid="notifications"]').click();
-    cy.contains('Branch flagged for rating review');
+    cy.contains("Branch flagged for rating review");
   });
 });
 ```
 
 **Test Content Warnings:**
+
 ```typescript
-describe('Content Warnings', () => {
-  it('should allow adding multiple content warnings', () => {
-    cy.visit('/story/create');
+describe("Content Warnings", () => {
+  it("should allow adding multiple content warnings", () => {
+    cy.visit("/story/create");
 
     cy.get('[data-testid="content-warnings"]').click();
     cy.get('[data-testid="warning-violence"]').check();
     cy.get('[data-testid="warning-language"]').check();
-    cy.get('[data-testid="warning-custom"]').type('Spiders');
+    cy.get('[data-testid="warning-custom"]').type("Spiders");
 
     cy.get('[type="submit"]').click();
 
     // Verify warnings displayed
-    cy.get('[data-testid="story-warnings"]').should('contain', 'Violence/Gore');
-    cy.get('[data-testid="story-warnings"]').should('contain', 'Strong Language');
-    cy.get('[data-testid="story-warnings"]').should('contain', 'Spiders');
+    cy.get('[data-testid="story-warnings"]').should("contain", "Violence/Gore");
+    cy.get('[data-testid="story-warnings"]').should(
+      "contain",
+      "Strong Language",
+    );
+    cy.get('[data-testid="story-warnings"]').should("contain", "Spiders");
   });
 
-  it('should allow users to filter by content warnings', () => {
-    cy.visit('/browse');
+  it("should allow users to filter by content warnings", () => {
+    cy.visit("/browse");
 
     cy.get('[data-testid="filters"]').click();
     cy.get('[data-testid="hide-violence"]').check();
 
     // Stories with violence warning should be hidden
-    cy.get('[data-testid="story-list"]').should('not.contain', 'Violent Story');
+    cy.get('[data-testid="story-list"]').should("not.contain", "Violent Story");
   });
 });
 ```
@@ -4136,69 +4459,77 @@ describe('Content Warnings', () => {
 ### 3. Content Moderation Testing
 
 **Test Automated Moderation:**
+
 ```typescript
 // tests/moderation/filters.test.ts
-import { checkProfanity, detectSpam } from '@/lib/moderation';
+import { checkProfanity, detectSpam } from "@/lib/moderation";
 
-describe('Automated Moderation', () => {
-  it('should detect profanity', () => {
-    const result = checkProfanity('This contains bad words');
+describe("Automated Moderation", () => {
+  it("should detect profanity", () => {
+    const result = checkProfanity("This contains bad words");
     expect(result.hasProfanity).toBe(true);
-    expect(result.severity).toBe('medium');
+    expect(result.severity).toBe("medium");
   });
 
-  it('should detect spam patterns', () => {
-    const repeatedContent = 'Buy now! '.repeat(100);
+  it("should detect spam patterns", () => {
+    const repeatedContent = "Buy now! ".repeat(100);
     const result = detectSpam(repeatedContent);
     expect(result.isSpam).toBe(true);
-    expect(result.reason).toContain('repeated content');
+    expect(result.reason).toContain("repeated content");
   });
 
-  it('should flag NSFW content without proper rating', () => {
+  it("should flag NSFW content without proper rating", () => {
     const story = {
-      content: 'explicit content here',
-      ageRating: 'G',
+      content: "explicit content here",
+      ageRating: "G",
     };
     const result = checkContentMatch(story);
     expect(result.flagged).toBe(true);
-    expect(result.reason).toContain('rating mismatch');
+    expect(result.reason).toContain("rating mismatch");
   });
 });
 ```
 
 **Test User Reporting:**
+
 ```typescript
 // cypress/e2e/reporting.cy.ts
-describe('User Reporting', () => {
-  it('should allow users to report content', () => {
-    cy.visit('/story/story-1');
+describe("User Reporting", () => {
+  it("should allow users to report content", () => {
+    cy.visit("/story/story-1");
 
     cy.get('[data-testid="report-button"]').click();
-    cy.get('[data-testid="report-reason"]').select('Inappropriate age rating');
-    cy.get('[data-testid="report-details"]').type('This story contains adult content but is rated T');
+    cy.get('[data-testid="report-reason"]').select("Inappropriate age rating");
+    cy.get('[data-testid="report-details"]').type(
+      "This story contains adult content but is rated T",
+    );
     cy.get('[data-testid="submit-report"]').click();
 
-    cy.contains('Report submitted');
+    cy.contains("Report submitted");
   });
 
-  it('should add reports to moderation queue', () => {
-    cy.login('moderator@example.com');
-    cy.visit('/admin/moderation');
+  it("should add reports to moderation queue", () => {
+    cy.login("moderator@example.com");
+    cy.visit("/admin/moderation");
 
-    cy.get('[data-testid="report-queue"]').should('contain', 'Inappropriate age rating');
+    cy.get('[data-testid="report-queue"]').should(
+      "contain",
+      "Inappropriate age rating",
+    );
     cy.get('[data-testid="report-item-1"]').click();
 
     // Review and take action
     cy.get('[data-testid="adjust-rating"]').click();
-    cy.get('[data-testid="new-rating"]').select('M');
+    cy.get('[data-testid="new-rating"]').select("M");
     cy.get('[data-testid="confirm-action"]').click();
 
-    cy.contains('Rating updated and reporter notified');
+    cy.contains("Rating updated and reporter notified");
   });
 });
 ```
 
 **Test Rate Limiting:**
+
 ```bash
 # Test story creation rate limit
 for i in {1..10}; do
@@ -4215,58 +4546,60 @@ done
 ### 4. Patreon Integration Testing
 
 **Test OAuth Flow:**
+
 ```typescript
 // cypress/e2e/patreon.cy.ts
-describe('Patreon Integration', () => {
-  it('should connect Patreon account', () => {
-    cy.login('user@example.com');
-    cy.visit('/profile/settings');
+describe("Patreon Integration", () => {
+  it("should connect Patreon account", () => {
+    cy.login("user@example.com");
+    cy.visit("/profile/settings");
 
     cy.get('[data-testid="connect-patreon"]').click();
 
     // Mock Patreon OAuth (in real test, use OAuth mock)
-    cy.url().should('include', 'patreon.com/oauth2/authorize');
+    cy.url().should("include", "patreon.com/oauth2/authorize");
 
     // After redirect back with code
-    cy.visit('/auth/patreon/callback?code=mock-code');
+    cy.visit("/auth/patreon/callback?code=mock-code");
 
-    cy.contains('Patreon account connected');
-    cy.get('[data-testid="supporter-badge"]').should('be.visible');
+    cy.contains("Patreon account connected");
+    cy.get('[data-testid="supporter-badge"]').should("be.visible");
   });
 
-  it('should show supporter benefits', () => {
-    cy.login('supporter@example.com'); // User with active Patreon pledge
+  it("should show supporter benefits", () => {
+    cy.login("supporter@example.com"); // User with active Patreon pledge
 
     // Check for ad-free experience
-    cy.visit('/browse');
-    cy.get('[data-testid="advertisement"]').should('not.exist');
+    cy.visit("/browse");
+    cy.get('[data-testid="advertisement"]').should("not.exist");
 
     // Check for supporter badge
-    cy.visit('/profile/supporter@example.com');
-    cy.get('[data-testid="supporter-badge"]').should('be.visible');
+    cy.visit("/profile/supporter@example.com");
+    cy.get('[data-testid="supporter-badge"]').should("be.visible");
 
     // Check for increased limits
-    cy.visit('/story/create');
-    cy.get('[data-testid="upload-limit"]').should('contain', '10 MB'); // vs 2 MB for free
+    cy.visit("/story/create");
+    cy.get('[data-testid="upload-limit"]').should("contain", "10 MB"); // vs 2 MB for free
   });
 });
 ```
 
 **Test Webhook Handling:**
+
 ```typescript
 // tests/api/patreon-webhook.test.ts
-import { handlePatreonWebhook } from '@/lib/patreon/webhooks';
+import { handlePatreonWebhook } from "@/lib/patreon/webhooks";
 
-describe('Patreon Webhooks', () => {
-  it('should handle new pledge event', async () => {
+describe("Patreon Webhooks", () => {
+  it("should handle new pledge event", async () => {
     const event = {
-      type: 'members:pledge:create',
+      type: "members:pledge:create",
       data: {
         attributes: {
-          patron_status: 'active_patron',
+          patron_status: "active_patron",
         },
         relationships: {
-          user: { data: { id: 'patreon-user-123' } },
+          user: { data: { id: "patreon-user-123" } },
         },
       },
     };
@@ -4274,24 +4607,24 @@ describe('Patreon Webhooks', () => {
     await handlePatreonWebhook(event);
 
     // Verify user marked as supporter
-    const user = await getUser('patreon-user-123');
+    const user = await getUser("patreon-user-123");
     expect(user.isSupporter).toBe(true);
     expect(user.supporterSince).toBeDefined();
   });
 
-  it('should handle pledge deletion', async () => {
+  it("should handle pledge deletion", async () => {
     const event = {
-      type: 'members:pledge:delete',
+      type: "members:pledge:delete",
       data: {
         relationships: {
-          user: { data: { id: 'patreon-user-123' } },
+          user: { data: { id: "patreon-user-123" } },
         },
       },
     };
 
     await handlePatreonWebhook(event);
 
-    const user = await getUser('patreon-user-123');
+    const user = await getUser("patreon-user-123");
     expect(user.isSupporter).toBe(false);
   });
 });
@@ -4300,80 +4633,83 @@ describe('Patreon Webhooks', () => {
 ### 5. Legal Compliance Verification
 
 **GDPR Compliance Testing:**
+
 ```typescript
 // cypress/e2e/gdpr.cy.ts
-describe('GDPR Compliance', () => {
-  it('should allow users to export their data', () => {
-    cy.login('user@example.com');
-    cy.visit('/profile/settings/privacy');
+describe("GDPR Compliance", () => {
+  it("should allow users to export their data", () => {
+    cy.login("user@example.com");
+    cy.visit("/profile/settings/privacy");
 
     cy.get('[data-testid="export-data"]').click();
-    cy.contains('Your data export is being prepared');
+    cy.contains("Your data export is being prepared");
 
     // Wait for export (mock in tests)
     cy.wait(2000);
     cy.get('[data-testid="download-export"]').click();
 
     // Verify downloaded file contains user data
-    cy.readFile('downloads/user-data.json').should((data) => {
-      expect(data).to.have.property('profile');
-      expect(data).to.have.property('stories');
-      expect(data).to.have.property('branches');
+    cy.readFile("downloads/user-data.json").should((data) => {
+      expect(data).to.have.property("profile");
+      expect(data).to.have.property("stories");
+      expect(data).to.have.property("branches");
     });
   });
 
-  it('should allow users to delete their account', () => {
-    cy.login('user@example.com');
-    cy.visit('/profile/settings/account');
+  it("should allow users to delete their account", () => {
+    cy.login("user@example.com");
+    cy.visit("/profile/settings/account");
 
     cy.get('[data-testid="delete-account"]').click();
-    cy.get('[data-testid="confirm-delete"]').type('DELETE');
+    cy.get('[data-testid="confirm-delete"]').type("DELETE");
     cy.get('[data-testid="submit-delete"]').click();
 
-    cy.contains('Account deleted');
+    cy.contains("Account deleted");
 
     // Try to login - should fail
-    cy.visit('/login');
-    cy.get('[name="email"]').type('user@example.com');
-    cy.get('[name="password"]').type('password');
+    cy.visit("/login");
+    cy.get('[name="email"]').type("user@example.com");
+    cy.get('[name="password"]').type("password");
     cy.get('[type="submit"]').click();
-    cy.contains('Invalid credentials');
+    cy.contains("Invalid credentials");
   });
 
-  it('should show cookie consent banner', () => {
+  it("should show cookie consent banner", () => {
     cy.clearCookies();
-    cy.visit('/');
+    cy.visit("/");
 
-    cy.get('[data-testid="cookie-banner"]').should('be.visible');
-    cy.contains('We use cookies');
+    cy.get('[data-testid="cookie-banner"]').should("be.visible");
+    cy.contains("We use cookies");
 
     cy.get('[data-testid="accept-cookies"]').click();
-    cy.get('[data-testid="cookie-banner"]').should('not.exist');
+    cy.get('[data-testid="cookie-banner"]').should("not.exist");
   });
 });
 ```
 
 **COPPA Compliance:**
-```typescript
-describe('COPPA Compliance', () => {
-  it('should prevent users under 13 from signing up', () => {
-    cy.visit('/signup');
 
-    cy.get('[name="email"]').type('child@example.com');
-    cy.get('[name="dateOfBirth"]').type('2015-01-01'); // Under 13
-    cy.get('[name="password"]').type('password');
+```typescript
+describe("COPPA Compliance", () => {
+  it("should prevent users under 13 from signing up", () => {
+    cy.visit("/signup");
+
+    cy.get('[name="email"]').type("child@example.com");
+    cy.get('[name="dateOfBirth"]').type("2015-01-01"); // Under 13
+    cy.get('[name="password"]').type("password");
     cy.get('[type="submit"]').click();
 
-    cy.contains('You must be at least 13 years old');
+    cy.contains("You must be at least 13 years old");
   });
 
-  it('should require age verification for 18+ content', () => {
+  it("should require age verification for 18+ content", () => {
     // Already covered in age rating tests
   });
 });
 ```
 
 **Terms of Service & Privacy Policy:**
+
 ```bash
 # Manual verification checklist:
 - [ ] Terms of Service page accessible at /terms
@@ -4391,6 +4727,7 @@ describe('COPPA Compliance', () => {
 ### 6. Pre-Launch Security Audit
 
 **Security Testing:**
+
 ```bash
 # Run comprehensive security audit
 npm audit --audit-level=moderate
@@ -4425,6 +4762,7 @@ curl -X POST https://api.thestoryhub.example.com/graphql \
 ```
 
 **Penetration Testing Checklist:**
+
 - [ ] Authentication bypass attempts - FAILED ✅
 - [ ] Authorization bypass attempts - FAILED ✅
 - [ ] SQL injection attempts - N/A (DynamoDB)
@@ -4438,6 +4776,7 @@ curl -X POST https://api.thestoryhub.example.com/graphql \
 ### 7. Beta Launch Checklist
 
 **Before Opening Beta:**
+
 - [ ] Beta invite system working
 - [ ] Invite codes generated (100-500 codes)
 - [ ] Onboarding tutorial complete
@@ -4456,22 +4795,23 @@ curl -X POST https://api.thestoryhub.example.com/graphql \
 - [ ] Support email/system ready
 
 **Beta Testing Focus:**
+
 ```typescript
 // Create beta metrics dashboard query
 const betaMetrics = {
-  totalBetaUsers: 'SELECT COUNT(*) FROM Users WHERE betaTester = true',
-  storiesCreated: 'Count of stories created in beta period',
-  branchesCreated: 'Count of branches created in beta period',
-  averageTimeToFirstStory: 'Time from signup to first story',
+  totalBetaUsers: "SELECT COUNT(*) FROM Users WHERE betaTester = true",
+  storiesCreated: "Count of stories created in beta period",
+  branchesCreated: "Count of branches created in beta period",
+  averageTimeToFirstStory: "Time from signup to first story",
   completionRates: {
-    tutorialCompleted: 'Percentage who completed tutorial',
-    firstStoryCreated: 'Percentage who created first story',
-    firstBranchCreated: 'Percentage who created first branch',
-    returnedAfter7Days: '7-day retention rate',
+    tutorialCompleted: "Percentage who completed tutorial",
+    firstStoryCreated: "Percentage who created first story",
+    firstBranchCreated: "Percentage who created first branch",
+    returnedAfter7Days: "7-day retention rate",
   },
-  feedbackSubmitted: 'Count of feedback submissions',
-  bugReportsSubmitted: 'Count of bug reports',
-  topPainPoints: 'Most common feedback themes',
+  feedbackSubmitted: "Count of feedback submissions",
+  bugReportsSubmitted: "Count of bug reports",
+  topPainPoints: "Most common feedback themes",
 };
 
 // Monitor these metrics daily during beta
@@ -4480,6 +4820,7 @@ const betaMetrics = {
 ### 8. Production Launch Checklist
 
 **Pre-Production Verification:**
+
 ```bash
 # Final smoke tests on staging
 yarn test:e2e:staging
@@ -4508,6 +4849,7 @@ curl -I https://thestoryhub.com | grep -i "x-cache"
 ```
 
 **Launch Day Monitoring:**
+
 ```bash
 # Set up real-time monitoring dashboard
 # Watch these metrics:
@@ -4533,6 +4875,7 @@ aws cloudwatch get-metric-statistics \
 ### 9. Manual Pre-Launch Testing
 
 **Complete User Journey (Manual):**
+
 1. [ ] Visit homepage as anonymous user
 2. [ ] Sign up with new account
 3. [ ] Verify email (or skip in test)
@@ -4557,6 +4900,7 @@ aws cloudwatch get-metric-statistics \
 22. [ ] Log out and log back in
 
 **Accessibility Testing:**
+
 - [ ] Screen reader compatibility (NVDA/JAWS)
 - [ ] Keyboard navigation works throughout site
 - [ ] Color contrast meets WCAG AA standards
@@ -4571,17 +4915,20 @@ aws cloudwatch get-metric-statistics \
 **Common Beta/Launch Issues:**
 
 1. **High signup rate overwhelming system:**
+
    - Monitor DynamoDB write capacity
    - Check Cognito rate limits
    - Verify email service (SES) sending limits
    - Enable CloudFront caching aggressively
 
 2. **Content moderation queue backing up:**
+
    - Add more moderators
    - Tune automated filters
    - Increase rate limits if false positives
 
 3. **Age gate causing user dropoff:**
+
    - Review copy and UX
    - Ensure process is clear and simple
    - Check analytics for dropoff points
@@ -4601,6 +4948,7 @@ aws cloudwatch get-metric-statistics \
 ## Phase 6: Marketing & Growth
 
 ### Prompt 29: SEO Optimization
+
 ```
 Optimize the platform for search engines:
 
@@ -4666,6 +5014,7 @@ Create monitoring for search rankings and organic traffic.
 ```
 
 ### Prompt 30: Launch Marketing Strategy
+
 ```
 Create comprehensive launch marketing plan:
 
@@ -4758,6 +5107,7 @@ Create a content calendar for first 6 months.
 ```
 
 ### Prompt 31: Community Guidelines & Culture
+
 ```
 Establish community guidelines and platform culture:
 
@@ -4836,6 +5186,7 @@ Create a "Culture Playbook" for moderators and team.
 ```
 
 ### Prompt 32: Analytics Dashboard for Authors
+
 ```
 Create analytics dashboard for story authors:
 
@@ -4894,6 +5245,7 @@ Make it beautiful and actionable, not just data dumps.
 ```
 
 ### Prompt 33: Mobile App Planning
+
 ```
 Plan for native mobile apps (future phase):
 
@@ -4981,6 +5333,7 @@ Verify all marketing, SEO, and growth initiatives are properly implemented and t
 ### 1. SEO Verification
 
 **Test Meta Tags:**
+
 ```bash
 # Check homepage meta tags
 curl -s https://thestoryhub.com | grep -E '<meta|<title'
@@ -4994,42 +5347,51 @@ curl -s https://thestoryhub.com | grep -E '<meta|<title'
 ```
 
 **Test Dynamic Story Pages:**
+
 ```typescript
 // cypress/e2e/seo.cy.ts
-describe('SEO Meta Tags', () => {
-  it('should have correct meta tags on story page', () => {
-    cy.visit('/story/story-1');
+describe("SEO Meta Tags", () => {
+  it("should have correct meta tags on story page", () => {
+    cy.visit("/story/story-1");
 
     // Check title
-    cy.title().should('include', 'The Enchanted Forest Chronicles');
+    cy.title().should("include", "The Enchanted Forest Chronicles");
 
     // Check meta description
     cy.get('meta[name="description"]')
-      .should('have.attr', 'content')
-      .and('include', 'magical forest');
+      .should("have.attr", "content")
+      .and("include", "magical forest");
 
     // Check Open Graph tags
     cy.get('meta[property="og:title"]')
-      .should('have.attr', 'content')
-      .and('include', 'The Enchanted Forest Chronicles');
+      .should("have.attr", "content")
+      .and("include", "The Enchanted Forest Chronicles");
 
-    cy.get('meta[property="og:type"]').should('have.attr', 'content', 'article');
+    cy.get('meta[property="og:type"]').should(
+      "have.attr",
+      "content",
+      "article",
+    );
 
     // Check Twitter Card
-    cy.get('meta[name="twitter:card"]')
-      .should('have.attr', 'content', 'summary_large_image');
+    cy.get('meta[name="twitter:card"]').should(
+      "have.attr",
+      "content",
+      "summary_large_image",
+    );
   });
 
-  it('should have canonical URLs', () => {
-    cy.visit('/story/story-1');
+  it("should have canonical URLs", () => {
+    cy.visit("/story/story-1");
     cy.get('link[rel="canonical"]')
-      .should('have.attr', 'href')
-      .and('include', '/story/story-1');
+      .should("have.attr", "href")
+      .and("include", "/story/story-1");
   });
 });
 ```
 
 **Test Sitemap:**
+
 ```bash
 # Verify sitemap exists and is accessible
 curl -s https://thestoryhub.com/sitemap.xml | head -20
@@ -5053,6 +5415,7 @@ curl -s https://thestoryhub.com/sitemap.xml | head -20
 ```
 
 **Test Structured Data:**
+
 ```bash
 # Test structured data with Google's tool
 # Visit: https://search.google.com/test/rich-results
@@ -5065,6 +5428,7 @@ curl -s https://thestoryhub.com/story/story-1 | grep -o '<script type="applicati
 ```
 
 **Test robots.txt:**
+
 ```bash
 curl https://thestoryhub.com/robots.txt
 
@@ -5079,6 +5443,7 @@ curl https://thestoryhub.com/robots.txt
 ### 2. Performance & Core Web Vitals
 
 **Lighthouse Audit (Production):**
+
 ```bash
 # Run Lighthouse on production
 lighthouse https://thestoryhub.com --view
@@ -5096,10 +5461,11 @@ lighthouse https://thestoryhub.com --view
 ```
 
 **Real User Monitoring:**
+
 ```typescript
 // Verify Web Vitals tracking
 // pages/_app.tsx should include:
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
+import { getCLS, getFID, getFCP, getLCP, getTTFB } from "web-vitals";
 
 export function reportWebVitals(metric) {
   // Send to analytics
@@ -5111,6 +5477,7 @@ export function reportWebVitals(metric) {
 ```
 
 **PageSpeed Insights:**
+
 ```bash
 # Check PageSpeed Insights score
 # Visit: https://pagespeed.web.dev/
@@ -5125,63 +5492,70 @@ export function reportWebVitals(metric) {
 ### 3. Marketing Campaign Verification
 
 **Test Landing Page:**
+
 ```typescript
 // cypress/e2e/landing-page.cy.ts
-describe('Landing Page', () => {
-  it('should have clear value proposition', () => {
-    cy.visit('/');
+describe("Landing Page", () => {
+  it("should have clear value proposition", () => {
+    cy.visit("/");
 
-    cy.contains('Collaborative Branching Stories');
-    cy.contains('Create stories where every reader can add their own branch');
+    cy.contains("Collaborative Branching Stories");
+    cy.contains("Create stories where every reader can add their own branch");
 
     // CTA buttons
-    cy.get('[data-testid="cta-signup"]').should('be.visible');
-    cy.get('[data-testid="cta-browse"]').should('be.visible');
+    cy.get('[data-testid="cta-signup"]').should("be.visible");
+    cy.get('[data-testid="cta-browse"]').should("be.visible");
   });
 
-  it('should show featured stories', () => {
-    cy.visit('/');
-    cy.get('[data-testid="featured-stories"]').should('exist');
-    cy.get('[data-testid="featured-stories"]').children().should('have.length.greaterThan', 0);
+  it("should show featured stories", () => {
+    cy.visit("/");
+    cy.get('[data-testid="featured-stories"]').should("exist");
+    cy.get('[data-testid="featured-stories"]')
+      .children()
+      .should("have.length.greaterThan", 0);
   });
 
-  it('should have working email signup', () => {
-    cy.visit('/');
-    cy.get('[data-testid="email-signup"]').type('interested@example.com');
+  it("should have working email signup", () => {
+    cy.visit("/");
+    cy.get('[data-testid="email-signup"]').type("interested@example.com");
     cy.get('[data-testid="email-submit"]').click();
 
-    cy.contains('Thanks for your interest');
+    cy.contains("Thanks for your interest");
   });
 });
 ```
 
 **Test Social Sharing:**
+
 ```typescript
-describe('Social Sharing', () => {
-  it('should generate correct share preview for stories', () => {
-    cy.visit('/story/story-1');
+describe("Social Sharing", () => {
+  it("should generate correct share preview for stories", () => {
+    cy.visit("/story/story-1");
 
     // Get share URL
     cy.get('[data-testid="share-button"]').click();
-    cy.get('[data-testid="share-twitter"]').should('have.attr', 'href')
-      .and('include', 'twitter.com/intent/tweet')
-      .and('include', 'The%20Enchanted%20Forest');
+    cy.get('[data-testid="share-twitter"]')
+      .should("have.attr", "href")
+      .and("include", "twitter.com/intent/tweet")
+      .and("include", "The%20Enchanted%20Forest");
 
-    cy.get('[data-testid="share-facebook"]').should('have.attr', 'href')
-      .and('include', 'facebook.com/sharer');
+    cy.get('[data-testid="share-facebook"]')
+      .should("have.attr", "href")
+      .and("include", "facebook.com/sharer");
   });
 
-  it('should copy share link', () => {
-    cy.visit('/story/story-1');
+  it("should copy share link", () => {
+    cy.visit("/story/story-1");
     cy.get('[data-testid="share-button"]').click();
     cy.get('[data-testid="copy-link"]').click();
 
-    cy.contains('Link copied');
+    cy.contains("Link copied");
   });
 });
 ```
 
 **Track UTM Parameters:**
+
 ```bash
 # Test campaign tracking
 curl -I "https://thestoryhub.com/?utm_source=reddit&utm_medium=social&utm_campaign=launch"
@@ -5193,6 +5567,7 @@ curl -I "https://thestoryhub.com/?utm_source=reddit&utm_medium=social&utm_campai
 ### 4. Community Engagement Testing
 
 **Test Community Guidelines:**
+
 ```bash
 # Verify guidelines page exists
 curl -s https://thestoryhub.com/guidelines | grep -i "community guidelines"
@@ -5207,49 +5582,51 @@ curl -s https://thestoryhub.com/guidelines | grep -i "community guidelines"
 ```
 
 **Test Welcome Program:**
+
 ```typescript
 // cypress/e2e/welcome-program.cy.ts
-describe('New User Welcome', () => {
-  it('should show welcome message to new users', () => {
-    cy.signup('newuser@example.com');
+describe("New User Welcome", () => {
+  it("should show welcome message to new users", () => {
+    cy.signup("newuser@example.com");
 
-    cy.get('[data-testid="welcome-banner"]').should('be.visible');
-    cy.contains('Welcome to Story Hub!');
+    cy.get('[data-testid="welcome-banner"]').should("be.visible");
+    cy.contains("Welcome to Story Hub!");
 
     // Tutorial prompt
-    cy.get('[data-testid="start-tutorial"]').should('be.visible');
+    cy.get('[data-testid="start-tutorial"]').should("be.visible");
   });
 
-  it('should celebrate first story', () => {
-    cy.login('newuser@example.com');
-    cy.createStory({ title: 'My First Story' });
+  it("should celebrate first story", () => {
+    cy.login("newuser@example.com");
+    cy.createStory({ title: "My First Story" });
 
     // Should see celebration
-    cy.get('[data-testid="first-story-celebration"]').should('be.visible');
-    cy.contains('Congratulations on your first story!');
+    cy.get('[data-testid="first-story-celebration"]').should("be.visible");
+    cy.contains("Congratulations on your first story!");
 
     // Should get achievement badge
-    cy.visit('/profile/newuser');
-    cy.get('[data-testid="achievement-first-story"]').should('exist');
+    cy.visit("/profile/newuser");
+    cy.get('[data-testid="achievement-first-story"]').should("exist");
   });
 });
 ```
 
 **Test Recognition System:**
+
 ```typescript
-describe('User Recognition', () => {
-  it('should display badges on profile', () => {
-    cy.visit('/profile/storyteller_alice');
+describe("User Recognition", () => {
+  it("should display badges on profile", () => {
+    cy.visit("/profile/storyteller_alice");
 
     // Check for milestone badges
-    cy.get('[data-testid="badge-prolific-writer"]').should('be.visible');
-    cy.get('[data-testid="badge-10-stories"]').should('be.visible');
+    cy.get('[data-testid="badge-prolific-writer"]').should("be.visible");
+    cy.get('[data-testid="badge-10-stories"]').should("be.visible");
   });
 
-  it('should show contributor of the month', () => {
-    cy.visit('/');
-    cy.get('[data-testid="contributor-spotlight"]').should('exist');
-    cy.contains('Contributor of the Month');
+  it("should show contributor of the month", () => {
+    cy.visit("/");
+    cy.get('[data-testid="contributor-spotlight"]').should("exist");
+    cy.contains("Contributor of the Month");
   });
 });
 ```
@@ -5257,78 +5634,80 @@ describe('User Recognition', () => {
 ### 5. Analytics Dashboard Testing
 
 **Verify Tracking:**
+
 ```typescript
 // Test analytics events are firing
-describe('Analytics Tracking', () => {
+describe("Analytics Tracking", () => {
   beforeEach(() => {
-    cy.visit('/');
+    cy.visit("/");
     cy.window().then((win) => {
       // Spy on analytics calls
-      cy.spy(win, 'gtag').as('gtag');
+      cy.spy(win, "gtag").as("gtag");
       // or your analytics service
     });
   });
 
-  it('should track story view', () => {
-    cy.visit('/story/story-1');
+  it("should track story view", () => {
+    cy.visit("/story/story-1");
 
-    cy.get('@gtag').should('have.been.calledWith', 'event', 'view_story', {
-      story_id: 'story-1',
+    cy.get("@gtag").should("have.been.calledWith", "event", "view_story", {
+      story_id: "story-1",
     });
   });
 
-  it('should track story creation', () => {
-    cy.login('user@example.com');
-    cy.createStory({ title: 'New Story' });
+  it("should track story creation", () => {
+    cy.login("user@example.com");
+    cy.createStory({ title: "New Story" });
 
-    cy.get('@gtag').should('have.been.calledWith', 'event', 'create_story');
+    cy.get("@gtag").should("have.been.calledWith", "event", "create_story");
   });
 
-  it('should track branch creation', () => {
-    cy.login('user@example.com');
-    cy.visit('/story/story-1/read');
+  it("should track branch creation", () => {
+    cy.login("user@example.com");
+    cy.visit("/story/story-1/read");
     cy.createBranch();
 
-    cy.get('@gtag').should('have.been.calledWith', 'event', 'create_branch');
+    cy.get("@gtag").should("have.been.calledWith", "event", "create_branch");
   });
 });
 ```
 
 **Test Author Analytics:**
+
 ```typescript
 // cypress/e2e/author-analytics.cy.ts
-describe('Author Analytics Dashboard', () => {
+describe("Author Analytics Dashboard", () => {
   beforeEach(() => {
-    cy.login('storyteller_alice@example.com');
+    cy.login("storyteller_alice@example.com");
   });
 
-  it('should show story analytics', () => {
-    cy.visit('/story/story-1/analytics');
+  it("should show story analytics", () => {
+    cy.visit("/story/story-1/analytics");
 
     // Overview metrics
-    cy.get('[data-testid="total-reads"]').should('contain', '156');
-    cy.get('[data-testid="total-branches"]').should('contain', '8');
-    cy.get('[data-testid="average-rating"]').should('contain', '4.5');
+    cy.get('[data-testid="total-reads"]').should("contain", "156");
+    cy.get('[data-testid="total-branches"]').should("contain", "8");
+    cy.get('[data-testid="average-rating"]').should("contain", "4.5");
 
     // Charts
-    cy.get('[data-testid="reads-chart"]').should('be.visible');
-    cy.get('[data-testid="branch-timeline"]').should('be.visible');
+    cy.get('[data-testid="reads-chart"]').should("be.visible");
+    cy.get('[data-testid="branch-timeline"]').should("be.visible");
   });
 
-  it('should show reader demographics', () => {
-    cy.visit('/story/story-1/analytics');
+  it("should show reader demographics", () => {
+    cy.visit("/story/story-1/analytics");
 
-    cy.get('[data-testid="demographics-section"]').should('exist');
-    cy.contains('Geographic Distribution');
-    cy.contains('Reading Device');
+    cy.get('[data-testid="demographics-section"]').should("exist");
+    cy.contains("Geographic Distribution");
+    cy.contains("Reading Device");
   });
 
-  it('should allow exporting analytics', () => {
-    cy.visit('/story/story-1/analytics');
+  it("should allow exporting analytics", () => {
+    cy.visit("/story/story-1/analytics");
 
     cy.get('[data-testid="export-csv"]').click();
     // Verify download started
-    cy.readFile('downloads/story-1-analytics.csv').should('exist');
+    cy.readFile("downloads/story-1-analytics.csv").should("exist");
   });
 });
 ```
@@ -5336,6 +5715,7 @@ describe('Author Analytics Dashboard', () => {
 ### 6. Content Marketing Verification
 
 **Test Blog/Content:**
+
 ```bash
 # Verify blog exists
 curl -s https://thestoryhub.com/blog | grep -i "<article"
@@ -5354,24 +5734,25 @@ curl -s https://thestoryhub.com/blog/rss.xml | head -20
 ```
 
 **Email Marketing:**
+
 ```typescript
 // Test email signup and campaigns
-describe('Email Marketing', () => {
-  it('should allow newsletter signup', () => {
-    cy.visit('/');
+describe("Email Marketing", () => {
+  it("should allow newsletter signup", () => {
+    cy.visit("/");
 
-    cy.get('[data-testid="newsletter-signup"]').type('reader@example.com');
+    cy.get('[data-testid="newsletter-signup"]').type("reader@example.com");
     cy.get('[data-testid="newsletter-submit"]').click();
 
-    cy.contains('Subscribed successfully');
+    cy.contains("Subscribed successfully");
   });
 
-  it('should allow unsubscribe', () => {
+  it("should allow unsubscribe", () => {
     // Visit unsubscribe link (from email)
-    cy.visit('/unsubscribe?email=reader@example.com&token=xyz');
+    cy.visit("/unsubscribe?email=reader@example.com&token=xyz");
 
     cy.get('[data-testid="confirm-unsubscribe"]').click();
-    cy.contains('Successfully unsubscribed');
+    cy.contains("Successfully unsubscribed");
   });
 });
 ```
@@ -5379,6 +5760,7 @@ describe('Email Marketing', () => {
 ### 7. Growth Metrics Monitoring
 
 **Key Metrics Dashboard:**
+
 ```bash
 # Create monitoring query for key growth metrics
 
@@ -5405,6 +5787,7 @@ describe('Email Marketing', () => {
 ```
 
 **Viral Coefficient:**
+
 ```typescript
 // Calculate viral coefficient
 const viralCoefficient = {
@@ -5421,6 +5804,7 @@ const viralCoefficient = {
 ```
 
 **Conversion Funnel:**
+
 ```bash
 # Track conversion at each step
 
@@ -5438,43 +5822,46 @@ const viralCoefficient = {
 ### 8. Search & Discovery Testing
 
 **Test Search Functionality:**
+
 ```typescript
 // cypress/e2e/search.cy.ts
-describe('Search and Discovery', () => {
-  it('should return relevant results', () => {
-    cy.visit('/');
+describe("Search and Discovery", () => {
+  it("should return relevant results", () => {
+    cy.visit("/");
 
-    cy.get('[data-testid="search-input"]').type('enchanted forest');
+    cy.get('[data-testid="search-input"]').type("enchanted forest");
     cy.get('[data-testid="search-submit"]').click();
 
-    cy.get('[data-testid="search-results"]').should('exist');
-    cy.contains('The Enchanted Forest Chronicles');
+    cy.get('[data-testid="search-results"]').should("exist");
+    cy.contains("The Enchanted Forest Chronicles");
   });
 
-  it('should filter by genre', () => {
-    cy.visit('/browse');
+  it("should filter by genre", () => {
+    cy.visit("/browse");
 
-    cy.get('[data-testid="filter-genre"]').select('Fantasy');
+    cy.get('[data-testid="filter-genre"]').select("Fantasy");
     cy.get('[data-testid="apply-filters"]').click();
 
     cy.get('[data-testid="story-card"]').each(($el) => {
-      cy.wrap($el).should('contain', 'Fantasy');
+      cy.wrap($el).should("contain", "Fantasy");
     });
   });
 
-  it('should sort results', () => {
-    cy.visit('/browse');
+  it("should sort results", () => {
+    cy.visit("/browse");
 
-    cy.get('[data-testid="sort-by"]').select('Most Popular');
+    cy.get('[data-testid="sort-by"]').select("Most Popular");
 
     // First story should have higher read count than last
-    cy.get('[data-testid="story-card"]').first()
+    cy.get('[data-testid="story-card"]')
+      .first()
       .find('[data-testid="read-count"]')
-      .invoke('text')
+      .invoke("text")
       .then((firstCount) => {
-        cy.get('[data-testid="story-card"]').last()
+        cy.get('[data-testid="story-card"]')
+          .last()
           .find('[data-testid="read-count"]')
-          .invoke('text')
+          .invoke("text")
           .should((lastCount) => {
             expect(parseInt(firstCount)).to.be.greaterThan(parseInt(lastCount));
           });
@@ -5484,21 +5871,25 @@ describe('Search and Discovery', () => {
 ```
 
 **Test Recommendations:**
-```typescript
-describe('Recommendation Engine', () => {
-  it('should show personalized recommendations', () => {
-    cy.login('user@example.com');
-    cy.visit('/');
 
-    cy.get('[data-testid="for-you-section"]').should('exist');
-    cy.get('[data-testid="recommended-story"]').should('have.length.greaterThan', 0);
+```typescript
+describe("Recommendation Engine", () => {
+  it("should show personalized recommendations", () => {
+    cy.login("user@example.com");
+    cy.visit("/");
+
+    cy.get('[data-testid="for-you-section"]').should("exist");
+    cy.get('[data-testid="recommended-story"]').should(
+      "have.length.greaterThan",
+      0,
+    );
   });
 
-  it('should show similar stories', () => {
-    cy.visit('/story/story-1');
+  it("should show similar stories", () => {
+    cy.visit("/story/story-1");
 
-    cy.get('[data-testid="similar-stories"]').should('exist');
-    cy.contains('Readers also enjoyed');
+    cy.get('[data-testid="similar-stories"]').should("exist");
+    cy.contains("Readers also enjoyed");
   });
 });
 ```
@@ -5506,6 +5897,7 @@ describe('Recommendation Engine', () => {
 ### 9. Marketing Campaign Checklist
 
 **Pre-Launch Marketing:**
+
 - [ ] Landing page optimized and live
 - [ ] SEO meta tags on all pages
 - [ ] Sitemap submitted to Google/Bing
@@ -5518,6 +5910,7 @@ describe('Recommendation Engine', () => {
 - [ ] Community Discord/Slack set up
 
 **Launch Day Marketing:**
+
 - [ ] Product Hunt submission
 - [ ] Hacker News "Show HN" post
 - [ ] Reddit posts in relevant subreddits
@@ -5529,6 +5922,7 @@ describe('Recommendation Engine', () => {
 - [ ] Social media posts scheduled
 
 **Post-Launch Marketing (First Month):**
+
 - [ ] Weekly blog posts published
 - [ ] "Story of the Week" features
 - [ ] User testimonials collected
@@ -5541,6 +5935,7 @@ describe('Recommendation Engine', () => {
 ### 10. Growth Metrics Targets
 
 **Week 1 Targets:**
+
 - [ ] 100+ signups
 - [ ] 50+ stories created
 - [ ] 100+ branches created
@@ -5548,6 +5943,7 @@ describe('Recommendation Engine', () => {
 - [ ] No critical bugs reported
 
 **Month 1 Targets:**
+
 - [ ] 1,000+ signups
 - [ ] 500+ stories created
 - [ ] 2,000+ branches created
@@ -5556,6 +5952,7 @@ describe('Recommendation Engine', () => {
 - [ ] 10+ press mentions
 
 **Month 3 Targets:**
+
 - [ ] 5,000+ signups
 - [ ] 2,500+ stories created
 - [ ] 10,000+ branches created
@@ -5568,24 +5965,28 @@ describe('Recommendation Engine', () => {
 **Common Marketing Issues:**
 
 1. **Low signup conversion:**
+
    - A/B test landing page copy
    - Simplify signup flow
    - Add social proof (user count, testimonials)
    - Improve value proposition clarity
 
 2. **High bounce rate:**
+
    - Check page load speed
    - Improve above-the-fold content
    - Make CTA more prominent
    - Add engaging visuals
 
 3. **Low SEO traffic:**
+
    - Check Google Search Console for indexing issues
    - Improve page titles and meta descriptions
    - Add more internal linking
    - Create more content targeting keywords
 
 4. **Social sharing not working:**
+
    - Validate Open Graph tags
    - Test with Facebook/Twitter debugger
    - Ensure images are correct size
@@ -5606,6 +6007,7 @@ describe('Recommendation Engine', () => {
 ## Phase 7: Advanced Features (Future)
 
 ### Prompt 34: AI Writing Assistant
+
 ```
 Integrate AI writing assistant features:
 
@@ -5656,6 +6058,7 @@ Introduce gradually with user education.
 ```
 
 ### Prompt 35: Collaborative Writing Tools
+
 ```
 Add real-time collaborative writing features:
 
@@ -5707,6 +6110,7 @@ Consider operational transform for conflict resolution.
 ```
 
 ### Prompt 36: Story Merging & Convergence
+
 ```
 Implement branch merging functionality:
 
@@ -5773,6 +6177,7 @@ Start with simple merges, iterate based on usage patterns.
 ```
 
 ### Prompt 37: Story Export & Publishing
+
 ```
 Add story export and external publishing features:
 
@@ -5847,6 +6252,7 @@ Partner with publishing consultants for guidance.
 ```
 
 ### Prompt 38: Gamification & Achievements
+
 ```
 Add gamification to increase engagement:
 
@@ -5927,6 +6333,7 @@ Focus on quality contributions over quantity.
 ```
 
 ### Prompt 39: Advanced Search & Recommendations
+
 ```
 Implement intelligent search and recommendation engine:
 
@@ -6020,6 +6427,7 @@ Build iteratively, start with simple recommendations.
 ```
 
 ### Prompt 40: Internationalization & Localization
+
 ```
 Prepare platform for international users:
 
@@ -6107,12 +6515,14 @@ Hire native speakers for quality translations.
 ## Summary Prompt: Complete System Overview
 
 ### Prompt 41: Integration & Final Review
+
 ```
 You've now built a complete story branching platform. Let's review and integrate everything:
 
 **System Architecture Overview:**
 
 ```
+
 Frontend (Next.js 15 + React 19)
 ├── App Router structure
 ├── Server and Client Components
@@ -6125,30 +6535,31 @@ Frontend (Next.js 15 + React 19)
 Backend (AWS Serverless)
 ├── AppSync (GraphQL API)
 ├── AppSync Pipeline Resolvers (TypeScript)
-│   ├── Story operations (Query/Mutation)
-│   ├── Chapter/Branch operations
-│   ├── User management
-│   ├── Voting & badges
-│   └── Image management
+│ ├── Story operations (Query/Mutation)
+│ ├── Chapter/Branch operations
+│ ├── User management
+│ ├── Voting & badges
+│ └── Image management
 ├── Lambda Functions (for S3 triggers, notifications)
-│   ├── Image processing (S3 trigger)
-│   └── Notification handlers
+│ ├── Image processing (S3 trigger)
+│ └── Notification handlers
 ├── DynamoDB (data storage, single-table design)
 ├── S3 + CloudFront (images/assets)
 └── CloudWatch (logging/monitoring)
 
 Infrastructure Dependencies (automatically handled)
 ├── WAF Stack (required first, us-east-1)
-│   └── Web Application Firewall for CloudFront
+│ └── Web Application Firewall for CloudFront
 └── Shared Stack (required second)
-    ├── VPC (Virtual Private Cloud)
-    ├── KMS (Key Management Service)
-    └── Common resources shared across apps
+├── VPC (Virtual Private Cloud)
+├── KMS (Key Management Service)
+└── Common resources shared across apps
 
 Shared
 ├── Zod schemas (validation)
 ├── TypeScript types
 └── Utility functions
+
 ```
 
 **Core Features Checklist:**

@@ -1296,13 +1296,14 @@ async function main() {
 
           logger.info(`📊 Target table: ${tableName}`);
 
-          // Run seeding
+          // Run seeding with --force flag to clear existing data first
           await seedDB({
             region,
             tableName,
             stage,
             appName,
             skipConfirmation: false, // Require confirmation for manual reseed
+            extraArgs: ["--force"], // Clear table before reseeding
           });
 
           logger.success(`✅ Successfully reseeded ${appName} database`);
