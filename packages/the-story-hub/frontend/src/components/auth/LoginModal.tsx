@@ -96,7 +96,7 @@ export function LoginModal({
                   onChange={(e) => setUserEmail(e.target.value)}
                   onKeyDown={handleKeyDown}
                   classNames={{
-                    input: "text-white placeholder:text-gray-500",
+                    input: "text-white placeholder:text-gray-500 !text-white",
                     inputWrapper:
                       "bg-gray-800 border-gray-700 group-data-[focus=true]:bg-gray-800 group-data-[focus=true]:border-gray-600 data-[hover=true]:bg-gray-800",
                     label:
@@ -111,7 +111,7 @@ export function LoginModal({
                   onChange={(e) => setUserPassword(e.target.value)}
                   onKeyDown={handleKeyDown}
                   classNames={{
-                    input: "text-white placeholder:text-gray-500",
+                    input: "text-white placeholder:text-gray-500 !text-white",
                     inputWrapper:
                       "bg-gray-800 border-gray-700 group-data-[focus=true]:bg-gray-800 group-data-[focus=true]:border-gray-600 data-[hover=true]:bg-gray-800",
                     label:
