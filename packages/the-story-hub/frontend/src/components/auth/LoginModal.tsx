@@ -96,7 +96,8 @@ export function LoginModal({
                   onChange={(e) => setUserEmail(e.target.value)}
                   onKeyDown={handleKeyDown}
                   classNames={{
-                    input: "text-white placeholder:text-gray-500 !text-white",
+                    input:
+                      "text-white placeholder:text-gray-500 !text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_rgb(31,41,55)]",
                     inputWrapper:
                       "bg-gray-800 border-gray-700 group-data-[focus=true]:bg-gray-800 group-data-[focus=true]:border-gray-600 data-[hover=true]:bg-gray-800",
                     label:
@@ -111,7 +112,8 @@ export function LoginModal({
                   onChange={(e) => setUserPassword(e.target.value)}
                   onKeyDown={handleKeyDown}
                   classNames={{
-                    input: "text-white placeholder:text-gray-500 !text-white",
+                    input:
+                      "text-white placeholder:text-gray-500 !text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:shadow-[inset_0_0_0px_1000px_rgb(31,41,55)]",
                     inputWrapper:
                       "bg-gray-800 border-gray-700 group-data-[focus=true]:bg-gray-800 group-data-[focus=true]:border-gray-600 data-[hover=true]:bg-gray-800",
                     label:
