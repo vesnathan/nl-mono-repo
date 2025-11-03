@@ -21,6 +21,7 @@ interface CommentSectionProps {
   storyAuthorId?: string;
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function CommentSection({
   storyId,
   nodeId,
