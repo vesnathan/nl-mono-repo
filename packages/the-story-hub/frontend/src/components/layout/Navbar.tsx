@@ -5,9 +5,17 @@ import { Button } from "@nextui-org/react";
 import Link from "next/link";
 import Image from "next/image";
 import { LoginModal } from "@/components/auth/LoginModal";
+import { useAuth } from "@/hooks/useAuth";
+import { authSignOut } from "shared/functions/authSignOut";
 
 export function Navbar() {
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const { isAuthenticated, isLoading } = useAuth();
+
+  const handleLogout = async () => {
+    await authSignOut();
+    window.location.reload();
+  };
 
   return (
     <>
@@ -24,18 +32,31 @@ export function Navbar() {
               />
             </Link>
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                className="text-white border-white hover:bg-white/20"
-                onPress={() => setShowLoginModal(true)}
-              >
-                Login
-              </Button>
-              <Link href="/register">
-                <Button className="bg-[#422F9F] hover:bg-[#2162BF] text-white">
-                  Register
-                </Button>
-              </Link>
+              {!isLoading &&
+                (isAuthenticated ? (
+                  <Button
+                    variant="ghost"
+                    className="text-white border-white hover:bg-white/20"
+                    onPress={handleLogout}
+                  >
+                    Logout
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      variant="ghost"
+                      className="text-white border-white hover:bg-white/20"
+                      onPress={() => setShowLoginModal(true)}
+                    >
+                      Login
+                    </Button>
+                    <Link href="/register">
+                      <Button className="bg-[#422F9F] hover:bg-[#2162BF] text-white">
+                        Register
+                      </Button>
+                    </Link>
+                  </>
+                ))}
             </div>
           </div>
         </div>
