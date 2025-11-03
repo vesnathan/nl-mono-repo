@@ -2,7 +2,6 @@ import {
   util,
   AppSyncIdentityCognito,
   Context,
-  DynamoDBUpdateItemRequest,
 } from "@aws-appsync/utils";
 import { SiteSettings, UpdateSiteSettingsInput } from "gqlTypes";
 
@@ -18,7 +17,7 @@ type CTX = Context<
 const SETTINGS_PK = "SETTINGS#SITE";
 const SETTINGS_SK = "CONFIG#GLOBAL";
 
-export function request(ctx: CTX): DynamoDBUpdateItemRequest {
+export function request(ctx: CTX) {
   const { input } = ctx.args;
   const identity = ctx.identity as AppSyncIdentityCognito;
 
