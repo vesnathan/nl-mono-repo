@@ -1,8 +1,4 @@
-import {
-  util,
-  AppSyncIdentityCognito,
-  Context,
-} from "@aws-appsync/utils";
+import { util, AppSyncIdentityCognito, Context } from "@aws-appsync/utils";
 import { SiteSettings, UpdateSiteSettingsInput } from "gqlTypes";
 
 type CTX = Context<

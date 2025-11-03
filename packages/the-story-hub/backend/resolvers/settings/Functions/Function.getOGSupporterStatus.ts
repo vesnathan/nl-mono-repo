@@ -10,7 +10,11 @@ type CTX = Context<
   object,
   object,
   object,
-  { ogSupporter: boolean; patreonSupporter: boolean; siteSettingEnabled: boolean }
+  {
+    ogSupporter: boolean;
+    patreonSupporter: boolean;
+    siteSettingEnabled: boolean;
+  }
 >;
 
 // Site settings are stored with a single PK/SK combination

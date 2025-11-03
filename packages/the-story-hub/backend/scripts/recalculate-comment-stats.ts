@@ -54,9 +54,7 @@ async function getAllComments(): Promise<Comment[]> {
 }
 
 // Get direct replies for a comment
-async function getDirectReplies(
-  comment: Comment,
-): Promise<Comment[]> {
+async function getDirectReplies(comment: Comment): Promise<Comment[]> {
   const result = await docClient.send(
     new QueryCommand({
       TableName: TABLE_NAME,

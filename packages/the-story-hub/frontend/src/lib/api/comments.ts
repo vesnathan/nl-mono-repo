@@ -282,7 +282,7 @@ function countAllComments(comment: Comment): number {
   let count = 1; // Count this comment
   if (comment.replies && comment.replies.length > 0) {
     count += comment.replies.reduce(
-      (sum, reply) => sum + countAllComments(reply),
+      (sum: number, reply: Comment) => sum + countAllComments(reply),
       0,
     );
   }
@@ -321,7 +321,9 @@ export async function listCommentsAPI(
     });
 
     // Validate response with Zod
-    const result = CommentConnectionSchema.parse(response.data.listComments);
+    const result = CommentConnectionSchema.parse(
+      (response as { data: { listComments: unknown } }).data.listComments,
+    );
 
     // Calculate total by recursively counting all fetched comments and replies
     const totalActivity = result.items.reduce(

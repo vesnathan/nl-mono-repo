@@ -9,6 +9,7 @@ import { getChapterAPI, listBranchesAPI } from "@/lib/api/chapters";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Button,
   Chip,
@@ -603,13 +604,13 @@ export default function StoryDetailPage() {
             <div className="flex flex-col md:flex-row gap-6">
               {/* Cover Image */}
               {story.coverImageUrl && (
-                <div className="w-full md:w-48 h-72 flex-shrink-0">
-                  <img
-                    src={story.coverImageUrl}
-                    alt={story.title}
-                    className="w-full h-full object-cover rounded"
-                  />
-                </div>
+                <Image
+                  src={story.coverImageUrl}
+                  alt={story.title}
+                  width={192} // Replace with the actual width of the image
+                  height={288} // Replace with the actual height of the image
+                  className="w-full h-full object-cover rounded"
+                />
               )}
 
               {/* Story Info */}
