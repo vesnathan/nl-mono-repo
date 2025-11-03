@@ -366,7 +366,9 @@ export async function listRepliesAPI(
   });
 
   // Validate response with Zod
-  return CommentConnectionSchema.parse(response.data.listReplies);
+  return CommentConnectionSchema.parse(
+    (response as { data: { listReplies: unknown } }).data.listReplies,
+  );
 }
 
 export async function getCommentAPI(
@@ -387,7 +389,9 @@ export async function getCommentAPI(
   });
 
   // Validate response with Zod
-  return CommentSchema.parse(response.data.getComment);
+  return CommentSchema.parse(
+    (response as { data: { getComment: unknown } }).data.getComment,
+  );
 }
 
 export async function createCommentAPI(
@@ -409,7 +413,9 @@ export async function createCommentAPI(
   });
 
   // Validate response with Zod
-  return CommentSchema.parse(response.data.createComment);
+  return CommentSchema.parse(
+    (response as { data: { createComment: unknown } }).data.createComment,
+  );
 }
 
 export async function updateCommentAPI(
@@ -431,7 +437,9 @@ export async function updateCommentAPI(
   });
 
   // Validate response with Zod
-  return CommentSchema.parse(response.data.updateComment);
+  return CommentSchema.parse(
+    (response as { data: { updateComment: unknown } }).data.updateComment,
+  );
 }
 
 export async function deleteCommentAPI(
@@ -450,7 +458,11 @@ export async function deleteCommentAPI(
     },
   });
 
-  return response.data.deleteComment;
+  return (
+    response as {
+      data: { deleteComment: { success: boolean; message?: string } };
+    }
+  ).data.deleteComment;
 }
 
 export async function voteOnCommentAPI(
@@ -470,5 +482,7 @@ export async function voteOnCommentAPI(
   });
 
   // Validate response with Zod
-  return CommentSchema.parse(response.data.voteOnComment);
+  return CommentSchema.parse(
+    (response as { data: { voteOnComment: unknown } }).data.voteOnComment,
+  );
 }

@@ -45,7 +45,7 @@ export function CommentSection({
   } = useQuery({
     queryKey: ["comments", storyId, nodeId, sortBy, nextToken],
     queryFn: () =>
-      listCommentsAPI(storyId, nodeId, sortBy, 20, nextToken || undefined),
+      listCommentsAPI(storyId, nodeId, sortBy, nextToken || undefined, 20),
     retry: 1, // Only retry once
     retryDelay: 1000,
   });

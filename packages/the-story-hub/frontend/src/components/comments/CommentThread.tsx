@@ -252,7 +252,7 @@ export function CommentThread({
               onPress={() => setShowReplies(!showReplies)}
             >
               <div className="space-y-2">
-                {comment.replies.map((reply) => (
+                {comment.replies.map((reply: Comment) => (
                   <CommentThread
                     key={reply.commentId}
                     comment={reply}
