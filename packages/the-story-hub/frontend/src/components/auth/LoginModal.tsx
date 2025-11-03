@@ -64,13 +64,13 @@ export function LoginModal({
       onClose={onClose}
       size="md"
       classNames={{
-        base: "bg-gray-900",
+        base: "bg-gray-900 border border-gray-700",
         header: "border-b border-gray-700",
         body: "py-6",
         footer: "border-t border-gray-700",
       }}
     >
-      <ModalContent className="bg-gray-900">
+      <ModalContent className="bg-gray-900 border border-gray-700">
         {(closeModal) => (
           <>
             <ModalHeader className="flex flex-col items-center gap-4 text-white pt-6">
@@ -125,10 +125,10 @@ export function LoginModal({
               </Button>
               <Button
                 color="default"
-                variant="light"
+                variant="bordered"
                 onPress={closeModal}
                 isDisabled={signInMutation.isPending}
-                className="w-full"
+                className="w-full text-gray-300 border-gray-600 hover:bg-gray-800"
               >
                 Cancel
               </Button>
