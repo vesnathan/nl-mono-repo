@@ -29,25 +29,41 @@ export function LoginModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <ModalContent>
-        <ModalHeader className="flex flex-col gap-1">
-          Login Required
-        </ModalHeader>
-        <ModalBody>
-          <p>You need to be logged in to {actionDescription}.</p>
-          <p className="text-sm text-default-500">
-            Create a free account or sign in to participate in the community!
-          </p>
-        </ModalBody>
-        <ModalFooter>
-          <Button color="default" variant="light" onPress={onClose}>
-            Cancel
-          </Button>
-          <Button color="primary" onPress={handleLogin}>
-            Go to Login
-          </Button>
-        </ModalFooter>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      classNames={{
+        base: "bg-gray-900",
+        header: "border-b border-gray-700",
+        body: "py-6",
+        footer: "border-t border-gray-700",
+      }}
+    >
+      <ModalContent className="bg-gray-900">
+        {(closeModal) => (
+          <>
+            <ModalHeader className="flex flex-col gap-1 text-white">
+              Login Required
+            </ModalHeader>
+            <ModalBody>
+              <p className="text-gray-300">
+                You need to be logged in to {actionDescription}.
+              </p>
+              <p className="text-sm text-gray-400">
+                Create a free account or sign in to participate in the
+                community!
+              </p>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="default" variant="light" onPress={closeModal}>
+                Cancel
+              </Button>
+              <Button color="primary" onPress={handleLogin}>
+                Go to Login
+              </Button>
+            </ModalFooter>
+          </>
+        )}
       </ModalContent>
     </Modal>
   );
