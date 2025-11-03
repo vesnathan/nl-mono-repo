@@ -19,27 +19,7 @@ Resources:
       Parameters:
         Stage: !Ref Stage
 
-  # VPC Resources
-  VPCStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub https://${TemplateBucketName}.s3.amazonaws.com/resources/VPC/VPC.yaml
-      Parameters:
-        Stage: !Ref Stage
-
 Outputs:
-  cwlSecurityGroupFromSharedVPCId:
-    Description: Security Group ID from VPC
-    Value: !GetAtt VPCStack.Outputs.cwlSecurityGroupFromSharedVPCId
-    Export:
-      Name: !Sub nlmonorepo-shared-${Stage}-security-group-id
-
-  cwlSecurityGroupFromSharedVPC:
-    Description: Security Group from VPC
-    Value: !GetAtt VPCStack.Outputs.cwlSecurityGroupFromSharedVPC
-    Export:
-      Name: !Sub nlmonorepo-shared-${Stage}-security-group
-
   KMSKeyId:
     Description: KMS Key ID for encryption
     Value: !GetAtt KMSStack.Outputs.KMSKeyId
@@ -51,12 +31,6 @@ Outputs:
     Value: !GetAtt KMSStack.Outputs.KMSKeyArn
     Export:
       Name: !Sub nlmonorepo-shared-${Stage}-kms-key-arn
-
-  VPCID:
-    Description: VPC ID
-    Value: !GetAtt VPCStack.Outputs.VPCID
-    Export:
-      Name: !Sub nlmonorepo-shared-${Stage}-vpc-id
 
   TemplateBucketName:
     Description: S3 bucket containing nested stack templates

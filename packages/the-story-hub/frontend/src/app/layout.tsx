@@ -12,6 +12,7 @@ import { GlobalMessage } from "@/components/common/GlobalMessage";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { LocalDataBanner } from "@/components/LocalDataBanner";
 import { AMPLIFY_CONFIG } from "../config/amplifyConfig";
 import "./globals.css";
 
@@ -49,6 +50,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <QueryProvider>
           <NextUIProvider>
+            <LocalDataBanner />
             <GlobalMessage />
             {isUnprotectedPage ? (
               <div className="flex flex-col min-h-screen">

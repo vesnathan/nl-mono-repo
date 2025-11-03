@@ -426,18 +426,68 @@ Resources:
         RuntimeVersion: 1.0.0
       CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/comments/Queries/Query.listReplies.js"
 
+  # Create Comment Pipeline Functions
+  FetchParentCommentFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}FetchParentCommentFunction"
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/comments/Functions/Function.fetchParent.js"
+
+  CreateCommentItemFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}CreateCommentItemFunction"
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/comments/Functions/Function.createComment.js"
+
+  UpdateParentCommentStatsFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}UpdateParentCommentStatsFunction"
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/comments/Functions/Function.updateParentStats.js"
+
+  IncrementStoryCommentsFunction:
+    Type: AWS::AppSync::FunctionConfiguration
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}IncrementStoryCommentsFunction"
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/comments/Functions/Function.incrementStoryComments.js"
+
   CreateCommentResolver:
     Type: AWS::AppSync::Resolver
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
       TypeName: Mutation
       FieldName: createComment
-      DataSourceName: !GetAtt MainTableDataSource.Name
-      Kind: UNIT
+      Kind: PIPELINE
+      PipelineConfig:
+        Functions:
+          - !GetAtt FetchParentCommentFunction.FunctionId
+          - !GetAtt CreateCommentItemFunction.FunctionId
+          - !GetAtt UpdateParentCommentStatsFunction.FunctionId
+          - !GetAtt IncrementStoryCommentsFunction.FunctionId
       Runtime:
         Name: APPSYNC_JS
         RuntimeVersion: 1.0.0
-      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/comments/Mutations/Mutation.createComment.js"
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/comments/Mutations/Mutation.createComment.pipeline.js"
 
   UpdateCommentResolver:
     Type: AWS::AppSync::Resolver

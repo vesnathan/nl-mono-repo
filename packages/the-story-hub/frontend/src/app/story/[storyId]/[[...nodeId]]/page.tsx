@@ -65,12 +65,14 @@ function ChapterSection({
   story,
   isRoot = false,
   currentUserId,
+  storyAuthorId,
 }: {
   storyId: string;
   nodeId: string;
   story: StoryData;
   isRoot?: boolean;
   currentUserId?: string;
+  storyAuthorId?: string;
 }) {
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
@@ -173,6 +175,7 @@ function ChapterSection({
                   storyId={storyId}
                   nodeId={nodeId}
                   currentUserId={currentUserId}
+                  storyAuthorId={storyAuthorId}
                 />
               </div>
             )}
@@ -288,6 +291,8 @@ function ChapterSection({
                       <CommentSection
                         storyId={storyId}
                         nodeId={branch.nodeId}
+                        currentUserId={currentUserId}
+                        storyAuthorId={storyAuthorId}
                       />
                     </div>
                   )}
@@ -485,6 +490,7 @@ function ChapterSection({
                             storyId={storyId}
                             nodeId={branch.nodeId}
                             currentUserId={currentUserId}
+                            storyAuthorId={storyAuthorId}
                           />
                         </div>
                       )}
@@ -542,6 +548,7 @@ function ChapterSection({
           nodeId={selectedBranchId}
           story={story}
           currentUserId={currentUserId}
+          storyAuthorId={storyAuthorId}
         />
       )}
     </>
@@ -641,6 +648,7 @@ export default function StoryDetailPage() {
                 <div className="flex gap-4 text-sm text-gray-400">
                   <span>📖 {story.stats.totalReads} reads</span>
                   <span>🌿 {story.stats.totalBranches} branches</span>
+                  <span>💬 {story.stats.totalComments} comments</span>
                   {story.stats.rating && (
                     <span>⭐ {story.stats.rating.toFixed(1)}</span>
                   )}
@@ -680,13 +688,14 @@ export default function StoryDetailPage() {
           </div>
 
           {/* Recursive chapter rendering starting from root */}
-          {story.rootChapterId ? (
+          {story.rootNodeId ? (
             <ChapterSection
               storyId={storyId}
-              nodeId={story.rootChapterId}
+              nodeId={story.rootNodeId}
               story={story}
               isRoot={true}
               currentUserId={userId}
+              storyAuthorId={story.authorId}
             />
           ) : (
             <div className="bg-gray-900 border border-gray-700 p-8 mb-6">

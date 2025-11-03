@@ -15,6 +15,12 @@ import type {
   VoteType,
   AwardBadgeInput,
 } from "@/types/gqlTypes";
+import {
+  shouldUseLocalData,
+  getNodeById,
+  getBranchesForNode,
+  setUsingLocalData,
+} from "@/lib/local-data";
 
 export async function createChapterAPI(
   input: CreateChapterInput,
@@ -72,20 +78,47 @@ export async function getChapterAPI(
   storyId: string,
   nodeId: string,
 ): Promise<ChapterNode | null> {
-  const result = await client.graphql({
-    query: getChapter,
-    variables: { storyId, nodeId },
-  });
-  return result.data.getChapter ?? null;
+  // Use local data if enabled
+  if (shouldUseLocalData()) {
+    const node = getNodeById(nodeId);
+    return node as ChapterNode | null;
+  }
+
+  try {
+    const result = await client.graphql({
+      query: getChapter,
+      variables: { storyId, nodeId },
+    });
+    return result.data.getChapter ?? null;
+  } catch (error) {
+    console.error("Error fetching chapter, falling back to local data:", error);
+    setUsingLocalData();
+    return getNodeById(nodeId) as ChapterNode | null;
+  }
 }
 
 export async function listBranchesAPI(
   storyId: string,
   nodeId: string,
 ): Promise<ChapterNode[]> {
-  const result = await client.graphql({
-    query: listBranches,
-    variables: { storyId, nodeId },
-  });
-  return result.data.listBranches;
+  // Use local data if enabled
+  if (shouldUseLocalData()) {
+    const branches = getBranchesForNode(storyId, nodeId);
+    return branches as ChapterNode[];
+  }
+
+  try {
+    const result = await client.graphql({
+      query: listBranches,
+      variables: { storyId, nodeId },
+    });
+    return result.data.listBranches;
+  } catch (error) {
+    console.error(
+      "Error fetching branches, falling back to local data:",
+      error,
+    );
+    setUsingLocalData();
+    return getBranchesForNode(storyId, nodeId) as ChapterNode[];
+  }
 }

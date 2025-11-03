@@ -9,10 +9,9 @@ import { ErrorMessage } from "@/components/common/ErrorMessage";
 import {
   useFeaturedStories,
   useTrendingStories,
-  useFantasyStories,
-  useSciFiStories,
-  useMysteryStories,
 } from "@/hooks/useStories";
+import { GenreSection } from "@/components/home/GenreSection";
+import { getHomePageGenres } from "@/constants/genres";
 
 import ParallaxGap from "@/components/layout/ParallaxGap";
 import ParallaxSection from "@/components/layout/ParallaxSection";
@@ -34,26 +33,8 @@ export default function HomePage() {
     refetch: refetchTrending,
   } = useTrendingStories(8);
 
-  const {
-    data: fantasyData,
-    isLoading: fantasyLoading,
-    error: fantasyError,
-    refetch: refetchFantasy,
-  } = useFantasyStories(8);
-
-  const {
-    data: sciFiData,
-    isLoading: sciFiLoading,
-    error: sciFiError,
-    refetch: refetchSciFi,
-  } = useSciFiStories(8);
-
-  const {
-    data: mysteryData,
-    isLoading: mysteryLoading,
-    error: mysteryError,
-    refetch: refetchMystery,
-  } = useMysteryStories(8);
+  // Get 6 genres to display on homepage
+  const homePageGenres = getHomePageGenres();
 
   return (
     <div className="min-h-screen">
@@ -254,130 +235,20 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Fantasy Stories Section - Dark Background */}
-      <ParallaxSection
-        background="#1a1a1a"
-        minHeight="auto"
-        className="relative overflow-hidden"
-      >
-        {/* Subtle constellation background */}
-        <div
-          className="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style={{
-            backgroundImage: "url(/images/constellation1.webp)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        />
-        <div className="container mx-auto px-4 py-20 relative z-10">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold text-white">
-                Fantasy Stories
-              </h2>
-              <Link href="/browse?genre=Fantasy">
-                <Button
-                  variant="bordered"
-                  className="text-white border-white hover:bg-white/20"
-                >
-                  View All
-                </Button>
-              </Link>
-            </div>
-            {fantasyError ? (
-              <ErrorMessage
-                message="Failed to load fantasy stories"
-                retry={refetchFantasy}
-              />
-            ) : fantasyLoading ? (
-              <LoadingSpinner label="Loading fantasy stories..." />
-            ) : (
-              <StoriesGrid stories={fantasyData?.items || []} />
-            )}
-          </div>
-        </div>
-      </ParallaxSection>
-
-      {/* Gap 3 - Sci-Fi Background with Sci-Fi Stories */}
-      <ParallaxGap
-        image="/themes/scifi.jpg"
-        minHeight="auto"
-        overlay="linear-gradient(0deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 100%)"
-      >
-        <div className="w-full pt-40 pb-32 px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg">
-                Sci-Fi Stories
-              </h2>
-              <Link href="/browse?genre=Sci-Fi">
-                <Button
-                  variant="bordered"
-                  className="text-white border-white hover:bg-white/20"
-                >
-                  View All
-                </Button>
-              </Link>
-            </div>
-            {sciFiError ? (
-              <ErrorMessage
-                message="Failed to load sci-fi stories"
-                retry={refetchSciFi}
-              />
-            ) : sciFiLoading ? (
-              <LoadingSpinner label="Loading sci-fi stories..." />
-            ) : (
-              <StoriesGrid stories={sciFiData?.items || []} />
-            )}
-          </div>
-        </div>
-      </ParallaxGap>
-
-      {/* Mystery Stories Section - Dark Background */}
-      <ParallaxSection
-        background="#1a1a1a"
-        minHeight="auto"
-        className="relative overflow-hidden"
-      >
-        {/* Subtle constellation background */}
-        <div
-          className="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style={{
-            backgroundImage: "url(/images/constellation1.webp)",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        />
-        <div className="container mx-auto px-4 py-20 relative z-10">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-12">
-              <h2 className="text-4xl md:text-5xl font-bold text-white">
-                Mystery Stories
-              </h2>
-              <Link href="/browse?genre=Mystery">
-                <Button
-                  variant="bordered"
-                  className="text-white border-white hover:bg-white/20"
-                >
-                  View All
-                </Button>
-              </Link>
-            </div>
-            {mysteryError ? (
-              <ErrorMessage
-                message="Failed to load mystery stories"
-                retry={refetchMystery}
-              />
-            ) : mysteryLoading ? (
-              <LoadingSpinner label="Loading mystery stories..." />
-            ) : (
-              <StoriesGrid stories={mysteryData?.items || []} />
-            )}
-          </div>
-        </div>
-      </ParallaxSection>
+      {/* Dynamic Genre Sections - Alternating between dark sections and parallax gaps */}
+      {homePageGenres.map((genre, index) => {
+        // Alternate between ParallaxSection (dark) and GenreSection (which uses ParallaxSection internally)
+        // For visual variety, we'll just use GenreSection with alternating backgrounds
+        const backgrounds = ["#1a1a1a", "#2a2a2a", "#1a1a1a", "#252525", "#1a1a1a", "#222222"];
+        return (
+          <GenreSection
+            key={genre}
+            genre={genre}
+            background={backgrounds[index % backgrounds.length]}
+            limit={8}
+          />
+        );
+      })}
 
       {/* Gap 4 - How It Works with Background */}
       <ParallaxGap

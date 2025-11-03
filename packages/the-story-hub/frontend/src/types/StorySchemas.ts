@@ -79,7 +79,7 @@ export const StorySchema = z.object({
   featured: z.boolean().default(false),
   createdAt: z.string(), // Accept any datetime string
   coverImageUrl: z.string().nullable().optional(),
-  rootChapterId: z.string().nullable().optional(), // Make UUID check optional
+  rootNodeId: z.string().nullable().optional(), // Make UUID check optional
   aiCreated: z.boolean().default(false),
   allowAI: z.boolean().default(false),
 });
