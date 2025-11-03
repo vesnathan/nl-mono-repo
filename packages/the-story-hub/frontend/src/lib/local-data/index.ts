@@ -73,7 +73,9 @@ function getRepliesForComment(
 
   // Sort replies by creation time (oldest first for threaded display)
   replies.sort(
-    (a, b) => new Date((a as any).createdAt).getTime() - new Date((b as any).createdAt).getTime(),
+    (a, b) =>
+      new Date((a as any).createdAt).getTime() -
+      new Date((b as any).createdAt).getTime(),
   );
 
   // Recursively get nested replies
@@ -107,13 +109,15 @@ export function getCommentsForNode(
     case "NEWEST":
       comments.sort(
         (a, b) =>
-          new Date((b as any).createdAt).getTime() - new Date((a as any).createdAt).getTime(),
+          new Date((b as any).createdAt).getTime() -
+          new Date((a as any).createdAt).getTime(),
       );
       break;
     case "OLDEST":
       comments.sort(
         (a, b) =>
-          new Date((a as any).createdAt).getTime() - new Date((b as any).createdAt).getTime(),
+          new Date((a as any).createdAt).getTime() -
+          new Date((b as any).createdAt).getTime(),
       );
       break;
     case "MOST_UPVOTED":

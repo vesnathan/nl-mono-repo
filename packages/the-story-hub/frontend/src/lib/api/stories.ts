@@ -87,7 +87,9 @@ export async function listStoriesAPI(
 
     // Apply genre filter if provided
     if (filter?.genre) {
-      stories = stories.filter((story) => (story.genre as unknown as string[])?.includes(filter.genre!));
+      stories = stories.filter((story) =>
+        (story.genre as unknown as string[])?.includes(filter.genre!),
+      );
     }
 
     // Apply limit if provided
@@ -97,7 +99,10 @@ export async function listStoriesAPI(
 
     // Cast to mutable Story[] type
     return {
-      items: stories.map(s => ({ ...s, genre: [...(s.genre as unknown as readonly string[])] })) as unknown as Story[],
+      items: stories.map((s) => ({
+        ...s,
+        genre: [...(s.genre as unknown as readonly string[])],
+      })) as unknown as Story[],
       nextToken: null,
       __typename: "StoryConnection" as const,
     };
@@ -118,7 +123,9 @@ export async function listStoriesAPI(
 
     // Apply genre filter if provided
     if (filter?.genre) {
-      stories = stories.filter((story) => (story.genre as unknown as string[])?.includes(filter.genre!));
+      stories = stories.filter((story) =>
+        (story.genre as unknown as string[])?.includes(filter.genre!),
+      );
     }
 
     // Apply limit if provided
@@ -128,7 +135,10 @@ export async function listStoriesAPI(
 
     // Cast to mutable Story[] type
     return {
-      items: stories.map(s => ({ ...s, genre: [...(s.genre as unknown as readonly string[])] })) as unknown as Story[],
+      items: stories.map((s) => ({
+        ...s,
+        genre: [...(s.genre as unknown as readonly string[])],
+      })) as unknown as Story[],
       nextToken: null,
       __typename: "StoryConnection" as const,
     };
@@ -154,7 +164,9 @@ export async function getReadingPathAPI(
     query: getReadingPath,
     variables: { storyId, nodePath },
   });
-  return z.array(ChapterNodeSchema).parse(
-    (result as { data: { getReadingPath: unknown } }).data.getReadingPath
-  );
+  return z
+    .array(ChapterNodeSchema)
+    .parse(
+      (result as { data: { getReadingPath: unknown } }).data.getReadingPath,
+    );
 }

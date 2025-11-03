@@ -157,11 +157,12 @@ export const NotificationSchema: z.ZodType<GQLNotification> = z.object({
 
 export type Notification = GQLNotification;
 
-export const NotificationConnectionSchema: z.ZodType<GQLNotificationConnection> = z.object({
-  __typename: z.literal("NotificationConnection"),
-  items: z.array(NotificationSchema),
-  nextToken: z.string().nullable().optional(),
-});
+export const NotificationConnectionSchema: z.ZodType<GQLNotificationConnection> =
+  z.object({
+    __typename: z.literal("NotificationConnection"),
+    items: z.array(NotificationSchema),
+    nextToken: z.string().nullable().optional(),
+  });
 
 export type NotificationConnection = GQLNotificationConnection;
 
@@ -191,7 +192,7 @@ export const TreeNodeSchema: z.ZodType<GQLTreeNode> = z.lazy(() =>
     badges: ChapterBadgesSchema,
     authorId: z.string(),
     children: z.array(TreeNodeSchema),
-  })
+  }),
 );
 
 export type TreeNode = GQLTreeNode;
