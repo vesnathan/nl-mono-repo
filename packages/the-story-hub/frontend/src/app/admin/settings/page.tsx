@@ -7,11 +7,80 @@ import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { getSiteSettingsAPI, updateSiteSettingsAPI } from "@/lib/api/settings";
 import type { SiteSettings } from "@/types/SettingsSchemas";
 
-export default function AdminSettingsPage() {
+// Reusable Components for Settings UI
+
+interface SettingsSectionProps {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}
+
+function SettingsSection({
+  title,
+  description,
+  children,
+}: SettingsSectionProps) {
   return (
-    <RequireAdmin>
-      <AdminSettingsContent />
-    </RequireAdmin>
+    <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+      <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
+      <p className="text-gray-400 text-sm mb-6">{description}</p>
+      <div className="space-y-4">{children}</div>
+    </div>
+  );
+}
+
+interface SettingToggleProps {
+  label: string;
+  description: string;
+  enabled: boolean;
+  onChange: (value: boolean) => void;
+  disabled?: boolean;
+}
+
+function SettingToggle({
+  label,
+  description,
+  enabled,
+  onChange,
+  disabled = false,
+}: SettingToggleProps) {
+  const toggleId = `toggle-${label.toLowerCase().replace(/\s+/g, "-")}`;
+
+  return (
+    <div className="flex items-start justify-between gap-4 py-4 border-b border-gray-700 last:border-b-0 last:pb-0">
+      <div className="flex-1">
+        <label htmlFor={toggleId} className="text-white font-medium block mb-1">
+          {label}
+        </label>
+        <p className="text-gray-400 text-sm">{description}</p>
+      </div>
+      <div className="flex-shrink-0 pt-1">
+        <button
+          id={toggleId}
+          type="button"
+          role="switch"
+          aria-checked={enabled}
+          aria-label={label}
+          disabled={disabled}
+          onClick={() => onChange(!enabled)}
+          className={`
+            relative inline-flex h-6 w-11 items-center rounded-full
+            transition-colors duration-200 ease-in-out
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800
+            ${enabled ? "bg-blue-600" : "bg-gray-600"}
+            ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+          `}
+        >
+          <span
+            className={`
+              inline-block h-4 w-4 transform rounded-full bg-white
+              transition-transform duration-200 ease-in-out
+              ${enabled ? "translate-x-6" : "translate-x-1"}
+            `}
+          />
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -171,73 +240,10 @@ function AdminSettingsContent() {
   );
 }
 
-// Reusable Components for Settings UI
-
-interface SettingsSectionProps {
-  title: string;
-  description: string;
-  children: React.ReactNode;
-}
-
-function SettingsSection({
-  title,
-  description,
-  children,
-}: SettingsSectionProps) {
+export default function AdminSettingsPage() {
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-      <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
-      <p className="text-gray-400 text-sm mb-6">{description}</p>
-      <div className="space-y-4">{children}</div>
-    </div>
-  );
-}
-
-interface SettingToggleProps {
-  label: string;
-  description: string;
-  enabled: boolean;
-  onChange: (value: boolean) => void;
-  disabled?: boolean;
-}
-
-function SettingToggle({
-  label,
-  description,
-  enabled,
-  onChange,
-  disabled = false,
-}: SettingToggleProps) {
-  return (
-    <div className="flex items-start justify-between gap-4 py-4 border-b border-gray-700 last:border-b-0 last:pb-0">
-      <div className="flex-1">
-        <label className="text-white font-medium block mb-1">{label}</label>
-        <p className="text-gray-400 text-sm">{description}</p>
-      </div>
-      <div className="flex-shrink-0 pt-1">
-        <button
-          type="button"
-          role="switch"
-          aria-checked={enabled}
-          disabled={disabled}
-          onClick={() => onChange(!enabled)}
-          className={`
-            relative inline-flex h-6 w-11 items-center rounded-full
-            transition-colors duration-200 ease-in-out
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800
-            ${enabled ? "bg-blue-600" : "bg-gray-600"}
-            ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-          `}
-        >
-          <span
-            className={`
-              inline-block h-4 w-4 transform rounded-full bg-white
-              transition-transform duration-200 ease-in-out
-              ${enabled ? "translate-x-6" : "translate-x-1"}
-            `}
-          />
-        </button>
-      </div>
-    </div>
+    <RequireAdmin>
+      <AdminSettingsContent />
+    </RequireAdmin>
   );
 }

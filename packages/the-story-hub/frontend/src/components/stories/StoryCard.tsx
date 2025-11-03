@@ -13,9 +13,9 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import type { Story } from "@/types/gqlTypes";
-import { StoryMetadataChips } from "./StoryMetadataChips";
 import { PatreonBadge } from "@/components/common/PatreonBadge";
 import { OGBadge } from "@/components/common/OGBadge";
+import { StoryMetadataChips } from "./StoryMetadataChips";
 
 interface StoryCardProps {
   story: Story;

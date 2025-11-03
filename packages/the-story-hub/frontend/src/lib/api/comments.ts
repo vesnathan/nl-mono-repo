@@ -323,7 +323,10 @@ export async function listCommentsAPI(
       // No authMode specified - uses default (Cognito with guest access)
     });
 
-    console.log("Response:", JSON.stringify(response.data.listComments, null, 2));
+    console.log(
+      "Response:",
+      JSON.stringify(response.data.listComments, null, 2),
+    );
     console.log("=====================================\n");
 
     // Validate response with Zod

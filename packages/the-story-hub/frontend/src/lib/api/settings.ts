@@ -19,7 +19,9 @@ export async function getSiteSettingsAPI(): Promise<SiteSettings> {
   });
 
   // Validate response with Zod
-  return SiteSettingsSchema.parse((response as any).data.getSiteSettings);
+  return SiteSettingsSchema.parse(
+    (response as { data: { getSiteSettings: unknown } }).data.getSiteSettings,
+  );
 }
 
 /**
@@ -39,5 +41,8 @@ export async function updateSiteSettingsAPI(
   });
 
   // Validate response with Zod
-  return SiteSettingsSchema.parse((response as any).data.updateSiteSettings);
+  return SiteSettingsSchema.parse(
+    (response as { data: { updateSiteSettings: unknown } }).data
+      .updateSiteSettings,
+  );
 }

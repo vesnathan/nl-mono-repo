@@ -95,7 +95,7 @@ export function CommentThreadModal({
             onDelete={onDelete}
             onVote={onVote}
             currentUserId={currentUserId}
-            isInModal={true}
+            isInModal
             storyAuthorId={storyAuthorId}
           />
         </ModalBody>

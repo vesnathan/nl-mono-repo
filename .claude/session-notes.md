@@ -6,6 +6,15 @@
 - **ALWAYS use `yarn` exclusively** - never use npm
 - Examples: `yarn install`, `yarn add`, `yarn workspace <name> <command>`
 
+### Git Commit Process
+- **ALWAYS run these commands BEFORE staging and committing**:
+  1. `yarn lint` - Run linter to check for code style issues
+  2. `npx tsc --noEmit` - Type check TypeScript without emitting files
+  3. Format with Prettier if available
+- Only proceed with `git add` and `git commit` after all checks pass
+- This ensures code quality and catches errors before deployment
+- Never skip these steps even for "simple" changes
+
 ### Deployments
 - **NEVER run deployments automatically under ANY circumstances**
 - **NEVER use the Bash tool to run `yarn deploy:tsh:dev` or any deployment commands**

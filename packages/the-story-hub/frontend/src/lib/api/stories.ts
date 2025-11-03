@@ -84,9 +84,7 @@ export async function listStoriesAPI(
 
     // Apply genre filter if provided
     if (filter?.genre) {
-      stories = stories.filter((story) =>
-        story.genre?.includes(filter.genre!),
-      );
+      stories = stories.filter((story) => story.genre?.includes(filter.genre!));
     }
 
     // Apply limit if provided
@@ -110,18 +108,13 @@ export async function listStoriesAPI(
     // Validate response with Zod
     return StoryConnectionSchema.parse(result.data.listStories);
   } catch (error) {
-    console.error(
-      "Error listing stories, falling back to local data:",
-      error,
-    );
+    console.error("Error listing stories, falling back to local data:", error);
     setUsingLocalData();
     let stories = getAllStories();
 
     // Apply genre filter if provided
     if (filter?.genre) {
-      stories = stories.filter((story) =>
-        story.genre?.includes(filter.genre!),
-      );
+      stories = stories.filter((story) => story.genre?.includes(filter.genre!));
     }
 
     // Apply limit if provided

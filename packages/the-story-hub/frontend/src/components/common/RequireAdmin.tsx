@@ -2,9 +2,9 @@
 
 import React from "react";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { useRouter } from "next/navigation";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorMessage } from "./ErrorMessage";
-import { useRouter } from "next/navigation";
 
 interface Props {
   children: React.ReactNode;

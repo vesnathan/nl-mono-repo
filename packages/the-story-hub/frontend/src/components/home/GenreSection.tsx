@@ -61,7 +61,9 @@ export function GenreSection({
               retry={refetch}
             />
           ) : isLoading ? (
-            <LoadingSpinner label={`Loading ${genre.toLowerCase()} stories...`} />
+            <LoadingSpinner
+              label={`Loading ${genre.toLowerCase()} stories...`}
+            />
           ) : (
             <StoriesGrid stories={data?.items || []} />
           )}

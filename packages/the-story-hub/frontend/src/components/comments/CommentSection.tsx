@@ -222,7 +222,10 @@ export function CommentSection({
     return count;
   };
 
-  const totalReplies = comments.reduce((sum, comment) => sum + countReplies(comment), 0);
+  const totalReplies = comments.reduce(
+    (sum, comment) => sum + countReplies(comment),
+    0,
+  );
 
   console.log("===== RENDER STATE =====");
   console.log("Rendering with comments.length:", comments.length);
@@ -303,8 +306,10 @@ export function CommentSection({
 
           {/* Showing comments text */}
           <div className="mb-4 text-center text-sm text-gray-400">
-            Showing {comments.length} of {totalAvailable} comment{totalAvailable === 1 ? "" : "s"}
-            {totalReplies > 0 && ` (${totalReplies} ${totalReplies === 1 ? "reply" : "replies"})`}
+            Showing {comments.length} of {totalAvailable} comment
+            {totalAvailable === 1 ? "" : "s"}
+            {totalReplies > 0 &&
+              ` (${totalReplies} ${totalReplies === 1 ? "reply" : "replies"})`}
           </div>
 
           <div className="space-y-4">

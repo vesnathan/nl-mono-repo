@@ -57,6 +57,31 @@ export function getAllStories() {
 }
 
 // Get comments for a node with pagination support
+// Get replies for a comment (recursively includes nested replies)
+function getRepliesForComment(
+  storyId: string,
+  nodeId: string,
+  parentCommentId: string,
+) {
+  const replies = LOCAL_DATA.comments.filter(
+    (c) =>
+      c.storyId === storyId &&
+      c.nodeId === nodeId &&
+      c.parentCommentId === parentCommentId,
+  );
+
+  // Sort replies by creation time (oldest first for threaded display)
+  replies.sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
+
+  // Recursively get nested replies
+  return replies.map((reply) => ({
+    ...reply,
+    replies: getRepliesForComment(storyId, nodeId, reply.commentId),
+  }));
+}
+
 export function getCommentsForNode(
   storyId: string,
   nodeId: string,
@@ -67,7 +92,7 @@ export function getCommentsForNode(
   },
 ) {
   // Get all top-level comments for this node (depth 0, no parent)
-  let comments = LOCAL_DATA.comments.filter(
+  const comments = LOCAL_DATA.comments.filter(
     (c) =>
       c.storyId === storyId &&
       c.nodeId === nodeId &&
@@ -91,13 +116,18 @@ export function getCommentsForNode(
       );
       break;
     case "MOST_UPVOTED":
-      comments.sort((a, b) => (b.stats?.upvotes || 0) - (a.stats?.upvotes || 0));
+      comments.sort(
+        (a, b) => (b.stats?.upvotes || 0) - (a.stats?.upvotes || 0),
+      );
       break;
     case "MOST_REPLIES":
       comments.sort(
         (a, b) =>
           (b.stats?.totalReplyCount || 0) - (a.stats?.totalReplyCount || 0),
       );
+      break;
+    default:
+      // Already sorted by NEWEST as default
       break;
   }
 
@@ -109,7 +139,7 @@ export function getCommentsForNode(
 
   // Handle pagination
   const limit = options?.limit || 20;
-  const startIndex = options?.nextToken ? parseInt(options.nextToken) : 0;
+  const startIndex = options?.nextToken ? parseInt(options.nextToken, 10) : 0;
   const endIndex = startIndex + limit;
 
   const paginatedComments = commentsWithReplies.slice(startIndex, endIndex);
@@ -121,32 +151,6 @@ export function getCommentsForNode(
     nextToken,
     total: commentsWithReplies.length,
   };
-}
-
-// Get replies for a comment (recursively includes nested replies)
-function getRepliesForComment(
-  storyId: string,
-  nodeId: string,
-  parentCommentId: string,
-) {
-  const replies = LOCAL_DATA.comments.filter(
-    (c) =>
-      c.storyId === storyId &&
-      c.nodeId === nodeId &&
-      c.parentCommentId === parentCommentId,
-  );
-
-  // Sort replies by creation time (oldest first for threaded display)
-  replies.sort(
-    (a, b) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-  );
-
-  // Recursively get nested replies
-  return replies.map((reply) => ({
-    ...reply,
-    replies: getRepliesForComment(storyId, nodeId, reply.commentId),
-  }));
 }
 
 // Get node by ID
