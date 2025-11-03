@@ -9,8 +9,10 @@ import {
   Button,
   Input,
 } from "@nextui-org/react";
+import { useState } from "react";
 import Logo from "@/components/common/Logo";
 import { useLoginController } from "@/hooks/useLoginController";
+import { EyeFilledIcon, EyeSlashFilledIcon } from "@/components/common/EyeSVGR";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -23,6 +25,8 @@ export function LoginModal({
   onClose,
   actionDescription = "perform this action",
 }: LoginModalProps) {
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
   const loginController = useLoginController({
     onLoginSuccess: () => {
       onClose();
@@ -44,6 +48,9 @@ export function LoginModal({
   } = loginController;
 
   const isLoginDisabled = !userEmail || !userPassword;
+
+  const togglePasswordVisibility = () =>
+    setIsPasswordVisible(!isPasswordVisible);
 
   const handleLogin = () => {
     signInMutation.mutate({
@@ -90,23 +97,40 @@ export function LoginModal({
                   onKeyDown={handleKeyDown}
                   classNames={{
                     input: "bg-gray-800 text-white",
-                    inputWrapper: "bg-gray-800 border-gray-700",
-                    label: "text-gray-300",
+                    inputWrapper:
+                      "bg-gray-800 border-gray-700 group-data-[focus=true]:border-gray-600 data-[hover=true]:border-gray-600",
+                    label:
+                      "text-white group-data-[filled-within=true]:text-white",
                   }}
                   isDisabled={signInMutation.isPending}
                 />
                 <Input
                   label="Password"
-                  type="password"
+                  type={isPasswordVisible ? "text" : "password"}
                   value={userPassword}
                   onChange={(e) => setUserPassword(e.target.value)}
                   onKeyDown={handleKeyDown}
                   classNames={{
                     input: "bg-gray-800 text-white",
-                    inputWrapper: "bg-gray-800 border-gray-700",
-                    label: "text-gray-300",
+                    inputWrapper:
+                      "bg-gray-800 border-gray-700 group-data-[focus=true]:border-gray-600 data-[hover=true]:border-gray-600",
+                    label:
+                      "text-white group-data-[filled-within=true]:text-white",
                   }}
                   isDisabled={signInMutation.isPending}
+                  endContent={
+                    <button
+                      className="focus:outline-none"
+                      type="button"
+                      onClick={togglePasswordVisibility}
+                    >
+                      {isPasswordVisible ? (
+                        <EyeFilledIcon className="text-xl text-gray-400 pointer-events-none" />
+                      ) : (
+                        <EyeSlashFilledIcon className="text-xl text-gray-400 pointer-events-none" />
+                      )}
+                    </button>
+                  }
                 />
                 {errorMessage && (
                   <p className="text-red-500 text-sm">{errorMessage}</p>
