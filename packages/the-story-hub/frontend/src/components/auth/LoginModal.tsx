@@ -63,6 +63,7 @@ export function LoginModal({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !isLoginDisabled) {
+      e.preventDefault();
       handleLogin();
     }
   };

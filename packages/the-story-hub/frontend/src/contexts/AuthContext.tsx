@@ -6,6 +6,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useMemo,
 } from "react";
 import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
 
@@ -20,13 +21,10 @@ export interface AuthStatus {
 const AuthContext = createContext<AuthStatus | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [authStatus, setAuthStatus] = useState<AuthStatus>({
-    isAuthenticated: false,
-    isLoading: true,
-    userId: undefined,
-    username: undefined,
-    refresh: async () => {},
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userId, setUserId] = useState<string | undefined>(undefined);
+  const [username, setUsername] = useState<string | undefined>(undefined);
 
   const checkAuthStatus = useCallback(async () => {
     try {
@@ -35,21 +33,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         getCurrentUser().catch(() => null),
       ]);
 
-      setAuthStatus((prev) => ({
-        ...prev,
-        isAuthenticated: session.tokens !== undefined && user !== null,
-        isLoading: false,
-        userId: user?.userId,
-        username: user?.username,
-      }));
+      setIsAuthenticated(session.tokens !== undefined && user !== null);
+      setIsLoading(false);
+      setUserId(user?.userId);
+      setUsername(user?.username);
     } catch {
-      setAuthStatus((prev) => ({
-        ...prev,
-        isAuthenticated: false,
-        isLoading: false,
-        userId: undefined,
-        username: undefined,
-      }));
+      setIsAuthenticated(false);
+      setIsLoading(false);
+      setUserId(undefined);
+      setUsername(undefined);
     }
   }, []);
 
@@ -57,13 +49,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuthStatus();
   }, [checkAuthStatus]);
 
-  // Add refresh function to auth status
-  useEffect(() => {
-    setAuthStatus((prev) => ({
-      ...prev,
+  // Memoize the context value to prevent unnecessary re-renders
+  const authStatus = useMemo(
+    () => ({
+      isAuthenticated,
+      isLoading,
+      userId,
+      username,
       refresh: checkAuthStatus,
-    }));
-  }, [checkAuthStatus]);
+    }),
+    [isAuthenticated, isLoading, userId, username, checkAuthStatus],
+  );
 
   return (
     <AuthContext.Provider value={authStatus}>{children}</AuthContext.Provider>
