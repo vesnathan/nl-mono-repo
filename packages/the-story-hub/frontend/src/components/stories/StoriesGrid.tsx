@@ -16,11 +16,11 @@ export function StoriesGrid({
 }: StoriesGridProps) {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {Array.from({ length: 8 }, (_, i) => `skeleton-${i}`).map((key) => (
           <div
             key={key}
-            className="h-[200px] bg-gray-800 border border-gray-700 animate-pulse"
+            className="h-[280px] bg-gray-800 border border-gray-700 animate-pulse"
           />
         ))}
       </div>
@@ -37,7 +37,7 @@ export function StoriesGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {stories.map((story) => (
         <StoryCard key={story.storyId} story={story} />
       ))}
