@@ -512,8 +512,8 @@ function ChapterSection({
             End of This Path
           </h2>
           <p className="text-gray-400 mb-6">
-            This story branch hasn't been continued yet. Be the first to write
-            what happens next!
+            This story branch hasn&rsquo;t been continued yet. Be the first to
+            write what happens next!
           </p>
           <AuthRequiredButton
             color="primary"
@@ -688,7 +688,7 @@ export default function StoryDetailPage() {
           ) : (
             <div className="bg-gray-900 border border-gray-700 p-8 mb-6">
               <p className="text-gray-400">
-                This story doesn't have any chapters yet.
+                This story doesn&rsquo;t have any chapters yet.
               </p>
             </div>
           )}

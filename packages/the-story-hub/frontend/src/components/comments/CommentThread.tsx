@@ -7,6 +7,7 @@ import { AuthorBadge } from "@/components/common/AuthorBadge";
 import { OGBadge } from "@/components/common/OGBadge";
 import { PatreonBadge } from "@/components/common/PatreonBadge";
 import { CommentForm } from "./CommentForm";
+// eslint-disable-next-line import/no-cycle
 import { CommentThreadModal } from "./CommentThreadModal";
 
 interface CommentThreadProps {
