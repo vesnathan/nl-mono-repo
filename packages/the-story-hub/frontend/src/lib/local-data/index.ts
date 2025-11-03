@@ -16,6 +16,7 @@ export const LOCAL_DATA = {
   users: SEED_USERS,
   stories: SEED_STORIES.map((story) => ({
     ...story,
+    __typename: "Story" as const,
     // Map to frontend format if needed
   })),
   nodes: SEED_NODES.reduce(
@@ -28,22 +29,34 @@ export const LOCAL_DATA = {
   comments: SEED_COMMENTS,
 };
 
-// Track if we're using local data (either forced or fallback)
-let usingLocalData = false;
+const LOCAL_STORAGE_KEY = "tsh-use-local-data";
 
-// Set flag that we're using local data
-export function setUsingLocalData() {
-  usingLocalData = true;
+// Get the saved preference from localStorage
+function getLocalDataPreference(): boolean {
+  if (typeof window === "undefined") return false;
+  const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+  return saved === "true";
 }
 
-// Check if we should use local data
+// Check if we should use local data (from env or localStorage)
 export function shouldUseLocalData(): boolean {
-  return process.env.NEXT_PUBLIC_USE_LOCAL_DATA === "true";
+  return (
+    process.env.NEXT_PUBLIC_USE_LOCAL_DATA === "true" ||
+    getLocalDataPreference()
+  );
 }
 
-// Check if we're currently using local data (forced or fallback)
-export function isUsingLocalData(): boolean {
-  return process.env.NEXT_PUBLIC_USE_LOCAL_DATA === "true" || usingLocalData;
+// Set local data preference (saves to localStorage)
+export function setUseLocalData(enabled: boolean) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(LOCAL_STORAGE_KEY, String(enabled));
+}
+
+// Toggle local data mode
+export function toggleLocalData(): boolean {
+  const newValue = !shouldUseLocalData();
+  setUseLocalData(newValue);
+  return newValue;
 }
 
 // Get story by ID
@@ -57,6 +70,33 @@ export function getAllStories() {
 }
 
 // Get comments for a node with pagination support
+// Get replies for a comment (recursively includes nested replies)
+function getRepliesForComment(
+  storyId: string,
+  nodeId: string,
+  parentCommentId: string,
+): Array<(typeof SEED_COMMENTS)[number] & { replies: unknown[] }> {
+  const replies = LOCAL_DATA.comments.filter(
+    (c) =>
+      c.storyId === storyId &&
+      c.nodeId === nodeId &&
+      c.parentCommentId === parentCommentId,
+  );
+
+  // Sort replies by creation time (oldest first for threaded display)
+  replies.sort(
+    (a, b) =>
+      new Date((a as { createdAt: string }).createdAt).getTime() -
+      new Date((b as { createdAt: string }).createdAt).getTime(),
+  );
+
+  // Recursively get nested replies
+  return replies.map((reply) => ({
+    ...reply,
+    replies: getRepliesForComment(storyId, nodeId, reply.commentId),
+  }));
+}
+
 export function getCommentsForNode(
   storyId: string,
   nodeId: string,
@@ -67,7 +107,7 @@ export function getCommentsForNode(
   },
 ) {
   // Get all top-level comments for this node (depth 0, no parent)
-  let comments = LOCAL_DATA.comments.filter(
+  const comments = LOCAL_DATA.comments.filter(
     (c) =>
       c.storyId === storyId &&
       c.nodeId === nodeId &&
@@ -81,23 +121,30 @@ export function getCommentsForNode(
     case "NEWEST":
       comments.sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          new Date((b as { createdAt: string }).createdAt).getTime() -
+          new Date((a as { createdAt: string }).createdAt).getTime(),
       );
       break;
     case "OLDEST":
       comments.sort(
         (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+          new Date((a as { createdAt: string }).createdAt).getTime() -
+          new Date((b as { createdAt: string }).createdAt).getTime(),
       );
       break;
     case "MOST_UPVOTED":
-      comments.sort((a, b) => (b.stats?.upvotes || 0) - (a.stats?.upvotes || 0));
+      comments.sort(
+        (a, b) => (b.stats?.upvotes || 0) - (a.stats?.upvotes || 0),
+      );
       break;
     case "MOST_REPLIES":
       comments.sort(
         (a, b) =>
           (b.stats?.totalReplyCount || 0) - (a.stats?.totalReplyCount || 0),
       );
+      break;
+    default:
+      // Already sorted by NEWEST as default
       break;
   }
 
@@ -109,7 +156,7 @@ export function getCommentsForNode(
 
   // Handle pagination
   const limit = options?.limit || 20;
-  const startIndex = options?.nextToken ? parseInt(options.nextToken) : 0;
+  const startIndex = options?.nextToken ? parseInt(options.nextToken, 10) : 0;
   const endIndex = startIndex + limit;
 
   const paginatedComments = commentsWithReplies.slice(startIndex, endIndex);
@@ -121,32 +168,6 @@ export function getCommentsForNode(
     nextToken,
     total: commentsWithReplies.length,
   };
-}
-
-// Get replies for a comment (recursively includes nested replies)
-function getRepliesForComment(
-  storyId: string,
-  nodeId: string,
-  parentCommentId: string,
-) {
-  const replies = LOCAL_DATA.comments.filter(
-    (c) =>
-      c.storyId === storyId &&
-      c.nodeId === nodeId &&
-      c.parentCommentId === parentCommentId,
-  );
-
-  // Sort replies by creation time (oldest first for threaded display)
-  replies.sort(
-    (a, b) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-  );
-
-  // Recursively get nested replies
-  return replies.map((reply) => ({
-    ...reply,
-    replies: getRepliesForComment(storyId, nodeId, reply.commentId),
-  }));
 }
 
 // Get node by ID

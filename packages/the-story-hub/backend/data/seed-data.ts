@@ -501,6 +501,8 @@ export const SEED_NODES = [
     branchDescription: null,
     paragraphIndex: null,
     parentNodeId: null,
+    createdAt: "2024-01-15T10:00:00Z",
+    editableUntil: "2024-01-16T10:00:00Z",
     stats: {
       reads: 1234,
       upvotes: 89,
@@ -508,7 +510,6 @@ export const SEED_NODES = [
       childBranches: 3,
     },
     badges: {
-      matchesVision: false,
       authorApproved: false,
     },
   },
@@ -524,6 +525,8 @@ export const SEED_NODES = [
     branchDescription: "The Path of Shadows",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.ENCHANTED_FOREST_ROOT,
+    createdAt: "2024-01-17T14:00:00.000Z",
+    editableUntil: "2024-01-18T14:00:00.000Z",
     stats: {
       reads: 456,
       upvotes: 42,
@@ -531,7 +534,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: true,
     },
   },
@@ -547,6 +549,8 @@ export const SEED_NODES = [
     branchDescription: "The Ancient Oak",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.ENCHANTED_FOREST_ROOT,
+    createdAt: "2024-01-17T16:00:00.000Z",
+    editableUntil: "2024-01-18T16:00:00.000Z",
     stats: {
       reads: 389,
       upvotes: 51,
@@ -554,7 +558,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: false,
     },
   },
@@ -570,6 +573,8 @@ export const SEED_NODES = [
     branchDescription: "Into the Wild",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.ENCHANTED_FOREST_ROOT,
+    createdAt: "2024-01-17T19:00:00.000Z",
+    editableUntil: "2024-01-18T19:00:00.000Z",
     stats: {
       reads: 389,
       upvotes: 47,
@@ -577,7 +582,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: true,
     },
   },
@@ -595,6 +599,8 @@ export const SEED_NODES = [
     branchDescription: null,
     paragraphIndex: null,
     parentNodeId: null,
+    createdAt: "2024-01-17T21:00:00.000Z",
+    editableUntil: "2024-01-18T21:00:00.000Z",
     stats: {
       reads: 892,
       upvotes: 67,
@@ -602,7 +608,6 @@ export const SEED_NODES = [
       childBranches: 3,
     },
     badges: {
-      matchesVision: false,
       authorApproved: false,
     },
   },
@@ -618,6 +623,8 @@ export const SEED_NODES = [
     branchDescription: "Trust the Message",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.CYBER_NEXUS_ROOT,
+    createdAt: "2024-01-17T23:00:00.000Z",
+    editableUntil: "2024-01-18T23:00:00.000Z",
     stats: {
       reads: 312,
       upvotes: 38,
@@ -625,7 +632,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: true,
     },
   },
@@ -641,6 +647,8 @@ export const SEED_NODES = [
     branchDescription: "Report to the Team",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.CYBER_NEXUS_ROOT,
+    createdAt: "2024-01-18T01:00:00.000Z",
+    editableUntil: "2024-01-19T01:00:00.000Z",
     stats: {
       reads: 289,
       upvotes: 34,
@@ -648,7 +656,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: true,
     },
   },
@@ -664,6 +671,8 @@ export const SEED_NODES = [
     branchDescription: "Go Dark",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.CYBER_NEXUS_ROOT,
+    createdAt: "2024-01-18T04:00:00.000Z",
+    editableUntil: "2024-01-19T04:00:00.000Z",
     stats: {
       reads: 291,
       upvotes: 41,
@@ -671,7 +680,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: false,
     },
   },
@@ -689,6 +697,8 @@ export const SEED_NODES = [
     branchDescription: null,
     paragraphIndex: null,
     parentNodeId: null,
+    createdAt: "2024-01-18T06:00:00.000Z",
+    editableUntil: "2024-01-19T06:00:00.000Z",
     stats: {
       reads: 567,
       upvotes: 45,
@@ -696,7 +706,6 @@ export const SEED_NODES = [
       childBranches: 3,
     },
     badges: {
-      matchesVision: false,
       authorApproved: false,
     },
   },
@@ -712,6 +721,8 @@ export const SEED_NODES = [
     branchDescription: "Examine the Study",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.BLACKWOOD_MANOR_ROOT,
+    createdAt: "2024-01-18T08:00:00.000Z",
+    editableUntil: "2024-01-19T08:00:00.000Z",
     stats: {
       reads: 234,
       upvotes: 28,
@@ -719,7 +730,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: true,
     },
   },
@@ -735,6 +745,8 @@ export const SEED_NODES = [
     branchDescription: "Interview the Guests",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.BLACKWOOD_MANOR_ROOT,
+    createdAt: "2024-01-18T10:00:00.000Z",
+    editableUntil: "2024-01-19T10:00:00.000Z",
     stats: {
       reads: 198,
       upvotes: 31,
@@ -742,7 +754,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: true,
     },
   },
@@ -758,6 +769,8 @@ export const SEED_NODES = [
     branchDescription: "Search the Grounds",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.BLACKWOOD_MANOR_ROOT,
+    createdAt: "2024-01-18T13:00:00.000Z",
+    editableUntil: "2024-01-19T13:00:00.000Z",
     stats: {
       reads: 135,
       upvotes: 26,
@@ -765,7 +778,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: false,
     },
   },
@@ -783,6 +795,8 @@ export const SEED_NODES = [
     branchDescription: null,
     paragraphIndex: null,
     parentNodeId: null,
+    createdAt: "2024-01-18T15:00:00.000Z",
+    editableUntil: "2024-01-19T15:00:00.000Z",
     stats: {
       reads: 423,
       upvotes: 38,
@@ -790,7 +804,6 @@ export const SEED_NODES = [
       childBranches: 3,
     },
     badges: {
-      matchesVision: false,
       authorApproved: false,
     },
   },
@@ -806,6 +819,8 @@ export const SEED_NODES = [
     branchDescription: "Listen to Their Story",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.LOVE_DRAGONS_ROOT,
+    createdAt: "2024-01-18T17:00:00.000Z",
+    editableUntil: "2024-01-19T17:00:00.000Z",
     stats: {
       reads: 178,
       upvotes: 24,
@@ -813,7 +828,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: true,
     },
   },
@@ -829,6 +843,8 @@ export const SEED_NODES = [
     branchDescription: "Call for Help",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.LOVE_DRAGONS_ROOT,
+    createdAt: "2024-01-18T19:00:00.000Z",
+    editableUntil: "2024-01-19T19:00:00.000Z",
     stats: {
       reads: 142,
       upvotes: 19,
@@ -836,7 +852,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: true,
     },
   },
@@ -852,6 +867,8 @@ export const SEED_NODES = [
     branchDescription: "Keep It Professional",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.LOVE_DRAGONS_ROOT,
+    createdAt: "2024-01-18T22:00:00.000Z",
+    editableUntil: "2024-01-19T22:00:00.000Z",
     stats: {
       reads: 103,
       upvotes: 22,
@@ -859,7 +876,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: false,
     },
   },
@@ -877,6 +893,8 @@ export const SEED_NODES = [
     branchDescription: null,
     paragraphIndex: null,
     parentNodeId: null,
+    createdAt: "2024-01-19T00:00:00.000Z",
+    editableUntil: "2024-01-20T00:00:00.000Z",
     stats: {
       reads: 756,
       upvotes: 72,
@@ -884,7 +902,6 @@ export const SEED_NODES = [
       childBranches: 3,
     },
     badges: {
-      matchesVision: false,
       authorApproved: false,
     },
   },
@@ -900,6 +917,8 @@ export const SEED_NODES = [
     branchDescription: "Decrypt Immediately",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.TRANSCENDENCE_ROOT,
+    createdAt: "2024-01-19T02:00:00.000Z",
+    editableUntil: "2024-01-20T02:00:00.000Z",
     stats: {
       reads: 289,
       upvotes: 36,
@@ -907,7 +926,6 @@ export const SEED_NODES = [
       childBranches: 1,
     },
     badges: {
-      matchesVision: true,
       authorApproved: true,
     },
   },
@@ -930,7 +948,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: true,
     },
   },
@@ -946,6 +963,8 @@ export const SEED_NODES = [
     branchDescription: "Consult the Scientific Community",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.TRANSCENDENCE_ROOT,
+    createdAt: "2024-01-19T07:00:00.000Z",
+    editableUntil: "2024-01-20T07:00:00.000Z",
     stats: {
       reads: 251,
       upvotes: 42,
@@ -953,7 +972,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: false,
       authorApproved: true,
     },
   },
@@ -969,6 +987,8 @@ export const SEED_NODES = [
     branchDescription: "Keep It Secret",
     paragraphIndex: null,
     parentNodeId: NODE_IDS.TRANSCENDENCE_ROOT,
+    createdAt: "2024-01-19T09:00:00.000Z",
+    editableUntil: "2024-01-20T09:00:00.000Z",
     stats: {
       reads: 216,
       upvotes: 39,
@@ -976,7 +996,6 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      matchesVision: true,
       authorApproved: false,
     },
   },
@@ -1061,7 +1080,8 @@ export const SEED_COMMENTS = [
     authorName: "MysteryWriter",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "This is such a captivating opening! The imagery is incredible - I can practically see the shimmering leaves.",
+    content:
+      "This is such a captivating opening! The imagery is incredible - I can practically see the shimmering leaves.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-01-16T10:30:00Z",
@@ -1083,7 +1103,8 @@ export const SEED_COMMENTS = [
     authorName: "CyberScribe",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "I agree! The way the trees are described as having a heartbeat is such a perfect detail.",
+    content:
+      "I agree! The way the trees are described as having a heartbeat is such a perfect detail.",
     parentCommentId: COMMENT_IDS.EF_ROOT_COMMENT_1,
     depth: 1,
     createdAt: "2024-01-16T14:45:00Z",
@@ -1105,7 +1126,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "Yes! It makes the forest feel alive and sentient. Really sets the tone for the magic system.",
+    content:
+      "Yes! It makes the forest feel alive and sentient. Really sets the tone for the magic system.",
     parentCommentId: COMMENT_IDS.EF_ROOT_COMMENT_1_REPLY_1,
     depth: 2,
     createdAt: "2024-01-16T16:20:00Z",
@@ -1127,7 +1149,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "I love the mystery around Elara's grandmother. Can't wait to see where the three paths lead!",
+    content:
+      "I love the mystery around Elara's grandmother. Can't wait to see where the three paths lead!",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-01-16T11:15:00Z",
@@ -1149,7 +1172,8 @@ export const SEED_COMMENTS = [
     authorName: "TheStoryteller",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "Thanks! Each path reveals a different aspect of the forest's secrets. I'm excited to see which one readers prefer!",
+    content:
+      "Thanks! Each path reveals a different aspect of the forest's secrets. I'm excited to see which one readers prefer!",
     parentCommentId: COMMENT_IDS.EF_ROOT_COMMENT_2,
     depth: 1,
     createdAt: "2024-01-16T14:45:00Z",
@@ -1173,7 +1197,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "The cyberpunk atmosphere is perfect! I can feel the neon rain. Love the neural implant details.",
+    content:
+      "The cyberpunk atmosphere is perfect! I can feel the neon rain. Love the neural implant details.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-01-19T10:30:00Z",
@@ -1195,7 +1220,8 @@ export const SEED_COMMENTS = [
     authorName: "MysteryWriter",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "Same! The way Kai pulls up the interface 'with a thought' - such a smooth way to show the tech without info-dumping.",
+    content:
+      "Same! The way Kai pulls up the interface 'with a thought' - such a smooth way to show the tech without info-dumping.",
     parentCommentId: COMMENT_IDS.CN_ROOT_COMMENT_1,
     depth: 1,
     createdAt: "2024-01-19T14:45:00Z",
@@ -1219,7 +1245,8 @@ export const SEED_COMMENTS = [
     authorName: "TheStoryteller",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "Classic locked-room mystery vibes! The storm cutting off the bridge is such a perfect setup.",
+    content:
+      "Classic locked-room mystery vibes! The storm cutting off the bridge is such a perfect setup.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-01-23T10:30:00Z",
@@ -1241,7 +1268,8 @@ export const SEED_COMMENTS = [
     authorName: "CyberScribe",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "Right? And having a detective as the protagonist means we can actually solve this! I'm taking notes.",
+    content:
+      "Right? And having a detective as the protagonist means we can actually solve this! I'm taking notes.",
     parentCommentId: COMMENT_IDS.BM_ROOT_COMMENT_1,
     depth: 1,
     createdAt: "2024-01-23T14:45:00Z",
@@ -1263,7 +1291,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "I'm already suspicious of Graves. The butler is always suspicious in these stories!",
+    content:
+      "I'm already suspicious of Graves. The butler is always suspicious in these stories!",
     parentCommentId: COMMENT_IDS.BM_ROOT_COMMENT_1,
     depth: 1,
     createdAt: "2024-01-23T14:45:00Z",
@@ -1287,7 +1316,8 @@ export const SEED_COMMENTS = [
     authorName: "MysteryWriter",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "A romance with dragons? I'm already hooked! The tension between Sera and Drakon is electric.",
+    content:
+      "A romance with dragons? I'm already hooked! The tension between Sera and Drakon is electric.",
     parentCommentId: null,
     depth: 0,
     edited: false,
@@ -1307,7 +1337,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "YES! The way he shifts between dragon and human form is so well described. You can feel the power and danger.",
+    content:
+      "YES! The way he shifts between dragon and human form is so well described. You can feel the power and danger.",
     parentCommentId: COMMENT_IDS.LD_ROOT_COMMENT_1,
     depth: 1,
     edited: false,
@@ -1327,7 +1358,8 @@ export const SEED_COMMENTS = [
     authorName: "CyberScribe",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "The world-building is fantastic. Love how the kingdom's politics are woven into the romance plot.",
+    content:
+      "The world-building is fantastic. Love how the kingdom's politics are woven into the romance plot.",
     parentCommentId: null,
     depth: 0,
     edited: false,
@@ -1349,7 +1381,8 @@ export const SEED_COMMENTS = [
     authorName: "TheStoryteller",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "This is giving me serious Black Mirror vibes. The consciousness upload premise is terrifying and fascinating at the same time.",
+    content:
+      "This is giving me serious Black Mirror vibes. The consciousness upload premise is terrifying and fascinating at the same time.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-02T10:30:00Z",
@@ -1371,7 +1404,8 @@ export const SEED_COMMENTS = [
     authorName: "CyberScribe",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "Agreed! The ethical questions about digital immortality are so well handled. Are you really 'you' if you're copied?",
+    content:
+      "Agreed! The ethical questions about digital immortality are so well handled. Are you really 'you' if you're copied?",
     parentCommentId: COMMENT_IDS.TR_ROOT_COMMENT_1,
     depth: 1,
     createdAt: "2024-02-02T14:45:00Z",
@@ -1393,7 +1427,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "That's the Ship of Theseus paradox! Love how the story explores it through the upload failures.",
+    content:
+      "That's the Ship of Theseus paradox! Love how the story explores it through the upload failures.",
     parentCommentId: COMMENT_IDS.TR_ROOT_COMMENT_1_REPLY_1,
     depth: 2,
     createdAt: "2024-02-02T16:20:00Z",
@@ -1415,7 +1450,8 @@ export const SEED_COMMENTS = [
     authorName: "MysteryWriter",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "Dr. Chen's character is so compelling. You can feel her desperation to save her dying husband mixed with the scientific curiosity.",
+    content:
+      "Dr. Chen's character is so compelling. You can feel her desperation to save her dying husband mixed with the scientific curiosity.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-02T11:15:00Z",
@@ -1437,7 +1473,8 @@ export const SEED_COMMENTS = [
     authorName: "CyberScribe",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "The way she struggles between professional ethics and personal motivation adds so much depth to the story.",
+    content:
+      "The way she struggles between professional ethics and personal motivation adds so much depth to the story.",
     parentCommentId: COMMENT_IDS.TR_ROOT_COMMENT_2,
     depth: 1,
     createdAt: "2024-02-02T13:45:00Z",
@@ -1459,7 +1496,8 @@ export const SEED_COMMENTS = [
     authorName: "TheStoryteller",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "Thanks! I wanted to show that even groundbreaking scientific discoveries are ultimately driven by very human needs and emotions.",
+    content:
+      "Thanks! I wanted to show that even groundbreaking scientific discoveries are ultimately driven by very human needs and emotions.",
     parentCommentId: COMMENT_IDS.TR_ROOT_COMMENT_2_REPLY_1,
     depth: 2,
     createdAt: "2024-02-02T15:20:00Z",
@@ -1481,7 +1519,8 @@ export const SEED_COMMENTS = [
     authorName: "FrostWeaver",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "The pacing is perfect. The revelation about the crystal being 4.4 billion years old hits like a freight train.",
+    content:
+      "The pacing is perfect. The revelation about the crystal being 4.4 billion years old hits like a freight train.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-02T17:00:00Z",
@@ -1497,7 +1536,8 @@ export const SEED_COMMENTS = [
     authorName: "PixelDreamer",
     authorPatreonSupporter: false,
     authorOGSupporter: true,
-    content: "I love how this tackles the Fermi Paradox. They didn't die out - they transcended and lost themselves in the process.",
+    content:
+      "I love how this tackles the Fermi Paradox. They didn't die out - they transcended and lost themselves in the process.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-02T18:30:00Z",
@@ -1513,7 +1553,8 @@ export const SEED_COMMENTS = [
     authorName: "InkPhoenix",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "The scientific accuracy is impressive. As a geologist, I appreciate the attention to detail with the zircon crystal dating.",
+    content:
+      "The scientific accuracy is impressive. As a geologist, I appreciate the attention to detail with the zircon crystal dating.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-02T19:15:00Z",
@@ -1529,7 +1570,8 @@ export const SEED_COMMENTS = [
     authorName: "DarkScribe",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "This gives me chills. The idea that consciousness could exist as dark energy is both beautiful and terrifying.",
+    content:
+      "This gives me chills. The idea that consciousness could exist as dark energy is both beautiful and terrifying.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-02T20:00:00Z",
@@ -1545,7 +1587,8 @@ export const SEED_COMMENTS = [
     authorName: "TheStoryteller",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "Thanks for all the feedback! I wanted to explore what immortality might truly cost.",
+    content:
+      "Thanks for all the feedback! I wanted to explore what immortality might truly cost.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-02T21:00:00Z",
@@ -1561,7 +1604,8 @@ export const SEED_COMMENTS = [
     authorName: "StarlightTales",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "The way you describe dark energy as a prison of infinite awareness is haunting. They can see everything but feel nothing.",
+    content:
+      "The way you describe dark energy as a prison of infinite awareness is haunting. They can see everything but feel nothing.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-03T08:00:00Z",
@@ -1577,7 +1621,8 @@ export const SEED_COMMENTS = [
     authorName: "RiverStone",
     authorPatreonSupporter: false,
     authorOGSupporter: true,
-    content: "Best hard sci-fi I've read in years. The concept of encoding messages in crystal lattices is genius.",
+    content:
+      "Best hard sci-fi I've read in years. The concept of encoding messages in crystal lattices is genius.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-03T10:00:00Z",
@@ -1593,7 +1638,8 @@ export const SEED_COMMENTS = [
     authorName: "MoonlitQuill",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "The moral dilemma is incredible. Do we accept their knowledge and risk their fate, or reject it and stay ignorant?",
+    content:
+      "The moral dilemma is incredible. Do we accept their knowledge and risk their fate, or reject it and stay ignorant?",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-03T12:00:00Z",
@@ -1609,7 +1655,8 @@ export const SEED_COMMENTS = [
     authorName: "EchoWriter",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "I can't stop thinking about this story. It's been days and I'm still processing the implications.",
+    content:
+      "I can't stop thinking about this story. It's been days and I'm still processing the implications.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-03T15:00:00Z",
@@ -1625,7 +1672,8 @@ export const SEED_COMMENTS = [
     authorName: "CrimsonWords",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "The characterization of Dr. Chen is phenomenal. You really feel her internal conflict.",
+    content:
+      "The characterization of Dr. Chen is phenomenal. You really feel her internal conflict.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-03T17:00:00Z",
@@ -1641,7 +1689,8 @@ export const SEED_COMMENTS = [
     authorName: "FrostbiteStories",
     authorPatreonSupporter: false,
     authorOGSupporter: true,
-    content: "This would make an amazing movie. The visuals of dark energy beings trying to communicate would be stunning.",
+    content:
+      "This would make an amazing movie. The visuals of dark energy beings trying to communicate would be stunning.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-03T19:00:00Z",
@@ -1657,7 +1706,8 @@ export const SEED_COMMENTS = [
     authorName: "TheStoryteller",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "I'm working on the next chapter! Your comments have been incredibly inspiring.",
+    content:
+      "I'm working on the next chapter! Your comments have been incredibly inspiring.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-03T20:00:00Z",
@@ -1673,7 +1723,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "The warning 'knowledge has its own momentum' is so profound. Once you start down this path, you can't go back.",
+    content:
+      "The warning 'knowledge has its own momentum' is so profound. Once you start down this path, you can't go back.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-04T09:00:00Z",
@@ -1689,7 +1740,8 @@ export const SEED_COMMENTS = [
     authorName: "MysteryWriter",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "I love the subtle horror elements. The idea of being conscious but not alive is nightmare fuel.",
+    content:
+      "I love the subtle horror elements. The idea of being conscious but not alive is nightmare fuel.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-04T11:00:00Z",
@@ -1705,7 +1757,8 @@ export const SEED_COMMENTS = [
     authorName: "CyberScribe",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "The scientific rigor combined with philosophical depth is exactly what great sci-fi should be.",
+    content:
+      "The scientific rigor combined with philosophical depth is exactly what great sci-fi should be.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-04T13:00:00Z",
@@ -1721,7 +1774,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "Anyone else getting Lovecraftian vibes? The cosmic horror of entities beyond our comprehension warning us...",
+    content:
+      "Anyone else getting Lovecraftian vibes? The cosmic horror of entities beyond our comprehension warning us...",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-04T15:00:00Z",
@@ -1737,7 +1791,8 @@ export const SEED_COMMENTS = [
     authorName: "MysteryWriter",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "The dialogue feels so natural. Dr. Chen's conversations with her team are pitch-perfect.",
+    content:
+      "The dialogue feels so natural. Dr. Chen's conversations with her team are pitch-perfect.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-04T17:00:00Z",
@@ -1753,7 +1808,8 @@ export const SEED_COMMENTS = [
     authorName: "CyberScribe",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "This is giving me Arrival vibes - the way time and perception work differently for transcended beings.",
+    content:
+      "This is giving me Arrival vibes - the way time and perception work differently for transcended beings.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-04T19:00:00Z",
@@ -1769,7 +1825,8 @@ export const SEED_COMMENTS = [
     authorName: "TheStoryteller",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "Glad you're all enjoying it! The Arrival comparison is spot on - that was definitely an influence.",
+    content:
+      "Glad you're all enjoying it! The Arrival comparison is spot on - that was definitely an influence.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-04T20:00:00Z",
@@ -1785,7 +1842,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "The symbolism of the crystal being ancient yet containing a warning for the future is brilliant.",
+    content:
+      "The symbolism of the crystal being ancient yet containing a warning for the future is brilliant.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-05T09:00:00Z",
@@ -1801,7 +1859,8 @@ export const SEED_COMMENTS = [
     authorName: "MysteryWriter",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "I'm recommending this to everyone. This deserves way more attention!",
+    content:
+      "I'm recommending this to everyone. This deserves way more attention!",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-05T11:00:00Z",
@@ -1817,7 +1876,8 @@ export const SEED_COMMENTS = [
     authorName: "CyberScribe",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "The world-building is exceptional. I want to know more about this civilization that came before us.",
+    content:
+      "The world-building is exceptional. I want to know more about this civilization that came before us.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-05T13:00:00Z",
@@ -1833,7 +1893,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "The ending left me breathless. That final choice Dr. Chen faces is going to haunt me.",
+    content:
+      "The ending left me breathless. That final choice Dr. Chen faces is going to haunt me.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-05T15:00:00Z",
@@ -1849,7 +1910,8 @@ export const SEED_COMMENTS = [
     authorName: "MysteryWriter",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "This tackles big questions without being preachy. That's hard to pull off.",
+    content:
+      "This tackles big questions without being preachy. That's hard to pull off.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-05T17:00:00Z",
@@ -1865,7 +1927,8 @@ export const SEED_COMMENTS = [
     authorName: "CyberScribe",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "The atmosphere is incredible. You can feel the weight of discovery and dread in every scene.",
+    content:
+      "The atmosphere is incredible. You can feel the weight of discovery and dread in every scene.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-05T19:00:00Z",
@@ -1881,7 +1944,8 @@ export const SEED_COMMENTS = [
     authorName: "TheStoryteller",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "Thank you all for the amazing support! Working on more branches based on your choices.",
+    content:
+      "Thank you all for the amazing support! Working on more branches based on your choices.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-05T20:00:00Z",
@@ -1897,7 +1961,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "This story asks: what does it mean to be human? And the answer is both beautiful and tragic.",
+    content:
+      "This story asks: what does it mean to be human? And the answer is both beautiful and tragic.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-06T09:00:00Z",
@@ -1913,7 +1978,8 @@ export const SEED_COMMENTS = [
     authorName: "MysteryWriter",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "Masterful storytelling. This is why I love interactive fiction - the community engagement is incredible.",
+    content:
+      "Masterful storytelling. This is why I love interactive fiction - the community engagement is incredible.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-06T11:00:00Z",
@@ -1929,7 +1995,8 @@ export const SEED_COMMENTS = [
     authorName: "CyberScribe",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "Can't wait to see where the different branches lead. Each choice feels meaningful.",
+    content:
+      "Can't wait to see where the different branches lead. Each choice feels meaningful.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-06T13:00:00Z",
@@ -1945,7 +2012,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "This is going in my top 10 sci-fi stories of all time. Absolutely phenomenal work.",
+    content:
+      "This is going in my top 10 sci-fi stories of all time. Absolutely phenomenal work.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-06T15:00:00Z",
@@ -1964,7 +2032,8 @@ export const SEED_COMMENTS = [
     authorName: "MysteryWriter",
     authorPatreonSupporter: true,
     authorOGSupporter: false,
-    content: "The quantum key concept is brilliant! This branch really captures the tension between scientific curiosity and caution.",
+    content:
+      "The quantum key concept is brilliant! This branch really captures the tension between scientific curiosity and caution.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-03T09:20:00Z",
@@ -1986,7 +2055,8 @@ export const SEED_COMMENTS = [
     authorName: "CyberScribe",
     authorPatreonSupporter: true,
     authorOGSupporter: true,
-    content: "I love how it communicates through dark energy fluctuations. That's such a creative way to show the scale of what they've become.",
+    content:
+      "I love how it communicates through dark energy fluctuations. That's such a creative way to show the scale of what they've become.",
     parentCommentId: COMMENT_IDS.TR_BRANCH1_COMMENT_1,
     depth: 1,
     createdAt: "2024-02-03T11:45:00Z",
@@ -2008,7 +2078,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "Right? It makes them feel omnipresent without being omnipotent. They're everywhere but still fading, which makes their warning even more urgent.",
+    content:
+      "Right? It makes them feel omnipresent without being omnipotent. They're everywhere but still fading, which makes their warning even more urgent.",
     parentCommentId: COMMENT_IDS.TR_BRANCH1_COMMENT_1_REPLY_1,
     depth: 2,
     createdAt: "2024-02-03T14:10:00Z",
@@ -2032,7 +2103,8 @@ export const SEED_COMMENTS = [
     authorName: "DragonQuill",
     authorPatreonSupporter: false,
     authorOGSupporter: false,
-    content: "This is heartbreaking. They achieved everything and lost what mattered most. The warning about knowledge having its own momentum gave me chills.",
+    content:
+      "This is heartbreaking. They achieved everything and lost what mattered most. The warning about knowledge having its own momentum gave me chills.",
     parentCommentId: null,
     depth: 0,
     createdAt: "2024-02-04T14:30:00Z",

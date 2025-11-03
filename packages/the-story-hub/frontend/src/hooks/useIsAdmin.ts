@@ -29,15 +29,20 @@ export function useIsAdmin(): AdminStatus {
         }
 
         // Check Cognito groups from token
-        const groups = session.tokens.accessToken.payload["cognito:groups"] as string[] | undefined;
+        const groups = session.tokens.accessToken.payload["cognito:groups"] as
+          | string[]
+          | undefined;
         const isCognitoAdmin = groups?.includes("SiteAdmin") ?? false;
 
         // Also check user profile for clientType
-        const userId = session.tokens.idToken?.payload.sub as string | undefined;
+        const userId = session.tokens.idToken?.payload.sub as
+          | string
+          | undefined;
         if (userId) {
           try {
             const userProfile = await getUserProfileAPI(userId);
-            const isProfileAdmin = userProfile?.clientType.includes(ClientType.SiteAdmin) ?? false;
+            const isProfileAdmin =
+              userProfile?.clientType.includes(ClientType.SiteAdmin) ?? false;
 
             setAdminStatus({
               isAdmin: isCognitoAdmin || isProfileAdmin,

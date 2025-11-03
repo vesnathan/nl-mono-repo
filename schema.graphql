@@ -46,14 +46,17 @@ type Mutation {
   awardBadge(input: AwardBadgeInput!): ChapterNode @aws_cognito_user_pools
   createBranch(input: CreateBranchInput!): ChapterNode @aws_cognito_user_pools
   createChapter(input: CreateChapterInput!): ChapterNode @aws_cognito_user_pools
-  createNotification(input: CreateNotificationInput!): Notification @aws_cognito_user_pools
+  createNotification(input: CreateNotificationInput!): Notification
+    @aws_cognito_user_pools
   createStory(input: CreateStoryInput!): Story @aws_cognito_user_pools
   markAllNotificationsAsRead(userId: ID!): Boolean! @aws_cognito_user_pools
-  markNotificationAsRead(notificationId: ID!): Notification @aws_cognito_user_pools
+  markNotificationAsRead(notificationId: ID!): Notification
+    @aws_cognito_user_pools
   saveBookmark(input: SaveBookmarkInput!): Bookmark @aws_cognito_user_pools
   updateChapter(input: UpdateChapterInput!): ChapterNode @aws_cognito_user_pools
   updateStory(input: UpdateStoryInput!): Story @aws_cognito_user_pools
-  voteOnChapter(nodeId: ID!, storyId: ID!, voteType: VoteType!): ChapterNode @aws_cognito_user_pools
+  voteOnChapter(nodeId: ID!, storyId: ID!, voteType: VoteType!): ChapterNode
+    @aws_cognito_user_pools
 }
 
 #  Real-time Subscriptions
@@ -80,14 +83,24 @@ type NotificationConnection {
 type Query {
   getBookmark(storyId: ID!): Bookmark @aws_cognito_user_pools
   getChapter(nodeId: ID!, storyId: ID!): ChapterNode @aws_cognito_user_pools
-  getReadingPath(nodePath: [ID!]!, storyId: ID!): [ChapterNode!]! @aws_cognito_user_pools
+  getReadingPath(nodePath: [ID!]!, storyId: ID!): [ChapterNode!]!
+    @aws_cognito_user_pools
   getStory(storyId: ID!): Story @aws_cognito_user_pools
   getStoryTree(storyId: ID!): TreeData @aws_cognito_user_pools
   getUnreadCount(userId: ID!): Int! @aws_cognito_user_pools
-  getUserNotifications(limit: Int, nextToken: String, userId: ID!): NotificationConnection @aws_cognito_user_pools
+  getUserNotifications(
+    limit: Int
+    nextToken: String
+    userId: ID!
+  ): NotificationConnection @aws_cognito_user_pools
   getUserProfile(userId: ID!): User @aws_cognito_user_pools
-  listBranches(nodeId: ID!, storyId: ID!): [ChapterNode!]! @aws_cognito_user_pools
-  listStories(filter: StoryFilter, limit: Int, nextToken: String): StoryConnection @aws_cognito_user_pools
+  listBranches(nodeId: ID!, storyId: ID!): [ChapterNode!]!
+    @aws_cognito_user_pools
+  listStories(
+    filter: StoryFilter
+    limit: Int
+    nextToken: String
+  ): StoryConnection @aws_cognito_user_pools
 }
 
 type Story @aws_cognito_user_pools {
@@ -117,8 +130,10 @@ type StoryStats {
 }
 
 type Subscription {
-  onNewBranch(storyId: ID!): ChapterNode @aws_subscribe(mutations : ["createBranch"])
-  onNewNotification(userId: ID!): Notification @aws_subscribe(mutations : ["createNotification"])
+  onNewBranch(storyId: ID!): ChapterNode
+    @aws_subscribe(mutations: ["createBranch"])
+  onNewNotification(userId: ID!): Notification
+    @aws_subscribe(mutations: ["createNotification"])
 }
 
 #  Chapter/Branch Queries and Mutations

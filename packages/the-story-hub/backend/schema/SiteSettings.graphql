@@ -13,7 +13,7 @@ type SiteSettings @aws_iam @aws_cognito_user_pools {
   # etc.
 
   updatedAt: String!
-  updatedBy: String  # userId of admin who last updated
+  updatedBy: String # userId of admin who last updated
 }
 
 input UpdateSiteSettingsInput {

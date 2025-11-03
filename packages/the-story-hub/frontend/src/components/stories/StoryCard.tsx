@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Card,
   Chip,
@@ -11,11 +12,10 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import type { Story } from "@/types/gqlTypes";
-import { StoryMetadataChips } from "./StoryMetadataChips";
 import { PatreonBadge } from "@/components/common/PatreonBadge";
 import { OGBadge } from "@/components/common/OGBadge";
+import { StoryMetadataChips } from "./StoryMetadataChips";
 
 interface StoryCardProps {
   story: Story;
@@ -54,6 +54,13 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
             <div
               className="w-32 h-full flex-shrink-0 relative overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
               onClick={onOpen}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  onOpen();
+                }
+              }}
+              role="button"
+              tabIndex={0}
               title="Click to enlarge"
             >
               <img

@@ -10,7 +10,7 @@ import {
 import {
   shouldUseLocalData,
   getCommentsForNode,
-  setUsingLocalData,
+  setUseLocalData,
 } from "@/lib/local-data";
 
 // GraphQL Queries
@@ -277,35 +277,32 @@ const VOTE_ON_COMMENT = /* GraphQL */ `
   }
 `;
 
+// Helper function to recursively count all comments in the fetched response
+function countAllComments(comment: Comment): number {
+  let count = 1; // Count this comment
+  if (comment.replies && comment.replies.length > 0) {
+    count += comment.replies.reduce(
+      (sum: number, reply: Comment) => sum + countAllComments(reply),
+      0,
+    );
+  }
+  return count;
+}
+
 // API Functions
 export async function listCommentsAPI(
   storyId: string,
   nodeId: string,
   sortBy?: CommentSortBy,
-  limit: number = 20, // Default to 20 comments for better performance
   nextToken?: string,
+  limit = 20, // Default to 20 comments for better performance
 ): Promise<CommentConnection> {
-  console.log("===== API CALL: listCommentsAPI =====");
-  console.log("Request params:", {
-    storyId,
-    nodeId,
-    sortBy,
-    limit,
-    nextToken,
-  });
-
   // Use local data if enabled
   if (shouldUseLocalData()) {
-    console.log("Using local data with pagination");
     const result = getCommentsForNode(storyId, nodeId, {
       limit,
       nextToken,
       sortBy,
-    });
-    console.log("Local data result:", {
-      itemsCount: result.items.length,
-      total: result.total,
-      nextToken: result.nextToken,
     });
     return result as CommentConnection;
   }
@@ -323,51 +320,27 @@ export async function listCommentsAPI(
       // No authMode specified - uses default (Cognito with guest access)
     });
 
-    console.log("Response:", JSON.stringify(response.data.listComments, null, 2));
-    console.log("=====================================\n");
-
     // Validate response with Zod
-    const result = CommentConnectionSchema.parse(response.data.listComments);
-
-    // Recursively count all comments in the fetched response
-    function countAllComments(comment: Comment): number {
-      let count = 1; // Count this comment
-      if (comment.replies && comment.replies.length > 0) {
-        for (const reply of comment.replies) {
-          count += countAllComments(reply);
-        }
-      }
-      return count;
-    }
+    const result = CommentConnectionSchema.parse(
+      (response as { data: { listComments: unknown } }).data.listComments,
+    );
 
     // Calculate total by recursively counting all fetched comments and replies
-    let totalActivity = 0;
-    for (const comment of result.items) {
-      totalActivity += countAllComments(comment);
-    }
-
-    console.log(
-      `Calculated total activity (recursively counted from response): ${totalActivity}`,
+    const totalActivity = result.items.reduce(
+      (sum, comment) => sum + countAllComments(comment),
+      0,
     );
 
     return {
       ...result,
       total: totalActivity, // Total includes all nested replies in response
     };
-  } catch (error) {
-    console.error("===== API ERROR - Falling back to local data =====");
-    console.error("Error:", error);
-    console.error("==================================================\n");
-    setUsingLocalData();
+  } catch {
+    setUseLocalData(true);
     const result = getCommentsForNode(storyId, nodeId, {
       limit,
       nextToken,
       sortBy,
-    });
-    console.log("Fallback to local data result:", {
-      itemsCount: result.items.length,
-      total: result.total,
-      nextToken: result.nextToken,
     });
     return result as CommentConnection;
   }
@@ -393,7 +366,9 @@ export async function listRepliesAPI(
   });
 
   // Validate response with Zod
-  return CommentConnectionSchema.parse(response.data.listReplies);
+  return CommentConnectionSchema.parse(
+    (response as { data: { listReplies: unknown } }).data.listReplies,
+  );
 }
 
 export async function getCommentAPI(
@@ -414,7 +389,9 @@ export async function getCommentAPI(
   });
 
   // Validate response with Zod
-  return CommentSchema.parse(response.data.getComment);
+  return CommentSchema.parse(
+    (response as { data: { getComment: unknown } }).data.getComment,
+  );
 }
 
 export async function createCommentAPI(
@@ -436,7 +413,9 @@ export async function createCommentAPI(
   });
 
   // Validate response with Zod
-  return CommentSchema.parse(response.data.createComment);
+  return CommentSchema.parse(
+    (response as { data: { createComment: unknown } }).data.createComment,
+  );
 }
 
 export async function updateCommentAPI(
@@ -458,7 +437,9 @@ export async function updateCommentAPI(
   });
 
   // Validate response with Zod
-  return CommentSchema.parse(response.data.updateComment);
+  return CommentSchema.parse(
+    (response as { data: { updateComment: unknown } }).data.updateComment,
+  );
 }
 
 export async function deleteCommentAPI(
@@ -477,7 +458,11 @@ export async function deleteCommentAPI(
     },
   });
 
-  return response.data.deleteComment;
+  return (
+    response as {
+      data: { deleteComment: { success: boolean; message?: string } };
+    }
+  ).data.deleteComment;
 }
 
 export async function voteOnCommentAPI(
@@ -497,5 +482,7 @@ export async function voteOnCommentAPI(
   });
 
   // Validate response with Zod
-  return CommentSchema.parse(response.data.voteOnComment);
+  return CommentSchema.parse(
+    (response as { data: { voteOnComment: unknown } }).data.voteOnComment,
+  );
 }

@@ -93,6 +93,7 @@ Buckets use placeholder syntax for dynamic values:
 - `{region}` - AWS region (ap-southeast-2, us-east-1, etc.)
 
 Example:
+
 ```typescript
 buckets: {
   templates: "nlmonorepo-myproject-templates-{stage}",
@@ -143,6 +144,7 @@ const stackChoices = Object.values(StackType).map((stackType) => ({
 ```
 
 This means:
+
 - New projects automatically appear in menus
 - Display names come from `project-config.ts`
 - No hardcoded menu items
@@ -156,6 +158,7 @@ node packages/aws-bootstrap/scripts/create-template.js
 ```
 
 The script will:
+
 1. Ask for project details (name, title, short name)
 2. Clone `aws-example` as template
 3. **Automatically update** `types.ts` with StackType
@@ -164,6 +167,7 @@ The script will:
 6. Rename files and replace tokens
 
 Then you only need to:
+
 1. Review generated config in `project-config.ts`
 2. Create deployment function
 3. Register in `index.ts`
@@ -177,12 +181,12 @@ See [ADDING_NEW_PROJECTS.md](ADDING_NEW_PROJECTS.md) for detailed manual steps.
 You can validate that all templates have configurations:
 
 ```typescript
-import { validateProjectConfigs } from './project-config';
+import { validateProjectConfigs } from "./project-config";
 
 const result = validateProjectConfigs();
 if (!result.valid) {
-  console.log('Missing configs:', result.missingConfigs);
-  console.log('Extra configs:', result.extraConfigs);
+  console.log("Missing configs:", result.missingConfigs);
+  console.log("Extra configs:", result.extraConfigs);
 }
 ```
 
@@ -193,6 +197,7 @@ This helps ensure your `project-config.ts` stays in sync with actual template di
 ### Before (Hardcoded)
 
 Adding a new project required updates to:
+
 - `types.ts` (enum, STACK_ORDER, template paths)
 - `dependency-validator.ts` (dependencies, dependents)
 - `force-delete-utils.ts` (bucket names in 2+ places)
@@ -205,6 +210,7 @@ Adding a new project required updates to:
 ### After (Dynamic + Bootstrap)
 
 Adding a new project:
+
 1. Run bootstrap script
 2. Review auto-generated config
 3. Create deployment function
@@ -244,6 +250,7 @@ No need to update multiple files!
 **Before**: Update bucket names in `force-delete-utils.ts` (2 places)
 
 **After**: Update `project-config.ts` once:
+
 ```typescript
 buckets: {
   templates: "new-bucket-name-{stage}",
@@ -255,6 +262,7 @@ buckets: {
 **Before**: Update `dependency-validator.ts` (2 objects)
 
 **After**: Update `project-config.ts` once:
+
 ```typescript
 dependsOn: [StackType.Shared, StackType.SomeNewDep],
 ```
@@ -264,6 +272,7 @@ dependsOn: [StackType.Shared, StackType.SomeNewDep],
 **Before**: Update `index.ts` (2+ places in menu definitions)
 
 **After**: Update `project-config.ts` once:
+
 ```typescript
 displayName: "My New Project Name",
 ```
@@ -281,6 +290,7 @@ A: Check `dependsOn` array in `PROJECT_CONFIGS`
 
 **Q: Bootstrap script failed?**
 A: Check that:
+
 - `aws-example` package exists as template
 - You have write permissions
 - Destination package doesn't already exist

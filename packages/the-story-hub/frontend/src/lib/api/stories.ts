@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+import { z } from "zod";
 import { client } from "@/lib/amplify";
 import { createStory, updateStory } from "@/graphql/mutations";
 import {
@@ -10,21 +11,22 @@ import {
 import {
   StorySchema,
   StoryConnectionSchema,
+  TreeDataSchema,
+  ChapterNodeSchema,
   type Story,
   type StoryConnection,
-} from "@/types/StorySchemas";
+  type TreeData,
+  type ChapterNode,
+} from "@/types/ValidationSchemas";
 import type {
   CreateStoryInput,
   UpdateStoryInput,
   StoryFilter,
-  TreeData,
-  ChapterNode,
 } from "@/types/gqlTypes";
 import {
   shouldUseLocalData,
   getStoryById,
   getAllStories,
-  setUsingLocalData,
 } from "@/lib/local-data";
 
 export async function createStoryAPI(input: CreateStoryInput): Promise<Story> {
@@ -54,23 +56,17 @@ export async function getStoryAPI(storyId: string): Promise<Story | null> {
     return localStory as Story | null;
   }
 
-  try {
-    const result = await client.graphql({
-      query: getStory,
-      variables: { storyId },
-    });
+  const result = await client.graphql({
+    query: getStory,
+    variables: { storyId },
+  });
 
-    if (!result.data.getStory) {
-      return null;
-    }
-
-    // Validate response with Zod
-    return StorySchema.parse(result.data.getStory);
-  } catch (error) {
-    console.error("Error fetching story, falling back to local data:", error);
-    setUsingLocalData();
-    return getStoryById(storyId) as Story | null;
+  if (!result.data.getStory) {
+    return null;
   }
+
+  // Validate response with Zod
+  return StorySchema.parse(result.data.getStory);
 }
 
 export async function listStoriesAPI(
@@ -85,7 +81,7 @@ export async function listStoriesAPI(
     // Apply genre filter if provided
     if (filter?.genre) {
       stories = stories.filter((story) =>
-        story.genre?.includes(filter.genre!),
+        (story.genre as unknown as string[])?.includes(filter.genre!),
       );
     }
 
@@ -94,47 +90,24 @@ export async function listStoriesAPI(
       stories = stories.slice(0, limit);
     }
 
+    // Cast to mutable Story[] type
     return {
-      items: stories as Story[],
+      items: stories.map((s) => ({
+        ...s,
+        genre: [...(s.genre as unknown as readonly string[])],
+      })) as unknown as Story[],
       nextToken: null,
-      total: stories.length,
+      __typename: "StoryConnection" as const,
     };
   }
 
-  try {
-    const result = await client.graphql({
-      query: listStories,
-      variables: { filter, limit, nextToken },
-    });
+  const result = await client.graphql({
+    query: listStories,
+    variables: { filter, limit, nextToken },
+  });
 
-    // Validate response with Zod
-    return StoryConnectionSchema.parse(result.data.listStories);
-  } catch (error) {
-    console.error(
-      "Error listing stories, falling back to local data:",
-      error,
-    );
-    setUsingLocalData();
-    let stories = getAllStories();
-
-    // Apply genre filter if provided
-    if (filter?.genre) {
-      stories = stories.filter((story) =>
-        story.genre?.includes(filter.genre!),
-      );
-    }
-
-    // Apply limit if provided
-    if (limit) {
-      stories = stories.slice(0, limit);
-    }
-
-    return {
-      items: stories as Story[],
-      nextToken: null,
-      total: stories.length,
-    };
-  }
+  // Validate response with Zod
+  return StoryConnectionSchema.parse(result.data.listStories);
 }
 
 export async function getStoryTreeAPI(
@@ -144,7 +117,8 @@ export async function getStoryTreeAPI(
     query: getStoryTree,
     variables: { storyId },
   });
-  return (result.data.getStoryTree as TreeData) ?? null;
+  if (!result.data.getStoryTree) return null;
+  return TreeDataSchema.parse(result.data.getStoryTree);
 }
 
 export async function getReadingPathAPI(
@@ -155,5 +129,9 @@ export async function getReadingPathAPI(
     query: getReadingPath,
     variables: { storyId, nodePath },
   });
-  return result.data.getReadingPath;
+  return z
+    .array(ChapterNodeSchema)
+    .parse(
+      (result as { data: { getReadingPath: unknown } }).data.getReadingPath,
+    );
 }

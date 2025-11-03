@@ -41,11 +41,13 @@ input CreateNotificationInput {
 # Notification Queries and Mutations
 
 extend type Query {
-  getUserNotifications(userId: ID!, limit: Int, nextToken: String): NotificationConnection
-    @aws_cognito_user_pools
+  getUserNotifications(
+    userId: ID!
+    limit: Int
+    nextToken: String
+  ): NotificationConnection @aws_cognito_user_pools
 
-  getUnreadCount(userId: ID!): Int!
-    @aws_cognito_user_pools
+  getUnreadCount(userId: ID!): Int! @aws_cognito_user_pools
 }
 
 extend type Mutation {
@@ -55,8 +57,7 @@ extend type Mutation {
   markNotificationAsRead(notificationId: ID!): Notification
     @aws_cognito_user_pools
 
-  markAllNotificationsAsRead(userId: ID!): Boolean!
-    @aws_cognito_user_pools
+  markAllNotificationsAsRead(userId: ID!): Boolean! @aws_cognito_user_pools
 }
 
 type NotificationConnection {

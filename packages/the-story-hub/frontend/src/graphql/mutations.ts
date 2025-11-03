@@ -30,10 +30,17 @@ export const createChapter =
     storyId
     parentNodeId
     authorId
+    authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -44,7 +51,6 @@ export const createChapter =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -62,10 +68,17 @@ export const createBranch =
     storyId
     parentNodeId
     authorId
+    authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -76,7 +89,6 @@ export const createBranch =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -94,10 +106,17 @@ export const updateChapter =
     storyId
     parentNodeId
     authorId
+    authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -108,7 +127,6 @@ export const updateChapter =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -126,10 +144,17 @@ export const voteOnChapter =
     storyId
     parentNodeId
     authorId
+    authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -140,7 +165,6 @@ export const voteOnChapter =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -158,10 +182,17 @@ export const awardBadge =
     storyId
     parentNodeId
     authorId
+    authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -172,7 +203,6 @@ export const awardBadge =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }

@@ -34,6 +34,7 @@ If the backend is down or unreachable, the API layer will automatically fall bac
 ## What Works in Local Mode
 
 Currently supported:
+
 - **Story listing**: Homepage will show 2 seed stories
 - **Story detail**: Can view story details
 - **Comments**: Shows sample comments for nodes
@@ -43,21 +44,25 @@ Currently supported:
 The local data includes:
 
 **Users:**
+
 - TheStoryteller (admin, OG supporter)
 - CyberScribe (Patreon, OG supporter)
 - MysteryWriter (Patreon supporter)
 - DragonQuill (regular user)
 
 **Stories:**
+
 - The Enchanted Forest (Fantasy/Adventure)
 - Transcendence (Sci-Fi/Thriller)
 
 **Sample Comments:**
+
 - One comment on "The Enchanted Forest"
 
 ## Extending Local Data
 
 To add more local data, edit:
+
 ```
 packages/the-story-hub/frontend/src/lib/local-data/index.ts
 ```

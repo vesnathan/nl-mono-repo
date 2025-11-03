@@ -1,32 +1,11 @@
 import { client } from "@/lib/amplify";
+import { getSiteSettings, updateSiteSettings } from "@/graphql/settings";
 import {
   SiteSettingsSchema,
   UpdateSiteSettingsInputSchema,
   type SiteSettings,
   type UpdateSiteSettingsInput,
 } from "@/types/SettingsSchemas";
-
-// GraphQL Queries
-const GET_SITE_SETTINGS = /* GraphQL */ `
-  query GetSiteSettings {
-    getSiteSettings {
-      grantOGBadgeToPatreonSupporters
-      updatedAt
-      updatedBy
-    }
-  }
-`;
-
-// GraphQL Mutations
-const UPDATE_SITE_SETTINGS = /* GraphQL */ `
-  mutation UpdateSiteSettings($input: UpdateSiteSettingsInput!) {
-    updateSiteSettings(input: $input) {
-      grantOGBadgeToPatreonSupporters
-      updatedAt
-      updatedBy
-    }
-  }
-`;
 
 // API Functions
 
@@ -36,11 +15,13 @@ const UPDATE_SITE_SETTINGS = /* GraphQL */ `
  */
 export async function getSiteSettingsAPI(): Promise<SiteSettings> {
   const response = await client.graphql({
-    query: GET_SITE_SETTINGS,
+    query: getSiteSettings,
   });
 
   // Validate response with Zod
-  return SiteSettingsSchema.parse((response as any).data.getSiteSettings);
+  return SiteSettingsSchema.parse(
+    (response as { data: { getSiteSettings: unknown } }).data.getSiteSettings,
+  );
 }
 
 /**
@@ -55,10 +36,13 @@ export async function updateSiteSettingsAPI(
   UpdateSiteSettingsInputSchema.parse(input);
 
   const response = await client.graphql({
-    query: UPDATE_SITE_SETTINGS,
+    query: updateSiteSettings,
     variables: { input },
   });
 
   // Validate response with Zod
-  return SiteSettingsSchema.parse((response as any).data.updateSiteSettings);
+  return SiteSettingsSchema.parse(
+    (response as { data: { updateSiteSettings: unknown } }).data
+      .updateSiteSettings,
+  );
 }

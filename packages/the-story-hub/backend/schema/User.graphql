@@ -20,7 +20,7 @@ type User @aws_iam @aws_cognito_user_pools {
   bio: String
   stats: UserStats!
   patreonSupporter: Boolean!
-  ogSupporter: Boolean!  # Original/Early supporter badge
+  ogSupporter: Boolean! # Original/Early supporter badge
   clientType: [ClientType!]!
   createdAt: String!
 }

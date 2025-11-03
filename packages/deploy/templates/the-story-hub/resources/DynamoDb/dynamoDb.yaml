@@ -125,19 +125,23 @@ Resources:
 
 Outputs:
   TSHDataTableName: # Output name expected by parent TSH stack
-    Value: !Ref TSHDataTable
+    Value:
+      !Ref TSHDataTable
       # Export removed: top-level template will declare global export
 
   TSHDataTableArn: # Output name expected by parent TSH stack
-    Value: !GetAtt TSHDataTable.Arn
+    Value:
+      !GetAtt TSHDataTable.Arn
       # Export removed: top-level template will declare global export
 
   DataTableName:
     Description: "DynamoDB Data Table Name"
-    Value: !Ref TSHDataTable
+    Value:
+      !Ref TSHDataTable
       # Export removed: top-level template will declare global export
 
   AppSyncDynamoDBRoleArn:
     Description: AppSync role ARN
-    Value: !GetAtt AppSyncDynamoDBRole.Arn
+    Value:
+      !GetAtt AppSyncDynamoDBRole.Arn
       # Export removed: top-level template will declare global export

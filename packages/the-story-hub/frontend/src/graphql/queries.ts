@@ -30,10 +30,16 @@ export const getChapter =
     parentNodeId
     authorId
     authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -44,7 +50,6 @@ export const getChapter =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -63,10 +68,13 @@ export const listBranches =
     parentNodeId
     authorId
     authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
     ageRating
     contentWarnings
     maxChildAgeRating
@@ -80,7 +88,6 @@ export const listBranches =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -96,6 +103,8 @@ export const getStory = /* GraphQL */ `query GetStory($storyId: ID!) {
     storyId
     authorId
     authorName
+    authorPatreonSupporter
+    authorOGSupporter
     title
     synopsis
     genre
@@ -112,7 +121,7 @@ export const getStory = /* GraphQL */ `query GetStory($storyId: ID!) {
     featured
     createdAt
     coverImageUrl
-    rootChapterId
+    rootNodeId
     aiCreated
     allowAI
     __typename
@@ -126,6 +135,8 @@ export const listStories =
       storyId
       authorId
       authorName
+      authorPatreonSupporter
+      authorOGSupporter
       title
       synopsis
       genre
@@ -168,7 +179,6 @@ export const getStoryTree = /* GraphQL */ `query GetStoryTree($storyId: ID!) {
         __typename
       }
       badges {
-        matchesVision
         authorApproved
         __typename
       }
@@ -185,7 +195,6 @@ export const getStoryTree = /* GraphQL */ `query GetStoryTree($storyId: ID!) {
           __typename
         }
         badges {
-          matchesVision
           authorApproved
           __typename
         }
@@ -202,7 +211,6 @@ export const getStoryTree = /* GraphQL */ `query GetStoryTree($storyId: ID!) {
             __typename
           }
           badges {
-            matchesVision
             authorApproved
             __typename
           }
@@ -219,7 +227,6 @@ export const getStoryTree = /* GraphQL */ `query GetStoryTree($storyId: ID!) {
               __typename
             }
             badges {
-              matchesVision
               authorApproved
               __typename
             }
@@ -247,10 +254,17 @@ export const getReadingPath =
     storyId
     parentNodeId
     authorId
+    authorName
+    authorPatreonSupporter
+    authorOGSupporter
     content
     branchDescription
     paragraphIndex
     chapterNumber
+    aiCreated
+    ageRating
+    contentWarnings
+    maxChildAgeRating
     createdAt
     editableUntil
     stats {
@@ -261,7 +275,6 @@ export const getReadingPath =
       __typename
     }
     badges {
-      matchesVision
       authorApproved
       __typename
     }
@@ -317,6 +330,7 @@ export const getUserProfile =
       __typename
     }
     patreonSupporter
+    ogSupporter
     clientType
     createdAt
     __typename

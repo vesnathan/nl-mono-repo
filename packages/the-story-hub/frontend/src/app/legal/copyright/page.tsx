@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 export default function CopyrightPage() {
   const currentYear = new Date().getFullYear();
@@ -31,9 +32,8 @@ export default function CopyrightPage() {
               All content on The Story Hub is protected by copyright law and is
               licensed under the
               <strong>
-                {" "}
-                Creative Commons Attribution-NonCommercial-NoDerivatives 4.0
-                International License (CC BY-NC-ND 4.0)
+                &nbpsp; Creative Commons Attribution-NonCommercial-NoDerivatives
+                4.0 International License (CC BY-NC-ND 4.0)
               </strong>
               .
             </p>
@@ -174,7 +174,7 @@ export default function CopyrightPage() {
 
           <section>
             <h2 className="text-2xl font-semibold text-[#21271C] mt-8 mb-4">
-              Authors' Rights
+              Authors&rsquo; Rights
             </h2>
             <p>As a content creator on The Story Hub:</p>
             <ul className="list-disc pl-6 space-y-2">
@@ -238,10 +238,10 @@ export default function CopyrightPage() {
             </h3>
             <p className="text-gray-800">
               <strong>
-                Just because content is free to read does NOT mean it's free to
-                use commercially.
+                Just because content is free to read does NOT mean it&rsquo;s
+                free to use commercially.
               </strong>
-              Always respect creators' rights and the license terms.
+              Always respect creators&rsquo; rights and the license terms.
             </p>
           </section>
 
@@ -280,24 +280,24 @@ export default function CopyrightPage() {
               </p>
             </div>
           </section>
-
           <section className="mt-8">
-            <div className="flex items-center justify-center">
+            <div>
               <Link
                 href="https://creativecommons.org/licenses/by-nc-nd/4.0/"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <img
+                <Image
                   src="https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png"
                   alt="CC BY-NC-ND 4.0 License"
+                  width={88}
+                  height={31}
                   className="h-10"
                 />
               </Link>
             </div>
           </section>
         </div>
-
         <div className="mt-12 pt-8 border-t border-gray-300">
           <p className="text-gray-600 text-center">
             Questions about copyright or licensing? Contact us through the

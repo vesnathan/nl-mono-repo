@@ -342,13 +342,13 @@ const createEvent = async (input: CreateEventInput) => {
 
 #### Key Files Summary
 
-| File                                                                               | Purpose                                        |
-| ---------------------------------------------------------------------------------- | ---------------------------------------------- |
+| File                                                                                 | Purpose                                        |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------- |
 | `packages/the-story-hub/backend/schema/users.graphql`                                | GraphQL schema operations (queries, mutations) |
-| `packages/shared/types/[TypeName].graphql`                                         | GraphQL type definitions                       |
+| `packages/shared/types/[TypeName].graphql`                                           | GraphQL type definitions                       |
 | `packages/the-story-hub/backend/resolvers/[domain]/[type]/[TypeName].[fieldName].ts` | Resolver implementation                        |
-| `packages/deploy/templates/tsh/resources/AppSync/appsync.yaml`                    | CloudFormation resolver registration           |
-| `packages/deploy/packages/tsh/tsh.ts`                                            | Deployment configuration                       |
+| `packages/deploy/templates/tsh/resources/AppSync/appsync.yaml`                       | CloudFormation resolver registration           |
+| `packages/deploy/packages/tsh/tsh.ts`                                                | Deployment configuration                       |
 
 #### Tips
 

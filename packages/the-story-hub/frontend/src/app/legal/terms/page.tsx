@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unescaped-entities */
+
 "use client";
 
 import Link from "next/link";
@@ -28,9 +30,9 @@ export default function TermsOfService() {
               1. Acceptance of Terms
             </h2>
             <p>
-              By accessing or using The Story Hub ("the Platform"), you agree to
-              be bound by these Terms of Service. If you do not agree to these
-              terms, please do not use the Platform.
+              By accessing or using The Story Hub (&quot;the Platform&quot;),
+              you agree to be bound by these Terms of Service. If you do not
+              agree to these terms, please do not use the Platform.
             </p>
           </section>
 
@@ -41,7 +43,7 @@ export default function TermsOfService() {
             <p>
               All content published on The Story Hub, including stories,
               chapters, and branches, is protected by copyright and is licensed
-              under the{" "}
+              under the&nbsp;
               <strong>
                 Creative Commons Attribution-NonCommercial-NoDerivatives 4.0
                 International License (CC BY-NC-ND 4.0)
@@ -142,7 +144,7 @@ export default function TermsOfService() {
               </li>
               <li>
                 You warrant that you have the right to submit the content and it
-                doesn't infringe on others' rights
+                doesn&apos;t infringe on others&apos; rights
               </li>
               <li>
                 You agree not to submit content that is illegal, harmful, or
@@ -177,7 +179,7 @@ export default function TermsOfService() {
               <li>Harass, abuse, or harm other users</li>
               <li>Post spam, malware, or malicious content</li>
               <li>Impersonate others or misrepresent your affiliation</li>
-              <li>Interfere with or disrupt the Platform's operation</li>
+              <li>Interfere with or disrupt the Platform&apos;s operation</li>
               <li>
                 Attempt to gain unauthorized access to systems or accounts
               </li>
@@ -204,8 +206,8 @@ export default function TermsOfService() {
               8. Disclaimer of Warranties
             </h2>
             <p>
-              THE PLATFORM IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND.
-              We do not guarantee:
+              THE PLATFORM IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTIES OF
+              ANY KIND. We do not guarantee:
             </p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Uninterrupted or error-free operation</li>
@@ -266,9 +268,9 @@ export default function TermsOfService() {
             <p className="text-gray-800">
               <strong>
                 Automated scraping is illegal and will be prosecuted.
-              </strong>{" "}
-              We actively monitor for scraping activity and will take immediate
-              legal action against violators.
+              </strong>
+              &nbsp; We actively monitor for scraping activity and will take
+              immediate legal action against violators.
             </p>
           </section>
         </div>

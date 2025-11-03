@@ -8,9 +8,7 @@ extend type Query {
     sortBy: CommentSortBy
     limit: Int
     nextToken: String
-  ): CommentConnection
-    @aws_iam
-    @aws_cognito_user_pools
+  ): CommentConnection @aws_iam @aws_cognito_user_pools
 
   # Get a specific comment with its replies
   getComment(
@@ -18,9 +16,7 @@ extend type Query {
     nodeId: ID!
     commentId: ID!
     includeReplies: Boolean
-  ): Comment
-    @aws_iam
-    @aws_cognito_user_pools
+  ): Comment @aws_iam @aws_cognito_user_pools
 
   # Get replies to a specific comment
   listReplies(
@@ -29,19 +25,15 @@ extend type Query {
     parentCommentId: ID!
     limit: Int
     nextToken: String
-  ): CommentConnection
-    @aws_iam
-    @aws_cognito_user_pools
+  ): CommentConnection @aws_iam @aws_cognito_user_pools
 }
 
 extend type Mutation {
   # Create a new comment or reply
-  createComment(input: CreateCommentInput!): Comment
-    @aws_cognito_user_pools
+  createComment(input: CreateCommentInput!): Comment @aws_cognito_user_pools
 
   # Update a comment
-  updateComment(input: UpdateCommentInput!): Comment
-    @aws_cognito_user_pools
+  updateComment(input: UpdateCommentInput!): Comment @aws_cognito_user_pools
 
   # Delete a comment
   deleteComment(input: DeleteCommentInput!): DeleteCommentResponse
@@ -53,22 +45,16 @@ extend type Mutation {
     nodeId: ID!
     commentId: ID!
     voteType: CommentVoteType!
-  ): Comment
-    @aws_cognito_user_pools
+  ): Comment @aws_cognito_user_pools
 }
 
-type CommentConnection
-  @aws_iam
-  @aws_cognito_user_pools
-{
+type CommentConnection @aws_iam @aws_cognito_user_pools {
   items: [Comment!]!
   nextToken: String
   total: Int
 }
 
-type DeleteCommentResponse
-  @aws_cognito_user_pools
-{
+type DeleteCommentResponse @aws_cognito_user_pools {
   success: Boolean!
   message: String
 }

@@ -6,6 +6,7 @@ import { StoryFilters } from "@/components/stories/StoryFilters";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { useStories } from "@/hooks/useStories";
+import { AgeRating } from "@/types/gqlTypes";
 import ParallaxGap from "@/components/layout/ParallaxGap";
 import ParallaxSection from "@/components/layout/ParallaxSection";
 
@@ -20,12 +21,7 @@ export default function BrowsePage() {
     genre: selectedGenres.length > 0 ? selectedGenres[0] : undefined,
     ageRating:
       selectedAgeRatings.length > 0
-        ? (selectedAgeRatings[0] as
-            | "GENERAL"
-            | "TEEN_13_PLUS"
-            | "MATURE_16_PLUS"
-            | "ADULT_18_PLUS"
-            | null)
+        ? (selectedAgeRatings[0] as AgeRating)
         : undefined,
   });
 

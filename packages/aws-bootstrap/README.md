@@ -127,6 +127,7 @@ This creates:
 The script automatically performs **comprehensive token replacement** across all files:
 
 1. **Content replacement in ALL files** (TypeScript, JavaScript, JSON, YAML, GraphQL, etc.):
+
    - `aws-example` → `your-long-name` (kebab-case)
    - `AWS_EXAMPLE` → `YOUR_LONG_NAME` (uppercase with underscores)
    - `aws_example` → `your_long_name` (snake_case)
@@ -137,11 +138,13 @@ The script automatically performs **comprehensive token replacement** across all
    - `Awse` → `Yourshortname` (capitalized)
 
 2. **File paths and import statements**:
+
    - All `../../../aws-example/` paths become `../../../your-long-name/`
    - Package names in `package.json` dependencies
    - Import/export statements
 
 3. **Configuration files automatically updated**:
+
    - Root `package.json` workspaces (adds frontend and backend entries)
    - Root `package.json` scripts (adds `dev:yourshortname`)
    - `packages/deploy/types.ts` (adds StackType enum, STACK_ORDER, TEMPLATE_PATHS)
@@ -185,11 +188,12 @@ The interactive bootstrap does most of the mechanical work, but a few manual che
 The bootstrap script supports two opt-in automation helpers:
 
 - `--autoregister-deploy` (or `--auto-register-deploy`)
-   - After creating the package files the script will copy the AWSE deploy handler (`packages/deploy/packages/aws-example/aws-example.ts`) into `packages/deploy/packages/<your-long-name>/deploy.ts`, perform conservative token replacements, and update `packages/deploy/index.ts` to import and call the new handler.
-   - This is best-effort and logged; if the script cannot safely edit `index.ts` it will warn and you will need to finish the registration manually.
+
+  - After creating the package files the script will copy the AWSE deploy handler (`packages/deploy/packages/aws-example/aws-example.ts`) into `packages/deploy/packages/<your-long-name>/deploy.ts`, perform conservative token replacements, and update `packages/deploy/index.ts` to import and call the new handler.
+  - This is best-effort and logged; if the script cannot safely edit `index.ts` it will warn and you will need to finish the registration manually.
 
 - `--no-autoinstall`
-   - Skips the automatic `yarn install` step after creation (useful in CI when you want to control installation).
+  - Skips the automatic `yarn install` step after creation (useful in CI when you want to control installation).
 
 Example (interactive create + autoregister):
 
@@ -205,13 +209,13 @@ Recommended CI-friendly improvement (future):
 
 - If `deploy/index.ts` wasn't updated automatically, add the following two lines manually:
 
-1) Add an import near the other deploy imports:
+1. Add an import near the other deploy imports:
 
 ```ts
 import { deployMyApp } from "./packages/my-app/deploy";
 ```
 
-2) Add a branch inside `deployStack` to call the new handler:
+2. Add a branch inside `deployStack` to call the new handler:
 
 ```ts
 } else if (stackType === StackType.MyApp) {

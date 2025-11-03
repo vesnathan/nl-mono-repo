@@ -15,6 +15,7 @@ node packages/aws-bootstrap/scripts/create-template.js
 ```
 
 This will:
+
 1. ✅ Clone the `aws-example` package as a template
 2. ✅ Rename all files and replace all placeholders
 3. ✅ **Automatically add the StackType enum to `types.ts`**
@@ -25,6 +26,7 @@ This will:
 8. ✅ Run post-clone tasks (yarn install, build-gql, tsc, lint)
 
 **After running the bootstrap script, you only need to:**
+
 1. Review and adjust the auto-generated configuration in `project-config.ts`
 2. Create a deployment function (see [Step 5](#5-create-deployment-function))
 3. Register the deployment function in `index.ts` (see [Step 6](#6-register-deployment-function))
@@ -84,18 +86,16 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
       frontend: "nlmonorepo-yournewproject-frontend-{stage}",
 
       // Additional buckets (like logs, archives, etc.)
-      additional: [
-        "nlmonorepo-{stage}-cfn-templates-{region}",
-      ],
+      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],
     },
 
     // Override region if needed (e.g., WAF is always us-east-1)
     region: undefined, // or "us-east-1" if fixed region
 
     // Feature flags
-    hasFrontend: true,     // Does this project have a Next.js/React frontend?
-    hasLambdas: true,      // Does this project have Lambda functions?
-    hasResolvers: true,    // Does this project have AppSync resolvers?
+    hasFrontend: true, // Does this project have a Next.js/React frontend?
+    hasLambdas: true, // Does this project have Lambda functions?
+    hasResolvers: true, // Does this project have AppSync resolvers?
   },
 };
 ```
@@ -214,6 +214,7 @@ yarn deploy
 ```
 
 Select your new project from the menu and verify:
+
 1. It appears in the deploy menu with your configured display name
 2. Dependencies are validated correctly
 3. The stack deploys successfully
@@ -224,6 +225,7 @@ Select your new project from the menu and verify:
 Here's a complete example for a fictional "Widget" project:
 
 **1. In `types.ts`:**
+
 ```typescript
 export enum StackType {
   WAF = "WAF",
@@ -235,6 +237,7 @@ export enum StackType {
 ```
 
 **2. In `project-config.ts`:**
+
 ```typescript
 [StackType.Widget]: {
   stackType: StackType.Widget,
@@ -290,6 +293,7 @@ A: Ensure you've added your project to both `TEMPLATE_PATHS` and `TEMPLATE_RESOU
 Each backend package is expected to provide its own database seeder because the single DynamoDB table may contain different entity shapes per project (users, organisations, domain-specific entities, etc.). Follow this convention so the centralized deploy utilities can discover and run the correct seeder automatically:
 
 - Seeder file location (canonical): `packages/<appName>/backend/scripts/seed-db.ts`
+
   - Use `seed-db.ts` as the canonical filename — the table often contains more than only users.
   - The script should read configuration from environment variables: `AWS_REGION`, `TABLE_NAME`, `STAGE` and optionally `SUPER_ADMIN_USER_ID`.
   - Implement the seeder to be idempotent or to detect an already-seeded table (recommended: lightweight Scan Limit=1 check).
@@ -316,15 +320,16 @@ Each backend package is expected to provide its own database seeder because the 
 
   // ... after deployment and outputs lookup ...
   await seedDB({
-    region: 'ap-southeast-2',
-    tableName: 'nlmonorepo-<app>-datatable-dev',
-    stage: 'dev',
-    appName: 'your-package-folder-name',
+    region: "ap-southeast-2",
+    tableName: "nlmonorepo-<app>-datatable-dev",
+    stage: "dev",
+    appName: "your-package-folder-name",
     skipConfirmation: true,
   });
   ```
 
   The centralized `seedDB` util will try common filenames (in order):
+
   - `packages/<appName>/backend/scripts/seed-db.ts`
   - `packages/<appName>/backend/scripts/seed.ts`
   - `packages/<appName>/backend/scripts/seed-db.ts`

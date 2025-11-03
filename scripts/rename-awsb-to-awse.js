@@ -1,16 +1,34 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const root = path.resolve(__dirname, '..');
-const IGNORES = ['.git', 'node_modules', 'dist', 'build', '.cache', '.venv'];
+const root = path.resolve(__dirname, "..");
+const IGNORES = [".git", "node_modules", "dist", "build", ".cache", ".venv"];
 const MAX_SIZE = 1024 * 1024; // 1MB
 
 const textFileExt = new Set([
-  '.js', '.ts', '.json', '.md', '.yaml', '.yml', '.env', '.sh', '.tsx', '.jsx', '.html', '.css', '.scss', '.txt', '.gitignore', '.graphql'
+  ".js",
+  ".ts",
+  ".json",
+  ".md",
+  ".yaml",
+  ".yml",
+  ".env",
+  ".sh",
+  ".tsx",
+  ".jsx",
+  ".html",
+  ".css",
+  ".scss",
+  ".txt",
+  ".gitignore",
+  ".graphql",
 ]);
 
 function shouldIgnore(p) {
-  return IGNORES.some(ignore => p.includes(path.sep + ignore + path.sep) || p.endsWith(path.sep + ignore));
+  return IGNORES.some(
+    (ignore) =>
+      p.includes(path.sep + ignore + path.sep) || p.endsWith(path.sep + ignore),
+  );
 }
 
 function isBinary(filename) {
@@ -32,18 +50,18 @@ function replaceInFile(file) {
     if (!stat.isFile()) return false;
     if (stat.size > MAX_SIZE) return false;
     if (isBinary(file)) return false;
-    const original = fs.readFileSync(file, 'utf8');
+    const original = fs.readFileSync(file, "utf8");
     let updated = original
       // replace inside identifiers as well (no word boundaries)
-      .replace(/AWSE/g, 'AWSE')
-      .replace(/Awse/g, 'Awse')
-      .replace(/awse/g, 'awse');
+      .replace(/AWSE/g, "AWSE")
+      .replace(/Awse/g, "Awse")
+      .replace(/awse/g, "awse");
     if (updated !== original) {
-      fs.writeFileSync(file, updated, 'utf8');
+      fs.writeFileSync(file, updated, "utf8");
       return true;
     }
   } catch (e) {
-    console.error('skip', file, e.message);
+    console.error("skip", file, e.message);
   }
   return false;
 }
@@ -65,5 +83,5 @@ function walk(dir) {
 }
 
 const changed = walk(root);
-console.log('FILES_CHANGED_COUNT=' + changed.length);
-changed.forEach(f => console.log(f));
+console.log("FILES_CHANGED_COUNT=" + changed.length);
+changed.forEach((f) => console.log(f));

@@ -22,7 +22,6 @@ type User @aws_cognito_user_pools {
   userPhone: String!
   clientType: [ClientType!]!
   userProfilePicture: S3Object
-
 }
 
 input UserInput {
@@ -32,5 +31,4 @@ input UserInput {
   userLastName: String!
   userPhone: String!
   sendWelcomeEmail: Boolean
-
 }

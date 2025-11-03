@@ -6,10 +6,7 @@ import Image from "next/image";
 import { StoriesGrid } from "@/components/stories/StoriesGrid";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
-import {
-  useFeaturedStories,
-  useTrendingStories,
-} from "@/hooks/useStories";
+import { useFeaturedStories, useTrendingStories } from "@/hooks/useStories";
 import { GenreSection } from "@/components/home/GenreSection";
 import { getHomePageGenres } from "@/constants/genres";
 
@@ -235,16 +232,30 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Dynamic Genre Sections - Alternating between dark sections and parallax gaps */}
+      {/* Dynamic Genre Sections - Alternating between parallax gaps with images and solid backgrounds */}
       {homePageGenres.map((genre, index) => {
-        // Alternate between ParallaxSection (dark) and GenreSection (which uses ParallaxSection internally)
-        // For visual variety, we'll just use GenreSection with alternating backgrounds
-        const backgrounds = ["#1a1a1a", "#2a2a2a", "#1a1a1a", "#252525", "#1a1a1a", "#222222"];
+        // Map genres to their theme images
+        const genreImages: Record<string, string> = {
+          Fantasy: "/themes/fantasy.jpg",
+          "Sci-Fi": "/themes/scifi.jpg",
+          Mystery: "/themes/mystery.jpg",
+          Horror: "/themes/horror.jpg",
+          Romance: "/themes/romance.jpg",
+          Thriller: "/themes/thriller.jpg",
+        };
+
+        // Alternate between image backgrounds (even indices) and solid backgrounds (odd indices)
+        const useImage = index % 2 === 0;
+        const backgrounds = ["#1a1a1a", "#2a2a2a", "#252525"];
+
         return (
           <GenreSection
             key={genre}
             genre={genre}
-            background={backgrounds[index % backgrounds.length]}
+            image={useImage ? genreImages[genre] : undefined}
+            background={
+              useImage ? undefined : backgrounds[index % backgrounds.length]
+            }
             limit={8}
           />
         );

@@ -11,18 +11,14 @@ extend type Query {
 }
 
 extend type Mutation {
-  createChapter(input: CreateChapterInput!): ChapterNode
-    @aws_cognito_user_pools
+  createChapter(input: CreateChapterInput!): ChapterNode @aws_cognito_user_pools
 
-  createBranch(input: CreateBranchInput!): ChapterNode
-    @aws_cognito_user_pools
+  createBranch(input: CreateBranchInput!): ChapterNode @aws_cognito_user_pools
 
-  updateChapter(input: UpdateChapterInput!): ChapterNode
-    @aws_cognito_user_pools
+  updateChapter(input: UpdateChapterInput!): ChapterNode @aws_cognito_user_pools
 
   voteOnChapter(storyId: ID!, nodeId: ID!, voteType: VoteType!): ChapterNode
     @aws_cognito_user_pools
 
-  awardBadge(input: AwardBadgeInput!): ChapterNode
-    @aws_cognito_user_pools
+  awardBadge(input: AwardBadgeInput!): ChapterNode @aws_cognito_user_pools
 }

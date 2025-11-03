@@ -86,8 +86,7 @@ Resources:
       DynamoDBConfig:
         TableName: !Ref DataTableName
         AwsRegion: !Ref AWS::Region
-      ServiceRoleArn:
-        !Ref AppSyncDynamoDBRoleArn
+      ServiceRoleArn: !Ref AppSyncDynamoDBRoleArn
 
   SendWelcomeEmailDataSource:
     Type: AWS::AppSync::DataSource

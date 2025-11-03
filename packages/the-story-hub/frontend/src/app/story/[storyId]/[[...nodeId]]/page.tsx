@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/cognitive-complexity */
+
 "use client";
 
 import { useParams } from "next/navigation";
@@ -7,6 +9,7 @@ import { getChapterAPI, listBranchesAPI } from "@/lib/api/chapters";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Button,
   Chip,
@@ -37,7 +40,7 @@ function BranchCommentButton({
 }) {
   const { data: commentData } = useQuery({
     queryKey: ["comments", storyId, nodeId, "NEWEST"],
-    queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", 1),
+    queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", undefined, 1),
     enabled: !!nodeId,
   });
 
@@ -99,7 +102,7 @@ function ChapterSection({
   // Fetch comment count for main chapter
   const { data: mainCommentData } = useQuery({
     queryKey: ["comments", storyId, nodeId, "NEWEST"],
-    queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", 1),
+    queryFn: () => listCommentsAPI(storyId, nodeId, "NEWEST", undefined, 1),
     enabled: !!nodeId,
   });
 
@@ -116,8 +119,8 @@ function ChapterSection({
   // Sort branches to put OP Approved first
   const sortedBranches = branches
     ? [...branches].sort((a, b) => {
-        if (a.badges?.matchesVision && !b.badges?.matchesVision) return -1;
-        if (!a.badges?.matchesVision && b.badges?.matchesVision) return 1;
+        if (a.badges?.authorApproved && !b.badges?.authorApproved) return -1;
+        if (!a.badges?.authorApproved && b.badges?.authorApproved) return 1;
         return 0;
       })
     : [];
@@ -239,14 +242,6 @@ function ChapterSection({
                           ✓ OP Approved
                         </span>
                       )}
-                      {branch.badges?.matchesVision && (
-                        <span
-                          className="px-2 py-1 text-xs bg-blue-600 text-white rounded whitespace-nowrap"
-                          title="Approved by original poster"
-                        >
-                          ★ OP Approved
-                        </span>
-                      )}
                     </div>
                   </div>
                   {branch.content && (
@@ -287,6 +282,13 @@ function ChapterSection({
                     <div
                       className="mt-4 pt-4 border-t border-gray-700"
                       onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.stopPropagation();
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
                     >
                       <CommentSection
                         storyId={storyId}
@@ -309,7 +311,6 @@ function ChapterSection({
                 actionDescription="add a new branch to this story"
                 onPress={() => {
                   // TODO: Navigate to branch creation page
-                  console.log("Add branch clicked for node:", nodeId);
                 }}
               >
                 + Add Your Own Branch
@@ -386,14 +387,6 @@ function ChapterSection({
                               title="Approved by original poster"
                             >
                               ✓ OP Approved
-                            </span>
-                          )}
-                          {branch.badges?.matchesVision && (
-                            <span
-                              className="px-2 py-1 text-xs bg-blue-600 text-white rounded whitespace-nowrap"
-                              title="Approved by original poster"
-                            >
-                              ★ OP Approved
                             </span>
                           )}
                         </div>
@@ -507,7 +500,6 @@ function ChapterSection({
                     actionDescription="add a new branch to this story"
                     onPress={() => {
                       // TODO: Navigate to branch creation page
-                      console.log("Add branch clicked for node:", nodeId);
                     }}
                   >
                     + Add Your Own Branch
@@ -523,8 +515,8 @@ function ChapterSection({
             End of This Path
           </h2>
           <p className="text-gray-400 mb-6">
-            This story branch hasn't been continued yet. Be the first to write
-            what happens next!
+            This story branch hasn&rsquo;t been continued yet. Be the first to
+            write what happens next!
           </p>
           <AuthRequiredButton
             color="primary"
@@ -533,7 +525,6 @@ function ChapterSection({
             actionDescription="continue this story"
             onPress={() => {
               // TODO: Navigate to branch creation page
-              console.log("Continue story clicked for node:", nodeId);
             }}
           >
             Continue the Story
@@ -613,11 +604,13 @@ export default function StoryDetailPage() {
             <div className="flex flex-col md:flex-row gap-6">
               {/* Cover Image */}
               {story.coverImageUrl && (
-                <div className="w-full md:w-48 h-72 flex-shrink-0">
-                  <img
+                <div className="flex-shrink-0">
+                  <Image
                     src={story.coverImageUrl}
                     alt={story.title}
-                    className="w-full h-full object-cover rounded"
+                    width={192}
+                    height={288}
+                    className="w-48 h-72 object-cover rounded shadow-lg"
                   />
                 </div>
               )}
@@ -693,14 +686,14 @@ export default function StoryDetailPage() {
               storyId={storyId}
               nodeId={story.rootNodeId}
               story={story}
-              isRoot={true}
+              isRoot
               currentUserId={userId}
               storyAuthorId={story.authorId}
             />
           ) : (
             <div className="bg-gray-900 border border-gray-700 p-8 mb-6">
               <p className="text-gray-400">
-                This story doesn't have any chapters yet.
+                This story doesn&rsquo;t have any chapters yet.
               </p>
             </div>
           )}

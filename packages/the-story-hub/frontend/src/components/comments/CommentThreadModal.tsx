@@ -1,6 +1,7 @@
 "use client";
 
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@nextui-org/react";
+// eslint-disable-next-line import/no-cycle
 import { CommentThread } from "./CommentThread";
 
 interface Comment {
@@ -95,7 +96,7 @@ export function CommentThreadModal({
             onDelete={onDelete}
             onVote={onVote}
             currentUserId={currentUserId}
-            isInModal={true}
+            isInModal
             storyAuthorId={storyAuthorId}
           />
         </ModalBody>
