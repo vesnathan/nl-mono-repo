@@ -71,11 +71,9 @@ export function response(ctx: CTX): StoryConnection {
     );
   }
 
-  // Map rootNodeId to rootChapterId for frontend compatibility
   // Add authorName fallback for existing stories that don't have it
   const mappedItems = filteredItems.map((item: any) => ({
     ...item,
-    rootChapterId: item.rootNodeId || item.rootChapterId,
     authorName: item.authorName || item.authorId, // Fallback to authorId if authorName not set
   }));
 

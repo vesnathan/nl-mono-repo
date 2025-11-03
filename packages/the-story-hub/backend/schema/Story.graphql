@@ -31,7 +31,7 @@ type Story @aws_iam @aws_cognito_user_pools {
   featured: Boolean!
   createdAt: String!
   coverImageUrl: String
-  rootChapterId: String
+  rootNodeId: String
   aiCreated: Boolean!
   allowAI: Boolean!
 }

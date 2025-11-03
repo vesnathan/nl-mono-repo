@@ -99,7 +99,7 @@ export const StorySchema: z.ZodType<GQLStory> = z.object({
   featured: z.boolean(),
   createdAt: z.string(),
   coverImageUrl: z.string().nullable().optional(),
-  rootChapterId: z.string().nullable().optional(),
+  rootNodeId: z.string().nullable().optional(),
   aiCreated: z.boolean(),
   allowAI: z.boolean(),
 });

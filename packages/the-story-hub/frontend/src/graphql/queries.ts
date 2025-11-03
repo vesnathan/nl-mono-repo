@@ -121,7 +121,7 @@ export const getStory = /* GraphQL */ `query GetStory($storyId: ID!) {
     featured
     createdAt
     coverImageUrl
-    rootChapterId
+    rootNodeId
     aiCreated
     allowAI
     __typename

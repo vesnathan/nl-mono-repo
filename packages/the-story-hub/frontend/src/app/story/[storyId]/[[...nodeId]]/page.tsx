@@ -679,10 +679,10 @@ export default function StoryDetailPage() {
           </div>
 
           {/* Recursive chapter rendering starting from root */}
-          {story.rootChapterId ? (
+          {story.rootNodeId ? (
             <ChapterSection
               storyId={storyId}
-              nodeId={story.rootChapterId}
+              nodeId={story.rootNodeId}
               story={story}
               isRoot
               currentUserId={userId}
