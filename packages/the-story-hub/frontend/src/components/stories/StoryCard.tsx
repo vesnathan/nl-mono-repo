@@ -30,7 +30,7 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="h-[200px]"
+      className="h-[280px]"
     >
       <Card className="hover:shadow-lg transition-shadow h-full rounded-none border border-gray-700 bg-gray-900">
         <div className="flex flex-row gap-4 p-4 h-full relative">
@@ -91,7 +91,7 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
               className="max-w-md"
               closeDelay={100}
             >
-              <p className="text-sm text-gray-300 line-clamp-2 cursor-help">
+              <p className="text-sm text-gray-300 line-clamp-4 cursor-help">
                 {story.synopsis}
               </p>
             </Tooltip>

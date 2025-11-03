@@ -16,6 +16,11 @@ import {
   Accordion,
   AccordionItem,
   Tooltip,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from "@nextui-org/react";
 import { useState } from "react";
 import { StoryMetadataChips } from "@/components/stories/StoryMetadataChips";
@@ -550,6 +555,7 @@ export default function StoryDetailPage() {
   const params = useParams();
   const storyId = (params?.storyId as string) || "";
   const { userId } = useAuth();
+  const [isSynopsisModalOpen, setIsSynopsisModalOpen] = useState(false);
 
   const {
     data: story,
@@ -652,9 +658,18 @@ export default function StoryDetailPage() {
             {/* Synopsis */}
             {story.synopsis && (
               <div className="mt-4 pt-4 border-t border-gray-700">
-                <p className="text-gray-300 leading-relaxed">
+                <p className="text-gray-300 leading-relaxed line-clamp-3">
                   {story.synopsis}
                 </p>
+                <Button
+                  color="secondary"
+                  variant="flat"
+                  size="sm"
+                  onPress={() => setIsSynopsisModalOpen(true)}
+                  className="mt-3"
+                >
+                  📖 View Full Synopsis
+                </Button>
               </div>
             )}
 
@@ -699,6 +714,40 @@ export default function StoryDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Synopsis Modal */}
+      <Modal
+        isOpen={isSynopsisModalOpen}
+        onClose={() => setIsSynopsisModalOpen(false)}
+        size="3xl"
+        scrollBehavior="inside"
+        classNames={{
+          base: "bg-gray-900",
+          header: "border-b border-gray-700",
+          body: "py-6",
+          footer: "border-t border-gray-700",
+        }}
+      >
+        <ModalContent className="bg-gray-900">
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1 text-white">
+                Full Synopsis
+              </ModalHeader>
+              <ModalBody>
+                <div className="text-gray-300 whitespace-pre-wrap leading-relaxed text-base">
+                  {story?.synopsis}
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="secondary" variant="flat" onPress={onClose}>
+                  Close
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
