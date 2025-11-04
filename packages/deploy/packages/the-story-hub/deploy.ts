@@ -635,7 +635,7 @@ export async function deployTheStoryHub(
 
     const lambdaSourceDir = path.join(
       __dirname,
-      "../../../the-story-hub/backend/lambda",
+      "../../../the-story-hub/backend/lambdas",
     );
     // Use a repo-local cache for generated Lambda artifacts to avoid committing them
     const lambdaOutputDir = path.join(
