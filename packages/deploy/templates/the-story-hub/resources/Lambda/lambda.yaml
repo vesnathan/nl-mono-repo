@@ -540,6 +540,105 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${PatreonOAuthFunction}"
       RetentionInDays: !Ref LogRetentionInDays
 
+  # Update Patreon Secrets Lambda (Admin-only)
+  UpdatePatreonSecretsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "nlmonorepo-${AppName}-update-patreon-secrets-${Stage}"
+      Handler: index.handler
+      Runtime: nodejs20.x
+      Timeout: 30
+      Role: !GetAtt UpdatePatreonSecretsRole.Arn
+      Code:
+        S3Bucket: !Ref TemplateBucketName
+        S3Key: !Sub "functions/${Stage}/updatePatreonSecrets.zip"
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+          PATREON_SECRETS_ARN: !Ref PatreonSecrets
+
+  UpdatePatreonSecretsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "nlmonorepo-${AppName}-update-patreon-secrets-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:PutSecretValue
+                Resource: !Ref PatreonSecrets
+
+  UpdatePatreonSecretsFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${UpdatePatreonSecretsFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+  # API Gateway routes for Update Patreon Secrets (requires Cognito auth)
+  UpdatePatreonSecretsIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref PatreonWebhookApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt UpdatePatreonSecretsFunction.Arn
+      PayloadFormatVersion: "2.0"
+
+  UpdatePatreonSecretsGetRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref PatreonWebhookApi
+      RouteKey: "GET /admin/patreon/secrets"
+      Target: !Sub "integrations/${UpdatePatreonSecretsIntegration}"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref PatreonApiAuthorizer
+
+  UpdatePatreonSecretsPostRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref PatreonWebhookApi
+      RouteKey: "POST /admin/patreon/secrets"
+      Target: !Sub "integrations/${UpdatePatreonSecretsIntegration}"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref PatreonApiAuthorizer
+
+  # Cognito Authorizer for admin endpoints
+  PatreonApiAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      ApiId: !Ref PatreonWebhookApi
+      AuthorizerType: JWT
+      IdentitySource:
+        - "$request.header.Authorization"
+      JwtConfiguration:
+        Audience:
+          - !Ref UserPoolId
+        Issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}"
+      Name: !Sub "${AppName}-cognito-authorizer-${Stage}"
+
+  # Permission for API Gateway to invoke the Update Patreon Secrets Lambda
+  UpdatePatreonSecretsApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref UpdatePatreonSecretsFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PatreonWebhookApi}/*"
+
 Outputs:
   PostDeployFunctionArn: # Renamed from PostFrontEndDeployFunctionArn
     Value: !GetAtt PostDeployFunction.Arn
@@ -612,3 +711,15 @@ Outputs:
   PatreonOAuthCallbackUrl:
     Value: !Sub "https://${PatreonWebhookApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/auth/patreon/callback"
     Description: OAuth callback URL (configure this in Patreon app settings)
+
+  UpdatePatreonSecretsFunctionArn:
+    Value: !GetAtt UpdatePatreonSecretsFunction.Arn
+    Description: ARN of the Update Patreon Secrets Lambda function
+
+  UpdatePatreonSecretsFunctionName:
+    Value: !Ref UpdatePatreonSecretsFunction
+    Description: Name of the Update Patreon Secrets Lambda function
+
+  UpdatePatreonSecretsUrl:
+    Value: !Sub "https://${PatreonWebhookApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/admin/patreon/secrets"
+    Description: URL for the Update Patreon Secrets API (GET/POST)
