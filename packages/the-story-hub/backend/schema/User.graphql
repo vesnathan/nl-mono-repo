@@ -36,6 +36,7 @@ type User @aws_iam @aws_cognito_user_pools {
   stats: UserStats!
   patreonSupporter: Boolean! # Deprecated: Use patreonInfo.tier instead
   patreonInfo: PatreonInfo
+  patreonCreatorUrl: String # Patreon creator page URL (only visible for PLATINUM tier)
   ogSupporter: Boolean! # Original/Early supporter badge
   clientType: [ClientType!]!
   createdAt: String!

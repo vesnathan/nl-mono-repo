@@ -217,7 +217,9 @@ Resources:
         {
           "creatorAccessToken": "PLACEHOLDER_TOKEN",
           "webhookSecret": "${PatreonWebhookSecret}",
-          "campaignId": "${PatreonCampaignId}"
+          "campaignId": "${PatreonCampaignId}",
+          "clientId": "PLACEHOLDER_CLIENT_ID",
+          "clientSecret": "PLACEHOLDER_CLIENT_SECRET"
         }
 
   # Patreon Webhook Handler Lambda
@@ -262,6 +264,58 @@ Resources:
                   - dynamodb:GetItem
                   - dynamodb:UpdateItem
                   - dynamodb:Scan
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DataTableName}"
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref PatreonSecrets
+
+  # Patreon OAuth Handler Lambda
+  PatreonOAuthFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "nlmonorepo-${AppName}-patreon-oauth-${Stage}"
+      Handler: index.handler
+      Runtime: nodejs20.x
+      Timeout: 30
+      Role: !GetAtt PatreonOAuthRole.Arn
+      Code:
+        S3Bucket: !Ref TemplateBucketName
+        S3Key: !Sub "functions/${Stage}/patreonOAuth.zip"
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+          DATA_TABLE_NAME: !Ref DataTableName
+          PATREON_SECRETS_ARN: !Ref PatreonSecrets
+          USE_MOCK_PATREON_DATA: !If [IsDev, "true", "false"]
+          FRONTEND_URL: !Ref AppURL
+          PATREON_OAUTH_CALLBACK_URL: !Sub "https://${PatreonWebhookApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/auth/patreon/callback"
+
+  PatreonOAuthRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "nlmonorepo-${AppName}-patreon-oauth-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:UpdateItem
                 Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DataTableName}"
         - PolicyName: SecretsManagerAccess
           PolicyDocument:
@@ -374,6 +428,29 @@ Resources:
       RouteKey: "POST /webhooks/patreon"
       Target: !Sub "integrations/${PatreonWebhookIntegration}"
 
+  # OAuth Routes
+  PatreonOAuthIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref PatreonWebhookApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt PatreonOAuthFunction.Arn
+      PayloadFormatVersion: "2.0"
+
+  PatreonOAuthInitRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref PatreonWebhookApi
+      RouteKey: "GET /auth/patreon"
+      Target: !Sub "integrations/${PatreonOAuthIntegration}"
+
+  PatreonOAuthCallbackRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref PatreonWebhookApi
+      RouteKey: "GET /auth/patreon/callback"
+      Target: !Sub "integrations/${PatreonOAuthIntegration}"
+
   PatreonWebhookStage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
@@ -397,6 +474,15 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !Ref PatreonWebhookFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PatreonWebhookApi}/*"
+
+  # Permission for API Gateway to invoke the OAuth Lambda
+  PatreonOAuthApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref PatreonOAuthFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PatreonWebhookApi}/*"
@@ -441,6 +527,14 @@ Resources:
     UpdateReplacePolicy: Retain
     Properties:
       LogGroupName: !Sub "/aws/lambda/${PatreonDailySyncFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+  PatreonOAuthFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${PatreonOAuthFunction}"
       RetentionInDays: !Ref LogRetentionInDays
 
 Outputs:
@@ -497,3 +591,19 @@ Outputs:
   PatreonWebhookEndpoint:
     Value: !Sub "https://${PatreonWebhookApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/webhooks/patreon"
     Description: Full URL for the Patreon webhook endpoint (configure this in Patreon portal)
+
+  PatreonOAuthFunctionArn:
+    Value: !GetAtt PatreonOAuthFunction.Arn
+    Description: ARN of the Patreon OAuth Lambda function
+
+  PatreonOAuthFunctionName:
+    Value: !Ref PatreonOAuthFunction
+    Description: Name of the Patreon OAuth Lambda function
+
+  PatreonOAuthInitUrl:
+    Value: !Sub "https://${PatreonWebhookApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/auth/patreon"
+    Description: URL to initiate Patreon OAuth flow (call with ?userId=USER_ID)
+
+  PatreonOAuthCallbackUrl:
+    Value: !Sub "https://${PatreonWebhookApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/auth/patreon/callback"
+    Description: OAuth callback URL (configure this in Patreon app settings)
