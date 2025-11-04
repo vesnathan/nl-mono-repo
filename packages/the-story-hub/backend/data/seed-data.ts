@@ -586,7 +586,7 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      authorApproved: true,
+      authorApproved: false,
     },
   },
   // Branch 2: The Ancient Oak
@@ -610,7 +610,7 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      authorApproved: false,
+      authorApproved: true,
     },
   },
   // Branch 3: Into the Wild
@@ -634,7 +634,7 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      authorApproved: true,
+      authorApproved: false,
     },
   },
 
@@ -710,7 +710,7 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      authorApproved: true,
+      authorApproved: false,
     },
   },
   // Branch 3: Go Dark
@@ -786,7 +786,7 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      authorApproved: true,
+      authorApproved: false,
     },
   },
   // Branch 2: Interview the Guests
@@ -910,7 +910,7 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      authorApproved: true,
+      authorApproved: false,
     },
   },
   // Branch 3: Keep It Professional
@@ -984,7 +984,7 @@ export const SEED_NODES = [
       childBranches: 1,
     },
     badges: {
-      authorApproved: true,
+      authorApproved: false,
     },
   },
   // Branch 1.1: Establish Communication
