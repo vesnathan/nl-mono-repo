@@ -54,7 +54,12 @@ Setting up Patreon integration involves these main steps:
 
 3. **Configure membership tiers**
 
-   Navigate to "Membership" → "Tiers" in the left sidebar, then click "Create a tier":
+   To create membership tiers:
+
+   - Look for "Tiers" or "Membership levels" in the left sidebar menu
+   - Alternatively, click on "Settings" in the left menu, then look for "Tiers" or "Membership"
+   - Or go directly to your creator page and look for "Edit tiers" option
+   - Click "Add tier" or "Create a tier" button
 
    Create at least these basic tiers to match the application's badge system:
 
