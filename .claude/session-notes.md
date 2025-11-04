@@ -28,6 +28,14 @@
 - This rule has been violated multiple times - it is CRITICAL to follow this
 - **Database seeding runs AUTOMATICALLY during deployment** - do NOT tell user to reseed after deploy
 
+#### Lambda Functions
+
+- Lambda functions are located in: `packages/the-story-hub/backend/lambdas/` (note the 's')
+- Deploy script looks for Lambda directory at: `packages/deploy/packages/the-story-hub/deploy.ts` (line 638)
+- **CRITICAL**: The path must be `../../../the-story-hub/backend/lambdas` (with 's')
+- Lambda functions are compiled and uploaded to S3 during deployment
+- Missing Lambda functions in S3 will cause CloudFormation stack creation to fail
+
 ### Seed Data Pattern
 
 - **Single source of truth**: All seed data lives in `packages/the-story-hub/backend/data/seed-data.ts`
