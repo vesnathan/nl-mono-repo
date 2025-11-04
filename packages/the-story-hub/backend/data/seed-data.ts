@@ -43,6 +43,13 @@ export const SEED_USERS = [
     screenName: "TheStoryteller",
     phone: "+61400123456",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "PLATINUM",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 24000, // $240 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
+    patreonCreatorUrl: "https://patreon.com/thestoryteller",
     ogSupporter: true,
   },
   {
@@ -54,6 +61,12 @@ export const SEED_USERS = [
     screenName: "CyberScribe",
     phone: "+61400234567",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "GOLD",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 12000, // $120 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
     ogSupporter: true,
   },
   {
@@ -65,6 +78,12 @@ export const SEED_USERS = [
     screenName: "MysteryWriter",
     phone: "+61400345678",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "SILVER",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 6000, // $60 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
     ogSupporter: false,
   },
   {
@@ -87,6 +106,12 @@ export const SEED_USERS = [
     screenName: "FrostWeaver",
     phone: "+61400567890",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "BRONZE",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 3600, // $36 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
     ogSupporter: false,
   },
   {

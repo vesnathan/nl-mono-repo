@@ -222,57 +222,57 @@ Resources:
           "clientSecret": "PLACEHOLDER_CLIENT_SECRET"
         }
 
-  # Patreon Webhook Handler Lambda
-  PatreonWebhookFunction:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: !Sub "nlmonorepo-${AppName}-patreon-webhook-${Stage}"
-      Handler: index.handler
-      Runtime: nodejs20.x
-      Timeout: 30
-      Role: !GetAtt PatreonWebhookRole.Arn
-      Code:
-        S3Bucket: !Ref TemplateBucketName
-        S3Key: !Sub "functions/${Stage}/patreonWebhook.zip"
-      Environment:
-        Variables:
-          STAGE: !Ref Stage
-          DATA_TABLE_NAME: !Ref DataTableName
-          PATREON_SECRETS_ARN: !Ref PatreonSecrets
-          USE_MOCK_PATREON_DATA: !If [IsDev, "true", "false"]
+  # Patreon Webhook Handler Lambda - DISABLED: Using seed data for development
+  # PatreonWebhookFunction:
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     FunctionName: !Sub "nlmonorepo-${AppName}-patreon-webhook-${Stage}"
+  #     Handler: index.handler
+  #     Runtime: nodejs20.x
+  #     Timeout: 30
+  #     Role: !GetAtt PatreonWebhookRole.Arn
+  #     Code:
+  #       S3Bucket: !Ref TemplateBucketName
+  #       S3Key: !Sub "functions/${Stage}/patreonWebhook.zip"
+  #     Environment:
+  #       Variables:
+  #         STAGE: !Ref Stage
+  #         DATA_TABLE_NAME: !Ref DataTableName
+  #         PATREON_SECRETS_ARN: !Ref PatreonSecrets
+  #         USE_MOCK_PATREON_DATA: !If [IsDev, "true", "false"]
 
-  PatreonWebhookRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "nlmonorepo-${AppName}-patreon-webhook-role-${Stage}"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-      Policies:
-        - PolicyName: DynamoDBAccess
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - dynamodb:GetItem
-                  - dynamodb:UpdateItem
-                  - dynamodb:Scan
-                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DataTableName}"
-        - PolicyName: SecretsManagerAccess
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - secretsmanager:GetSecretValue
-                Resource: !Ref PatreonSecrets
+  # PatreonWebhookRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: !Sub "nlmonorepo-${AppName}-patreon-webhook-role-${Stage}"
+  #     AssumeRolePolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: lambda.amazonaws.com
+  #           Action: sts:AssumeRole
+  #     ManagedPolicyArns:
+  #       - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  #     Policies:
+  #       - PolicyName: DynamoDBAccess
+  #         PolicyDocument:
+  #           Version: "2012-10-17"
+  #           Statement:
+  #             - Effect: Allow
+  #               Action:
+  #                 - dynamodb:GetItem
+  #                 - dynamodb:UpdateItem
+  #                 - dynamodb:Scan
+  #               Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DataTableName}"
+  #       - PolicyName: SecretsManagerAccess
+  #         PolicyDocument:
+  #           Version: "2012-10-17"
+  #           Statement:
+  #             - Effect: Allow
+  #               Action:
+  #                 - secretsmanager:GetSecretValue
+  #               Resource: !Ref PatreonSecrets
 
   # Patreon OAuth Handler Lambda
   PatreonOAuthFunction:
@@ -326,77 +326,77 @@ Resources:
                   - secretsmanager:GetSecretValue
                 Resource: !Ref PatreonSecrets
 
-  # Patreon Daily Sync Lambda
-  PatreonDailySyncFunction:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: !Sub "nlmonorepo-${AppName}-patreon-daily-sync-${Stage}"
-      Handler: index.handler
-      Runtime: nodejs20.x
-      Timeout: 300
-      Role: !GetAtt PatreonDailySyncRole.Arn
-      Code:
-        S3Bucket: !Ref TemplateBucketName
-        S3Key: !Sub "functions/${Stage}/patreonDailySync.zip"
-      Environment:
-        Variables:
-          STAGE: !Ref Stage
-          DATA_TABLE_NAME: !Ref DataTableName
-          PATREON_SECRETS_ARN: !Ref PatreonSecrets
-          USE_MOCK_PATREON_DATA: !If [IsDev, "true", "false"]
+  # Patreon Daily Sync Lambda - DISABLED: Using seed data for development
+  # PatreonDailySyncFunction:
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     FunctionName: !Sub "nlmonorepo-${AppName}-patreon-daily-sync-${Stage}"
+  #     Handler: index.handler
+  #     Runtime: nodejs20.x
+  #     Timeout: 300
+  #     Role: !GetAtt PatreonDailySyncRole.Arn
+  #     Code:
+  #       S3Bucket: !Ref TemplateBucketName
+  #       S3Key: !Sub "functions/${Stage}/patreonDailySync.zip"
+  #     Environment:
+  #       Variables:
+  #         STAGE: !Ref Stage
+  #         DATA_TABLE_NAME: !Ref DataTableName
+  #         PATREON_SECRETS_ARN: !Ref PatreonSecrets
+  #         USE_MOCK_PATREON_DATA: !If [IsDev, "true", "false"]
 
-  PatreonDailySyncRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "nlmonorepo-${AppName}-patreon-daily-sync-role-${Stage}"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-      Policies:
-        - PolicyName: DynamoDBAccess
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - dynamodb:Scan
-                  - dynamodb:UpdateItem
-                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DataTableName}"
-        - PolicyName: SecretsManagerAccess
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - secretsmanager:GetSecretValue
-                Resource: !Ref PatreonSecrets
+  # PatreonDailySyncRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: !Sub "nlmonorepo-${AppName}-patreon-daily-sync-role-${Stage}"
+  #     AssumeRolePolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: lambda.amazonaws.com
+  #           Action: sts:AssumeRole
+  #     ManagedPolicyArns:
+  #       - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  #     Policies:
+  #       - PolicyName: DynamoDBAccess
+  #         PolicyDocument:
+  #           Version: "2012-10-17"
+  #           Statement:
+  #             - Effect: Allow
+  #               Action:
+  #                 - dynamodb:Scan
+  #                 - dynamodb:UpdateItem
+  #               Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DataTableName}"
+  #       - PolicyName: SecretsManagerAccess
+  #         PolicyDocument:
+  #           Version: "2012-10-17"
+  #           Statement:
+  #             - Effect: Allow
+  #               Action:
+  #                 - secretsmanager:GetSecretValue
+  #               Resource: !Ref PatreonSecrets
 
-  # EventBridge rule to trigger Patreon sync daily at 3 AM UTC
-  PatreonDailySyncRule:
-    Type: AWS::Events::Rule
-    Properties:
-      Name: !Sub "nlmonorepo-${AppName}-patreon-daily-sync-${Stage}"
-      Description: Trigger Patreon member sync daily at 3 AM UTC
-      ScheduleExpression: "cron(0 3 * * ? *)"
-      State: ENABLED
-      Targets:
-        - Arn: !GetAtt PatreonDailySyncFunction.Arn
-          Id: PatreonDailySyncTarget
+  # EventBridge rule to trigger Patreon sync daily at 3 AM UTC - DISABLED
+  # PatreonDailySyncRule:
+  #   Type: AWS::Events::Rule
+  #   Properties:
+  #     Name: !Sub "nlmonorepo-${AppName}-patreon-daily-sync-${Stage}"
+  #     Description: Trigger Patreon member sync daily at 3 AM UTC
+  #     ScheduleExpression: "cron(0 3 * * ? *)"
+  #     State: ENABLED
+  #     Targets:
+  #       - Arn: !GetAtt PatreonDailySyncFunction.Arn
+  #         Id: PatreonDailySyncTarget
 
-  # Permission for EventBridge to invoke the Lambda
-  PatreonDailySyncPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !Ref PatreonDailySyncFunction
-      Action: lambda:InvokeFunction
-      Principal: events.amazonaws.com
-      SourceArn: !GetAtt PatreonDailySyncRule.Arn
+  # Permission for EventBridge to invoke the Lambda - DISABLED
+  # PatreonDailySyncPermission:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     FunctionName: !Ref PatreonDailySyncFunction
+  #     Action: lambda:InvokeFunction
+  #     Principal: events.amazonaws.com
+  #     SourceArn: !GetAtt PatreonDailySyncRule.Arn
 
   # API Gateway for Patreon Webhook
   PatreonWebhookApi:
@@ -413,20 +413,21 @@ Resources:
         AllowHeaders:
           - "*"
 
-  PatreonWebhookIntegration:
-    Type: AWS::ApiGatewayV2::Integration
-    Properties:
-      ApiId: !Ref PatreonWebhookApi
-      IntegrationType: AWS_PROXY
-      IntegrationUri: !GetAtt PatreonWebhookFunction.Arn
-      PayloadFormatVersion: "2.0"
+  # DISABLED: Webhook integration - using seed data
+  # PatreonWebhookIntegration:
+  #   Type: AWS::ApiGatewayV2::Integration
+  #   Properties:
+  #     ApiId: !Ref PatreonWebhookApi
+  #     IntegrationType: AWS_PROXY
+  #     IntegrationUri: !GetAtt PatreonWebhookFunction.Arn
+  #     PayloadFormatVersion: "2.0"
 
-  PatreonWebhookRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref PatreonWebhookApi
-      RouteKey: "POST /webhooks/patreon"
-      Target: !Sub "integrations/${PatreonWebhookIntegration}"
+  # PatreonWebhookRoute:
+  #   Type: AWS::ApiGatewayV2::Route
+  #   Properties:
+  #     ApiId: !Ref PatreonWebhookApi
+  #     RouteKey: "POST /webhooks/patreon"
+  #     Target: !Sub "integrations/${PatreonWebhookIntegration}"
 
   # OAuth Routes
   PatreonOAuthIntegration:
@@ -469,14 +470,14 @@ Resources:
       LogGroupName: !Sub "/aws/apigateway/${AppName}-patreon-webhook-${Stage}"
       RetentionInDays: !Ref LogRetentionInDays
 
-  # Permission for API Gateway to invoke the webhook Lambda
-  PatreonWebhookApiPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !Ref PatreonWebhookFunction
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PatreonWebhookApi}/*"
+  # Permission for API Gateway to invoke the webhook Lambda - DISABLED
+  # PatreonWebhookApiPermission:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     FunctionName: !Ref PatreonWebhookFunction
+  #     Action: lambda:InvokeFunction
+  #     Principal: apigateway.amazonaws.com
+  #     SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PatreonWebhookApi}/*"
 
   # Permission for API Gateway to invoke the OAuth Lambda
   PatreonOAuthApiPermission:
@@ -513,21 +514,23 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${CreateCognitoUserFunction}"
       RetentionInDays: !Ref LogRetentionInDays
 
-  PatreonWebhookFunctionLogGroup:
-    Type: AWS::Logs::LogGroup
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Retain
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${PatreonWebhookFunction}"
-      RetentionInDays: !Ref LogRetentionInDays
+  # DISABLED: Webhook function log group
+  # PatreonWebhookFunctionLogGroup:
+  #   Type: AWS::Logs::LogGroup
+  #   DeletionPolicy: Delete
+  #   UpdateReplacePolicy: Retain
+  #   Properties:
+  #     LogGroupName: !Sub "/aws/lambda/${PatreonWebhookFunction}"
+  #     RetentionInDays: !Ref LogRetentionInDays
 
-  PatreonDailySyncFunctionLogGroup:
-    Type: AWS::Logs::LogGroup
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Retain
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${PatreonDailySyncFunction}"
-      RetentionInDays: !Ref LogRetentionInDays
+  # DISABLED: Daily sync function log group
+  # PatreonDailySyncFunctionLogGroup:
+  #   Type: AWS::Logs::LogGroup
+  #   DeletionPolicy: Delete
+  #   UpdateReplacePolicy: Retain
+  #   Properties:
+  #     LogGroupName: !Sub "/aws/lambda/${PatreonDailySyncFunction}"
+  #     RetentionInDays: !Ref LogRetentionInDays
 
   PatreonOAuthFunctionLogGroup:
     Type: AWS::Logs::LogGroup
@@ -564,21 +567,22 @@ Outputs:
     Value: !Ref CreateCognitoUserFunction
     Description: Name of the create Cognito user Lambda function
 
-  PatreonWebhookFunctionArn:
-    Value: !GetAtt PatreonWebhookFunction.Arn
-    Description: ARN of the Patreon webhook Lambda function
+  # DISABLED outputs for webhook and daily sync functions
+  # PatreonWebhookFunctionArn:
+  #   Value: !GetAtt PatreonWebhookFunction.Arn
+  #   Description: ARN of the Patreon webhook Lambda function
 
-  PatreonWebhookFunctionName:
-    Value: !Ref PatreonWebhookFunction
-    Description: Name of the Patreon webhook Lambda function
+  # PatreonWebhookFunctionName:
+  #   Value: !Ref PatreonWebhookFunction
+  #   Description: Name of the Patreon webhook Lambda function
 
-  PatreonDailySyncFunctionArn:
-    Value: !GetAtt PatreonDailySyncFunction.Arn
-    Description: ARN of the Patreon daily sync Lambda function
+  # PatreonDailySyncFunctionArn:
+  #   Value: !GetAtt PatreonDailySyncFunction.Arn
+  #   Description: ARN of the Patreon daily sync Lambda function
 
-  PatreonDailySyncFunctionName:
-    Value: !Ref PatreonDailySyncFunction
-    Description: Name of the Patreon daily sync Lambda function
+  # PatreonDailySyncFunctionName:
+  #   Value: !Ref PatreonDailySyncFunction
+  #   Description: Name of the Patreon daily sync Lambda function
 
   PatreonSecretsArn:
     Value: !Ref PatreonSecrets
@@ -588,9 +592,10 @@ Outputs:
     Value: !Sub "https://${PatreonWebhookApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}"
     Description: Base URL for the Patreon webhook API
 
-  PatreonWebhookEndpoint:
-    Value: !Sub "https://${PatreonWebhookApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/webhooks/patreon"
-    Description: Full URL for the Patreon webhook endpoint (configure this in Patreon portal)
+  # DISABLED: Webhook endpoint
+  # PatreonWebhookEndpoint:
+  #   Value: !Sub "https://${PatreonWebhookApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/webhooks/patreon"
+  #   Description: Full URL for the Patreon webhook endpoint (configure this in Patreon portal)
 
   PatreonOAuthFunctionArn:
     Value: !GetAtt PatreonOAuthFunction.Arn

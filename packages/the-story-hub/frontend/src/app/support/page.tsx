@@ -11,43 +11,56 @@ export default function SupportUsPage() {
 
   const tiers = [
     {
-      name: "Early Access",
-      price: "$3-5",
+      name: "Bronze Supporter",
+      price: "$3",
       color: "primary",
+      tierColor: "bg-amber-700",
       benefits: [
-        "Patreon Supporter badge on profile and stories",
+        "Bronze badge on profile and contributions",
+        "Ad-free experience across the site",
         "Recognition on supporters page",
+        "Support the platform's development",
+      ],
+    },
+    {
+      name: "Silver Supporter",
+      price: "$5",
+      color: "secondary",
+      tierColor: "bg-gray-400",
+      benefits: [
+        "All Bronze benefits, plus:",
+        "Silver badge on profile and contributions",
         "Early access to new features before public release",
         "Beta testing opportunities",
-        "Vote on feature priorities",
         "Behind-the-scenes development updates",
-        "Priority response to bug reports and feature requests",
-        "Monthly poll participation on what to build next",
       ],
     },
     {
-      name: "Creator",
-      price: "$5-10",
-      color: "secondary",
+      name: "Gold Supporter",
+      price: "$10",
+      color: "warning",
+      tierColor: "bg-yellow-500",
       popular: true,
       benefits: [
-        "All Early Access benefits, plus:",
-        "Priority placement for featured stories",
-        "Analytics dashboard for your stories (views, engagement metrics)",
-        "Ability to pin comments on your stories",
+        "All Silver benefits, plus:",
+        "Gold badge on profile and contributions",
+        "Exclusive Discord role and channel access",
+        "Vote on feature priorities",
+        "Priority response to bug reports and feature requests",
       ],
     },
     {
-      name: "Premium",
-      price: "$10-15",
-      color: "warning",
+      name: "Platinum Supporter",
+      price: "$20",
+      color: "danger",
+      tierColor: "bg-gradient-to-r from-purple-500 to-pink-500",
       benefits: [
-        "All Creator benefits, plus:",
-        "Custom public profile page highlighting your contributions and discussions",
+        "All Gold benefits, plus:",
+        "Platinum badge on profile and contributions",
+        "Vote on new feature development",
+        "Display your Patreon creator page link on your profile & contributions",
         "Monthly spotlight feature for one of your stories",
-        "Direct messaging with other patrons",
-        "Story export: Download stories in ePub/PDF format",
-        "Advanced moderation: Tools to better manage your story communities",
+        "Direct influence on platform direction",
       ],
     },
   ];
@@ -139,7 +152,7 @@ export default function SupportUsPage() {
         </div>
 
         {/* Tier Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12 items-stretch">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 items-stretch">
           {tiers.map((tier) => (
             <div key={tier.name} className="relative">
               {tier.popular && (
@@ -218,12 +231,28 @@ export default function SupportUsPage() {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white mb-2">
+                How do I connect my Patreon account?
+              </h3>
+              <p>
+                After becoming a patron, visit your{" "}
+                <Link
+                  href="/settings"
+                  className="text-purple-400 hover:underline"
+                >
+                  account settings
+                </Link>{" "}
+                and click "Connect with Patreon". This links your accounts so
+                we can automatically sync your tier and benefits.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-2">
                 When do I get my benefits?
               </h3>
               <p>
-                Most benefits (like badges and early access) are activated
-                immediately upon becoming a patron. Some benefits like featured
-                story placement are on a monthly rotation.
+                Benefits are activated immediately after connecting your Patreon
+                account. Your tier updates automatically when you change your
+                pledge level.
               </p>
             </div>
             <div>
