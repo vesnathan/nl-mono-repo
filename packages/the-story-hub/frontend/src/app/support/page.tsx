@@ -241,8 +241,8 @@ export default function SupportUsPage() {
                 >
                   account settings
                 </Link>{" "}
-                and click "Connect with Patreon". This links your accounts so
-                we can automatically sync your tier and benefits.
+                and click &ldquo;Connect with Patreon&rdquo;. This links your
+                accounts so we can automatically sync your tier and benefits.
               </p>
             </div>
             <div>

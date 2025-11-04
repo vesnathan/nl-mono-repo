@@ -123,7 +123,7 @@ export const SEED_USERS = [
     screenName: "PixelDreamer",
     phone: "+61400678901",
     patreonSupporter: false,
-    ogSupporter: true,
+    ogSupporter: false,
   },
   {
     userId: USER_IDS.GRACE,
@@ -134,6 +134,12 @@ export const SEED_USERS = [
     screenName: "InkPhoenix",
     phone: "+61400789012",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "SILVER",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 5000, // $50 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
     ogSupporter: true,
   },
   {
@@ -156,6 +162,12 @@ export const SEED_USERS = [
     screenName: "StarlightTales",
     phone: "+61400901234",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "BRONZE",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 3000, // $30 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
     ogSupporter: false,
   },
   {
@@ -167,7 +179,7 @@ export const SEED_USERS = [
     screenName: "RiverStone",
     phone: "+61401012345",
     patreonSupporter: false,
-    ogSupporter: true,
+    ogSupporter: false,
   },
   {
     userId: USER_IDS.KATE,
@@ -178,6 +190,12 @@ export const SEED_USERS = [
     screenName: "MoonlitQuill",
     phone: "+61401123456",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "GOLD",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 10000, // $100 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
     ogSupporter: true,
   },
   {
@@ -200,6 +218,13 @@ export const SEED_USERS = [
     screenName: "CrimsonWords",
     phone: "+61401345678",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "PLATINUM",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 25000, // $250 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
+    patreonCreatorUrl: "https://patreon.com/crimsonwords",
     ogSupporter: false,
   },
   {
@@ -211,7 +236,7 @@ export const SEED_USERS = [
     screenName: "FrostbiteStories",
     phone: "+61401456789",
     patreonSupporter: false,
-    ogSupporter: true,
+    ogSupporter: false,
   },
   {
     userId: USER_IDS.OLIVIA,
