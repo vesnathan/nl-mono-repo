@@ -125,88 +125,6 @@ Resources:
                   - cloudfront:GetInvalidation
                 Resource: "*" # Consider restricting this to the specific distribution ARN if possible
 
-  SendWelcomeEmailFunction:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: !Sub "nlmonorepo-${AppName}-send-welcome-email-${Stage}"
-      Handler: index.handler
-      Runtime: nodejs20.x
-      Timeout: 30
-      Role: !GetAtt SendWelcomeEmailRole.Arn
-      Code:
-        S3Bucket: !Ref TemplateBucketName
-        S3Key: !Sub "functions/${Stage}/sendWelcomeEmail.zip"
-      Environment:
-        Variables:
-          STAGE: !Ref Stage
-          FROM_EMAIL: !Ref FromEmail
-          APP_URL: !Ref AppURL
-
-  SendWelcomeEmailRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "nlmonorepo-${AppName}-send-welcome-email-role-${Stage}"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-      Policies:
-        - PolicyName: SESEmailSending
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ses:SendEmail
-                  - ses:SendRawEmail
-                Resource: "*"
-
-  CreateCognitoUserFunction:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: !Sub "nlmonorepo-${AppName}-create-cognito-user-${Stage}"
-      Handler: index.handler
-      Runtime: nodejs20.x
-      Timeout: 30
-      Role: !GetAtt CreateCognitoUserRole.Arn
-      Code:
-        S3Bucket: !Ref TemplateBucketName
-        S3Key: !Sub "functions/${Stage}/createCognitoUser.zip"
-      Environment:
-        Variables:
-          STAGE: !Ref Stage
-          USER_POOL_ID: !Ref UserPoolId
-
-  CreateCognitoUserRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "nlmonorepo-${AppName}-create-cognito-user-role-${Stage}"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-      Policies:
-        - PolicyName: CognitoUserManagement
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - cognito-idp:AdminCreateUser
-                  - cognito-idp:AdminAddUserToGroup
-                  - cognito-idp:AdminSetUserPassword
-                Resource: !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${UserPoolId}"
-
   # Secrets Manager for Patreon API credentials
   PatreonSecrets:
     Type: AWS::SecretsManager::Secret
@@ -498,22 +416,6 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${PostDeployFunction}"
       RetentionInDays: !Ref LogRetentionInDays
 
-  SendWelcomeEmailFunctionLogGroup:
-    Type: AWS::Logs::LogGroup
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Retain
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${SendWelcomeEmailFunction}"
-      RetentionInDays: !Ref LogRetentionInDays
-
-  CreateCognitoUserFunctionLogGroup:
-    Type: AWS::Logs::LogGroup
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Retain
-    Properties:
-      LogGroupName: !Sub "/aws/lambda/${CreateCognitoUserFunction}"
-      RetentionInDays: !Ref LogRetentionInDays
-
   # DISABLED: Webhook function log group
   # PatreonWebhookFunctionLogGroup:
   #   Type: AWS::Logs::LogGroup
@@ -647,24 +549,6 @@ Outputs:
   PostDeployFunctionName: # Renamed from PostFrontEndDeployFunctionName
     Value: !Ref PostDeployFunction
     Description: Name of the post-deploy Lambda function
-
-  SendWelcomeEmailFunctionArn:
-    Value: !GetAtt SendWelcomeEmailFunction.Arn
-    Description: ARN of the send welcome email Lambda function
-    # Export removed: top-level template will declare canonical exports
-
-  SendWelcomeEmailFunctionName:
-    Value: !Ref SendWelcomeEmailFunction
-    Description: Name of the send welcome email Lambda function
-
-  CreateCognitoUserFunctionArn:
-    Value: !GetAtt CreateCognitoUserFunction.Arn
-    Description: ARN of the create Cognito user Lambda function
-    # Export removed: top-level template will declare canonical exports
-
-  CreateCognitoUserFunctionName:
-    Value: !Ref CreateCognitoUserFunction
-    Description: Name of the create Cognito user Lambda function
 
   # DISABLED outputs for webhook and daily sync functions
   # PatreonWebhookFunctionArn:

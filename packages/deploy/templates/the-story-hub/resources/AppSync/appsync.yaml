@@ -28,12 +28,6 @@ Parameters:
   UserPoolId:
     Type: String
     Description: Cognito User Pool ID
-  SendWelcomeEmailFunctionArn:
-    Type: String
-    Description: ARN of the Lambda function to send welcome emails
-  CreateCognitoUserFunctionArn:
-    Type: String
-    Description: ARN of the Lambda function to create Cognito users
 
 Resources:
   AppSyncLoggingServiceRole:
@@ -98,49 +92,6 @@ Resources:
       ApiId: !GetAtt GraphQlApi.ApiId
       Name: !Sub "${AppName}NoneDataSource"
       Type: NONE
-
-  SendWelcomeEmailDataSource:
-    Type: AWS::AppSync::DataSource
-    Properties:
-      ApiId: !GetAtt GraphQlApi.ApiId
-      Name: !Sub "${AppName}SendWelcomeEmailLambdaDataSource"
-      Type: AWS_LAMBDA
-      LambdaConfig:
-        LambdaFunctionArn: !Ref SendWelcomeEmailFunctionArn
-      ServiceRoleArn: !GetAtt AppSyncLambdaInvokeRole.Arn
-
-  CreateCognitoUserDataSource:
-    Type: AWS::AppSync::DataSource
-    Properties:
-      ApiId: !GetAtt GraphQlApi.ApiId
-      Name: !Sub "${AppName}CreateCognitoUserLambdaDataSource"
-      Type: AWS_LAMBDA
-      LambdaConfig:
-        LambdaFunctionArn: !Ref CreateCognitoUserFunctionArn
-      ServiceRoleArn: !GetAtt AppSyncLambdaInvokeRole.Arn
-
-  AppSyncLambdaInvokeRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "${AppName}-appsync-lambda-invoke-role-${Stage}"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: appsync.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: !Sub "${AppName}-appsync-lambda-invoke-policy-${Stage}"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - lambda:InvokeFunction
-                Resource:
-                  - !Ref SendWelcomeEmailFunctionArn
-                  - !Ref CreateCognitoUserFunctionArn
 
   # User Resolvers
   GetUserProfileResolver:
