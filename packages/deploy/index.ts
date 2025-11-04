@@ -135,6 +135,35 @@ class DeploymentManager {
     logger.info(`🗑️  Removing ${stackType} stack: ${stackName}`);
     logger.info(`📍 Region: ${region}`);
 
+    // For The Story Hub prod, also check and delete DNS stack in us-east-1
+    if (stackType === StackType.TheStoryHub && stage === "prod") {
+      const dnsStackName = `nlmonorepo-thestoryhub-dns-${stage}`;
+      const dnsRegion = "us-east-1";
+
+      try {
+        logger.info(`🗑️  Checking for DNS stack in us-east-1: ${dnsStackName}`);
+        const dnsClient = new CloudFormationClient({ region: dnsRegion });
+        const dnsExists = await this.stackExists(dnsStackName, dnsClient);
+
+        if (dnsExists) {
+          logger.info(`DNS stack found. Deleting...`);
+          const forceDeleteManager = new ForceDeleteManager(dnsRegion, stage);
+          await forceDeleteManager.forceDeleteStack(
+            "nlmonorepo-thestoryhub-dns",
+            stackType,
+            stage,
+          );
+          logger.success(`✓ DNS stack ${dnsStackName} deleted successfully.`);
+        } else {
+          logger.info(`DNS stack ${dnsStackName} does not exist in us-east-1.`);
+        }
+      } catch (dnsError: any) {
+        logger.warning(
+          `Failed to delete DNS stack: ${dnsError.message}. Continuing with main stack deletion.`,
+        );
+      }
+    }
+
     try {
       // Create region-specific CloudFormation client
       const regionClient =
@@ -1103,6 +1132,52 @@ async function main() {
             skipWAF = skipWAFPrompt;
           }
 
+          // Ask about custom domain configuration for prod deployments of The Story Hub
+          let domainName: string | undefined;
+          let hostedZoneId: string | undefined;
+          if (
+            stage === "prod" &&
+            (stack === StackType.TheStoryHub || stack === "all")
+          ) {
+            const { configureDomain } = await inquirer.prompt([
+              {
+                type: "confirm",
+                name: "configureDomain",
+                message:
+                  "Configure custom domain for CloudFront? (Requires Route53 hosted zone)",
+                default: false,
+              },
+            ]);
+
+            if (configureDomain) {
+              const domainAnswers = await inquirer.prompt([
+                {
+                  type: "input",
+                  name: "domainName",
+                  message: "Enter your custom domain name:",
+                  default: "the-story-hub.com",
+                  validate: (input: string) =>
+                    input.trim().length > 0 || "Domain name cannot be empty",
+                },
+                {
+                  type: "input",
+                  name: "hostedZoneId",
+                  message: "Enter your Route53 Hosted Zone ID:",
+                  default: "Z02681573J5GWRCZ2PHRC",
+                  validate: (input: string) =>
+                    input.trim().length > 0 ||
+                    "Hosted Zone ID cannot be empty",
+                },
+              ]);
+              domainName = domainAnswers.domainName.trim();
+              hostedZoneId = domainAnswers.hostedZoneId.trim();
+
+              logger.info(`✓ Domain configuration:`);
+              logger.info(`  - Domain: ${domainName}`);
+              logger.info(`  - Hosted Zone: ${hostedZoneId}`);
+            }
+          }
+
           const options: DeploymentOptions = {
             stage,
             adminEmail,
@@ -1111,6 +1186,8 @@ async function main() {
             skipFrontendBuild,
             disableRollback,
             skipWAF,
+            ...(domainName && { domainName }),
+            ...(hostedZoneId && { hostedZoneId }),
           };
 
           const deployAction = async (stackToDeploy: StackType | "all") => {

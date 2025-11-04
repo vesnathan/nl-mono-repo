@@ -57,14 +57,14 @@ export function StoryFilters({
         <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
           Genres
         </h3>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {STORY_GENRES.map((genre) => (
             <Chip
               key={genre}
               variant={selectedGenres.includes(genre) ? "solid" : "bordered"}
               color={selectedGenres.includes(genre) ? "primary" : "default"}
               onClick={() => handleGenreToggle(genre)}
-              className={`cursor-pointer hover:scale-105 transition-transform w-[140px] justify-center ${
+              className={`cursor-pointer hover:scale-105 transition-transform !w-full !max-w-none justify-center ${
                 selectedGenres.includes(genre)
                   ? "bg-brand-purple text-white"
                   : "bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500"
@@ -80,7 +80,7 @@ export function StoryFilters({
         <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
           Age Rating
         </h3>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {AGE_RATINGS.map((rating) => (
             <Chip
               key={rating.id}
@@ -91,7 +91,7 @@ export function StoryFilters({
                 selectedAgeRatings.includes(rating.id) ? "warning" : "default"
               }
               onClick={() => handleRatingToggle(rating.id)}
-              className={`cursor-pointer hover:scale-105 transition-transform w-[140px] justify-center ${
+              className={`cursor-pointer hover:scale-105 transition-transform !w-full !max-w-none justify-center ${
                 selectedAgeRatings.includes(rating.id)
                   ? "bg-[#F28C28] text-white"
                   : "bg-gray-800 border-gray-600 text-gray-300 hover:border-gray-500"
