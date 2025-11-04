@@ -2,6 +2,24 @@
 
 This guide walks you through setting up Patreon integration for The Story Hub, including creating a Patreon Creator account, configuring OAuth, and connecting it to the application.
 
+## Quick Overview
+
+Setting up Patreon integration involves these main steps:
+
+1. **Create Patreon Creator Account** → Set up your creator page and membership tiers
+2. **Register OAuth App** → Get Client ID, Client Secret, and Access Token from Patreon
+3. **Deploy Infrastructure** → Deploy AWS resources and get API Gateway URLs
+4. **Update Patreon OAuth** → Add the real callback URL to your Patreon app
+5. **Configure Admin Settings** → Enter all credentials in The Story Hub admin panel
+6. **Test** → Verify the integration works end-to-end
+
+**Total Time**: 30-45 minutes
+
+**What You'll Need**:
+- Patreon creator account
+- AWS account with deployment access
+- Admin access to The Story Hub
+
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
@@ -22,66 +40,116 @@ This guide walks you through setting up Patreon integration for The Story Hub, i
 
 1. **Sign up for Patreon**
    - Visit [https://www.patreon.com/signup](https://www.patreon.com/signup)
-   - Create a creator account (not a patron account)
+   - Click "Sign up as a creator" (not "Become a patron")
+   - Fill in your email, password, and creator name
    - Verify your email address
 
 2. **Set up your creator page**
-   - Complete your profile information
-   - Add a profile picture and banner
-   - Write a description of your project
-   - Set up membership tiers (recommended: Bronze, Silver, Gold, Platinum)
+   - After signing up, you'll be taken to the creator dashboard
+   - Click "Edit page" in the top right corner to customize your page
+   - **Profile Picture**: Click on the circular profile image placeholder to upload a logo/photo
+   - **Cover Photo**: Click "Add cover photo" at the top to upload a banner image (recommended: 1600x400px)
+   - **Page Description**: Scroll down and click "Edit" next to "About" to write your project description
+   - Click "Save" after each section
 
 3. **Configure membership tiers**
+
+   Navigate to "Membership" → "Tiers" in the left sidebar, then click "Create a tier":
 
    Create at least these basic tiers to match the application's badge system:
 
    - **Bronze Tier** - $3/month
-     - Basic supporter benefits
-     - Bronze badge in The Story Hub
+     - Click "Create a tier"
+     - **Tier name**: Bronze
+     - **Monthly price**: $3.00
+     - **Description**: Basic supporter benefits + Bronze badge in The Story Hub
+     - Click "Save tier"
 
    - **Silver Tier** - $5/month
-     - All Bronze benefits
-     - Silver badge in The Story Hub
+     - Create another tier with similar steps
+     - **Tier name**: Silver
+     - **Monthly price**: $5.00
+     - **Description**: All Bronze benefits + Silver badge in The Story Hub
 
    - **Gold Tier** - $10/month
-     - All Silver benefits
-     - Gold badge in The Story Hub
+     - **Tier name**: Gold
+     - **Monthly price**: $10.00
+     - **Description**: All Silver benefits + Gold badge in The Story Hub
 
    - **Platinum Tier** - $25/month
-     - All Gold benefits
-     - Platinum badge in The Story Hub
+     - **Tier name**: Platinum
+     - **Monthly price**: $25.00
+     - **Description**: All Gold benefits + Platinum badge in The Story Hub
+
+   **Important**: The tier names (Bronze, Silver, Gold, Platinum) must match exactly as the application uses these to assign badges.
 
 4. **Note your Campaign ID**
-   - Your Campaign ID can be found in your Patreon creator dashboard URL
-   - It's the numeric ID after `/campaign/` in the URL
-   - Example: `https://www.patreon.com/portal/campaigns/12345678` → Campaign ID is `12345678`
-   - Alternatively, you can get it via the Patreon API endpoint: `https://www.patreon.com/api/oauth2/v2/campaigns`
+
+   You'll need this ID for the application configuration:
+
+   - **Option 1 (Easiest)**: Look at your browser URL when in the Patreon creator portal
+     - Navigate to "My page" or any creator dashboard page
+     - Look for the URL pattern: `https://www.patreon.com/portal/campaigns/12345678`
+     - The number after `/campaigns/` is your Campaign ID (e.g., `12345678`)
+
+   - **Option 2**: Via Patreon API
+     - While logged in to Patreon, visit: `https://www.patreon.com/api/oauth2/v2/campaigns`
+     - Look for the `id` field in the JSON response
+
+   - **Option 3**: From the creator page URL
+     - Go to your public creator page (e.g., `https://www.patreon.com/yourname`)
+     - Right-click the page, select "View Page Source"
+     - Search for `campaignId` in the HTML source
 
 ## Register Patreon OAuth Application
 
 1. **Access the Patreon Client Portal**
    - Visit [https://www.patreon.com/portal/registration/register-clients](https://www.patreon.com/portal/registration/register-clients)
-   - Log in with your creator account
+   - Log in with your creator account if prompted
+   - You should see a page titled "Clients & API Keys"
 
 2. **Create a new client**
-   - Click "Create Client"
-   - Fill in the application details:
+   - Click the blue "Create Client" button at the top right
+   - A form will appear with multiple fields
 
 3. **Application Configuration**
 
-   Fill in the following fields:
+   Fill in the form with the following information:
 
-   - **App Name**: The Story Hub
-   - **Description**: Interactive storytelling platform with Patreon supporter integration
-   - **App Category**: Choose appropriate category (e.g., "Art & Design" or "Writing")
-   - **Author or Company Name**: Your name or company
-   - **Icon URL**: URL to your application logo (optional)
-   - **Privacy Policy URL**: URL to your privacy policy
-   - **Terms of Service URL**: URL to your terms of service
+   - **App Name**: `The Story Hub`
+     - This is the name users will see when authorizing your app
+
+   - **Description**: `Interactive storytelling platform with Patreon supporter integration`
+     - Brief description of what your app does
+
+   - **App Category**: Select from dropdown
+     - Choose "Art & Design" or "Writing" (whichever fits better)
+
+   - **Author or Company Name**: Your name or company name
+     - This appears to users during OAuth
+
+   - **Privacy Policy URL**: Your privacy policy URL
+     - Example: `https://yourdomain.com/privacy`
+     - Required for OAuth apps
+
+   - **Terms of Service URL**: Your terms of service URL
+     - Example: `https://yourdomain.com/terms`
+     - Required for OAuth apps
+
+   - **Icon URL** (Optional): URL to your application logo
+     - Example: `https://yourdomain.com/logo.png`
+     - Must be a publicly accessible image URL
+     - Recommended size: 256x256px or larger, square aspect ratio
 
 4. **OAuth Redirect URIs**
 
-   Add the OAuth callback URL(s) from your deployment:
+   Scroll down to find the "Redirect URIs" section in the form:
+
+   - You'll see a text field labeled "Redirect URI"
+   - Click the "+ Add" button to add callback URLs
+   - **Important**: You'll need to deploy your infrastructure first to get these URLs (see [Deploy Infrastructure](#deploy-infrastructure))
+   - For now, you can use a placeholder like `https://example.com/callback` and update it later
+   - After deployment, come back and click "Edit Client" to add the real callback URLs:
 
    **For Development:**
    ```
@@ -93,44 +161,79 @@ This guide walks you through setting up Patreon integration for The Story Hub, i
    https://{your-api-gateway-id}.execute-api.{region}.amazonaws.com/prod/auth/patreon/callback
    ```
 
-   You'll get these URLs after deploying the infrastructure (see [Deploy Infrastructure](#deploy-infrastructure)).
+   - Click "Create Client" button at the bottom of the form
 
-5. **Client Credentials**
+5. **Save Client Credentials**
 
-   After creating the client, you'll receive:
-   - **Client ID** - Public identifier for your app
-   - **Client Secret** - Keep this secret! Never expose in client-side code
+   After clicking "Create Client", you'll be shown your credentials:
 
-   **Important:** Copy these values immediately and store them securely.
+   - **Client ID** - A long alphanumeric string (public, safe to expose)
+   - **Client Secret** - A long secret string (KEEP THIS SECRET!)
 
-6. **Generate Creator Access Token**
+   **Critical Steps:**
+   1. Click "Show" next to Client Secret to reveal it
+   2. Copy both Client ID and Client Secret to a secure location (password manager recommended)
+   3. These credentials cannot be retrieved again without regenerating them
+   4. Click "Done" or "Close" to return to the clients list
 
-   You'll also need a Creator Access Token for server-side API calls:
+6. **Get Creator Access Token**
 
-   - In the Patreon Portal, go to your client settings
-   - Find the "Creator's Access Token" section
-   - Click "Generate Token" or use the existing token
-   - Copy the token and store it securely
+   You'll need a Creator Access Token for server-side API calls:
 
-   This token is used for:
+   - From the "Clients & API Keys" page, find your newly created client
+   - Click on your client name to view details
+   - Scroll down to the "Creator's Access Token" section
+   - You'll see either:
+     - An existing token (if one was auto-generated)
+     - A "Generate Token" button
+
+   **To get your token:**
+   1. If you see a token, click the "Copy" icon or select and copy it
+   2. If you see "Generate Token", click it, then copy the generated token
+   3. Store this token securely with your other credentials
+
+   **This token is used for:**
    - Fetching campaign member lists
-   - Verifying pledge amounts
-   - Managing webhooks
+   - Verifying pledge amounts and tiers
+   - Checking member status
+   - Managing webhooks (if enabled)
 
-7. **Set up Webhook (Optional - for real-time updates)**
+7. **Set up Webhook Secret (Optional)**
 
-   Note: Currently, webhooks are disabled in the application (using seed data for development). Skip this step unless you're enabling webhook support.
+   **Note**: Webhooks are currently disabled in the application (using seed data for development). You can skip this step for now.
 
-   If enabling webhooks in the future:
-   - Create a webhook secret (any random string, e.g., use `openssl rand -hex 32`)
-   - Configure webhook URL in Patreon portal:
-     ```
-     https://{your-api-gateway-id}.execute-api.{region}.amazonaws.com/dev/webhooks/patreon
-     ```
-   - Select events to listen for:
-     - `members:pledge:create`
-     - `members:pledge:update`
-     - `members:pledge:delete`
+   If you want to enable webhooks in the future:
+
+   1. **Generate a webhook secret:**
+      ```bash
+      # On Mac/Linux
+      openssl rand -hex 32
+
+      # Or use any password generator to create a 64-character random string
+      ```
+
+   2. **Store this secret** - You'll enter it in The Story Hub admin settings
+
+   3. **Configure webhook in Patreon** (after infrastructure is deployed):
+      - Go to your client settings
+      - Find the "Webhooks" section
+      - Click "Add Webhook"
+      - **Webhook URL**: `https://{your-api-gateway-id}.execute-api.{region}.amazonaws.com/dev/webhooks/patreon`
+      - **Events to trigger**: Select these events:
+        - `members:pledge:create`
+        - `members:pledge:update`
+        - `members:pledge:delete`
+      - Click "Save"
+
+8. **Return to Update Redirect URIs Later**
+
+   Remember to come back after deploying your infrastructure:
+
+   1. Go to [Patreon Clients & API Keys](https://www.patreon.com/portal/registration/register-clients)
+   2. Click on your client name
+   3. Click "Edit Client"
+   4. Update the Redirect URIs with the real URLs from your deployment
+   5. Click "Update Client"
 
 ## Configure Application Settings
 
@@ -158,29 +261,59 @@ After deployment completes, note the output values:
 ### Step 3: Configure Secrets via Admin UI
 
 1. **Log in to The Story Hub as an admin**
-   - Navigate to your deployed application
-   - Log in with an account that has `SiteAdmin` role in Cognito
+   - Navigate to your deployed application URL
+   - Click "Login" in the top navigation bar
+   - Enter credentials for an account that has `SiteAdmin` role in Cognito
+   - If you don't have an admin account yet, you'll need to create one in AWS Cognito Console and add the `custom:clientType` attribute with value `SiteAdmin`
 
 2. **Access Admin Settings**
-   - Click "Admin Settings" in the top navigation bar
-   - Scroll to the "Patreon Configuration" section
+   - After logging in, look at the top navigation bar
+   - You should see an "Admin Settings" button (only visible to admins)
+   - Click "Admin Settings"
+   - You'll be taken to `/admin/settings` page
+   - Scroll down to find the "Patreon Configuration" section (it has a blue info box)
 
 3. **Enter Patreon Credentials**
 
-   Fill in all the fields from your Patreon setup:
+   You'll see 5 text input fields. Fill them in order:
 
-   - **Patreon Campaign ID**: The numeric ID from your campaign URL
-   - **Patreon Client ID**: From the Patreon OAuth client
-   - **Patreon Client Secret**: From the Patreon OAuth client (will be masked after saving)
-   - **Patreon Creator Access Token**: The token generated in Patreon Portal (will be masked)
-   - **Patreon Webhook Secret**: Your webhook secret if using webhooks (will be masked)
+   **a) Patreon Campaign ID**
+   - Click in the text field under "Patreon Campaign ID"
+   - Paste your numeric Campaign ID (from earlier step, e.g., `12345678`)
+   - Click outside the field or press Tab
+   - The field will auto-save and you'll see a green success message
 
-4. **Save Settings**
+   **b) Patreon Client ID**
+   - Click in the "Patreon Client ID" field
+   - Paste your Client ID from Patreon (the long alphanumeric string)
+   - Click outside the field to auto-save
+   - You'll see a success message
 
-   - Each field updates individually when you change it
-   - The system automatically syncs to AWS Secrets Manager
-   - Sensitive fields are masked after saving (showing only first 8 characters)
-   - Changes are applied immediately to all Lambda functions
+   **c) Patreon Client Secret**
+   - Click in the "Patreon Client Secret" field
+   - Paste your Client Secret
+   - Click outside the field to auto-save
+   - **Important**: After saving, this field will show only `abc12345...` (masked for security)
+   - If you need to update it later, just paste the full new value
+
+   **d) Patreon Creator Access Token**
+   - Click in the "Patreon Creator Access Token" field
+   - Paste your Creator Access Token
+   - Click outside the field to auto-save
+   - This will also be masked after saving
+
+   **e) Patreon Webhook Secret** (optional)
+   - Only fill this if you're using webhooks
+   - Otherwise, you can leave it empty or put any placeholder value
+   - Will be masked after saving
+
+4. **Verify Settings Saved**
+
+   After entering each credential:
+   - Wait for the green "Settings saved successfully!" message to appear at the top
+   - Refresh the page to verify your settings persisted
+   - Sensitive fields should show masked values like `abc12345...`
+   - Campaign ID should show the full numeric value (not sensitive)
 
 5. **Security Notes**
 
