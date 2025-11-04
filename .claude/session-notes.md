@@ -160,3 +160,10 @@
 - Update this file with significant changes, decisions, and pending work
 - User prefers concise, technical communication
 - Focus on facts and problem-solving over validation
+
+### Pending Issues
+
+- **OP Approved Badge - Multiple Branches**: Multiple branches under the same parent node are showing "OP Approved" badges
+  - Business rule: **Only ONE branch can be OP Approved per parent node**
+  - Need to add enforcement in the admin settings/mutation to ensure only one branch can be approved at a time
+  - When approving a branch, any previously approved sibling branches should be automatically un-approved
