@@ -84,6 +84,52 @@ function SettingToggle({
   );
 }
 
+interface SettingInputProps {
+  label: string;
+  description: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  type?: "text" | "password";
+  disabled?: boolean;
+}
+
+function SettingInput({
+  label,
+  description,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  disabled = false,
+}: SettingInputProps) {
+  const inputId = `input-${label.toLowerCase().replace(/\s+/g, "-")}`;
+
+  return (
+    <div className="py-4 border-b border-gray-700 last:border-b-0 last:pb-0">
+      <label htmlFor={inputId} className="text-white font-medium block mb-1">
+        {label}
+      </label>
+      <p className="text-gray-400 text-sm mb-3">{description}</p>
+      <input
+        id={inputId}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        disabled={disabled}
+        className={`
+          w-full px-4 py-2 rounded-lg
+          bg-gray-700 border border-gray-600
+          text-white placeholder-gray-500
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+          ${disabled ? "opacity-50 cursor-not-allowed" : ""}
+        `}
+      />
+    </div>
+  );
+}
+
 function AdminSettingsContent() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -197,6 +243,67 @@ function AdminSettingsContent() {
               onChange={(value) =>
                 handleToggleChange("grantOGBadgeToPatreonSupporters", value)
               }
+              disabled={isSaving}
+            />
+          </SettingsSection>
+
+          {/* Patreon Configuration Section */}
+          <SettingsSection
+            title="Patreon Configuration"
+            description="Configure Patreon integration settings. These credentials are stored securely in AWS Secrets Manager."
+          >
+            <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 mb-4">
+              <p className="text-blue-200 text-sm">
+                <strong>Note:</strong> After updating these settings, you'll need to update the AWS Secrets Manager manually with these values.
+                The secret is named: <code className="bg-gray-800 px-2 py-1 rounded">nlmonorepo-tsh-patreon-secrets-dev</code>
+              </p>
+            </div>
+
+            <SettingInput
+              label="Patreon Campaign ID"
+              description="Your Patreon campaign ID. Found in your Patreon creator dashboard URL or API."
+              value={settings?.patreonCampaignId ?? ""}
+              onChange={(value) => handleToggleChange("patreonCampaignId" as any, value as any)}
+              placeholder="1234567"
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="Patreon Client ID"
+              description="OAuth Client ID from your Patreon app. Get this from https://www.patreon.com/portal/registration/register-clients"
+              value={settings?.patreonClientId ?? ""}
+              onChange={(value) => handleToggleChange("patreonClientId" as any, value as any)}
+              placeholder="abc123def456..."
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="Patreon Client Secret"
+              description="OAuth Client Secret from your Patreon app. Keep this secret!"
+              value={settings?.patreonClientSecret ?? ""}
+              onChange={(value) => handleToggleChange("patreonClientSecret" as any, value as any)}
+              placeholder="xyz789uvw012..."
+              type="password"
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="Patreon Creator Access Token"
+              description="Creator access token for API access. Generate this from your Patreon app settings."
+              value={settings?.patreonCreatorAccessToken ?? ""}
+              onChange={(value) => handleToggleChange("patreonCreatorAccessToken" as any, value as any)}
+              placeholder="Enter creator access token"
+              type="password"
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="Patreon Webhook Secret"
+              description="Webhook secret for verifying webhook authenticity. Set this when creating your webhook in Patreon."
+              value={settings?.patreonWebhookSecret ?? ""}
+              onChange={(value) => handleToggleChange("patreonWebhookSecret" as any, value as any)}
+              placeholder="Enter webhook secret"
+              type="password"
               disabled={isSaving}
             />
           </SettingsSection>

@@ -6,11 +6,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { authSignOut } from "shared/functions/authSignOut";
 
 export function Navbar() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const { isAuthenticated, isLoading, refresh } = useAuth();
+  const { isAdmin } = useIsAdmin();
 
   const handleLogout = async () => {
     await authSignOut();
@@ -34,13 +36,33 @@ export function Navbar() {
             <div className="flex items-center gap-4">
               {!isLoading &&
                 (isAuthenticated ? (
-                  <Button
-                    variant="ghost"
-                    className="text-white border-white hover:bg-white/20"
-                    onPress={handleLogout}
-                  >
-                    Logout
-                  </Button>
+                  <>
+                    {isAdmin && (
+                      <Link href="/admin/settings">
+                        <Button
+                          variant="ghost"
+                          className="text-white border-white hover:bg-white/20"
+                        >
+                          Admin Settings
+                        </Button>
+                      </Link>
+                    )}
+                    <Link href="/settings">
+                      <Button
+                        variant="ghost"
+                        className="text-white border-white hover:bg-white/20"
+                      >
+                        Settings
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      className="text-white border-white hover:bg-white/20"
+                      onPress={handleLogout}
+                    >
+                      Logout
+                    </Button>
+                  </>
                 ) : (
                   <>
                     <Button
