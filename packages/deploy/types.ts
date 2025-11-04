@@ -23,6 +23,8 @@ export interface DeploymentOptions {
   tags?: { [key: string]: string };
   disableRollback?: boolean;
   skipWAF?: boolean; // Skip WAF dependency (useful for dev to save costs)
+  domainName?: string; // Custom domain name for CloudFront (prod only)
+  hostedZoneId?: string; // Route53 Hosted Zone ID for domain validation (prod only)
 }
 
 export interface ForceDeleteOptions {

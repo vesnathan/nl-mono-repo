@@ -45,7 +45,7 @@ export default function BrowsePage() {
             minHeight="auto"
             overlay="linear-gradient(0deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.65) 100%)"
           >
-            <div className="w-full pt-24 pb-32 px-4">
+            <div className="w-full pt-32 pb-32 px-4">
               <div className="max-w-4xl mx-auto text-center">
                 <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 drop-shadow-lg">
                   Browse Stories
@@ -77,7 +77,7 @@ export default function BrowsePage() {
       <ParallaxSection
         background="#1a1a1a"
         minHeight="auto"
-        className="relative overflow-hidden -mt-32 pt-16 z-10"
+        className="relative overflow-hidden -mt-32 pt-32 z-10"
       >
         {/* Subtle constellation background */}
         <div
@@ -119,16 +119,10 @@ export default function BrowsePage() {
                 ) : isLoading ? (
                   <LoadingSpinner label="Loading stories..." />
                 ) : (
-                  <>
-                    <div className="mb-6 text-gray-400 text-lg">
-                      Found {filteredStories?.length || 0}{" "}
-                      {filteredStories?.length === 1 ? "story" : "stories"}
-                    </div>
-                    <StoriesGrid
-                      stories={filteredStories || []}
-                      emptyMessage="No stories match your filters. Try adjusting your search criteria."
-                    />
-                  </>
+                  <StoriesGrid
+                    stories={filteredStories || []}
+                    emptyMessage="No stories match your filters. Try adjusting your search criteria."
+                  />
                 )}
               </main>
             </div>

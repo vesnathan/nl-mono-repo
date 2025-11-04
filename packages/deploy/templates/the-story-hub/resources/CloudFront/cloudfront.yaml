@@ -18,6 +18,17 @@ Parameters:
   AppBucketRegionalDomainName: # Renamed from TSHBucketRegionalDomainName
     Type: String
     Description: Regional domain name of the S3 bucket for CloudFront origin
+  CertificateArn:
+    Type: String
+    Description: ACM certificate ARN (must be in us-east-1 for CloudFront)
+    Default: ""
+  CustomDomainName:
+    Type: String
+    Description: Custom domain name (e.g., the-story-hub.com)
+    Default: ""
+
+Conditions:
+  HasCustomDomain: !Not [!Equals [!Ref CustomDomainName, ""]]
 
 Resources:
   AppBucketPolicy: # Renamed from TSHBucketPolicy
@@ -27,15 +38,12 @@ Resources:
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Effect: Allow
+          - Sid: AllowCloudFrontServicePrincipalReadOnly
+            Effect: Allow
             Principal:
               Service: cloudfront.amazonaws.com
-            Action:
-              - s3:GetObject
-              - s3:ListBucket
-            Resource:
-              - !Ref AppBucketArn
-              - !Sub "${AppBucketArn}/*"
+            Action: s3:GetObject
+            Resource: !Sub "${AppBucketArn}/*"
             Condition:
               StringEquals:
                 AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${AppCloudFrontDistribution}"
@@ -44,8 +52,8 @@ Resources:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
-        Name: !Sub "${AppName}BucketOAC"
-        Description: "Origin Access Control for application bucket"
+        Name: !Sub "${AppName}BucketOAC-${Stage}"
+        Description: !Sub "Origin Access Control for ${AppName} ${Stage} bucket"
         SigningBehavior: always
         SigningProtocol: sigv4
         OriginAccessControlOriginType: s3
@@ -55,6 +63,17 @@ Resources:
     Properties:
       DistributionConfig:
         Comment: !Sub "CloudFront distribution for ${AppName} ${Stage}"
+        Aliases: !If
+          - HasCustomDomain
+          - - !Ref CustomDomainName
+            - !Sub "www.${CustomDomainName}"
+          - !Ref AWS::NoValue
+        ViewerCertificate: !If
+          - HasCustomDomain
+          - AcmCertificateArn: !Ref CertificateArn
+            SslSupportMethod: sni-only
+            MinimumProtocolVersion: TLSv1.2_2021
+          - CloudFrontDefaultCertificate: true
         Origins:
           - DomainName: !Ref AppBucketRegionalDomainName
             Id: S3Origin

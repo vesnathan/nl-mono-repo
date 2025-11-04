@@ -6,6 +6,7 @@ import {
   UpdateStackCommand,
   DescribeStacksCommand,
   DescribeStackEventsCommand,
+  DeleteStackCommand,
 } from "@aws-sdk/client-cloudformation";
 import {
   S3,
@@ -16,6 +17,12 @@ import {
   PutPublicAccessBlockCommand,
   PutBucketVersioningCommand,
 } from "@aws-sdk/client-s3";
+import {
+  CloudFrontClient,
+  GetDistributionConfigCommand,
+  UpdateDistributionCommand,
+  CreateInvalidationCommand,
+} from "@aws-sdk/client-cloudfront";
 import {
   DeploymentOptions,
   StackType,
@@ -79,6 +86,190 @@ async function retryOperation<T>(
     }
   }
   throw new Error("Unexpected: Should not reach here");
+}
+
+// Deploy DNS stack to us-east-1 (ACM certificates for CloudFront must be in us-east-1)
+async function deployDNSStack(
+  domainName: string,
+  hostedZoneId: string,
+  stage: string,
+  cloudFrontDomainName?: string,
+): Promise<string> {
+  const region = "us-east-1"; // ACM certs for CloudFront MUST be in us-east-1
+  const cfn = new CloudFormationClient({ region });
+  const s3 = new S3({ region });
+  const stackName = `nlmonorepo-thestoryhub-dns-${stage}`;
+  const templateBucketName = `nlmonorepo-thestoryhub-dns-templates-${stage}`;
+
+  logger.info(`📋 Deploying DNS stack to us-east-1 for domain: ${domainName}`);
+
+  // Create S3 bucket for DNS template in us-east-1
+  const s3BucketManager = new S3BucketManager(region);
+  const bucketExists = await s3BucketManager.ensureBucketExists(
+    templateBucketName,
+  );
+  if (!bucketExists) {
+    throw new Error(
+      `Failed to create DNS template bucket ${templateBucketName} in us-east-1`,
+    );
+  }
+
+  // Upload DNS template to S3
+  const dnsTemplatePath = path.join(
+    __dirname,
+    "../../templates/the-story-hub/resources/DNS/dns.yaml",
+  );
+  const dnsTemplateKey = "dns.yaml";
+
+  try {
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: templateBucketName,
+        Key: dnsTemplateKey,
+        Body: createReadStream(dnsTemplatePath),
+        ContentType: "application/x-yaml",
+      }),
+    );
+    logger.debug("DNS template uploaded to us-east-1");
+  } catch (error: any) {
+    throw new Error(`Failed to upload DNS template: ${error.message}`);
+  }
+
+  // Prepare CloudFormation parameters
+  const stackParams: Parameter[] = [
+    { ParameterKey: "Stage", ParameterValue: stage },
+    { ParameterKey: "DomainName", ParameterValue: domainName },
+    { ParameterKey: "HostedZoneId", ParameterValue: hostedZoneId },
+    {
+      ParameterKey: "CloudFrontDomainName",
+      ParameterValue: cloudFrontDomainName || "",
+    },
+  ];
+
+  const templateUrl = `https://s3.${region}.amazonaws.com/${templateBucketName}/${dnsTemplateKey}`;
+
+  // Check if stack exists
+  let stackExists = false;
+  try {
+    const describeResponse = await cfn.send(
+      new DescribeStacksCommand({ StackName: stackName }),
+    );
+    stackExists = !!(
+      describeResponse.Stacks && describeResponse.Stacks.length > 0
+    );
+  } catch (error: any) {
+    if (
+      error.name === "ValidationError" ||
+      error.message?.includes("does not exist")
+    ) {
+      stackExists = false;
+    } else {
+      throw error;
+    }
+  }
+
+  // Create or update stack
+  if (stackExists) {
+    logger.info(`Updating DNS stack in us-east-1...`);
+    try {
+      await cfn.send(
+        new UpdateStackCommand({
+          StackName: stackName,
+          TemplateURL: templateUrl,
+          Parameters: stackParams,
+          Capabilities: [Capability.CAPABILITY_NAMED_IAM],
+        }),
+      );
+      await waitForStackCompletion(cfn, stackName, "UPDATE");
+    } catch (error: any) {
+      if (error.message?.includes("No updates are to be performed")) {
+        logger.info("DNS stack is already up to date");
+      } else {
+        throw error;
+      }
+    }
+  } else {
+    logger.info(`Creating DNS stack in us-east-1...`);
+    logger.info(
+      `⏳ This may take 5-10 minutes for ACM certificate validation...`,
+    );
+    await cfn.send(
+      new CreateStackCommand({
+        StackName: stackName,
+        TemplateURL: templateUrl,
+        Parameters: stackParams,
+        Capabilities: [Capability.CAPABILITY_NAMED_IAM],
+      }),
+    );
+    await waitForStackCompletion(cfn, stackName, "CREATE");
+  }
+
+  // Get certificate ARN from stack outputs
+  const stackData = await cfn.send(
+    new DescribeStacksCommand({ StackName: stackName }),
+  );
+  const certificateArn = stackData.Stacks?.[0]?.Outputs?.find(
+    (output) => output.OutputKey === "CertificateArn",
+  )?.OutputValue;
+
+  if (!certificateArn) {
+    throw new Error("Failed to get Certificate ARN from DNS stack outputs");
+  }
+
+  logger.success(`✓ DNS stack deployed successfully in us-east-1`);
+  logger.info(`📜 Certificate ARN: ${certificateArn}`);
+
+  return certificateArn;
+}
+
+// Update CloudFront distribution with custom domain and certificate
+async function updateCloudFrontWithDomain(
+  distributionId: string,
+  certificateArn: string,
+  domainName: string,
+): Promise<void> {
+  const cloudfront = new CloudFrontClient({ region: "us-east-1" }); // CloudFront is global but API is in us-east-1
+
+  logger.info(`☁️  Updating CloudFront distribution ${distributionId}...`);
+
+  // Get current distribution configuration
+  const getConfigResponse = await cloudfront.send(
+    new GetDistributionConfigCommand({ Id: distributionId }),
+  );
+
+  const config = getConfigResponse.DistributionConfig;
+  const etag = getConfigResponse.ETag;
+
+  if (!config || !etag) {
+    throw new Error("Failed to get CloudFront distribution configuration");
+  }
+
+  // Update configuration with custom domain and certificate
+  config.Aliases = {
+    Quantity: 2,
+    Items: [domainName, `www.${domainName}`],
+  };
+
+  config.ViewerCertificate = {
+    ACMCertificateArn: certificateArn,
+    SSLSupportMethod: "sni-only",
+    MinimumProtocolVersion: "TLSv1.2_2021",
+    Certificate: certificateArn,
+    CertificateSource: "acm",
+  };
+
+  // Update the distribution
+  await cloudfront.send(
+    new UpdateDistributionCommand({
+      Id: distributionId,
+      DistributionConfig: config,
+      IfMatch: etag,
+    }),
+  );
+
+  logger.success(
+    `✓ CloudFront distribution updated with custom domain: ${domainName}`,
+  );
 }
 
 // Recursively find all .ts files
@@ -261,7 +452,7 @@ async function waitForStackCompletion(
 }
 
 export async function deployTheStoryHub(
-  options: DeploymentOptions,
+  options: DeploymentOptions & { domainName?: string; hostedZoneId?: string },
 ): Promise<void> {
   // Cache is cleared at the main() entry point in index.ts
   // Logging is set up in the deploy menu in index.ts
@@ -277,6 +468,35 @@ export async function deployTheStoryHub(
   );
 
   const region = options.region || process.env.AWS_REGION || "ap-southeast-2";
+
+  // Deploy DNS stack first if domain configuration is provided (prod only)
+  let certificateArn: string | undefined;
+  if (options.domainName && options.hostedZoneId && options.stage === "prod") {
+    try {
+      logger.info(`🌐 Domain configuration detected for ${options.domainName}`);
+      logger.info(
+        `📋 Deploying DNS stack to us-east-1 (ACM certificates for CloudFront must be in us-east-1)`,
+      );
+
+      // First deployment: Create certificate without CloudFront domain
+      certificateArn = await deployDNSStack(
+        options.domainName,
+        options.hostedZoneId,
+        options.stage,
+        undefined, // CloudFront domain not available yet
+      );
+
+      logger.success(
+        `✓ DNS stack deployed with certificate: ${certificateArn.substring(0, 50)}...`,
+      );
+    } catch (error: any) {
+      logger.error(`Failed to deploy DNS stack: ${error.message}`);
+      logger.error(
+        `Deployment cannot continue without DNS configuration. Please fix the issue and try again.`,
+      );
+      throw error;
+    }
+  }
 
   // Initialize clients early to check if stack exists
   const cfn = new CloudFormationClient({ region });
@@ -949,6 +1169,22 @@ export async function deployTheStoryHub(
       ParameterValue: resolversBuildHash,
     });
 
+    // Domain configuration parameters (optional, for prod with custom domain)
+    // Note: These are passed to main template but not currently used by nested stacks
+    // Certificate and domain are handled by separate DNS stack in us-east-1
+    if (options.domainName) {
+      stackParams.push({
+        ParameterKey: "DomainName",
+        ParameterValue: options.domainName,
+      });
+    }
+    if (options.hostedZoneId) {
+      stackParams.push({
+        ParameterKey: "HostedZoneId",
+        ParameterValue: options.hostedZoneId,
+      });
+    }
+
     // Log the parameters we will pass to CloudFormation for debugging
     try {
       logger.debug(
@@ -1062,6 +1298,148 @@ export async function deployTheStoryHub(
       logger.success(
         `CloudFormation stack ${stackName} deployed/updated successfully`,
       );
+
+      // Update CloudFront and DNS for custom domain (second phase)
+      if (
+        certificateArn &&
+        options.domainName &&
+        options.hostedZoneId &&
+        options.stage === "prod"
+      ) {
+        try {
+          logger.info(`🌐 Configuring custom domain for CloudFront...`);
+
+          // Get CloudFront distribution ID and domain from stack outputs
+          const stackOutputs = await cfn.send(
+            new DescribeStacksCommand({ StackName: stackName }),
+          );
+          const cloudFrontDomain = stackOutputs.Stacks?.[0]?.Outputs?.find(
+            (output) => output.OutputKey === "CloudFrontDomainName",
+          )?.OutputValue;
+          const cloudFrontDistributionId = stackOutputs.Stacks?.[0]?.Outputs?.find(
+            (output) => output.OutputKey === "CloudFrontDistributionId",
+          )?.OutputValue;
+
+          if (cloudFrontDomain && cloudFrontDistributionId) {
+            logger.info(`📡 CloudFront domain: ${cloudFrontDomain}`);
+            logger.info(`🆔 Distribution ID: ${cloudFrontDistributionId}`);
+
+            // Update CloudFront distribution with certificate and custom domains
+            await updateCloudFrontWithDomain(
+              cloudFrontDistributionId,
+              certificateArn,
+              options.domainName,
+            );
+
+            // Update DNS stack with CloudFront domain to create Route53 records
+            await deployDNSStack(
+              options.domainName,
+              options.hostedZoneId,
+              options.stage,
+              cloudFrontDomain,
+            );
+
+            logger.success(
+              `✓ Custom domain configuration complete!`,
+            );
+            logger.info(`🌍 Your site will be accessible at:`);
+            logger.info(`   - https://${options.domainName}`);
+            logger.info(`   - https://www.${options.domainName}`);
+            logger.info(
+              `   - https://${cloudFrontDomain} (CloudFront default domain)`,
+            );
+            logger.info(
+              `⏳ Note: CloudFront distribution update may take 15-20 minutes to propagate globally`,
+            );
+          } else {
+            logger.warning(
+              `Could not find CloudFront outputs. Domain configuration incomplete.`,
+            );
+          }
+        } catch (error: any) {
+          logger.error(
+            `Failed to configure custom domain: ${error.message}`,
+          );
+          logger.error(
+            `Deployment failed during domain configuration. Please fix the issue and redeploy.`,
+          );
+          throw error;
+        }
+      }
+
+      // Upload frontend to S3 if it was built
+      const frontendOutPath = path.join(
+        __dirname,
+        "../../../the-story-hub/frontend/out",
+      );
+      try {
+        // Check if the out directory exists
+        if (require("fs").existsSync(frontendOutPath)) {
+          logger.info("📤 Uploading frontend to S3...");
+
+          // Get bucket name from stack outputs
+          const stackOutputs = await cfn.send(
+            new DescribeStacksCommand({ StackName: stackName }),
+          );
+          const bucketName = stackOutputs.Stacks?.[0]?.Outputs?.find(
+            (output) => output.OutputKey === "WebsiteBucket",
+          )?.OutputValue;
+
+          if (bucketName) {
+            logger.debug(`Uploading to bucket: ${bucketName}`);
+
+            // Use custom AWS CLI path if available (for local-aws setup)
+            const awsCliPath = process.env.AWS_CLI_PATH || "aws";
+            const noVerifyFlag = process.env.AWS_NO_VERIFY_SSL === "true" ? "--no-verify-ssl" : "";
+
+            // Use AWS CLI sync for efficient upload
+            const syncCommand = `${awsCliPath} s3 sync ${frontendOutPath} s3://${bucketName}/ --delete ${noVerifyFlag}`;
+            execSync(syncCommand, {
+              stdio: options.debugMode ? "inherit" : "pipe",
+              encoding: "utf8",
+            });
+
+            logger.success("✓ Frontend uploaded to S3");
+
+            // Invalidate CloudFront cache
+            const distributionId = stackOutputs.Stacks?.[0]?.Outputs?.find(
+              (output) => output.OutputKey === "CloudFrontDistributionId",
+            )?.OutputValue;
+
+            if (distributionId) {
+              logger.info("🔄 Invalidating CloudFront cache...");
+              const cfClient = new CloudFrontClient({ region: "us-east-1" });
+
+              await cfClient.send(
+                new CreateInvalidationCommand({
+                  DistributionId: distributionId,
+                  InvalidationBatch: {
+                    CallerReference: Date.now().toString(),
+                    Paths: {
+                      Quantity: 1,
+                      Items: ["/*"],
+                    },
+                  },
+                }),
+              );
+              logger.success("✓ CloudFront cache invalidation created");
+            }
+          } else {
+            logger.warning(
+              "Could not find WebsiteBucket output. Skipping frontend upload.",
+            );
+          }
+        } else {
+          logger.info(
+            "⏭️  Skipping frontend upload (out directory not found). Run frontend build with 'output: export' to generate static files.",
+          );
+        }
+      } catch (uploadError: any) {
+        logger.error(
+          `Failed to upload frontend: ${uploadError.message}`,
+        );
+        // Don't throw - continue with deployment
+      }
 
       // Run seeding and admin-user creation for AWS Example (if possible)
       try {
