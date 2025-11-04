@@ -79,7 +79,7 @@ Resources:
   # Lambda Functions
   LambdaStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [CloudFrontStack, CognitoStack]
+    DependsOn: [CloudFrontStack, CognitoStack, DynamoDbStack]
     Properties:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml
       Parameters:
@@ -92,6 +92,9 @@ Resources:
         TemplateBucketName: !Ref TemplateBucketName
         UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
         LogRetentionInDays: !Ref LogRetentionInDays
+        DataTableName: !GetAtt DynamoDbStack.Outputs.DataTableName
+        PatreonCampaignId: ""
+        PatreonWebhookSecret: ""
 
   # AppSync API
   AppSyncStack:
