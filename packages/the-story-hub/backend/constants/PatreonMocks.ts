@@ -106,7 +106,8 @@ export const MOCK_PATREON_IDENTITY_RESPONSE = {
       attributes: {
         amount_cents: 1000,
         created_at: "2024-01-01T00:00:00.000+00:00",
-        description: "Gold Supporter - All Silver benefits plus exclusive Discord role and priority support",
+        description:
+          "Gold Supporter - All Silver benefits plus exclusive Discord role and priority support",
         discord_role_ids: ["gold-role-123"],
         edited_at: "2024-01-01T00:00:00.000+00:00",
         image_url: null,
@@ -197,19 +198,26 @@ export const MOCK_PATREON_WEBHOOK_MEMBER_DELETE = {
 /**
  * Helper to extract tier from Patreon API response
  */
-export function extractPatreonTier(patreonResponse: typeof MOCK_PATREON_IDENTITY_RESPONSE): string {
-  const member = patreonResponse.included?.find((item) => item.type === "member");
+export function extractPatreonTier(
+  patreonResponse: typeof MOCK_PATREON_IDENTITY_RESPONSE,
+): string {
+  const member = patreonResponse.included?.find(
+    (item) => item.type === "member",
+  );
 
   if (!member || member.attributes.patron_status !== "active_patron") {
     return "NONE";
   }
 
-  const entitledTiers = member.relationships?.currently_entitled_tiers?.data || [];
+  const entitledTiers =
+    member.relationships?.currently_entitled_tiers?.data || [];
   if (entitledTiers.length === 0) {
     return "NONE";
   }
 
   // Get the highest tier (assumes tiers are sorted by amount)
   const tierId = entitledTiers[entitledTiers.length - 1].id;
-  return PATREON_TIER_MAPPING[tierId as keyof typeof PATREON_TIER_MAPPING] || "NONE";
+  return (
+    PATREON_TIER_MAPPING[tierId as keyof typeof PATREON_TIER_MAPPING] || "NONE"
+  );
 }

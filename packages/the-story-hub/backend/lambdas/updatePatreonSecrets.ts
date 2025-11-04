@@ -57,9 +57,7 @@ function maskSecrets(secrets: PatreonSecrets): Record<string, string> {
       ? `${secrets.webhookSecret.substring(0, 8)}...`
       : "",
     campaignId: secrets.campaignId || "",
-    clientId: secrets.clientId
-      ? `${secrets.clientId.substring(0, 8)}...`
-      : "",
+    clientId: secrets.clientId ? `${secrets.clientId.substring(0, 8)}...` : "",
     clientSecret: secrets.clientSecret
       ? `${secrets.clientSecret.substring(0, 8)}...`
       : "",
