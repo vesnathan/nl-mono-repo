@@ -85,7 +85,6 @@ function SettingsContent() {
   // Initialize edit form and settings when user data loads
   useEffect(() => {
     if (user && user.userId) {
-      setEditedUsername(user.username);
       setEditedBio(user.bio || "");
 
       // Initialize privacy settings
@@ -141,7 +140,6 @@ function SettingsContent() {
   };
 
   const handleCancelEdit = () => {
-    setEditedUsername(user.username);
     setEditedBio(user.bio || "");
     setIsEditingProfile(false);
   };
