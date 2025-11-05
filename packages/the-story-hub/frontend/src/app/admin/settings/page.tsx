@@ -6,6 +6,11 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ErrorMessage } from "@/components/common/ErrorMessage";
 import { getSiteSettingsAPI, updateSiteSettingsAPI } from "@/lib/api/settings";
 import type { SiteSettings } from "@/types/SettingsSchemas";
+import {
+  getPatreonSecretsAPI,
+  updatePatreonSecretsAPI,
+} from "@/lib/api/patreonSecrets";
+import type { PatreonSecrets } from "@/types/PatreonSecretsSchemas";
 
 // Reusable Components for Settings UI
 
@@ -84,8 +89,57 @@ function SettingToggle({
   );
 }
 
+interface SettingInputProps {
+  label: string;
+  description: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  type?: "text" | "password";
+  disabled?: boolean;
+}
+
+function SettingInput({
+  label,
+  description,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  disabled = false,
+}: SettingInputProps) {
+  const inputId = `input-${label.toLowerCase().replace(/\s+/g, "-")}`;
+
+  return (
+    <div className="py-4 border-b border-gray-700 last:border-b-0 last:pb-0">
+      <label htmlFor={inputId} className="text-white font-medium block mb-1">
+        {label}
+      </label>
+      <p className="text-gray-400 text-sm mb-3">{description}</p>
+      <input
+        id={inputId}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        disabled={disabled}
+        className={`
+          w-full px-4 py-2 rounded-lg
+          bg-gray-700 border border-gray-600
+          text-white placeholder-gray-500
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+          ${disabled ? "opacity-50 cursor-not-allowed" : ""}
+        `}
+      />
+    </div>
+  );
+}
+
 function AdminSettingsContent() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [patreonSecrets, setPatreonSecrets] = useState<PatreonSecrets | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -100,8 +154,12 @@ function AdminSettingsContent() {
     try {
       setIsLoading(true);
       setError(null);
-      const data = await getSiteSettingsAPI();
-      setSettings(data);
+      const [settingsData, secretsData] = await Promise.all([
+        getSiteSettingsAPI(),
+        getPatreonSecretsAPI(),
+      ]);
+      setSettings(settingsData);
+      setPatreonSecrets(secretsData);
     } catch (err) {
       console.error("Failed to load settings:", err);
       setError("Failed to load site settings. Please try again.");
@@ -112,7 +170,7 @@ function AdminSettingsContent() {
 
   const handleToggleChange = async (
     field: keyof SiteSettings,
-    value: boolean,
+    value: boolean | string,
   ) => {
     if (!settings) return;
 
@@ -133,6 +191,36 @@ function AdminSettingsContent() {
     } catch (err) {
       console.error("Failed to update settings:", err);
       setError("Failed to save settings. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handlePatreonSecretChange = async (
+    field: keyof PatreonSecrets,
+    value: string,
+  ) => {
+    if (!patreonSecrets) return;
+
+    try {
+      setIsSaving(true);
+      setSaveSuccess(false);
+      setError(null);
+
+      await updatePatreonSecretsAPI({
+        [field]: value,
+      });
+
+      // Reload secrets to get masked values
+      const updatedSecrets = await getPatreonSecretsAPI();
+      setPatreonSecrets(updatedSecrets);
+      setSaveSuccess(true);
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      console.error("Failed to update Patreon secrets:", err);
+      setError("Failed to save Patreon secrets. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -197,6 +285,77 @@ function AdminSettingsContent() {
               onChange={(value) =>
                 handleToggleChange("grantOGBadgeToPatreonSupporters", value)
               }
+              disabled={isSaving}
+            />
+          </SettingsSection>
+
+          {/* Patreon Configuration Section */}
+          <SettingsSection
+            title="Patreon Configuration"
+            description="Configure Patreon integration settings. These credentials are stored securely in AWS Secrets Manager and encrypted both in transit (HTTPS) and at rest (KMS)."
+          >
+            <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 mb-4">
+              <p className="text-blue-200 text-sm">
+                <strong>Security:</strong> These values are directly synced to
+                AWS Secrets Manager. Sensitive fields are masked after saving.
+                Changes are applied immediately and used by all Patreon
+                integration functions.
+              </p>
+            </div>
+
+            <SettingInput
+              label="Patreon Campaign ID"
+              description="Your Patreon campaign ID. Found in your Patreon creator dashboard URL or API."
+              value={patreonSecrets?.campaignId ?? ""}
+              onChange={(value) =>
+                handlePatreonSecretChange("campaignId", value)
+              }
+              placeholder="1234567"
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="Patreon Client ID"
+              description="OAuth Client ID from your Patreon app. Get this from https://www.patreon.com/portal/registration/register-clients"
+              value={patreonSecrets?.clientId ?? ""}
+              onChange={(value) => handlePatreonSecretChange("clientId", value)}
+              placeholder="abc123def456..."
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="Patreon Client Secret"
+              description="OAuth Client Secret from your Patreon app. Keep this secret!"
+              value={patreonSecrets?.clientSecret ?? ""}
+              onChange={(value) =>
+                handlePatreonSecretChange("clientSecret", value)
+              }
+              placeholder="xyz789uvw012..."
+              type="password"
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="Patreon Creator Access Token"
+              description="Creator access token for API access. Generate this from your Patreon app settings."
+              value={patreonSecrets?.creatorAccessToken ?? ""}
+              onChange={(value) =>
+                handlePatreonSecretChange("creatorAccessToken", value)
+              }
+              placeholder="Enter creator access token"
+              type="password"
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="Patreon Webhook Secret"
+              description="Webhook secret for verifying webhook authenticity. Set this when creating your webhook in Patreon."
+              value={patreonSecrets?.webhookSecret ?? ""}
+              onChange={(value) =>
+                handlePatreonSecretChange("webhookSecret", value)
+              }
+              placeholder="Enter webhook secret"
+              type="password"
               disabled={isSaving}
             />
           </SettingsSection>

@@ -1,5 +1,16 @@
 import { util, AppSyncIdentityCognito, Context } from "@aws-appsync/utils";
-import { User, ClientType } from "gqlTypes";
+import {
+  User,
+  ClientType,
+  PatreonTier,
+  PatreonInfo,
+  UserPrivacySettings,
+  UserNotificationSettings,
+  UserContentSettings,
+  ProfileVisibility,
+  NotificationFrequency,
+  AgeRating,
+} from "gqlTypes";
 
 type CTX = Context<{ userId: string }, object, object, object, User>;
 
@@ -27,7 +38,7 @@ export function response(ctx: CTX): User | null {
     return util.error(ctx.error.message, ctx.error.type);
   }
 
-  const item = ctx.result;
+  const item = ctx.result as any;
 
   if (!item) {
     return null;
@@ -53,6 +64,43 @@ export function response(ctx: CTX): User | null {
     clientType.push(ClientType.UnauthenticatedUser);
   }
 
+  // Build PatreonInfo from DynamoDB item
+  let patreonInfo: PatreonInfo | null = null;
+  if (item.patreonTier) {
+    patreonInfo = {
+      __typename: "PatreonInfo",
+      tier: item.patreonTier as PatreonTier,
+      patreonUserId: item.patreonUserId || null,
+      lastSynced: item.patreonLastSynced || null,
+    };
+  }
+
+  // Build Privacy Settings with defaults
+  const privacySettings: UserPrivacySettings = item.privacySettings || {
+    __typename: "UserPrivacySettings",
+    profileVisibility: ProfileVisibility.PUBLIC,
+    showStats: true,
+  };
+
+  // Build Notification Settings with defaults
+  const notificationSettings: UserNotificationSettings =
+    item.notificationSettings || {
+      __typename: "UserNotificationSettings",
+      emailNotifications: true,
+      notifyOnReply: true,
+      notifyOnUpvote: true,
+      notifyOnStoryUpdate: true,
+      notificationFrequency: NotificationFrequency.IMMEDIATE,
+    };
+
+  // Build Content Settings with defaults
+  const contentSettings: UserContentSettings = item.contentSettings || {
+    __typename: "UserContentSettings",
+    defaultAgeRatingFilter: AgeRating.M,
+    hideAIContent: false,
+    autoSaveEnabled: true,
+  };
+
   const user: User = {
     __typename: "User",
     userId: item.userId || ctx.args.userId,
@@ -61,9 +109,13 @@ export function response(ctx: CTX): User | null {
     bio: item.bio,
     stats: item.stats,
     patreonSupporter: item.patreonSupporter || false,
+    patreonInfo,
     ogSupporter: item.ogSupporter || false,
     clientType,
     createdAt: item.createdAt,
+    privacySettings,
+    notificationSettings,
+    contentSettings,
   };
 
   console.log("User profile fetched successfully");

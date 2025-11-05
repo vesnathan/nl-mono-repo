@@ -30,5 +30,5 @@ extend type Query {
 extend type Mutation {
   updateSiteSettings(input: UpdateSiteSettingsInput!): SiteSettings!
     @aws_iam
-    @aws_cognito_user_pools(cognito_groups: ["SiteAdmin"])
+    @aws_cognito_user_pools
 }

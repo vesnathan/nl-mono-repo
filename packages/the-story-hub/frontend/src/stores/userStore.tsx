@@ -14,6 +14,7 @@ const createDefaultUser = (): User => ({
     totalUpvotes: 0,
   },
   patreonSupporter: false,
+  patreonInfo: null,
   ogSupporter: false,
   clientType: [],
   createdAt: "",

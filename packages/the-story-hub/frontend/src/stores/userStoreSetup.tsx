@@ -1,16 +1,13 @@
 "use client";
 
-import { Progress } from "@nextui-org/react";
-// no ProgressProps needed; using Progress directly
 import { LOGIN_PATH } from "@/constants/layout/navigation/navigation";
 import { useUserStore } from "@/stores/userStore";
 import { useQuery } from "@tanstack/react-query";
 import { DataFetchError } from "@/components/common/DataFetchError";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useRouter } from "next/navigation";
 import { FC, PropsWithChildren, useEffect } from "react";
 import { getUserProfileAPI } from "@/lib/api/users";
-
-// using @heroui Progress component directly
 
 type Props = PropsWithChildren & {
   userId: string;
@@ -47,7 +44,11 @@ export const UserStoreSetup: FC<Props> = ({ userId, children }) => {
   }, [User, setUser]);
 
   if (isPending) {
-    return <Progress isIndeterminate aria-label="Loading user data" />;
+    return (
+      <div className="flex items-center justify-center py-20">
+        <LoadingSpinner label="Loading user data..." />
+      </div>
+    );
   }
 
   if (error || !User) {

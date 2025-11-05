@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Icon } from "@iconify/react";
 
-export const LOGIN_PATH = "/login";
+export const LOGIN_PATH = "/";
 
 interface NavItemData {
   id?: string;

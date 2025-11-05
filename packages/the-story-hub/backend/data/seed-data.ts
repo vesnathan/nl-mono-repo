@@ -43,6 +43,13 @@ export const SEED_USERS = [
     screenName: "TheStoryteller",
     phone: "+61400123456",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "PLATINUM",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 24000, // $240 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
+    patreonCreatorUrl: "https://patreon.com/thestoryteller",
     ogSupporter: true,
   },
   {
@@ -54,6 +61,12 @@ export const SEED_USERS = [
     screenName: "CyberScribe",
     phone: "+61400234567",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "GOLD",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 12000, // $120 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
     ogSupporter: true,
   },
   {
@@ -65,6 +78,12 @@ export const SEED_USERS = [
     screenName: "MysteryWriter",
     phone: "+61400345678",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "SILVER",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 6000, // $60 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
     ogSupporter: false,
   },
   {
@@ -87,6 +106,12 @@ export const SEED_USERS = [
     screenName: "FrostWeaver",
     phone: "+61400567890",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "BRONZE",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 3600, // $36 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
     ogSupporter: false,
   },
   {
@@ -98,7 +123,7 @@ export const SEED_USERS = [
     screenName: "PixelDreamer",
     phone: "+61400678901",
     patreonSupporter: false,
-    ogSupporter: true,
+    ogSupporter: false,
   },
   {
     userId: USER_IDS.GRACE,
@@ -109,6 +134,12 @@ export const SEED_USERS = [
     screenName: "InkPhoenix",
     phone: "+61400789012",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "SILVER",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 5000, // $50 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
     ogSupporter: true,
   },
   {
@@ -131,6 +162,12 @@ export const SEED_USERS = [
     screenName: "StarlightTales",
     phone: "+61400901234",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "BRONZE",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 3000, // $30 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
     ogSupporter: false,
   },
   {
@@ -142,7 +179,7 @@ export const SEED_USERS = [
     screenName: "RiverStone",
     phone: "+61401012345",
     patreonSupporter: false,
-    ogSupporter: true,
+    ogSupporter: false,
   },
   {
     userId: USER_IDS.KATE,
@@ -153,6 +190,12 @@ export const SEED_USERS = [
     screenName: "MoonlitQuill",
     phone: "+61401123456",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "GOLD",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 10000, // $100 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
     ogSupporter: true,
   },
   {
@@ -175,6 +218,13 @@ export const SEED_USERS = [
     screenName: "CrimsonWords",
     phone: "+61401345678",
     patreonSupporter: true,
+    patreonInfo: {
+      tier: "PLATINUM",
+      patronStatus: "active_patron",
+      lifetimeSupportCents: 25000, // $250 lifetime
+      lastRefreshedAt: new Date().toISOString(),
+    },
+    patreonCreatorUrl: "https://patreon.com/crimsonwords",
     ogSupporter: false,
   },
   {
@@ -186,7 +236,7 @@ export const SEED_USERS = [
     screenName: "FrostbiteStories",
     phone: "+61401456789",
     patreonSupporter: false,
-    ogSupporter: true,
+    ogSupporter: false,
   },
   {
     userId: USER_IDS.OLIVIA,
@@ -536,7 +586,7 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      authorApproved: true,
+      authorApproved: false,
     },
   },
   // Branch 2: The Ancient Oak
@@ -560,7 +610,7 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      authorApproved: false,
+      authorApproved: true,
     },
   },
   // Branch 3: Into the Wild
@@ -584,7 +634,7 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      authorApproved: true,
+      authorApproved: false,
     },
   },
 
@@ -660,7 +710,7 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      authorApproved: true,
+      authorApproved: false,
     },
   },
   // Branch 3: Go Dark
@@ -736,7 +786,7 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      authorApproved: true,
+      authorApproved: false,
     },
   },
   // Branch 2: Interview the Guests
@@ -860,7 +910,7 @@ export const SEED_NODES = [
       childBranches: 0,
     },
     badges: {
-      authorApproved: true,
+      authorApproved: false,
     },
   },
   // Branch 3: Keep It Professional
@@ -934,7 +984,7 @@ export const SEED_NODES = [
       childBranches: 1,
     },
     badges: {
-      authorApproved: true,
+      authorApproved: false,
     },
   },
   // Branch 1.1: Establish Communication

@@ -1165,8 +1165,7 @@ async function main() {
                   message: "Enter your Route53 Hosted Zone ID:",
                   default: "Z02681573J5GWRCZ2PHRC",
                   validate: (input: string) =>
-                    input.trim().length > 0 ||
-                    "Hosted Zone ID cannot be empty",
+                    input.trim().length > 0 || "Hosted Zone ID cannot be empty",
                 },
               ]);
               domainName = domainAnswers.domainName.trim();

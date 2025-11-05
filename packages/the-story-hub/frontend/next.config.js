@@ -112,7 +112,7 @@ if (!isLinting) {
 
 module.exports = {
   // Only use static export for production builds (not dev server)
-  ...(process.env.NODE_ENV === 'production' && { output: 'export' }),
+  ...(process.env.NODE_ENV === "production" && { output: "export" }),
   env: {
     NEXT_PUBLIC_ENVIRONMENT: process.env.NEXT_PUBLIC_ENVIRONMENT,
     NEXT_PUBLIC_USE_LOCAL_DATA:

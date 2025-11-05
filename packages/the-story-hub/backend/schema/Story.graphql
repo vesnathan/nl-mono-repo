@@ -1,12 +1,5 @@
 # Story Type Definitions
-
-enum AgeRating {
-  G
-  PG
-  PG_13
-  M
-  ADULT_18_PLUS
-}
+# Note: AgeRating enum is defined in 00-schema.graphql
 
 type StoryStats @aws_iam @aws_cognito_user_pools {
   totalBranches: Int!

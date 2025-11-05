@@ -1,10 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { LoadingSpinner } from "./LoadingSpinner";
-import { ErrorMessage } from "./ErrorMessage";
 
 interface Props {
   children: React.ReactNode;
@@ -18,6 +17,13 @@ export const RequireAdmin: React.FC<Props> = ({ children }) => {
   const { isAdmin, isLoading } = useIsAdmin();
   const router = useRouter();
 
+  // Redirect to home if not admin
+  useEffect(() => {
+    if (!isLoading && !isAdmin) {
+      router.push("/");
+    }
+  }, [isLoading, isAdmin, router]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
@@ -27,15 +33,10 @@ export const RequireAdmin: React.FC<Props> = ({ children }) => {
   }
 
   if (!isAdmin) {
+    // Show loading while redirecting
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
-        <div className="max-w-md w-full">
-          <ErrorMessage
-            title="Access Denied"
-            message="Admin privileges required to access this page."
-            retry={() => router.push("/")}
-          />
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-900">
+        <LoadingSpinner label="Redirecting..." />
       </div>
     );
   }

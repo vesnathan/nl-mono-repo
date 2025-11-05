@@ -5,24 +5,38 @@
  */
 import { Context } from "@aws-appsync/utils";
 
+interface OGSupporterResult {
+  ogSupporter: boolean;
+  patreonSupporter: boolean;
+  siteSettingEnabled: boolean;
+  shouldShowOGBadge: boolean;
+}
+
+interface BatchGetItemResult {
+  data: {
+    [tableName: string]: any[];
+  };
+}
+
 type CTX = Context<
+  object,
+  object,
   { userId: string },
   object,
-  object,
-  object,
-  {
-    ogSupporter: boolean;
-    patreonSupporter: boolean;
-    siteSettingEnabled: boolean;
-  }
->;
+  OGSupporterResult
+> & {
+  result: BatchGetItemResult;
+  env: {
+    TABLE_NAME: string;
+  };
+};
 
 // Site settings are stored with a single PK/SK combination
 const SETTINGS_PK = "SETTINGS#SITE";
 const SETTINGS_SK = "CONFIG#GLOBAL";
 
 export function request(ctx: CTX) {
-  const { userId } = ctx.stash;
+  const { userId } = ctx.stash as { userId: string };
 
   console.log(`Fetching OG supporter status for user: ${userId}`);
 
@@ -30,7 +44,7 @@ export function request(ctx: CTX) {
   return {
     operation: "BatchGetItem",
     tables: {
-      [ctx.env.TABLE_NAME]: {
+      [(ctx as any).env.TABLE_NAME]: {
         keys: [
           {
             PK: { S: `USER#${userId}` },
@@ -47,17 +61,18 @@ export function request(ctx: CTX) {
   };
 }
 
-export function response(ctx: CTX) {
+export function response(ctx: CTX): OGSupporterResult {
   if (ctx.error) {
     console.error("Error fetching OG supporter data:", ctx.error);
     return {
       ogSupporter: false,
       patreonSupporter: false,
       siteSettingEnabled: false,
+      shouldShowOGBadge: false,
     };
   }
 
-  const items = ctx.result.data[ctx.env.TABLE_NAME] || [];
+  const items = (ctx.result as any).data[(ctx as any).env.TABLE_NAME] || [];
 
   // Parse user profile
   const userProfile = items.find((item: any) => item.PK?.startsWith("USER#"));

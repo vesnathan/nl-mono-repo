@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "build-gql": "ts-node -TP ../../../tsconfig.node.json ./scripts/buildGql.ts"
+    "build-gql": "ts-node -TP ../../../tsconfig.node.json ./scripts/buildGql.ts",
+    "update-env": "bash ./scripts/update-env-from-aws.sh"
   },
   "dependencies": {
     "@aws-amplify/auth": "^6.6.0",

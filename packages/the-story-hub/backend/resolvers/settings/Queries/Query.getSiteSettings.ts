@@ -33,7 +33,7 @@ export function response(ctx: CTX): SiteSettings {
     const defaultSettings: SiteSettings = {
       __typename: "SiteSettings",
       grantOGBadgeToPatreonSupporters: false,
-      updatedAt: new Date().toISOString(),
+      updatedAt: util.time.nowISO8601(),
       updatedBy: null,
     };
     return defaultSettings;
@@ -43,7 +43,7 @@ export function response(ctx: CTX): SiteSettings {
     __typename: "SiteSettings",
     grantOGBadgeToPatreonSupporters:
       item.grantOGBadgeToPatreonSupporters ?? false,
-    updatedAt: item.updatedAt || new Date().toISOString(),
+    updatedAt: item.updatedAt || util.time.nowISO8601(),
     updatedBy: item.updatedBy || null,
   };
 
