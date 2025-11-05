@@ -11,6 +11,9 @@ import {
   BadgeType,
   NotificationType,
   ClientType,
+  PatreonTier,
+  ProfileVisibility,
+  NotificationFrequency,
   type Bookmark as GQLBookmark,
   type ChapterNode as GQLChapterNode,
   type ChapterStats as GQLChapterStats,
@@ -22,6 +25,10 @@ import {
   type NotificationConnection as GQLNotificationConnection,
   type User as GQLUser,
   type UserStats as GQLUserStats,
+  type PatreonInfo as GQLPatreonInfo,
+  type UserPrivacySettings as GQLUserPrivacySettings,
+  type UserNotificationSettings as GQLUserNotificationSettings,
+  type UserContentSettings as GQLUserContentSettings,
   type TreeData as GQLTreeData,
   type TreeNode as GQLTreeNode,
 } from "./gqlTypes";
@@ -116,14 +123,54 @@ export type StoryConnection = GQLStoryConnection;
 
 // ==================== User Schemas ====================
 
+export const PatreonInfoSchema: z.ZodType<GQLPatreonInfo> = z.object({
+  __typename: z.literal("PatreonInfo"),
+  tier: z.nativeEnum(PatreonTier),
+  patreonUserId: z.string().nullable().optional(),
+  lastSynced: z.string().nullable().optional(),
+});
+
+export type PatreonInfo = GQLPatreonInfo;
+
 export const UserStatsSchema: z.ZodType<GQLUserStats> = z.object({
   __typename: z.literal("UserStats"),
   storiesCreated: z.number().int().min(0),
-  branchesContributed: z.number().int().min(0),
-  totalUpvotes: z.number().int().min(0),
+  branchesContributed: z.number().int().min(0).nullable().optional(),
+  totalUpvotes: z.number().int().min(0).nullable().optional(),
 });
 
 export type UserStats = GQLUserStats;
+
+export const UserPrivacySettingsSchema: z.ZodType<GQLUserPrivacySettings> =
+  z.object({
+    __typename: z.literal("UserPrivacySettings"),
+    profileVisibility: z.nativeEnum(ProfileVisibility),
+    showStats: z.boolean(),
+  });
+
+export type UserPrivacySettings = GQLUserPrivacySettings;
+
+export const UserNotificationSettingsSchema: z.ZodType<GQLUserNotificationSettings> =
+  z.object({
+    __typename: z.literal("UserNotificationSettings"),
+    emailNotifications: z.boolean(),
+    notifyOnReply: z.boolean(),
+    notifyOnUpvote: z.boolean(),
+    notifyOnStoryUpdate: z.boolean(),
+    notificationFrequency: z.nativeEnum(NotificationFrequency),
+  });
+
+export type UserNotificationSettings = GQLUserNotificationSettings;
+
+export const UserContentSettingsSchema: z.ZodType<GQLUserContentSettings> =
+  z.object({
+    __typename: z.literal("UserContentSettings"),
+    defaultAgeRatingFilter: z.nativeEnum(AgeRating),
+    hideAIContent: z.boolean(),
+    autoSaveEnabled: z.boolean(),
+  });
+
+export type UserContentSettings = GQLUserContentSettings;
 
 export const UserSchema: z.ZodType<GQLUser> = z.object({
   __typename: z.literal("User"),
@@ -133,9 +180,13 @@ export const UserSchema: z.ZodType<GQLUser> = z.object({
   bio: z.string().nullable().optional(),
   stats: UserStatsSchema,
   patreonSupporter: z.boolean(),
+  patreonInfo: PatreonInfoSchema.nullable().optional(),
   ogSupporter: z.boolean(),
   clientType: z.array(z.nativeEnum(ClientType)),
   createdAt: z.string(),
+  privacySettings: UserPrivacySettingsSchema.nullable().optional(),
+  notificationSettings: UserNotificationSettingsSchema.nullable().optional(),
+  contentSettings: UserContentSettingsSchema.nullable().optional(),
 });
 
 export type User = GQLUser;
@@ -207,4 +258,13 @@ export type TreeData = GQLTreeData;
 
 // ==================== Export all enums for convenience ====================
 
-export { AgeRating, VoteType, BadgeType, NotificationType, ClientType };
+export {
+  AgeRating,
+  VoteType,
+  BadgeType,
+  NotificationType,
+  ClientType,
+  PatreonTier,
+  ProfileVisibility,
+  NotificationFrequency,
+};

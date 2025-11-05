@@ -28,6 +28,9 @@ Parameters:
   ResolversBuildHash:
     Type: String
     Description: Optional build hash to version resolver S3 keys
+  SchemaHash:
+    Type: String
+    Description: Content hash of GraphQL schema for versioning
   LogRetentionInDays:
     Type: Number
     Description: Number of days to retain CloudWatch Logs for nested stacks
@@ -91,6 +94,7 @@ Resources:
         AppURL: !Sub "https://${CloudFrontStack.Outputs.CloudFrontDomainName}"
         TemplateBucketName: !Ref TemplateBucketName
         UserPoolId: !GetAtt CognitoStack.Outputs.UserPoolId
+        UserPoolClientId: !GetAtt CognitoStack.Outputs.UserPoolClientId
         LogRetentionInDays: !Ref LogRetentionInDays
         DataTableName: !GetAtt DynamoDbStack.Outputs.DataTableName
         PatreonCampaignId: ""
@@ -110,6 +114,7 @@ Resources:
         DataTableName: !GetAtt DynamoDbStack.Outputs.DataTableName
         AppSyncDynamoDBRoleArn: !GetAtt DynamoDbStack.Outputs.AppSyncDynamoDBRoleArn
         ResolversBuildHash: !Ref ResolversBuildHash
+        SchemaHash: !Ref SchemaHash
         LogRetentionInDays: !Ref LogRetentionInDays
 
 Outputs:
@@ -166,3 +171,9 @@ Outputs:
     Value: !GetAtt DynamoDbStack.Outputs.DataTableName
     Export:
       Name: !Sub "nlmonorepo-${AppName}-${Stage}-datatable-name"
+
+  PatreonWebhookApiUrl:
+    Description: "Patreon API Gateway URL for admin endpoints"
+    Value: !GetAtt LambdaStack.Outputs.PatreonWebhookApiUrl
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-patreon-api-url"

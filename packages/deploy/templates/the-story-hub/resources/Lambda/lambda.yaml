@@ -29,6 +29,9 @@ Parameters:
   UserPoolId:
     Type: String
     Description: Cognito User Pool ID for user creation
+  UserPoolClientId:
+    Type: String
+    Description: Cognito User Pool Client ID for JWT validation
   LogRetentionInDays:
     Type: Number
     Description: Number of days to retain CloudWatch Logs for Lambda functions
@@ -327,9 +330,13 @@ Resources:
         AllowOrigins:
           - "*"
         AllowMethods:
+          - GET
           - POST
+          - OPTIONS
         AllowHeaders:
-          - "*"
+          - Content-Type
+          - Authorization
+        MaxAge: 300
 
   # DISABLED: Webhook integration - using seed data
   # PatreonWebhookIntegration:
@@ -454,10 +461,12 @@ Resources:
       Code:
         S3Bucket: !Ref TemplateBucketName
         S3Key: !Sub "functions/${Stage}/updatePatreonSecrets.zip"
+      Description: "Admin API for managing Patreon integration secrets - Fixed API Gateway V2 event format"
       Environment:
         Variables:
           STAGE: !Ref Stage
           PATREON_SECRETS_ARN: !Ref PatreonSecrets
+          FORCE_UPDATE: "2025-11-05T03:15:00Z"
 
   UpdatePatreonSecretsRole:
     Type: AWS::IAM::Role
@@ -528,7 +537,7 @@ Resources:
         - "$request.header.Authorization"
       JwtConfiguration:
         Audience:
-          - !Ref UserPoolId
+          - !Ref UserPoolClientId
         Issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}"
       Name: !Sub "${AppName}-cognito-authorizer-${Stage}"
 

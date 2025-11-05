@@ -598,17 +598,31 @@ export async function deployTheStoryHub(
       `Successfully uploaded ${successfulUploads.length} template files`,
     );
 
-    // Upload GraphQL schema file
+    // Upload GraphQL schema file with content-based versioning
     logger.debug("Uploading GraphQL schema file...");
     const schemaPath = path.join(
       __dirname,
       "../../../the-story-hub/backend/combined_schema.graphql",
     );
 
+    let schemaHash = "";
     if (existsSync(schemaPath)) {
+      // Calculate hash of schema content for versioning
+      const crypto = require("crypto");
+      const fs = require("fs");
+      const schemaContent = fs.readFileSync(schemaPath, "utf8");
+      schemaHash = crypto
+        .createHash("sha256")
+        .update(schemaContent)
+        .digest("hex")
+        .substring(0, 16); // Use first 16 chars of hash
+
+      const schemaKey = `schema-${schemaHash}.graphql`;
+      logger.debug(`Schema hash: ${schemaHash}, uploading as ${schemaKey}`);
+
       const schemaUploadCommand = new PutObjectCommand({
         Bucket: templateBucketName,
-        Key: "schema.graphql",
+        Key: schemaKey,
         Body: createReadStream(schemaPath),
         ContentType: "application/graphql",
       });
@@ -616,7 +630,9 @@ export async function deployTheStoryHub(
       try {
         await retryOperation(async () => {
           await s3.send(schemaUploadCommand);
-          logger.debug("GraphQL schema uploaded successfully");
+          logger.debug(
+            `GraphQL schema uploaded successfully with hash ${schemaHash}`,
+          );
         });
       } catch (error: any) {
         logger.error(`Failed to upload GraphQL schema: ${error.message}`);
@@ -949,6 +965,17 @@ export async function deployTheStoryHub(
       ParameterValue: resolversBuildHash,
     });
 
+    // SchemaHash is required for schema versioning
+    if (!schemaHash) {
+      throw new Error(
+        "SchemaHash is required but was not computed. Schema upload may have failed.",
+      );
+    }
+    stackParams.push({
+      ParameterKey: "SchemaHash",
+      ParameterValue: schemaHash,
+    });
+
     // Log the parameters we will pass to CloudFormation for debugging
     try {
       logger.debug(
@@ -1063,6 +1090,23 @@ export async function deployTheStoryHub(
         `CloudFormation stack ${stackName} deployed/updated successfully`,
       );
 
+      // Save stack outputs to deployment-outputs.json
+      try {
+        logger.info("💾 Saving stack outputs to deployment-outputs.json...");
+        const outputsManager = new OutputsManager();
+        await outputsManager.saveStackOutputs(
+          StackType.TheStoryHub,
+          options.stage,
+          region,
+        );
+        logger.success("✓ Stack outputs saved successfully");
+      } catch (outputsError: any) {
+        logger.error(
+          `Failed to save stack outputs: ${outputsError instanceof Error ? outputsError.message : outputsError}`,
+        );
+        // don't throw - this is non-critical
+      }
+
       // Run seeding and admin-user creation for AWS Example (if possible)
       try {
         const repoRoot = path.join(__dirname, "../../../../");
@@ -1145,31 +1189,32 @@ export async function deployTheStoryHub(
           // don't throw to avoid failing the entire deploy; surface error to logs
         }
 
-        // Generate frontend .env.local file with CloudFormation outputs
+        // Update frontend environment variables from CloudFormation outputs
         try {
-          logger.info("📝 Generating frontend .env.local file...");
-          const frontendEnvPath = path.join(
+          logger.info("📝 Updating frontend environment variables...");
+          const frontendPath = path.join(
             __dirname,
-            "../../../the-story-hub/frontend/.env.local",
+            "../../../../the-story-hub/frontend",
+          );
+          const updateEnvScript = path.join(
+            frontendPath,
+            "scripts/update-env-from-aws.sh",
           );
 
-          const envContent = `# Auto-generated from CloudFormation outputs
-# Stack: ${stackName}
-# Generated on: ${new Date().toISOString()}
-
-NEXT_PUBLIC_USER_POOL_ID=${userPoolId}
-NEXT_PUBLIC_USER_POOL_CLIENT_ID=${userPoolClientId}
-NEXT_PUBLIC_IDENTITY_POOL_ID=${identityPoolId}
-NEXT_PUBLIC_GRAPHQL_URL=${apiUrl}
-NEXT_PUBLIC_ENVIRONMENT=${options.stage}
-`;
-
-          const { writeFileSync } = await import("fs");
-          writeFileSync(frontendEnvPath, envContent, "utf8");
-          logger.success(`✓ Frontend .env.local created at ${frontendEnvPath}`);
+          if (existsSync(updateEnvScript)) {
+            execSync(`bash ${updateEnvScript} ${options.stage}`, {
+              cwd: frontendPath,
+              stdio: "inherit",
+            });
+            logger.success("✓ Frontend environment variables updated");
+          } else {
+            logger.warning(
+              `Update env script not found at ${updateEnvScript}`,
+            );
+          }
         } catch (envError: any) {
           logger.error(
-            `Failed to generate frontend .env.local: ${envError instanceof Error ? envError.message : envError}`,
+            `Failed to update frontend environment variables: ${envError instanceof Error ? envError.message : envError}`,
           );
           // don't throw - this is non-critical
         }

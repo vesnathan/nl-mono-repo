@@ -14,7 +14,7 @@
  * - Admin-only access via Cognito authorization
  */
 
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import {
   SecretsManagerClient,
   GetSecretValueCommand,
@@ -35,20 +35,55 @@ interface PatreonSecrets {
 
 /**
  * Validate that the user is an admin by checking Cognito claims
+ * API Gateway V2 HTTP API format: requestContext.authorizer.jwt.claims
  */
 function isAdmin(event: any): boolean {
-  const claims = event.requestContext?.authorizer?.claims;
-  if (!claims) return false;
+  console.log("Authorization check - full event:", JSON.stringify(event, null, 2));
+
+  const claims = event.requestContext?.authorizer?.jwt?.claims;
+  console.log("JWT claims:", JSON.stringify(claims, null, 2));
+
+  if (!claims) {
+    console.log("No claims found in event.requestContext.authorizer.jwt.claims");
+    return false;
+  }
 
   // Check if user has SiteAdmin in their cognito:groups claim
   const groups = claims["cognito:groups"];
+  console.log("cognito:groups value:", groups, "type:", typeof groups);
+  console.log("cognito:groups JSON:", JSON.stringify(groups));
+  console.log("cognito:groups charCodeAt(0):", groups?.toString().charCodeAt(0));
+
   if (typeof groups === "string") {
-    // Groups might be a comma-separated string or array
-    return groups.split(",").includes("SiteAdmin");
+    // API Gateway JWT authorizer passes groups as a JSON string like "[SiteAdmin]"
+    // But it might also pass as actual array or comma-separated
+    // Try to parse as JSON first
+    try {
+      const parsedGroups = JSON.parse(groups);
+      console.log("JSON.parse succeeded, result:", parsedGroups);
+      if (Array.isArray(parsedGroups)) {
+        const hasAdmin = parsedGroups.includes("SiteAdmin");
+        console.log("Parsed array groups check - hasAdmin:", hasAdmin);
+        return hasAdmin;
+      }
+    } catch (e: any) {
+      console.log("JSON.parse failed with error:", e.message);
+      console.log("Trying alternative parsing strategies...");
+
+      // Try removing brackets and splitting
+      const cleanedGroups = groups.replace(/[\[\]]/g, "");
+      const hasAdmin = cleanedGroups.split(",").map(g => g.trim()).includes("SiteAdmin");
+      console.log("Cleaned groups check - hasAdmin:", hasAdmin);
+      return hasAdmin;
+    }
   }
   if (Array.isArray(groups)) {
-    return groups.includes("SiteAdmin");
+    const hasAdmin = groups.includes("SiteAdmin");
+    console.log("Array groups check - hasAdmin:", hasAdmin);
+    return hasAdmin;
   }
+
+  console.log("Groups not found or invalid format");
   return false;
 }
 
@@ -71,11 +106,12 @@ function maskSecrets(secrets: PatreonSecrets): Record<string, string> {
   };
 }
 
-export const handler: APIGatewayProxyHandler = async (event) => {
-  console.log("Patreon secrets update request:", {
-    method: event.httpMethod,
-    path: event.path,
-  });
+export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+  // API Gateway V2 HTTP API uses requestContext.http.method and rawPath
+  const method = event.requestContext.http.method;
+  const path = event.rawPath;
+
+  console.log("Patreon secrets update request:", { method, path });
 
   try {
     // Check admin authorization
@@ -91,7 +127,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
     // GET: Retrieve current secrets (masked)
-    if (event.httpMethod === "GET") {
+    if (method === "GET") {
       const response = await secretsClient.send(
         new GetSecretValueCommand({ SecretId: SECRETS_ARN }),
       );
@@ -114,7 +150,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     }
 
     // POST: Update secrets
-    if (event.httpMethod === "POST") {
+    if (method === "POST") {
       if (!event.body) {
         return {
           statusCode: 400,

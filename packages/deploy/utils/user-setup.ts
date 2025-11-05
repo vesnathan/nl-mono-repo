@@ -343,7 +343,14 @@ export class UserSetupManager {
       );
 
       logger.info("User already exists in Cognito. Getting user ID...");
-      return getUserResponse.Username || userEmail;
+      // Return the 'sub' attribute which is the actual Cognito user ID (UUID)
+      const subAttribute = getUserResponse.UserAttributes?.find(
+        attr => attr.Name === 'sub'
+      );
+      if (!subAttribute?.Value) {
+        throw new Error("User exists but 'sub' attribute not found");
+      }
+      return subAttribute.Value;
     } catch (error: any) {
       if (error.name === "UserNotFoundException") {
         // User doesn't exist, create them
@@ -374,10 +381,14 @@ export class UserSetupManager {
         }),
       );
 
-      const cognitoUserId = createUserResponse.User?.Username;
-      if (!cognitoUserId) {
-        throw new Error("Failed to create user in Cognito");
+      // Get the 'sub' attribute which is the actual Cognito user ID (UUID)
+      const subAttribute = createUserResponse.User?.Attributes?.find(
+        attr => attr.Name === 'sub'
+      );
+      if (!subAttribute?.Value) {
+        throw new Error("User created but 'sub' attribute not found");
       }
+      const cognitoUserId = subAttribute.Value;
 
       logger.success(`Created user in Cognito with ID: ${cognitoUserId}`);
 

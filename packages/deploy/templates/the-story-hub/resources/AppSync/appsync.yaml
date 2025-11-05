@@ -21,6 +21,9 @@ Parameters:
   ResolversBuildHash:
     Type: String
     Description: Optional build hash used to version resolver S3 keys (set by deploy script)
+  SchemaHash:
+    Type: String
+    Description: Content hash of GraphQL schema for versioning
   LogRetentionInDays:
     Type: Number
     Description: Number of days to retain CloudWatch Logs for AppSync and Lambda
@@ -73,7 +76,7 @@ Resources:
     Type: AWS::AppSync::GraphQLSchema
     Properties:
       ApiId: !GetAtt GraphQlApi.ApiId
-      DefinitionS3Location: !Sub "s3://${TemplateBucketName}/schema.graphql"
+      DefinitionS3Location: !Sub "s3://${TemplateBucketName}/schema-${SchemaHash}.graphql"
 
   MainTableDataSource: # Renamed from UsersTableDataSource for generality
     Type: AWS::AppSync::DataSource
@@ -669,6 +672,33 @@ Resources:
         export function response(ctx) {
           return ctx.prev.result;
         }
+
+  # Site Settings Resolvers
+  GetSiteSettingsResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      TypeName: Query
+      FieldName: getSiteSettings
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Kind: UNIT
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/settings/Queries/Query.getSiteSettings.js"
+
+  UpdateSiteSettingsResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      TypeName: Mutation
+      FieldName: updateSiteSettings
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Kind: UNIT
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/settings/Mutations/Mutation.updateSiteSettings.js"
 
   # Explicit AppSync LogGroup so we can control retention
   # DeletionPolicy: Delete ensures LogGroup is removed when stack is deleted

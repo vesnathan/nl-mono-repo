@@ -109,6 +109,7 @@ interface CliOptions {
   buildFrontend: boolean;
   disableRollback: boolean;
   skipWaf: boolean;
+  skipUserCreation: boolean;
   debug: boolean;
 }
 
@@ -151,6 +152,12 @@ async function main() {
       description: "Skip WAF deployment (recommended for dev)",
       default: false,
     })
+    .option("skip-user-creation", {
+      alias: "u",
+      type: "boolean",
+      description: "Skip admin user creation/update (for update deployments)",
+      default: false,
+    })
     .option("debug", {
       alias: "d",
       type: "boolean",
@@ -168,6 +175,7 @@ async function main() {
     buildFrontend: argv["build-frontend"],
     disableRollback: argv["disable-rollback"],
     skipWaf: argv["skip-waf"],
+    skipUserCreation: argv["skip-user-creation"],
     debug: argv.debug,
   };
 
@@ -198,6 +206,7 @@ async function main() {
   logger.info(`  Build Frontend: ${options.buildFrontend ? "Yes" : "No"}`);
   logger.info(`  Disable Rollback: ${options.disableRollback ? "Yes" : "No"}`);
   logger.info(`  Skip WAF: ${options.skipWaf ? "Yes" : "No"}`);
+  logger.info(`  Skip User Creation: ${options.skipUserCreation ? "Yes" : "No"}`);
   logger.info("");
 
   try {
@@ -207,7 +216,7 @@ async function main() {
     const deploymentOptions: DeploymentOptions = {
       stage: options.stage,
       adminEmail: options.adminEmail,
-      skipUserCreation: false, // Always create/update admin user
+      skipUserCreation: options.skipUserCreation,
       autoDeleteFailedStacks: true,
       skipFrontendBuild: !options.buildFrontend,
       disableRollback: options.disableRollback,

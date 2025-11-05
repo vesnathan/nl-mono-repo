@@ -2,6 +2,10 @@ import * as fs from "fs-extra";
 import * as path from "path";
 import * as esbuild from "esbuild";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  LambdaClient,
+  UpdateFunctionCodeCommand,
+} from "@aws-sdk/client-lambda";
 import archiver from "archiver";
 import { logger } from "./logger";
 
@@ -31,6 +35,8 @@ export class LambdaCompiler {
   private s3KeyPrefix: string;
   private stage: string;
   private s3Client?: S3Client;
+  private lambdaClient?: LambdaClient;
+  private region?: string;
   private debugMode: boolean;
 
   constructor(options: LambdaCompilerOptions) {
@@ -40,10 +46,12 @@ export class LambdaCompiler {
     this.s3BucketName = options.s3BucketName;
     this.s3KeyPrefix = options.s3KeyPrefix || "functions";
     this.stage = options.stage || "dev";
+    this.region = options.region;
     this.debugMode = options.debugMode || false;
 
     if (this.s3BucketName && options.region) {
       this.s3Client = new S3Client({ region: options.region });
+      this.lambdaClient = new LambdaClient({ region: options.region });
     }
   }
 
@@ -88,6 +96,13 @@ export class LambdaCompiler {
               `✓ Uploaded ${lambdaFunc.functionName} to S3: s3://${this.s3BucketName}/${s3Key}`,
             );
           }
+
+          // Force Lambda function to update from S3
+          await this.updateLambdaFunctionCode(
+            lambdaFunc.functionName,
+            this.s3BucketName,
+            s3Key,
+          );
         }
       } catch (error: any) {
         this.logger.error(
@@ -266,6 +281,51 @@ ${jsCode}`;
     if (await fs.pathExists(this.outputDir)) {
       this.logger.info(`Cleaning Lambda output directory: ${this.outputDir}`);
       await fs.remove(this.outputDir);
+    }
+  }
+
+  /**
+   * Force update Lambda function code from S3
+   * This is necessary because CloudFormation doesn't update Lambda code when only S3 file content changes
+   */
+  private async updateLambdaFunctionCode(
+    functionName: string,
+    s3Bucket: string,
+    s3Key: string,
+  ): Promise<void> {
+    if (!this.lambdaClient) {
+      return;
+    }
+
+    const fullFunctionName = `nlmonorepo-thestoryhub-${functionName}-${this.stage}`;
+
+    try {
+      const command = new UpdateFunctionCodeCommand({
+        FunctionName: fullFunctionName,
+        S3Bucket: s3Bucket,
+        S3Key: s3Key,
+      });
+
+      await this.lambdaClient.send(command);
+
+      if (this.debugMode) {
+        this.logger.debug(
+          `✓ Force updated Lambda function: ${fullFunctionName}`,
+        );
+      }
+    } catch (error: any) {
+      // Lambda might not exist yet (first deployment), so don't fail
+      if (error.name === "ResourceNotFoundException") {
+        if (this.debugMode) {
+          this.logger.debug(
+            `Lambda function ${fullFunctionName} does not exist yet (will be created by CloudFormation)`,
+          );
+        }
+      } else {
+        this.logger.warning(
+          `Could not force update Lambda ${fullFunctionName}: ${error.message}`,
+        );
+      }
     }
   }
 }

@@ -32,27 +32,39 @@ IDENTITY_POOL_ID=$(/home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo-agent-1/.local-a
 
 GRAPHQL_URL=$(/home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo-agent-1/.local-aws/v2/2.27.45/dist/aws cloudformation describe-stacks \
   --stack-name "$STACK_NAME" \
-  --query 'Stacks[0].Outputs[?OutputKey==`AppSyncApiUrl`].OutputValue' \
+  --query 'Stacks[0].Outputs[?OutputKey==`ApiUrl`].OutputValue' \
   --output text \
   --no-verify-ssl 2>/dev/null)
 
-# Check if all values were retrieved
+PATREON_API_URL=$(/home/liqk1ugzoezh5okwywlr_/dev/nl-mono-repo-agent-1/.local-aws/v2/2.27.45/dist/aws cloudformation describe-stacks \
+  --stack-name "$STACK_NAME" \
+  --query 'Stacks[0].Outputs[?OutputKey==`PatreonWebhookApiUrl`].OutputValue' \
+  --output text \
+  --no-verify-ssl 2>/dev/null)
+
+# Check if required values were retrieved
 if [ -z "$USER_POOL_ID" ] || [ -z "$USER_POOL_CLIENT_ID" ] || [ -z "$IDENTITY_POOL_ID" ] || [ -z "$GRAPHQL_URL" ]; then
   echo "❌ Error: Could not retrieve all required values from CloudFormation stack"
   echo "   Make sure the stack $STACK_NAME exists and has the required outputs"
   exit 1
 fi
 
+# PATREON_API_URL is optional - set to empty string if not found
+if [ -z "$PATREON_API_URL" ]; then
+  echo "⚠️  Warning: PatreonWebhookApiUrl not found in stack outputs (this is optional)"
+  PATREON_API_URL=""
+fi
+
 # Write to .env.local
 cat > "$ENV_FILE" <<EOF
 # Auto-generated from CloudFormation outputs
-# Stack: $STACK_NAME
-# Generated on: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+# Generated on: $(date +"%Y-%m-%d")
 
 NEXT_PUBLIC_USER_POOL_ID=$USER_POOL_ID
 NEXT_PUBLIC_USER_POOL_CLIENT_ID=$USER_POOL_CLIENT_ID
 NEXT_PUBLIC_IDENTITY_POOL_ID=$IDENTITY_POOL_ID
 NEXT_PUBLIC_GRAPHQL_URL=$GRAPHQL_URL
+NEXT_PUBLIC_PATREON_API_URL=$PATREON_API_URL
 NEXT_PUBLIC_ENVIRONMENT=$STAGE
 EOF
 
@@ -63,4 +75,5 @@ echo "   User Pool ID: $USER_POOL_ID"
 echo "   User Pool Client ID: $USER_POOL_CLIENT_ID"
 echo "   Identity Pool ID: $IDENTITY_POOL_ID"
 echo "   GraphQL URL: $GRAPHQL_URL"
+echo "   Patreon API URL: $PATREON_API_URL"
 echo "   Environment: $STAGE"

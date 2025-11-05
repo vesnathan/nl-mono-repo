@@ -7,15 +7,21 @@ import {
 } from "@/types/PatreonSecretsSchemas";
 
 const PATREON_SECRETS_API_BASE_URL =
-  process.env.NEXT_PUBLIC_PATREON_API_URL ||
-  "https://your-api-gateway-url.execute-api.region.amazonaws.com/dev";
+  process.env.NEXT_PUBLIC_PATREON_API_URL || "";
+
+if (!PATREON_SECRETS_API_BASE_URL) {
+  console.error(
+    "NEXT_PUBLIC_PATREON_API_URL is not set. This will be populated after deploying the stack. Restart the dev server after deployment to pick up the new value.",
+  );
+}
 
 /**
  * Get authorization header with Cognito JWT token
+ * Uses access token because it contains cognito:groups claim
  */
 async function getAuthHeader(): Promise<Record<string, string>> {
   const session = await fetchAuthSession();
-  const token = session.tokens?.idToken?.toString();
+  const token = session.tokens?.accessToken?.toString();
 
   if (!token) {
     throw new Error("No authentication token available");
@@ -31,6 +37,12 @@ async function getAuthHeader(): Promise<Record<string, string>> {
  * @returns Current Patreon secrets with masked sensitive values
  */
 export async function getPatreonSecretsAPI(): Promise<PatreonSecrets> {
+  if (!PATREON_SECRETS_API_BASE_URL) {
+    throw new Error(
+      "Patreon API URL is not configured. Deploy the stack to configure it, then restart the dev server.",
+    );
+  }
+
   const authHeader = await getAuthHeader();
 
   const response = await fetch(
@@ -65,6 +77,12 @@ export async function getPatreonSecretsAPI(): Promise<PatreonSecrets> {
 export async function updatePatreonSecretsAPI(
   input: UpdatePatreonSecretsInput,
 ): Promise<{ success: boolean; message: string }> {
+  if (!PATREON_SECRETS_API_BASE_URL) {
+    throw new Error(
+      "Patreon API URL is not configured. Deploy the stack to configure it, then restart the dev server.",
+    );
+  }
+
   // Validate input with Zod
   UpdatePatreonSecretsInputSchema.parse(input);
 

@@ -3,7 +3,7 @@
 import { FC, ReactNode, useState } from "react";
 import to from "await-to-js";
 import { AuthUser, getCurrentUser } from "aws-amplify/auth";
-import { Progress } from "@heroui/progress";
+import { LoadingSpinner } from "./LoadingSpinner";
 import { useEffectOnce } from "../../hooks/useEffectOnce";
 
 type Props = {
@@ -31,7 +31,11 @@ export const RequireLoggedIn: FC<Props> = ({
   });
 
   if (!checked) {
-    return <Progress isIndeterminate aria-label="Checking current user" />;
+    return (
+      <div className="flex items-center justify-center py-20">
+        <LoadingSpinner label="Checking authentication..." />
+      </div>
+    );
   }
 
   if (!currentUser) {

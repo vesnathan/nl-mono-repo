@@ -7,10 +7,58 @@ enum ClientType {
   UnauthenticatedUser
 }
 
+enum PatreonTier {
+  NONE
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+type PatreonInfo @aws_iam @aws_cognito_user_pools {
+  tier: PatreonTier!
+  patreonUserId: String
+  lastSynced: String
+}
+
 type UserStats @aws_iam @aws_cognito_user_pools {
   storiesCreated: Int!
-  branchesContributed: Int!
-  totalUpvotes: Int!
+  branchesContributed: Int
+  totalUpvotes: Int
+}
+
+# User Privacy Settings (GOLD+ tier)
+type UserPrivacySettings @aws_iam @aws_cognito_user_pools {
+  profileVisibility: ProfileVisibility!
+  showStats: Boolean!
+}
+
+enum ProfileVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+# User Notification Preferences
+type UserNotificationSettings @aws_iam @aws_cognito_user_pools {
+  emailNotifications: Boolean!
+  notifyOnReply: Boolean!
+  notifyOnUpvote: Boolean!
+  notifyOnStoryUpdate: Boolean!
+  notificationFrequency: NotificationFrequency!
+}
+
+enum NotificationFrequency {
+  IMMEDIATE
+  DAILY_DIGEST
+  WEEKLY_DIGEST
+  NEVER
+}
+
+# User Content Preferences
+type UserContentSettings @aws_iam @aws_cognito_user_pools {
+  defaultAgeRatingFilter: AgeRating!
+  hideAIContent: Boolean!
+  autoSaveEnabled: Boolean!
 }
 
 type User @aws_iam @aws_cognito_user_pools {
@@ -20,7 +68,11 @@ type User @aws_iam @aws_cognito_user_pools {
   bio: String
   stats: UserStats!
   patreonSupporter: Boolean!
+  patreonInfo: PatreonInfo
   ogSupporter: Boolean! # Original/Early supporter badge
   clientType: [ClientType!]!
   createdAt: String!
+  privacySettings: UserPrivacySettings
+  notificationSettings: UserNotificationSettings
+  contentSettings: UserContentSettings
 }
