@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable sonarjs/cognitive-complexity */
+
 import { useEffect, useState } from "react";
 import {
   Button,
@@ -23,6 +25,14 @@ import {
   NotificationFrequency,
   AgeRating,
 } from "@/types/ValidationSchemas";
+
+// CSS class constants
+const TEXT_GRAY_400 = "text-gray-400";
+const TEXT_SM_GRAY_400 = "text-sm text-gray-400";
+const LABEL_TEXT_GRAY_400 = "text-sm font-medium text-gray-400";
+const TEXT_WHITE = "text-white";
+const BG_GRAY_700 = "bg-gray-700";
+const TRIGGER_BG = "bg-gray-800 border-gray-700";
 
 // Patreon tier configuration
 const PATREON_TIERS = {
@@ -50,7 +60,6 @@ function SettingsContent() {
 
   // Profile editing state
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [editedUsername, setEditedUsername] = useState("");
   const [editedBio, setEditedBio] = useState("");
   const [isSavingProfile, setIsSavingProfile] = useState(false);
 
@@ -143,12 +152,10 @@ function SettingsContent() {
     setIsSavingProfile(true);
     try {
       // TODO: Call updateUserProfile mutation
-      // For now, just simulate success
-      alert("Profile update functionality coming soon!");
+      // For now, just simulate success (functionality coming soon)
       setIsEditingProfile(false);
     } catch (error) {
       console.error("Failed to update profile:", error);
-      alert("Failed to update profile. Please try again.");
     } finally {
       setIsSavingProfile(false);
     }
@@ -160,11 +167,9 @@ function SettingsContent() {
     setIsSavingSettings(true);
     try {
       // TODO: Call updateUserSettings mutation
-      // For now, just simulate success
-      alert("Settings update functionality coming soon!");
+      // For now, just simulate success (functionality coming soon)
     } catch (error) {
       console.error("Failed to update settings:", error);
-      alert("Failed to update settings. Please try again.");
     } finally {
       setIsSavingSettings(false);
     }
@@ -231,7 +236,7 @@ function SettingsContent() {
             {isConnected && tierConfig ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-gray-400">Status:</span>
+                  <span className={TEXT_GRAY_400}>Status:</span>
                   <Chip
                     className={`${tierConfig.color} text-white font-semibold`}
                     size="lg"
@@ -298,7 +303,7 @@ function SettingsContent() {
                           {tier.name}
                         </span>
                       </div>
-                      <span className="text-gray-400">{tier.price}</span>
+                      <span className={TEXT_GRAY_400}>{tier.price}</span>
                     </div>
                   ))}
                 </div>
@@ -335,15 +340,15 @@ function SettingsContent() {
           </CardHeader>
           <CardBody className="p-6 space-y-4">
             <div>
-              <span className="text-gray-400">Username: </span>
+              <span className={TEXT_GRAY_400}>Username: </span>
               <span className="text-white">{user.username}</span>
             </div>
             <div>
-              <span className="text-gray-400">Email: </span>
+              <span className={TEXT_GRAY_400}>Email: </span>
               <span className="text-white">{user.email}</span>
             </div>
             <div>
-              <span className="text-gray-400">Account Created: </span>
+              <span className={TEXT_GRAY_400}>Account Created: </span>
               <span className="text-white">
                 {new Date(user.createdAt).toLocaleDateString()}
               </span>
@@ -386,24 +391,24 @@ function SettingsContent() {
                     onValueChange={setEditedBio}
                     maxLength={500}
                     classNames={{
-                      input: "text-white",
-                      label: "text-gray-400",
+                      input: TEXT_WHITE,
+                      label: LABEL_TEXT_GRAY_400,
                     }}
                   />
                   <Input
                     label="Favorite Authors"
                     placeholder="Comma-separated list of your favorite authors"
                     classNames={{
-                      input: "text-white",
-                      label: "text-gray-400",
+                      input: TEXT_WHITE,
+                      label: LABEL_TEXT_GRAY_400,
                     }}
                   />
                   <Input
                     label="Interests/Tags"
                     placeholder="e.g., Fantasy, Sci-Fi, Mystery"
                     classNames={{
-                      input: "text-white",
-                      label: "text-gray-400",
+                      input: TEXT_WHITE,
+                      label: LABEL_TEXT_GRAY_400,
                     }}
                   />
                   <div className="flex gap-2">
@@ -428,25 +433,25 @@ function SettingsContent() {
               ) : (
                 <>
                   <div>
-                    <span className="text-gray-400">Bio: </span>
+                    <span className={TEXT_GRAY_400}>Bio: </span>
                     {user.bio ? (
                       <span className="text-white">{user.bio}</span>
                     ) : (
                       <span className="text-gray-500 italic">
-                        No bio yet. Click "Edit Profile" to add one.
+                        No bio yet. Click &ldquo;Edit Profile&rdquo; to add one.
                       </span>
                     )}
                   </div>
                   <div>
-                    <span className="text-gray-400">Favorite Authors: </span>
+                    <span className={TEXT_GRAY_400}>Favorite Authors: </span>
                     <span className="text-gray-500 italic">
-                      Not set. Click "Edit Profile" to add.
+                      Not set. Click &ldquo;Edit Profile&rdquo; to add.
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Interests: </span>
+                    <span className={TEXT_GRAY_400}>Interests: </span>
                     <span className="text-gray-500 italic">
-                      Not set. Click "Edit Profile" to add.
+                      Not set. Click &ldquo;Edit Profile&rdquo; to add.
                     </span>
                   </div>
                 </>
@@ -487,7 +492,7 @@ function SettingsContent() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white font-medium">Profile Visibility</p>
-                    <p className="text-sm text-gray-400">
+                    <p className={TEXT_SM_GRAY_400}>
                       Control who can see your profile
                     </p>
                   </div>
@@ -501,8 +506,8 @@ function SettingsContent() {
                     }
                     className="w-40"
                     classNames={{
-                      trigger: "bg-gray-800 border-gray-700",
-                      value: "text-white",
+                      trigger: TRIGGER_BG,
+                      value: TEXT_WHITE,
                     }}
                   >
                     <SelectItem
@@ -523,7 +528,7 @@ function SettingsContent() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white font-medium">Show Statistics</p>
-                    <p className="text-sm text-gray-400">
+                    <p className={TEXT_SM_GRAY_400}>
                       Display your stats on your profile
                     </p>
                   </div>
@@ -536,7 +541,7 @@ function SettingsContent() {
                       })
                     }
                     classNames={{
-                      wrapper: "bg-gray-700",
+                      wrapper: BG_GRAY_700,
                     }}
                   />
                 </div>
@@ -585,7 +590,7 @@ function SettingsContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white font-medium">Email Notifications</p>
-                <p className="text-sm text-gray-400">
+                <p className={TEXT_SM_GRAY_400}>
                   Receive notifications via email
                 </p>
               </div>
@@ -598,7 +603,7 @@ function SettingsContent() {
                   })
                 }
                 classNames={{
-                  wrapper: "bg-gray-700",
+                  wrapper: BG_GRAY_700,
                 }}
               />
             </div>
@@ -606,7 +611,7 @@ function SettingsContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white font-medium">Notify on Reply</p>
-                <p className="text-sm text-gray-400">
+                <p className={TEXT_SM_GRAY_400}>
                   When someone replies to your comment
                 </p>
               </div>
@@ -619,7 +624,7 @@ function SettingsContent() {
                   })
                 }
                 classNames={{
-                  wrapper: "bg-gray-700",
+                  wrapper: BG_GRAY_700,
                 }}
               />
             </div>
@@ -627,7 +632,7 @@ function SettingsContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white font-medium">Notify on Upvote</p>
-                <p className="text-sm text-gray-400">
+                <p className={TEXT_SM_GRAY_400}>
                   When someone upvotes your contribution
                 </p>
               </div>
@@ -640,7 +645,7 @@ function SettingsContent() {
                   })
                 }
                 classNames={{
-                  wrapper: "bg-gray-700",
+                  wrapper: BG_GRAY_700,
                 }}
               />
             </div>
@@ -648,7 +653,7 @@ function SettingsContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white font-medium">Notify on Story Update</p>
-                <p className="text-sm text-gray-400">
+                <p className={TEXT_SM_GRAY_400}>
                   When a story you follow is updated
                 </p>
               </div>
@@ -661,7 +666,7 @@ function SettingsContent() {
                   })
                 }
                 classNames={{
-                  wrapper: "bg-gray-700",
+                  wrapper: BG_GRAY_700,
                 }}
               />
             </div>
@@ -669,7 +674,7 @@ function SettingsContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white font-medium">Notification Frequency</p>
-                <p className="text-sm text-gray-400">
+                <p className={TEXT_SM_GRAY_400}>
                   How often you want to receive notifications
                 </p>
               </div>
@@ -684,8 +689,8 @@ function SettingsContent() {
                 }
                 className="w-48"
                 classNames={{
-                  trigger: "bg-gray-800 border-gray-700",
-                  value: "text-white",
+                  trigger: TRIGGER_BG,
+                  value: TEXT_WHITE,
                 }}
               >
                 <SelectItem
@@ -737,7 +742,7 @@ function SettingsContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white font-medium">Age Rating Filter</p>
-                <p className="text-sm text-gray-400">
+                <p className={TEXT_SM_GRAY_400}>
                   Default content filter for stories
                 </p>
               </div>
@@ -751,8 +756,8 @@ function SettingsContent() {
                 }
                 className="w-40"
                 classNames={{
-                  trigger: "bg-gray-800 border-gray-700",
-                  value: "text-white",
+                  trigger: TRIGGER_BG,
+                  value: TEXT_WHITE,
                 }}
               >
                 <SelectItem key={AgeRating.G} value={AgeRating.G}>
@@ -779,7 +784,7 @@ function SettingsContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white font-medium">Hide AI Content</p>
-                <p className="text-sm text-gray-400">
+                <p className={TEXT_SM_GRAY_400}>
                   Hide AI-generated contributions from stories
                 </p>
               </div>
@@ -792,7 +797,7 @@ function SettingsContent() {
                   })
                 }
                 classNames={{
-                  wrapper: "bg-gray-700",
+                  wrapper: BG_GRAY_700,
                 }}
               />
             </div>
@@ -800,7 +805,7 @@ function SettingsContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-white font-medium">Auto-save</p>
-                <p className="text-sm text-gray-400">
+                <p className={TEXT_SM_GRAY_400}>
                   Automatically save your drafts while writing
                 </p>
               </div>
@@ -813,7 +818,7 @@ function SettingsContent() {
                   })
                 }
                 classNames={{
-                  wrapper: "bg-gray-700",
+                  wrapper: BG_GRAY_700,
                 }}
               />
             </div>

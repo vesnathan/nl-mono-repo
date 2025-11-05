@@ -54,6 +54,7 @@ export function Navbar() {
       return () =>
         document.removeEventListener("mousedown", handleClickOutside);
     }
+    return undefined;
   }, [showDropdown]);
 
   return (
@@ -75,6 +76,7 @@ export function Navbar() {
                 (isAuthenticated ? (
                   <div className="relative" ref={dropdownRef}>
                     <button
+                      type="button"
                       onClick={() => setShowDropdown(!showDropdown)}
                       className="w-12 h-12 rounded-full bg-gradient-to-br from-[#422F9F] to-[#2162BF] flex items-center justify-center text-white font-semibold hover:scale-110 transition-transform cursor-pointer"
                     >
@@ -96,6 +98,7 @@ export function Navbar() {
                         </div>
                         <div className="py-1">
                           <button
+                            type="button"
                             onClick={() => {
                               router.push("/settings");
                               setShowDropdown(false);
@@ -106,6 +109,7 @@ export function Navbar() {
                           </button>
                           {!isAdminLoading && isAdmin && (
                             <button
+                              type="button"
                               onClick={() => {
                                 router.push("/admin/settings");
                                 setShowDropdown(false);
@@ -116,6 +120,7 @@ export function Navbar() {
                             </button>
                           )}
                           <button
+                            type="button"
                             onClick={handleLogout}
                             className="w-full px-4 py-2 text-left text-red-500 hover:bg-[#3a3a3a] transition-colors"
                           >

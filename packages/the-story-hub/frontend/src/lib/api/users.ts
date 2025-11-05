@@ -54,7 +54,7 @@ export async function getUserProfileAPI(userId: string): Promise<User | null> {
     query: getUserProfileQuery,
     variables: { userId },
   });
-  const data = (result as { data: { getUserProfile: unknown } }).data;
+  const { data } = result as { data: { getUserProfile: unknown } };
   if (!data.getUserProfile) return null;
   return UserSchema.parse(data.getUserProfile);
 }
