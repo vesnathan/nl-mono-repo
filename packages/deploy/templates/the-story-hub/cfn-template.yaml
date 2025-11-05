@@ -35,6 +35,17 @@ Parameters:
     Type: Number
     Description: Number of days to retain CloudWatch Logs for nested stacks
     Default: 14
+  DomainName:
+    Type: String
+    Description: Custom domain name for CloudFront (e.g., the-story-hub.com)
+    Default: ""
+  HostedZoneId:
+    Type: String
+    Description: Route53 Hosted Zone ID for domain validation
+    Default: ""
+
+Conditions:
+  HasCustomDomain: !Not [!Equals [!Ref DomainName, ""]]
 
 Resources:
   # DynamoDb Tables
@@ -78,6 +89,8 @@ Resources:
         AppBucketName: !GetAtt S3Stack.Outputs.TSHBucketName
         AppBucketArn: !GetAtt S3Stack.Outputs.TSHBucketArn
         AppBucketRegionalDomainName: !GetAtt S3Stack.Outputs.TSHBucketRegionalDomainName
+        CertificateArn: ""  # Domain configuration not yet supported in nested stacks
+        CustomDomainName: ""  # Domain configuration not yet supported in nested stacks
 
   # Lambda Functions
   LambdaStack:
