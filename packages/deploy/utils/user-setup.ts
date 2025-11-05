@@ -345,7 +345,7 @@ export class UserSetupManager {
       logger.info("User already exists in Cognito. Getting user ID...");
       // Return the 'sub' attribute which is the actual Cognito user ID (UUID)
       const subAttribute = getUserResponse.UserAttributes?.find(
-        attr => attr.Name === 'sub'
+        (attr) => attr.Name === "sub",
       );
       if (!subAttribute?.Value) {
         throw new Error("User exists but 'sub' attribute not found");
@@ -383,7 +383,7 @@ export class UserSetupManager {
 
       // Get the 'sub' attribute which is the actual Cognito user ID (UUID)
       const subAttribute = createUserResponse.User?.Attributes?.find(
-        attr => attr.Name === 'sub'
+        (attr) => attr.Name === "sub",
       );
       if (!subAttribute?.Value) {
         throw new Error("User created but 'sub' attribute not found");

@@ -97,7 +97,9 @@ async function emptyAndDeleteBucket(
     if (error.name === "NoSuchBucket" || error.Code === "NoSuchBucket") {
       logger.info(`  Bucket ${bucketName} does not exist, skipping`);
     } else {
-      logger.warning(`  Failed to delete bucket ${bucketName}: ${error.message}`);
+      logger.warning(
+        `  Failed to delete bucket ${bucketName}: ${error.message}`,
+      );
     }
   }
 }
@@ -206,7 +208,9 @@ async function main() {
   logger.info(`  Build Frontend: ${options.buildFrontend ? "Yes" : "No"}`);
   logger.info(`  Disable Rollback: ${options.disableRollback ? "Yes" : "No"}`);
   logger.info(`  Skip WAF: ${options.skipWaf ? "Yes" : "No"}`);
-  logger.info(`  Skip User Creation: ${options.skipUserCreation ? "Yes" : "No"}`);
+  logger.info(
+    `  Skip User Creation: ${options.skipUserCreation ? "Yes" : "No"}`,
+  );
   logger.info("");
 
   try {
@@ -225,7 +229,9 @@ async function main() {
     };
 
     if (options.strategy === "replace") {
-      logger.info("⚠️  Force Replace mode: Stack will be deleted if it exists, then recreated");
+      logger.info(
+        "⚠️  Force Replace mode: Stack will be deleted if it exists, then recreated",
+      );
 
       // Delete existing stack if it exists
       const region = process.env.AWS_REGION || "ap-southeast-2";
@@ -234,7 +240,9 @@ async function main() {
 
       try {
         logger.info(`Checking if stack ${stackName} exists...`);
-        await cfClient.send(new DescribeStacksCommand({ StackName: stackName }));
+        await cfClient.send(
+          new DescribeStacksCommand({ StackName: stackName }),
+        );
 
         logger.info(`Stack found. Preparing for deletion...`);
 
@@ -261,10 +269,15 @@ async function main() {
         logger.success(`✓ Stack ${stackName} deleted successfully`);
       } catch (error: any) {
         // Stack might not exist, which is fine
-        if (error.name === "ResourceNotFoundException" || error.message?.includes("does not exist")) {
+        if (
+          error.name === "ResourceNotFoundException" ||
+          error.message?.includes("does not exist")
+        ) {
           logger.info(`Stack ${stackName} does not exist, skipping deletion`);
         } else {
-          logger.warning(`Note: ${error instanceof Error ? error.message : String(error)}`);
+          logger.warning(
+            `Note: ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
       }
     }

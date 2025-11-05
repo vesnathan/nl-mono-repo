@@ -38,13 +38,18 @@ interface PatreonSecrets {
  * API Gateway V2 HTTP API format: requestContext.authorizer.jwt.claims
  */
 function isAdmin(event: any): boolean {
-  console.log("Authorization check - full event:", JSON.stringify(event, null, 2));
+  console.log(
+    "Authorization check - full event:",
+    JSON.stringify(event, null, 2),
+  );
 
   const claims = event.requestContext?.authorizer?.jwt?.claims;
   console.log("JWT claims:", JSON.stringify(claims, null, 2));
 
   if (!claims) {
-    console.log("No claims found in event.requestContext.authorizer.jwt.claims");
+    console.log(
+      "No claims found in event.requestContext.authorizer.jwt.claims",
+    );
     return false;
   }
 
@@ -52,7 +57,10 @@ function isAdmin(event: any): boolean {
   const groups = claims["cognito:groups"];
   console.log("cognito:groups value:", groups, "type:", typeof groups);
   console.log("cognito:groups JSON:", JSON.stringify(groups));
-  console.log("cognito:groups charCodeAt(0):", groups?.toString().charCodeAt(0));
+  console.log(
+    "cognito:groups charCodeAt(0):",
+    groups?.toString().charCodeAt(0),
+  );
 
   if (typeof groups === "string") {
     // API Gateway JWT authorizer passes groups as a JSON string like "[SiteAdmin]"
@@ -72,7 +80,10 @@ function isAdmin(event: any): boolean {
 
       // Try removing brackets and splitting
       const cleanedGroups = groups.replace(/[\[\]]/g, "");
-      const hasAdmin = cleanedGroups.split(",").map(g => g.trim()).includes("SiteAdmin");
+      const hasAdmin = cleanedGroups
+        .split(",")
+        .map((g) => g.trim())
+        .includes("SiteAdmin");
       console.log("Cleaned groups check - hasAdmin:", hasAdmin);
       return hasAdmin;
     }

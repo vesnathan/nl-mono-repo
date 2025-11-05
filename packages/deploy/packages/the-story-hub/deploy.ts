@@ -1208,9 +1208,7 @@ export async function deployTheStoryHub(
             });
             logger.success("✓ Frontend environment variables updated");
           } else {
-            logger.warning(
-              `Update env script not found at ${updateEnvScript}`,
-            );
+            logger.warning(`Update env script not found at ${updateEnvScript}`);
           }
         } catch (envError: any) {
           logger.error(

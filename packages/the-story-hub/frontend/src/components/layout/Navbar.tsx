@@ -88,7 +88,10 @@ export function Navbar() {
                             Signed in as
                           </p>
                           <p className="text-xs text-gray-400">
-                            {user?.email || user?.username || username || "Loading..."}
+                            {user?.email ||
+                              user?.username ||
+                              username ||
+                              "Loading..."}
                           </p>
                         </div>
                         <div className="py-1">
