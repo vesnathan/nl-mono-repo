@@ -105,9 +105,8 @@ async function deployDNSStack(
 
   // Create S3 bucket for DNS template in us-east-1
   const s3BucketManager = new S3BucketManager(region);
-  const bucketExists = await s3BucketManager.ensureBucketExists(
-    templateBucketName,
-  );
+  const bucketExists =
+    await s3BucketManager.ensureBucketExists(templateBucketName);
   if (!bucketExists) {
     throw new Error(
       `Failed to create DNS template bucket ${templateBucketName} in us-east-1`,
@@ -1360,9 +1359,10 @@ export async function deployTheStoryHub(
           const cloudFrontDomain = stackOutputs.Stacks?.[0]?.Outputs?.find(
             (output) => output.OutputKey === "CloudFrontDomainName",
           )?.OutputValue;
-          const cloudFrontDistributionId = stackOutputs.Stacks?.[0]?.Outputs?.find(
-            (output) => output.OutputKey === "CloudFrontDistributionId",
-          )?.OutputValue;
+          const cloudFrontDistributionId =
+            stackOutputs.Stacks?.[0]?.Outputs?.find(
+              (output) => output.OutputKey === "CloudFrontDistributionId",
+            )?.OutputValue;
 
           if (cloudFrontDomain && cloudFrontDistributionId) {
             logger.info(`📡 CloudFront domain: ${cloudFrontDomain}`);
@@ -1383,9 +1383,7 @@ export async function deployTheStoryHub(
               cloudFrontDomain,
             );
 
-            logger.success(
-              `✓ Custom domain configuration complete!`,
-            );
+            logger.success(`✓ Custom domain configuration complete!`);
             logger.info(`🌍 Your site will be accessible at:`);
             logger.info(`   - https://${options.domainName}`);
             logger.info(`   - https://www.${options.domainName}`);
@@ -1401,9 +1399,7 @@ export async function deployTheStoryHub(
             );
           }
         } catch (error: any) {
-          logger.error(
-            `Failed to configure custom domain: ${error.message}`,
-          );
+          logger.error(`Failed to configure custom domain: ${error.message}`);
           logger.error(
             `Deployment failed during domain configuration. Please fix the issue and redeploy.`,
           );
@@ -1434,7 +1430,8 @@ export async function deployTheStoryHub(
 
             // Use custom AWS CLI path if available (for local-aws setup)
             const awsCliPath = process.env.AWS_CLI_PATH || "aws";
-            const noVerifyFlag = process.env.AWS_NO_VERIFY_SSL === "true" ? "--no-verify-ssl" : "";
+            const noVerifyFlag =
+              process.env.AWS_NO_VERIFY_SSL === "true" ? "--no-verify-ssl" : "";
 
             // Use AWS CLI sync for efficient upload
             const syncCommand = `${awsCliPath} s3 sync ${frontendOutPath} s3://${bucketName}/ --delete ${noVerifyFlag}`;
@@ -1479,9 +1476,7 @@ export async function deployTheStoryHub(
           );
         }
       } catch (uploadError: any) {
-        logger.error(
-          `Failed to upload frontend: ${uploadError.message}`,
-        );
+        logger.error(`Failed to upload frontend: ${uploadError.message}`);
         // Don't throw - continue with deployment
       }
 
