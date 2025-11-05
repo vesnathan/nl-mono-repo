@@ -145,7 +145,6 @@ export function Navbar() {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        initialMode="login"
         onAuthSuccess={refresh}
       />
     </>
