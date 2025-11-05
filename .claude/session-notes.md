@@ -282,6 +282,28 @@ AppSync resolvers run in a restricted JavaScript environment. Follow these conve
 - User prefers concise, technical communication
 - Focus on facts and problem-solving over validation
 
+### Before Production Deployment
+
+**Critical Testing Required**:
+
+- **Full Patreon Integration Test**: The Patreon integration has been implemented but NOT fully tested end-to-end
+  - Test OAuth flow: User connects Patreon account
+  - Test webhook: Verify pledge/unpledge events update user status
+  - Test daily sync: Verify scheduled sync updates all Patreon supporters
+  - Test secret management: Verify admin can update Patreon API credentials via admin settings
+  - Test tier detection: Verify correct tier is assigned (BRONZE, SILVER, GOLD, PLATINUM)
+  - Test OG badge: Verify site setting for granting OG badge to Patreon supporters works correctly
+
+**Unit Testing**:
+
+- **CRITICAL**: The entire site lacks unit tests
+  - Need to add Jest/Vitest testing framework
+  - Need to write unit tests for all resolvers
+  - Need to write unit tests for all Lambda functions
+  - Need to write unit tests for frontend components
+  - Need to write integration tests for API endpoints
+  - This should be completed BEFORE production deployment
+
 ### Pending Issues
 
 - **OP Approved Badge - Multiple Branches**: Multiple branches under the same parent node are showing "OP Approved" badges
