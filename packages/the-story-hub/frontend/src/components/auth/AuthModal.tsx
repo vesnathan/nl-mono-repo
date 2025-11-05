@@ -435,7 +435,7 @@ export function AuthModal({
                         </svg>
                       }
                     >
-                      Continue with Google
+                      Google
                     </Button>
 
                     <Button
@@ -453,7 +453,7 @@ export function AuthModal({
                         </svg>
                       }
                     >
-                      Continue with Facebook
+                      Facebook
                     </Button>
 
                     <Button
@@ -471,7 +471,7 @@ export function AuthModal({
                         </svg>
                       }
                     >
-                      Continue with Apple
+                      Apple
                     </Button>
                   </div>
                 </>
