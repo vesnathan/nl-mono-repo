@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@nextui-org/react";
 import Link from "next/link";
 import Image from "next/image";
-import { LoginModal } from "@/components/auth/LoginModal";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { useUserStore } from "@/stores/userStore";
@@ -12,7 +12,7 @@ import { authSignOut } from "shared/functions/authSignOut";
 import { useRouter } from "next/navigation";
 
 export function Navbar() {
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated, isLoading, refresh, username } = useAuth();
@@ -131,29 +131,22 @@ export function Navbar() {
                     )}
                   </div>
                 ) : (
-                  <>
-                    <Button
-                      variant="ghost"
-                      className="text-white border-white hover:bg-white/20"
-                      onPress={() => setShowLoginModal(true)}
-                    >
-                      Login
-                    </Button>
-                    <Link href="/register">
-                      <Button className="bg-[#422F9F] hover:bg-[#2162BF] text-white">
-                        Register
-                      </Button>
-                    </Link>
-                  </>
+                  <Button
+                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                    onPress={() => setShowAuthModal(true)}
+                  >
+                    Login / Register
+                  </Button>
                 ))}
             </div>
           </div>
         </div>
       </nav>
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onLoginSuccess={refresh}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialMode="login"
+        onAuthSuccess={refresh}
       />
     </>
   );
