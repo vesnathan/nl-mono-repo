@@ -7,21 +7,6 @@ enum ClientType {
   UnauthenticatedUser
 }
 
-enum PatreonTier {
-  NONE
-  BRONZE # $3/month - Ad-free experience
-  SILVER # $5/month - Bronze + Early access to features
-  GOLD # $10/month - Silver + Exclusive Discord role
-  PLATINUM # $20/month - Gold + Vote on new features
-}
-
-type PatreonInfo @aws_iam @aws_cognito_user_pools {
-  tier: PatreonTier!
-  patronStatus: String # "active_patron", "declined_patron", "former_patron"
-  lifetimeSupportCents: Int # Total amount pledged all-time
-  lastRefreshedAt: String # When we last synced with Patreon API
-}
-
 type UserStats @aws_iam @aws_cognito_user_pools {
   storiesCreated: Int!
   branchesContributed: Int!
@@ -34,9 +19,7 @@ type User @aws_iam @aws_cognito_user_pools {
   email: String!
   bio: String
   stats: UserStats!
-  patreonSupporter: Boolean! # Deprecated: Use patreonInfo.tier instead
-  patreonInfo: PatreonInfo
-  patreonCreatorUrl: String # Patreon creator page URL (only visible for PLATINUM tier)
+  patreonSupporter: Boolean!
   ogSupporter: Boolean! # Original/Early supporter badge
   clientType: [ClientType!]!
   createdAt: String!

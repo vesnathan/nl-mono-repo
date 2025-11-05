@@ -110,8 +110,9 @@ program
       const stage = options.stage;
       const maxWaitMinutes = parseInt(options.maxWait);
 
-      // Delete in reverse dependency order: aws-example & cwl -> shared -> waf
+      // Delete in reverse dependency order: tsh & aws-example & cwl -> shared -> waf
       const stackTypes: StackType[] = [
+        StackType.TheStoryHub,
         StackType.CWL,
         StackType.AwsExample,
         StackType.Shared,

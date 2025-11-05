@@ -1,5 +1,14 @@
 # Base Schema - Defines root Query, Mutation, and Subscription types
 
+# Shared enums that are used across multiple schemas
+enum AgeRating {
+  G
+  PG
+  PG_13
+  M
+  ADULT_18_PLUS
+}
+
 type Query {
   # Placeholder - actual queries defined in extending files
   _empty: String

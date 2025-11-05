@@ -1,7 +1,5 @@
 # Chapter/Branch Type Definitions
-
-# Import AgeRating from Story schema
-# enum AgeRating is defined in Story.graphql
+# Note: AgeRating enum is defined in 00-schema.graphql
 
 type ChapterStats @aws_iam @aws_cognito_user_pools {
   reads: Int!

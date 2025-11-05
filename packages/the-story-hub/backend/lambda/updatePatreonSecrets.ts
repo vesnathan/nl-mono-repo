@@ -40,9 +40,16 @@ function isAdmin(event: any): boolean {
   const claims = event.requestContext?.authorizer?.claims;
   if (!claims) return false;
 
-  // Check if user has SiteAdmin in their custom:clientType claim
-  const clientType = claims["custom:clientType"];
-  return clientType?.includes("SiteAdmin") ?? false;
+  // Check if user has SiteAdmin in their cognito:groups claim
+  const groups = claims["cognito:groups"];
+  if (typeof groups === "string") {
+    // Groups might be a comma-separated string or array
+    return groups.split(",").includes("SiteAdmin");
+  }
+  if (Array.isArray(groups)) {
+    return groups.includes("SiteAdmin");
+  }
+  return false;
 }
 
 /**

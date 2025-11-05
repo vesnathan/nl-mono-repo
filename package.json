@@ -68,6 +68,7 @@
     "reset-modules": "rm -rf node_modules/ packages/**/*/node_modules",
     "install-aws-cli-local": "./scripts/install-aws-cli-local.sh",
     "deploy": "yarn workspace @deploy/core deploy",
+    "deploy:tsh:dev": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-tsh-quick.ts",
     "aws-package-manager": "node packages/aws-bootstrap/scripts/aws-package-manager.js",
     "build": "lerna run build --stream",
     "build:tsh": "yarn workspace tshfrontend build",

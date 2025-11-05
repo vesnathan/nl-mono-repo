@@ -635,7 +635,7 @@ export async function deployTheStoryHub(
 
     const lambdaSourceDir = path.join(
       __dirname,
-      "../../../the-story-hub/backend/lambdas",
+      "../../../the-story-hub/backend/lambda",
     );
     // Use a repo-local cache for generated Lambda artifacts to avoid committing them
     const lambdaOutputDir = path.join(
@@ -1143,6 +1143,35 @@ export async function deployTheStoryHub(
             `TSH Cognito admin creation failed: ${userError instanceof Error ? userError.message : userError}`,
           );
           // don't throw to avoid failing the entire deploy; surface error to logs
+        }
+
+        // Generate frontend .env.local file with CloudFormation outputs
+        try {
+          logger.info("📝 Generating frontend .env.local file...");
+          const frontendEnvPath = path.join(
+            __dirname,
+            "../../../the-story-hub/frontend/.env.local",
+          );
+
+          const envContent = `# Auto-generated from CloudFormation outputs
+# Stack: ${stackName}
+# Generated on: ${new Date().toISOString()}
+
+NEXT_PUBLIC_USER_POOL_ID=${userPoolId}
+NEXT_PUBLIC_USER_POOL_CLIENT_ID=${userPoolClientId}
+NEXT_PUBLIC_IDENTITY_POOL_ID=${identityPoolId}
+NEXT_PUBLIC_GRAPHQL_URL=${apiUrl}
+NEXT_PUBLIC_ENVIRONMENT=${options.stage}
+`;
+
+          const { writeFileSync } = await import("fs");
+          writeFileSync(frontendEnvPath, envContent, "utf8");
+          logger.success(`✓ Frontend .env.local created at ${frontendEnvPath}`);
+        } catch (envError: any) {
+          logger.error(
+            `Failed to generate frontend .env.local: ${envError instanceof Error ? envError.message : envError}`,
+          );
+          // don't throw - this is non-critical
         }
       } catch (err) {
         logger.error(

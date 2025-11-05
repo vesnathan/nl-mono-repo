@@ -38,6 +38,7 @@ export async function updateSiteSettingsAPI(
   const response = await client.graphql({
     query: updateSiteSettings,
     variables: { input },
+    authMode: "userPool", // Must use Cognito User Pools for admin operations
   });
 
   // Validate response with Zod

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "AWS Example S3 Resources"
+Description: "The Story Hub S3 Resources"
 
 Parameters:
   Stage:

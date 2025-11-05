@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "AWS Example Cognito User Pool Resources"
+Description: "The Story Hub Cognito User Pool Resources"
 
 Parameters:
   Stage:

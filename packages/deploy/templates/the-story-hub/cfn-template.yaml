@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "AWS Example Backend Infrastructure"
+Description: "The Story Hub Backend Infrastructure"
 
 Parameters:
   Stage:

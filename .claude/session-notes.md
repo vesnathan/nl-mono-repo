@@ -45,6 +45,43 @@
 - **Why this matters**: Local development data must match live database exactly so URLs/IDs work consistently
 - **NEVER generate UUIDs in seed script**: Always use the hardcoded IDs from `seed-data.ts`
 
+### Patreon Supporter Tiers & Benefits
+
+When implementing features, always check if they should be gated by Patreon tier:
+
+- **NONE** (Non-supporter):
+  - Basic site access
+  - Can read and contribute to stories
+
+- **BRONZE** ($3/month):
+  - Ad-free experience across the site
+
+- **SILVER** ($5/month):
+  - Ad-free experience
+  - Early access to new features
+  - **Custom bio** on profile
+  - **Profile page** with user info and activity
+  - **Favorite authors** feature
+  - **Custom tags/interests**
+
+- **GOLD** ($10/month):
+  - All SILVER benefits, plus:
+  - Exclusive Discord role and access
+  - **Profile visibility settings** (public/private)
+  - **Show/hide statistics on profile**
+
+- **PLATINUM** ($20/month):
+  - All GOLD benefits, plus:
+  - Vote on new feature development
+  - Display Patreon creator page link on profile & contributions
+  - Priority support
+
+**Implementation Notes**:
+- Patreon tier is stored in `User.patreonInfo.tier` (enum: NONE, BRONZE, SILVER, GOLD, PLATINUM)
+- Always check tier before showing premium features in UI
+- Backend resolvers must verify tier for protected mutations/queries
+- Frontend should gracefully show "upgrade" prompts for unavailable features
+
 ---
 
 ## Technical Architecture Notes
@@ -120,6 +157,43 @@
   - If resolver exists but isn't in appsync.yaml, AppSync won't use it and queries will fail
   - This has caused multiple issues where resolvers were created but never deployed
 
+#### AppSync JavaScript Runtime Restrictions
+
+AppSync resolvers run in a restricted JavaScript environment. Follow these conventions strictly:
+
+**✅ REQUIRED PATTERNS:**
+
+- **Imports**: Must import `{ util, Context }` from `"@aws-appsync/utils"`
+- **IDs**: Use `util.autoId()` - NOT `uuid` or other libraries
+- **Timestamps**: Use `util.time.nowISO8601()` - NOT `new Date().toISOString()`
+- **DynamoDB**: Use `util.dynamodb.toMapValues()` for converting objects
+- **Errors**: Use `return util.error(message, type)` - MUST include `return` keyword
+  - In request function: `return util.error("Invalid input", "ValidationException")`
+  - In response function: `return util.error(ctx.error.message, ctx.error.type)`
+  - `util.error()` throws an error - it doesn't return a value, but you still need `return` for TypeScript
+
+**✅ ALLOWED JAVASCRIPT:**
+
+- Template literals, arrow functions, spread operators
+- Object/array manipulation (map, filter, reduce, etc.)
+- for loops, for...of loops
+- console.log() for logging
+- Nullish coalescing (`??`) and optional chaining (`?.`)
+- Standard ES6+ features
+
+**❌ NOT ALLOWED:**
+
+- `new Date()` - causes "code contains one or more errors" at deployment
+- `uuid` package or other external npm packages
+- Node.js built-in modules (fs, path, crypto, etc.)
+- Most browser/Node APIs not in the util namespace
+
+**Common Mistakes:**
+
+- Using `new Date()` instead of `util.time.nowISO8601()` (causes deployment failure)
+- Forgetting `return` before `util.error()` (causes compilation errors)
+- Importing external packages that aren't available in AppSync runtime
+
 ### DynamoDB Table Structure
 
 - Single table design with PK/SK pattern
@@ -133,20 +207,67 @@
 - Dual auth modes: `@aws_cognito_user_pools` and `@aws_iam`
 - Guest access supported via IAM for read operations
 
+### GraphQL Schema Merging for AppSync
+
+- **CRITICAL**: LocalStack's AppSync does NOT support forward type references
+- All types MUST be defined before they are used in the schema
+- Schema files are processed alphabetically by the merge script
+- **Solution**: Put shared enums and base types in `00-schema.graphql` so they're defined first
+- Example: `AgeRating` enum must be in `00-schema.graphql`, not `Story.graphql`, because `ChapterNode.graphql` uses it
+- After modifying schema files, ALWAYS run: `npx ts-node packages/the-story-hub/backend/scripts/merge-schema-for-appsync.ts`
+- The merged schema is uploaded to S3 and used by AppSync during deployment
+
+#### Schema Deployment Issue
+
+- **PROBLEM**: CloudFormation's `AWS::AppSync::GraphQLSchema` with `DefinitionS3Location` does NOT detect S3 file content changes
+- CloudFormation only updates the schema when the S3 location URL changes, not when the file content changes
+- **SOLUTION**: Use content-based versioning for schema S3 key (e.g., `schema-{hash}.graphql`)
+  - Calculate hash of schema file content
+  - Upload to S3 with versioned key: `schema-{hash}.graphql`
+  - Update CloudFormation parameter/template to reference the new versioned key
+  - This forces CloudFormation to see a "change" and reload the schema in AppSync
+- **NEVER** use quick workarounds like manual AWS CLI calls - always implement properly with versioned keys
+
+#### Lambda Deployment Issue
+
+- **PROBLEM**: CloudFormation's `AWS::Lambda::Function` with S3 code source does NOT update Lambda code when only S3 file content changes
+- CloudFormation only updates Lambda code when the S3 location (Bucket/Key) changes, NOT when file content at that location changes
+- Changing environment variables or Description does NOT trigger code updates - only metadata is updated
+- **SOLUTION**: After uploading Lambda zip to S3, directly call `aws lambda update-function-code` to force the update
+  - Implemented in `lambda-compiler.ts` - automatically force updates after S3 upload
+  - Handles ResourceNotFoundException gracefully (Lambda doesn't exist yet on first deploy)
+  - This ensures Lambda code is ALWAYS up to date regardless of CloudFormation's change detection
+
 ---
 
 ## Common Commands
 
 ### Development
 
-- `yarn dev` - Start frontend dev server
-- `yarn build` - Build frontend
+- `yarn dev:tsh` - Start The Story Hub frontend dev server (from root)
+- `yarn build:tsh` - Build The Story Hub frontend (from root)
 - `yarn lint` - Run linter
+- `yarn workspace tshfrontend update-env` - Manually update `.env.local` from AWS (auto-generated during deployment)
 
 ### Deployment
 
-- `yarn deploy:tsh:dev` - Deploy The Story Hub to dev (ask user to run)
-- `yarn deploy:tsh:prod` - Deploy to production (ask user to run)
+**Quick Deploy (Non-interactive)**:
+
+- `yarn deploy:tsh:dev` - Deploy The Story Hub to dev with default settings (replace strategy)
+  - Default settings: stage=dev, strategy=replace, admin-email=vesnathan@gmail.com, skip-waf=false, disable-rollback=true, build-frontend=false, skip-user-creation=false
+  - Override with flags: `yarn deploy:tsh:dev --admin-email=your@email.com --stage=prod --skip-waf=true`
+  - Use `yarn deploy:tsh:dev --help` to see all options
+  - **Dependencies**: Requires Shared stack and WAF stack to be deployed first (unless --skip-waf=true)
+  - **Force Replace**: When using replace strategy, S3 buckets are automatically emptied and deleted before stack deletion
+
+- `yarn deploy:tsh:dev:update` - Update The Story Hub dev stack (update strategy, skips user creation)
+  - Default settings: stage=dev, strategy=update, skip-user-creation=true, skip-waf=false, disable-rollback=true, build-frontend=false
+  - Use this for iterative deployments when you don't want to recreate the admin user or reset the database
+  - Can add flags: `yarn deploy:tsh:dev:update --build-frontend`
+
+**Interactive Deploy**:
+
+- `yarn deploy` - Interactive deployment wizard (asks for all options)
 
 ### Database
 
@@ -167,3 +288,73 @@
   - Business rule: **Only ONE branch can be OP Approved per parent node**
   - Need to add enforcement in the admin settings/mutation to ensure only one branch can be approved at a time
   - When approving a branch, any previously approved sibling branches should be automatically un-approved
+
+### Recent Issues Resolved
+
+- **Admin Mutations Using Wrong Auth Mode (2025-11-05)**:
+  - Issue: `updateSiteSettings` mutation returning "Unauthorized" even after fixing schema and resolver
+  - Root cause: Frontend was not specifying `authMode`, so Amplify defaulted to IAM authentication (Cognito Identity Pool)
+  - IAM identity objects don't have `groups` property - only Cognito User Pool identities have groups
+  - AppSync logs showed: `"identity.groups:" null` and identity was IAM role instead of User Pool user
+  - Solution: Added `authMode: "userPool"` to the GraphQL mutation call in frontend API
+  - Files affected: [settings.ts:41](packages/the-story-hub/frontend/src/lib/api/settings.ts#L41)
+  - **Important**: Admin mutations MUST explicitly specify `authMode: "userPool"` to access Cognito groups
+  - Lesson: Always specify authMode for protected operations - don't rely on Amplify defaults
+
+- **Invalid cognito_groups Parameter in GraphQL Schema (2025-11-05)**:
+  - Issue: `updateSiteSettings` mutation returning "Unauthorized: Only site administrators can update settings" (403) even for admin users
+  - Root cause: Schema file had `@aws_cognito_user_pools(cognito_groups: ["SiteAdmin"])` directive parameter, which is NOT supported in GraphQL SDL
+  - This parameter was previously removed in commit 9840e27 but was accidentally re-added
+  - Solution: Removed `cognito_groups: ["SiteAdmin"]` parameter from `@aws_cognito_user_pools` directive in SiteSettings.graphql
+  - The authorization check remains in the resolver code (`identity.groups.includes("SiteAdmin")`)
+  - Files affected: [SiteSettings.graphql:33](packages/the-story-hub/backend/schema/SiteSettings.graphql#L33)
+  - **Important**: The `cognito_groups` parameter is ONLY valid in AppSync resolver CloudFormation configuration, NOT in GraphQL SDL schema
+  - Lesson: AppSync GraphQL directives in SDL don't support group parameters - group checking must be done in resolver code
+
+- **Admin Settings Menu Not Showing After Login (2025-11-05)**:
+  - Issue: "Admin Settings" menu item didn't appear immediately after login on homepage
+  - Root cause: `useIsAdmin` hook only ran once on mount with empty dependency array, so it didn't re-check when user logged in
+  - Solution: Added Amplify Hub listener to watch for auth events (`signedIn`, `signedOut`, `tokenRefresh`) and trigger re-check
+  - Files affected: `useIsAdmin.ts` (added Hub listener and authChangeCounter state), `Navbar.tsx` (added isAdminLoading check)
+  - Lesson: React hooks that depend on external state (like auth) need to listen for state changes, not just run once
+
+- **Lambda Authorization for API Gateway V2 HTTP API (2025-11-05)**:
+  - Issue: `updatePatreonSecrets` Lambda returning "Admin access required" (403) for admin users
+  - Root causes (multiple issues):
+    1. Lambda was using `APIGatewayProxyHandler` (REST API format) instead of `APIGatewayProxyHandlerV2` (HTTP API format)
+    2. Lambda was checking `event.requestContext.authorizer.claims` instead of `event.requestContext.authorizer.jwt.claims`
+    3. Lambda was reading `event.httpMethod` and `event.path` instead of `event.requestContext.http.method` and `event.rawPath`
+    4. Frontend was sending ID token instead of access token (cognito:groups is only in access token)
+  - Solution:
+    - Changed Lambda to use `APIGatewayProxyHandlerV2` type
+    - Updated to read from `event.requestContext.authorizer.jwt.claims`
+    - Updated to read method/path from correct V2 format
+    - Changed frontend to send access token instead of ID token
+  - Files affected: `packages/the-story-hub/backend/lambda/updatePatreonSecrets.ts`, `packages/the-story-hub/frontend/src/lib/api/patreonSecrets.ts`
+  - **Important differences between API Gateway formats**:
+    - REST API: `event.httpMethod`, `event.path`, `event.requestContext.authorizer.claims`
+    - HTTP API V2: `event.requestContext.http.method`, `event.rawPath`, `event.requestContext.authorizer.jwt.claims`
+  - **Token types**: cognito:groups claim is in access token, not ID token - always use access token for authorization
+  - Lesson: API Gateway V2 HTTP API has completely different event structure than REST API - check CloudFormation template to see which type is configured
+
+- **Protected Routes Not Redirecting on Logout (2025-11-05)**:
+  - Issue: Settings and admin settings pages showed error messages instead of redirecting when user logged out
+  - Root cause: Routes were checking auth during render instead of using useEffect for navigation
+  - Solution: Updated `RequireAdmin` to use useEffect for redirect, updated settings page to use `RequireAuth` wrapper component
+  - Files affected: `RequireAdmin.tsx`, `settings/page.tsx`
+  - Pattern: Always use wrapper components with useEffect for protected route redirects, never redirect during render
+
+- **AgeRating Enum Values (2025-11-05)**:
+  - Issue: Deployment failed with "Property 'MATURE' does not exist on type 'typeof AgeRating'"
+  - Root cause: AgeRating enum uses film rating values (G, PG, PG_13, M, ADULT_18_PLUS), but code was using generic values (GENERAL, TEEN, MATURE, EXPLICIT)
+  - Solution: Updated all code to use correct enum values
+  - **Correct values**: `AgeRating.G`, `AgeRating.PG`, `AgeRating.PG_13`, `AgeRating.M`, `AgeRating.ADULT_18_PLUS`
+  - **NEVER use**: GENERAL, TEEN, MATURE, EXPLICIT (these don't exist!)
+  - Files affected: Query.getUserProfile.ts, settings page
+  - Lesson: Always check the actual enum definition in `00-schema.graphql` before using enum values
+
+- **GraphQL Schema Parse Failure (2025-11-04)**:
+  - Issue: "Failed to parse schema document" error during AppSync deployment
+  - Root cause: LocalStack AppSync doesn't support forward type references - `AgeRating` enum was defined in `Story.graphql` but used earlier in `ChapterNode.graphql` (alphabetical ordering)
+  - Solution: Moved `AgeRating` enum to `00-schema.graphql` so it's defined before use
+  - Lesson: Always define shared types in `00-schema.graphql` or files that sort alphabetically before their usage
