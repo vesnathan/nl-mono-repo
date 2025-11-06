@@ -710,8 +710,8 @@ Outputs:
     Description: URL for the Update Patreon Secrets API (GET/POST)
 
   GoogleOAuthSecretsArn:
-    Value: !Ref GoogleOAuthSecrets
-    Description: ARN of the Google OAuth secrets in Secrets Manager
+    Value: !Ref GoogleOAuthSecretsArn
+    Description: ARN of the Google OAuth secrets in Secrets Manager (passed from Cognito stack)
 
   UpdateGoogleOAuthSecretsFunctionArn:
     Value: !GetAtt UpdateGoogleOAuthSecretsFunction.Arn
