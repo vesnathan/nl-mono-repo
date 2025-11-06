@@ -14,8 +14,7 @@ export interface StackOutput {
   ExportName?: string;
 }
 
-export interface DeploymentOutputs {
-  stage: string;
+export interface StageDeploymentOutputs {
   lastUpdated: string;
   stacks: Partial<
     Record<
@@ -27,6 +26,10 @@ export interface DeploymentOutputs {
       }
     >
   >;
+}
+
+export interface DeploymentOutputs {
+  stages: Record<string, StageDeploymentOutputs>;
 }
 
 export class OutputsManager {
@@ -72,23 +75,43 @@ export class OutputsManager {
       let deploymentOutputs: DeploymentOutputs;
       try {
         const existingContent = await readFile(this.outputsFilePath, "utf8");
-        deploymentOutputs = JSON.parse(existingContent);
+        const parsed = JSON.parse(existingContent);
+
+        // Handle migration from old format
+        if ('stage' in parsed && 'stacks' in parsed && !('stages' in parsed)) {
+          // Old format: { stage, lastUpdated, stacks }
+          deploymentOutputs = {
+            stages: {
+              [parsed.stage]: {
+                lastUpdated: parsed.lastUpdated,
+                stacks: parsed.stacks,
+              },
+            },
+          };
+        } else {
+          deploymentOutputs = parsed;
+        }
       } catch {
         deploymentOutputs = {
-          stage,
+          stages: {},
+        };
+      }
+
+      // Initialize stage if it doesn't exist
+      if (!deploymentOutputs.stages[stage]) {
+        deploymentOutputs.stages[stage] = {
           lastUpdated: new Date().toISOString(),
           stacks: {},
         };
       }
 
-      // Update the specific stack outputs
-      deploymentOutputs.stacks[stackType] = {
+      // Update the specific stack outputs for this stage
+      deploymentOutputs.stages[stage].stacks[stackType] = {
         region: stackRegion,
         stackName,
         outputs,
       };
-      deploymentOutputs.lastUpdated = new Date().toISOString();
-      deploymentOutputs.stage = stage;
+      deploymentOutputs.stages[stage].lastUpdated = new Date().toISOString();
 
       // Ensure directory exists
       await mkdir(join(__dirname), { recursive: true });
@@ -125,9 +148,9 @@ export class OutputsManager {
         return;
       }
 
-      if (deploymentOutputs.stacks[stackType]) {
-        delete deploymentOutputs.stacks[stackType];
-        deploymentOutputs.lastUpdated = new Date().toISOString();
+      if (deploymentOutputs.stages?.[stage]?.stacks[stackType]) {
+        delete deploymentOutputs.stages[stage].stacks[stackType];
+        deploymentOutputs.stages[stage].lastUpdated = new Date().toISOString();
 
         await writeFile(
           this.outputsFilePath,
@@ -157,14 +180,14 @@ export class OutputsManager {
       const content = await readFile(this.outputsFilePath, "utf8");
       const deploymentOutputs: DeploymentOutputs = JSON.parse(content);
 
-      if (deploymentOutputs.stage !== stage) {
+      if (!deploymentOutputs.stages?.[stage]) {
         logger.warning(
-          `Outputs file is for stage ${deploymentOutputs.stage}, but requested stage ${stage}`,
+          `No outputs found for stage ${stage}`,
         );
         return null;
       }
 
-      return deploymentOutputs.stacks[stackType]?.outputs || null;
+      return deploymentOutputs.stages[stage].stacks[stackType]?.outputs || null;
     } catch (error: unknown) {
       logger.warning(
         `Could not read outputs for ${stackType}: ${(error as Error).message}`,
@@ -198,14 +221,14 @@ export class OutputsManager {
       const content = await readFile(this.outputsFilePath, "utf8");
       const deploymentOutputs: DeploymentOutputs = JSON.parse(content);
 
-      if (deploymentOutputs.stage !== stage) {
+      if (!deploymentOutputs.stages?.[stage]) {
         logger.warning(
-          `Outputs file is for stage ${deploymentOutputs.stage}, but requested stage ${stage}`,
+          `No outputs found for stage ${stage}`,
         );
         return null;
       }
 
-      const stacks = deploymentOutputs.stacks || {};
+      const stacks = deploymentOutputs.stages[stage].stacks || {};
 
       for (const stackKey of Object.keys(stacks) as StackType[]) {
         const stackOutputs = stacks[stackKey]?.outputs || [];
@@ -230,19 +253,19 @@ export class OutputsManager {
     }
   }
 
-  async getAllOutputs(stage: string): Promise<DeploymentOutputs | null> {
+  async getAllOutputs(stage: string): Promise<StageDeploymentOutputs | null> {
     try {
       const content = await readFile(this.outputsFilePath, "utf8");
       const deploymentOutputs: DeploymentOutputs = JSON.parse(content);
 
-      if (deploymentOutputs.stage !== stage) {
+      if (!deploymentOutputs.stages?.[stage]) {
         logger.warning(
-          `Outputs file is for stage ${deploymentOutputs.stage}, but requested stage ${stage}`,
+          `No outputs found for stage ${stage}`,
         );
         return null;
       }
 
-      return deploymentOutputs;
+      return deploymentOutputs.stages[stage];
     } catch (error: unknown) {
       logger.warning(
         `Could not read deployment outputs: ${(error as Error).message}`,
@@ -295,16 +318,31 @@ export class OutputsManager {
   }
 
   async clearOutputs(stage: string): Promise<void> {
-    const emptyOutputs: DeploymentOutputs = {
-      stage,
-      lastUpdated: new Date().toISOString(),
-      stacks: {},
-    };
+    try {
+      const content = await readFile(this.outputsFilePath, "utf8");
+      const deploymentOutputs: DeploymentOutputs = JSON.parse(content);
 
-    await writeFile(
-      this.outputsFilePath,
-      JSON.stringify(emptyOutputs, null, 2),
-    );
-    logger.info(`Cleared deployment outputs for stage ${stage}`);
+      // Remove only the specified stage
+      if (deploymentOutputs.stages?.[stage]) {
+        delete deploymentOutputs.stages[stage];
+        await writeFile(
+          this.outputsFilePath,
+          JSON.stringify(deploymentOutputs, null, 2),
+        );
+        logger.info(`Cleared deployment outputs for stage ${stage}`);
+      } else {
+        logger.warning(`No outputs found for stage ${stage} to clear`);
+      }
+    } catch {
+      // File doesn't exist, create empty structure
+      const emptyOutputs: DeploymentOutputs = {
+        stages: {},
+      };
+      await writeFile(
+        this.outputsFilePath,
+        JSON.stringify(emptyOutputs, null, 2),
+      );
+      logger.info(`Initialized empty deployment outputs file`);
+    }
   }
 }

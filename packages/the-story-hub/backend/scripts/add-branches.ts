@@ -38,7 +38,7 @@ async function getChaptersForStory(storyId: string) {
       KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
       ExpressionAttributeValues: {
         ":pk": `STORY#${storyId}`,
-        ":sk": "CHAPTER#",
+        ":sk": "NODE#",
       },
     }),
   );
@@ -79,9 +79,9 @@ function createBranchChapter(
 
   return {
     PK: `STORY#${storyId}`,
-    SK: `CHAPTER#${nodeId}`,
+    SK: `NODE#${nodeId}`,
     GSI1PK: `STORY#${storyId}`,
-    GSI1SK: `CHAPTER#${nodeId}`,
+    GSI1SK: `NODE#${nodeId}`,
     storyId,
     nodeId,
     chapterNumber,

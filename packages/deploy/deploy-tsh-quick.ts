@@ -20,6 +20,9 @@ import { deployTheStoryHub } from "./packages/the-story-hub/deploy";
 import { DeploymentOptions, StackType, getStackName } from "./types";
 import { logger, setDebugMode, setLogFile } from "./utils/logger";
 import { getAwsCredentials } from "./utils/aws-credentials";
+import { OutputsManager } from "./outputs-manager";
+import { getDependencyChain } from "./dependency-validator";
+import { DeploymentManager } from "./deployment-manager";
 import yargs from "yargs/yargs";
 import { hideBin } from "yargs/helpers";
 import {
@@ -109,8 +112,8 @@ interface CliOptions {
   adminEmail: string;
   strategy: "update" | "replace";
   buildFrontend: boolean;
+  buildResolvers: boolean;
   disableRollback: boolean;
-  skipWaf: boolean;
   skipUserCreation: boolean;
   debug: boolean;
 }
@@ -128,7 +131,7 @@ async function main() {
       alias: "e",
       type: "string",
       description: "Admin email address for user creation",
-      default: "vesnathan@gmail.com",
+      default: "vesnathan+tsh@gmail.com",
     })
     .option("strategy", {
       type: "string",
@@ -140,19 +143,18 @@ async function main() {
       alias: "b",
       type: "boolean",
       description: "Build frontend application before deployment",
-      default: false,
+      default: true,
+    })
+    .option("build-resolvers", {
+      type: "boolean",
+      description: "Build and upload resolvers and Lambda functions",
+      default: true,
     })
     .option("disable-rollback", {
       alias: "r",
       type: "boolean",
       description: "Disable automatic rollback on stack creation failure",
       default: true,
-    })
-    .option("skip-waf", {
-      alias: "w",
-      type: "boolean",
-      description: "Skip WAF deployment (recommended for dev)",
-      default: false,
     })
     .option("skip-user-creation", {
       alias: "u",
@@ -175,8 +177,8 @@ async function main() {
     adminEmail: argv["admin-email"],
     strategy: argv.strategy,
     buildFrontend: argv["build-frontend"],
+    buildResolvers: argv["build-resolvers"],
     disableRollback: argv["disable-rollback"],
-    skipWaf: argv["skip-waf"],
     skipUserCreation: argv["skip-user-creation"],
     debug: argv.debug,
   };
@@ -206,8 +208,8 @@ async function main() {
   logger.info(`  Strategy: ${options.strategy}`);
   logger.info(`  Admin Email: ${options.adminEmail}`);
   logger.info(`  Build Frontend: ${options.buildFrontend ? "Yes" : "No"}`);
+  logger.info(`  Build Resolvers: ${options.buildResolvers ? "Yes" : "No"}`);
   logger.info(`  Disable Rollback: ${options.disableRollback ? "Yes" : "No"}`);
-  logger.info(`  Skip WAF: ${options.skipWaf ? "Yes" : "No"}`);
   logger.info(
     `  Skip User Creation: ${options.skipUserCreation ? "Yes" : "No"}`,
   );
@@ -223,8 +225,9 @@ async function main() {
       skipUserCreation: options.skipUserCreation,
       autoDeleteFailedStacks: true,
       skipFrontendBuild: !options.buildFrontend,
+      skipResolversBuild: !options.buildResolvers,
       disableRollback: options.disableRollback,
-      skipWAF: options.skipWaf,
+      skipWAF: true, // Temporarily skip WAF - will add back after deployment works
       debugMode: options.debug,
     };
 
@@ -249,6 +252,7 @@ async function main() {
         // Delete S3 buckets first (they must be empty before stack deletion)
         logger.info("Deleting S3 buckets that prevent stack deletion...");
         const bucketNames = [
+          `nlmonorepo-thestoryhub-frontend-${options.stage}`,
           `nlmonorepo-thestoryhub-userfiles-${options.stage}`,
           `nlmonorepo-thestoryhub-templates-${options.stage}`,
         ];
@@ -282,8 +286,46 @@ async function main() {
       }
     }
 
+    // Check and deploy dependencies
+    logger.info("🔍 Checking dependencies...");
+    const outputsManager = new OutputsManager();
+    const dependencyChain = getDependencyChain(StackType.TheStoryHub);
+
+    const missingDeps: StackType[] = [];
+
+    for (const depStack of dependencyChain) {
+      // Skip TheStoryHub itself
+      if (depStack === StackType.TheStoryHub) continue;
+
+      const depExists = await outputsManager.validateStackExists(
+        depStack,
+        options.stage,
+      );
+
+      if (!depExists) {
+        missingDeps.push(depStack);
+      }
+    }
+
+    if (missingDeps.length > 0) {
+      logger.info(
+        `📦 Missing dependencies detected: ${missingDeps.join(", ")}`,
+      );
+      logger.info("🚀 Auto-deploying dependencies...");
+
+      const deploymentManager = new DeploymentManager();
+
+      for (const depStack of missingDeps) {
+        logger.info(`\n📦 Deploying ${depStack}...`);
+        await deploymentManager.deployStack(depStack, deploymentOptions);
+        logger.success(`✓ ${depStack} deployed successfully\n`);
+      }
+    } else {
+      logger.success("✓ All dependencies are already deployed");
+    }
+
     // Deploy The Story Hub
-    logger.info("🏗️  Deploying The Story Hub...");
+    logger.info("\n🏗️  Deploying The Story Hub...");
     await deployTheStoryHub(deploymentOptions);
 
     logger.success("\n✅ Deployment completed successfully!");

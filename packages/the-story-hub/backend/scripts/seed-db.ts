@@ -232,7 +232,7 @@ function transformStoryForDB(story: (typeof SEED_STORIES)[number]): any {
 function transformNodeForDB(node: (typeof SEED_NODES)[number]): any {
   return {
     PK: `STORY#${node.storyId}`,
-    SK: `CHAPTER#${node.nodeId}`,
+    SK: `NODE#${node.nodeId}`,
     GSI1PK: `USER#${node.authorId}`,
     GSI1SK: `BRANCH#${node.createdAt}#${node.nodeId}`,
     storyId: node.storyId,

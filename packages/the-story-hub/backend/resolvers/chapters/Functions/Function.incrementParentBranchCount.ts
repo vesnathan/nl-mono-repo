@@ -20,7 +20,7 @@ export function request(ctx: any) {
     operation: "UpdateItem",
     key: util.dynamodb.toMapValues({
       PK: `STORY#${storyId}`,
-      SK: `CHAPTER#${targetNodeId}`,
+      SK: `NODE#${targetNodeId}`,
     }),
     update: {
       expression: "ADD stats.childBranches :inc",

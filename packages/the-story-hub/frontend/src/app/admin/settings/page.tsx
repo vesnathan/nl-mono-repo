@@ -11,6 +11,11 @@ import {
   updatePatreonSecretsAPI,
 } from "@/lib/api/patreonSecrets";
 import type { PatreonSecrets } from "@/types/PatreonSecretsSchemas";
+import {
+  getGoogleOAuthSecretsAPI,
+  updateGoogleOAuthSecretsAPI,
+} from "@/lib/api/googleOAuthSecrets";
+import type { GoogleOAuthSecrets } from "@/types/GoogleOAuthSecretsSchemas";
 
 // Reusable Components for Settings UI
 
@@ -140,6 +145,8 @@ function AdminSettingsContent() {
   const [patreonSecrets, setPatreonSecrets] = useState<PatreonSecrets | null>(
     null,
   );
+  const [googleOAuthSecrets, setGoogleOAuthSecrets] =
+    useState<GoogleOAuthSecrets | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -154,12 +161,14 @@ function AdminSettingsContent() {
     try {
       setIsLoading(true);
       setError(null);
-      const [settingsData, secretsData] = await Promise.all([
+      const [settingsData, secretsData, googleSecretsData] = await Promise.all([
         getSiteSettingsAPI(),
         getPatreonSecretsAPI(),
+        getGoogleOAuthSecretsAPI(),
       ]);
       setSettings(settingsData);
       setPatreonSecrets(secretsData);
+      setGoogleOAuthSecrets(googleSecretsData);
     } catch (err) {
       console.error("Failed to load settings:", err);
       setError("Failed to load site settings. Please try again.");
@@ -221,6 +230,36 @@ function AdminSettingsContent() {
     } catch (err) {
       console.error("Failed to update Patreon secrets:", err);
       setError("Failed to save Patreon secrets. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleGoogleOAuthSecretChange = async (
+    field: keyof GoogleOAuthSecrets,
+    value: string,
+  ) => {
+    if (!googleOAuthSecrets) return;
+
+    try {
+      setIsSaving(true);
+      setSaveSuccess(false);
+      setError(null);
+
+      await updateGoogleOAuthSecretsAPI({
+        [field]: value,
+      });
+
+      // Reload secrets to get masked values
+      const updatedSecrets = await getGoogleOAuthSecretsAPI();
+      setGoogleOAuthSecrets(updatedSecrets);
+      setSaveSuccess(true);
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      console.error("Failed to update Google OAuth secrets:", err);
+      setError("Failed to save Google OAuth secrets. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -355,6 +394,56 @@ function AdminSettingsContent() {
                 handlePatreonSecretChange("webhookSecret", value)
               }
               placeholder="Enter webhook secret"
+              type="password"
+              disabled={isSaving}
+            />
+          </SettingsSection>
+
+          {/* Google OAuth Configuration Section */}
+          <SettingsSection
+            title="Google OAuth Configuration"
+            description="Configure Google Sign-In credentials for user authentication. These credentials are stored securely in AWS Secrets Manager and encrypted both in transit (HTTPS) and at rest (KMS)."
+          >
+            <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 mb-4">
+              <p className="text-blue-200 text-sm">
+                <strong>Security:</strong> These values are directly synced to
+                AWS Secrets Manager. Sensitive fields are masked after saving.
+                Changes are applied immediately and used by the Cognito User
+                Pool for Google OAuth authentication.
+              </p>
+              <p className="text-blue-200 text-sm mt-2">
+                <strong>Setup:</strong> Get these credentials from{" "}
+                <a
+                  href="https://console.cloud.google.com/apis/credentials"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-blue-100"
+                >
+                  Google Cloud Console
+                </a>
+                . Create an OAuth 2.0 Client ID for a web application.
+              </p>
+            </div>
+
+            <SettingInput
+              label="Google OAuth Client ID"
+              description="The Client ID from your Google Cloud OAuth 2.0 credentials. Looks like: 123456789-abcdef.apps.googleusercontent.com"
+              value={googleOAuthSecrets?.clientId ?? ""}
+              onChange={(value) =>
+                handleGoogleOAuthSecretChange("clientId", value)
+              }
+              placeholder="123456789-abcdef.apps.googleusercontent.com"
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="Google OAuth Client Secret"
+              description="The Client Secret from your Google Cloud OAuth 2.0 credentials. Keep this secret!"
+              value={googleOAuthSecrets?.clientSecret ?? ""}
+              onChange={(value) =>
+                handleGoogleOAuthSecretChange("clientSecret", value)
+              }
+              placeholder="GOCSPX-..."
               type="password"
               disabled={isSaving}
             />

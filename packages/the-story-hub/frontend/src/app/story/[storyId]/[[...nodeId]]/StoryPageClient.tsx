@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { useStory } from "@/hooks/useStory";
 import { useQuery } from "@tanstack/react-query";
 import { getChapterAPI, listBranchesAPI } from "@/lib/api/chapters";
@@ -21,8 +21,9 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  useDisclosure,
 } from "@nextui-org/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StoryMetadataChips } from "@/components/stories/StoryMetadataChips";
 import { CommentSection } from "@/components/comments/CommentSection";
 import { useAuth } from "@/hooks/useAuth";
@@ -84,7 +85,7 @@ function ChapterSection({
 }) {
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
-  const [shouldFetchBranches, setShouldFetchBranches] = useState(isRoot); // Only fetch for root initially
+  const [shouldFetchBranches, setShouldFetchBranches] = useState(true); // Always fetch branches - React Query handles caching
   const [expandedBranchComments, setExpandedBranchComments] = useState<
     string | null
   >(null); // Track which branch's comments are expanded
@@ -97,12 +98,45 @@ function ChapterSection({
     enabled: !!nodeId,
   });
 
-  // Fetch branches for this chapter - only when accordion is opened
-  const { data: branches } = useQuery({
+  // Fetch branches for this chapter
+  const {
+    data: branches,
+    error: branchesError,
+    isLoading: branchesLoading,
+  } = useQuery({
     queryKey: ["branches", storyId, nodeId],
-    queryFn: () => listBranchesAPI(storyId, nodeId),
+    queryFn: async () => {
+      console.log(
+        `[ChapterSection] Fetching branches for nodeId: ${nodeId}, storyId: ${storyId}`,
+      );
+      try {
+        const result = await listBranchesAPI(storyId, nodeId);
+        console.log(
+          `[ChapterSection] Fetched ${result?.length || 0} branches for nodeId: ${nodeId}`,
+          result,
+        );
+        return result;
+      } catch (error) {
+        console.error(
+          `[ChapterSection] Error fetching branches for nodeId: ${nodeId}`,
+          error,
+        );
+        throw error;
+      }
+    },
     enabled: !!nodeId && shouldFetchBranches,
   });
+
+  // Log if there's an error or if branches are loading
+  if (branchesError) {
+    console.error(
+      `[ChapterSection] Branches query error for nodeId: ${nodeId}`,
+      branchesError,
+    );
+  }
+  if (branchesLoading) {
+    console.log(`[ChapterSection] Branches loading for nodeId: ${nodeId}`);
+  }
 
   // Fetch comment count for main chapter
   const { data: mainCommentData } = useQuery({
@@ -160,6 +194,18 @@ function ChapterSection({
           id={`chapter-${nodeId}`}
           className="bg-gray-900 border border-gray-700 p-8 mb-6"
         >
+          {chapter.branchDescription && !isRoot && (
+            <div className="mb-6 pb-4 border-b border-gray-700">
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {chapter.branchDescription}
+              </h2>
+              <div className="flex items-center gap-1">
+                <p className="text-sm text-gray-400">by {chapter.authorName}</p>
+                {chapter.authorOGSupporter && <OGBadge size="sm" />}
+                {chapter.authorPatreonSupporter && <PatreonBadge size="sm" />}
+              </div>
+            </div>
+          )}
           <div className="prose prose-invert prose-lg max-w-none">
             <div className="text-gray-100 whitespace-pre-wrap leading-relaxed">
               {chapter.content}
@@ -329,12 +375,7 @@ function ChapterSection({
               selectedKeys={isAccordionOpen ? ["branches"] : []}
               onSelectionChange={(keys) => {
                 const keysArray = Array.from(keys);
-                const isOpening = keysArray.includes("branches");
-                setIsAccordionOpen(isOpening);
-                // Trigger branch fetching when accordion opens
-                if (isOpening && !shouldFetchBranches) {
-                  setShouldFetchBranches(true);
-                }
+                setIsAccordionOpen(keysArray.includes("branches"));
               }}
             >
               <AccordionItem
@@ -553,9 +594,19 @@ function ChapterSection({
 
 export default function StoryDetailPage() {
   const params = useParams();
-  const storyId = (params?.storyId as string) || "";
+  const pathname = usePathname();
   const { userId } = useAuth();
   const [isSynopsisModalOpen, setIsSynopsisModalOpen] = useState(false);
+  const {
+    isOpen: isImageOpen,
+    onOpen: onImageOpen,
+    onClose: onImageClose,
+  } = useDisclosure();
+
+  // Extract storyId from the actual browser URL pathname
+  // CloudFront rewrites /story/{storyId}/ to /story/placeholder/index.html
+  // but the browser URL still shows /story/{storyId}/, so we parse it directly
+  const storyId = pathname?.split("/")[2] || (params?.storyId as string) || "";
 
   const {
     data: story,
@@ -610,7 +661,18 @@ export default function StoryDetailPage() {
             <div className="flex flex-col md:flex-row gap-6">
               {/* Cover Image */}
               {story.coverImageUrl && (
-                <div className="flex-shrink-0">
+                <div
+                  className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={onImageOpen}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      onImageOpen();
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  title="Click to enlarge"
+                >
                   <Image
                     src={story.coverImageUrl}
                     alt={story.title}
@@ -746,6 +808,29 @@ export default function StoryDetailPage() {
               </ModalFooter>
             </>
           )}
+        </ModalContent>
+      </Modal>
+
+      {/* Cover Image Modal */}
+      <Modal
+        isOpen={isImageOpen}
+        onClose={onImageClose}
+        size="3xl"
+        classNames={{
+          base: "bg-black/90",
+          closeButton: "text-white hover:bg-white/20",
+        }}
+      >
+        <ModalContent>
+          <ModalBody className="p-0">
+            {story?.coverImageUrl && (
+              <img
+                src={story.coverImageUrl}
+                alt={story.title}
+                className="w-full h-auto max-h-[80vh] object-contain"
+              />
+            )}
+          </ModalBody>
         </ModalContent>
       </Modal>
     </div>

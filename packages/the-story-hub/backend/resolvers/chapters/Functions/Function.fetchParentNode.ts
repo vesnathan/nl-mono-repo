@@ -20,7 +20,7 @@ export function request(ctx: CTX) {
   // OR we can use a Scan with filter (not ideal but works for pipeline demo)
 
   // Alternative: Use Query on main table if we store parent references
-  // Let's query CHAPTER# prefix items to find the parent
+  // Let's query NODE# prefix items to find the parent
 
   // Best approach: Store a reverse lookup or require storyId in input
   // For this example, let's create a query that finds the chapter
@@ -31,7 +31,7 @@ export function request(ctx: CTX) {
     query: {
       expression: "SK = :sk",
       expressionValues: util.dynamodb.toMapValues({
-        ":sk": `CHAPTER#${input.parentNodeId}`,
+        ":sk": `NODE#${input.parentNodeId}`,
       }),
     },
     limit: 1,

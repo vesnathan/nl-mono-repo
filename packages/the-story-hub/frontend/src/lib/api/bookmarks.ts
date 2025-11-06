@@ -1,7 +1,8 @@
 import { client } from "@/lib/amplify";
 import { saveBookmark } from "@/graphql/mutations";
 import { getBookmark } from "@/graphql/queries";
-import type { Bookmark, SaveBookmarkInput } from "@/types/gqlTypes";
+import { BookmarkSchema, type Bookmark } from "@/types/BookmarkSchemas";
+import type { SaveBookmarkInput } from "@/types/gqlTypes";
 
 export async function saveBookmarkAPI(
   input: SaveBookmarkInput,
@@ -10,7 +11,7 @@ export async function saveBookmarkAPI(
     query: saveBookmark,
     variables: { input },
   });
-  return result.data.saveBookmark;
+  return BookmarkSchema.parse(result.data.saveBookmark);
 }
 
 export async function getBookmarkAPI(
@@ -20,5 +21,7 @@ export async function getBookmarkAPI(
     query: getBookmark,
     variables: { storyId },
   });
-  return result.data.getBookmark ?? null;
+  const { data } = result as { data: { getBookmark: unknown } };
+  if (!data.getBookmark) return null;
+  return BookmarkSchema.parse(data.getBookmark);
 }

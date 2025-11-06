@@ -48,6 +48,9 @@ Parameters:
     Description: Patreon Webhook Secret for signature verification
     Default: ""
     NoEcho: true
+  GoogleOAuthSecretsArn:
+    Type: String
+    Description: ARN of Google OAuth Secrets in Secrets Manager (from Cognito stack)
 
 Conditions:
   IsDev: !Equals [!Ref Stage, "dev"]
@@ -142,6 +145,9 @@ Resources:
           "clientId": "PLACEHOLDER_CLIENT_ID",
           "clientSecret": "PLACEHOLDER_CLIENT_SECRET"
         }
+
+  # Note: GoogleOAuthSecrets is created in CognitoStack to avoid circular dependency
+  # and passed to this stack via the GoogleOAuthSecretsArn parameter
 
   # Patreon Webhook Handler Lambda - DISABLED: Using seed data for development
   # PatreonWebhookFunction:
@@ -550,6 +556,92 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PatreonWebhookApi}/*"
 
+  # Update Google OAuth Secrets Lambda (Admin-only)
+  UpdateGoogleOAuthSecretsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "nlmonorepo-${AppName}-update-google-oauth-secrets-${Stage}"
+      Handler: index.handler
+      Runtime: nodejs20.x
+      Timeout: 30
+      Role: !GetAtt UpdateGoogleOAuthSecretsRole.Arn
+      Code:
+        S3Bucket: !Ref TemplateBucketName
+        S3Key: !Sub "functions/${Stage}/updateGoogleOAuthSecrets.zip"
+      Description: "Admin API for managing Google OAuth integration secrets"
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+          GOOGLE_OAUTH_SECRETS_ARN: !Ref GoogleOAuthSecretsArn
+
+  UpdateGoogleOAuthSecretsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "nlmonorepo-${AppName}-update-google-oauth-secrets-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SecretsManagerAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                  - secretsmanager:PutSecretValue
+                Resource: !Ref GoogleOAuthSecretsArn
+
+  UpdateGoogleOAuthSecretsFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${UpdateGoogleOAuthSecretsFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+  # API Gateway routes for Update Google OAuth Secrets (requires Cognito auth)
+  UpdateGoogleOAuthSecretsIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref PatreonWebhookApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !GetAtt UpdateGoogleOAuthSecretsFunction.Arn
+      PayloadFormatVersion: "2.0"
+
+  UpdateGoogleOAuthSecretsGetRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref PatreonWebhookApi
+      RouteKey: "GET /admin/google-oauth/secrets"
+      Target: !Sub "integrations/${UpdateGoogleOAuthSecretsIntegration}"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref PatreonApiAuthorizer
+
+  UpdateGoogleOAuthSecretsPostRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref PatreonWebhookApi
+      RouteKey: "POST /admin/google-oauth/secrets"
+      Target: !Sub "integrations/${UpdateGoogleOAuthSecretsIntegration}"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref PatreonApiAuthorizer
+
+  # Permission for API Gateway to invoke the Update Google OAuth Secrets Lambda
+  UpdateGoogleOAuthSecretsApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref UpdateGoogleOAuthSecretsFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${PatreonWebhookApi}/*"
+
 Outputs:
   PostDeployFunctionArn: # Renamed from PostFrontEndDeployFunctionArn
     Value: !GetAtt PostDeployFunction.Arn
@@ -616,3 +708,19 @@ Outputs:
   UpdatePatreonSecretsUrl:
     Value: !Sub "https://${PatreonWebhookApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/admin/patreon/secrets"
     Description: URL for the Update Patreon Secrets API (GET/POST)
+
+  GoogleOAuthSecretsArn:
+    Value: !Ref GoogleOAuthSecrets
+    Description: ARN of the Google OAuth secrets in Secrets Manager
+
+  UpdateGoogleOAuthSecretsFunctionArn:
+    Value: !GetAtt UpdateGoogleOAuthSecretsFunction.Arn
+    Description: ARN of the Update Google OAuth Secrets Lambda function
+
+  UpdateGoogleOAuthSecretsFunctionName:
+    Value: !Ref UpdateGoogleOAuthSecretsFunction
+    Description: Name of the Update Google OAuth Secrets Lambda function
+
+  UpdateGoogleOAuthSecretsUrl:
+    Value: !Sub "https://${PatreonWebhookApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/admin/google-oauth/secrets"
+    Description: URL for the Update Google OAuth Secrets API (GET/POST)

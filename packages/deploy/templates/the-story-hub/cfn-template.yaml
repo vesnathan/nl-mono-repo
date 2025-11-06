@@ -13,18 +13,6 @@ Parameters:
   TemplateBucketName:
     Type: String
     Description: Name of the S3 bucket containing nested stack templates
-  KMSKeyId:
-    Type: String
-    Description: KMS Key ID for encryption
-  KMSKeyArn:
-    Type: String
-    Description: KMS Key ARN for encryption
-  WebACLId:
-    Type: String
-    Description: WAF Web ACL ID from us-east-1 region
-  WebACLArn:
-    Type: String
-    Description: WAF Web ACL ARN from us-east-1 region
   ResolversBuildHash:
     Type: String
     Description: Optional build hash to version resolver S3 keys
@@ -56,7 +44,6 @@ Resources:
       Parameters:
         Stage: !Ref Stage
         AppName: !Ref AppName
-        KMSKeyArn: !Ref KMSKeyArn
 
   # S3 Buckets for frontend and assets
   S3Stack:
@@ -66,16 +53,19 @@ Resources:
       Parameters:
         Stage: !Ref Stage
         AppName: !Ref AppName
-        KMSKeyId: !Ref KMSKeyId
 
   # Cognito Resources
   CognitoStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: DynamoDbStack
     Properties:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Cognito/cognito.yaml
       Parameters:
         Stage: !Ref Stage
         AppName: !Ref AppName
+        TemplateBucketName: !Ref TemplateBucketName
+        DataTableName: !GetAtt DynamoDbStack.Outputs.DataTableName
+        LogRetentionInDays: !Ref LogRetentionInDays
 
   # CloudFront Distribution
   CloudFrontStack:
@@ -86,16 +76,16 @@ Resources:
       Parameters:
         Stage: !Ref Stage
         AppName: !Ref AppName
-        AppBucketName: !GetAtt S3Stack.Outputs.TSHBucketName
-        AppBucketArn: !GetAtt S3Stack.Outputs.TSHBucketArn
-        AppBucketRegionalDomainName: !GetAtt S3Stack.Outputs.TSHBucketRegionalDomainName
+        AppBucketName: !GetAtt S3Stack.Outputs.FrontendBucketName
+        AppBucketArn: !GetAtt S3Stack.Outputs.FrontendBucketArn
+        AppBucketRegionalDomainName: !GetAtt S3Stack.Outputs.FrontendBucketRegionalDomainName
         CertificateArn: ""  # Domain configuration not yet supported in nested stacks
         CustomDomainName: ""  # Domain configuration not yet supported in nested stacks
 
   # Lambda Functions
   LambdaStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [CloudFrontStack, CognitoStack, DynamoDbStack]
+    DependsOn: [CloudFrontStack, DynamoDbStack, CognitoStack]
     Properties:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/lambda.yaml
       Parameters:
@@ -112,6 +102,7 @@ Resources:
         DataTableName: !GetAtt DynamoDbStack.Outputs.DataTableName
         PatreonCampaignId: ""
         PatreonWebhookSecret: ""
+        GoogleOAuthSecretsArn: !GetAtt CognitoStack.Outputs.GoogleOAuthSecretsArn
 
   # AppSync API
   AppSyncStack:
@@ -163,7 +154,7 @@ Outputs:
 
   WebsiteBucket:
     Description: "S3 bucket for frontend website assets"
-    Value: !GetAtt S3Stack.Outputs.TSHBucketName
+    Value: !GetAtt S3Stack.Outputs.FrontendBucketName
     Export:
       Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-bucket"
 

@@ -13,6 +13,7 @@ export interface DeploymentOptions {
   region?: string;
   autoDeleteFailedStacks?: boolean;
   skipFrontendBuild?: boolean;
+  skipResolversBuild?: boolean; // Skip building and uploading resolvers and Lambda functions
   skipUpload?: boolean;
   skipInvalidation?: boolean;
   skipUserSetup?: boolean;
