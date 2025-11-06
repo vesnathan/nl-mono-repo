@@ -33,16 +33,26 @@ export const handler = async (
   // Extract user details from Cognito attributes
   const userId = userAttributes.sub; // Cognito sub is the unique user ID
   const email = userAttributes.email;
-  const givenName = userAttributes.given_name || "";
-  const familyName = userAttributes.family_name || "";
 
-  // Generate a screen name from the email (user can change this later)
-  const screenName = email.split("@")[0];
+  // For OAuth sign-ins (Google, etc.), use the 'name' attribute if available
+  // Otherwise fall back to given_name/family_name or generate from email
+  let username: string;
+  if (userAttributes.name) {
+    // OAuth providers like Google provide a 'name' attribute
+    username = userAttributes.name;
+  } else if (userAttributes.given_name || userAttributes.family_name) {
+    // Email/password signups might have given_name/family_name
+    username =
+      `${userAttributes.given_name || ""} ${userAttributes.family_name || ""}`.trim();
+  } else {
+    // Fallback: generate from email
+    username = email.split("@")[0];
+  }
 
   const now = new Date().toISOString();
 
   try {
-    // Create user profile in DynamoDB
+    // Create user profile in DynamoDB with GraphQL-compatible field names
     await docClient.send(
       new PutCommand({
         TableName: TABLE_NAME,
@@ -50,18 +60,28 @@ export const handler = async (
           PK: `USER#${userId}`,
           SK: `PROFILE#${userId}`,
           userId,
+          username, // GraphQL field
+          email, // GraphQL field
+          createdAt: now, // GraphQL field
+          stats: {
+            // GraphQL field
+            storiesCreated: 0,
+            branchesContributed: 0,
+            totalUpvotes: 0,
+          },
+          patreonSupporter: false,
+          ogSupporter: false,
+          // Legacy fields for backward compatibility
           userEmail: email,
           userTitle: "",
-          userFirstName: givenName,
-          userLastName: familyName,
-          userScreenName: screenName,
+          userFirstName: userAttributes.given_name || "",
+          userLastName: userAttributes.family_name || "",
+          userScreenName: username,
           userPhone: "",
           privacyPolicy: true,
           termsAndConditions: true,
           userAddedById: "cognito-post-confirmation",
           userCreated: now,
-          patreonSupporter: false,
-          ogSupporter: false,
           GSI1PK: `USER#${userId}`,
           GSI1SK: `USER#${userId}`,
         },

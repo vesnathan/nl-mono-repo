@@ -473,6 +473,17 @@ export class UserSetupManager {
           PK: { S: `USER#${cognitoUserId}` },
           SK: { S: `PROFILE#${cognitoUserId}` },
           userId: { S: cognitoUserId },
+          username: { S: "admin" },
+          email: { S: userEmail },
+          createdAt: { S: currentTimestamp },
+          stats: {
+            M: {
+              storiesCreated: { N: "0" },
+              branchesContributed: { N: "0" },
+              totalUpvotes: { N: "0" },
+            },
+          },
+          // Legacy fields for backward compatibility
           userEmail: { S: userEmail },
           userTitle: { S: "Mr" },
           userFirstName: { S: "Admin" },

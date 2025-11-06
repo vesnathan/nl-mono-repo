@@ -86,10 +86,10 @@ Resources:
         - COGNITO
         - Google
       CallbackURLs:
-        - "https://d2d51g7zjzznag.cloudfront.net"
+        - "https://d32h8ny4vmj7kl.cloudfront.net"
         - "http://localhost:3000"
       LogoutURLs:
-        - "https://d2d51g7zjzznag.cloudfront.net"
+        - "https://d32h8ny4vmj7kl.cloudfront.net"
         - "http://localhost:3000"
       AllowedOAuthFlows:
         - code

@@ -181,9 +181,7 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1">
-                <h2 className="text-2xl font-bold text-white">
-                  {story.title}
-                </h2>
+                <h2 className="text-2xl font-bold text-white">{story.title}</h2>
               </ModalHeader>
               <ModalBody>
                 <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">

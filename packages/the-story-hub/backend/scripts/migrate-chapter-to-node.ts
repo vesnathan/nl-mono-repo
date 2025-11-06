@@ -57,7 +57,9 @@ async function migrateChapterToNode() {
 
       // Create new SK and GSI1SK with NODE# prefix
       const newSK = oldSK.replace("CHAPTER#", "NODE#");
-      const newGSI1SK = oldGSI1SK ? oldGSI1SK.replace("CHAPTER#", "NODE#") : oldGSI1SK;
+      const newGSI1SK = oldGSI1SK
+        ? oldGSI1SK.replace("CHAPTER#", "NODE#")
+        : oldGSI1SK;
 
       console.log(`Migrating: ${oldSK} -> ${newSK}`);
 
