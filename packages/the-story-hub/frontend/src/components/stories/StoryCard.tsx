@@ -101,6 +101,7 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
                 {story.synopsis}
               </p>
               <button
+                type="button"
                 onClick={onSynopsisOpen}
                 className="text-xs text-blue-400 hover:text-blue-300 underline mt-1"
               >
@@ -178,7 +179,7 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
         }}
       >
         <ModalContent className="bg-gray-900">
-          {(onClose) => (
+          {() => (
             <>
               <ModalHeader className="flex flex-col gap-1">
                 <h2 className="text-2xl font-bold text-white">{story.title}</h2>

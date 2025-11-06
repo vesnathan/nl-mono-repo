@@ -23,7 +23,7 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@nextui-org/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { StoryMetadataChips } from "@/components/stories/StoryMetadataChips";
 import { CommentSection } from "@/components/comments/CommentSection";
 import { useAuth } from "@/hooks/useAuth";
@@ -85,7 +85,6 @@ function ChapterSection({
 }) {
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
-  const [shouldFetchBranches, setShouldFetchBranches] = useState(true); // Always fetch branches - React Query handles caching
   const [expandedBranchComments, setExpandedBranchComments] = useState<
     string | null
   >(null); // Track which branch's comments are expanded
@@ -106,16 +105,8 @@ function ChapterSection({
   } = useQuery({
     queryKey: ["branches", storyId, nodeId],
     queryFn: async () => {
-      console.log(
-        `[ChapterSection] Fetching branches for nodeId: ${nodeId}, storyId: ${storyId}`,
-      );
       try {
-        const result = await listBranchesAPI(storyId, nodeId);
-        console.log(
-          `[ChapterSection] Fetched ${result?.length || 0} branches for nodeId: ${nodeId}`,
-          result,
-        );
-        return result;
+        return await listBranchesAPI(storyId, nodeId);
       } catch (error) {
         console.error(
           `[ChapterSection] Error fetching branches for nodeId: ${nodeId}`,
@@ -124,18 +115,15 @@ function ChapterSection({
         throw error;
       }
     },
-    enabled: !!nodeId && shouldFetchBranches,
+    enabled: !!nodeId,
   });
 
-  // Log if there's an error or if branches are loading
+  // Error and loading states handled by React Query
   if (branchesError) {
-    console.error(
-      `[ChapterSection] Branches query error for nodeId: ${nodeId}`,
-      branchesError,
-    );
+    // Error handled by React Query
   }
   if (branchesLoading) {
-    console.log(`[ChapterSection] Branches loading for nodeId: ${nodeId}`);
+    // Loading state handled by React Query
   }
 
   // Fetch comment count for main chapter
