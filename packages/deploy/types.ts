@@ -74,7 +74,10 @@ export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
   [StackType.CWL]: join(__dirname, "templates/cwl/"),
   [StackType.AwsExample]: join(__dirname, "templates/aws-example/"),
   [StackType.TheStoryHub]: join(__dirname, "templates/the-story-hub/"),
-  [StackType.CardCountingTrainer]: join(__dirname, "templates/card-counting-trainer/"),
+  [StackType.CardCountingTrainer]: join(
+    __dirname,
+    "templates/card-counting-trainer/",
+  ),
 };
 
 export const getStackName = (stackType: StackType, stage: string) =>

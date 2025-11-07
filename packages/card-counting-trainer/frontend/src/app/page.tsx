@@ -33,8 +33,8 @@ export default function HomePage() {
             <li className="flex items-start">
               <span className="chip-gold mr-2">♠</span>
               <span>
-                Multiple counting systems (Hi-Lo, KO, Hi-Opt I, Hi-Opt II,
-                Omega II)
+                Multiple counting systems (Hi-Lo, KO, Hi-Opt I, Hi-Opt II, Omega
+                II)
               </span>
             </li>
             <li className="flex items-start">
