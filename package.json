@@ -12,7 +12,9 @@
     "packages/deploy",
     "packages/ec2-vsc",
     "packages/the-story-hub/frontend",
-    "packages/the-story-hub/backend"
+    "packages/the-story-hub/backend",
+    "packages/card-counting-trainer/frontend",
+    "packages/card-counting-trainer/backend"
   ],
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.0.14",
@@ -73,11 +75,13 @@
     "aws-package-manager": "node packages/aws-bootstrap/scripts/aws-package-manager.js",
     "build": "lerna run build --stream",
     "build:tsh": "yarn workspace tshfrontend build",
+    "build:cct": "yarn workspace cctfrontend build",
     "lint": "lerna run lint --stream",
     "tsc": "lerna run tsc --stream",
     "test": "lerna run test --stream",
     "dev:cwl": "yarn workspace cwlfrontend dev:local",
     "dev:awse": "yarn workspace awsefrontend dev:local",
-    "dev:tsh": "yarn workspace tshfrontend dev:local"
+    "dev:tsh": "yarn workspace tshfrontend dev:local",
+    "dev:cct": "yarn workspace cctfrontend dev:local"
   }
 }

@@ -1,0 +1,12 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  getUser: User @aws_cognito_user_pools @aws_iam
+}
+
+type Mutation {
+  _empty: String
+}

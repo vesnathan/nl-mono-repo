@@ -39,6 +39,7 @@ export enum StackType {
   CWL = "CWL",
   AwsExample = "AwsExample",
   TheStoryHub = "TheStoryHub",
+  CardCountingTrainer = "CardCountingTrainer",
 }
 
 export const STACK_ORDER: StackType[] = [
@@ -61,6 +62,10 @@ export const TEMPLATE_PATHS: Record<StackType, string> = {
     __dirname,
     "templates/the-story-hub/cfn-template.yaml",
   ),
+  [StackType.CardCountingTrainer]: join(
+    __dirname,
+    "templates/card-counting-trainer/cfn-template.yaml",
+  ),
 };
 
 export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
@@ -69,13 +74,14 @@ export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
   [StackType.CWL]: join(__dirname, "templates/cwl/"),
   [StackType.AwsExample]: join(__dirname, "templates/aws-example/"),
   [StackType.TheStoryHub]: join(__dirname, "templates/the-story-hub/"),
+  [StackType.CardCountingTrainer]: join(__dirname, "templates/card-counting-trainer/"),
 };
 
 export const getStackName = (stackType: StackType, stage: string) =>
   `nlmonorepo-${String(stackType).toLowerCase().replace(/_/g, "-")}-${stage}`;
 
-export const getTemplateBucketName = (stackType: StackType, stage: string) =>
-  `nlmonorepo-${String(stackType).toLowerCase().replace(/_/g, "-")}-templates-${stage}`;
+export const getTemplateBucketName = (stage: string) =>
+  `nlmonorepo-templates-${stage}`;
 
 export const getTemplateBody = async (
   stackType: StackType,

@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "AppSync Resources for Card Counting Trainer"
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  AppName:
+    Type: String
+    Description: Application Name
+  DataTableName:
+    Type: String
+    Description: DynamoDB table name for application data
+  AppSyncDynamoDBRoleArn:
+    Type: String
+    Description: ARN of the IAM role AppSync should use to access DynamoDB
+  TemplateBucketName:
+    Type: String
+    Description: S3 bucket containing templates and resolvers
+  ResolversBuildHash:
+    Type: String
+    Description: Optional build hash used to version resolver S3 keys
+  SchemaHash:
+    Type: String
+    Description: Content hash of GraphQL schema for versioning
+  LogRetentionInDays:
+    Type: Number
+    Description: Number of days to retain CloudWatch Logs
+    Default: 14
+  UserPoolId:
+    Type: String
+    Description: Cognito User Pool ID
+
+Resources:
+  AppSyncLoggingServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AppName}-appsync-logging-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub "${AppName}-appsync-logging-policy-${Stage}"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+  GraphQlApi:
+    Type: AWS::AppSync::GraphQLApi
+    Properties:
+      Name: !Sub "${AppName}-appsync-api-${Stage}"
+      AuthenticationType: AMAZON_COGNITO_USER_POOLS
+      UserPoolConfig:
+        UserPoolId: !Ref UserPoolId
+        DefaultAction: ALLOW
+        AwsRegion: ap-southeast-2
+      AdditionalAuthenticationProviders:
+        - AuthenticationType: AWS_IAM
+      LogConfig:
+        CloudWatchLogsRoleArn: !GetAtt AppSyncLoggingServiceRole.Arn
+        FieldLogLevel: ALL
+        ExcludeVerboseContent: false
+
+  GraphQlSchema:
+    Type: AWS::AppSync::GraphQLSchema
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      DefinitionS3Location: !Sub "s3://${TemplateBucketName}/schema-${SchemaHash}.graphql"
+
+  MainTableDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}MainTableDynamoDBDataSource"
+      Type: AMAZON_DYNAMODB
+      DynamoDBConfig:
+        TableName: !Ref DataTableName
+        AwsRegion: !Ref AWS::Region
+      ServiceRoleArn: !Ref AppSyncDynamoDBRoleArn
+
+  NoneDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      Name: !Sub "${AppName}NoneDataSource"
+      Type: NONE
+
+  # User Resolver
+  GetUserResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      TypeName: Query
+      FieldName: getUser
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Kind: UNIT
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/User/Queries/Query.getUser.js"
+
+Outputs:
+  AppSyncApiUrl:
+    Description: "AppSync GraphQL API endpoint URL"
+    Value: !GetAtt GraphQlApi.GraphQLUrl
+
+  AppSyncApiId:
+    Description: "AppSync GraphQL API ID"
+    Value: !GetAtt GraphQlApi.ApiId

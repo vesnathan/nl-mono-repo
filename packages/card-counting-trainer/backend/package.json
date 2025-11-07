@@ -1,0 +1,26 @@
+{
+  "name": "cctbackend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-appsync/utils": "^1.10.1",
+    "@aws-sdk/client-cloudformation": "3.669.0",
+    "@aws-sdk/client-cognito-identity-provider": "3.669.0",
+    "@aws-sdk/client-dynamodb": "3.669.0",
+    "@aws-sdk/client-secrets-manager": "3.669.0",
+    "@aws-sdk/lib-dynamodb": "3.669.0",
+    "@aws-sdk/util-dynamodb": "3.669.0",
+    "@types/uuid": "^9.0.0",
+    "shared": "*",
+    "uuid": "^9.0.0"
+  },
+  "scripts": {
+    "seed:db": "tsx scripts/seed-db.ts",
+    "seed": "tsx scripts/seed-db.ts"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6"
+  }
+}

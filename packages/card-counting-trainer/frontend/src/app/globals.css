@@ -1,0 +1,42 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root {
+  --background: #0C5F38; /* Casino green */
+  --foreground: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.nextui-modal-container {
+  position: fixed !important;
+  z-index: 9999 !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+}
+
+/* Casino-themed styles */
+.felt-background {
+  background: linear-gradient(135deg, #0C5F38 0%, #0A4F2E 100%);
+}
+
+.chip-gold {
+  color: #FFD700;
+}
+
+.chip-red {
+  color: #D32F2F;
+}
