@@ -81,7 +81,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
           ":pk": "USER",
           ":fbId": facebookUserId,
         },
-      })
+      }),
     );
 
     // Log the deletion request
@@ -100,7 +100,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
           source: "facebook",
           status: "pending",
         },
-      })
+      }),
     );
 
     // Return confirmation to Facebook

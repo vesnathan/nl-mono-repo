@@ -44,9 +44,7 @@ function DataDeletionStatusContent() {
                     This includes your profile, stories, comments, and all
                     personal information
                   </li>
-                  <li>
-                    Once deleted, this data cannot be recovered
-                  </li>
+                  <li>Once deleted, this data cannot be recovered</li>
                   <li>
                     You will receive a confirmation email when the deletion is
                     complete
@@ -84,21 +82,13 @@ function DataDeletionStatusContent() {
                 Steps to Delete Your Data:
               </h3>
               <ol className="list-decimal list-inside space-y-2 text-sm">
-                <li>
-                  Go to your Facebook Settings & Privacy &gt; Settings
-                </li>
-                <li>
-                  Click on "Apps and Websites" in the left sidebar
-                </li>
-                <li>
-                  Find "The Story Hub" in your list of apps
-                </li>
+                <li>Go to your Facebook Settings & Privacy &gt; Settings</li>
+                <li>Click on "Apps and Websites" in the left sidebar</li>
+                <li>Find "The Story Hub" in your list of apps</li>
                 <li>
                   Click "Remove" to disconnect the app and delete your data
                 </li>
-                <li>
-                  Facebook will send you a confirmation code and link
-                </li>
+                <li>Facebook will send you a confirmation code and link</li>
               </ol>
             </div>
 

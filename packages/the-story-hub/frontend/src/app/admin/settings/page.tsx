@@ -200,13 +200,17 @@ function AdminSettingsContent() {
     try {
       setIsLoading(true);
       setError(null);
-      const [settingsData, secretsData, googleSecretsData, facebookSecretsData] =
-        await Promise.all([
-          getSiteSettingsAPI(),
-          getPatreonSecretsAPI(),
-          getGoogleOAuthSecretsAPI(),
-          getFacebookOAuthSecretsAPI(),
-        ]);
+      const [
+        settingsData,
+        secretsData,
+        googleSecretsData,
+        facebookSecretsData,
+      ] = await Promise.all([
+        getSiteSettingsAPI(),
+        getPatreonSecretsAPI(),
+        getGoogleOAuthSecretsAPI(),
+        getFacebookOAuthSecretsAPI(),
+      ]);
       setSettings(settingsData);
       setPatreonSecrets(secretsData);
       setGoogleOAuthSecrets(googleSecretsData);
