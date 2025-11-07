@@ -320,6 +320,13 @@ AppSync resolvers run in a restricted JavaScript environment. Follow these conve
   - Need to add enforcement in the admin settings/mutation to ensure only one branch can be approved at a time
   - When approving a branch, any previously approved sibling branches should be automatically un-approved
 
+- **Facebook OAuth Secret Name Change (2025-11-07)**:
+  - **Issue**: Original secret name `nlmonorepo-thestoryhub-facebook-oauth-secrets-dev` already existed from Lambda and couldn't be deleted immediately (7-day AWS retention)
+  - **Solution**: Changed secret name to `nlmonorepo-thestoryhub-facebook-login-secrets-dev` in CloudFormation to match Google OAuth pattern
+  - **Current State**: Facebook OAuth now follows same CloudFormation-managed pattern as Google OAuth, just with different secret name
+  - **Files Modified**: [cognito.yaml:36-47](packages/deploy/templates/the-story-hub/resources/Cognito/cognito.yaml#L36-L47) - Uses new secret name `facebook-login-secrets`
+  - **Note**: Old secret `nlmonorepo-thestoryhub-facebook-oauth-secrets-dev` can be manually deleted from AWS Console after ~2025-11-14 (no action required, it's scheduled for deletion)
+
 ### Recent Work
 
 - **Cognito Post-Confirmation Lambda Restructuring (2025-11-05)**:

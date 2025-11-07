@@ -78,7 +78,7 @@ export class OutputsManager {
         const parsed = JSON.parse(existingContent);
 
         // Handle migration from old format
-        if ('stage' in parsed && 'stacks' in parsed && !('stages' in parsed)) {
+        if ("stage" in parsed && "stacks" in parsed && !("stages" in parsed)) {
           // Old format: { stage, lastUpdated, stacks }
           deploymentOutputs = {
             stages: {
@@ -181,9 +181,7 @@ export class OutputsManager {
       const deploymentOutputs: DeploymentOutputs = JSON.parse(content);
 
       if (!deploymentOutputs.stages?.[stage]) {
-        logger.warning(
-          `No outputs found for stage ${stage}`,
-        );
+        logger.warning(`No outputs found for stage ${stage}`);
         return null;
       }
 
@@ -222,9 +220,7 @@ export class OutputsManager {
       const deploymentOutputs: DeploymentOutputs = JSON.parse(content);
 
       if (!deploymentOutputs.stages?.[stage]) {
-        logger.warning(
-          `No outputs found for stage ${stage}`,
-        );
+        logger.warning(`No outputs found for stage ${stage}`);
         return null;
       }
 
@@ -259,9 +255,7 @@ export class OutputsManager {
       const deploymentOutputs: DeploymentOutputs = JSON.parse(content);
 
       if (!deploymentOutputs.stages?.[stage]) {
-        logger.warning(
-          `No outputs found for stage ${stage}`,
-        );
+        logger.warning(`No outputs found for stage ${stage}`);
         return null;
       }
 

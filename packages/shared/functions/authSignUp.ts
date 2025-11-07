@@ -1,4 +1,7 @@
-import { signUp as amplifySignUp, confirmSignUp as amplifyConfirmSignUp } from "aws-amplify/auth";
+import {
+  signUp as amplifySignUp,
+  confirmSignUp as amplifyConfirmSignUp,
+} from "aws-amplify/auth";
 import to from "await-to-js";
 
 type SignUpInput = {
@@ -58,7 +61,8 @@ export const authSignUp = async (input: SignUpInput) => {
       break;
     }
     case "CONFIRM_SIGN_UP": {
-      const destination = signUpResult.nextStep.codeDeliveryDetails?.destination || input.email;
+      const destination =
+        signUpResult.nextStep.codeDeliveryDetails?.destination || input.email;
       input.onConfirmationRequired(destination);
       break;
     }
@@ -110,8 +114,6 @@ export const authConfirmSignUp = async (input: ConfirmSignUpInput) => {
   if (confirmResult.isSignUpComplete) {
     input.onSuccess();
   } else {
-    input.onUnhandledError(
-      new Error("257.245 signUp confirmation incomplete"),
-    );
+    input.onUnhandledError(new Error("257.245 signUp confirmation incomplete"));
   }
 };

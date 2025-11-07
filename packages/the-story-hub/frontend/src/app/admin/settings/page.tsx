@@ -16,6 +16,11 @@ import {
   updateGoogleOAuthSecretsAPI,
 } from "@/lib/api/googleOAuthSecrets";
 import type { GoogleOAuthSecrets } from "@/types/GoogleOAuthSecretsSchemas";
+import {
+  getFacebookOAuthSecretsAPI,
+  updateFacebookOAuthSecretsAPI,
+} from "@/lib/api/facebookOAuthSecrets";
+import type { FacebookOAuthSecrets } from "@/types/FacebookOAuthSecretsSchemas";
 
 // Reusable Components for Settings UI
 
@@ -23,18 +28,48 @@ interface SettingsSectionProps {
   title: string;
   description: string;
   children: React.ReactNode;
+  defaultExpanded?: boolean;
 }
 
 function SettingsSection({
   title,
   description,
   children,
+  defaultExpanded = true,
 }: SettingsSectionProps) {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-      <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
-      <p className="text-gray-400 text-sm mb-6">{description}</p>
-      <div className="space-y-4">{children}</div>
+    <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full p-6 text-left hover:bg-gray-750 transition-colors flex items-center justify-between"
+      >
+        <div className="flex-1">
+          <h2 className="text-xl font-bold text-white mb-2">{title}</h2>
+          <p className="text-gray-400 text-sm">{description}</p>
+        </div>
+        <svg
+          className={`w-5 h-5 text-gray-400 transition-transform duration-200 flex-shrink-0 ml-4 ${
+            isExpanded ? "rotate-180" : ""
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+      {isExpanded && (
+        <div className="px-6 pb-6">
+          <div className="space-y-4">{children}</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -147,10 +182,14 @@ function AdminSettingsContent() {
   );
   const [googleOAuthSecrets, setGoogleOAuthSecrets] =
     useState<GoogleOAuthSecrets | null>(null);
+  const [facebookOAuthSecrets, setFacebookOAuthSecrets] =
+    useState<FacebookOAuthSecrets | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [showFacebookRedeployModal, setShowFacebookRedeployModal] =
+    useState(false);
 
   // Fetch settings on mount
   useEffect(() => {
@@ -161,14 +200,17 @@ function AdminSettingsContent() {
     try {
       setIsLoading(true);
       setError(null);
-      const [settingsData, secretsData, googleSecretsData] = await Promise.all([
-        getSiteSettingsAPI(),
-        getPatreonSecretsAPI(),
-        getGoogleOAuthSecretsAPI(),
-      ]);
+      const [settingsData, secretsData, googleSecretsData, facebookSecretsData] =
+        await Promise.all([
+          getSiteSettingsAPI(),
+          getPatreonSecretsAPI(),
+          getGoogleOAuthSecretsAPI(),
+          getFacebookOAuthSecretsAPI(),
+        ]);
       setSettings(settingsData);
       setPatreonSecrets(secretsData);
       setGoogleOAuthSecrets(googleSecretsData);
+      setFacebookOAuthSecrets(facebookSecretsData);
     } catch (err) {
       console.error("Failed to load settings:", err);
       setError("Failed to load site settings. Please try again.");
@@ -265,6 +307,40 @@ function AdminSettingsContent() {
     }
   };
 
+  const handleFacebookOAuthSecretChange = async (
+    field: keyof FacebookOAuthSecrets,
+    value: string,
+  ) => {
+    if (!facebookOAuthSecrets) return;
+
+    try {
+      setIsSaving(true);
+      setSaveSuccess(false);
+      setError(null);
+
+      // Send only the field that changed (partial update)
+      await updateFacebookOAuthSecretsAPI({
+        [field]: value,
+      } as Partial<FacebookOAuthSecrets>);
+
+      // Reload secrets to get masked values
+      const updatedSecrets = await getFacebookOAuthSecretsAPI();
+      setFacebookOAuthSecrets(updatedSecrets);
+      setSaveSuccess(true);
+
+      // Show redeploy reminder modal
+      setShowFacebookRedeployModal(true);
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      console.error("Failed to update Facebook OAuth secrets:", err);
+      setError("Failed to save Facebook OAuth secrets. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -332,6 +408,7 @@ function AdminSettingsContent() {
           <SettingsSection
             title="Patreon Configuration"
             description="Configure Patreon integration settings. These credentials are stored securely in AWS Secrets Manager and encrypted both in transit (HTTPS) and at rest (KMS)."
+            defaultExpanded={false}
           >
             <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 mb-4">
               <p className="text-blue-200 text-sm">
@@ -403,6 +480,7 @@ function AdminSettingsContent() {
           <SettingsSection
             title="Google OAuth Configuration"
             description="Configure Google Sign-In credentials for user authentication. These credentials are stored securely in AWS Secrets Manager and encrypted both in transit (HTTPS) and at rest (KMS)."
+            defaultExpanded={false}
           >
             <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 mb-4">
               <p className="text-blue-200 text-sm">
@@ -449,6 +527,124 @@ function AdminSettingsContent() {
             />
           </SettingsSection>
 
+          {/* Facebook OAuth Configuration Section */}
+          <SettingsSection
+            title="Facebook OAuth Configuration"
+            description="Configure Facebook Sign-In credentials for user authentication. These credentials are stored securely in AWS Secrets Manager and encrypted both in transit (HTTPS) and at rest (KMS)."
+            defaultExpanded={false}
+          >
+            <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 mb-4">
+              <p className="text-blue-200 text-sm">
+                <strong>Security:</strong> These values are directly synced to
+                AWS Secrets Manager. Sensitive fields are masked after saving.
+                Changes are applied immediately and used by the Cognito User
+                Pool for Facebook OAuth authentication.
+              </p>
+              <p className="text-blue-200 text-sm mt-2">
+                <strong>Setup:</strong> Get these credentials from{" "}
+                <a
+                  href="https://developers.facebook.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-blue-100"
+                >
+                  Facebook Developers
+                </a>
+                . Create a Facebook App with Facebook Login configured. See{" "}
+                <a
+                  href="/FACEBOOK_OAUTH_SETUP.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-blue-100"
+                >
+                  FACEBOOK_OAUTH_SETUP.md
+                </a>{" "}
+                for detailed step-by-step instructions.
+              </p>
+            </div>
+
+            <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 mb-6">
+              <h4 className="text-white font-semibold mb-3">
+                Facebook App Configuration Reference
+              </h4>
+              <p className="text-gray-400 text-sm mb-3">
+                These values should be configured in your Facebook App Settings
+                (Settings → Basic). They are listed here for reference.
+              </p>
+              <div className="space-y-2 text-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div>
+                    <span className="text-gray-400">Display Name:</span>{" "}
+                    <span className="text-white">The Story Hub</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Namespace:</span>{" "}
+                    <span className="text-white">the-story-hub</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-gray-400">App Domains:</span>{" "}
+                  <span className="text-white">
+                    d32h8ny4vmj7kl.cloudfront.net
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Privacy Policy URL:</span>{" "}
+                  <a
+                    href="https://d32h8ny4vmj7kl.cloudfront.net/legal/privacy/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 underline"
+                  >
+                    https://d32h8ny4vmj7kl.cloudfront.net/legal/privacy/
+                  </a>
+                </div>
+                <div>
+                  <span className="text-gray-400">Terms of Service URL:</span>{" "}
+                  <a
+                    href="https://d32h8ny4vmj7kl.cloudfront.net/legal/terms/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 underline"
+                  >
+                    https://d32h8ny4vmj7kl.cloudfront.net/legal/terms/
+                  </a>
+                </div>
+                <div>
+                  <span className="text-gray-400">
+                    Data Deletion Callback URL:
+                  </span>{" "}
+                  <span className="text-white">
+                    https://pvey1gnejj.execute-api.ap-southeast-2.amazonaws.com/dev/facebook/data-deletion
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <SettingInput
+              label="Facebook OAuth Client ID"
+              description="The App ID from your Facebook App settings. This is a numeric ID."
+              value={facebookOAuthSecrets?.clientId ?? ""}
+              onChange={(value) =>
+                handleFacebookOAuthSecretChange("clientId", value)
+              }
+              placeholder="1234567890123456"
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="Facebook OAuth Client Secret"
+              description="The App Secret from your Facebook App settings. Keep this secret!"
+              value={facebookOAuthSecrets?.clientSecret ?? ""}
+              onChange={(value) =>
+                handleFacebookOAuthSecretChange("clientSecret", value)
+              }
+              placeholder="Enter your Facebook App Secret"
+              type="password"
+              disabled={isSaving}
+            />
+          </SettingsSection>
+
           {/* Future Settings Sections Can Be Added Here */}
           {/*
           <SettingsSection
@@ -484,6 +680,43 @@ function AdminSettingsContent() {
           )}
         </div>
       </div>
+
+      {/* Facebook OAuth Redeploy Reminder Modal */}
+      {showFacebookRedeployModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg max-w-2xl w-full p-6">
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Redeploy Required
+            </h2>
+            <div className="space-y-4 text-gray-300">
+              <p>
+                Your Facebook OAuth credentials have been saved to AWS Secrets
+                Manager. To complete the setup, you need to redeploy the stack.
+              </p>
+              <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+                <p className="text-sm font-semibold text-blue-400 mb-2">
+                  Run this command:
+                </p>
+                <code className="text-green-400 text-sm">
+                  yarn deploy:tsh:dev:update
+                </code>
+              </div>
+              <p className="text-sm text-gray-400">
+                The deployment will update the Cognito Identity Provider to use
+                your Facebook OAuth credentials for authentication.
+              </p>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowFacebookRedeployModal(false)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                Got it!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

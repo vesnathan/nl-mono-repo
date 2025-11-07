@@ -883,7 +883,9 @@ export async function deployTheStoryHub(
     );
 
     if (options.skipResolversBuild) {
-      logger.info("⏭️  Skipping Lambda function compilation (--build-resolvers=false)");
+      logger.info(
+        "⏭️  Skipping Lambda function compilation (--build-resolvers=false)",
+      );
     } else {
       logger.info(`Looking for Lambda functions in: ${lambdaSourceDir}`);
 
@@ -906,7 +908,9 @@ export async function deployTheStoryHub(
           await lambdaCompiler.clean();
 
           await lambdaCompiler.compileLambdaFunctions();
-          logger.success("✓ Lambda functions compiled and uploaded successfully");
+          logger.success(
+            "✓ Lambda functions compiled and uploaded successfully",
+          );
         } catch (error: any) {
           logger.error(`Lambda compilation failed: ${error.message}`);
           throw error;
@@ -924,7 +928,9 @@ export async function deployTheStoryHub(
     }
 
     if (options.skipResolversBuild) {
-      logger.info("⏭️  Skipping resolver compilation (--build-resolvers=false)");
+      logger.info(
+        "⏭️  Skipping resolver compilation (--build-resolvers=false)",
+      );
       logger.info("Fetching latest resolver build hash from S3...");
 
       // Get the latest resolver build hash from S3
@@ -960,7 +966,9 @@ export async function deployTheStoryHub(
 
       // Use the most recent build hash (last in alphabetical order since they're timestamps)
       resolversBuildHash = buildHashes.sort().pop();
-      logger.success(`Using existing resolver build hash: ${resolversBuildHash}`);
+      logger.success(
+        `Using existing resolver build hash: ${resolversBuildHash}`,
+      );
     } else {
       // Double-check that the bucket exists before compiling and uploading resolvers
       const bucketExistsBeforeResolvers =
@@ -990,129 +998,129 @@ export async function deployTheStoryHub(
 
       logger.info(`Looking for resolvers in: ${resolverDir}`);
 
-    if (existsSync(resolverDir)) {
-      logger.success(`Resolver directory found: ${resolverDir}`);
-      // Find all resolver files in the specified directory
-      const allFiles = findTypeScriptFiles(resolverDir);
-      logger.debug(
-        `Found ${allFiles.length} total TypeScript files in ${resolverDir}`,
-      );
-
-      // Log all discovered files for debugging
-      allFiles.forEach((file, index) => {
-        logger.debug(`File ${index + 1}: ${file}`);
-      });
-
-      const resolverFiles = allFiles
-        .map((file) => path.relative(resolverDir, file)) // Convert to relative paths first
-        .filter((file) => {
-          const shouldInclude =
-            !file.endsWith(".bak") && // Exclude backup files
-            path.basename(file) !== "gqlTypes.ts" && // Exclude the main types file
-            file.includes(path.sep); // IMPORTANT: Only include files in subdirectories (relative path check)
-
-          if (!shouldInclude) {
-            logger.debug(`Excluding file: ${file}`);
-          }
-          return shouldInclude;
-        });
-
-      logger.success(
-        `After filtering, found ${resolverFiles.length} resolver files to compile:`,
-      );
-      resolverFiles.forEach((file, index) => {
-        logger.success(`  [${index + 1}] ${file}`);
-      });
-
-      if (resolverFiles.length === 0) {
-        const errorMsg = `No TypeScript resolver files found in ${resolverDir}. This will cause deployment to fail.`;
-        logger.error(errorMsg);
-        throw new Error(errorMsg);
-      } else {
-        // Define constants directory path for the-story-hub
-        const constantsDir = path.join(
-          __dirname,
-          "../../../the-story-hub/backend/constants",
+      if (existsSync(resolverDir)) {
+        logger.success(`Resolver directory found: ${resolverDir}`);
+        // Find all resolver files in the specified directory
+        const allFiles = findTypeScriptFiles(resolverDir);
+        logger.debug(
+          `Found ${allFiles.length} total TypeScript files in ${resolverDir}`,
         );
 
-        const resolverCompiler = new ResolverCompiler({
-          logger: logger,
-          baseResolverDir: resolverDir,
-          s3KeyPrefix: "resolvers",
-          stage: options.stage,
-          s3BucketName: templateBucketName,
-          region: region,
-          resolverFiles: resolverFiles,
-          sharedFileName: "gqlTypes.ts",
-          constantsDir: constantsDir,
+        // Log all discovered files for debugging
+        allFiles.forEach((file, index) => {
+          logger.debug(`File ${index + 1}: ${file}`);
         });
 
-        // Use the outer-scoped resolversBuildHash so it is available when building CloudFormation parameters
-        resolversBuildHash = "";
-        try {
-          // Compile and upload resolvers (returns build hash)
-          resolversBuildHash =
-            await resolverCompiler.compileAndUploadResolvers();
+        const resolverFiles = allFiles
+          .map((file) => path.relative(resolverDir, file)) // Convert to relative paths first
+          .filter((file) => {
+            const shouldInclude =
+              !file.endsWith(".bak") && // Exclude backup files
+              path.basename(file) !== "gqlTypes.ts" && // Exclude the main types file
+              file.includes(path.sep); // IMPORTANT: Only include files in subdirectories (relative path check)
 
-          // Verify that the resolvers were uploaded successfully
-          if (options.debugMode) {
-            logger.debug("Verifying resolver uploads...");
-          }
-
-          // First verification: Check using ListObjectsV2
-          // List objects under the specific build hash prefix to verify uploads
-          const hashedPrefix = `resolvers/${options.stage}/${resolversBuildHash}/`;
-          const listCommand = new ListObjectsV2Command({
-            Bucket: templateBucketName,
-            Prefix: hashedPrefix,
+            if (!shouldInclude) {
+              logger.debug(`Excluding file: ${file}`);
+            }
+            return shouldInclude;
           });
 
-          let retryCount = 0;
-          let resolverCount = 0;
-          const maxRetries = 3;
+        logger.success(
+          `After filtering, found ${resolverFiles.length} resolver files to compile:`,
+        );
+        resolverFiles.forEach((file, index) => {
+          logger.success(`  [${index + 1}] ${file}`);
+        });
 
-          while (retryCount < maxRetries) {
-            try {
-              const listedObjects = await s3.send(listCommand);
-              // Properly type the response from ListObjectsV2Command
-              const listObjectsResult = listedObjects as {
-                Contents?: Array<{ Key: string }>;
-              };
-              resolverCount = listObjectsResult.Contents?.length || 0;
+        if (resolverFiles.length === 0) {
+          const errorMsg = `No TypeScript resolver files found in ${resolverDir}. This will cause deployment to fail.`;
+          logger.error(errorMsg);
+          throw new Error(errorMsg);
+        } else {
+          // Define constants directory path for the-story-hub
+          const constantsDir = path.join(
+            __dirname,
+            "../../../the-story-hub/backend/constants",
+          );
 
-              if (resolverCount > 0) {
-                logger.debug(
-                  `Verified ${resolverCount} resolvers were uploaded to S3`,
+          const resolverCompiler = new ResolverCompiler({
+            logger: logger,
+            baseResolverDir: resolverDir,
+            s3KeyPrefix: "resolvers",
+            stage: options.stage,
+            s3BucketName: templateBucketName,
+            region: region,
+            resolverFiles: resolverFiles,
+            sharedFileName: "gqlTypes.ts",
+            constantsDir: constantsDir,
+          });
+
+          // Use the outer-scoped resolversBuildHash so it is available when building CloudFormation parameters
+          resolversBuildHash = "";
+          try {
+            // Compile and upload resolvers (returns build hash)
+            resolversBuildHash =
+              await resolverCompiler.compileAndUploadResolvers();
+
+            // Verify that the resolvers were uploaded successfully
+            if (options.debugMode) {
+              logger.debug("Verifying resolver uploads...");
+            }
+
+            // First verification: Check using ListObjectsV2
+            // List objects under the specific build hash prefix to verify uploads
+            const hashedPrefix = `resolvers/${options.stage}/${resolversBuildHash}/`;
+            const listCommand = new ListObjectsV2Command({
+              Bucket: templateBucketName,
+              Prefix: hashedPrefix,
+            });
+
+            let retryCount = 0;
+            let resolverCount = 0;
+            const maxRetries = 3;
+
+            while (retryCount < maxRetries) {
+              try {
+                const listedObjects = await s3.send(listCommand);
+                // Properly type the response from ListObjectsV2Command
+                const listObjectsResult = listedObjects as {
+                  Contents?: Array<{ Key: string }>;
+                };
+                resolverCount = listObjectsResult.Contents?.length || 0;
+
+                if (resolverCount > 0) {
+                  logger.debug(
+                    `Verified ${resolverCount} resolvers were uploaded to S3`,
+                  );
+                  break;
+                } else {
+                  logger.warning(
+                    `No resolvers found in S3 (attempt ${retryCount + 1}/${maxRetries}). Waiting and retrying...`,
+                  );
+                  await sleep(5000); // Wait 5 seconds before retrying
+                  retryCount++;
+                }
+              } catch (error: any) {
+                logger.error(
+                  `Error verifying resolver uploads (attempt ${retryCount + 1}/${maxRetries}): ${error.message}`,
                 );
-                break;
-              } else {
-                logger.warning(
-                  `No resolvers found in S3 (attempt ${retryCount + 1}/${maxRetries}). Waiting and retrying...`,
-                );
-                await sleep(5000); // Wait 5 seconds before retrying
+                await sleep(5000);
                 retryCount++;
               }
-            } catch (error: any) {
-              logger.error(
-                `Error verifying resolver uploads (attempt ${retryCount + 1}/${maxRetries}): ${error.message}`,
-              );
-              await sleep(5000);
-              retryCount++;
             }
-          }
 
-          if (resolverCount === 0) {
-            throw new Error(
-              "No resolvers were uploaded to S3. Deployment will fail.",
+            if (resolverCount === 0) {
+              throw new Error(
+                "No resolvers were uploaded to S3. Deployment will fail.",
+              );
+            }
+          } catch (error: any) {
+            logger.error(
+              `Resolver compilation and upload failed: ${error.message}`,
             );
+            throw error;
           }
-        } catch (error: any) {
-          logger.error(
-            `Resolver compilation and upload failed: ${error.message}`,
-          );
-          throw error;
         }
-      }
       } else {
         const errorMsg = `Resolver directory not found at ${resolverDir}. This will cause deployment to fail if resolvers are referenced in AppSync template.`;
         logger.error(errorMsg);
@@ -1181,10 +1189,7 @@ export async function deployTheStoryHub(
       );
 
       // Validate required parameters to fail fast with a clear message if anything is missing
-      const requiredKeys = [
-        "Stage",
-        "TemplateBucketName",
-      ];
+      const requiredKeys = ["Stage", "TemplateBucketName"];
 
       const missing = requiredKeys.filter(
         (k) =>
@@ -1370,7 +1375,10 @@ export async function deployTheStoryHub(
       );
 
       // Check if frontend needs to be built (out directory doesn't exist)
-      if (!require("fs").existsSync(frontendOutPath) && !options.skipFrontendBuild) {
+      if (
+        !require("fs").existsSync(frontendOutPath) &&
+        !options.skipFrontendBuild
+      ) {
         try {
           // Verify stack is now healthy (has required outputs)
           const postDeployStackData = await cfn.send(
@@ -1384,7 +1392,9 @@ export async function deployTheStoryHub(
           );
 
           if (hasApiUrl && hasCognito) {
-            logger.info("🏗️  Building frontend application (post-deployment)...");
+            logger.info(
+              "🏗️  Building frontend application (post-deployment)...",
+            );
             logger.info("   Stack is now healthy with API and Cognito outputs");
 
             // Generate GraphQL schema and types first

@@ -33,6 +33,19 @@ Resources:
           "clientSecret": "PLACEHOLDER_CLIENT_SECRET"
         }
 
+  # Secrets Manager for Facebook OAuth credentials
+  # Using a new name to avoid conflict with existing secret
+  FacebookOAuthSecrets:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "nlmonorepo-${AppName}-facebook-login-secrets-${Stage}"
+      Description: Facebook OAuth credentials for Sign-In integration
+      SecretString: |
+        {
+          "clientId": "PLACEHOLDER_CLIENT_ID",
+          "clientSecret": "PLACEHOLDER_CLIENT_SECRET"
+        }
+
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
@@ -75,9 +88,27 @@ Resources:
         picture: picture
         username: sub
 
+  # Facebook Identity Provider
+  FacebookIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties:
+      UserPoolId: !Ref UserPool
+      ProviderName: Facebook
+      ProviderType: Facebook
+      ProviderDetails:
+        client_id: !Sub "{{resolve:secretsmanager:nlmonorepo-${AppName}-facebook-login-secrets-${Stage}:SecretString:clientId}}"
+        client_secret: !Sub "{{resolve:secretsmanager:nlmonorepo-${AppName}-facebook-login-secrets-${Stage}:SecretString:clientSecret}}"
+        authorize_scopes: "email,public_profile"
+      AttributeMapping:
+        email: email
+        name: name
+        picture: picture
+
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
-    DependsOn: GoogleIdentityProvider
+    DependsOn:
+      - GoogleIdentityProvider
+      - FacebookIdentityProvider
     Properties:
       ClientName: !Sub "nlmonorepo-tsh-client-${Stage}"
       UserPoolId: !Ref UserPool
@@ -85,6 +116,7 @@ Resources:
       SupportedIdentityProviders:
         - COGNITO
         - Google
+        - Facebook
       CallbackURLs:
         - "https://d32h8ny4vmj7kl.cloudfront.net"
         - "http://localhost:3000"
@@ -264,3 +296,7 @@ Outputs:
   GoogleOAuthSecretsArn:
     Description: ARN of the Google OAuth Secrets in Secrets Manager
     Value: !Ref GoogleOAuthSecrets
+
+  FacebookOAuthSecretsArn:
+    Description: ARN of the Facebook OAuth Secrets in Secrets Manager
+    Value: !Ref FacebookOAuthSecrets

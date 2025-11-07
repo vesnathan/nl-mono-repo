@@ -10,11 +10,7 @@ import {
   setLogFile,
 } from "./utils/logger"; // Import resetDebugMode
 import { getAwsCredentials } from "./utils/aws-credentials";
-import {
-  DeploymentOptions,
-  StackType,
-  ForceDeleteOptions,
-} from "./types";
+import { DeploymentOptions, StackType, ForceDeleteOptions } from "./types";
 import { DeploymentManager } from "./deployment-manager";
 import { OutputsManager } from "./outputs-manager";
 import { candidateExportNames } from "./utils/export-names";
@@ -44,8 +40,7 @@ async function promptForAdminEmail(): Promise<string> {
       message: "Enter admin email address for user creation:",
       default: "admin@example.com",
       validate: (input: string) =>
-        REGEX.EMAIL.test(input.trim()) ||
-        "Please enter a valid email address.",
+        REGEX.EMAIL.test(input.trim()) || "Please enter a valid email address.",
     },
   ]);
   return adminEmail.trim();
