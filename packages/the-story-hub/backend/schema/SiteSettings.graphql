@@ -5,6 +5,26 @@ type SiteSettings @aws_iam @aws_cognito_user_pools {
   # Badge Settings
   grantOGBadgeToPatreonSupporters: Boolean!
 
+  # OAuth Provider Settings
+  googleOAuthEnabled: Boolean!
+  facebookOAuthEnabled: Boolean!
+  appleOAuthEnabled: Boolean!
+
+  # Advertising Settings
+  adsEnabled: Boolean!
+  adsensePublisherId: String # ca-pub-XXXXXXXXXXXXXX
+  adsenseVerificationCode: String # For site verification
+  showAdsOnHomepage: Boolean!
+  showAdsOnStoryEnd: Boolean!
+  showAdsInFooter: Boolean!
+  homepageAdSlot: String # AdSense ad unit ID for homepage
+  storyEndAdSlot: String # AdSense ad unit ID for story end
+  footerAdSlot: String # AdSense ad unit ID for footer
+
+  # Error Tracking Settings
+  sentryDsn: String # Sentry DSN for error tracking
+  sentryEnabled: Boolean!
+
   # Future settings can be added here:
   # maintenanceMode: Boolean
   # allowNewUserRegistration: Boolean
@@ -19,6 +39,26 @@ type SiteSettings @aws_iam @aws_cognito_user_pools {
 input UpdateSiteSettingsInput {
   # Badge Settings
   grantOGBadgeToPatreonSupporters: Boolean
+
+  # OAuth Provider Settings
+  googleOAuthEnabled: Boolean
+  facebookOAuthEnabled: Boolean
+  appleOAuthEnabled: Boolean
+
+  # Advertising Settings
+  adsEnabled: Boolean
+  adsensePublisherId: String
+  adsenseVerificationCode: String
+  showAdsOnHomepage: Boolean
+  showAdsOnStoryEnd: Boolean
+  showAdsInFooter: Boolean
+  homepageAdSlot: String
+  storyEndAdSlot: String
+  footerAdSlot: String
+
+  # Error Tracking Settings
+  sentryDsn: String
+  sentryEnabled: Boolean
 
   # Future settings can be added here
 }

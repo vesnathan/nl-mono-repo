@@ -42,6 +42,7 @@ function SettingsSection({
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
       <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full p-6 text-left hover:bg-gray-750 transition-colors flex items-center justify-between"
       >
@@ -190,6 +191,12 @@ function AdminSettingsContent() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showFacebookRedeployModal, setShowFacebookRedeployModal] =
     useState(false);
+  const [showOAuthStatusModal, setShowOAuthStatusModal] = useState(false);
+  const [oauthStatusModalData, setOAuthStatusModalData] = useState<{
+    provider: string;
+    status: string;
+    enabled: boolean;
+  } | null>(null);
 
   // Fetch settings on mount
   useEffect(() => {
@@ -249,6 +256,37 @@ function AdminSettingsContent() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleOAuthToggleChange = async (
+    provider: "Google" | "Facebook" | "Apple",
+    field: "googleOAuthEnabled" | "facebookOAuthEnabled" | "appleOAuthEnabled",
+    value: boolean,
+  ) => {
+    if (!settings) return;
+
+    // Show status modal when toggling ON
+    if (value) {
+      let status = "";
+      if (provider === "Google") {
+        status = "Working as expected";
+      } else if (provider === "Facebook") {
+        status =
+          "Needs a new account without FB Business account disabled. See FACEBOOK_OAUTH_SETUP.md for details.";
+      } else if (provider === "Apple") {
+        status = "Not yet implemented. Coming soon.";
+      }
+
+      setOAuthStatusModalData({
+        provider,
+        status,
+        enabled: value,
+      });
+      setShowOAuthStatusModal(true);
+    }
+
+    // Save the toggle state
+    await handleToggleChange(field, value);
   };
 
   const handlePatreonSecretChange = async (
@@ -392,6 +430,84 @@ function AdminSettingsContent() {
             </div>
           )}
 
+          {/* Error Tracking Settings Section */}
+          <SettingsSection
+            title="Error Tracking & Bug Reporting"
+            description="Configure Sentry for automatic error tracking and user bug reports"
+          >
+            {/* Setup Instructions */}
+            <div className="bg-blue-900/20 border border-blue-700/50 rounded-lg p-4 mb-4">
+              <h3 className="text-white font-semibold mb-2 flex items-center gap-2">
+                <svg
+                  className="w-5 h-5 text-blue-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Sentry Setup Instructions
+              </h3>
+              <ol className="text-gray-300 text-sm space-y-2 ml-7 list-decimal">
+                <li>
+                  Create a free account at{" "}
+                  <a
+                    href="https://sentry.io/signup/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 underline"
+                  >
+                    sentry.io/signup
+                  </a>
+                </li>
+                <li>
+                  Create a new project and select{" "}
+                  <span className="font-mono bg-gray-800 px-1 rounded">
+                    Next.js
+                  </span>{" "}
+                  as the platform
+                </li>
+                <li>
+                  Copy your DSN from the project settings (Settings → Client
+                  Keys)
+                </li>
+                <li>Paste the DSN below and enable Sentry tracking</li>
+                <li>
+                  Click Save Settings - Sentry will automatically start tracking
+                  errors
+                </li>
+              </ol>
+              <div className="mt-3 pt-3 border-t border-blue-700/30">
+                <p className="text-gray-400 text-xs">
+                  <strong>Free tier includes:</strong> 50,000 errors/month,
+                  30-day retention, unlimited team members
+                </p>
+              </div>
+            </div>
+
+            <SettingToggle
+              label="Enable Sentry Error Tracking"
+              description="Enable automatic error tracking with Sentry. Errors will be captured and sent to your Sentry project for monitoring."
+              enabled={settings?.sentryEnabled ?? false}
+              onChange={(value) => handleToggleChange("sentryEnabled", value)}
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="Sentry DSN (Data Source Name)"
+              description="Your Sentry project DSN from https://sentry.io. Format: https://[key]@[org].ingest.sentry.io/[project]"
+              value={settings?.sentryDsn ?? ""}
+              onChange={(value) => handleToggleChange("sentryDsn", value)}
+              placeholder="https://examplePublicKey@o0.ingest.sentry.io/0"
+              disabled={isSaving}
+            />
+          </SettingsSection>
+
           {/* Badge Settings Section */}
           <SettingsSection
             title="Badge Settings"
@@ -406,6 +522,168 @@ function AdminSettingsContent() {
               }
               disabled={isSaving}
             />
+          </SettingsSection>
+
+          {/* OAuth Provider Settings Section */}
+          <SettingsSection
+            title="OAuth Provider Settings"
+            description="Enable or disable third-party OAuth providers for user authentication. When enabled, provider buttons will appear on the login/registration modal."
+          >
+            <SettingToggle
+              label="Google OAuth"
+              description="Enable Google Sign-In for user authentication. Currently working as expected."
+              enabled={settings?.googleOAuthEnabled ?? false}
+              onChange={(value) =>
+                handleOAuthToggleChange("Google", "googleOAuthEnabled", value)
+              }
+              disabled={isSaving}
+            />
+            <SettingToggle
+              label="Facebook OAuth"
+              description="Enable Facebook Login for user authentication. Requires a new Facebook App without FB Business account disabled."
+              enabled={settings?.facebookOAuthEnabled ?? false}
+              onChange={(value) =>
+                handleOAuthToggleChange(
+                  "Facebook",
+                  "facebookOAuthEnabled",
+                  value,
+                )
+              }
+              disabled={isSaving}
+            />
+            <SettingToggle
+              label="Apple OAuth"
+              description="Enable Sign In with Apple for user authentication. Not yet implemented."
+              enabled={settings?.appleOAuthEnabled ?? false}
+              onChange={(value) =>
+                handleOAuthToggleChange("Apple", "appleOAuthEnabled", value)
+              }
+              disabled={isSaving}
+            />
+          </SettingsSection>
+
+          {/* Advertising Settings Section */}
+          <SettingsSection
+            title="Advertising Settings"
+            description="Configure Google AdSense for non-intrusive ads. Bronze+ Patreon supporters never see ads. See GOOGLE_ADSENSE_SETUP.md for setup instructions."
+            defaultExpanded={false}
+          >
+            <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 mb-4">
+              <p className="text-blue-200 text-sm">
+                <strong>Note:</strong> Ads are automatically hidden for Bronze+
+                Patreon supporters (ad-free benefit). All ad placements are
+                unobtrusive and won&apos;t interrupt reading.
+              </p>
+            </div>
+
+            <SettingToggle
+              label="Enable Ads"
+              description="Master toggle for all advertising on the site. When disabled, no ads will be shown to anyone."
+              enabled={settings?.adsEnabled ?? false}
+              onChange={(value) => handleToggleChange("adsEnabled", value)}
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="AdSense Publisher ID"
+              description="Your Google AdSense Publisher ID (e.g., ca-pub-1234567890123456). Get this from your AdSense dashboard."
+              value={settings?.adsensePublisherId ?? ""}
+              onChange={(value) =>
+                handleToggleChange("adsensePublisherId", value)
+              }
+              placeholder="ca-pub-XXXXXXXXXXXXXX"
+              disabled={isSaving}
+            />
+
+            <SettingInput
+              label="AdSense Verification Code (Optional)"
+              description="Site verification code from Google AdSense, if required for site approval."
+              value={settings?.adsenseVerificationCode ?? ""}
+              onChange={(value) =>
+                handleToggleChange("adsenseVerificationCode", value)
+              }
+              placeholder="Enter verification code"
+              disabled={isSaving}
+            />
+
+            <div className="border-t border-gray-700 mt-4 pt-4">
+              <h4 className="text-white font-medium mb-2">Ad Unit IDs</h4>
+              <p className="text-gray-400 text-sm mb-4">
+                Ad unit IDs from your AdSense dashboard. Leave empty to show
+                Patreon support messages instead.
+              </p>
+
+              <SettingInput
+                label="Homepage Ad Slot ID (Optional)"
+                description="AdSense ad unit ID for homepage ads (e.g., 1234567890)."
+                value={settings?.homepageAdSlot ?? ""}
+                onChange={(value) =>
+                  handleToggleChange("homepageAdSlot", value)
+                }
+                placeholder="Enter ad slot ID"
+                disabled={isSaving}
+              />
+
+              <SettingInput
+                label="Story End Ad Slot ID (Optional)"
+                description="AdSense ad unit ID for story end ads (e.g., 1234567890)."
+                value={settings?.storyEndAdSlot ?? ""}
+                onChange={(value) =>
+                  handleToggleChange("storyEndAdSlot", value)
+                }
+                placeholder="Enter ad slot ID"
+                disabled={isSaving}
+              />
+
+              <SettingInput
+                label="Footer Ad Slot ID (Optional)"
+                description="AdSense ad unit ID for footer ads (e.g., 1234567890)."
+                value={settings?.footerAdSlot ?? ""}
+                onChange={(value) => handleToggleChange("footerAdSlot", value)}
+                placeholder="Enter ad slot ID"
+                disabled={isSaving}
+              />
+            </div>
+
+            <div className="border-t border-gray-700 mt-4 pt-4">
+              <h4 className="text-white font-medium mb-2">
+                Ad Placement Controls
+              </h4>
+              <p className="text-gray-400 text-sm mb-4">
+                Choose where ads appear on the site. All placements respect
+                Patreon supporter status.
+              </p>
+
+              <SettingToggle
+                label="Show Ads on Homepage"
+                description="Display ads between story listings on the homepage (after every 3rd story)."
+                enabled={settings?.showAdsOnHomepage ?? false}
+                onChange={(value) =>
+                  handleToggleChange("showAdsOnHomepage", value)
+                }
+                disabled={isSaving || !settings?.adsEnabled}
+              />
+
+              <SettingToggle
+                label="Show Ads at Story End"
+                description="Display ads after completing a chapter, before branch selection."
+                enabled={settings?.showAdsOnStoryEnd ?? false}
+                onChange={(value) =>
+                  handleToggleChange("showAdsOnStoryEnd", value)
+                }
+                disabled={isSaving || !settings?.adsEnabled}
+              />
+
+              <SettingToggle
+                label="Show Ads in Footer"
+                description="Display ads at the bottom of long-form pages."
+                enabled={settings?.showAdsInFooter ?? false}
+                onChange={(value) =>
+                  handleToggleChange("showAdsInFooter", value)
+                }
+                disabled={isSaving || !settings?.adsEnabled}
+              />
+            </div>
           </SettingsSection>
 
           {/* Patreon Configuration Section */}
@@ -712,7 +990,54 @@ function AdminSettingsContent() {
             </div>
             <div className="mt-6 flex justify-end">
               <button
+                type="button"
                 onClick={() => setShowFacebookRedeployModal(false)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                Got it!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* OAuth Implementation Status Modal */}
+      {showOAuthStatusModal && oauthStatusModalData && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-800 border border-gray-700 rounded-lg max-w-2xl w-full p-6">
+            <h2 className="text-2xl font-bold text-white mb-4">
+              {oauthStatusModalData.provider} OAuth Status
+            </h2>
+            <div className="space-y-4 text-gray-300">
+              <p className="text-lg">
+                {oauthStatusModalData.enabled ? "Enabled" : "Disabled"}
+              </p>
+              <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+                <p className="text-sm font-semibold text-blue-400 mb-2">
+                  Implementation Status:
+                </p>
+                <p className="text-gray-300">{oauthStatusModalData.status}</p>
+              </div>
+              {oauthStatusModalData.provider === "Facebook" && (
+                <p className="text-sm text-gray-400">
+                  For detailed setup instructions, see FACEBOOK_OAUTH_SETUP.md
+                  in the project root.
+                </p>
+              )}
+              {oauthStatusModalData.enabled && (
+                <p className="text-sm text-gray-400">
+                  The {oauthStatusModalData.provider} OAuth button will now
+                  appear on the login/registration modal.
+                </p>
+              )}
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowOAuthStatusModal(false);
+                  setOAuthStatusModalData(null);
+                }}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
               >
                 Got it!
