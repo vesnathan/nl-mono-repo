@@ -31,6 +31,7 @@ import { AuthRequiredButton } from "@/components/auth/AuthRequiredButton";
 import { listCommentsAPI } from "@/lib/api/comments";
 import { PatreonBadge } from "@/components/common/PatreonBadge";
 import { OGBadge } from "@/components/common/OGBadge";
+import { CreateBranchModal } from "@/components/stories/CreateBranchModal";
 
 // Component to display branch comment count
 function BranchCommentButton({
@@ -89,6 +90,7 @@ function ChapterSection({
     string | null
   >(null); // Track which branch's comments are expanded
   const [showMainComments, setShowMainComments] = useState(false); // Track if main chapter comments are expanded
+  const [isCreateBranchModalOpen, setIsCreateBranchModalOpen] = useState(false); // Track create branch modal
 
   // Fetch the chapter content
   const { data: chapter, isLoading: chapterLoading } = useQuery({
@@ -348,9 +350,7 @@ function ChapterSection({
                 variant="flat"
                 className="w-full"
                 actionDescription="add a new branch to this story"
-                onPress={() => {
-                  // TODO: Navigate to branch creation page
-                }}
+                onPress={() => setIsCreateBranchModalOpen(true)}
               >
                 + Add Your Own Branch
               </AuthRequiredButton>
@@ -532,9 +532,7 @@ function ChapterSection({
                     variant="flat"
                     className="w-full"
                     actionDescription="add a new branch to this story"
-                    onPress={() => {
-                      // TODO: Navigate to branch creation page
-                    }}
+                    onPress={() => setIsCreateBranchModalOpen(true)}
                   >
                     + Add Your Own Branch
                   </AuthRequiredButton>
@@ -557,9 +555,7 @@ function ChapterSection({
             size="lg"
             className="bg-brand-purple"
             actionDescription="continue this story"
-            onPress={() => {
-              // TODO: Navigate to branch creation page
-            }}
+            onPress={() => setIsCreateBranchModalOpen(true)}
           >
             Continue the Story
           </AuthRequiredButton>
@@ -576,6 +572,19 @@ function ChapterSection({
           storyAuthorId={storyAuthorId}
         />
       )}
+
+      {/* Create Branch Modal */}
+      <CreateBranchModal
+        isOpen={isCreateBranchModalOpen}
+        onClose={() => setIsCreateBranchModalOpen(false)}
+        storyId={storyId}
+        parentNodeId={nodeId}
+        onBranchCreated={(newNodeId) => {
+          // Select the newly created branch
+          setSelectedBranchId(newNodeId);
+          setIsAccordionOpen(false);
+        }}
+      />
     </>
   );
 }
