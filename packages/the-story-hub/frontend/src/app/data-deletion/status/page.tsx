@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -83,10 +84,13 @@ function DataDeletionStatusContent() {
               </h3>
               <ol className="list-decimal list-inside space-y-2 text-sm">
                 <li>Go to your Facebook Settings & Privacy &gt; Settings</li>
-                <li>Click on "Apps and Websites" in the left sidebar</li>
-                <li>Find "The Story Hub" in your list of apps</li>
                 <li>
-                  Click "Remove" to disconnect the app and delete your data
+                  Click on &quot;Apps and Websites&quot; in the left sidebar
+                </li>
+                <li>Find &quot;The Story Hub&quot; in your list of apps</li>
+                <li>
+                  Click &quot;Remove&quot; to disconnect the app and delete your
+                  data
                 </li>
                 <li>Facebook will send you a confirmation code and link</li>
               </ol>
@@ -114,12 +118,12 @@ function DataDeletionStatusContent() {
         )}
 
         <div className="mt-8 pt-6 border-t border-gray-700">
-          <a
+          <Link
             href="/"
             className="text-blue-400 hover:text-blue-300 transition-colors"
           >
             ← Return to Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

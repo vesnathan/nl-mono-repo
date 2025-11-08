@@ -2,4 +2,7 @@
 
 extend type Query {
   getUserProfile(userId: ID!): User @aws_iam @aws_cognito_user_pools
+  checkUsernameAvailability(username: String!): UsernameAvailability!
+    @aws_iam
+    @aws_cognito_user_pools
 }

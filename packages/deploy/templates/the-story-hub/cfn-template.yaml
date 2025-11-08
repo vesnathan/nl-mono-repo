@@ -33,7 +33,10 @@ Parameters:
     Default: ""
 
 Conditions:
-  HasCustomDomain: !Not [!Equals [!Ref DomainName, ""]]
+  IsProd: !Equals [!Ref Stage, "prod"]
+  HasCustomDomain: !And
+    - !Condition IsProd
+    - !Not [!Equals [!Ref DomainName, ""]]
 
 Resources:
   # DynamoDb Tables
@@ -79,8 +82,8 @@ Resources:
         AppBucketName: !GetAtt S3Stack.Outputs.FrontendBucketName
         AppBucketArn: !GetAtt S3Stack.Outputs.FrontendBucketArn
         AppBucketRegionalDomainName: !GetAtt S3Stack.Outputs.FrontendBucketRegionalDomainName
-        CertificateArn: ""  # Domain configuration not yet supported in nested stacks
-        CustomDomainName: ""  # Domain configuration not yet supported in nested stacks
+        CertificateArn: !If [HasCustomDomain, "arn:aws:acm:us-east-1:430118819356:certificate/395eac12-e59b-479f-9334-cece4f368405", ""]
+        CustomDomainName: !Ref DomainName
 
   # Lambda Functions
   LambdaStack:

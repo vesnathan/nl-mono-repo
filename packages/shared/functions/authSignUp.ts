@@ -27,6 +27,7 @@ export const authSignUp = async (input: SignUpInput) => {
       options: {
         userAttributes: {
           email: input.email,
+          name: input.username, // Pass username as 'name' attribute for Lambda
         },
       },
     }),

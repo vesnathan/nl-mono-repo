@@ -48,6 +48,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           content="Collaborative branching storytelling platform"
         />
         <link rel="icon" href="/images/logo-small.png" />
+        {/* Google AdSense verification and script */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6030709852460281"
+          crossOrigin="anonymous"
+        />
       </head>
       <body>
         <QueryProvider>

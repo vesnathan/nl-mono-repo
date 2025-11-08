@@ -58,6 +58,8 @@ Resources:
       Policies:
         PasswordPolicy:
           MinimumLength: 8
+      AutoVerifiedAttributes:
+        - email
       MfaConfiguration: "OFF"
       LambdaConfig:
         PostConfirmation: !GetAtt CognitoPostConfirmationFunction.Arn
@@ -91,6 +93,7 @@ Resources:
   # Facebook Identity Provider
   FacebookIdentityProvider:
     Type: AWS::Cognito::UserPoolIdentityProvider
+    DependsOn: FacebookOAuthSecrets
     Properties:
       UserPoolId: !Ref UserPool
       ProviderName: Facebook
@@ -99,6 +102,7 @@ Resources:
         client_id: !Sub "{{resolve:secretsmanager:nlmonorepo-${AppName}-facebook-login-secrets-${Stage}:SecretString:clientId}}"
         client_secret: !Sub "{{resolve:secretsmanager:nlmonorepo-${AppName}-facebook-login-secrets-${Stage}:SecretString:clientSecret}}"
         authorize_scopes: "email,public_profile"
+        api_version: "v21.0"
       AttributeMapping:
         email: email
         name: name

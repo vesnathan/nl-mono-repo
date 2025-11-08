@@ -19,14 +19,10 @@
 
 ### Deployments
 
-- **NEVER run deployments automatically under ANY circumstances**
-- **NEVER use the Bash tool to run `yarn deploy:tsh:dev` or any deployment commands**
-- **NEVER run `yarn ts-node index.ts` in the deploy package**
-- **If a deployment is accidentally started, IMMEDIATELY kill it with `pkill -f "yarn ts-node index.ts"`**
-- Always ask the user to run deploys manually
-- Deployment command: `yarn deploy:tsh:dev` (USER RUNS THIS, NOT CLAUDE)
-- This rule has been violated multiple times - it is CRITICAL to follow this
+- Deployment commands: `yarn deploy:tsh:dev` (replace strategy), `yarn deploy:tsh:dev:update` (update strategy)
 - **Database seeding runs AUTOMATICALLY during deployment** - do NOT tell user to reseed after deploy
+- When asked to deploy, you can run deployments directly using the Bash tool
+- Use update strategy (`yarn deploy:tsh:dev:update`) for iterative changes to avoid recreating resources
 
 #### Lambda Functions
 

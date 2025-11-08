@@ -2,6 +2,7 @@ import React from "react";
 import { useMutation } from "@tanstack/react-query";
 import { authSignUp, authConfirmSignUp } from "shared/functions/authSignUp";
 import { authSignIn } from "shared/functions/authSignIn";
+import { checkUsernameAvailability } from "@/lib/api/users";
 
 export type RegistrationStep =
   | "register-enter-details"
@@ -30,11 +31,39 @@ export const useRegistrationController = (options: {
   // state for registration forms
   const [userEmail, setUserEmail] = React.useState("");
   const [username, setUsername] = React.useState("");
+  const [usernameError, setUsernameError] = React.useState("");
+  const [isCheckingUsername, setIsCheckingUsername] = React.useState(false);
   const [userPassword, setUserPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [confirmationCode, setConfirmationCode] = React.useState("");
   const [confirmationDestination, setConfirmationDestination] =
     React.useState("");
+
+  // Debounced username validation
+  React.useEffect(() => {
+    if (!username || username.length < 3) {
+      setUsernameError("");
+      return undefined;
+    }
+
+    setIsCheckingUsername(true);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const result = await checkUsernameAvailability(username);
+        if (!result.available) {
+          setUsernameError("Username is already taken");
+        } else {
+          setUsernameError("");
+        }
+      } catch (error) {
+        console.error("Error checking username:", error);
+      } finally {
+        setIsCheckingUsername(false);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [username]);
 
   const signUpMutation = useMutation({
     mutationFn: async (input: {
@@ -120,6 +149,8 @@ export const useRegistrationController = (options: {
     setUserEmail,
     username,
     setUsername,
+    usernameError,
+    isCheckingUsername,
     userPassword,
     setUserPassword,
     confirmPassword,

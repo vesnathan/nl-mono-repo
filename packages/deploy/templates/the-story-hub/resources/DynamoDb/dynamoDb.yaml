@@ -68,6 +68,7 @@ Resources:
   # 7. Get Notifications: PK=USER#{userId}, SK begins_with NOTIFICATION#
   # 8. Get Child Branches: PK=NODE#{parentNodeId}, SK begins_with CHILD#
   # 9. Browse/Discover Stories: GSI1PK=STORY_LIST, GSI1SK={timestamp}#{storyId}
+  # 10. Username Lookup: GSI2PK=USERNAME#{username}, GSI2SK=USER#
   TSHDataTable:
     Type: AWS::DynamoDB::Table
     DependsOn: DynamoDBRole
@@ -82,6 +83,10 @@ Resources:
           AttributeType: "S"
         - AttributeName: "GSI1SK"
           AttributeType: "S"
+        - AttributeName: "GSI2PK"
+          AttributeType: "S"
+        - AttributeName: "GSI2SK"
+          AttributeType: "S"
       BillingMode: PAY_PER_REQUEST
       KeySchema:
         - AttributeName: "PK"
@@ -94,6 +99,14 @@ Resources:
             - AttributeName: "GSI1PK"
               KeyType: "HASH"
             - AttributeName: "GSI1SK"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+        - IndexName: "GSI2"
+          KeySchema:
+            - AttributeName: "GSI2PK"
+              KeyType: "HASH"
+            - AttributeName: "GSI2SK"
               KeyType: "RANGE"
           Projection:
             ProjectionType: "ALL"

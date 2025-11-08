@@ -180,10 +180,21 @@ async function batchInsertItems(
 
 // Transform user for DynamoDB format
 function transformUserForDB(user: (typeof SEED_USERS)[number]): any {
+  const now = new Date().toISOString();
   return {
     PK: `USER#${user.userId}`,
     SK: `PROFILE#${user.userId}`,
     userId: user.userId,
+    // GraphQL fields
+    username: user.screenName,
+    email: user.email,
+    createdAt: now,
+    stats: {
+      storiesCreated: 0,
+      branchesContributed: 0,
+      totalUpvotes: 0,
+    },
+    // Legacy fields for backward compatibility
     userEmail: user.email,
     userTitle: user.title || "",
     userFirstName: user.firstName,
@@ -193,11 +204,13 @@ function transformUserForDB(user: (typeof SEED_USERS)[number]): any {
     privacyPolicy: true,
     termsAndConditions: true,
     userAddedById: SUPER_ADMIN_USER_ID,
-    userCreated: new Date().toISOString(),
+    userCreated: now,
     patreonSupporter: user.patreonSupporter ?? false,
     ogSupporter: user.ogSupporter ?? false,
     GSI1PK: `USER#${user.userId}`,
     GSI1SK: `USER#${user.userId}`,
+    GSI2PK: `USERNAME#${user.screenName}`,
+    GSI2SK: `USER#`,
   };
 }
 

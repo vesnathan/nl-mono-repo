@@ -1,5 +1,9 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  PutCommand,
+  QueryCommand,
+} from "@aws-sdk/lib-dynamodb";
 import type { PostConfirmationTriggerEvent } from "aws-lambda";
 
 const ddbClient = new DynamoDBClient({
@@ -52,6 +56,33 @@ export const handler = async (
   const now = new Date().toISOString();
 
   try {
+    // Check if username already exists using GSI2
+    const existingUserCheck = await docClient.send(
+      new QueryCommand({
+        TableName: TABLE_NAME,
+        IndexName: "GSI2",
+        KeyConditionExpression: "GSI2PK = :usernamePK",
+        ExpressionAttributeValues: {
+          ":usernamePK": `USERNAME#${username}`,
+        },
+        ProjectionExpression: "username, userId",
+        Limit: 1,
+      }),
+    );
+
+    if (existingUserCheck.Items && existingUserCheck.Items.length > 0) {
+      const existingUserId = existingUserCheck.Items[0].userId;
+      // If it's not the same user (shouldn't happen, but safety check)
+      if (existingUserId !== userId) {
+        console.error(
+          `Username "${username}" already exists for user ${existingUserId}`,
+        );
+        throw new Error(
+          `Username "${username}" is already taken. Please choose a different username.`,
+        );
+      }
+    }
+
     // Create user profile in DynamoDB with GraphQL-compatible field names
     await docClient.send(
       new PutCommand({
@@ -84,6 +115,8 @@ export const handler = async (
           userCreated: now,
           GSI1PK: `USER#${userId}`,
           GSI1SK: `USER#${userId}`,
+          GSI2PK: `USERNAME#${username}`,
+          GSI2SK: `USER#`,
         },
         // Don't overwrite if user already exists (safety check)
         ConditionExpression: "attribute_not_exists(PK)",
