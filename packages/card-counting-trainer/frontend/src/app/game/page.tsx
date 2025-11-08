@@ -67,6 +67,7 @@ export default function GamePage() {
   const [suspicionLevel, setSuspicionLevel] = useState(0);
   const [speechBubbles, setSpeechBubbles] = useState<SpeechBubble[]>([]);
   const [handNumber, setHandNumber] = useState(0);
+  const [initialized, setInitialized] = useState(false);
 
   // Track previous hand states for in-hand reactions
   const prevAIHandsRef = useRef<Map<string, number>>(new Map());
@@ -83,6 +84,7 @@ export default function GamePage() {
 
     const initialDealer = getRandomDealer();
     setCurrentDealer(initialDealer);
+    setInitialized(true);
   }, []);
 
   // Suspicion meter decay
@@ -120,6 +122,31 @@ export default function GamePage() {
       setCurrentDealer(newDealer);
     }
   }, [shoesDealt, currentDealer]);
+
+  // Auto-start first hand after initialization
+  useEffect(() => {
+    if (initialized && aiPlayers.length > 0 && handNumber === 0 && phase === "BETTING") {
+      const timer = setTimeout(() => {
+        setPhase("DEALING");
+        setDealerRevealed(false);
+        setPlayerHand({ cards: [], bet: currentBet });
+        setDealerHand({ cards: [], bet: 0 });
+        setPlayerChips(prev => prev - currentBet);
+
+        // Reset AI hands with random bets
+        const updatedAI = aiPlayers.map(ai => ({
+          ...ai,
+          hand: { cards: [], bet: Math.floor(Math.random() * 50) + 25 },
+        }));
+        setAIPlayers(updatedAI);
+
+        // Deal initial cards
+        setTimeout(() => dealInitialCards(), 500);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [initialized, aiPlayers.length, handNumber, phase]);
 
   // Start new round
   const startNewRound = useCallback(() => {
