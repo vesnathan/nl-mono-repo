@@ -87,6 +87,7 @@ export default function HomePage() {
                   color="warning"
                   variant="shadow"
                   className="text-lg font-bold"
+                  onPress={() => router.push("/game")}
                 >
                   Get Started
                 </Button>
