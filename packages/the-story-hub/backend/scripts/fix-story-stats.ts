@@ -41,7 +41,7 @@ async function getNodesForStory(storyId: string) {
       KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
       ExpressionAttributeValues: {
         ":pk": `STORY#${storyId}`,
-        ":sk": "CHAPTER#",
+        ":sk": "NODE#",
       },
       ProjectionExpression: "nodeId",
     }),

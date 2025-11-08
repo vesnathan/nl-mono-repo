@@ -17,7 +17,7 @@ export function request(ctx: any) {
       expression: "PK = :pk AND begins_with(SK, :sk)",
       expressionValues: util.dynamodb.toMapValues({
         ":pk": `STORY#${storyId}`,
-        ":sk": "CHAPTER#",
+        ":sk": "NODE#",
       }),
     },
   };

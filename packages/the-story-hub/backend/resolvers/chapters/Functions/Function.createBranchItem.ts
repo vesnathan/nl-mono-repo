@@ -41,9 +41,9 @@ export function request(ctx: CTX) {
 
   const item = {
     PK: `STORY#${storyId}`,
-    SK: `CHAPTER#${nodeId}`,
+    SK: `NODE#${nodeId}`,
     GSI1PK: `STORY#${storyId}`,
-    GSI1SK: `CHAPTER#${nodeId}`,
+    GSI1SK: `NODE#${nodeId}`,
     nodeId,
     storyId,
     parentNodeId: input.parentNodeId,

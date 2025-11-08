@@ -141,7 +141,7 @@ Following aws-example pattern (see deploy/templates/aws-example/resources/Dynamo
    - PK = `STORY#{storyId}`, SK = `METADATA`
 
 2. **Get all Chapters for Story**
-   - PK = `STORY#{storyId}`, SK begins_with `CHAPTER#`
+   - PK = `STORY#{storyId}`, SK begins_with `NODE#`
    - Query returns all chapter nodes for the story
 
 3. **Get User Profile**
@@ -160,7 +160,7 @@ Following aws-example pattern (see deploy/templates/aws-example/resources/Dynamo
    - PK = `USER#{userId}`, SK begins_with `NOTIFICATION#`
 
 8. **Get Child Branches**
-   - PK = `CHAPTER#{parentNodeId}`, SK begins_with `CHILD#`
+   - PK = `NODE#{parentNodeId}`, SK begins_with `CHILD#`
 
 9. **Browse/Discover Stories**
    - GSI1PK = `STORY_LIST`, GSI1SK = `{timestamp}` or `{rating}`
@@ -177,7 +177,7 @@ GSI1SK: "{createdAt}#{storyId}"
 
 // ChapterNode
 PK: "STORY#{storyId}"
-SK: "CHAPTER#{nodeId}"
+SK: "NODE#{nodeId}"
 GSI1PK: "USER#{authorId}"
 GSI1SK: "BRANCH#{createdAt}#{nodeId}"
 // + all chapter attributes
@@ -1121,7 +1121,7 @@ backend/resolvers/chapters/
 **Key Implementation Details:**
 
 **Mutation.createChapter.ts:**
-- PK: `STORY#{storyId}`, SK: `CHAPTER#{nodeId}`
+- PK: `STORY#{storyId}`, SK: `NODE#{nodeId}`
 - Set GSI1PK: `USER#{authorId}`, GSI1SK: `BRANCH#{createdAt}#{nodeId}`
 - Initialize stats: `{ reads: 0, upvotes: 0, downvotes: 0, childBranches: 0 }`
 - Set editableUntil: `util.time.nowEpochMilliSeconds() + 3600000` (1 hour)
@@ -1133,11 +1133,11 @@ backend/resolvers/chapters/
 - Atomic increment parent's childBranches: `ADD #childBranches :inc`
 
 **Query.getChapter.ts:**
-- GetItem with PK: `STORY#{storyId}`, SK: `CHAPTER#{nodeId}`
+- GetItem with PK: `STORY#{storyId}`, SK: `NODE#{nodeId}`
 - In response function, atomic increment reads counter using second DynamoDB call
 
 **Query.listBranches.ts:**
-- Query with PK: `CHAPTER#{parentNodeId}`, SK begins_with `CHILD#`
+- Query with PK: `NODE#{parentNodeId}`, SK begins_with `CHILD#`
 - Or Query main table where PK = parent storyId and filter by parentNodeId
 - Sort by stats in response function
 
@@ -1156,7 +1156,7 @@ return {
   operation: "UpdateItem",
   key: util.dynamodb.toMapValues({
     PK: `STORY#{storyId}`,
-    SK: `CHAPTER#{nodeId}`,
+    SK: `NODE#{nodeId}`,
   }),
   update: {
     expression: "ADD #reads :inc",
@@ -1182,14 +1182,14 @@ Place in: the-story-hub/backend/resolvers/reading/
 
 **Query.getStoryTree.ts:**
 
-- Query all chapters: PK = `STORY#{storyId}`, SK begins_with `CHAPTER#`
+- Query all chapters: PK = `STORY#{storyId}`, SK begins_with `NODE#`
 - In response function, build tree structure recursively
 - Return TreeData with rootNode and totalNodes
 
 **Query.getReadingPath.ts:**
 
 - Use DynamoDB BatchGetItem to fetch multiple chapters efficiently
-- Map nodePath array to keys: `{ PK: STORY#{storyId}, SK: CHAPTER#{nodeId} }`
+- Map nodePath array to keys: `{ PK: STORY#{storyId}, SK: NODE#{nodeId} }`
 - Return ordered array matching nodePath order
 
 **Mutation.saveBookmark.ts:**
@@ -1383,7 +1383,7 @@ async function seedDatabase() {
   const chapters = [
     {
       PK: "STORY#story-1",
-      SK: "CHAPTER#chapter-1-1",
+      SK: "NODE#chapter-1-1",
       nodeId: "chapter-1-1",
       storyId: "story-1",
       parentNodeId: null,
@@ -1401,7 +1401,7 @@ async function seedDatabase() {
     },
     {
       PK: "STORY#story-1",
-      SK: "CHAPTER#chapter-1-2",
+      SK: "NODE#chapter-1-2",
       nodeId: "chapter-1-2",
       storyId: "story-1",
       parentNodeId: "chapter-1-1",

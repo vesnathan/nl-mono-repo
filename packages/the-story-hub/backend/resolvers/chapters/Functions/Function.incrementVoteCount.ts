@@ -18,7 +18,7 @@ export function request(ctx: any) {
     operation: "UpdateItem",
     key: util.dynamodb.toMapValues({
       PK: `STORY#${storyId}`,
-      SK: `CHAPTER#${nodeId}`,
+      SK: `NODE#${nodeId}`,
     }),
     update: {
       expression,

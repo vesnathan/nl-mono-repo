@@ -304,12 +304,70 @@ AppSync resolvers run in a restricted JavaScript environment. Follow these conve
   - Need to write integration tests for API endpoints
   - This should be completed BEFORE production deployment
 
+**Database Backups**:
+
+- **CRITICAL**: Set up automated DynamoDB backups before production
+  - Configure point-in-time recovery (PITR) for DynamoDB table
+  - Set up automated daily backups with retention policy
+  - Test backup restoration process
+  - Document backup and recovery procedures
+  - Consider cross-region backup replication for disaster recovery
+
 ### Pending Issues
 
 - **OP Approved Badge - Multiple Branches**: Multiple branches under the same parent node are showing "OP Approved" badges
   - Business rule: **Only ONE branch can be OP Approved per parent node**
   - Need to add enforcement in the admin settings/mutation to ensure only one branch can be approved at a time
   - When approving a branch, any previously approved sibling branches should be automatically un-approved
+
+### Recent Work
+
+- **Cognito Post-Confirmation Lambda Restructuring (2025-11-05)**:
+  - **Goal**: Fix user signup bug where new users get Cognito accounts but no DynamoDB profile, causing getUserProfile to fail
+  - **Problem discovered**: User `vesnathan+tsh@gmail.com` could sign up and login but couldn't access settings page due to missing DynamoDB record
+  - **Root cause**: No post-confirmation Lambda trigger configured to create DynamoDB user profiles after Cognito signup
+  - **Immediate fix**: Manually created DynamoDB record for affected user
+  - **Permanent fix**: Implementing Cognito post-confirmation Lambda trigger
+  - **Architecture challenge**: Hit circular dependency when trying to add Lambda
+    - CognitoStack needs LambdaStack (for Lambda ARN)
+    - LambdaStack needs CognitoStack (for UserPoolId)
+    - CloudFormation cannot resolve this circular dependency
+  - **Solution**: Moved post-confirmation Lambda INTO CognitoStack itself
+    - Lambda function now lives in Cognito template, not Lambda template
+    - CognitoStack is self-contained and doesn't depend on LambdaStack
+    - LambdaStack can still depend on CognitoStack (no circular dependency)
+  - **Files modified**:
+    - Created: [cognitoPostConfirmation.ts](packages/the-story-hub/backend/lambda/cognitoPostConfirmation.ts) - Lambda function code
+    - Modified: [cognito.yaml](packages/deploy/templates/the-story-hub/resources/Cognito/cognito.yaml) - Added Lambda resources (function, role, permission, log group)
+    - Modified: [lambda.yaml](packages/deploy/templates/the-story-hub/resources/Lambda/lambda.yaml) - Removed all CognitoPostConfirmation resources
+    - Modified: [cfn-template.yaml](packages/deploy/templates/the-story-hub/cfn-template.yaml) - Updated CognitoStack parameters and dependencies
+  - **Lambda details**:
+    - Creates DynamoDB user profile with proper structure based on seed-data.ts pattern
+    - Runs after user confirms email or admin creates user
+    - Uses Cognito user attributes (sub, email, given_name, family_name)
+    - Sets default values for userScreenName (from email), patreonSupporter (false), ogSupporter (false)
+    - Handles duplicate users gracefully (ConditionalCheckFailedException)
+  - **Status**: CloudFormation templates validated successfully, ready to deploy
+  - **Next step**: User needs to run `yarn deploy:tsh:dev` to deploy the fix
+  - **Note**: Lambda code path in S3 is `lambdas/${Stage}/cognitoPostConfirmation.zip` (NOT `functions/`)
+
+- **CloudFront Frontend Setup (2025-11-05)**:
+  - Issue: CloudFront distribution returning "Access Denied" - no frontend bucket or files deployed
+  - Root cause: CloudFront was pointing to userfiles bucket instead of dedicated frontend bucket
+  - Solution implemented:
+    - Created new `FrontendBucket` resource in S3 stack (`nlmonorepo-${AppName}-frontend-${Stage}`)
+    - Added outputs: FrontendBucketName, FrontendBucketArn, FrontendBucketRegionalDomainName
+    - Updated CloudFront stack to use FrontendBucket instead of TSHBucket (userfiles)
+    - Added custom error responses to CloudFront for Next.js SPA routing (403/404 → /index.html)
+    - Built frontend successfully (static export in `out` directory)
+  - Files affected:
+    - [s3.yaml:18-36](packages/deploy/templates/the-story-hub/resources/S3/s3.yaml#L18-L36) - Added FrontendBucket
+    - [s3.yaml:62-72](packages/deploy/templates/the-story-hub/resources/S3/s3.yaml#L62-L72) - Added FrontendBucket outputs
+    - [cfn-template.yaml:89-91](packages/deploy/templates/the-story-hub/cfn-template.yaml#L89-L91) - CloudFront now uses FrontendBucket
+    - [cfn-template.yaml:166](packages/deploy/templates/the-story-hub/cfn-template.yaml#L166) - WebsiteBucket output uses FrontendBucket
+    - [cloudfront.yaml:86-94](packages/deploy/templates/the-story-hub/resources/CloudFront/cloudfront.yaml#L86-L94) - Added CustomErrorResponses
+  - Next step: User needs to run `yarn deploy:tsh:dev:update` to deploy updated stack
+  - Note: TSHBucket remains as userfiles bucket, FrontendBucket is separate for static website hosting
 
 ### Recent Issues Resolved
 
@@ -380,3 +438,61 @@ AppSync resolvers run in a restricted JavaScript environment. Follow these conve
   - Root cause: LocalStack AppSync doesn't support forward type references - `AgeRating` enum was defined in `Story.graphql` but used earlier in `ChapterNode.graphql` (alphabetical ordering)
   - Solution: Moved `AgeRating` enum to `00-schema.graphql` so it's defined before use
   - Lesson: Always define shared types in `00-schema.graphql` or files that sort alphabetically before their usage
+
+### CloudFront & Frontend Deployment
+
+- **CloudFront Story Routes Showing Homepage (2025-11-05)**:
+  - Issue: CloudFront route `/story/{storyId}/` was displaying homepage instead of story content
+  - Root cause: Next.js app uses static export (`output: "export"`) with a single placeholder page at `/story/placeholder/index.html`. When CloudFront receives requests for non-existent story IDs, S3 returns 404, and CloudFront's `CustomErrorResponses` redirects to `/index.html` (homepage)
+  - Solution: Added CloudFront Function to rewrite story URLs to the placeholder page for client-side routing
+  - Files affected: [cloudfront.yaml:39-69](packages/deploy/templates/the-story-hub/resources/CloudFront/cloudfront.yaml#L39-L69) (SPARoutingFunction)
+  - **How it works**:
+    1. CloudFront Function intercepts all viewer requests
+    2. Matches `/story/{storyId}/` or `/story/{storyId}/{nodeId}/` patterns
+    3. Rewrites URI to `/story/placeholder/index.html`
+    4. S3 serves the placeholder HTML with "Loading story..." state
+    5. JavaScript loads and uses `useParams()` to get storyId/nodeId from URL
+    6. Client fetches actual story data from GraphQL API and renders
+  - **Function configuration**:
+    - Runtime: `cloudfront-js-2.0`
+    - Event type: `viewer-request`
+    - Name: `{AppName}-{Stage}-spa-routing`
+    - AutoPublish: true
+  - **Important**: This is the correct pattern for Next.js static export SPAs - the placeholder page is NOT a real story, it's the shell that loads the real story client-side
+  - Lesson: CloudFront Functions are ideal for URL rewriting in SPAs - they run at edge locations with minimal latency
+
+- **Story Page Reading "placeholder" as StoryId (2025-11-05)**:
+  - Issue: After CloudFront Function was added, story pages were querying for storyId "placeholder" instead of the actual story ID from the URL
+  - Root cause: `useParams()` reads route parameters from the actual file path served by Next.js. When CloudFront Function rewrites `/story/{storyId}/` to `/story/placeholder/index.html`, Next.js reads "placeholder" as the storyId
+  - Solution: Changed StoryPageClient to use `usePathname()` instead of `useParams()` to read the actual browser URL, then parse the storyId from pathname
+  - Files affected: [StoryPageClient.tsx:5,556-563](packages/the-story-hub/frontend/src/app/story/[storyId]/[[...nodeId]]/StoryPageClient.tsx#L5,L556-L563)
+  - **Code change**:
+    ```typescript
+    // OLD: const storyId = (params?.storyId as string) || "";
+    // NEW:
+    const pathname = usePathname();
+    const storyId = pathname?.split("/")[2] || (params?.storyId as string) || "";
+    ```
+  - **Important**: For SPAs with CloudFront URL rewriting, always use `usePathname()` or `window.location.pathname` to read the actual browser URL, not `useParams()` which reads the physical file path
+  - Lesson: CloudFront Functions rewrite the request URI before it reaches S3, but the browser URL remains unchanged - use this to your advantage in client-side routing
+
+- **CloudFront Complete Failure After Adding Security Features (2025-11-05)**:
+  - Issue: After implementing OAC, KMS encryption, WAF, and caching policies, CloudFront returned Access Denied for all requests
+  - Investigation: Attempted to fix by removing CloudFront Function, invalidating cache, manually attaching OAC - nothing worked
+  - Solution: Stripped everything down to minimal configuration to establish baseline
+  - **Working minimal configuration** (tested 2025-11-05):
+    - CloudFront URL: `http://d31ljsocam0k5r.cloudfront.net/`
+    - Distribution ID: E1KK27C2D8DADA
+    - Public S3 bucket with public bucket policy (no OAC)
+    - No KMS encryption on bucket
+    - No WAF
+    - Basic ForwardedValues caching (no caching policies)
+    - CloudFront Function for SPA routing (working correctly)
+  - **What's working**: Homepage, all static pages, and story routes with CloudFront Function
+  - **Next steps**: Add features back incrementally to identify what causes Access Denied:
+    1. First: Test OAC (Origin Access Control) for secure S3 access
+    2. Then: Add KMS encryption to bucket
+    3. Then: Add caching policies
+    4. Then: Add WAF if needed
+  - Files: `/tmp/minimal-cloudfront.yaml` contains working baseline template
+  - Lesson: When CloudFront completely breaks, strip to absolute minimum (public bucket + basic distribution) to establish baseline, then add features back one at a time

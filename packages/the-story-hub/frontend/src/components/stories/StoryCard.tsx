@@ -8,6 +8,7 @@ import {
   Tooltip,
   Modal,
   ModalContent,
+  ModalHeader,
   ModalBody,
   useDisclosure,
 } from "@nextui-org/react";
@@ -23,7 +24,16 @@ interface StoryCardProps {
 }
 
 export function StoryCard({ story, index = 0 }: StoryCardProps) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isImageOpen,
+    onOpen: onImageOpen,
+    onClose: onImageClose,
+  } = useDisclosure();
+  const {
+    isOpen: isSynopsisOpen,
+    onOpen: onSynopsisOpen,
+    onClose: onSynopsisClose,
+  } = useDisclosure();
 
   return (
     <motion.div
@@ -53,10 +63,10 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
           {story.coverImageUrl && (
             <div
               className="w-32 h-full flex-shrink-0 relative overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={onOpen}
+              onClick={onImageOpen}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
-                  onOpen();
+                  onImageOpen();
                 }
               }}
               role="button"
@@ -86,15 +96,18 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
             </div>
 
             {/* Synopsis */}
-            <Tooltip
-              content={story.synopsis}
-              className="max-w-md"
-              closeDelay={100}
-            >
-              <p className="text-sm text-gray-300 line-clamp-4 cursor-help">
+            <div className="flex-grow min-h-0">
+              <p className="text-sm text-gray-300 line-clamp-3">
                 {story.synopsis}
               </p>
-            </Tooltip>
+              <button
+                type="button"
+                onClick={onSynopsisOpen}
+                className="text-xs text-blue-400 hover:text-blue-300 underline mt-1"
+              >
+                Read full synopsis
+              </button>
+            </div>
 
             {/* Tags */}
             <div className="flex flex-wrap gap-1">
@@ -131,8 +144,8 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
 
       {/* Image Modal */}
       <Modal
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={isImageOpen}
+        onClose={onImageClose}
         size="3xl"
         classNames={{
           base: "bg-black/90",
@@ -149,6 +162,35 @@ export function StoryCard({ story, index = 0 }: StoryCardProps) {
               />
             )}
           </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      {/* Synopsis Modal */}
+      <Modal
+        isOpen={isSynopsisOpen}
+        onClose={onSynopsisClose}
+        size="2xl"
+        scrollBehavior="inside"
+        classNames={{
+          base: "bg-gray-900",
+          header: "border-b border-gray-700",
+          body: "py-6 overflow-y-auto",
+          closeButton: "text-white hover:bg-white/20",
+        }}
+      >
+        <ModalContent className="bg-gray-900">
+          {() => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                <h2 className="text-2xl font-bold text-white">{story.title}</h2>
+              </ModalHeader>
+              <ModalBody>
+                <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">
+                  {story.synopsis}
+                </p>
+              </ModalBody>
+            </>
+          )}
         </ModalContent>
       </Modal>
     </motion.div>

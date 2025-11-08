@@ -29,7 +29,7 @@ export function request(ctx: CTX) {
     operation: "PutItem",
     key: util.dynamodb.toMapValues({
       PK: `STORY#${input.storyId}`,
-      SK: `CHAPTER#${nodeId}`,
+      SK: `NODE#${nodeId}`,
     }),
     attributeValues: util.dynamodb.toMapValues({
       nodeId,

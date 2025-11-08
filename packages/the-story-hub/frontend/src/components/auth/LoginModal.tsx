@@ -20,6 +20,7 @@ interface LoginModalProps {
   onClose: () => void;
   actionDescription?: string;
   onLoginSuccess?: () => void;
+  onSwitchToRegister?: () => void;
 }
 
 export function LoginModal({
@@ -27,6 +28,7 @@ export function LoginModal({
   onClose,
   actionDescription = "perform this action",
   onLoginSuccess,
+  onSwitchToRegister,
 }: LoginModalProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -241,6 +243,21 @@ export function LoginModal({
                   Continue with Apple
                 </Button>
               </div>
+
+              {onSwitchToRegister && (
+                <div className="text-center mt-4">
+                  <p className="text-sm text-gray-400">
+                    Don&rsquo;t have an account?{" "}
+                    <button
+                      type="button"
+                      onClick={onSwitchToRegister}
+                      className="text-primary hover:underline"
+                    >
+                      Sign up
+                    </button>
+                  </p>
+                </div>
+              )}
 
               <Button
                 color="default"

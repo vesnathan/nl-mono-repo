@@ -882,36 +882,44 @@ export async function deployTheStoryHub(
       "functions",
     );
 
-    logger.info(`Looking for Lambda functions in: ${lambdaSourceDir}`);
-
-    if (existsSync(lambdaSourceDir)) {
-      logger.success(`Lambda directory found: ${lambdaSourceDir}`);
-
-      const lambdaCompiler = new LambdaCompiler({
-        logger: logger,
-        baseLambdaDir: lambdaSourceDir,
-        outputDir: lambdaOutputDir,
-        s3BucketName: templateBucketName,
-        s3KeyPrefix: "functions",
-        stage: options.stage,
-        region: region,
-        debugMode: options.debugMode,
-      });
-
-      try {
-        // Clean up previous Lambda cache before compilation
-        await lambdaCompiler.clean();
-
-        await lambdaCompiler.compileLambdaFunctions();
-        logger.success("✓ Lambda functions compiled and uploaded successfully");
-      } catch (error: any) {
-        logger.error(`Lambda compilation failed: ${error.message}`);
-        throw error;
-      }
-    } else {
-      logger.warning(
-        `Lambda directory not found at ${lambdaSourceDir}. Skipping Lambda compilation.`,
+    if (options.skipResolversBuild) {
+      logger.info(
+        "⏭️  Skipping Lambda function compilation (--build-resolvers=false)",
       );
+    } else {
+      logger.info(`Looking for Lambda functions in: ${lambdaSourceDir}`);
+
+      if (existsSync(lambdaSourceDir)) {
+        logger.success(`Lambda directory found: ${lambdaSourceDir}`);
+
+        const lambdaCompiler = new LambdaCompiler({
+          logger: logger,
+          baseLambdaDir: lambdaSourceDir,
+          outputDir: lambdaOutputDir,
+          s3BucketName: templateBucketName,
+          s3KeyPrefix: "functions",
+          stage: options.stage,
+          region: region,
+          debugMode: options.debugMode,
+        });
+
+        try {
+          // Clean up previous Lambda cache before compilation
+          await lambdaCompiler.clean();
+
+          await lambdaCompiler.compileLambdaFunctions();
+          logger.success(
+            "✓ Lambda functions compiled and uploaded successfully",
+          );
+        } catch (error: any) {
+          logger.error(`Lambda compilation failed: ${error.message}`);
+          throw error;
+        }
+      } else {
+        logger.warning(
+          `Lambda directory not found at ${lambdaSourceDir}. Skipping Lambda compilation.`,
+        );
+      }
     }
 
     // Compile and upload TypeScript resolvers
@@ -919,245 +927,208 @@ export async function deployTheStoryHub(
       logger.debug("Compiling and uploading AppSync resolvers...");
     }
 
-    // Double-check that the bucket exists before compiling and uploading resolvers
-    const bucketExistsBeforeResolvers =
-      await s3BucketManager.ensureBucketExists(templateBucketName);
-    if (!bucketExistsBeforeResolvers) {
-      throw new Error(
-        `Template bucket ${templateBucketName} not accessible before resolver compilation`,
+    if (options.skipResolversBuild) {
+      logger.info(
+        "⏭️  Skipping resolver compilation (--build-resolvers=false)",
       );
-    }
+      logger.info("Fetching latest resolver build hash from S3...");
 
-    // Add AppSync bucket policy to allow AppSync to read resolver code from S3
-    logger.info("Adding AppSync bucket policy...");
-    try {
-      await addAppSyncBucketPolicy(templateBucketName, region);
-      logger.success("AppSync bucket policy configured successfully");
-    } catch (error: any) {
-      logger.error(`Failed to add AppSync bucket policy: ${error.message}`);
-      throw new Error(
-        `AppSync bucket policy configuration failed - deployment cannot continue`,
-      );
-    }
-
-    const resolverDir = path.join(
-      __dirname,
-      "../../../the-story-hub/backend/resolvers",
-    );
-
-    logger.info(`Looking for resolvers in: ${resolverDir}`);
-
-    if (existsSync(resolverDir)) {
-      logger.success(`Resolver directory found: ${resolverDir}`);
-      // Find all resolver files in the specified directory
-      const allFiles = findTypeScriptFiles(resolverDir);
-      logger.debug(
-        `Found ${allFiles.length} total TypeScript files in ${resolverDir}`,
-      );
-
-      // Log all discovered files for debugging
-      allFiles.forEach((file, index) => {
-        logger.debug(`File ${index + 1}: ${file}`);
+      // Get the latest resolver build hash from S3
+      const resolverPrefix = `resolvers/${options.stage}/`;
+      const listCommand = new ListObjectsV2Command({
+        Bucket: templateBucketName,
+        Prefix: resolverPrefix,
+        Delimiter: "/",
       });
 
-      const resolverFiles = allFiles
-        .map((file) => path.relative(resolverDir, file)) // Convert to relative paths first
-        .filter((file) => {
-          const shouldInclude =
-            !file.endsWith(".bak") && // Exclude backup files
-            path.basename(file) !== "gqlTypes.ts" && // Exclude the main types file
-            file.includes(path.sep); // IMPORTANT: Only include files in subdirectories (relative path check)
+      const listedObjects = await s3.send(listCommand);
+      const commonPrefixes = listedObjects.CommonPrefixes || [];
 
-          if (!shouldInclude) {
-            logger.debug(`Excluding file: ${file}`);
-          }
-          return shouldInclude;
-        });
+      if (commonPrefixes.length === 0) {
+        throw new Error(
+          `No existing resolver builds found in S3 at ${resolverPrefix}. Cannot skip resolver build - you must build at least once.`,
+        );
+      }
 
+      // Extract build hashes from common prefixes
+      const buildHashes = commonPrefixes
+        .map((cp) => {
+          const prefix = cp.Prefix || "";
+          return prefix.replace(resolverPrefix, "").replace("/", "");
+        })
+        .filter((hash) => hash.length > 0);
+
+      if (buildHashes.length === 0) {
+        throw new Error(
+          `No valid resolver build hashes found in S3. Cannot skip resolver build.`,
+        );
+      }
+
+      // Use the most recent build hash (last in alphabetical order since they're timestamps)
+      resolversBuildHash = buildHashes.sort().pop();
       logger.success(
-        `After filtering, found ${resolverFiles.length} resolver files to compile:`,
+        `Using existing resolver build hash: ${resolversBuildHash}`,
       );
-      resolverFiles.forEach((file, index) => {
-        logger.success(`  [${index + 1}] ${file}`);
-      });
+    } else {
+      // Double-check that the bucket exists before compiling and uploading resolvers
+      const bucketExistsBeforeResolvers =
+        await s3BucketManager.ensureBucketExists(templateBucketName);
+      if (!bucketExistsBeforeResolvers) {
+        throw new Error(
+          `Template bucket ${templateBucketName} not accessible before resolver compilation`,
+        );
+      }
 
-      if (resolverFiles.length === 0) {
-        const errorMsg = `No TypeScript resolver files found in ${resolverDir}. This will cause deployment to fail.`;
-        logger.error(errorMsg);
-        throw new Error(errorMsg);
-      } else {
-        // Define constants directory path for the-story-hub
-        const constantsDir = path.join(
-          __dirname,
-          "../../../the-story-hub/backend/constants",
+      // Add AppSync bucket policy to allow AppSync to read resolver code from S3
+      logger.info("Adding AppSync bucket policy...");
+      try {
+        await addAppSyncBucketPolicy(templateBucketName, region);
+        logger.success("AppSync bucket policy configured successfully");
+      } catch (error: any) {
+        logger.error(`Failed to add AppSync bucket policy: ${error.message}`);
+        throw new Error(
+          `AppSync bucket policy configuration failed - deployment cannot continue`,
+        );
+      }
+
+      const resolverDir = path.join(
+        __dirname,
+        "../../../the-story-hub/backend/resolvers",
+      );
+
+      logger.info(`Looking for resolvers in: ${resolverDir}`);
+
+      if (existsSync(resolverDir)) {
+        logger.success(`Resolver directory found: ${resolverDir}`);
+        // Find all resolver files in the specified directory
+        const allFiles = findTypeScriptFiles(resolverDir);
+        logger.debug(
+          `Found ${allFiles.length} total TypeScript files in ${resolverDir}`,
         );
 
-        const resolverCompiler = new ResolverCompiler({
-          logger: logger,
-          baseResolverDir: resolverDir,
-          s3KeyPrefix: "resolvers",
-          stage: options.stage,
-          s3BucketName: templateBucketName,
-          region: region,
-          resolverFiles: resolverFiles,
-          sharedFileName: "gqlTypes.ts",
-          constantsDir: constantsDir,
+        // Log all discovered files for debugging
+        allFiles.forEach((file, index) => {
+          logger.debug(`File ${index + 1}: ${file}`);
         });
 
-        // Use the outer-scoped resolversBuildHash so it is available when building CloudFormation parameters
-        resolversBuildHash = "";
-        try {
-          // Compile and upload resolvers (returns build hash)
-          resolversBuildHash =
-            await resolverCompiler.compileAndUploadResolvers();
+        const resolverFiles = allFiles
+          .map((file) => path.relative(resolverDir, file)) // Convert to relative paths first
+          .filter((file) => {
+            const shouldInclude =
+              !file.endsWith(".bak") && // Exclude backup files
+              path.basename(file) !== "gqlTypes.ts" && // Exclude the main types file
+              file.includes(path.sep); // IMPORTANT: Only include files in subdirectories (relative path check)
 
-          // Verify that the resolvers were uploaded successfully
-          if (options.debugMode) {
-            logger.debug("Verifying resolver uploads...");
-          }
-
-          // First verification: Check using ListObjectsV2
-          // List objects under the specific build hash prefix to verify uploads
-          const hashedPrefix = `resolvers/${options.stage}/${resolversBuildHash}/`;
-          const listCommand = new ListObjectsV2Command({
-            Bucket: templateBucketName,
-            Prefix: hashedPrefix,
+            if (!shouldInclude) {
+              logger.debug(`Excluding file: ${file}`);
+            }
+            return shouldInclude;
           });
 
-          let retryCount = 0;
-          let resolverCount = 0;
-          const maxRetries = 3;
+        logger.success(
+          `After filtering, found ${resolverFiles.length} resolver files to compile:`,
+        );
+        resolverFiles.forEach((file, index) => {
+          logger.success(`  [${index + 1}] ${file}`);
+        });
 
-          while (retryCount < maxRetries) {
-            try {
-              const listedObjects = await s3.send(listCommand);
-              // Properly type the response from ListObjectsV2Command
-              const listObjectsResult = listedObjects as {
-                Contents?: Array<{ Key: string }>;
-              };
-              resolverCount = listObjectsResult.Contents?.length || 0;
+        if (resolverFiles.length === 0) {
+          const errorMsg = `No TypeScript resolver files found in ${resolverDir}. This will cause deployment to fail.`;
+          logger.error(errorMsg);
+          throw new Error(errorMsg);
+        } else {
+          // Define constants directory path for the-story-hub
+          const constantsDir = path.join(
+            __dirname,
+            "../../../the-story-hub/backend/constants",
+          );
 
-              if (resolverCount > 0) {
-                logger.debug(
-                  `Verified ${resolverCount} resolvers were uploaded to S3`,
+          const resolverCompiler = new ResolverCompiler({
+            logger: logger,
+            baseResolverDir: resolverDir,
+            s3KeyPrefix: "resolvers",
+            stage: options.stage,
+            s3BucketName: templateBucketName,
+            region: region,
+            resolverFiles: resolverFiles,
+            sharedFileName: "gqlTypes.ts",
+            constantsDir: constantsDir,
+          });
+
+          // Use the outer-scoped resolversBuildHash so it is available when building CloudFormation parameters
+          resolversBuildHash = "";
+          try {
+            // Compile and upload resolvers (returns build hash)
+            resolversBuildHash =
+              await resolverCompiler.compileAndUploadResolvers();
+
+            // Verify that the resolvers were uploaded successfully
+            if (options.debugMode) {
+              logger.debug("Verifying resolver uploads...");
+            }
+
+            // First verification: Check using ListObjectsV2
+            // List objects under the specific build hash prefix to verify uploads
+            const hashedPrefix = `resolvers/${options.stage}/${resolversBuildHash}/`;
+            const listCommand = new ListObjectsV2Command({
+              Bucket: templateBucketName,
+              Prefix: hashedPrefix,
+            });
+
+            let retryCount = 0;
+            let resolverCount = 0;
+            const maxRetries = 3;
+
+            while (retryCount < maxRetries) {
+              try {
+                const listedObjects = await s3.send(listCommand);
+                // Properly type the response from ListObjectsV2Command
+                const listObjectsResult = listedObjects as {
+                  Contents?: Array<{ Key: string }>;
+                };
+                resolverCount = listObjectsResult.Contents?.length || 0;
+
+                if (resolverCount > 0) {
+                  logger.debug(
+                    `Verified ${resolverCount} resolvers were uploaded to S3`,
+                  );
+                  break;
+                } else {
+                  logger.warning(
+                    `No resolvers found in S3 (attempt ${retryCount + 1}/${maxRetries}). Waiting and retrying...`,
+                  );
+                  await sleep(5000); // Wait 5 seconds before retrying
+                  retryCount++;
+                }
+              } catch (error: any) {
+                logger.error(
+                  `Error verifying resolver uploads (attempt ${retryCount + 1}/${maxRetries}): ${error.message}`,
                 );
-                break;
-              } else {
-                logger.warning(
-                  `No resolvers found in S3 (attempt ${retryCount + 1}/${maxRetries}). Waiting and retrying...`,
-                );
-                await sleep(5000); // Wait 5 seconds before retrying
+                await sleep(5000);
                 retryCount++;
               }
-            } catch (error: any) {
-              logger.error(
-                `Error verifying resolver uploads (attempt ${retryCount + 1}/${maxRetries}): ${error.message}`,
-              );
-              await sleep(5000);
-              retryCount++;
             }
-          }
 
-          if (resolverCount === 0) {
-            throw new Error(
-              "No resolvers were uploaded to S3. Deployment will fail.",
+            if (resolverCount === 0) {
+              throw new Error(
+                "No resolvers were uploaded to S3. Deployment will fail.",
+              );
+            }
+          } catch (error: any) {
+            logger.error(
+              `Resolver compilation and upload failed: ${error.message}`,
             );
+            throw error;
           }
-        } catch (error: any) {
-          logger.error(
-            `Resolver compilation and upload failed: ${error.message}`,
-          );
-          throw error;
         }
+      } else {
+        const errorMsg = `Resolver directory not found at ${resolverDir}. This will cause deployment to fail if resolvers are referenced in AppSync template.`;
+        logger.error(errorMsg);
+        throw new Error(errorMsg);
       }
-    } else {
-      const errorMsg = `Resolver directory not found at ${resolverDir}. This will cause deployment to fail if resolvers are referenced in AppSync template.`;
-      logger.error(errorMsg);
-      throw new Error(errorMsg);
     }
 
-    // Get KMS Key info from shared stack outputs
-    const sharedStackData = await cfn.send(
-      new DescribeStacksCommand({
-        StackName: getStackName(StackType.Shared, options.stage),
-      }),
-    );
-
-    let kmsKeyId = sharedStackData.Stacks?.[0]?.Outputs?.find(
-      (output) => output.OutputKey === "KMSKeyId",
-    )?.OutputValue;
-
-    let kmsKeyArn = sharedStackData.Stacks?.[0]?.Outputs?.find(
-      (output) => output.OutputKey === "KMSKeyArn",
-    )?.OutputValue;
-
-    // Fallback: attempt to find parameterized/legacy export names in deployment outputs
-    if (!kmsKeyId || !kmsKeyArn) {
-      const outputsManager = new OutputsManager();
-      kmsKeyId =
-        kmsKeyId ||
-        (await outputsManager.findOutputValueByCandidates(
-          options.stage,
-          candidateExportNames(StackType.Shared, options.stage, "kms-key-id"),
-        )) ||
-        undefined;
-      kmsKeyArn =
-        kmsKeyArn ||
-        (await outputsManager.findOutputValueByCandidates(
-          options.stage,
-          candidateExportNames(StackType.Shared, options.stage, "kms-key-arn"),
-        )) ||
-        undefined;
-    }
-
-    if (!kmsKeyId || !kmsKeyArn) {
-      throw new Error("Failed to get KMS key information from shared stack");
-    }
-
-    // Use OutputsManager to get values from other stacks
-    const outputsManager = new OutputsManager();
-
-    // Get WAF Web ACL ID and ARN
-    // WAF parameters - optional if skipWAF is enabled
-    let webAclId = "NONE";
-    let webAclArn = "NONE";
-
-    if (!options.skipWAF) {
-      const foundWebAclId =
-        (await outputsManager.findOutputValueByCandidates(
-          options.stage,
-          candidateExportNames(StackType.WAF, options.stage, "web-acl-id"),
-        )) ||
-        (await outputsManager.getOutputValue(
-          StackType.WAF,
-          options.stage,
-          "WebACLId",
-        ));
-
-      const foundWebAclArn =
-        (await outputsManager.findOutputValueByCandidates(
-          options.stage,
-          candidateExportNames(StackType.WAF, options.stage, "web-acl-arn"),
-        )) ||
-        (await outputsManager.getOutputValue(
-          StackType.WAF,
-          options.stage,
-          "WebACLArn",
-        ));
-
-      if (!foundWebAclId || !foundWebAclArn) {
-        throw new Error(
-          "Failed to get WAF Web ACL information from WAF stack outputs",
-        );
-      }
-
-      webAclId = foundWebAclId;
-      webAclArn = foundWebAclArn;
-    } else {
-      logger.info(
-        "Skipping WAF parameter lookup (skipWAF enabled) - using placeholder values",
-      );
-    }
+    // KMS encryption removed - no need to get keys from Shared stack
 
     // Create or update the CloudFormation stack
     const stackTemplateUrl = `https://s3.${region}.amazonaws.com/${templateBucketName}/${mainTemplateS3Key}`;
@@ -1167,10 +1138,6 @@ export async function deployTheStoryHub(
         ParameterKey: "TemplateBucketName",
         ParameterValue: templateBucketName,
       },
-      { ParameterKey: "KMSKeyId", ParameterValue: kmsKeyId },
-      { ParameterKey: "KMSKeyArn", ParameterValue: kmsKeyArn },
-      { ParameterKey: "WebACLId", ParameterValue: webAclId },
-      { ParameterKey: "WebACLArn", ParameterValue: webAclArn },
     ];
 
     // ResolversBuildHash is required by the CloudFormation template
@@ -1222,17 +1189,7 @@ export async function deployTheStoryHub(
       );
 
       // Validate required parameters to fail fast with a clear message if anything is missing
-      const requiredKeys = [
-        "Stage",
-        "TemplateBucketName",
-        "KMSKeyId",
-        "KMSKeyArn",
-      ];
-
-      // WAF parameters are only required if skipWAF is false
-      if (!options.skipWAF) {
-        requiredKeys.push("WebACLId", "WebACLArn");
-      }
+      const requiredKeys = ["Stage", "TemplateBucketName"];
 
       const missing = requiredKeys.filter(
         (k) =>
@@ -1407,11 +1364,66 @@ export async function deployTheStoryHub(
         }
       }
 
-      // Upload frontend to S3 if it was built
+      // Build frontend if it wasn't built yet and stack is now healthy
       const frontendOutPath = path.join(
         __dirname,
         "../../../the-story-hub/frontend/out",
       );
+      const frontendPath = path.join(
+        __dirname,
+        "../../../the-story-hub/frontend",
+      );
+
+      // Check if frontend needs to be built (out directory doesn't exist)
+      if (
+        !require("fs").existsSync(frontendOutPath) &&
+        !options.skipFrontendBuild
+      ) {
+        try {
+          // Verify stack is now healthy (has required outputs)
+          const postDeployStackData = await cfn.send(
+            new DescribeStacksCommand({ StackName: stackName }),
+          );
+          const hasApiUrl = postDeployStackData.Stacks?.[0]?.Outputs?.some(
+            (output) => output.OutputKey === "ApiUrl",
+          );
+          const hasCognito = postDeployStackData.Stacks?.[0]?.Outputs?.some(
+            (output) => output.OutputKey === "UserPoolId",
+          );
+
+          if (hasApiUrl && hasCognito) {
+            logger.info(
+              "🏗️  Building frontend application (post-deployment)...",
+            );
+            logger.info("   Stack is now healthy with API and Cognito outputs");
+
+            // Generate GraphQL schema and types first
+            logger.info("📝 Generating GraphQL schema and types...");
+            execSync("yarn build-gql", {
+              cwd: frontendPath,
+              stdio: options.debugMode ? "inherit" : "pipe",
+              encoding: "utf8",
+            });
+
+            // Build frontend
+            execSync("yarn build", {
+              cwd: frontendPath,
+              stdio: options.debugMode ? "inherit" : "pipe",
+              encoding: "utf8",
+            });
+            logger.success("✓ Frontend built successfully");
+          } else {
+            logger.warning(
+              "Stack deployed but missing API/Cognito outputs. Skipping frontend build.",
+            );
+          }
+        } catch (buildError: any) {
+          logger.error(`Failed to build frontend: ${buildError.message}`);
+          logger.warning("Continuing without frontend build...");
+        }
+      }
+
+      // Upload frontend to S3 if it was built
       try {
         // Check if the out directory exists
         if (require("fs").existsSync(frontendOutPath)) {
@@ -1567,7 +1579,7 @@ export async function deployTheStoryHub(
           logger.info("📝 Updating frontend environment variables...");
           const frontendPath = path.join(
             __dirname,
-            "../../../../the-story-hub/frontend",
+            "../../../the-story-hub/frontend",
           );
           const updateEnvScript = path.join(
             frontendPath,

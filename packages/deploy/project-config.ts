@@ -128,11 +128,14 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
     displayName: "The Story Hub",
     templateDir: "the-story-hub",
     packageDir: "the-story-hub",
-    dependsOn: [StackType.WAF, StackType.Shared],
+    dependsOn: [], // No dependencies - WAF and Shared removed
     buckets: {
       templates: "nlmonorepo-thestoryhub-templates-{stage}",
-      frontend: "nlmonorepo-thestoryhub-userfiles-{stage}",
-      additional: ["nlmonorepo-{stage}-cfn-templates-{region}"],
+      frontend: "nlmonorepo-thestoryhub-frontend-{stage}",
+      additional: [
+        "nlmonorepo-{stage}-cfn-templates-{region}",
+        "nlmonorepo-thestoryhub-userfiles-{stage}",
+      ],
     },
     hasFrontend: true,
     hasLambdas: true,

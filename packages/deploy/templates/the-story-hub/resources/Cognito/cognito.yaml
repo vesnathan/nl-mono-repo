@@ -8,8 +8,44 @@ Parameters:
   AppName:
     Type: String
     Description: Application short name used in exported resource names
+  TemplateBucketName:
+    Type: String
+    Description: S3 bucket name for CloudFormation templates
+  DataTableName:
+    Type: String
+    Description: DynamoDB table name for application data
+  LogRetentionInDays:
+    Type: Number
+    Description: Number of days to retain CloudWatch Logs
+    Default: 14
 
 Resources:
+  # Secrets Manager for Google OAuth credentials
+  # Created here (not in LambdaStack) to avoid circular dependency
+  GoogleOAuthSecrets:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "nlmonorepo-${AppName}-google-oauth-secrets-${Stage}"
+      Description: Google OAuth credentials for Sign-In integration
+      SecretString: |
+        {
+          "clientId": "PLACEHOLDER_CLIENT_ID",
+          "clientSecret": "PLACEHOLDER_CLIENT_SECRET"
+        }
+
+  # Secrets Manager for Facebook OAuth credentials
+  # Using a new name to avoid conflict with existing secret
+  FacebookOAuthSecrets:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "nlmonorepo-${AppName}-facebook-login-secrets-${Stage}"
+      Description: Facebook OAuth credentials for Sign-In integration
+      SecretString: |
+        {
+          "clientId": "PLACEHOLDER_CLIENT_ID",
+          "clientSecret": "PLACEHOLDER_CLIENT_SECRET"
+        }
+
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
@@ -22,18 +58,84 @@ Resources:
       Policies:
         PasswordPolicy:
           MinimumLength: 8
+      AutoVerifiedAttributes:
+        - email
       MfaConfiguration: "OFF"
+      LambdaConfig:
+        PostConfirmation: !GetAtt CognitoPostConfirmationFunction.Arn
       UserPoolTags:
         Stack: !Sub "nlmonorepo-tsh-${Stage}"
 
+  # Cognito User Pool Domain (required for OAuth)
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub "nlmonorepo-tsh-${Stage}"
+      UserPoolId: !Ref UserPool
+
+  # Google Identity Provider
+  GoogleIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties:
+      UserPoolId: !Ref UserPool
+      ProviderName: Google
+      ProviderType: Google
+      ProviderDetails:
+        client_id: !Sub "{{resolve:secretsmanager:nlmonorepo-${AppName}-google-oauth-secrets-${Stage}:SecretString:clientId}}"
+        client_secret: !Sub "{{resolve:secretsmanager:nlmonorepo-${AppName}-google-oauth-secrets-${Stage}:SecretString:clientSecret}}"
+        authorize_scopes: "email openid profile"
+      AttributeMapping:
+        email: email
+        name: name
+        picture: picture
+        username: sub
+
+  # Facebook Identity Provider
+  FacebookIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    DependsOn: FacebookOAuthSecrets
+    Properties:
+      UserPoolId: !Ref UserPool
+      ProviderName: Facebook
+      ProviderType: Facebook
+      ProviderDetails:
+        client_id: !Sub "{{resolve:secretsmanager:nlmonorepo-${AppName}-facebook-login-secrets-${Stage}:SecretString:clientId}}"
+        client_secret: !Sub "{{resolve:secretsmanager:nlmonorepo-${AppName}-facebook-login-secrets-${Stage}:SecretString:clientSecret}}"
+        authorize_scopes: "email,public_profile"
+        api_version: "v21.0"
+      AttributeMapping:
+        email: email
+        name: name
+        picture: picture
+
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
+    DependsOn:
+      - GoogleIdentityProvider
+      - FacebookIdentityProvider
     Properties:
       ClientName: !Sub "nlmonorepo-tsh-client-${Stage}"
       UserPoolId: !Ref UserPool
       GenerateSecret: false
       SupportedIdentityProviders:
         - COGNITO
+        - Google
+        - Facebook
+      CallbackURLs:
+        - "https://d32h8ny4vmj7kl.cloudfront.net"
+        - "http://localhost:3000"
+      LogoutURLs:
+        - "https://d32h8ny4vmj7kl.cloudfront.net"
+        - "http://localhost:3000"
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+        - aws.cognito.signin.user.admin
+      AllowedOAuthFlowsUserPoolClient: true
 
   IdentityPool:
     Type: AWS::Cognito::IdentityPool
@@ -51,6 +153,59 @@ Resources:
       Roles:
         authenticated: !GetAtt AuthenticatedRole.Arn
         unauthenticated: !GetAtt UnauthenticatedRole.Arn
+
+  # Post-Confirmation Lambda Function
+  CognitoPostConfirmationFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "nlmonorepo-thestoryhub-cognito-post-confirmation-${Stage}"
+      Runtime: nodejs20.x
+      Handler: index.handler
+      Role: !GetAtt CognitoPostConfirmationRole.Arn
+      Timeout: 30
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref DataTableName
+      Code:
+        S3Bucket: !Ref TemplateBucketName
+        S3Key: !Sub "functions/${Stage}/cognitoPostConfirmation.zip"
+
+  CognitoPostConfirmationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "nlmonorepo-thestoryhub-cognito-post-confirmation-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DataTableName}"
+
+  CognitoPostConfirmationPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref CognitoPostConfirmationFunction
+      Principal: cognito-idp.amazonaws.com
+      Action: lambda:InvokeFunction
+      SourceArn: !GetAtt UserPool.Arn
+
+  CognitoPostConfirmationFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/nlmonorepo-thestoryhub-cognito-post-confirmation-${Stage}"
+      RetentionInDays: !Ref LogRetentionInDays
 
   AuthenticatedRole:
     Type: AWS::IAM::Role
@@ -133,3 +288,19 @@ Outputs:
     Description: ID of the Cognito Identity Pool
     Value: !Ref IdentityPool
     # Export removed: top-level template will declare global export
+
+  UserPoolDomain:
+    Description: Cognito User Pool Domain (for OAuth redirects)
+    Value: !Sub "https://${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com"
+
+  UserPoolDomainName:
+    Description: Cognito User Pool Domain Name (without https://)
+    Value: !Sub "${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com"
+
+  GoogleOAuthSecretsArn:
+    Description: ARN of the Google OAuth Secrets in Secrets Manager
+    Value: !Ref GoogleOAuthSecrets
+
+  FacebookOAuthSecretsArn:
+    Description: ARN of the Facebook OAuth Secrets in Secrets Manager
+    Value: !Ref FacebookOAuthSecrets

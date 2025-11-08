@@ -55,6 +55,14 @@ export default function Footer() {
                   Copyright & Licensing
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/data-deletion/status"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  Data Deletion Requests
+                </Link>
+              </li>
             </ul>
           </div>
 

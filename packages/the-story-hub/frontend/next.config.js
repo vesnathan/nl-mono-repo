@@ -7,8 +7,20 @@ function getDeploymentOutputs() {
     const raw = readFileSync(p, "utf8");
     const parsed = JSON.parse(raw);
 
-    // Only use outputs from the TheStoryHub stack to avoid accidental cross-app picks
-    const awseStack = parsed.stacks && parsed.stacks.TheStoryHub;
+    // Determine stage from environment variable
+    const stage =
+      process.env.NEXT_PUBLIC_ENVIRONMENT || process.env.STAGE || "dev";
+
+    // Handle both old and new format
+    let awseStack;
+    if (parsed.stages) {
+      // New format: { stages: { dev: { stacks: { TheStoryHub: {...} } } } }
+      awseStack = parsed.stages?.[stage]?.stacks?.TheStoryHub;
+    } else if (parsed.stacks) {
+      // Old format: { stage: "dev", stacks: { TheStoryHub: {...} } }
+      awseStack = parsed.stacks.TheStoryHub;
+    }
+
     if (!awseStack || !Array.isArray(awseStack.outputs)) return {};
 
     const outputs = awseStack.outputs.map((o) => ({
@@ -19,8 +31,6 @@ function getDeploymentOutputs() {
 
     // Helper: produce prioritized candidate export names for this app
     const appName = "tsh"; // short app identifier for the-story-hub
-    const stage =
-      process.env.NEXT_PUBLIC_ENVIRONMENT || process.env.STAGE || "dev";
     function paramCandidates(suffix) {
       const base = `nlmonorepo-${appName}-${stage}-${suffix}`;
       const alt = `nlmonorepo-${appName}example-${stage}-${suffix}`; // transitional
