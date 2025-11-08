@@ -33,6 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     pathname?.startsWith("/game");
 
   const isUnprotectedPage = !isProtectedPage;
+  const isHomePage = pathname === "/";
 
   return (
     <html lang="en" className="dark">
@@ -51,7 +52,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <GlobalMessage />
               {isUnprotectedPage ? (
                 <div className="flex flex-col min-h-screen">
-                  <Navbar />
+                  {!isHomePage && <Navbar />}
                   <main className="flex-grow">{children}</main>
                 </div>
               ) : (

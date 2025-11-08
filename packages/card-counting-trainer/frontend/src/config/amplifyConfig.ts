@@ -20,8 +20,6 @@ export const AMPLIFY_CONFIG: ResourcesConfig = {
     Cognito: {
       userPoolId: DEPLOYMENT_OUTPUT.cctUserPoolId,
       userPoolClientId: DEPLOYMENT_OUTPUT.cctUserPoolClientId,
-      allowGuestAccess: true,
-      identityPoolId: DEPLOYMENT_OUTPUT.cctIdentityPoolId,
       loginWith: {
         oauth: {
           domain: "nlmonorepo-cct-dev.auth.ap-southeast-2.amazoncognito.com", // TODO: Update after deployment
@@ -42,7 +40,7 @@ export const AMPLIFY_CONFIG: ResourcesConfig = {
     GraphQL: {
       endpoint: DEPLOYMENT_OUTPUT.cctGraphQLUrl,
       region: AWS_REGION,
-      defaultAuthMode: "identityPool",
+      defaultAuthMode: "userPool",
     },
   },
 };

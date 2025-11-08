@@ -7,8 +7,20 @@ function getDeploymentOutputs() {
     const raw = readFileSync(p, "utf8");
     const parsed = JSON.parse(raw);
 
-    // Only use outputs from the CardCountingTrainer stack
-    const cctStack = parsed.stacks && parsed.stacks.CardCountingTrainer;
+    // Determine stage from environment variable
+    const stage =
+      process.env.NEXT_PUBLIC_ENVIRONMENT || process.env.STAGE || "dev";
+
+    // Handle both old and new format
+    let cctStack;
+    if (parsed.stages) {
+      // New format: { stages: { dev: { stacks: { CardCountingTrainer: {...} } } } }
+      cctStack = parsed.stages?.[stage]?.stacks?.CardCountingTrainer;
+    } else if (parsed.stacks) {
+      // Old format: { stage: "dev", stacks: { CardCountingTrainer: {...} } }
+      cctStack = parsed.stacks.CardCountingTrainer;
+    }
+
     if (!cctStack || !Array.isArray(cctStack.outputs)) return {};
 
     const outputs = cctStack.outputs.map((o) => ({
@@ -19,8 +31,6 @@ function getDeploymentOutputs() {
 
     // Helper: produce prioritized candidate export names for this app
     const appName = "cct"; // short app identifier for card-counting-trainer
-    const stage =
-      process.env.NEXT_PUBLIC_ENVIRONMENT || process.env.STAGE || "dev";
     function paramCandidates(suffix) {
       const base = `nlmonorepo-${appName}-${stage}-${suffix}`;
       return [base.toLowerCase(), suffix.toLowerCase()];
@@ -62,9 +72,6 @@ function getDeploymentOutputs() {
       NEXT_PUBLIC_USER_POOL_CLIENT_ID: find("user-pool-client-id", [
         "CCTUserPoolClientId",
       ]),
-      NEXT_PUBLIC_IDENTITY_POOL_ID: find("identity-pool-id", [
-        "CCTIdentityPoolId",
-      ]),
       NEXT_PUBLIC_GRAPHQL_URL: find("api-url", ["ApiUrl"]),
     };
   } catch (e) {
@@ -79,7 +86,6 @@ function assertRequiredDeploymentEnvs(envs) {
   const required = [
     "NEXT_PUBLIC_USER_POOL_ID",
     "NEXT_PUBLIC_USER_POOL_CLIENT_ID",
-    "NEXT_PUBLIC_IDENTITY_POOL_ID",
     "NEXT_PUBLIC_GRAPHQL_URL",
   ];
   const missing = required.filter((k) => !envs[k]);

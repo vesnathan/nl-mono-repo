@@ -1,5 +1,5 @@
 import { util, AppSyncIdentityCognito, Context } from "@aws-appsync/utils";
-import { User, PatreonInfo, PatreonTier } from "gqlTypes";
+import { User } from "gqlTypes";
 
 type CTX = Context<object, object, object, object, User>;
 
@@ -8,7 +8,7 @@ export function request(ctx: CTX) {
   const userId = identity.sub;
 
   if (!userId) {
-    return util.error("User not authenticated", "UnauthorizedException");
+    return util.error("Unauthorized: No user ID found", "UnauthorizedException");
   }
 
   console.log(`Getting user for userId: ${userId}`);
@@ -17,7 +17,7 @@ export function request(ctx: CTX) {
     operation: "GetItem",
     key: util.dynamodb.toMapValues({
       PK: `USER#${userId}`,
-      SK: "METADATA",
+      SK: `USER#${userId}`,
     }),
   };
 }
@@ -31,44 +31,23 @@ export function response(ctx: CTX): User | null {
   const item = ctx.result as any;
 
   if (!item) {
-    // User doesn't exist in DB yet - return basic info from Cognito
-    const identity = ctx.identity as AppSyncIdentityCognito;
-    return {
-      __typename: "User",
-      id: identity.sub,
-      email: identity.claims?.email || "",
-      username: identity.username || "",
-      chips: 1000, // Default starting chips
-      totalChipsPurchased: 0,
-      patreonInfo: null,
-      earlyAdopter: false,
-      createdAt: util.time.nowISO8601(),
-      updatedAt: util.time.nowISO8601(),
-    };
+    return null;
   }
 
-  // Build PatreonInfo from DynamoDB item
-  let patreonInfo: PatreonInfo | null = null;
-  if (item.patreonTier) {
-    patreonInfo = {
-      __typename: "PatreonInfo",
-      tier: item.patreonTier as PatreonTier,
-      patreonUserId: item.patreonUserId || null,
-      lastSynced: item.patreonLastSynced || null,
-    };
-  }
+  const identity = ctx.identity as AppSyncIdentityCognito;
+  const userId = identity.sub;
 
   const user: User = {
     __typename: "User",
-    id: item.id,
-    email: item.email,
-    username: item.username,
-    chips: item.chips || 1000,
+    id: userId,
+    email: item.email || "",
+    username: item.username || "",
+    chips: item.chips || 0,
     totalChipsPurchased: item.totalChipsPurchased || 0,
-    patreonInfo,
+    patreonInfo: item.patreonInfo || null,
     earlyAdopter: item.earlyAdopter || false,
-    createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
+    createdAt: item.createdAt || util.time.nowISO8601(),
+    updatedAt: item.updatedAt || util.time.nowISO8601(),
   };
 
   console.log("User fetched successfully");

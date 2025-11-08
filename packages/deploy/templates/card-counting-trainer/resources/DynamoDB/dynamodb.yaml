@@ -5,10 +5,7 @@ Parameters:
   AppName:
     Type: String
     Description: Application Name
-    Default: cct
-  KMSKeyArn:
-    Type: String
-    Description: ARN of the KMS key for encryption
+    Default: bjcct
 
 Resources:
   DynamoDBRole:
@@ -31,11 +28,6 @@ Resources:
                 Action:
                   - dynamodb:*
                 Resource: "*"
-              - Effect: Allow
-                Action:
-                  - kms:Decrypt
-                  - kms:GenerateDataKey*
-                Resource: !Ref KMSKeyArn
 
   AppSyncDynamoDBRole:
     Type: AWS::IAM::Role
@@ -64,11 +56,6 @@ Resources:
                 Resource:
                   - !GetAtt CCTDataTable.Arn
                   - !Sub "${CCTDataTable.Arn}/*"
-              - Effect: Allow
-                Action:
-                  - kms:Decrypt
-                  - kms:GenerateDataKey
-                Resource: !Ref KMSKeyArn
 
   # Single-table design for card counting trainer
   # Access Patterns:
@@ -109,9 +96,7 @@ Resources:
           Projection:
             ProjectionType: "ALL"
       SSESpecification:
-        SSEEnabled: true
-        SSEType: "KMS"
-        KMSMasterKeyId: !Ref KMSKeyArn
+        SSEEnabled: false
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
       StreamSpecification:

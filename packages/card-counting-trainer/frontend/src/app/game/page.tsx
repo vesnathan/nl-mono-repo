@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { createAndShuffleShoe, calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
 import { dealCard, calculateHandValue, isBlackjack, isBusted } from "@/lib/gameActions";
 import { playDealerHand, determineHandResult, calculatePayout } from "@/lib/dealer";
-import { Card as GameCard } from "@/types/game";
+import { Card as GameCard, HandResult } from "@/types/game";
 import { AI_CHARACTERS, AICharacter } from "@/data/aiCharacters";
 import { DEALER_CHARACTERS, DealerCharacter, getRandomDealer } from "@/data/dealerCharacters";
 import { getInitialHandReaction, getHitReaction } from "@/data/inHandReactions";
@@ -19,7 +19,7 @@ import DealerInfo from "@/components/DealerInfo";
 interface PlayerHand {
   cards: GameCard[];
   bet: number;
-  result?: string;
+  result?: HandResult;
 }
 
 interface AIPlayer {

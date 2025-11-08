@@ -9,16 +9,10 @@ Parameters:
   AppName:
     Type: String
     Description: Application short name (used in export names)
-    Default: cardcountingtrainer
+    Default: bjcct
   TemplateBucketName:
     Type: String
     Description: Name of the S3 bucket containing nested stack templates
-  KMSKeyId:
-    Type: String
-    Description: KMS Key ID for encryption
-  KMSKeyArn:
-    Type: String
-    Description: KMS Key ARN for encryption
   ResolversBuildHash:
     Type: String
     Description: Optional build hash to version resolver S3 keys
@@ -39,7 +33,6 @@ Resources:
       Parameters:
         Stage: !Ref Stage
         AppName: !Ref AppName
-        KMSKeyArn: !Ref KMSKeyArn
 
   # S3 Buckets for frontend and assets
   S3Stack:
@@ -49,7 +42,6 @@ Resources:
       Parameters:
         Stage: !Ref Stage
         AppName: !Ref AppName
-        KMSKeyId: !Ref KMSKeyId
 
   # Cognito Resources
   CognitoStack:
@@ -69,9 +61,9 @@ Resources:
       Parameters:
         Stage: !Ref Stage
         AppName: !Ref AppName
-        AppBucketName: !GetAtt S3Stack.Outputs.CCTBucketName
-        AppBucketArn: !GetAtt S3Stack.Outputs.CCTBucketArn
-        AppBucketRegionalDomainName: !GetAtt S3Stack.Outputs.CCTBucketRegionalDomainName
+        AppBucketName: !GetAtt S3Stack.Outputs.FrontendBucketName
+        AppBucketArn: !GetAtt S3Stack.Outputs.FrontendBucketArn
+        AppBucketRegionalDomainName: !GetAtt S3Stack.Outputs.FrontendBucketRegionalDomainName
 
   # AppSync API
   AppSyncStack:
@@ -115,11 +107,11 @@ Outputs:
     Export:
       Name: !Sub "nlmonorepo-${AppName}-${Stage}-user-pool-client-id"
 
-  IdentityPoolId:
-    Description: "Cognito Identity Pool ID for guest access"
-    Value: !GetAtt CognitoStack.Outputs.IdentityPoolId
+  UserPoolDomain:
+    Description: "Cognito User Pool Domain for OAuth"
+    Value: !GetAtt CognitoStack.Outputs.UserPoolDomain
     Export:
-      Name: !Sub "nlmonorepo-${AppName}-${Stage}-identity-pool-id"
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-user-pool-domain"
 
   CloudFrontDistributionId:
     Description: "CloudFront Distribution ID"
@@ -138,3 +130,15 @@ Outputs:
     Value: !GetAtt DynamoDBStack.Outputs.DataTableName
     Export:
       Name: !Sub "nlmonorepo-${AppName}-${Stage}-data-table-name"
+
+  WebsiteBucket:
+    Description: "S3 bucket for frontend website assets"
+    Value: !GetAtt S3Stack.Outputs.FrontendBucketName
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-bucket"
+
+  UserPoolDomain:
+    Description: "Cognito User Pool Domain"
+    Value: !GetAtt CognitoStack.Outputs.UserPoolDomain
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-user-pool-domain"
