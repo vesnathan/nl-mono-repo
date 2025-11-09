@@ -274,6 +274,10 @@ export default function GamePage() {
   }, [currentBet, aiPlayers]);
 
   const dealInitialCards = useCallback(() => {
+    console.log("🎴 Starting dealInitialCards");
+    console.log("  AI Players:", aiPlayers.length, aiPlayers.map(ai => ({ pos: ai.position, name: ai.character.name })));
+    console.log("  Player Seat:", playerSeat);
+
     // Pre-deal all cards BEFORE animations to ensure uniqueness
     // We need to manually track the shoe state because React batches state updates
     const dealtCards: { type: string; index: number; card: GameCard }[] = [];
@@ -297,31 +301,50 @@ export default function GamePage() {
         currentRunningCount += card.count;
       }
 
+      console.log(`  📤 Dealt: ${card.rank}${card.suit}`);
       return card;
     };
 
     // Sort AI players by position (right to left from dealer's perspective = descending)
     const sortedAIPlayers = [...aiPlayers].sort((a, b) => b.position - a.position);
+    console.log("  Sorted AI order:", sortedAIPlayers.map(ai => `${ai.character.name} (pos ${ai.position})`));
 
+    console.log("🎴 ROUND 1 - First card to everyone:");
     // Deal first card to everyone (right to left, dealer last)
     sortedAIPlayers.forEach((ai) => {
       const idx = aiPlayers.indexOf(ai);
-      dealtCards.push({ type: "ai", index: idx, card: dealFromCurrentShoe() });
+      const card = dealFromCurrentShoe();
+      console.log(`    → AI[${idx}] ${ai.character.name} (pos ${ai.position}): ${card.rank}${card.suit}`);
+      dealtCards.push({ type: "ai", index: idx, card });
     });
     if (playerSeat !== null) {
-      dealtCards.push({ type: "player", index: 0, card: dealFromCurrentShoe() });
+      const card = dealFromCurrentShoe();
+      console.log(`    → PLAYER: ${card.rank}${card.suit}`);
+      dealtCards.push({ type: "player", index: 0, card });
     }
-    dealtCards.push({ type: "dealer", index: 0, card: dealFromCurrentShoe() });
+    const dealerCard1 = dealFromCurrentShoe();
+    console.log(`    → DEALER: ${dealerCard1.rank}${dealerCard1.suit}`);
+    dealtCards.push({ type: "dealer", index: 0, card: dealerCard1 });
 
+    console.log("🎴 ROUND 2 - Second card to everyone:");
     // Deal second card to everyone (right to left, dealer last)
     sortedAIPlayers.forEach((ai) => {
       const idx = aiPlayers.indexOf(ai);
-      dealtCards.push({ type: "ai", index: idx, card: dealFromCurrentShoe() });
+      const card = dealFromCurrentShoe();
+      console.log(`    → AI[${idx}] ${ai.character.name} (pos ${ai.position}): ${card.rank}${card.suit}`);
+      dealtCards.push({ type: "ai", index: idx, card });
     });
     if (playerSeat !== null) {
-      dealtCards.push({ type: "player", index: 0, card: dealFromCurrentShoe() });
+      const card = dealFromCurrentShoe();
+      console.log(`    → PLAYER: ${card.rank}${card.suit}`);
+      dealtCards.push({ type: "player", index: 0, card });
     }
-    dealtCards.push({ type: "dealer", index: 0, card: dealFromCurrentShoe() });
+    const dealerCard2 = dealFromCurrentShoe();
+    console.log(`    → DEALER: ${dealerCard2.rank}${dealerCard2.suit}`);
+    dealtCards.push({ type: "dealer", index: 0, card: dealerCard2 });
+
+    console.log("🎴 Total cards dealt:", dealtCards.length);
+    console.log("🎴 Card summary:", dealtCards.map(c => `${c.type}[${c.index}]: ${c.card.rank}${c.card.suit}`));
 
     // Update state with final shoe state
     setShoe(currentShoe);
@@ -330,19 +353,33 @@ export default function GamePage() {
     setShoesDealt(currentShoesDealt);
 
     // Now animate dealing the pre-dealt cards using managed timeouts
+    console.log("🎬 Starting card animations...");
     let delay = 0;
-    dealtCards.forEach(({ type, index, card }) => {
+    dealtCards.forEach(({ type, index, card }, animIdx) => {
       registerTimeout(() => {
+        console.log(`  🎬 [${animIdx}] Showing ${type}[${index}]: ${card.rank}${card.suit} (delay: ${delay}ms)`);
         if (type === "ai") {
           setAIPlayers((prev) => {
             const updated = [...prev];
+            console.log(`    Before: AI[${index}] has ${updated[index].hand.cards.length} cards`);
             updated[index].hand.cards.push(card);
+            console.log(`    After: AI[${index}] has ${updated[index].hand.cards.length} cards:`, updated[index].hand.cards.map(c => `${c.rank}${c.suit}`));
             return updated;
           });
         } else if (type === "player") {
-          setPlayerHand((prev) => ({ ...prev, cards: [...prev.cards, card] }));
+          setPlayerHand((prev) => {
+            console.log(`    Before: Player has ${prev.cards.length} cards`);
+            const newHand = { ...prev, cards: [...prev.cards, card] };
+            console.log(`    After: Player has ${newHand.cards.length} cards:`, newHand.cards.map(c => `${c.rank}${c.suit}`));
+            return newHand;
+          });
         } else if (type === "dealer") {
-          setDealerHand((prev) => ({ ...prev, cards: [...prev.cards, card] }));
+          setDealerHand((prev) => {
+            console.log(`    Before: Dealer has ${prev.cards.length} cards`);
+            const newHand = { ...prev, cards: [...prev.cards, card] };
+            console.log(`    After: Dealer has ${newHand.cards.length} cards:`, newHand.cards.map(c => `${c.rank}${c.suit}`));
+            return newHand;
+          });
         }
       }, delay);
       delay += 300;
