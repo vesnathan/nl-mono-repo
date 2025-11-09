@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Card } from "@/types/game";
 import { createAndShuffleShoe } from "@/lib/deck";
 import { dealCard } from "@/lib/gameActions";
@@ -22,6 +22,10 @@ export function useGameShoe(gameSettings: GameSettings) {
   const [runningCount, setRunningCount] = useState(0);
   const [shoesDealt, setShoesDealt] = useState(0);
 
+  // Use ref to always have the latest shoe for dealing
+  const shoeRef = useRef(shoe);
+  shoeRef.current = shoe;
+
   /**
    * Deal a single card from the shoe
    * Updates shoe state, cards dealt counter, and running count
@@ -30,8 +34,9 @@ export function useGameShoe(gameSettings: GameSettings) {
    * @returns The dealt card
    */
   const dealCardFromShoe = useCallback(() => {
+    // Use ref to get the most current shoe, avoiding stale closure issues
     const { card, remainingShoe, reshuffled } = dealCard(
-      shoe,
+      shoeRef.current,
       gameSettings.numberOfDecks,
       gameSettings.countingSystem,
     );
@@ -50,7 +55,7 @@ export function useGameShoe(gameSettings: GameSettings) {
     }
 
     return card;
-  }, [shoe, gameSettings.numberOfDecks, gameSettings.countingSystem]);
+  }, [gameSettings.numberOfDecks, gameSettings.countingSystem]);
 
   /**
    * Reset the shoe to a fresh shuffled state
