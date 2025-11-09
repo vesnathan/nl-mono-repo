@@ -275,21 +275,50 @@ export default function GamePage() {
 
   const dealInitialCards = useCallback(() => {
     // Pre-deal all cards BEFORE animations to ensure uniqueness
+    // We need to manually track the shoe state because React batches state updates
     const dealtCards: { type: string; index: number; card: GameCard }[] = [];
+    let currentShoe = [...shoe];
+    let currentCardsDealt = cardsDealt;
+    let currentRunningCount = runningCount;
+    let currentShoesDealt = shoesDealt;
+
+    // Helper to deal from the current shoe state
+    const dealFromCurrentShoe = () => {
+      const { card, remainingShoe, reshuffled } = dealCard(currentShoe, numDecks);
+
+      if (reshuffled) {
+        currentShoe = remainingShoe;
+        currentCardsDealt = 1;
+        currentRunningCount = card.count;
+        currentShoesDealt += 1;
+      } else {
+        currentShoe = remainingShoe;
+        currentCardsDealt += 1;
+        currentRunningCount += card.count;
+      }
+
+      return card;
+    };
 
     // First card to everyone (round 1)
     aiPlayers.forEach((_, idx) => {
-      dealtCards.push({ type: "ai", index: idx, card: dealCardFromShoe() });
+      dealtCards.push({ type: "ai", index: idx, card: dealFromCurrentShoe() });
     });
-    dealtCards.push({ type: "player", index: 0, card: dealCardFromShoe() });
-    dealtCards.push({ type: "dealer", index: 0, card: dealCardFromShoe() });
+    dealtCards.push({ type: "player", index: 0, card: dealFromCurrentShoe() });
+    dealtCards.push({ type: "dealer", index: 0, card: dealFromCurrentShoe() });
 
     // Second card to everyone (round 2)
     aiPlayers.forEach((_, idx) => {
-      dealtCards.push({ type: "ai", index: idx, card: dealCardFromShoe() });
+      dealtCards.push({ type: "ai", index: idx, card: dealFromCurrentShoe() });
     });
-    dealtCards.push({ type: "player", index: 0, card: dealCardFromShoe() });
-    dealtCards.push({ type: "dealer", index: 0, card: dealCardFromShoe() });
+    dealtCards.push({ type: "player", index: 0, card: dealFromCurrentShoe() });
+    dealtCards.push({ type: "dealer", index: 0, card: dealFromCurrentShoe() });
+
+    // Update state with final shoe state
+    setShoe(currentShoe);
+    setCardsDealt(currentCardsDealt);
+    setRunningCount(currentRunningCount);
+    setShoesDealt(currentShoesDealt);
 
     // Now animate dealing the pre-dealt cards using managed timeouts
     let delay = 0;
@@ -314,7 +343,7 @@ export default function GamePage() {
       checkForInitialReactions();
       setPhase("PLAYER_TURN");
     }, delay + 500);
-  }, [aiPlayers, dealCardFromShoe, registerTimeout]);
+  }, [aiPlayers, shoe, cardsDealt, runningCount, shoesDealt, numDecks, registerTimeout]);
 
   // Check for initial hand reactions
   const checkForInitialReactions = useCallback(() => {
