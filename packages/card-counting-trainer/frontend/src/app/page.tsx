@@ -85,14 +85,7 @@ import { useTimedChallenge } from "@/hooks/useTimedChallenge";
 import { useConversationTriggers } from "@/hooks/useConversationTriggers";
 import { usePitBossMovement } from "@/hooks/usePitBossMovement";
 import { useAutoStartHand } from "@/hooks/useAutoStartHand";
-import {
-  generateInitialReactions,
-  generateEndOfHandReactions,
-} from "@/utils/reactions";
-import {
-  createConversation,
-  createSpeechBubble,
-} from "@/utils/conversationHelpers";
+import { useGameInteractions } from "@/hooks/useGameInteractions";
 import { shouldHitBasicStrategy } from "@/utils/aiStrategy";
 
 export default function GamePage() {
@@ -229,36 +222,17 @@ export default function GamePage() {
     [aiPlayers, playerSeat],
   );
 
-  // Conversation system functions
-  const triggerConversation = useCallback(
-    (speakerId: string, speakerName: string, position: number) => {
-      // Don't trigger if there's already an active conversation
-      if (activeConversation) return;
-
-      const conversation = createConversation(speakerId, speakerName, position);
-      setActiveConversation(conversation);
-    },
-    [activeConversation],
-  );
-
-  const addSpeechBubble = useCallback(
-    (playerId: string, message: string, position: number) => {
-      const bubble = createSpeechBubble(
-        playerId,
-        message,
-        position,
-        aiPlayers,
-        addDebugLog,
-      );
-
-      setSpeechBubbles((prev) => [...prev, bubble]);
-
-      registerTimeout(() => {
-        setSpeechBubbles((prev) => prev.filter((b) => b.id !== bubble.id));
-      }, 12000); // Increased to 12 seconds - speech bubbles stay visible longer
-    },
-    [registerTimeout, aiPlayers, addDebugLog],
-  );
+  // Game interactions hook - provides conversation and speech bubble functions
+  const { triggerConversation, addSpeechBubble, checkForInitialReactions, showEndOfHandReactions } = useGameInteractions({
+    activeConversation,
+    setActiveConversation,
+    setSpeechBubbles,
+    registerTimeout,
+    aiPlayers,
+    dealerHand,
+    blackjackPayout: gameSettings.blackjackPayout,
+    addDebugLog,
+  });
 
   // Game actions hook - provides startNewRound, dealInitialCards, hit, stand
   const { startNewRound, dealInitialCards, hit, stand } = useGameActions({
@@ -388,27 +362,6 @@ export default function GamePage() {
     addDebugLog(`Player seat: ${playerSeat}`);
     addDebugLog(`Should show betting interface: ${shouldShowBetting}`);
   }, [phase, initialized, playerSeat, addDebugLog]);
-
-  // Check for initial hand reactions
-  const checkForInitialReactions = useCallback(() => {
-    const selectedReactions = generateInitialReactions(aiPlayers);
-
-    // Show speech bubbles
-    selectedReactions.forEach((reaction, idx) => {
-      setTimeout(() => {
-        const aiPlayer = aiPlayers.find(
-          (ai) => ai.character.id === reaction.playerId,
-        );
-        if (aiPlayer) {
-          addSpeechBubble(
-            reaction.playerId,
-            reaction.message,
-            aiPlayer.position,
-          );
-        }
-      }, idx * 600);
-    });
-  }, [aiPlayers, addSpeechBubble]);
 
   // Reset playersFinished when entering AI_TURNS phase (only on phase transition)
   useEffect(() => {
@@ -942,25 +895,6 @@ export default function GamePage() {
       }, 1500);
     }
   }, [phase, dealerHand, dealCardFromShoe, gameSettings, registerTimeout]);
-
-  // Show end-of-hand reactions (defined here before useEffect uses it)
-  const showEndOfHandReactions = useCallback(() => {
-    const selectedReactions = generateEndOfHandReactions(
-      aiPlayers,
-      dealerHand,
-      gameSettings.blackjackPayout,
-    );
-
-    selectedReactions.forEach((reaction, idx) => {
-      registerTimeout(() => {
-        addSpeechBubble(
-          `${reaction.playerId}-reaction-${idx}`, // Unique ID per reaction
-          reaction.message,
-          reaction.position,
-        );
-      }, idx * 1000); // Stagger by 1 second to avoid overlap
-    });
-  }, [aiPlayers, dealerHand, gameSettings.blackjackPayout, registerTimeout, addSpeechBubble]);
 
   // Track if we've already resolved this hand
   const hasResolvedRef = useRef(false);
