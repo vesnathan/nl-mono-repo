@@ -33,7 +33,7 @@ export function getCardPosition(
     const cardOffset = cardIndex !== undefined ? cardIndex * 74 : 0;
     return {
       left: `calc(50% + ${containerOffset + cardOffset}px)`,
-      top: "calc(8% + 162px + 4px)",
+      top: "calc(8% + 162px + 24px)",
     };
   }
 
