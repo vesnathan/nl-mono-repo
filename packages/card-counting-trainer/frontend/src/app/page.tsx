@@ -111,6 +111,7 @@ export default function GamePage() {
     bet: 0,
   });
   const [currentBet, setCurrentBet] = useState(10);
+  const [previousBet, setPreviousBet] = useState(10); // Track previous bet for bet spread detection
 
   // AI players state
   const [aiPlayers, setAIPlayers] = useState<AIPlayer[]>([]);
@@ -129,6 +130,7 @@ export default function GamePage() {
   // UI state
   const [phase, setPhase] = useState<GamePhase>("BETTING");
   const [suspicionLevel, setSuspicionLevel] = useState(0);
+  const [pitBossDistance, setPitBossDistance] = useState(70); // 0-100, higher = farther away (safer)
   const [speechBubbles, setSpeechBubbles] = useState<SpeechBubble[]>([]);
   const [handNumber, setHandNumber] = useState(0);
   const [showDealerInfo, setShowDealerInfo] = useState(false);
@@ -138,6 +140,7 @@ export default function GamePage() {
   // Action bubbles and turn tracking
   const [activePlayerIndex, setActivePlayerIndex] = useState<number | null>(null); // -1 = player, 0+ = AI index
   const [playerActions, setPlayerActions] = useState<Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT">>(new Map());
+  const [playersFinished, setPlayersFinished] = useState<Set<number>>(new Set()); // Track which AI players have finished
 
   // Flying card animations
   const [flyingCards, setFlyingCards] = useState<FlyingCardData[]>([]);
@@ -289,6 +292,20 @@ export default function GamePage() {
       setCurrentDealer(newDealer);
     }
   }, [shoesDealt, dealerChangeInterval, currentDealer]);
+
+  // Pit boss randomly moves around the floor
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPitBossDistance(prev => {
+        // Random movement: -8 to +12 (tends to move away slightly over time)
+        const movement = Math.random() * 20 - 8;
+        const newDistance = Math.max(0, Math.min(100, prev + movement));
+        return newDistance;
+      });
+    }, 8000); // Move every 8 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Auto-start first hand after initialization
   useEffect(() => {
@@ -588,29 +605,47 @@ export default function GamePage() {
     setPhase("AI_TURNS");
   }, []);
 
+  // Clear playersFinished when entering AI_TURNS phase
+  useEffect(() => {
+    if (phase === "AI_TURNS") {
+      setPlayersFinished(new Set());
+    }
+  }, [phase]);
+
   // AI turns - process one player at a time, allowing multiple hits
   useEffect(() => {
     if (phase === "AI_TURNS" && activePlayerIndex === null) {
-      // Find the next AI player who needs to act
-      const nextPlayerIndex = aiPlayers.findIndex((ai, idx) => {
+      // Create array of players with their indices, sorted by table position (dealer's left to right = player's right to left)
+      const playersByPosition = aiPlayers
+        .map((ai, idx) => ({ ai, idx, position: ai.position }))
+        .sort((a, b) => b.position - a.position); // Reverse sort: highest position (dealer's left) goes first
+
+      // Find the next AI player who needs to act (in table order)
+      const nextPlayer = playersByPosition.find(({ ai, idx }) => {
+        // Skip if already finished
+        if (playersFinished.has(idx)) return false;
+
         const handValue = calculateHandValue(ai.hand.cards);
         const isBust = isBusted(ai.hand.cards);
+
         // Player needs to act if they haven't busted and are below 17
-        return handValue < 17 && !isBust;
+        if (handValue < 17 && !isBust) return true;
+
+        // Player at 17+ or bust - they need to show STAND then be marked finished
+        return true;
       });
 
-      if (nextPlayerIndex === -1) {
-        // No more players need to act, move to dealer turn
+      if (!nextPlayer) {
+        // All players finished, move to dealer turn
         console.log("✅ All AI players done, moving to DEALER_TURN");
         registerTimeout(() => setPhase("DEALER_TURN"), 1000);
         return;
       }
 
       // Process this player's action
-      const ai = aiPlayers[nextPlayerIndex];
-      console.log(`\n🎮 Processing AI[${nextPlayerIndex}] ${ai.character.name}`);
+      const { ai, idx } = nextPlayer;
+      console.log(`\n🎮 Processing AI[${idx}] ${ai.character.name} at position ${ai.position}`);
 
-      const idx = nextPlayerIndex;
       // Calculate hand value first to determine difficulty
       const handValue = calculateHandValue(ai.hand.cards);
       const isBust = isBusted(ai.hand.cards);
@@ -646,44 +681,71 @@ export default function GamePage() {
       // Set active player immediately
       setActivePlayerIndex(idx);
 
-      // HIT - player needs another card
-      // Show HIT action
-      registerTimeout(() => {
-        setPlayerActions(prev => new Map(prev).set(idx, "HIT"));
-      }, 0);
+      // Decide: HIT or STAND?
+      if (handValue < 17 && !isBust) {
+        console.log(`  → Action: HIT`);
 
-      // Deal card after decision time
-      registerTimeout(() => {
-        const card = dealCardFromShoe();
-        setAIPlayers((prev) => {
-          const updated = [...prev];
-          updated[idx] = {
-            ...updated[idx],
-            hand: {
-              ...updated[idx].hand,
-              cards: [...updated[idx].hand.cards, card]
-            }
-          };
-          return updated;
-        });
-      }, decisionTime);
+        // Show HIT action
+        registerTimeout(() => {
+          setPlayerActions(prev => new Map(prev).set(idx, "HIT"));
+        }, 0);
 
-      // Clear action after display
-      registerTimeout(() => {
-        setPlayerActions(prev => {
-          const newMap = new Map(prev);
-          newMap.delete(idx);
-          return newMap;
-        });
-      }, decisionTime + actionDisplay);
+        // Deal card after decision time
+        registerTimeout(() => {
+          const card = dealCardFromShoe();
+          setAIPlayers((prev) => {
+            const updated = [...prev];
+            updated[idx] = {
+              ...updated[idx],
+              hand: {
+                ...updated[idx].hand,
+                cards: [...updated[idx].hand.cards, card]
+              }
+            };
+            return updated;
+          });
+        }, decisionTime);
 
-      // Clear active player to trigger next action
-      registerTimeout(() => {
-        console.log(`  ⏹️ Clearing active player`);
-        setActivePlayerIndex(null);
-      }, decisionTime + actionDisplay + turnClear);
+        // Clear action after display
+        registerTimeout(() => {
+          setPlayerActions(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(idx);
+            return newMap;
+          });
+        }, decisionTime + actionDisplay);
+
+        // Clear active player to trigger next action
+        registerTimeout(() => {
+          console.log(`  ⏹️ Clearing active player for next action`);
+          setActivePlayerIndex(null);
+        }, decisionTime + actionDisplay + turnClear);
+      } else {
+        console.log(`  → Action: STAND (handValue=${handValue}, bust=${isBust})`);
+
+        // Show STAND action
+        registerTimeout(() => {
+          setPlayerActions(prev => new Map(prev).set(idx, "STAND"));
+        }, 0);
+
+        // Clear action after display
+        registerTimeout(() => {
+          setPlayerActions(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(idx);
+            return newMap;
+          });
+        }, actionDisplay);
+
+        // Mark player as finished and clear active to move to next player
+        registerTimeout(() => {
+          console.log(`  ✅ Player ${idx} finished`);
+          setPlayersFinished(prev => new Set(prev).add(idx));
+          setActivePlayerIndex(null);
+        }, actionDisplay + turnClear);
+      }
     }
-  }, [phase, aiPlayers, dealCardFromShoe, registerTimeout, activePlayerIndex]);
+  }, [phase, aiPlayers, dealCardFromShoe, registerTimeout, activePlayerIndex, playersFinished]);
 
   // Dealer turn
   useEffect(() => {
@@ -759,6 +821,50 @@ export default function GamePage() {
 
       setPlayerChips((prev) => prev + playerPayout);
       setPlayerHand((prev) => ({ ...prev, result: playerResult }));
+
+      // Update pit boss distance based on player behavior
+      if (playerSeat !== null && playerHand.bet > 0) {
+        const betVariation = Math.abs(playerHand.bet - previousBet) / previousBet;
+        const netGain = playerPayout - playerHand.bet;
+        const isBigWin = netGain > playerHand.bet * 1.5; // Win more than 1.5x bet
+
+        // Calculate proximity change
+        let proximityChange = 0;
+
+        // Big wins attract attention
+        if (isBigWin) {
+          proximityChange -= 15; // Pit boss moves closer
+          console.log("💰 Big win! Pit boss attention +15");
+        }
+
+        // Large bet variations attract attention
+        if (betVariation > 0.5) { // 50%+ bet change
+          const variationPenalty = Math.min(betVariation * 20, 20);
+          proximityChange -= variationPenalty;
+          console.log(`📊 Large bet variation (${(betVariation * 100).toFixed(0)}%)! Pit boss attention +${variationPenalty.toFixed(0)}`);
+        }
+
+        // Small random drift (pit boss walking around)
+        const drift = Math.random() * 10 - 3; // -3 to +7, slightly tends to move away
+        proximityChange += drift;
+
+        // Distance affects suspicion multiplier
+        setPitBossDistance(prev => {
+          const newDistance = Math.max(0, Math.min(100, prev + proximityChange));
+
+          // If pit boss is very close, increase suspicion more
+          if (newDistance < 30 && (isBigWin || betVariation > 0.5)) {
+            const suspicionIncrease = isBigWin ? 5 : Math.floor(betVariation * 10);
+            setSuspicionLevel(s => Math.min(100, s + suspicionIncrease));
+            console.log(`⚠️ Pit boss is close! Extra suspicion +${suspicionIncrease}`);
+          }
+
+          return newDistance;
+        });
+
+        // Update previous bet for next hand
+        setPreviousBet(playerHand.bet);
+      }
 
       // Dealer announces payouts for winning hands
       const dealerValue = calculateHandValue(dealerHand.cards);
@@ -851,6 +957,7 @@ export default function GamePage() {
       playerId: string;
       message: string;
       outcome: string;
+      position: number;
     }> = [];
 
     const bjPayoutMultiplier = getBlackjackPayoutMultiplier(
@@ -864,36 +971,47 @@ export default function GamePage() {
 
       let outcomeType = "push";
       let messages: string[] = [];
+      let reactionChance = 0;
 
       if (result === "BLACKJACK") {
         outcomeType = "bigWin";
         messages = ai.character.reactions.bigWin;
+        reactionChance = 0.8; // Very likely to react to blackjack
       } else if (netGain > ai.hand.bet * 0.5) {
         outcomeType = "bigWin";
         messages = ai.character.reactions.bigWin;
+        reactionChance = 0.7; // Likely to react to big win
       } else if (netGain > 0) {
         outcomeType = "smallWin";
         messages = ai.character.reactions.smallWin;
+        reactionChance = 0.3; // Sometimes react to small win
       } else if (netGain === 0) {
         outcomeType = "push";
         messages = ai.character.reactions.push;
+        reactionChance = 0.1; // Rarely react to push
       } else if (result === "BUST" || netGain < -ai.hand.bet * 0.5) {
         outcomeType = "bigLoss";
         messages = ai.character.reactions.bigLoss;
+        reactionChance = 0.7; // Likely to react to big loss
       } else {
         outcomeType = "smallLoss";
         messages = ai.character.reactions.smallLoss;
+        reactionChance = 0.3; // Sometimes react to small loss
       }
 
-      const message = messages[Math.floor(Math.random() * messages.length)];
-      reactions.push({
-        playerId: ai.character.id,
-        message,
-        outcome: outcomeType,
-      });
+      // Only add reaction if player decides to react
+      if (Math.random() < reactionChance) {
+        const message = messages[Math.floor(Math.random() * messages.length)];
+        reactions.push({
+          playerId: ai.character.id,
+          message,
+          outcome: outcomeType,
+          position: ai.position,
+        });
+      }
     });
 
-    // Limit to 1-2 bubbles with priority
+    // Limit to 0-2 bubbles with priority (most interesting reactions)
     const priorityOrder = [
       "bigWin",
       "bigLoss",
@@ -906,27 +1024,27 @@ export default function GamePage() {
         priorityOrder.indexOf(a.outcome) - priorityOrder.indexOf(b.outcome)
       );
     });
-    const numBubbles = Math.random() < 0.6 ? 1 : 2;
-    const selectedReactions = sortedReactions.slice(0, numBubbles);
+
+    // Show 0-2 reactions max
+    const maxReactions = Math.min(reactions.length, Math.random() < 0.5 ? 1 : 2);
+    const selectedReactions = sortedReactions.slice(0, maxReactions);
+
+    console.log(`💬 Showing ${selectedReactions.length} end-of-hand reactions out of ${reactions.length} possible`);
 
     selectedReactions.forEach((reaction, idx) => {
       registerTimeout(() => {
-        const aiPlayer = aiPlayers.find(
-          (ai) => ai.character.id === reaction.playerId,
+        addSpeechBubble(
+          reaction.playerId,
+          reaction.message,
+          reaction.position,
         );
-        if (aiPlayer) {
-          addSpeechBubble(
-            reaction.playerId,
-            reaction.message,
-            aiPlayer.position,
-          );
-        }
-      }, idx * 600);
+      }, idx * 800); // Slightly stagger multiple reactions
     });
   }, [aiPlayers, dealerHand, gameSettings, registerTimeout, addSpeechBubble]);
 
   // Next hand
   const nextHand = useCallback(() => {
+    console.log("🆕 nextHand() called - starting new hand");
     setHandNumber((prev) => prev + 1);
     setPhase("BETTING");
     setSpeechBubbles([]); // Clear speech bubbles from previous hand
@@ -935,7 +1053,11 @@ export default function GamePage() {
   // Round end - automatically progress to next hand
   useEffect(() => {
     if (phase === "ROUND_END") {
+      console.log("🎯 ROUND_END phase reached - scheduling auto-progression in 4 seconds");
+
       registerTimeout(() => {
+        console.log("⏰ Auto-progression timer fired");
+
         // Check if we need to reshuffle (cut card reached)
         const totalCards = numDecks * 52;
         const cardsUntilCutCard = totalCards - cutCardPosition;
@@ -955,10 +1077,12 @@ export default function GamePage() {
           setDealerCallout("Shuffling new shoe...");
           registerTimeout(() => {
             setDealerCallout(null);
+            console.log("📞 Calling nextHand() after reshuffle");
             nextHand();
           }, 3000);
         } else {
           // No reshuffle needed, just continue to next hand
+          console.log("📞 Calling nextHand() directly (no reshuffle needed)");
           nextHand();
         }
       }, 4000); // Show results for 4 seconds before continuing
@@ -980,7 +1104,7 @@ export default function GamePage() {
       }}
     >
       {/* Suspicion Meter - Fixed position */}
-      <SuspicionMeter level={suspicionLevel} />
+      <SuspicionMeter level={suspicionLevel} pitBossDistance={pitBossDistance} />
 
       {/* Stats Bar at Top */}
       <div
@@ -1319,11 +1443,9 @@ export default function GamePage() {
                             {/* Render each card in a fixed position - first row at bottom */}
                             {aiPlayer.hand.cards.map((card, cardIdx) => {
                               // Calculate row and column for this card (3 cards per row)
-                              const cardRow = Math.floor(cardIdx / 3);
+                              const row = Math.floor(cardIdx / 3); // Row 0 = first 3 cards, Row 1 = next 3, etc
                               const col = cardIdx % 3;
-                              // Invert row so first 3 cards are at bottom, additional rows stack above
-                              const maxRow = Math.floor((aiPlayer.hand.cards.length - 1) / 3);
-                              const row = maxRow - cardRow;
+                              // Position from bottom: row 0 at bottom, row 1 above it, etc
                               // Fixed positions: left = col * (70px + 4px gap)
                               //                  bottom = row * (98px + 4px gap) - anchor from bottom
                               return (
@@ -1332,7 +1454,7 @@ export default function GamePage() {
                                   style={{
                                     position: "absolute",
                                     left: `${col * 74}px`,
-                                    bottom: `${row * 102}px`, // Use bottom instead of top
+                                    bottom: `${row * 102}px`, // Row 0 at bottom, higher rows stack above
                                     width: "70px",
                                     height: "98px",
                                   }}
@@ -1427,11 +1549,9 @@ export default function GamePage() {
                           {/* Render each card in a fixed position - first row at bottom */}
                           {playerHand.cards.map((card, cardIdx) => {
                             // Calculate row and column for this card (3 cards per row)
-                            const cardRow = Math.floor(cardIdx / 3);
+                            const row = Math.floor(cardIdx / 3); // Row 0 = first 3 cards, Row 1 = next 3, etc
                             const col = cardIdx % 3;
-                            // Invert row so first 3 cards are at bottom, additional rows stack above
-                            const maxRow = Math.floor((playerHand.cards.length - 1) / 3);
-                            const row = maxRow - cardRow;
+                            // Position from bottom: row 0 at bottom, row 1 above it, etc
                             // Fixed positions: left = col * (70px + 4px gap)
                             //                  bottom = row * (98px + 4px gap) - anchor from bottom
                             return (
@@ -1440,7 +1560,7 @@ export default function GamePage() {
                                 style={{
                                   position: "absolute",
                                   left: `${col * 74}px`,
-                                  bottom: `${row * 102}px`, // Use bottom instead of top
+                                  bottom: `${row * 102}px`, // Row 0 at bottom, higher rows stack above
                                   width: "70px",
                                   height: "98px",
                                 }}
@@ -1570,19 +1690,6 @@ export default function GamePage() {
                     {playerHand.result === "BUST" && "Bust!"}
                     {playerHand.result === "BLACKJACK" && "Blackjack!"}
                   </div>
-                  <Button
-                    size="lg"
-                    onPress={nextHand}
-                    style={{
-                      backgroundColor: "#4CAF50",
-                      color: "white",
-                      fontWeight: "bold",
-                      fontSize: "16px",
-                      padding: "12px 24px",
-                    }}
-                  >
-                    Next Hand
-                  </Button>
                 </div>
               )}
             </div>

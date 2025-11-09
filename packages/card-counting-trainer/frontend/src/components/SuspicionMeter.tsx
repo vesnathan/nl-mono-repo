@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 interface SuspicionMeterProps {
   level: number; // 0-100 (alternate prop name)
   suspicionLevel?: number; // 0-100
+  pitBossDistance?: number; // 0-100, higher = farther away (safer)
   dealerName?: string;
   dealerDetectionSkill?: number; // 0-100
   onYourSide?: boolean;
@@ -13,6 +14,7 @@ interface SuspicionMeterProps {
 export default function SuspicionMeter({
   level,
   suspicionLevel,
+  pitBossDistance,
   dealerName,
   dealerDetectionSkill,
   onYourSide,
@@ -158,6 +160,42 @@ export default function SuspicionMeter({
           {actualSuspicionLevel}%
         </div>
       </div>
+
+      {/* Pit Boss Distance */}
+      {pitBossDistance !== undefined && (
+        <div style={{ marginTop: "12px" }}>
+          <div
+            style={{
+              fontSize: "11px",
+              color: "#AAA",
+              fontWeight: "bold",
+              marginBottom: "4px",
+            }}
+          >
+            PIT BOSS DISTANCE
+          </div>
+          <div
+            style={{
+              height: "24px",
+              backgroundColor: "#222",
+              borderRadius: "12px",
+              overflow: "hidden",
+              border: "1px solid #444",
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                height: "100%",
+                width: `${pitBossDistance}%`,
+                backgroundColor: pitBossDistance > 70 ? "#4CAF50" : pitBossDistance > 40 ? "#FFC107" : "#F44336",
+                transition: "width 0.8s ease-out, background-color 0.3s ease",
+                boxShadow: `0 0 10px ${pitBossDistance > 70 ? "#4CAF50" : pitBossDistance > 40 ? "#FFC107" : "#F44336"}`,
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         @keyframes pulse-warning {
