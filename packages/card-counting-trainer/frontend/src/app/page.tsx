@@ -56,6 +56,7 @@ import DealerSection from "@/components/DealerSection";
 import TableSeats from "@/components/TableSeats";
 import GameOverlays from "@/components/GameOverlays";
 import DebugLogModal from "@/components/DebugLogModal";
+import GameModals from "@/components/GameModals";
 import { CARD_APPEAR_TIME, CARD_ANIMATION_DURATION } from "@/constants/animations";
 import {
   PlayerHand,
@@ -2251,55 +2252,34 @@ export default function GamePage() {
         `}</style>
       </div>
 
-      {/* Betting Interface - shown during BETTING phase when player is seated */}
-      {phase === "BETTING" && initialized && playerSeat !== null && (
-        <BettingInterface
-          playerChips={playerChips}
-          currentBet={currentBet}
-          minBet={minBet}
-          maxBet={maxBet}
-          onBetChange={handleBetChange}
-          onConfirmBet={handleConfirmBet}
-          onClearBet={handleClearBet}
-        />
-      )}
 
-      {/* Game Settings Modal */}
-      <GameSettingsModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-        currentSettings={gameSettings}
-        onSave={(newSettings) => {
-          setGameSettings({ ...gameSettings, ...newSettings });
-          // Note: Changing settings mid-game would require game reset
-          // For now, settings only apply to new games
-        }}
-      />
-
-      {/* Leaderboard Modal */}
-      <LeaderboardModal
-        isOpen={showLeaderboard}
-        onClose={() => setShowLeaderboard(false)}
-        currentChips={playerChips}
+      {/* All Game Modals */}
+      <GameModals
+        phase={phase}
+        initialized={initialized}
+        playerSeat={playerSeat}
+        playerChips={playerChips}
+        currentBet={currentBet}
+        minBet={minBet}
+        maxBet={maxBet}
+        handleBetChange={handleBetChange}
+        handleConfirmBet={handleConfirmBet}
+        handleClearBet={handleClearBet}
+        showSettings={showSettings}
+        setShowSettings={setShowSettings}
+        gameSettings={gameSettings}
+        setGameSettings={setGameSettings}
+        showLeaderboard={showLeaderboard}
+        setShowLeaderboard={setShowLeaderboard}
         peakChips={peakChips}
         longestStreak={longestStreak}
         currentScore={currentScore}
-      />
-
-      {/* Basic Strategy Card Modal */}
-      <BasicStrategyCard
-        isOpen={showStrategyCard}
-        onClose={() => setShowStrategyCard(false)}
-        settings={gameSettings}
-      />
-
-      {/* Debug Log Modal and Button */}
-      <DebugLogModal
+        showStrategyCard={showStrategyCard}
+        setShowStrategyCard={setShowStrategyCard}
         debugLogs={debugLogs}
-        phase={phase}
         showDebugLog={showDebugLog}
-        onShowDebugLog={setShowDebugLog}
-        onClearDebugLogs={clearDebugLogs}
+        setShowDebugLog={setShowDebugLog}
+        clearDebugLogs={clearDebugLogs}
       />
     </div>
   );
