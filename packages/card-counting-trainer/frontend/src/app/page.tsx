@@ -29,7 +29,11 @@ import {
   calculateCutCardPosition,
   TrainingMode,
 } from "@/types/gameSettings";
-import { AI_CHARACTERS, AICharacter, getAIAvatarPath } from "@/data/aiCharacters";
+import {
+  AI_CHARACTERS,
+  AICharacter,
+  getAIAvatarPath,
+} from "@/data/aiCharacters";
 import {
   DEALER_CHARACTERS,
   DealerCharacter,
@@ -57,6 +61,11 @@ import LeaderboardModal from "@/components/LeaderboardModal";
 import GameSettingsModal from "@/components/GameSettingsModal";
 import BasicStrategyCard from "@/components/BasicStrategyCard";
 import BettingInterface from "@/components/BettingInterface";
+import {
+  CARD_ANIMATION_DURATION,
+  CARD_APPEAR_TIME,
+  TABLE_POSITIONS,
+} from "@/constants/animations";
 
 interface PlayerHand {
   cards: GameCard[];
@@ -117,11 +126,16 @@ export default function GamePage() {
   const { user } = useAuth();
 
   // Game settings
-  const [gameSettings, setGameSettings] = useState<GameSettings>(DEFAULT_GAME_SETTINGS);
+  const [gameSettings, setGameSettings] = useState<GameSettings>(
+    DEFAULT_GAME_SETTINGS,
+  );
 
   // Game state
   const [shoe, setShoe] = useState<GameCard[]>(() =>
-    createAndShuffleShoe(gameSettings.numberOfDecks, gameSettings.countingSystem)
+    createAndShuffleShoe(
+      gameSettings.numberOfDecks,
+      gameSettings.countingSystem,
+    ),
   );
   const [cardsDealt, setCardsDealt] = useState(0);
   const [runningCount, setRunningCount] = useState(0);
@@ -157,7 +171,9 @@ export default function GamePage() {
   const [currentDealer, setCurrentDealer] = useState<DealerCharacter | null>(
     null,
   );
-  const [dealerChangeInterval] = useState(() => Math.floor(Math.random() * 3) + 8); // 8-10 shoes
+  const [dealerChangeInterval] = useState(
+    () => Math.floor(Math.random() * 3) + 8,
+  ); // 8-10 shoes
 
   // UI state
   const [phase, setPhase] = useState<GamePhase>("BETTING");
@@ -165,7 +181,8 @@ export default function GamePage() {
   const [pitBossDistance, setPitBossDistance] = useState(30); // 0-100, higher = closer (more dangerous), start farther away
   const [speechBubbles, setSpeechBubbles] = useState<SpeechBubble[]>([]);
   const [winLossBubbles, setWinLossBubbles] = useState<WinLossBubbleData[]>([]);
-  const [activeConversation, setActiveConversation] = useState<ActiveConversation | null>(null);
+  const [activeConversation, setActiveConversation] =
+    useState<ActiveConversation | null>(null);
   const [playerSociability, setPlayerSociability] = useState(50); // 0-100: how friendly/responsive player has been
   const [handNumber, setHandNumber] = useState(0);
   const [showDealerInfo, setShowDealerInfo] = useState(false);
@@ -176,9 +193,15 @@ export default function GamePage() {
   const [playerSeat, setPlayerSeat] = useState<number | null>(null); // null means not seated
 
   // Action bubbles and turn tracking
-  const [activePlayerIndex, setActivePlayerIndex] = useState<number | null>(null); // -1 = player, 0+ = AI index
-  const [playerActions, setPlayerActions] = useState<Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK">>(new Map());
-  const [playersFinished, setPlayersFinished] = useState<Set<number>>(new Set()); // Track which AI players have finished
+  const [activePlayerIndex, setActivePlayerIndex] = useState<number | null>(
+    null,
+  ); // -1 = player, 0+ = AI index
+  const [playerActions, setPlayerActions] = useState<
+    Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK">
+  >(new Map());
+  const [playersFinished, setPlayersFinished] = useState<Set<number>>(
+    new Set(),
+  ); // Track which AI players have finished
 
   // Flying card animations
   const [flyingCards, setFlyingCards] = useState<FlyingCardData[]>([]);
@@ -198,6 +221,12 @@ export default function GamePage() {
 
   // Track if dealer has finished dealing (to prevent duplicate final hand announcements)
   const dealerFinishedRef = useRef<boolean>(false);
+
+  // Track if AI turn is currently being processed (to prevent duplicate turns)
+  const aiTurnProcessingRef = useRef<boolean>(false);
+
+  // Track if dealer turn is currently being processed (to prevent duplicate dealer actions)
+  const dealerTurnProcessingRef = useRef<boolean>(false);
 
   // Timeout management - store all active timeouts for cleanup
   const timeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
@@ -224,10 +253,10 @@ export default function GamePage() {
 
   // Debug logging helper
   const addDebugLog = useCallback((message: string) => {
-    const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+    const timestamp = new Date().toISOString().split("T")[1].split(".")[0];
     const logEntry = `[${timestamp}] ${message}`;
     console.log(logEntry);
-    setDebugLogs(prev => [...prev, logEntry]);
+    setDebugLogs((prev) => [...prev, logEntry]);
   }, []);
 
   // Clear debug logs and continue to next hand
@@ -280,57 +309,75 @@ export default function GamePage() {
   }, [gameSettings.trainingMode, timedChallengeActive, timeRemaining]);
 
   // Helper to calculate card positions for flying animation
-  const getCardPosition = useCallback((type: "ai" | "player" | "dealer" | "shoe", index?: number, cardIndex?: number) => {
-    const tablePositions = [
-      [5, 55], // Seat 0 - Far left
-      [16, 62], // Seat 1 - Left
-      [29, 68], // Seat 2 - Center-left
-      [42, 72], // Seat 3 - Center
-      [56, 72], // Seat 4 - Center
-      [69, 68], // Seat 5 - Center-right
-      [82, 62], // Seat 6 - Right
-      [93, 55], // Seat 7 - Far right
-    ];
+  const getCardPosition = useCallback(
+    (
+      type: "ai" | "player" | "dealer" | "shoe",
+      index?: number,
+      cardIndex?: number,
+    ) => {
+      // Card dimensions and spacing
+      const cardWidth = 60; // px
+      const cardSpacing = 15; // px between cards
 
-    // Card dimensions and spacing
-    const cardWidth = 60; // px
-    const cardSpacing = 15; // px between cards
-
-    if (type === "shoe") {
-      // Shoe is positioned at right: 7%, top: 20px (from the Shoe component positioning)
-      // Convert to left position: 100% - 7% = 93%
-      return { left: "93%", top: "20px" };
-    }
-
-    if (type === "dealer") {
-      // Dealer cards are below the dealer avatar
-      // Dealer section is at 8%, avatar is 150px + 12px margin = 162px
-      // Cards appear below the avatar with horizontal offset for multiple cards
-      const baseLeft = 50; // Center at 50%
-      const offset = cardIndex !== undefined ? (cardIndex * cardSpacing) - ((cardSpacing * (cardIndex > 0 ? 1 : 0)) / 2) : 0;
-      return { left: `calc(${baseLeft}% + ${offset}px)`, top: "calc(8% + 162px)" };
-    }
-
-    if (type === "player" && playerSeat !== null) {
-      const [x, y] = tablePositions[playerSeat];
-      // Cards are positioned above the avatar with horizontal offset
-      const offset = cardIndex !== undefined ? (cardIndex * cardSpacing) - ((cardSpacing * (cardIndex > 0 ? 1 : 0)) / 2) : 0;
-      return { left: `calc(${x}% + ${offset}px)`, top: `calc(${y}% - 190px)` };
-    }
-
-    if (type === "ai" && index !== undefined) {
-      const aiPlayer = aiPlayers[index];
-      if (aiPlayer) {
-        const [x, y] = tablePositions[aiPlayer.position];
-        // Cards are positioned above the avatar with horizontal offset
-        const offset = cardIndex !== undefined ? (cardIndex * cardSpacing) - ((cardSpacing * (cardIndex > 0 ? 1 : 0)) / 2) : 0;
-        return { left: `calc(${x}% + ${offset}px)`, top: `calc(${y}% - 140px)` };
+      if (type === "shoe") {
+        // Shoe is positioned at right: 7%, top: 20px (from the Shoe component positioning)
+        // The shoe is rotated 90deg and cards exit from the bottom opening
+        // Adjusted 100px further left from the shoe opening
+        return { left: "calc(85% - 100px)", top: "calc(20px + 15vh)" };
       }
-    }
 
-    // Default fallback
-    return { left: "50%", top: "50%" };
-  }, [aiPlayers, playerSeat]);
+      if (type === "dealer") {
+        // Dealer cards are below the dealer avatar
+        // Dealer section is at 8%, avatar is 150px + 12px margin = 162px
+        // Cards appear below the avatar with horizontal offset for multiple cards
+        const baseLeft = 50; // Center at 50%
+        const offset =
+          cardIndex !== undefined
+            ? cardIndex * cardSpacing -
+              (cardSpacing * (cardIndex > 0 ? 1 : 0)) / 2
+            : 0;
+        return {
+          left: `calc(${baseLeft}% + ${offset}px)`,
+          top: "calc(8% + 162px)",
+        };
+      }
+
+      if (type === "player" && playerSeat !== null) {
+        const [x, y] = TABLE_POSITIONS[playerSeat];
+        // Cards are positioned above the avatar with horizontal offset
+        const offset =
+          cardIndex !== undefined
+            ? cardIndex * cardSpacing -
+              (cardSpacing * (cardIndex > 0 ? 1 : 0)) / 2
+            : 0;
+        return {
+          left: `calc(${x}% + ${offset}px)`,
+          top: `calc(${y}% - 190px)`,
+        };
+      }
+
+      if (type === "ai" && index !== undefined) {
+        const aiPlayer = aiPlayers[index];
+        if (aiPlayer) {
+          const [x, y] = TABLE_POSITIONS[aiPlayer.position];
+          // Cards are positioned above the avatar with horizontal offset
+          const offset =
+            cardIndex !== undefined
+              ? cardIndex * cardSpacing -
+                (cardSpacing * (cardIndex > 0 ? 1 : 0)) / 2
+              : 0;
+          return {
+            left: `calc(${x}% + ${offset}px)`,
+            top: `calc(${y}% - 140px)`,
+          };
+        }
+      }
+
+      // Default fallback
+      return { left: "50%", top: "50%" };
+    },
+    [aiPlayers, playerSeat],
+  );
 
   // Initialize AI players and dealer on mount
   useEffect(() => {
@@ -377,7 +424,11 @@ export default function GamePage() {
 
   // Deal a card with reshuffle handling
   const dealCardFromShoe = useCallback(() => {
-    const { card, remainingShoe, reshuffled } = dealCard(shoe, gameSettings.numberOfDecks, gameSettings.countingSystem);
+    const { card, remainingShoe, reshuffled } = dealCard(
+      shoe,
+      gameSettings.numberOfDecks,
+      gameSettings.countingSystem,
+    );
 
     if (reshuffled) {
       setShoe(remainingShoe);
@@ -404,74 +455,57 @@ export default function GamePage() {
   }, [shoesDealt, dealerChangeInterval, currentDealer]);
 
   // Conversation system functions
-  const triggerConversation = useCallback((speakerId: string, speakerName: string, position: number) => {
-    // Don't trigger if there's already an active conversation
-    if (activeConversation) return;
+  const triggerConversation = useCallback(
+    (speakerId: string, speakerName: string, position: number) => {
+      // Don't trigger if there's already an active conversation
+      if (activeConversation) return;
 
-    const tablePositions = [
-      [5, 55],   // Seat 0 - Far left
-      [16, 62],  // Seat 1 - Left
-      [29, 68],  // Seat 2 - Center-left
-      [42, 72],  // Seat 3 - Center
-      [56, 72],  // Seat 4 - Center
-      [69, 68],  // Seat 5 - Center-right
-      [82, 62],  // Seat 6 - Right
-      [93, 55],  // Seat 7 - Far right
-    ];
+      const [x, y] = TABLE_POSITIONS[position] || TABLE_POSITIONS[0];
 
-    const [x, y] = tablePositions[position] || tablePositions[0];
+      // Get character-specific or dealer dialogue
+      let question: string;
+      if (speakerId === "dealer") {
+        question = getDealerPlayerLine("generic", "dealerQuestions");
+      } else {
+        question = getDealerPlayerLine(speakerId, "playerQuestions");
+      }
 
-    // Get character-specific or dealer dialogue
-    let question: string;
-    if (speakerId === "dealer") {
-      question = getDealerPlayerLine("generic", "dealerQuestions");
-    } else {
-      question = getDealerPlayerLine(speakerId, "playerQuestions");
-    }
+      // Create response choices
+      const choices = [
+        { text: "Sure, yeah...", suspicionChange: -2 }, // Friendly, reduces suspicion slightly
+        { text: "*nods politely*", suspicionChange: 0 }, // Neutral
+        { text: "*focuses on cards*", suspicionChange: 5 }, // Ignoring - increases suspicion
+      ];
 
-    // Create response choices
-    const choices = [
-      { text: "Sure, yeah...", suspicionChange: -2 }, // Friendly, reduces suspicion slightly
-      { text: "*nods politely*", suspicionChange: 0 }, // Neutral
-      { text: "*focuses on cards*", suspicionChange: 5 }, // Ignoring - increases suspicion
-    ];
+      const conversation: ActiveConversation = {
+        id: `conv-${Date.now()}`,
+        speakerId,
+        speakerName,
+        question,
+        choices,
+        position: { left: `${x}%`, top: `${y}%` },
+      };
 
-    const conversation: ActiveConversation = {
-      id: `conv-${Date.now()}`,
-      speakerId,
-      speakerName,
-      question,
-      choices,
-      position: { left: `${x}%`, top: `${y}%` },
-    };
-
-    setActiveConversation(conversation);
-  }, [activeConversation]);
+      setActiveConversation(conversation);
+    },
+    [activeConversation],
+  );
 
   const addSpeechBubble = useCallback(
     (playerId: string, message: string, position: number) => {
       // Find the character name and hand for logging
-      const player = aiPlayers.find(p => p.character.id === playerId);
+      const player = aiPlayers.find((p) => p.character.id === playerId);
       const characterName = player?.character?.name || playerId;
       const hand = player?.hand?.cards || [];
-      const handStr = hand.map(c => `${c.rank}${c.suit}`).join(', ');
+      const handStr = hand.map((c) => `${c.rank}${c.suit}`).join(", ");
       const handValue = hand.length > 0 ? calculateHandValue(hand) : 0;
 
-      addDebugLog(`💬 ${characterName} [Hand: ${handStr} (${handValue})]: "${message}"`);
+      addDebugLog(
+        `💬 ${characterName} [Hand: ${handStr} (${handValue})]: "${message}"`,
+      );
 
       // Use same positions as player avatars on the table
-      const tablePositions = [
-        [5, 55],   // Seat 0 - Far left
-        [16, 62],  // Seat 1 - Left
-        [29, 68],  // Seat 2 - Center-left
-        [42, 72],  // Seat 3 - Center
-        [56, 72],  // Seat 4 - Center
-        [69, 68],  // Seat 5 - Center-right
-        [82, 62],  // Seat 6 - Right
-        [93, 55],  // Seat 7 - Far right
-      ];
-
-      const [x, y] = tablePositions[position] || tablePositions[0];
+      const [x, y] = TABLE_POSITIONS[position] || TABLE_POSITIONS[0];
 
       const bubble: SpeechBubble = {
         playerId,
@@ -504,44 +538,75 @@ export default function GamePage() {
     // Interval also affected by sociability (lower sociability = longer intervals)
     const baseInterval = 25000; // 25 seconds base
     const intervalVariation = 10000; // +/- 10 seconds
-    const sociabilityIntervalMultiplier = Math.max(0.5, 2 - (playerSociability / 50)); // Low sociability = longer waits
+    const sociabilityIntervalMultiplier = Math.max(
+      0.5,
+      2 - playerSociability / 50,
+    ); // Low sociability = longer waits
 
-    const conversationInterval = setInterval(() => {
-      const shouldTrigger = Math.random() < triggerChance;
-      if (!shouldTrigger) return;
+    const conversationInterval = setInterval(
+      () => {
+        const shouldTrigger = Math.random() < triggerChance;
+        if (!shouldTrigger) return;
 
-      // 60% chance it's from an AI player, 40% from dealer
-      if (Math.random() < 0.6 && aiPlayers.length > 0) {
-        // Pick random AI player
-        const randomAI = aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
-        triggerConversation(randomAI.character.id, randomAI.character.name, randomAI.position);
-      } else if (currentDealer) {
-        // Dealer asks a question (use dealer's position - center top)
-        const dealerPosition = 3; // Center position for visualization
-        triggerConversation("dealer", currentDealer.name, dealerPosition);
-      }
-    }, (baseInterval + Math.random() * intervalVariation) * sociabilityIntervalMultiplier);
+        // 60% chance it's from an AI player, 40% from dealer
+        if (Math.random() < 0.6 && aiPlayers.length > 0) {
+          // Pick random AI player
+          const randomAI =
+            aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
+          triggerConversation(
+            randomAI.character.id,
+            randomAI.character.name,
+            randomAI.position,
+          );
+        } else if (currentDealer) {
+          // Dealer asks a question (use dealer's position - center top)
+          const dealerPosition = 3; // Center position for visualization
+          triggerConversation("dealer", currentDealer.name, dealerPosition);
+        }
+      },
+      (baseInterval + Math.random() * intervalVariation) *
+        sociabilityIntervalMultiplier,
+    );
 
     return () => clearInterval(conversationInterval);
-  }, [initialized, playerSeat, activeConversation, aiPlayers, currentDealer, triggerConversation, playerSociability]);
+  }, [
+    initialized,
+    playerSeat,
+    activeConversation,
+    aiPlayers,
+    currentDealer,
+    triggerConversation,
+    playerSociability,
+  ]);
 
   // AI-to-AI and AI-to-Dealer banter (background conversation)
   useEffect(() => {
     if (!initialized || phase === "BETTING") return;
 
-    const banterInterval = setInterval(() => {
-      // 20% chance for background banter every 15-25 seconds
-      if (Math.random() < 0.2 && aiPlayers.length >= 2) {
-        const randomAI = aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
+    const banterInterval = setInterval(
+      () => {
+        // 20% chance for background banter every 15-25 seconds
+        if (Math.random() < 0.2 && aiPlayers.length >= 2) {
+          const randomAI =
+            aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
 
-        // Get some small talk banter
-        const message = getDealerPlayerLine(randomAI.character.id, "smallTalk");
+          // Get some small talk banter
+          const message = getDealerPlayerLine(
+            randomAI.character.id,
+            "smallTalk",
+          );
 
-        if (message) {
-          addSpeechBubble(`ai-banter-${Date.now()}`, message, randomAI.position);
+          if (message) {
+            addSpeechBubble(
+              `ai-banter-${Date.now()}`,
+              message,
+              randomAI.position,
+            );
+          }
         }
-      }
-    }, 15000 + Math.random() * 10000); // 15-25 seconds
+      },
+      15000 + Math.random() * 10000,
+    ); // 15-25 seconds
 
     return () => clearInterval(banterInterval);
   }, [initialized, phase, aiPlayers, addSpeechBubble]);
@@ -549,7 +614,7 @@ export default function GamePage() {
   // Pit boss randomly moves around the floor
   useEffect(() => {
     const interval = setInterval(() => {
-      setPitBossDistance(prev => {
+      setPitBossDistance((prev) => {
         // Random movement: -8 to +12 (tends to move away slightly over time)
         const movement = Math.random() * 20 - 8;
         const newDistance = Math.max(0, Math.min(100, prev + movement));
@@ -573,7 +638,8 @@ export default function GamePage() {
         setDealerRevealed(false);
 
         // Player only gets cards if seated and has placed a bet
-        const playerBet = playerSeat !== null && currentBet > 0 ? currentBet : 0;
+        const playerBet =
+          playerSeat !== null && currentBet > 0 ? currentBet : 0;
         setPlayerHand({ cards: [], bet: playerBet });
         setDealerHand({ cards: [], bet: 0 });
 
@@ -597,7 +663,14 @@ export default function GamePage() {
 
       return () => clearTimeout(timer);
     }
-  }, [initialized, aiPlayers.length, handNumber, phase, playerSeat, currentBet]);
+  }, [
+    initialized,
+    aiPlayers.length,
+    handNumber,
+    phase,
+    playerSeat,
+    currentBet,
+  ]);
 
   // Auto-start subsequent hands (handNumber > 0)
   useEffect(() => {
@@ -612,7 +685,8 @@ export default function GamePage() {
         setDealerRevealed(false);
 
         // Player only gets cards if seated and has placed a bet
-        const playerBet = playerSeat !== null && currentBet > 0 ? currentBet : 0;
+        const playerBet =
+          playerSeat !== null && currentBet > 0 ? currentBet : 0;
         setPlayerHand({ cards: [], bet: playerBet });
         setDealerHand({ cards: [], bet: 0 });
 
@@ -634,7 +708,14 @@ export default function GamePage() {
 
       return () => clearTimeout(timer);
     }
-  }, [initialized, aiPlayers.length, handNumber, phase, playerSeat, currentBet]);
+  }, [
+    initialized,
+    aiPlayers.length,
+    handNumber,
+    phase,
+    playerSeat,
+    currentBet,
+  ]);
 
   // Start new round - transition to BETTING phase
   const startNewRound = useCallback(() => {
@@ -659,7 +740,9 @@ export default function GamePage() {
     addDebugLog(`Cards dealt this shoe: ${cardsDealt}`);
     addDebugLog(`Running count: ${runningCount}`);
     addDebugLog(`Number of AI players: ${aiPlayers.length}`);
-    addDebugLog(`Player seated: ${playerSeat !== null ? `Yes (Seat ${playerSeat})` : 'No (observing)'}`);
+    addDebugLog(
+      `Player seated: ${playerSeat !== null ? `Yes (Seat ${playerSeat})` : "No (observing)"}`,
+    );
 
     // Pre-deal all cards BEFORE animations to ensure uniqueness
     // We need to manually track the shoe state because React batches state updates
@@ -671,7 +754,11 @@ export default function GamePage() {
 
     // Helper to deal from the current shoe state
     const dealFromCurrentShoe = () => {
-      const { card, remainingShoe, reshuffled } = dealCard(currentShoe, gameSettings.numberOfDecks, gameSettings.countingSystem);
+      const { card, remainingShoe, reshuffled } = dealCard(
+        currentShoe,
+        gameSettings.numberOfDecks,
+        gameSettings.countingSystem,
+      );
 
       if (reshuffled) {
         currentShoe = remainingShoe;
@@ -687,24 +774,35 @@ export default function GamePage() {
       return card;
     };
 
-    // Sort AI players by position (right to left from dealer's perspective = descending)
-    const sortedAIPlayers = [...aiPlayers].sort((a, b) => b.position - a.position);
+    // Sort AI players by position (right to left from dealer's perspective = ascending since seats are numbered 0=right, 7=left)
+    const sortedAIPlayers = [...aiPlayers].sort(
+      (a, b) => a.position - b.position,
+    );
+    addDebugLog(
+      `Sorted dealing order: ${sortedAIPlayers.map((ai) => `${ai.character.name}(seat ${ai.position})`).join(" -> ")}`,
+    );
 
     addDebugLog("--- First card round (right to left) ---");
     // Deal first card to everyone (right to left, dealer last)
     sortedAIPlayers.forEach((ai) => {
       const idx = aiPlayers.indexOf(ai);
       const card = dealFromCurrentShoe();
-      addDebugLog(`AI Player ${idx} (${ai.character.name}, Seat ${ai.position}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`);
+      addDebugLog(
+        `${ai.character.name} (Seat ${ai.position}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | RC: ${currentRunningCount}`,
+      );
       dealtCards.push({ type: "ai", index: idx, card });
     });
     if (playerSeat !== null) {
       const card = dealFromCurrentShoe();
-      addDebugLog(`Player (Seat ${playerSeat}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`);
+      addDebugLog(
+        `Player (Seat ${playerSeat}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | RC: ${currentRunningCount}`,
+      );
       dealtCards.push({ type: "player", index: 0, card });
     }
     const dealerCard1 = dealFromCurrentShoe();
-    addDebugLog(`Dealer card 1: ${dealerCard1.rank}${dealerCard1.suit} (value: ${dealerCard1.value}, count: ${dealerCard1.count}) [FACE UP] | Running count: ${currentRunningCount}`);
+    addDebugLog(
+      `Dealer card 1: ${dealerCard1.rank}${dealerCard1.suit} (value: ${dealerCard1.value}, count: ${dealerCard1.count}) [FACE UP] | RC: ${currentRunningCount}`,
+    );
     dealtCards.push({ type: "dealer", index: 0, card: dealerCard1 });
 
     addDebugLog("--- Second card round (right to left) ---");
@@ -712,18 +810,23 @@ export default function GamePage() {
     sortedAIPlayers.forEach((ai) => {
       const idx = aiPlayers.indexOf(ai);
       const card = dealFromCurrentShoe();
-      addDebugLog(`AI Player ${idx} (${ai.character.name}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`);
+      addDebugLog(
+        `${ai.character.name} (Seat ${ai.position}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | RC: ${currentRunningCount}`,
+      );
       dealtCards.push({ type: "ai", index: idx, card });
     });
     if (playerSeat !== null) {
       const card = dealFromCurrentShoe();
-      addDebugLog(`Player: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`);
+      addDebugLog(
+        `Player: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | RC: ${currentRunningCount}`,
+      );
       dealtCards.push({ type: "player", index: 0, card });
     }
     const dealerCard2 = dealFromCurrentShoe();
-    addDebugLog(`Dealer card 2: ${dealerCard2.rank}${dealerCard2.suit} (value: ${dealerCard2.value}, count: ${dealerCard2.count}) [FACE DOWN] | Running count: ${currentRunningCount}`);
+    addDebugLog(
+      `Dealer card 2: ${dealerCard2.rank}${dealerCard2.suit} (value: ${dealerCard2.value}, count: ${dealerCard2.count}) [FACE DOWN] | RC: ${currentRunningCount}`,
+    );
     dealtCards.push({ type: "dealer", index: 0, card: dealerCard2 });
-
 
     // Update state with final shoe state
     setShoe(currentShoe);
@@ -737,13 +840,12 @@ export default function GamePage() {
     const dealerSpeed = currentDealer?.dealSpeed ?? 1.0;
     const delayBetweenCards = Math.round(baseDelayBetweenCards / dealerSpeed);
 
-
     let delay = 0;
     // Track card counts for each player/dealer to calculate proper positions
     const cardCounts = {
       ai: new Map<number, number>(), // AI player index -> card count
       player: 0,
-      dealer: 0
+      dealer: 0,
     };
 
     dealtCards.forEach(({ type, index, card }, animIdx) => {
@@ -763,25 +865,42 @@ export default function GamePage() {
 
         // Calculate positions for flying animation
         const fromPosition = getCardPosition("shoe");
-        const toPosition = type === "ai"
-          ? getCardPosition("ai", index, cardIndex)
-          : type === "player"
-          ? getCardPosition("player", undefined, cardIndex)
-          : getCardPosition("dealer", undefined, cardIndex);
+        const toPosition =
+          type === "ai"
+            ? getCardPosition("ai", index, cardIndex)
+            : type === "player"
+              ? getCardPosition("player", undefined, cardIndex)
+              : getCardPosition("dealer", undefined, cardIndex);
+
+        // Log card animation details
+        const playerName =
+          type === "ai"
+            ? `${aiPlayers[index]?.character.name} (AI${index}, seat ${aiPlayers[index]?.position})`
+            : type === "player"
+              ? "PLAYER"
+              : "DEALER";
+        addDebugLog(
+          `🎴 Card #${cardIndex} for ${playerName} (${card.rank}${card.suit})`,
+        );
+        addDebugLog(`   From: ${fromPosition.left}, ${fromPosition.top}`);
+        addDebugLog(`   To: ${toPosition.left}, ${toPosition.top}`);
 
         // Create flying card
         const flyingCardId = `flying-${animIdx}-${Date.now()}`;
-        setFlyingCards(prev => [...prev, {
-          id: flyingCardId,
-          card,
-          fromPosition,
-          toPosition
-        }]);
+        setFlyingCards((prev) => [
+          ...prev,
+          {
+            id: flyingCardId,
+            card,
+            fromPosition,
+            toPosition,
+          },
+        ]);
 
         // After animation mostly completes, add card to hand (reduced from 800ms to 700ms)
         registerTimeout(() => {
           // Remove flying card
-          setFlyingCards(prev => prev.filter(fc => fc.id !== flyingCardId));
+          setFlyingCards((prev) => prev.filter((fc) => fc.id !== flyingCardId));
 
           // Add card to appropriate hand
           if (type === "ai") {
@@ -792,8 +911,8 @@ export default function GamePage() {
                 ...updated[index],
                 hand: {
                   ...updated[index].hand,
-                  cards: [...updated[index].hand.cards, card]
-                }
+                  cards: [...updated[index].hand.cards, card],
+                },
               };
               return updated;
             });
@@ -808,83 +927,103 @@ export default function GamePage() {
               return newHand;
             });
           }
-        }, 700); // Slightly before animation completes for smoother transition
+        }, CARD_APPEAR_TIME);
       }, delay);
       delay += delayBetweenCards;
     });
 
     // Wait for all cards to finish flying and be added to hands
     // delay = time when last card STARTS flying
-    // + 800ms for the last card's animation to complete
+    // + CARD_ANIMATION_DURATION for the last card's animation to complete
     // + 500ms buffer for reactions
-    registerTimeout(() => {
-      checkForInitialReactions();
+    registerTimeout(
+      () => {
+        checkForInitialReactions();
 
-      // Check for blackjacks using the dealt cards
-      // Build hands from dealtCards to check for blackjacks
-      const aiHands: Map<number, GameCard[]> = new Map();
-      let playerCards: GameCard[] = [];
+        // Check for blackjacks using the dealt cards
+        // Build hands from dealtCards to check for blackjacks
+        const aiHands: Map<number, GameCard[]> = new Map();
+        let playerCards: GameCard[] = [];
 
-      dealtCards.forEach(({ type, index, card }) => {
-        if (type === "ai") {
-          if (!aiHands.has(index)) {
-            aiHands.set(index, []);
+        dealtCards.forEach(({ type, index, card }) => {
+          if (type === "ai") {
+            if (!aiHands.has(index)) {
+              aiHands.set(index, []);
+            }
+            aiHands.get(index)!.push(card);
+          } else if (type === "player") {
+            playerCards.push(card);
           }
-          aiHands.get(index)!.push(card);
-        } else if (type === "player") {
-          playerCards.push(card);
+        });
+
+        addDebugLog("--- Deal complete - checking for blackjacks ---");
+        // Check AI players for blackjack
+        aiHands.forEach((cards, idx) => {
+          const handValue = calculateHandValue(cards);
+          const hasBlackjack = isBlackjack(cards);
+          addDebugLog(
+            `AI Player ${idx}: Hand value = ${handValue}, Blackjack = ${hasBlackjack}`,
+          );
+          if (hasBlackjack) {
+            setPlayerActions((prev) => new Map(prev).set(idx, "BLACKJACK"));
+            setTimeout(() => {
+              setPlayerActions((prev) => {
+                const newMap = new Map(prev);
+                newMap.delete(idx);
+                return newMap;
+              });
+            }, 800); // Reduced from 2000ms - show briefly
+          }
+        });
+
+        // Check player for blackjack
+        if (playerSeat !== null) {
+          const playerValue = calculateHandValue(playerCards);
+          const playerHasBlackjack = isBlackjack(playerCards);
+          addDebugLog(
+            `Player: Hand value = ${playerValue}, Blackjack = ${playerHasBlackjack}`,
+          );
+          if (playerHasBlackjack) {
+            setPlayerActions((prev) => new Map(prev).set(-1, "BLACKJACK"));
+            setTimeout(() => {
+              setPlayerActions((prev) => {
+                const newMap = new Map(prev);
+                newMap.delete(-1);
+                return newMap;
+              });
+            }, 800); // Reduced from 2000ms - show briefly
+          }
         }
-      });
 
-      addDebugLog("--- Deal complete - checking for blackjacks ---");
-      // Check AI players for blackjack
-      aiHands.forEach((cards, idx) => {
-        const handValue = calculateHandValue(cards);
-        const hasBlackjack = isBlackjack(cards);
-        addDebugLog(`AI Player ${idx}: Hand value = ${handValue}, Blackjack = ${hasBlackjack}`);
-        if (hasBlackjack) {
-          setPlayerActions(prev => new Map(prev).set(idx, "BLACKJACK"));
-          setTimeout(() => {
-            setPlayerActions(prev => {
-              const newMap = new Map(prev);
-              newMap.delete(idx);
-              return newMap;
-            });
-          }, 800); // Reduced from 2000ms - show briefly
+        addDebugLog(`Updated running count: ${currentRunningCount}`);
+        addDebugLog(`Shoe cards remaining: ${currentShoe.length}`);
+        addDebugLog("=== DEALING PHASE END ===");
+
+        // If player is not seated, skip PLAYER_TURN and go straight to AI_TURNS
+        if (playerSeat === null) {
+          addDebugLog("Player not seated, moving to AI_TURNS");
+          setPhase("AI_TURNS");
+        } else {
+          addDebugLog("Moving to PLAYER_TURN");
+          setPhase("PLAYER_TURN");
         }
-      });
-
-      // Check player for blackjack
-      if (playerSeat !== null) {
-        const playerValue = calculateHandValue(playerCards);
-        const playerHasBlackjack = isBlackjack(playerCards);
-        addDebugLog(`Player: Hand value = ${playerValue}, Blackjack = ${playerHasBlackjack}`);
-        if (playerHasBlackjack) {
-          setPlayerActions(prev => new Map(prev).set(-1, "BLACKJACK"));
-          setTimeout(() => {
-            setPlayerActions(prev => {
-              const newMap = new Map(prev);
-              newMap.delete(-1);
-              return newMap;
-            });
-          }, 800); // Reduced from 2000ms - show briefly
-        }
-      }
-
-      addDebugLog(`Updated running count: ${currentRunningCount}`);
-      addDebugLog(`Shoe cards remaining: ${currentShoe.length}`);
-      addDebugLog("=== DEALING PHASE END ===");
-
-      // If player is not seated, skip PLAYER_TURN and go straight to AI_TURNS
-      if (playerSeat === null) {
-        addDebugLog("Player not seated, moving to AI_TURNS");
-        setPhase("AI_TURNS");
-      } else {
-        addDebugLog("Moving to PLAYER_TURN");
-        setPhase("PLAYER_TURN");
-      }
-    }, delay + 800 + 500);
-  }, [aiPlayers, shoe, cardsDealt, runningCount, shoesDealt, gameSettings.numberOfDecks, gameSettings.countingSystem, registerTimeout, playerSeat, getCardPosition, currentDealer, addDebugLog]);
+      },
+      delay + 800 + 500,
+    );
+  }, [
+    aiPlayers,
+    shoe,
+    cardsDealt,
+    runningCount,
+    shoesDealt,
+    gameSettings.numberOfDecks,
+    gameSettings.countingSystem,
+    registerTimeout,
+    playerSeat,
+    getCardPosition,
+    currentDealer,
+    addDebugLog,
+  ]);
 
   // Betting handlers - manual bet placement
   const handleConfirmBet = useCallback(() => {
@@ -895,7 +1034,12 @@ export default function GamePage() {
     addDebugLog(`Phase: ${phase}`);
     addDebugLog(`Player seat: ${playerSeat}`);
 
-    const canBet = currentBet >= minBet && currentBet <= maxBet && currentBet <= playerChips && phase === "BETTING" && playerSeat !== null;
+    const canBet =
+      currentBet >= minBet &&
+      currentBet <= maxBet &&
+      currentBet <= playerChips &&
+      phase === "BETTING" &&
+      playerSeat !== null;
     addDebugLog(`Can place bet: ${canBet}`);
 
     if (canBet) {
@@ -905,7 +1049,9 @@ export default function GamePage() {
       setPlayerHand({ cards: [], bet: currentBet });
       setDealerHand({ cards: [], bet: 0 });
       setPlayerChips((prev) => {
-        addDebugLog(`Deducting bet: $${prev} - $${currentBet} = $${prev - currentBet}`);
+        addDebugLog(
+          `Deducting bet: $${prev} - $${currentBet} = $${prev - currentBet}`,
+        );
         return prev - currentBet;
       });
       setPreviousBet(currentBet);
@@ -922,27 +1068,44 @@ export default function GamePage() {
       setTimeout(() => dealInitialCards(), 500);
     } else {
       addDebugLog("✗ BET NOT CONFIRMED - Requirements not met");
-      if (currentBet < minBet) addDebugLog(`  - Bet too low (${currentBet} < ${minBet})`);
-      if (currentBet > maxBet) addDebugLog(`  - Bet too high (${currentBet} > ${maxBet})`);
-      if (currentBet > playerChips) addDebugLog(`  - Insufficient chips (${currentBet} > ${playerChips})`);
+      if (currentBet < minBet)
+        addDebugLog(`  - Bet too low (${currentBet} < ${minBet})`);
+      if (currentBet > maxBet)
+        addDebugLog(`  - Bet too high (${currentBet} > ${maxBet})`);
+      if (currentBet > playerChips)
+        addDebugLog(`  - Insufficient chips (${currentBet} > ${playerChips})`);
       if (phase !== "BETTING") addDebugLog(`  - Wrong phase (${phase})`);
       if (playerSeat === null) addDebugLog(`  - Player not seated`);
     }
-  }, [currentBet, minBet, maxBet, playerChips, phase, playerSeat, aiPlayers, dealInitialCards, addDebugLog]);
+  }, [
+    currentBet,
+    minBet,
+    maxBet,
+    playerChips,
+    phase,
+    playerSeat,
+    aiPlayers,
+    dealInitialCards,
+    addDebugLog,
+  ]);
 
   const handleClearBet = useCallback(() => {
     addDebugLog("CLEAR BET - Resetting bet to $0");
     setCurrentBet(0);
   }, [addDebugLog]);
 
-  const handleBetChange = useCallback((newBet: number) => {
-    addDebugLog(`BET CHANGED: $${currentBet} → $${newBet}`);
-    setCurrentBet(newBet);
-  }, [currentBet, addDebugLog]);
+  const handleBetChange = useCallback(
+    (newBet: number) => {
+      addDebugLog(`BET CHANGED: $${currentBet} → $${newBet}`);
+      setCurrentBet(newBet);
+    },
+    [currentBet, addDebugLog],
+  );
 
   // Log betting interface visibility conditions
   useEffect(() => {
-    const shouldShowBetting = phase === "BETTING" && initialized && playerSeat !== null;
+    const shouldShowBetting =
+      phase === "BETTING" && initialized && playerSeat !== null;
     addDebugLog(`=== BETTING INTERFACE CHECK ===`);
     addDebugLog(`Phase: ${phase}`);
     addDebugLog(`Initialized: ${initialized}`);
@@ -1017,15 +1180,23 @@ export default function GamePage() {
   // Player actions
   const hit = useCallback(() => {
     addDebugLog("=== PLAYER ACTION: HIT ===");
-    addDebugLog(`Current hand: ${playerHand.cards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
+    addDebugLog(
+      `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+    );
     addDebugLog(`Current hand value: ${calculateHandValue(playerHand.cards)}`);
 
     const card = dealCardFromShoe();
-    addDebugLog(`Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${runningCount + card.count}`);
+    addDebugLog(
+      `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | RC: ${runningCount + card.count}`,
+    );
 
     // Add flying card animation
     const shoePosition = getCardPosition("shoe");
-    const playerPosition = getCardPosition("player", undefined, playerHand.cards.length);
+    const playerPosition = getCardPosition(
+      "player",
+      undefined,
+      playerHand.cards.length,
+    );
 
     const flyingCard: FlyingCardData = {
       id: `hit-player-${Date.now()}`,
@@ -1034,7 +1205,7 @@ export default function GamePage() {
       toPosition: playerPosition,
     };
 
-    setFlyingCards(prev => [...prev, flyingCard]);
+    setFlyingCards((prev) => [...prev, flyingCard]);
 
     // Add card to hand after animation completes
     setTimeout(() => {
@@ -1042,21 +1213,23 @@ export default function GamePage() {
       const newCards = [...playerHand.cards, card];
       const newHandValue = calculateHandValue(newCards);
 
-      addDebugLog(`New hand: ${newCards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
+      addDebugLog(
+        `New hand: ${newCards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+      );
       addDebugLog(`New hand value: ${newHandValue}`);
 
       setPlayerHand((prev) => ({ ...prev, cards: newCards }));
-      setFlyingCards(prev => prev.filter(fc => fc.id !== flyingCard.id));
+      setFlyingCards((prev) => prev.filter((fc) => fc.id !== flyingCard.id));
 
       if (newHandValue > 21) {
         addDebugLog("PLAYER BUSTED!");
         // Show BUST indicator
-        setPlayerActions(prev => new Map(prev).set(-1, "BUST"));
+        setPlayerActions((prev) => new Map(prev).set(-1, "BUST"));
 
         // Muck (clear) the cards after showing bust indicator
         setTimeout(() => {
           setPlayerHand((prev) => ({ ...prev, cards: [] }));
-          setPlayerActions(prev => {
+          setPlayerActions((prev) => {
             const newMap = new Map(prev);
             newMap.delete(-1);
             return newMap;
@@ -1065,59 +1238,73 @@ export default function GamePage() {
           setPhase("AI_TURNS");
         }, 1500); // Show BUST for 1.5s then muck cards
       }
-    }, 800); // Match FlyingCard animation duration
-  }, [playerHand, dealCardFromShoe, getCardPosition, addDebugLog, runningCount]);
+    }, CARD_ANIMATION_DURATION);
+  }, [
+    playerHand,
+    dealCardFromShoe,
+    getCardPosition,
+    addDebugLog,
+    runningCount,
+  ]);
 
   const stand = useCallback(() => {
     addDebugLog("=== PLAYER ACTION: STAND ===");
-    addDebugLog(`Final hand: ${playerHand.cards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
+    addDebugLog(
+      `Final hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+    );
     addDebugLog(`Final hand value: ${calculateHandValue(playerHand.cards)}`);
     addDebugLog("Moving to AI_TURNS phase");
     setPhase("AI_TURNS");
   }, [playerHand, addDebugLog]);
 
   // Basic strategy decision - returns true if should HIT, false if should STAND
-  const shouldHitBasicStrategy = useCallback((playerCards: GameCard[], dealerUpCard: GameCard): boolean => {
-    const playerValue = calculateHandValue(playerCards);
-    const dealerValue = dealerUpCard.rank === 'A' ? 11 :
-                        ['J', 'Q', 'K'].includes(dealerUpCard.rank) ? 10 :
-                        parseInt(dealerUpCard.rank);
+  const shouldHitBasicStrategy = useCallback(
+    (playerCards: GameCard[], dealerUpCard: GameCard): boolean => {
+      const playerValue = calculateHandValue(playerCards);
+      const dealerValue =
+        dealerUpCard.rank === "A"
+          ? 11
+          : ["J", "Q", "K"].includes(dealerUpCard.rank)
+            ? 10
+            : parseInt(dealerUpCard.rank);
 
-    // Check if player has soft hand (Ace counted as 11)
-    const hasAce = playerCards.some(card => card.rank === 'A');
-    const hardValue = playerCards.reduce((sum, card) => {
-      if (card.rank === 'A') return sum + 1;
-      if (['J', 'Q', 'K'].includes(card.rank)) return sum + 10;
-      return sum + parseInt(card.rank);
-    }, 0);
-    const isSoft = hasAce && hardValue + 10 === playerValue;
+      // Check if player has soft hand (Ace counted as 11)
+      const hasAce = playerCards.some((card) => card.rank === "A");
+      const hardValue = playerCards.reduce((sum, card) => {
+        if (card.rank === "A") return sum + 1;
+        if (["J", "Q", "K"].includes(card.rank)) return sum + 10;
+        return sum + parseInt(card.rank);
+      }, 0);
+      const isSoft = hasAce && hardValue + 10 === playerValue;
 
-    // Soft hand strategy (has Ace counted as 11)
-    if (isSoft) {
-      if (playerValue >= 19) return false; // Stand on soft 19+
-      if (playerValue === 18) {
-        // Soft 18: hit vs 9, 10, A; stand vs 2-8
-        return dealerValue >= 9;
+      // Soft hand strategy (has Ace counted as 11)
+      if (isSoft) {
+        if (playerValue >= 19) return false; // Stand on soft 19+
+        if (playerValue === 18) {
+          // Soft 18: hit vs 9, 10, A; stand vs 2-8
+          return dealerValue >= 9;
+        }
+        return true; // Hit on soft 17 or less
       }
-      return true; // Hit on soft 17 or less
-    }
 
-    // Hard hand strategy
-    if (playerValue >= 17) return false; // Always stand on 17+
-    if (playerValue <= 11) return true; // Always hit on 11 or less
+      // Hard hand strategy
+      if (playerValue >= 17) return false; // Always stand on 17+
+      if (playerValue <= 11) return true; // Always hit on 11 or less
 
-    // 12-16: depends on dealer upcard
-    if (playerValue === 12) {
-      // Hit vs 2, 3, 7+; stand vs 4-6
-      return dealerValue <= 3 || dealerValue >= 7;
-    }
-    if (playerValue >= 13 && playerValue <= 16) {
-      // Stand vs dealer 2-6, hit vs 7+
-      return dealerValue >= 7;
-    }
+      // 12-16: depends on dealer upcard
+      if (playerValue === 12) {
+        // Hit vs 2, 3, 7+; stand vs 4-6
+        return dealerValue <= 3 || dealerValue >= 7;
+      }
+      if (playerValue >= 13 && playerValue <= 16) {
+        // Stand vs dealer 2-6, hit vs 7+
+        return dealerValue >= 7;
+      }
 
-    return false;
-  }, []);
+      return false;
+    },
+    [],
+  );
 
   // Calculate exponential score points: 10 × 2^(N-1) for Nth correct decision
   const calculateStreakPoints = useCallback((streakNumber: number): number => {
@@ -1131,7 +1318,7 @@ export default function GamePage() {
     const pointsWithMultiplier = Math.floor(basePoints * scoreMultiplier);
 
     setCurrentStreak(newStreak);
-    setCurrentScore(prev => prev + pointsWithMultiplier);
+    setCurrentScore((prev) => prev + pointsWithMultiplier);
 
     // Update longest streak
     if (newStreak > longestStreak) {
@@ -1158,246 +1345,287 @@ export default function GamePage() {
       addDebugLog(`Resetting playersFinished set and activePlayerIndex`);
       setPlayersFinished(new Set());
       setActivePlayerIndex(null);
+      aiTurnProcessingRef.current = false; // Reset processing flag on phase entry
     }
     prevPhaseRef.current = phase;
   }, [phase, addDebugLog]);
 
   // AI turns - process one player at a time, allowing multiple hits
   useEffect(() => {
-    if (phase === "AI_TURNS" && activePlayerIndex === null) {
-      // Create array of players with their indices, sorted by table position
-      // Higher position numbers are closer to dealer's left (first base)
-      // Playing order: dealer's left to right (highest position to lowest)
-      const playersByPosition = aiPlayers
-        .map((ai, idx) => ({ ai, idx, position: ai.position }))
-        .sort((a, b) => b.position - a.position); // Descending: highest position (first base) acts first
+    if (phase !== "AI_TURNS") {
+      // Phase has changed away from AI_TURNS, do nothing
+      return;
+    }
 
-      // Log the sorted order for debugging
-      addDebugLog(`Turn order (sorted by position): ${playersByPosition.map(p => `${p.ai.character.name} (idx:${p.idx}, seat:${p.position})`).join(', ')}`);
-      addDebugLog(`Players finished: [${Array.from(playersFinished).join(', ')}]`);
+    if (activePlayerIndex !== null) {
+      // A player is currently active, wait for them to finish
+      return;
+    }
 
-      // Find the next AI player who needs to act (in table order)
-      const nextPlayer = playersByPosition.find(({ ai, idx }) => {
-        // Skip if already finished
-        if (playersFinished.has(idx)) return false;
+    // Guard against re-entry while processing
+    if (aiTurnProcessingRef.current) {
+      addDebugLog("⚠️ AI turn already processing, skipping re-entry");
+      return;
+    }
 
-        const handValue = calculateHandValue(ai.hand.cards);
-        const isBust = isBusted(ai.hand.cards);
+    aiTurnProcessingRef.current = true;
+    addDebugLog("🔒 AI turn processing locked");
 
-        // Skip if already busted - they should have been marked finished already
-        if (isBust) return false;
+    // Players act in seat order (0-7, right to left from dealer's perspective)
+    // Sort by position ascending (0=right/first base, 7=left/third base)
+    const playersByPosition = aiPlayers
+      .map((ai, idx) => ({ ai, idx, position: ai.position }))
+      .sort((a, b) => a.position - b.position);
 
-        // Player needs to act if they're below 21
-        if (handValue < 21) return true;
+    // Log the turn order for debugging
+    addDebugLog(
+      `Turn order (right to left): ${playersByPosition.map((p) => `${p.ai.character.name} (seat ${p.position})`).join(" -> ")}`,
+    );
+    addDebugLog(
+      `Players finished: [${Array.from(playersFinished).join(", ")}]`,
+    );
 
-        // Player at 21 - they need to show STAND then be marked finished
-        if (handValue === 21) return true;
+    // Find the next AI player who needs to act (in index order 0-7)
+    const nextPlayer = playersByPosition.find(({ ai, idx }) => {
+      // Skip if already finished
+      if (playersFinished.has(idx)) return false;
 
-        return false;
-      });
-
-      if (!nextPlayer) {
-        // All players finished, move to dealer turn
-        addDebugLog("=== ALL AI PLAYERS FINISHED ===");
-        addDebugLog(`Players finished: ${Array.from(playersFinished).join(', ')}`);
-        addDebugLog("Moving to DEALER_TURN phase");
-        registerTimeout(() => setPhase("DEALER_TURN"), 1000);
-        return;
-      }
-
-      // Process this player's action
-      const { ai, idx } = nextPlayer;
-
-      addDebugLog(`=== AI PLAYER ${idx} TURN (${ai.character.name}, Seat ${ai.position}) ===`);
-      addDebugLog(`Current hand: ${ai.hand.cards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
-
-      // Calculate hand value first to determine difficulty
       const handValue = calculateHandValue(ai.hand.cards);
       const isBust = isBusted(ai.hand.cards);
 
-      addDebugLog(`Hand value: ${handValue}, Busted: ${isBust}`);
+      // Skip if already busted - they should have been marked finished already
+      if (isBust) return false;
 
-      // Calculate hand difficulty multiplier
-      let handDifficultyMultiplier = 1.0;
-      if (isBust || handValue >= 20) {
-        handDifficultyMultiplier = 0.5;
-      } else if (handValue >= 17) {
-        handDifficultyMultiplier = 0.8;
-      } else if (handValue >= 12 && handValue <= 16) {
-        handDifficultyMultiplier = 1.5;
-      } else {
-        handDifficultyMultiplier = 0.7;
+      // Player needs to act if they're below 21
+      if (handValue < 21) return true;
+
+      // Player at 21 - they need to show STAND then be marked finished
+      if (handValue === 21) return true;
+
+      return false;
+    });
+
+    if (!nextPlayer) {
+      // All players finished, move to dealer turn
+      addDebugLog("=== ALL AI PLAYERS FINISHED ===");
+      addDebugLog("Moving to DEALER_TURN phase");
+      aiTurnProcessingRef.current = false; // Unlock before moving to next phase
+      addDebugLog("🔓 AI turn processing unlocked (all finished)");
+      registerTimeout(() => setPhase("DEALER_TURN"), 1000);
+      return;
+    }
+
+    // Process this player's action
+    const { ai, idx } = nextPlayer;
+
+    addDebugLog(`=== ${ai.character.name}'S TURN (Seat ${ai.position}) ===`);
+    addDebugLog(
+      `Hand: ${ai.hand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+    );
+
+    // Calculate hand value first to determine difficulty
+    const handValue = calculateHandValue(ai.hand.cards);
+    const isBust = isBusted(ai.hand.cards);
+
+    addDebugLog(`Hand value: ${handValue}, Busted: ${isBust}`);
+
+    // Calculate hand difficulty multiplier
+    let handDifficultyMultiplier = 1.0;
+    if (isBust || handValue >= 20) {
+      handDifficultyMultiplier = 0.5;
+    } else if (handValue >= 17) {
+      handDifficultyMultiplier = 0.8;
+    } else if (handValue >= 12 && handValue <= 16) {
+      handDifficultyMultiplier = 1.5;
+    } else {
+      handDifficultyMultiplier = 0.7;
+    }
+
+    // Calculate timing
+    const baseDecisionTime = 800; // Reduced from 1500 - faster thinking
+    const baseActionDelay = 800;
+    const baseActionDisplay = 600; // Reduced from 2000 - show action briefly
+    const baseTurnClear = 100; // Reduced from 500 - minimal delay between players
+
+    const playSpeed = ai.character.playSpeed;
+    const combinedSpeed = playSpeed / handDifficultyMultiplier;
+    const decisionTime = Math.round(baseDecisionTime / combinedSpeed);
+    const actionDelay = Math.round(baseActionDelay / combinedSpeed);
+    const actionDisplay = Math.round(baseActionDisplay / combinedSpeed);
+    const turnClear = Math.round(baseTurnClear / combinedSpeed);
+
+    // Set active player immediately
+    setActivePlayerIndex(idx);
+
+    // Decide: HIT or STAND using basic strategy with skill level
+    const dealerUpCard = dealerHand.cards[0]; // Dealer's face-up card
+    const basicStrategyDecision = shouldHitBasicStrategy(
+      ai.hand.cards,
+      dealerUpCard,
+    );
+
+    // Apply skill level: X% chance to follow basic strategy, (100-X)% chance to use simple "hit on < 17" rule
+    const followsBasicStrategy = Math.random() * 100 < ai.character.skillLevel;
+    const shouldHit = followsBasicStrategy
+      ? basicStrategyDecision
+      : handValue < 17;
+
+    addDebugLog(`Dealer up card: ${dealerUpCard.rank}${dealerUpCard.suit}`);
+    addDebugLog(
+      `Basic strategy says: ${basicStrategyDecision ? "HIT" : "STAND"}`,
+    );
+    addDebugLog(
+      `Follows basic strategy: ${followsBasicStrategy}, Decision: ${shouldHit ? "HIT" : "STAND"}`,
+    );
+
+    if (shouldHit && !isBust) {
+      // 15% chance to show banter during turn
+      if (Math.random() < 0.15) {
+        const banterLines = AI_DIALOGUE_ADDONS.find(
+          (addon) => addon.id === ai.character.id,
+        )?.banterWithPlayer;
+
+        if (banterLines && banterLines.length > 0) {
+          const randomBanter = pick(banterLines);
+          registerTimeout(() => {
+            addSpeechBubble(
+              `ai-turn-banter-${idx}-${Date.now()}`,
+              randomBanter.text,
+              ai.position,
+            );
+          }, decisionTime / 2); // Show banter halfway through thinking
+        }
       }
 
-      // Calculate timing
-      const baseDecisionTime = 800; // Reduced from 1500 - faster thinking
-      const baseActionDelay = 800;
-      const baseActionDisplay = 600; // Reduced from 2000 - show action briefly
-      const baseTurnClear = 100; // Reduced from 500 - minimal delay between players
+      // Show HIT action after thinking
+      registerTimeout(() => {
+        setPlayerActions((prev) => new Map(prev).set(idx, "HIT"));
+      }, decisionTime);
 
-      const playSpeed = ai.character.playSpeed;
-      const combinedSpeed = playSpeed / handDifficultyMultiplier;
-      const decisionTime = Math.round(baseDecisionTime / combinedSpeed);
-      const actionDelay = Math.round(baseActionDelay / combinedSpeed);
-      const actionDisplay = Math.round(baseActionDisplay / combinedSpeed);
-      const turnClear = Math.round(baseTurnClear / combinedSpeed);
+      // Deal card immediately after showing action with animation
+      registerTimeout(() => {
+        const card = dealCardFromShoe();
+        addDebugLog(
+          `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
+        );
 
+        // Add flying card animation
+        const shoePosition = getCardPosition("shoe");
+        const aiPosition = getCardPosition("ai", idx, ai.hand.cards.length);
 
-      // Set active player immediately
-      setActivePlayerIndex(idx);
+        const flyingCard: FlyingCardData = {
+          id: `hit-ai-${idx}-${Date.now()}`,
+          card,
+          fromPosition: shoePosition,
+          toPosition: aiPosition,
+        };
 
-      // Decide: HIT or STAND using basic strategy with skill level
-      const dealerUpCard = dealerHand.cards[0]; // Dealer's face-up card
-      const basicStrategyDecision = shouldHitBasicStrategy(ai.hand.cards, dealerUpCard);
+        setFlyingCards((prev) => [...prev, flyingCard]);
 
-      // Apply skill level: X% chance to follow basic strategy, (100-X)% chance to use simple "hit on < 17" rule
-      const followsBasicStrategy = Math.random() * 100 < ai.character.skillLevel;
-      const shouldHit = followsBasicStrategy ? basicStrategyDecision : handValue < 17;
+        // Add card to hand after animation completes
+        setTimeout(() => {
+          setAIPlayers((prev) => {
+            const updated = [...prev];
+            updated[idx] = {
+              ...updated[idx],
+              hand: {
+                ...updated[idx].hand,
+                cards: [...updated[idx].hand.cards, card],
+              },
+            };
+            return updated;
+          });
+          setFlyingCards((prev) =>
+            prev.filter((fc) => fc.id !== flyingCard.id),
+          );
 
-      addDebugLog(`Dealer up card: ${dealerUpCard.rank}${dealerUpCard.suit}`);
-      addDebugLog(`Basic strategy says: ${basicStrategyDecision ? 'HIT' : 'STAND'}`);
-      addDebugLog(`Follows basic strategy: ${followsBasicStrategy}, Decision: ${shouldHit ? 'HIT' : 'STAND'}`);
+          // Check if player busted or reached 21+ after receiving card
+          const newHandValue = calculateHandValue([...ai.hand.cards, card]);
+          const busted = isBusted([...ai.hand.cards, card]);
 
-      if (shouldHit && !isBust) {
+          addDebugLog(`New hand value: ${newHandValue}, Busted: ${busted}`);
 
-        // 15% chance to show banter during turn
-        if (Math.random() < 0.15) {
-          const banterLines = AI_DIALOGUE_ADDONS.find(
-            addon => addon.id === ai.character.id
-          )?.banterWithPlayer;
+          if (busted) {
+            addDebugLog(`AI Player ${idx} BUSTED!`);
+            addDebugLog(`Marking AI Player ${idx} as FINISHED (busted)`);
 
-          if (banterLines && banterLines.length > 0) {
-            const randomBanter = pick(banterLines);
-            registerTimeout(() => {
-              addSpeechBubble(
-                `ai-turn-banter-${idx}-${Date.now()}`,
-                randomBanter.text,
-                ai.position
-              );
-            }, decisionTime / 2); // Show banter halfway through thinking
-          }
-        }
+            // Mark player as finished FIRST, before any async operations
+            setPlayersFinished((prev) => new Set(prev).add(idx));
 
-        // Show HIT action after thinking
-        registerTimeout(() => {
-          setPlayerActions(prev => new Map(prev).set(idx, "HIT"));
-        }, decisionTime);
-
-        // Deal card immediately after showing action with animation
-        registerTimeout(() => {
-          const card = dealCardFromShoe();
-          addDebugLog(`Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`);
-
-          // Add flying card animation
-          const shoePosition = getCardPosition("shoe");
-          const aiPosition = getCardPosition("ai", idx, ai.hand.cards.length);
-
-          const flyingCard: FlyingCardData = {
-            id: `hit-ai-${idx}-${Date.now()}`,
-            card,
-            fromPosition: shoePosition,
-            toPosition: aiPosition,
-          };
-
-          setFlyingCards(prev => [...prev, flyingCard]);
-
-          // Add card to hand after animation completes
-          setTimeout(() => {
-            setAIPlayers((prev) => {
-              const updated = [...prev];
-              updated[idx] = {
-                ...updated[idx],
-                hand: {
-                  ...updated[idx].hand,
-                  cards: [...updated[idx].hand.cards, card]
-                }
-              };
-              return updated;
+            // Clear HIT action first
+            setPlayerActions((prev) => {
+              const newMap = new Map(prev);
+              newMap.delete(idx);
+              return newMap;
             });
-            setFlyingCards(prev => prev.filter(fc => fc.id !== flyingCard.id));
 
-            // Check if player busted or reached 21+ after receiving card
-            const newHandValue = calculateHandValue([...ai.hand.cards, card]);
-            const busted = isBusted([...ai.hand.cards, card]);
+            // Show BUST indicator after a brief delay
+            setTimeout(() => {
+              setPlayerActions((prev) => new Map(prev).set(idx, "BUST"));
+            }, 100);
 
-            addDebugLog(`New hand value: ${newHandValue}, Busted: ${busted}`);
-
-            if (busted) {
-              addDebugLog(`AI Player ${idx} BUSTED!`);
-              addDebugLog(`Marking AI Player ${idx} as FINISHED (busted)`);
-
-              // Mark player as finished FIRST, before any async operations
-              setPlayersFinished(prev => new Set(prev).add(idx));
-
-              // Clear HIT action first
-              setPlayerActions(prev => {
+            // Muck (clear) the cards after showing bust indicator
+            setTimeout(() => {
+              setAIPlayers((prev) => {
+                const updated = [...prev];
+                updated[idx] = {
+                  ...updated[idx],
+                  hand: {
+                    ...updated[idx].hand,
+                    cards: [],
+                  },
+                };
+                return updated;
+              });
+              setPlayerActions((prev) => {
                 const newMap = new Map(prev);
                 newMap.delete(idx);
                 return newMap;
               });
+              // Move to next player immediately after mucking
+              aiTurnProcessingRef.current = false; // Unlock before next turn
+              addDebugLog("🔓 AI turn processing unlocked (bust)");
+              setActivePlayerIndex(null);
+            }, 800); // Show BUST for 0.8s then muck cards and move on
+          } else if (newHandValue >= 21) {
+            addDebugLog(`AI Player ${idx} reached 21!`);
+            addDebugLog(`Marking AI Player ${idx} as FINISHED (21)`);
 
-              // Show BUST indicator after a brief delay
-              setTimeout(() => {
-                setPlayerActions(prev => new Map(prev).set(idx, "BUST"));
-              }, 100);
+            // Mark player as finished FIRST (21 but not bust)
+            setPlayersFinished((prev) => new Set(prev).add(idx));
 
-              // Muck (clear) the cards after showing bust indicator
-              setTimeout(() => {
-                setAIPlayers((prev) => {
-                  const updated = [...prev];
-                  updated[idx] = {
-                    ...updated[idx],
-                    hand: {
-                      ...updated[idx].hand,
-                      cards: []
-                    }
-                  };
-                  return updated;
-                });
-                setPlayerActions(prev => {
-                  const newMap = new Map(prev);
-                  newMap.delete(idx);
-                  return newMap;
-                });
-                // Move to next player immediately after mucking
-                setActivePlayerIndex(null);
-              }, 800); // Show BUST for 0.8s then muck cards and move on
-            } else if (newHandValue >= 21) {
-              addDebugLog(`AI Player ${idx} reached 21!`);
-              addDebugLog(`Marking AI Player ${idx} as FINISHED (21)`);
+            // Player got 21 - clear HIT and show STAND
+            setPlayerActions((prev) => {
+              const newMap = new Map(prev);
+              newMap.delete(idx);
+              return newMap;
+            });
 
-              // Mark player as finished FIRST (21 but not bust)
-              setPlayersFinished(prev => new Set(prev).add(idx));
+            setTimeout(() => {
+              setPlayerActions((prev) => new Map(prev).set(idx, "STAND"));
+            }, 100);
 
-              // Player got 21 - clear HIT and show STAND
-              setPlayerActions(prev => {
+            // Clear STAND indicator after display and move to next player
+            setTimeout(() => {
+              setPlayerActions((prev) => {
                 const newMap = new Map(prev);
                 newMap.delete(idx);
                 return newMap;
               });
+              // Move to next player immediately
+              aiTurnProcessingRef.current = false; // Unlock before next turn
+              addDebugLog("🔓 AI turn processing unlocked (21)");
+              setActivePlayerIndex(null);
+            }, 600); // Show STAND for 0.6s then move on
+          }
+        }, CARD_ANIMATION_DURATION);
+      }, decisionTime + 50); // Show action, then immediately deal card
 
-              setTimeout(() => {
-                setPlayerActions(prev => new Map(prev).set(idx, "STAND"));
-              }, 100);
-
-              // Clear STAND indicator after display and move to next player
-              setTimeout(() => {
-                setPlayerActions(prev => {
-                  const newMap = new Map(prev);
-                  newMap.delete(idx);
-                  return newMap;
-                });
-                // Move to next player immediately
-                setActivePlayerIndex(null);
-              }, 600); // Show STAND for 0.6s then move on
-            }
-          }, 800); // Match FlyingCard animation duration
-        }, decisionTime + 50); // Show action, then immediately deal card
-
-        // Clear HIT action after display (only if player didn't bust or get 21)
-        // This timeout will be overridden by the bust/21 logic above if needed
-        registerTimeout(() => {
-          setPlayerActions(prev => {
+      // Clear HIT action after display (only if player didn't bust or get 21)
+      // This timeout will be overridden by the bust/21 logic above if needed
+      registerTimeout(
+        () => {
+          setPlayerActions((prev) => {
             const newMap = new Map(prev);
             // Only delete if it's still "HIT" (not "BUST" or "STAND" from hitting 21)
             if (newMap.get(idx) === "HIT") {
@@ -1405,74 +1633,115 @@ export default function GamePage() {
             }
             return newMap;
           });
-        }, decisionTime + 50 + 800 + actionDisplay); // thinking + action display + card animation
+        },
+        decisionTime + 50 + CARD_ANIMATION_DURATION + actionDisplay,
+      );
 
-        // Clear active player to trigger next action (with thinking time for the new hand)
-        // Need to wait for: decision + action show + card animation + action display + turn clear + NEW THINKING TIME
-        registerTimeout(() => {
+      // Clear active player to trigger next action (with thinking time for the new hand)
+      // Need to wait for: decision + action show + card animation + action display + turn clear + NEW THINKING TIME
+      registerTimeout(
+        () => {
+          aiTurnProcessingRef.current = false; // Unlock before next turn
+          addDebugLog("🔓 AI turn processing unlocked (hit, continuing)");
           setActivePlayerIndex(null);
-        }, decisionTime + 50 + 800 + actionDisplay + turnClear + decisionTime); // Add another decision time for thinking about new hand
-      } else {
-        addDebugLog(`AI Player ${idx} decision: STAND`);
-        addDebugLog(`Marking AI Player ${idx} as FINISHED (stand)`);
+        },
+        decisionTime +
+          50 +
+          CARD_ANIMATION_DURATION +
+          actionDisplay +
+          turnClear +
+          decisionTime,
+      );
+    } else {
+      addDebugLog(`AI Player ${idx} decision: STAND`);
+      addDebugLog(`Marking AI Player ${idx} as FINISHED (stand)`);
 
-        // Mark player as finished FIRST
-        setPlayersFinished(prev => new Set(prev).add(idx));
+      // Mark player as finished FIRST
+      setPlayersFinished((prev) => new Set(prev).add(idx));
 
-        // 15% chance to show banter during turn
-        if (Math.random() < 0.15) {
-          const banterLines = AI_DIALOGUE_ADDONS.find(
-            addon => addon.id === ai.character.id
-          )?.banterWithPlayer;
+      // 15% chance to show banter during turn
+      if (Math.random() < 0.15) {
+        const banterLines = AI_DIALOGUE_ADDONS.find(
+          (addon) => addon.id === ai.character.id,
+        )?.banterWithPlayer;
 
-          if (banterLines && banterLines.length > 0) {
-            const randomBanter = pick(banterLines);
-            registerTimeout(() => {
-              addSpeechBubble(
-                `ai-turn-banter-${idx}-${Date.now()}`,
-                randomBanter.text,
-                ai.position
-              );
-            }, decisionTime / 2); // Show banter halfway through thinking
-          }
+        if (banterLines && banterLines.length > 0) {
+          const randomBanter = pick(banterLines);
+          registerTimeout(() => {
+            addSpeechBubble(
+              `ai-turn-banter-${idx}-${Date.now()}`,
+              randomBanter.text,
+              ai.position,
+            );
+          }, decisionTime / 2); // Show banter halfway through thinking
         }
-
-        // Show STAND action after thinking
-        registerTimeout(() => {
-          setPlayerActions(prev => new Map(prev).set(idx, "STAND"));
-        }, decisionTime);
-
-        // Clear action after display
-        registerTimeout(() => {
-          setPlayerActions(prev => {
-            const newMap = new Map(prev);
-            newMap.delete(idx);
-            return newMap;
-          });
-        }, decisionTime + actionDisplay);
-
-        // Clear active to move to next player
-        registerTimeout(() => {
-          setActivePlayerIndex(null);
-        }, decisionTime + actionDisplay + turnClear);
       }
+
+      // Show STAND action after thinking
+      registerTimeout(() => {
+        setPlayerActions((prev) => new Map(prev).set(idx, "STAND"));
+      }, decisionTime);
+
+      // Clear action after display
+      registerTimeout(() => {
+        setPlayerActions((prev) => {
+          const newMap = new Map(prev);
+          newMap.delete(idx);
+          return newMap;
+        });
+      }, decisionTime + actionDisplay);
+
+      // Clear active to move to next player
+      registerTimeout(
+        () => {
+          aiTurnProcessingRef.current = false; // Unlock before next turn
+          addDebugLog("🔓 AI turn processing unlocked (stand)");
+          setActivePlayerIndex(null);
+        },
+        decisionTime + actionDisplay + turnClear,
+      );
     }
-  }, [phase, aiPlayers, dealCardFromShoe, registerTimeout, activePlayerIndex, playersFinished, dealerHand, shouldHitBasicStrategy, getCardPosition, addDebugLog]);
+  }, [
+    phase,
+    aiPlayers,
+    dealCardFromShoe,
+    registerTimeout,
+    activePlayerIndex,
+    playersFinished,
+    dealerHand,
+    shouldHitBasicStrategy,
+    getCardPosition,
+    addDebugLog,
+  ]);
 
   // Dealer turn
   useEffect(() => {
-    if (phase === "DEALER_TURN") {
-      addDebugLog("=== PHASE: DEALER_TURN START ===");
-      addDebugLog(`Dealer hand: ${dealerHand.cards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
-      addDebugLog(`Dealer hand value: ${calculateHandValue(dealerHand.cards)}`);
-      setDealerRevealed(true);
-      dealerFinishedRef.current = false; // Reset flag when entering dealer turn
+    if (phase !== "DEALER_TURN") {
+      // Phase changed away from DEALER_TURN
+      return;
+    }
+
+    // Guard against re-entry while dealer is playing
+    if (dealerTurnProcessingRef.current) {
+      addDebugLog("⚠️ Dealer turn already processing, skipping re-entry");
+      return;
+    }
+
+    dealerTurnProcessingRef.current = true;
+    addDebugLog("=== PHASE: DEALER_TURN START ===");
+    addDebugLog(
+      `Dealer hand: ${dealerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+    );
+    addDebugLog(`Dealer hand value: ${calculateHandValue(dealerHand.cards)}`);
+    setDealerRevealed(true);
+    dealerFinishedRef.current = false; // Reset flag when entering dealer turn
 
       // 10% chance to show dealer-directed banter when dealer reveals
-      if (Math.random() < 0.10 && aiPlayers.length > 0) {
-        const randomAI = aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
+      if (Math.random() < 0.1 && aiPlayers.length > 0) {
+        const randomAI =
+          aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
         const banterLines = AI_DIALOGUE_ADDONS.find(
-          addon => addon.id === randomAI.character.id
+          (addon) => addon.id === randomAI.character.id,
         )?.banterWithDealer;
 
         if (banterLines && banterLines.length > 0) {
@@ -1481,7 +1750,7 @@ export default function GamePage() {
             addSpeechBubble(
               `dealer-banter-${Date.now()}`,
               randomBanter,
-              randomAI.position
+              randomAI.position,
             );
           }, 500); // Show shortly after dealer reveals
         }
@@ -1504,7 +1773,7 @@ export default function GamePage() {
               // On 17: depends on soft 17 rule
               if (handValue === 17) {
                 // Check if it's a soft 17 (has an Ace counted as 11)
-                const hasAce = prevHand.cards.some(card => card.rank === "A");
+                const hasAce = prevHand.cards.some((card) => card.rank === "A");
                 const hasMultipleCards = prevHand.cards.length > 2;
                 const isSoft = hasAce && hasMultipleCards;
 
@@ -1520,11 +1789,17 @@ export default function GamePage() {
             // Check if dealer should hit and hasn't busted
             if (shouldHit() && !isBusted(prevHand.cards)) {
               const card = dealCardFromShoe();
-              addDebugLog(`Dealer HIT: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`);
+              addDebugLog(
+                `Dealer HIT: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
+              );
 
               // Add flying card animation
               const shoePosition = getCardPosition("shoe");
-              const dealerPosition = getCardPosition("dealer", undefined, prevHand.cards.length);
+              const dealerPosition = getCardPosition(
+                "dealer",
+                undefined,
+                prevHand.cards.length,
+              );
 
               const flyingCard: FlyingCardData = {
                 id: `hit-dealer-${Date.now()}`,
@@ -1533,11 +1808,13 @@ export default function GamePage() {
                 toPosition: dealerPosition,
               };
 
-              setFlyingCards(prev => [...prev, flyingCard]);
+              setFlyingCards((prev) => [...prev, flyingCard]);
 
               // Add card to hand after animation
               setTimeout(() => {
-                setFlyingCards(prev => prev.filter(fc => fc.id !== flyingCard.id));
+                setFlyingCards((prev) =>
+                  prev.filter((fc) => fc.id !== flyingCard.id),
+                );
               }, 800);
 
               const newHand = { ...prevHand, cards: [...prevHand.cards, card] };
@@ -1557,7 +1834,9 @@ export default function GamePage() {
                 const isBust = isBusted(prevHand.cards);
 
                 addDebugLog(`=== DEALER FINAL HAND ===`);
-                addDebugLog(`Dealer cards: ${prevHand.cards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
+                addDebugLog(
+                  `Dealer cards: ${prevHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+                );
                 addDebugLog(`Dealer hand value: ${finalValue}`);
                 addDebugLog(`Dealer busted: ${isBust}`);
 
@@ -1570,6 +1849,7 @@ export default function GamePage() {
                 // Clear callout and move to resolving
                 registerTimeout(() => {
                   setDealerCallout(null);
+                  dealerTurnProcessingRef.current = false; // Unlock dealer turn
                   setPhase("RESOLVING");
                 }, 10000); // Increased to 10 seconds - dealer callouts stay visible longer
               }
@@ -1595,7 +1875,7 @@ export default function GamePage() {
     }> = [];
 
     const bjPayoutMultiplier = getBlackjackPayoutMultiplier(
-      gameSettings.blackjackPayout
+      gameSettings.blackjackPayout,
     );
 
     aiPlayers.forEach((ai) => {
@@ -1607,10 +1887,12 @@ export default function GamePage() {
 
       // Determine the specific context
       const isBusted = handValue > 21;
-      const isDealerBlackjack = dealerValue === 21 && dealerHand.cards.length === 2;
+      const isDealerBlackjack =
+        dealerValue === 21 && dealerHand.cards.length === 2;
       const isDealerWin = !isBusted && result === "LOSE";
 
-      let currentContext: "bust" | "dealerBlackjack" | "dealerWin" | "any" = "any";
+      let currentContext: "bust" | "dealerBlackjack" | "dealerWin" | "any" =
+        "any";
       if (isBusted) {
         currentContext = "bust";
       } else if (isDealerBlackjack && result === "LOSE") {
@@ -1650,13 +1932,16 @@ export default function GamePage() {
       }
 
       // Filter reactions by context - only show reactions appropriate for the situation
-      const validReactions = reactions_pool.filter(reaction =>
-        reaction.contexts.includes(currentContext) || reaction.contexts.includes("any")
+      const validReactions = reactions_pool.filter(
+        (reaction) =>
+          reaction.contexts.includes(currentContext) ||
+          reaction.contexts.includes("any"),
       );
 
       // Only add reaction if player decides to react and there are valid messages
       if (validReactions.length > 0 && Math.random() < reactionChance) {
-        const selectedReaction = validReactions[Math.floor(Math.random() * validReactions.length)];
+        const selectedReaction =
+          validReactions[Math.floor(Math.random() * validReactions.length)];
         reactions.push({
           playerId: ai.character.id,
           message: selectedReaction.text,
@@ -1681,9 +1966,11 @@ export default function GamePage() {
     });
 
     // Show 0-2 reactions max
-    const maxReactions = Math.min(reactions.length, Math.random() < 0.5 ? 1 : 2);
+    const maxReactions = Math.min(
+      reactions.length,
+      Math.random() < 0.5 ? 1 : 2,
+    );
     const selectedReactions = sortedReactions.slice(0, maxReactions);
-
 
     selectedReactions.forEach((reaction, idx) => {
       registerTimeout(() => {
@@ -1706,12 +1993,12 @@ export default function GamePage() {
 
       const playerResult = determineHandResult(playerHand, dealerHand);
       const bjPayoutMultiplier = getBlackjackPayoutMultiplier(
-        gameSettings.blackjackPayout
+        gameSettings.blackjackPayout,
       );
       const playerPayout = calculatePayout(
         playerHand,
         playerResult,
-        bjPayoutMultiplier
+        bjPayoutMultiplier,
       );
 
       setPlayerChips((prev) => prev + playerPayout);
@@ -1719,23 +2006,30 @@ export default function GamePage() {
 
       // Update pit boss distance and suspicion based on player behavior
       if (playerSeat !== null && playerHand.bet > 0) {
-        const betVariation = Math.abs(playerHand.bet - previousBet) / previousBet;
+        const betVariation =
+          Math.abs(playerHand.bet - previousBet) / previousBet;
         const netGain = playerPayout - playerHand.bet;
         const isBigWin = netGain > playerHand.bet * 1.5; // Win more than 1.5x bet
 
         // Calculate true count for bet correlation detection
-        const decksRemaining = calculateDecksRemaining(gameSettings.numberOfDecks * 52, cardsDealt);
+        const decksRemaining = calculateDecksRemaining(
+          gameSettings.numberOfDecks * 52,
+          cardsDealt,
+        );
         const trueCount = calculateTrueCount(runningCount, decksRemaining);
 
         // Determine if bet change correlates with count (sign of counting)
         const betIncreased = playerHand.bet > previousBet;
         const countIsFavorable = trueCount >= 2; // Count of +2 or higher favors player
         const countIsUnfavorable = trueCount <= -1;
-        const suspiciousBetting = (betIncreased && countIsFavorable) || (!betIncreased && countIsUnfavorable);
+        const suspiciousBetting =
+          (betIncreased && countIsFavorable) ||
+          (!betIncreased && countIsUnfavorable);
 
         // Calculate suspicion from bet variation
         let suspicionIncrease = 0;
-        if (betVariation > 0.3 && currentDealer) { // 30%+ bet change
+        if (betVariation > 0.3 && currentDealer) {
+          // 30%+ bet change
           // Base suspicion from bet size change
           const baseSuspicion = betVariation * 15; // Max ~15 for 100% change
 
@@ -1747,9 +2041,13 @@ export default function GamePage() {
           const correlationMultiplier = suspiciousBetting ? 1.5 : 0.5;
 
           // Count extremity multiplier - more extreme counts = more suspicious to vary bet
-          const countMultiplier = 1 + (Math.abs(trueCount) * 0.2); // +20% per count point
+          const countMultiplier = 1 + Math.abs(trueCount) * 0.2; // +20% per count point
 
-          suspicionIncrease = baseSuspicion * detectionMultiplier * correlationMultiplier * countMultiplier;
+          suspicionIncrease =
+            baseSuspicion *
+            detectionMultiplier *
+            correlationMultiplier *
+            countMultiplier;
           suspicionIncrease = Math.min(suspicionIncrease, 25); // Cap at 25 points
         }
 
@@ -1762,7 +2060,8 @@ export default function GamePage() {
         }
 
         // Large bet variations attract attention
-        if (betVariation > 0.5) { // 50%+ bet change
+        if (betVariation > 0.5) {
+          // 50%+ bet change
           const variationPenalty = Math.min(betVariation * 20, 20);
           proximityChange -= variationPenalty;
         }
@@ -1772,8 +2071,11 @@ export default function GamePage() {
         proximityChange += drift;
 
         // Distance affects suspicion multiplier
-        setPitBossDistance(prev => {
-          const newDistance = Math.max(0, Math.min(100, prev + proximityChange));
+        setPitBossDistance((prev) => {
+          const newDistance = Math.max(
+            0,
+            Math.min(100, prev + proximityChange),
+          );
 
           // If pit boss is very close, increase suspicion more
           if (newDistance < 30 && (isBigWin || betVariation > 0.5)) {
@@ -1786,7 +2088,7 @@ export default function GamePage() {
 
         // Apply suspicion increase
         if (suspicionIncrease > 0) {
-          setSuspicionLevel(s => Math.min(100, s + suspicionIncrease));
+          setSuspicionLevel((s) => Math.min(100, s + suspicionIncrease));
         }
 
         // Update previous bet for next hand
@@ -1821,18 +2123,7 @@ export default function GamePage() {
       // Add bubble for human player if they have cards
       if (playerSeat !== null && playerHand.cards.length > 0) {
         addDebugLog(`Player has cards, creating bubble for seat ${playerSeat}`);
-        const tablePositions = [
-          [5, 55],   // Seat 0 - Far left
-          [16, 62],  // Seat 1 - Left
-          [29, 68],  // Seat 2 - Center-left
-          [42, 72],  // Seat 3 - Center
-          [56, 72],  // Seat 4 - Center
-          [69, 68],  // Seat 5 - Center-right
-          [82, 62],  // Seat 6 - Right
-          [93, 55],  // Seat 7 - Far right
-        ];
-
-        const [x, y] = tablePositions[playerSeat];
+        const [x, y] = TABLE_POSITIONS[playerSeat];
         let result: "win" | "lose" | "push" | "blackjack" = "lose";
 
         if (playerResult === "BLACKJACK") {
@@ -1856,19 +2147,10 @@ export default function GamePage() {
       addDebugLog(`Checking ${aiPlayers.length} AI players for bubbles`);
       aiPlayers.forEach((ai) => {
         if (ai.hand.cards.length > 0) {
-          addDebugLog(`AI Player ${ai.character.name} has ${ai.hand.cards.length} cards`);
-          const tablePositions = [
-            [5, 55],   // Seat 0 - Far left
-            [16, 62],  // Seat 1 - Left
-            [29, 68],  // Seat 2 - Center-left
-            [42, 72],  // Seat 3 - Center
-            [56, 72],  // Seat 4 - Center
-            [69, 68],  // Seat 5 - Center-right
-            [82, 62],  // Seat 6 - Right
-            [93, 55],  // Seat 7 - Far right
-          ];
-
-          const [x, y] = tablePositions[ai.position];
+          addDebugLog(
+            `AI Player ${ai.character.name} has ${ai.hand.cards.length} cards`,
+          );
+          const [x, y] = TABLE_POSITIONS[ai.position];
           const aiResult = determineHandResult(ai.hand, dealerHand);
           let result: "win" | "lose" | "push" | "blackjack" = "lose";
 
@@ -1887,7 +2169,9 @@ export default function GamePage() {
             result,
             position: { left: `${x}%`, top: `${y - 5}%` }, // Slightly above AI position
           });
-          addDebugLog(`Added ${result} bubble for ${ai.character.name} at seat ${ai.position}`);
+          addDebugLog(
+            `Added ${result} bubble for ${ai.character.name} at seat ${ai.position}`,
+          );
         }
       });
 
@@ -1905,59 +2189,69 @@ export default function GamePage() {
       // Reset the flag when we leave RESOLVING phase
       hasResolvedRef.current = false;
     }
-  }, [phase, playerHand, dealerHand, gameSettings, aiPlayers, playerSeat, registerTimeout, showEndOfHandReactions, currentDealer, previousBet, cardsDealt, runningCount]);
+  }, [
+    phase,
+    playerHand,
+    dealerHand,
+    gameSettings,
+    aiPlayers,
+    playerSeat,
+    registerTimeout,
+    showEndOfHandReactions,
+    currentDealer,
+    previousBet,
+    cardsDealt,
+    runningCount,
+  ]);
 
-  const handleConversationResponse = useCallback((choiceIndex: number) => {
-    if (!activeConversation) return;
+  const handleConversationResponse = useCallback(
+    (choiceIndex: number) => {
+      if (!activeConversation) return;
 
-    const choice = activeConversation.choices[choiceIndex];
+      const choice = activeConversation.choices[choiceIndex];
 
-    // Apply suspicion change
-    if (choice.suspicionChange !== 0) {
-      setSuspicionLevel(prev => Math.max(0, Math.min(100, prev + choice.suspicionChange)));
-    }
+      // Apply suspicion change
+      if (choice.suspicionChange !== 0) {
+        setSuspicionLevel((prev) =>
+          Math.max(0, Math.min(100, prev + choice.suspicionChange)),
+        );
+      }
 
-    // Adjust sociability based on response type
-    if (choiceIndex === 0) {
-      // Friendly response - people want to talk to you more
-      setPlayerSociability(prev => Math.min(100, prev + 3));
-    } else if (choiceIndex === 1) {
-      // Neutral - small increase
-      setPlayerSociability(prev => Math.min(100, prev + 1));
-    } else if (choiceIndex === 2) {
-      // Dismissive response - people talk to you less
-      setPlayerSociability(prev => Math.max(0, prev - 5));
-    }
+      // Adjust sociability based on response type
+      if (choiceIndex === 0) {
+        // Friendly response - people want to talk to you more
+        setPlayerSociability((prev) => Math.min(100, prev + 3));
+      } else if (choiceIndex === 1) {
+        // Neutral - small increase
+        setPlayerSociability((prev) => Math.min(100, prev + 1));
+      } else if (choiceIndex === 2) {
+        // Dismissive response - people talk to you less
+        setPlayerSociability((prev) => Math.max(0, prev - 5));
+      }
 
-    // Show speech bubble with player's response
-    if (playerSeat !== null) {
-      addSpeechBubble(
-        "player-response",
-        choice.text,
-        playerSeat
-      );
-    }
+      // Show speech bubble with player's response
+      if (playerSeat !== null) {
+        addSpeechBubble("player-response", choice.text, playerSeat);
+      }
 
-    // Clear the conversation
-    setActiveConversation(null);
-  }, [activeConversation, playerSeat, addSpeechBubble]);
+      // Clear the conversation
+      setActiveConversation(null);
+    },
+    [activeConversation, playerSeat, addSpeechBubble],
+  );
 
   const handleConversationIgnore = useCallback(() => {
     if (!activeConversation) return;
 
     // Ignoring conversations raises suspicion significantly
-    setSuspicionLevel(prev => Math.min(100, prev + 8));
+    setSuspicionLevel((prev) => Math.min(100, prev + 8));
 
     // Being unresponsive makes people avoid you
-    setPlayerSociability(prev => Math.max(0, prev - 8));
+    setPlayerSociability((prev) => Math.max(0, prev - 8));
 
     // Show that player is too focused (suspicious)
     if (playerSeat !== null) {
-      addSpeechBubble(
-        "player-ignore",
-        "*concentrating intensely*",
-        playerSeat
-      );
+      addSpeechBubble("player-ignore", "*concentrating intensely*", playerSeat);
     }
 
     setActiveConversation(null);
@@ -1984,7 +2278,7 @@ export default function GamePage() {
 
         if (playerChangeChance < 0.15) {
           const currentAICount = aiPlayers.length;
-          const occupiedSeats = new Set(aiPlayers.map(p => p.position));
+          const occupiedSeats = new Set(aiPlayers.map((p) => p.position));
           if (playerSeat !== null) occupiedSeats.add(playerSeat);
 
           // 50/50 chance to add or remove (if possible)
@@ -1993,23 +2287,29 @@ export default function GamePage() {
           if (shouldAdd && currentAICount < 7 && occupiedSeats.size < 8) {
             // Add a new player
             const availableSeats = [0, 1, 2, 3, 4, 5, 6, 7].filter(
-              seat => !occupiedSeats.has(seat)
+              (seat) => !occupiedSeats.has(seat),
             );
 
             if (availableSeats.length > 0) {
               // Pick random available seat
-              const newSeat = availableSeats[Math.floor(Math.random() * availableSeats.length)];
+              const newSeat =
+                availableSeats[
+                  Math.floor(Math.random() * availableSeats.length)
+                ];
 
               // Pick random character not already at table
-              const usedCharacterIds = new Set(aiPlayers.map(p => p.character.id));
+              const usedCharacterIds = new Set(
+                aiPlayers.map((p) => p.character.id),
+              );
               const availableCharacters = AI_CHARACTERS.filter(
-                char => !usedCharacterIds.has(char.id)
+                (char) => !usedCharacterIds.has(char.id),
               );
 
               if (availableCharacters.length > 0) {
-                const newCharacter = availableCharacters[
-                  Math.floor(Math.random() * availableCharacters.length)
-                ];
+                const newCharacter =
+                  availableCharacters[
+                    Math.floor(Math.random() * availableCharacters.length)
+                  ];
 
                 const newPlayer: AIPlayer = {
                   character: newCharacter,
@@ -2018,7 +2318,7 @@ export default function GamePage() {
                   position: newSeat,
                 };
 
-                setAIPlayers(prev => [...prev, newPlayer]);
+                setAIPlayers((prev) => [...prev, newPlayer]);
 
                 // Show dealer callout
                 setDealerCallout(`${newCharacter.name} joins the table!`);
@@ -2030,10 +2330,14 @@ export default function GamePage() {
             const removeIndex = Math.floor(Math.random() * currentAICount);
             const removedPlayer = aiPlayers[removeIndex];
 
-            setAIPlayers(prev => prev.filter((_, idx) => idx !== removeIndex));
+            setAIPlayers((prev) =>
+              prev.filter((_, idx) => idx !== removeIndex),
+            );
 
             // Show dealer callout
-            setDealerCallout(`${removedPlayer.character.name} leaves the table.`);
+            setDealerCallout(
+              `${removedPlayer.character.name} leaves the table.`,
+            );
             registerTimeout(() => setDealerCallout(null), 2000);
           }
         }
@@ -2042,7 +2346,7 @@ export default function GamePage() {
         const totalCards = gameSettings.numberOfDecks * 52;
         const cutCardPosition = calculateCutCardPosition(
           gameSettings.numberOfDecks,
-          gameSettings.deckPenetration
+          gameSettings.deckPenetration,
         );
         const cardsUntilCutCard = totalCards - cutCardPosition;
 
@@ -2054,7 +2358,7 @@ export default function GamePage() {
 
           // Get their banter lines
           const banterLines = AI_DIALOGUE_ADDONS.find(
-            addon => addon.id === speaker.character.id
+            (addon) => addon.id === speaker.character.id,
           )?.banterWithPlayer;
 
           if (banterLines && banterLines.length > 0) {
@@ -2062,19 +2366,21 @@ export default function GamePage() {
             addSpeechBubble(
               `ai-banter-${Date.now()}`,
               randomBanter.text,
-              speaker.position
+              speaker.position,
             );
           }
         }
 
         if (cardsDealt >= cardsUntilCutCard) {
-
           // Reshuffle the shoe
-          const newShoe = createAndShuffleShoe(gameSettings.numberOfDecks, gameSettings.countingSystem);
+          const newShoe = createAndShuffleShoe(
+            gameSettings.numberOfDecks,
+            gameSettings.countingSystem,
+          );
           setShoe(newShoe);
           setCardsDealt(0);
           setRunningCount(0);
-          setShoesDealt(prev => prev + 1);
+          setShoesDealt((prev) => prev + 1);
 
           // Show reshuffle message
           setDealerCallout("Shuffling new shoe...");
@@ -2088,12 +2394,24 @@ export default function GamePage() {
         }
       }, 4000); // Show results for 4 seconds before continuing
     }
-  }, [phase, cardsDealt, gameSettings.numberOfDecks, gameSettings.deckPenetration, gameSettings.countingSystem, nextHand, registerTimeout, aiPlayers, playerSeat, debugLogs.length, addSpeechBubble]);
+  }, [
+    phase,
+    cardsDealt,
+    gameSettings.numberOfDecks,
+    gameSettings.deckPenetration,
+    gameSettings.countingSystem,
+    nextHand,
+    registerTimeout,
+    aiPlayers,
+    playerSeat,
+    debugLogs.length,
+    addSpeechBubble,
+  ]);
 
   // Pit boss wandering - they move around the casino floor, influenced by suspicion
   useEffect(() => {
     const wanderInterval = setInterval(() => {
-      setPitBossDistance(prev => {
+      setPitBossDistance((prev) => {
         // Random walk: small changes up or down
         const change = (Math.random() - 0.5) * 20; // -10 to +10
         let newDistance = prev + change;
@@ -2141,7 +2459,10 @@ export default function GamePage() {
     return () => clearInterval(wanderInterval);
   }, [suspicionLevel]);
 
-  const decksRemaining = calculateDecksRemaining(gameSettings.numberOfDecks * 52, cardsDealt);
+  const decksRemaining = calculateDecksRemaining(
+    gameSettings.numberOfDecks * 52,
+    cardsDealt,
+  );
   const trueCount = calculateTrueCount(runningCount, decksRemaining);
 
   return (
@@ -2156,7 +2477,10 @@ export default function GamePage() {
       }}
     >
       {/* Suspicion Meter - Fixed position */}
-      <SuspicionMeter level={suspicionLevel} pitBossDistance={pitBossDistance} />
+      <SuspicionMeter
+        level={suspicionLevel}
+        pitBossDistance={pitBossDistance}
+      />
 
       {/* Stats Bar at Top */}
       <div
@@ -2177,38 +2501,8 @@ export default function GamePage() {
       >
         <div className="flex gap-3 items-center">
           {gameSettings.trainingMode === TrainingMode.PRACTICE && (
-            <div style={{
-              backgroundColor: "rgba(255, 215, 0, 0.1)",
-              color: "#FFF",
-              border: "2px solid #FFD700",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              width: "150px",
-              textAlign: "center",
-            }}>
-              COUNT: <span style={{ color: "#FFD700" }}>{runningCount >= 0 ? `+${runningCount}` : runningCount}</span>
-            </div>
-          )}
-          {gameSettings.trainingMode === TrainingMode.TEST && (
-            <div style={{
-              backgroundColor: "rgba(255, 107, 107, 0.1)",
-              color: "#FF6B6B",
-              border: "2px solid #FF6B6B",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              width: "150px",
-              textAlign: "center",
-            }}>
-              🧪 TEST MODE
-            </div>
-          )}
-          {gameSettings.trainingMode === TrainingMode.TIMED_CHALLENGE && (
-            <>
-              <div style={{
+            <div
+              style={{
                 backgroundColor: "rgba(255, 215, 0, 0.1)",
                 color: "#FFF",
                 border: "2px solid #FFD700",
@@ -2218,79 +2512,162 @@ export default function GamePage() {
                 fontWeight: "bold",
                 width: "150px",
                 textAlign: "center",
-              }}>
-                COUNT: <span style={{ color: "#FFD700" }}>{runningCount >= 0 ? `+${runningCount}` : runningCount}</span>
-              </div>
-              <div style={{
-                backgroundColor: timeRemaining < 60 ? "rgba(255, 107, 107, 0.1)" : timeRemaining < 180 ? "rgba(255, 215, 0, 0.1)" : "rgba(76, 175, 80, 0.1)",
-                color: "#FFF",
-                border: `2px solid ${timeRemaining < 60 ? "#FF6B6B" : timeRemaining < 180 ? "#FFD700" : "#4CAF50"}`,
+              }}
+            >
+              COUNT:{" "}
+              <span style={{ color: "#FFD700" }}>
+                {runningCount >= 0 ? `+${runningCount}` : runningCount}
+              </span>
+            </div>
+          )}
+          {gameSettings.trainingMode === TrainingMode.TEST && (
+            <div
+              style={{
+                backgroundColor: "rgba(255, 107, 107, 0.1)",
+                color: "#FF6B6B",
+                border: "2px solid #FF6B6B",
                 borderRadius: "8px",
                 padding: "6px 12px",
                 fontSize: "14px",
                 fontWeight: "bold",
                 width: "150px",
                 textAlign: "center",
-              }}>
-                ⏱️ TIME: <span style={{
-                  color: timeRemaining < 60 ? "#FF6B6B" : timeRemaining < 180 ? "#FFD700" : "#4CAF50"
-                }}>
-                  {Math.floor(timeRemaining / 60)}:{String(timeRemaining % 60).padStart(2, '0')}
+              }}
+            >
+              🧪 TEST MODE
+            </div>
+          )}
+          {gameSettings.trainingMode === TrainingMode.TIMED_CHALLENGE && (
+            <>
+              <div
+                style={{
+                  backgroundColor: "rgba(255, 215, 0, 0.1)",
+                  color: "#FFF",
+                  border: "2px solid #FFD700",
+                  borderRadius: "8px",
+                  padding: "6px 12px",
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  width: "150px",
+                  textAlign: "center",
+                }}
+              >
+                COUNT:{" "}
+                <span style={{ color: "#FFD700" }}>
+                  {runningCount >= 0 ? `+${runningCount}` : runningCount}
+                </span>
+              </div>
+              <div
+                style={{
+                  backgroundColor:
+                    timeRemaining < 60
+                      ? "rgba(255, 107, 107, 0.1)"
+                      : timeRemaining < 180
+                        ? "rgba(255, 215, 0, 0.1)"
+                        : "rgba(76, 175, 80, 0.1)",
+                  color: "#FFF",
+                  border: `2px solid ${timeRemaining < 60 ? "#FF6B6B" : timeRemaining < 180 ? "#FFD700" : "#4CAF50"}`,
+                  borderRadius: "8px",
+                  padding: "6px 12px",
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  width: "150px",
+                  textAlign: "center",
+                }}
+              >
+                ⏱️ TIME:{" "}
+                <span
+                  style={{
+                    color:
+                      timeRemaining < 60
+                        ? "#FF6B6B"
+                        : timeRemaining < 180
+                          ? "#FFD700"
+                          : "#4CAF50",
+                  }}
+                >
+                  {Math.floor(timeRemaining / 60)}:
+                  {String(timeRemaining % 60).padStart(2, "0")}
                 </span>
               </div>
             </>
           )}
-          <div style={{
-            backgroundColor: "rgba(76, 175, 80, 0.1)",
-            color: "#FFF",
-            border: "2px solid #4CAF50",
-            borderRadius: "8px",
-            padding: "6px 12px",
-            fontSize: "14px",
-            fontWeight: "bold",
-            width: "150px",
-            textAlign: "center",
-          }}>
-            STREAK: <span style={{ color: currentStreak > 0 ? "#4CAF50" : "#AAA" }}>{currentStreak}</span>
+          <div
+            style={{
+              backgroundColor: "rgba(76, 175, 80, 0.1)",
+              color: "#FFF",
+              border: "2px solid #4CAF50",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              width: "150px",
+              textAlign: "center",
+            }}
+          >
+            STREAK:{" "}
+            <span style={{ color: currentStreak > 0 ? "#4CAF50" : "#AAA" }}>
+              {currentStreak}
+            </span>
           </div>
-          <div style={{
-            backgroundColor: "rgba(255, 215, 0, 0.1)",
-            color: "#FFF",
-            border: "2px solid #FFD700",
-            borderRadius: "8px",
-            padding: "6px 12px",
-            fontSize: "14px",
-            fontWeight: "bold",
-            width: "150px",
-            textAlign: "center",
-          }}>
-            CHIPS: <span style={{ color: "#FFD700" }}>{playerChips.toLocaleString()}</span>
+          <div
+            style={{
+              backgroundColor: "rgba(255, 215, 0, 0.1)",
+              color: "#FFF",
+              border: "2px solid #FFD700",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              width: "150px",
+              textAlign: "center",
+            }}
+          >
+            CHIPS:{" "}
+            <span style={{ color: "#FFD700" }}>
+              {playerChips.toLocaleString()}
+            </span>
           </div>
-          <div style={{
-            backgroundColor: "rgba(155, 89, 182, 0.1)",
-            color: "#FFF",
-            border: "2px solid #9B59B6",
-            borderRadius: "8px",
-            padding: "6px 12px",
-            fontSize: "14px",
-            fontWeight: "bold",
-            width: "150px",
-            textAlign: "center",
-          }}>
-            SCORE: <span style={{ color: "#9B59B6" }}>{currentScore.toLocaleString()}</span>
+          <div
+            style={{
+              backgroundColor: "rgba(155, 89, 182, 0.1)",
+              color: "#FFF",
+              border: "2px solid #9B59B6",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              width: "150px",
+              textAlign: "center",
+            }}
+          >
+            SCORE:{" "}
+            <span style={{ color: "#9B59B6" }}>
+              {currentScore.toLocaleString()}
+            </span>
           </div>
-          <div style={{
-            backgroundColor: scoreMultiplier > 1.0 ? "rgba(76, 175, 80, 0.1)" : "rgba(128, 128, 128, 0.1)",
-            color: "#FFF",
-            border: `2px solid ${scoreMultiplier > 1.0 ? "#4CAF50" : "#808080"}`,
-            borderRadius: "8px",
-            padding: "6px 12px",
-            fontSize: "14px",
-            fontWeight: "bold",
-            width: "150px",
-            textAlign: "center",
-          }}>
-            MULTIPLIER: <span style={{ color: scoreMultiplier > 1.0 ? "#4CAF50" : "#808080" }}>{scoreMultiplier.toFixed(1)}x</span>
+          <div
+            style={{
+              backgroundColor:
+                scoreMultiplier > 1.0
+                  ? "rgba(76, 175, 80, 0.1)"
+                  : "rgba(128, 128, 128, 0.1)",
+              color: "#FFF",
+              border: `2px solid ${scoreMultiplier > 1.0 ? "#4CAF50" : "#808080"}`,
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              width: "150px",
+              textAlign: "center",
+            }}
+          >
+            MULTIPLIER:{" "}
+            <span
+              style={{ color: scoreMultiplier > 1.0 ? "#4CAF50" : "#808080" }}
+            >
+              {scoreMultiplier.toFixed(1)}x
+            </span>
           </div>
         </div>
 
@@ -2409,7 +2786,10 @@ export default function GamePage() {
           <Shoe
             numDecks={gameSettings.numberOfDecks}
             cardsDealt={cardsDealt}
-            dealerCutCard={calculateCutCardPosition(gameSettings.numberOfDecks, gameSettings.deckPenetration)}
+            dealerCutCard={calculateCutCardPosition(
+              gameSettings.numberOfDecks,
+              gameSettings.deckPenetration,
+            )}
           />
 
           {/* Dealer Section - Top Center with Avatar */}
@@ -2482,7 +2862,8 @@ export default function GamePage() {
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = "scale(1.05)";
-                    e.currentTarget.style.boxShadow = "0 0 20px rgba(255, 215, 0, 0.6)";
+                    e.currentTarget.style.boxShadow =
+                      "0 0 20px rgba(255, 215, 0, 0.6)";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = "scale(1)";
@@ -2501,7 +2882,8 @@ export default function GamePage() {
                       e.currentTarget.style.display = "none";
                       const parent = e.currentTarget.parentElement;
                       if (parent) {
-                        parent.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;color:#FFD700">D</div>';
+                        parent.innerHTML =
+                          '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:60px;color:#FFD700">D</div>';
                       }
                     }}
                   />
@@ -2520,7 +2902,14 @@ export default function GamePage() {
             >
               {dealerHand.cards.length > 0 && (
                 <>
-                  <div style={{ position: "relative", width: "370px", height: "98px", marginBottom: "4px" }}>
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "370px",
+                      height: "98px",
+                      marginBottom: "4px",
+                    }}
+                  >
                     {dealerHand.cards.map((card, idx) => (
                       <div
                         key={idx}
@@ -2529,7 +2918,7 @@ export default function GamePage() {
                           left: `${idx * 74}px`, // 70px card + 4px gap
                           top: 0,
                           width: "70px",
-                          height: "98px"
+                          height: "98px",
                         }}
                       >
                         <PlayingCard
@@ -2557,18 +2946,7 @@ export default function GamePage() {
             {[0, 1, 2, 3, 4, 5, 6, 7].map((seatIndex) => {
               // Positions based on reference project: [left%, top%]
               // Extended to 8 seats with arc pattern - moved down so center seats are near bottom
-              const tablePositions = [
-                [5, 55], // Seat 0 - Far left
-                [16, 62], // Seat 1 - Left
-                [29, 68], // Seat 2 - Center-left
-                [42, 72], // Seat 3 - Center
-                [56, 72], // Seat 4 - Center
-                [69, 68], // Seat 5 - Center-right
-                [82, 62], // Seat 6 - Right
-                [93, 55], // Seat 7 - Far right
-              ];
-
-              const [x, y] = tablePositions[seatIndex];
+              const [x, y] = TABLE_POSITIONS[seatIndex];
               // Find if this seat is occupied by an AI player
               const aiPlayer = aiPlayers.find(
                 (ai) => ai.position === seatIndex,
@@ -2592,11 +2970,15 @@ export default function GamePage() {
                     <div
                       onClick={() => {
                         if (playerSeat === null) {
-                          addDebugLog(`=== PLAYER SITTING AT SEAT ${seatIndex} ===`);
+                          addDebugLog(
+                            `=== PLAYER SITTING AT SEAT ${seatIndex} ===`,
+                          );
                           addDebugLog(`Phase before sitting: ${phase}`);
                           setPlayerSeat(seatIndex);
                         } else {
-                          addDebugLog(`Cannot sit - player already seated at ${playerSeat}`);
+                          addDebugLog(
+                            `Cannot sit - player already seated at ${playerSeat}`,
+                          );
                         }
                       }}
                       style={{
@@ -2649,114 +3031,121 @@ export default function GamePage() {
                   )}
 
                   {/* AI Player */}
-                  {aiPlayer && (() => {
-                    // Find the index of this AI player in the aiPlayers array
-                    const aiPlayerIndex = aiPlayers.findIndex(ai => ai.position === seatIndex);
+                  {aiPlayer &&
+                    (() => {
+                      // Find the index of this AI player in the aiPlayers array
+                      const aiPlayerIndex = aiPlayers.findIndex(
+                        (ai) => ai.position === seatIndex,
+                      );
 
-                    return (
-                      <div
-                        style={{
-                          position: "relative",
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                        }}
-                      >
-                        {/* Cards positioned absolutely above - fixed positions */}
-                        {aiPlayer.hand.cards.length > 0 && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              bottom: "calc(100% + 54px)", // 50px higher (was 4px, now 54px above avatar)
-                              left: "50%",
-                              transform: "translate(-50%, 0)", // Center horizontally, anchor to bottom
-                              width: "230px", // 3 cards * 70px + 2 gaps * 4px
-                              height: "210px", // Reserve space for 2 rows
-                            }}
-                          >
-                            {/* Render each card in a fixed position - first row at bottom */}
-                            {aiPlayer.hand.cards.map((card, cardIdx) => {
-                              // Calculate row and column for this card (3 cards per row)
-                              const row = Math.floor(cardIdx / 3); // Row 0 = first 3 cards, Row 1 = next 3, etc
-                              const col = cardIdx % 3;
-                              // Position from bottom: row 0 at bottom, row 1 above it, etc
-                              // Fixed positions: left = col * (70px + 4px gap)
-                              //                  bottom = row * (98px + 4px gap) - anchor from bottom
-                              return (
-                                <div
-                                  key={cardIdx}
-                                  style={{
-                                    position: "absolute",
-                                    left: `${col * 74}px`,
-                                    bottom: `${row * 102}px`, // Row 0 at bottom, higher rows stack above
-                                    width: "70px",
-                                    height: "98px",
-                                  }}
-                                >
-                                  <PlayingCard card={card} />
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                        {/* Avatar with indicators */}
+                      return (
                         <div
                           style={{
                             position: "relative",
-                            width: "150px",
-                            height: "150px",
-                            marginBottom: "6px",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
                           }}
                         >
-                          {/* Turn Indicator */}
-                          <TurnIndicator isActive={activePlayerIndex === aiPlayerIndex} />
-
-                          {/* Action Bubble */}
-                          {playerActions.has(aiPlayerIndex) && (
-                            <ActionBubble action={playerActions.get(aiPlayerIndex)!} />
+                          {/* Cards positioned absolutely above - fixed positions */}
+                          {aiPlayer.hand.cards.length > 0 && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                bottom: "calc(100% + 54px)", // 50px higher (was 4px, now 54px above avatar)
+                                left: "50%",
+                                transform: "translate(-50%, 0)", // Center horizontally, anchor to bottom
+                                width: "230px", // 3 cards * 70px + 2 gaps * 4px
+                                height: "210px", // Reserve space for 2 rows
+                              }}
+                            >
+                              {/* Render each card in a fixed position - first row at bottom */}
+                              {aiPlayer.hand.cards.map((card, cardIdx) => {
+                                // Calculate row and column for this card (3 cards per row)
+                                const row = Math.floor(cardIdx / 3); // Row 0 = first 3 cards, Row 1 = next 3, etc
+                                const col = cardIdx % 3;
+                                // Position from bottom: row 0 at bottom, row 1 above it, etc
+                                // Fixed positions: left = col * (70px + 4px gap)
+                                //                  bottom = row * (98px + 4px gap) - anchor from bottom
+                                return (
+                                  <div
+                                    key={cardIdx}
+                                    style={{
+                                      position: "absolute",
+                                      left: `${col * 74}px`,
+                                      bottom: `${row * 102}px`, // Row 0 at bottom, higher rows stack above
+                                      width: "70px",
+                                      height: "98px",
+                                    }}
+                                  >
+                                    <PlayingCard card={card} />
+                                  </div>
+                                );
+                              })}
+                            </div>
                           )}
-
-                        <div
-                          style={{
-                            width: "150px",
-                            height: "150px",
-                            borderRadius: "50%",
-                            border: "4px solid #FFD700",
-                            overflow: "hidden",
-                            backgroundColor: "#333",
-                          }}
-                        >
-                          <img
-                            src={getAIAvatarPath(aiPlayer.character)}
-                            alt={aiPlayer.character.name}
+                          {/* Avatar with indicators */}
+                          <div
                             style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
+                              position: "relative",
+                              width: "150px",
+                              height: "150px",
+                              marginBottom: "6px",
                             }}
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                              const parent = e.currentTarget.parentElement;
-                              if (parent) {
-                                parent.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:40px;color:#FFD700">${aiPlayer.character.name.charAt(0)}</div>`;
-                              }
+                          >
+                            {/* Turn Indicator */}
+                            <TurnIndicator
+                              isActive={activePlayerIndex === aiPlayerIndex}
+                            />
+
+                            {/* Action Bubble */}
+                            {playerActions.has(aiPlayerIndex) && (
+                              <ActionBubble
+                                action={playerActions.get(aiPlayerIndex)!}
+                              />
+                            )}
+
+                            <div
+                              style={{
+                                width: "150px",
+                                height: "150px",
+                                borderRadius: "50%",
+                                border: "4px solid #FFD700",
+                                overflow: "hidden",
+                                backgroundColor: "#333",
+                              }}
+                            >
+                              <img
+                                src={getAIAvatarPath(aiPlayer.character)}
+                                alt={aiPlayer.character.name}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                }}
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                  const parent = e.currentTarget.parentElement;
+                                  if (parent) {
+                                    parent.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:40px;color:#FFD700">${aiPlayer.character.name.charAt(0)}</div>`;
+                                  }
+                                }}
+                              />
+                            </div>
+                          </div>
+                          {/* Name */}
+                          <div
+                            className="text-white text-sm"
+                            style={{
+                              fontWeight: "bold",
+                              textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
                             }}
-                          />
+                          >
+                            {aiPlayer.character.name.split(" ")[0]}
+                          </div>
                         </div>
-                      </div>
-                      {/* Name */}
-                      <div
-                        className="text-white text-sm"
-                        style={{
-                          fontWeight: "bold",
-                          textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
-                        }}
-                      >
-                        {aiPlayer.character.name.split(" ")[0]}
-                      </div>
-                    </div>
-                    );
-                  })()}
+                      );
+                    })()}
 
                   {/* Human Player */}
                   {isPlayerSeat && (
@@ -2950,7 +3339,7 @@ export default function GamePage() {
               result={bubble.result}
               onComplete={() => {
                 setWinLossBubbles((prev) =>
-                  prev.filter((b) => b.id !== bubble.id)
+                  prev.filter((b) => b.id !== bubble.id),
                 );
               }}
             />
@@ -3027,7 +3416,7 @@ export default function GamePage() {
         onClose={() => setShowSettings(false)}
         currentSettings={gameSettings}
         onSave={(newSettings) => {
-          setGameSettings({...gameSettings, ...newSettings});
+          setGameSettings({ ...gameSettings, ...newSettings });
           // Note: Changing settings mid-game would require game reset
           // For now, settings only apply to new games
         }}
@@ -3112,9 +3501,28 @@ export default function GamePage() {
               border: "2px solid #FFD700",
             }}
           >
-            <div style={{ marginBottom: "20px", borderBottom: "2px solid #333", paddingBottom: "12px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#FFD700", margin: 0 }}>
+            <div
+              style={{
+                marginBottom: "20px",
+                borderBottom: "2px solid #333",
+                paddingBottom: "12px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <h2
+                  style={{
+                    fontSize: "24px",
+                    fontWeight: "bold",
+                    color: "#FFD700",
+                    margin: 0,
+                  }}
+                >
                   Debug Log ({debugLogs.length} entries)
                 </h2>
                 <button
@@ -3152,10 +3560,17 @@ export default function GamePage() {
               ))}
             </div>
 
-            <div style={{ marginTop: "20px", display: "flex", gap: "12px", justifyContent: "center" }}>
+            <div
+              style={{
+                marginTop: "20px",
+                display: "flex",
+                gap: "12px",
+                justifyContent: "center",
+              }}
+            >
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(debugLogs.join('\n'));
+                  navigator.clipboard.writeText(debugLogs.join("\n"));
                 }}
                 style={{
                   backgroundColor: "#3B82F6",

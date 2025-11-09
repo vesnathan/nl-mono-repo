@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 
 interface FlyingCardProps {
   rank: string;
@@ -19,15 +20,10 @@ export default function FlyingCard({
 }: FlyingCardProps) {
   const [isFlying, setIsFlying] = useState(true);
 
-  useEffect(() => {
-    // Animation duration is 1500ms (SLOWED DOWN FOR TESTING - was 800ms)
-    const timer = setTimeout(() => {
-      setIsFlying(false);
-      onAnimationComplete?.();
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [onAnimationComplete]);
+  const handleAnimationEnd = () => {
+    setIsFlying(false);
+    onAnimationComplete?.();
+  };
 
   if (!isFlying) return null;
 
@@ -38,12 +34,13 @@ export default function FlyingCard({
           position: "fixed",
           left: fromPosition.left,
           top: fromPosition.top,
-          width: "60px",
-          height: "84px",
+          width: "70px",
+          height: "98px",
           zIndex: 9999,
-          animation: `fly-to-position 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
+          animation: `fly-to-position ${CARD_ANIMATION_DURATION}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
           pointerEvents: "none",
         }}
+        onAnimationEnd={handleAnimationEnd}
       >
         <div
           style={{
