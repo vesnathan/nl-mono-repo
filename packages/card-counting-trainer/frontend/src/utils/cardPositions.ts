@@ -1,0 +1,93 @@
+import { AIPlayer } from "@/types/gameState";
+
+/**
+ * Table seat positions as [left%, top%] for all 8 seats
+ * Seats are numbered 0-7, left to right around the table
+ */
+const TABLE_POSITIONS: readonly [number, number][] = [
+  [5, 55], // Seat 0 - Far left
+  [16, 62], // Seat 1 - Left
+  [29, 68], // Seat 2 - Center-left
+  [42, 72], // Seat 3 - Center
+  [56, 72], // Seat 4 - Center
+  [69, 68], // Seat 5 - Center-right
+  [82, 62], // Seat 6 - Right
+  [93, 55], // Seat 7 - Far right
+] as const;
+
+/**
+ * Calculate the position for a flying card animation
+ * Returns CSS position values (left, top) for the card's destination
+ *
+ * @param type - Type of card position: "ai", "player", "dealer", or "shoe"
+ * @param aiPlayers - Array of AI players (needed for AI player positions)
+ * @param playerSeat - Player's seat number (0-7) or null if not seated
+ * @param index - AI player index (for type="ai")
+ * @param cardIndex - Card index in hand (for calculating grid position)
+ * @returns Position object with left and top CSS values
+ */
+export function getCardPosition(
+  type: "ai" | "player" | "dealer" | "shoe",
+  aiPlayers: AIPlayer[],
+  playerSeat: number | null,
+  index?: number,
+  cardIndex?: number,
+): { left: string; top: string } {
+  if (type === "shoe") {
+    // Shoe is positioned at right: 7%, top: 20px (from the Shoe component positioning)
+    // Convert to left position: 100% - 7% = 93%
+    return { left: "93%", top: "20px" };
+  }
+
+  if (type === "dealer") {
+    // Dealer cards: rendered at idx * 74px in a 370px centered container
+    // Container is at left: calc(50% - 185px), cards are at left: idx * 74px within container
+    // So absolute position is: calc(50% - 185px + idx * 74px)
+    const containerOffset = -185; // 370px / 2
+    const cardOffset = cardIndex !== undefined ? cardIndex * 74 : 0;
+    return {
+      left: `calc(50% + ${containerOffset + cardOffset}px)`,
+      top: "calc(8% + 162px + 4px)",
+    };
+  }
+
+  if (type === "player" && playerSeat !== null) {
+    const [x, y] = TABLE_POSITIONS[playerSeat];
+    // Player cards: rendered in 230px centered container with col * 74px, row * 102px
+    // Cards use grid: 3 per row, positioned from BOTTOM (row 0 at bottom, row 1 above it)
+    const cardsPerRow = 3;
+    const col = cardIndex !== undefined ? cardIndex % cardsPerRow : 0;
+    const row =
+      cardIndex !== undefined ? Math.floor(cardIndex / cardsPerRow) : 0;
+    const containerOffset = -115; // 230px / 2
+    const cardLeft = col * 74;
+    const cardBottomOffset = row * 102; // Higher rows need LOWER top values (subtract)
+    return {
+      left: `calc(${x}% + ${containerOffset + cardLeft}px)`,
+      top: `calc(${y}% - 204px - ${cardBottomOffset}px)`, // 150px avatar + 54px gap - row offset
+    };
+  }
+
+  if (type === "ai" && index !== undefined) {
+    const aiPlayer = aiPlayers[index];
+    if (aiPlayer) {
+      const [x, y] = TABLE_POSITIONS[aiPlayer.position];
+      // AI cards: same as player - rendered in 230px centered container with col * 74px, row * 102px
+      // Cards positioned from BOTTOM (row 0 at bottom, row 1 above it)
+      const cardsPerRow = 3;
+      const col = cardIndex !== undefined ? cardIndex % cardsPerRow : 0;
+      const row =
+        cardIndex !== undefined ? Math.floor(cardIndex / cardsPerRow) : 0;
+      const containerOffset = -115; // 230px / 2
+      const cardLeft = col * 74;
+      const cardBottomOffset = row * 102; // Higher rows need LOWER top values (subtract)
+      return {
+        left: `calc(${x}% + ${containerOffset + cardLeft}px)`,
+        top: `calc(${y}% - 204px - ${cardBottomOffset}px)`, // 150px avatar + 54px gap - row offset
+      };
+    }
+  }
+
+  // Default fallback
+  return { left: "50%", top: "50%" };
+}

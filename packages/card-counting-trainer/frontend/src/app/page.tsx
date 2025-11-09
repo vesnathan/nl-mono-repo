@@ -52,60 +52,17 @@ import GameSettingsModal from "@/components/GameSettingsModal";
 import BasicStrategyCard from "@/components/BasicStrategyCard";
 import BettingInterface from "@/components/BettingInterface";
 import { CARD_APPEAR_TIME, CARD_ANIMATION_DURATION } from "@/constants/animations";
-
-interface PlayerHand {
-  cards: GameCard[];
-  bet: number;
-  result?: HandResult;
-}
-
-interface AIPlayer {
-  character: AICharacter;
-  hand: PlayerHand;
-  chips: number;
-  position: number;
-}
-
-interface SpeechBubble {
-  playerId: string;
-  message: string;
-  position: { left: string; top: string };
-  id: string;
-}
-
-interface WinLossBubbleData {
-  id: string;
-  result: "win" | "lose" | "push" | "blackjack";
-  position: { left: string; top: string };
-}
-
-interface ActiveConversation {
-  id: string;
-  speakerId: string; // AI character id or "dealer"
-  speakerName: string;
-  question: string;
-  choices: Array<{
-    text: string;
-    suspicionChange: number;
-  }>;
-  position: { left: string; top: string };
-}
-
-interface FlyingCardData {
-  id: string;
-  card: GameCard;
-  fromPosition: { left: string; top: string };
-  toPosition: { left: string; top: string };
-}
-
-type GamePhase =
-  | "BETTING"
-  | "DEALING"
-  | "PLAYER_TURN"
-  | "AI_TURNS"
-  | "DEALER_TURN"
-  | "RESOLVING"
-  | "ROUND_END";
+import {
+  PlayerHand,
+  AIPlayer,
+  SpeechBubble,
+  WinLossBubbleData,
+  ActiveConversation,
+  FlyingCardData,
+  GamePhase,
+} from "@/types/gameState";
+import { getCardPosition } from "@/utils/cardPositions";
+import { calculateStreakPoints } from "@/utils/scoreCalculation";
 
 export default function GamePage() {
   // Game settings
@@ -294,78 +251,14 @@ export default function GamePage() {
   }, [gameSettings.trainingMode, timedChallengeActive, timeRemaining]);
 
   // Helper to calculate card positions for flying animation
-  const getCardPosition = useCallback(
+  // Wrapper around utility function to provide current game state
+  const getCardPositionForAnimation = useCallback(
     (
       type: "ai" | "player" | "dealer" | "shoe",
       index?: number,
       cardIndex?: number,
     ) => {
-      const tablePositions = [
-        [5, 55], // Seat 0 - Far left
-        [16, 62], // Seat 1 - Left
-        [29, 68], // Seat 2 - Center-left
-        [42, 72], // Seat 3 - Center
-        [56, 72], // Seat 4 - Center
-        [69, 68], // Seat 5 - Center-right
-        [82, 62], // Seat 6 - Right
-        [93, 55], // Seat 7 - Far right
-      ];
-
-      if (type === "shoe") {
-        // Shoe is positioned at right: 7%, top: 20px (from the Shoe component positioning)
-        // Convert to left position: 100% - 7% = 93%
-        return { left: "93%", top: "20px" };
-      }
-
-      if (type === "dealer") {
-        // Dealer cards: rendered at idx * 74px in a 370px centered container
-        // Container is at left: calc(50% - 185px), cards are at left: idx * 74px within container
-        // So absolute position is: calc(50% - 185px + idx * 74px)
-        const containerOffset = -185; // 370px / 2
-        const cardOffset = cardIndex !== undefined ? cardIndex * 74 : 0;
-        return {
-          left: `calc(50% + ${containerOffset + cardOffset}px)`,
-          top: "calc(8% + 162px + 4px)",
-        };
-      }
-
-      if (type === "player" && playerSeat !== null) {
-        const [x, y] = tablePositions[playerSeat];
-        // Player cards: rendered in 230px centered container with col * 74px, row * 102px
-        // Cards use grid: 3 per row, positioned from BOTTOM (row 0 at bottom, row 1 above it)
-        const cardsPerRow = 3;
-        const col = cardIndex !== undefined ? cardIndex % cardsPerRow : 0;
-        const row = cardIndex !== undefined ? Math.floor(cardIndex / cardsPerRow) : 0;
-        const containerOffset = -115; // 230px / 2
-        const cardLeft = col * 74;
-        const cardBottomOffset = row * 102; // Higher rows need LOWER top values (subtract)
-        return {
-          left: `calc(${x}% + ${containerOffset + cardLeft}px)`,
-          top: `calc(${y}% - 204px - ${cardBottomOffset}px)`, // 150px avatar + 54px gap - row offset
-        };
-      }
-
-      if (type === "ai" && index !== undefined) {
-        const aiPlayer = aiPlayers[index];
-        if (aiPlayer) {
-          const [x, y] = tablePositions[aiPlayer.position];
-          // AI cards: same as player - rendered in 230px centered container with col * 74px, row * 102px
-          // Cards positioned from BOTTOM (row 0 at bottom, row 1 above it)
-          const cardsPerRow = 3;
-          const col = cardIndex !== undefined ? cardIndex % cardsPerRow : 0;
-          const row = cardIndex !== undefined ? Math.floor(cardIndex / cardsPerRow) : 0;
-          const containerOffset = -115; // 230px / 2
-          const cardLeft = col * 74;
-          const cardBottomOffset = row * 102; // Higher rows need LOWER top values (subtract)
-          return {
-            left: `calc(${x}% + ${containerOffset + cardLeft}px)`,
-            top: `calc(${y}% - 204px - ${cardBottomOffset}px)`, // 150px avatar + 54px gap - row offset
-          };
-        }
-      }
-
-      // Default fallback
-      return { left: "50%", top: "50%" };
+      return getCardPosition(type, aiPlayers, playerSeat, index, cardIndex);
     },
     [aiPlayers, playerSeat],
   );
@@ -873,13 +766,13 @@ export default function GamePage() {
         }
 
         // Calculate positions for flying animation
-        const fromPosition = getCardPosition("shoe");
+        const fromPosition = getCardPositionForAnimation("shoe");
         const toPosition =
           type === "ai"
-            ? getCardPosition("ai", index, cardIndex)
+            ? getCardPositionForAnimation("ai", index, cardIndex)
             : type === "player"
-              ? getCardPosition("player", undefined, cardIndex)
-              : getCardPosition("dealer", undefined, cardIndex);
+              ? getCardPositionForAnimation("player", undefined, cardIndex)
+              : getCardPositionForAnimation("dealer", undefined, cardIndex);
 
         // Create flying card
         const flyingCardId = `flying-${animIdx}-${Date.now()}`;
@@ -1185,8 +1078,8 @@ export default function GamePage() {
     );
 
     // Add flying card animation
-    const shoePosition = getCardPosition("shoe");
-    const playerPosition = getCardPosition(
+    const shoePosition = getCardPositionForAnimation("shoe");
+    const playerPosition = getCardPositionForAnimation(
       "player",
       undefined,
       playerHand.cards.length,
@@ -1300,11 +1193,6 @@ export default function GamePage() {
     [],
   );
 
-  // Calculate exponential score points: 10 × 2^(N-1) for Nth correct decision
-  const calculateStreakPoints = useCallback((streakNumber: number): number => {
-    return 10 * 2 ** (streakNumber - 1);
-  }, []);
-
   // Award points for correct decision and update streak
   // TODO: Use this function when implementing decision tracking
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1320,7 +1208,7 @@ export default function GamePage() {
     if (newStreak > longestStreak) {
       setLongestStreak(newStreak);
     }
-  }, [currentStreak, scoreMultiplier, longestStreak, calculateStreakPoints]);
+  }, [currentStreak, scoreMultiplier, longestStreak]);
 
   // Reset streak on incorrect decision
   // TODO: Use this function when implementing decision tracking
@@ -1516,8 +1404,8 @@ export default function GamePage() {
           );
 
           // Add flying card animation
-          const shoePosition = getCardPosition("shoe");
-          const aiPosition = getCardPosition("ai", idx, ai.hand.cards.length);
+          const shoePosition = getCardPositionForAnimation("shoe");
+          const aiPosition = getCardPositionForAnimation("ai", idx, ai.hand.cards.length);
 
           const flyingCard: FlyingCardData = {
             id: `hit-ai-${idx}-${Date.now()}`,
@@ -1799,8 +1687,8 @@ export default function GamePage() {
               );
 
               // Add flying card animation
-              const shoePosition = getCardPosition("shoe");
-              const dealerPosition = getCardPosition(
+              const shoePosition = getCardPositionForAnimation("shoe");
+              const dealerPosition = getCardPositionForAnimation(
                 "dealer",
                 undefined,
                 prevHand.cards.length,
