@@ -81,6 +81,7 @@ import { useGameActions } from "@/hooks/useGameActions";
 import { useSuspicionDecay } from "@/hooks/useSuspicionDecay";
 import { useDealerChange } from "@/hooks/useDealerChange";
 import { useGameInitialization } from "@/hooks/useGameInitialization";
+import { useTimedChallenge } from "@/hooks/useTimedChallenge";
 import {
   generateInitialReactions,
   generateEndOfHandReactions,
@@ -211,35 +212,6 @@ export default function GamePage() {
 
   // Track if dealer turn is currently being processed (to prevent duplicate dealer actions)
   const dealerTurnProcessingRef = useRef<boolean>(false);
-
-  // Timed challenge countdown timer
-  useEffect(() => {
-    if (gameSettings.trainingMode === TrainingMode.TIMED_CHALLENGE) {
-      if (!timedChallengeActive) {
-        // Start the timer
-        setTimedChallengeActive(true);
-        setTimeRemaining(300); // Reset to 5 minutes
-      }
-
-      if (timedChallengeActive && timeRemaining > 0) {
-        const timer = setInterval(() => {
-          setTimeRemaining((prev) => {
-            if (prev <= 1) {
-              // Time's up!
-              clearInterval(timer);
-              // Could show a modal or message here
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
-
-        return () => clearInterval(timer);
-      }
-    } else {
-      setTimedChallengeActive(false);
-    }
-  }, [gameSettings.trainingMode, timedChallengeActive, timeRemaining]);
 
   // Helper to calculate card positions for flying animation
   // Wrapper around utility function to provide current game state
@@ -553,6 +525,15 @@ export default function GamePage() {
 
   // Game initialization hook
   useGameInitialization(setAIPlayers, setCurrentDealer, setInitialized);
+
+  // Timed challenge hook
+  useTimedChallenge(
+    gameSettings.trainingMode,
+    timedChallengeActive,
+    setTimedChallengeActive,
+    timeRemaining,
+    setTimeRemaining
+  );
 
   // Log betting interface visibility conditions
   useEffect(() => {
