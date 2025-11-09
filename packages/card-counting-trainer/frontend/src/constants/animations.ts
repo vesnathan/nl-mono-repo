@@ -9,13 +9,14 @@ export const CARD_SPACING = 15; // px between cards
 
 // Table positions for all 8 seats [left%, top%]
 // Seats are numbered right-to-left from dealer's perspective (0=far right/first base, 7=far left/third base)
+// Note: Positions shifted 1% right for better visual balance
 export const TABLE_POSITIONS: readonly [number, number][] = [
-  [93, 55], // Seat 0 - Far right (first base)
-  [82, 62], // Seat 1 - Right
-  [69, 68], // Seat 2 - Center-right
-  [56, 72], // Seat 3 - Center
-  [42, 72], // Seat 4 - Center
-  [29, 68], // Seat 5 - Center-left
-  [16, 62], // Seat 6 - Left
-  [5, 55],  // Seat 7 - Far left (third base)
+  [94, 55], // Seat 0 - Far right (first base)
+  [83, 62], // Seat 1 - Right
+  [70, 68], // Seat 2 - Center-right
+  [57, 72], // Seat 3 - Center
+  [43, 72], // Seat 4 - Center
+  [30, 68], // Seat 5 - Center-left
+  [17, 62], // Seat 6 - Left
+  [6, 55],  // Seat 7 - Far left (third base)
 ] as const;
