@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 interface SuspicionMeterProps {
   level: number; // 0-100 (alternate prop name)
   suspicionLevel?: number; // 0-100
-  pitBossDistance?: number; // 0-100, higher = farther away (safer)
+  pitBossDistance?: number; // 0-100, higher = closer (more dangerous)
   dealerName?: string;
   dealerDetectionSkill?: number; // 0-100
   onYourSide?: boolean;
@@ -181,9 +181,9 @@ export default function SuspicionMeter({
               style={{
                 height: "100%",
                 width: `${pitBossDistance}%`,
-                backgroundColor: pitBossDistance > 70 ? "#4CAF50" : pitBossDistance > 40 ? "#FFC107" : "#F44336",
+                backgroundColor: pitBossDistance < 30 ? "#4CAF50" : pitBossDistance < 60 ? "#FFC107" : "#F44336",
                 transition: "width 0.8s ease-out, background-color 0.3s ease",
-                boxShadow: `0 0 10px ${pitBossDistance > 70 ? "#4CAF50" : pitBossDistance > 40 ? "#FFC107" : "#F44336"}`,
+                boxShadow: `0 0 10px ${pitBossDistance < 30 ? "#4CAF50" : pitBossDistance < 60 ? "#FFC107" : "#F44336"}`,
               }}
             />
           </div>

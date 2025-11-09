@@ -17,15 +17,10 @@ export default function WinLossBubble({
 }: WinLossBubbleProps) {
   const [visible, setVisible] = useState(true);
 
-  useEffect(() => {
-    // Bubble rises and fades out after 2 seconds
-    const timer = setTimeout(() => {
-      setVisible(false);
-      onComplete?.();
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [onComplete]);
+  const handleAnimationEnd = () => {
+    setVisible(false);
+    onComplete?.();
+  };
 
   const getMessage = () => {
     if (message) return message;
@@ -62,6 +57,10 @@ export default function WinLossBubble({
 
   if (!visible) return null;
 
+  // Speech bubbles (message prop) should not fade, only win/loss bubbles should fade
+  const isSpeechBubble = !!message;
+  const animationName = isSpeechBubble ? "rise-only" : "rise-fade";
+
   return (
     <div
       style={{
@@ -70,9 +69,10 @@ export default function WinLossBubble({
         top: position.top,
         transform: "translateX(-50%)",
         zIndex: 2000,
-        animation: "rise-fade 2s ease-out forwards",
+        animation: `${animationName} 2s ease-out forwards`,
         pointerEvents: "none",
       }}
+      onAnimationEnd={handleAnimationEnd}
     >
       <div
         style={{
@@ -95,8 +95,26 @@ export default function WinLossBubble({
             opacity: 1;
             transform: translateY(0) translateX(-50%);
           }
+          50% {
+            opacity: 1;
+            transform: translateY(-40px) translateX(-50%);
+          }
           100% {
             opacity: 0;
+            transform: translateY(-80px) translateX(-50%);
+          }
+        }
+        @keyframes rise-only {
+          0% {
+            opacity: 1;
+            transform: translateY(0) translateX(-50%);
+          }
+          15% {
+            opacity: 1;
+            transform: translateY(-60px) translateX(-50%);
+          }
+          100% {
+            opacity: 1;
             transform: translateY(-60px) translateX(-50%);
           }
         }

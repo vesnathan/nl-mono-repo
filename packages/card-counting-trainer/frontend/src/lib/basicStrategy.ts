@@ -1,13 +1,16 @@
 import { Card, StrategyAction } from "@/types/game";
 import { calculateHandValue, isSoftHand, canSplit } from "./gameActions";
+import { GameSettings, DoubleDownRule } from "@/types/gameSettings";
 
 /**
  * Basic Strategy Tables
- * Based on standard blackjack basic strategy for:
+ * These are the base strategy tables for:
  * - 6 decks
- * - Dealer hits soft 17
- * - Double after split allowed
+ * - Dealer hits soft 17 (H17)
+ * - Double after split allowed (DAS)
  * - Surrender allowed
+ *
+ * Strategy is dynamically adjusted based on actual game settings
  *
  * Actions:
  * H = Hit
@@ -129,46 +132,122 @@ function getDealerIndex(dealerCard: Card): number {
 }
 
 /**
+ * Check if double down is allowed based on hand value and game rules
+ */
+function canDoubleByRules(handValue: number, settings: GameSettings): boolean {
+  switch (settings.doubleDownRule) {
+    case DoubleDownRule.ANY_TWO_CARDS:
+      return true;
+    case DoubleDownRule.NINE_TEN_ELEVEN:
+      return handValue === 9 || handValue === 10 || handValue === 11;
+    case DoubleDownRule.TEN_ELEVEN:
+      return handValue === 10 || handValue === 11;
+    case DoubleDownRule.NOT_ALLOWED:
+      return false;
+    default:
+      return true;
+  }
+}
+
+/**
  * Get the basic strategy action for a given hand
+ * Dynamically adjusts based on game settings
  * @param playerCards Player's cards
  * @param dealerUpCard Dealer's face-up card
- * @param canSplitHand Whether the hand can be split
- * @param canDoubleHand Whether the hand can be doubled
+ * @param settings Game settings (dealer rules, double rules, etc.)
+ * @param canSplitHand Whether the hand can be split (has chips for it)
+ * @param canDoubleHand Whether the hand can be doubled (first two cards + has chips)
  * @returns Recommended strategy action
  */
 export function getBasicStrategyAction(
   playerCards: Card[],
   dealerUpCard: Card,
+  settings: GameSettings,
   canSplitHand: boolean = false,
   canDoubleHand: boolean = false
 ): StrategyAction {
   const dealerIndex = getDealerIndex(dealerUpCard);
   const handValue = calculateHandValue(playerCards);
+  const isSoft = isSoftHand(playerCards);
 
   // Check for pair splitting first
   if (canSplitHand && canSplit(playerCards)) {
     const pairRank = playerCards[0].rank;
-    const action = PAIR_SPLITS[pairRank]?.[dealerIndex];
-    if (action === "SP") return action;
+    let action = PAIR_SPLITS[pairRank]?.[dealerIndex];
+
+    // Adjust split strategy based on settings
+    if (action === "SP") {
+      // If no double after split, be more conservative with 2-2, 3-3, 6-6
+      if (!settings.doubleAfterSplit) {
+        if ((pairRank === "2" || pairRank === "3") && dealerIndex >= 5) {
+          // Don't split 2s/3s vs 7+ if no DAS
+          action = "H";
+        } else if (pairRank === "6" && dealerIndex >= 4) {
+          // Don't split 6s vs 6+ if no DAS
+          action = "H";
+        }
+      }
+      if (action === "SP") return action;
+    }
   }
 
   // Check for soft hands (Ace counted as 11)
-  if (isSoftHand(playerCards)) {
-    const softAction = SOFT_TOTALS[handValue]?.[dealerIndex];
+  if (isSoft) {
+    let softAction = SOFT_TOTALS[handValue]?.[dealerIndex];
     if (softAction) {
-      // If strategy says double but can't, hit instead
-      if (softAction === "D" && !canDoubleHand) return "H";
+      // Adjust soft strategy based on dealer hitting soft 17
+      if (handValue === 18 && dealerIndex === 0 && !settings.dealerHitsSoft17) {
+        // A-7 vs 2: Stand if dealer stands on soft 17 (S17)
+        softAction = "S";
+      } else if (handValue === 19 && dealerIndex === 4 && settings.dealerHitsSoft17) {
+        // A-8 vs 6: Double if dealer hits soft 17 (H17)
+        if (canDoubleHand && canDoubleByRules(handValue, settings)) {
+          softAction = "D";
+        }
+      }
+
+      // If strategy says double but can't (by rules or chips), hit instead
+      if (softAction === "D") {
+        if (!canDoubleHand || !canDoubleByRules(handValue, settings)) {
+          return "H";
+        }
+      }
       return softAction;
     }
   }
 
   // Hard hands
-  const hardAction = HARD_TOTALS[handValue]?.[dealerIndex];
+  let hardAction = HARD_TOTALS[handValue]?.[dealerIndex];
   if (hardAction) {
-    // If strategy says double but can't, hit instead
-    if (hardAction === "D" && !canDoubleHand) return "H";
-    // If strategy says surrender but can't, hit instead
-    if (hardAction === "SU") return "H"; // Simplified: surrender not implemented yet
+    // Adjust hard strategy based on dealer hitting soft 17
+    if (handValue === 9 && dealerIndex === 0 && settings.dealerHitsSoft17) {
+      // 9 vs 2: Double if dealer hits soft 17 (H17)
+      if (canDoubleHand && canDoubleByRules(handValue, settings)) {
+        hardAction = "D";
+      }
+    } else if (handValue === 15 && dealerIndex === 8 && !settings.dealerHitsSoft17) {
+      // 15 vs 10: Don't surrender if dealer stands on soft 17 (S17)
+      if (hardAction === "SU") {
+        hardAction = "H";
+      }
+    }
+
+    // If strategy says double but can't (by rules or chips), hit instead
+    if (hardAction === "D") {
+      if (!canDoubleHand || !canDoubleByRules(handValue, settings)) {
+        return "H";
+      }
+    }
+
+    // If strategy says surrender but not allowed or available
+    if (hardAction === "SU") {
+      if (!settings.lateSurrenderAllowed) {
+        return "H";
+      }
+      // Note: Surrender is not implemented in the game yet, so default to hit
+      return "H";
+    }
+
     return hardAction;
   }
 
@@ -194,6 +273,76 @@ export function strategyActionToText(action: StrategyAction): string {
     default:
       return "Unknown";
   }
+}
+
+/**
+ * Get a human-readable explanation of the strategy decision
+ */
+export function getStrategyExplanation(
+  action: StrategyAction,
+  playerCards: Card[],
+  dealerUpCard: Card,
+  settings: GameSettings
+): string {
+  const handValue = calculateHandValue(playerCards);
+  const dealerValue = dealerUpCard.rank === "A" ? 11 : dealerUpCard.value;
+  const isSoft = isSoftHand(playerCards);
+  const isPair = playerCards.length === 2 && playerCards[0].rank === playerCards[1].rank;
+
+  // Pair splits
+  if (action === "SP" && isPair) {
+    const rank = playerCards[0].rank;
+    if (rank === "A") {
+      return "Always split Aces - gives you two chances at blackjack!";
+    }
+    if (rank === "8") {
+      return "Always split 8s - a pair of 8s (16) is terrible, but 8 is a strong start.";
+    }
+    return `Split ${rank}s against dealer ${dealerUpCard.rank} - optimal by basic strategy.`;
+  }
+
+  // Surrender
+  if (action === "SU") {
+    return `Surrender ${handValue} vs ${dealerUpCard.rank} - you'll lose less money over time.`;
+  }
+
+  // Soft hands
+  if (isSoft) {
+    if (action === "D") {
+      return `Double soft ${handValue} vs ${dealerUpCard.rank} - dealer is weak, maximize your advantage!`;
+    }
+    if (action === "H") {
+      return `Hit soft ${handValue} - you can't bust with a soft hand, keep improving.`;
+    }
+    return `Stand on soft ${handValue} vs ${dealerUpCard.rank} - strong hand against dealer.`;
+  }
+
+  // Hard hands
+  if (action === "D") {
+    return `Double ${handValue} vs ${dealerUpCard.rank} - you have the advantage, bet more!`;
+  }
+
+  if (action === "S") {
+    if (handValue >= 17) {
+      return `Stand on ${handValue} - too risky to hit with this total.`;
+    }
+    if (dealerValue >= 2 && dealerValue <= 6) {
+      return `Stand on ${handValue} vs ${dealerUpCard.rank} - dealer is likely to bust.`;
+    }
+    return `Stand on ${handValue} vs ${dealerUpCard.rank} - optimal play.`;
+  }
+
+  if (action === "H") {
+    if (handValue <= 11) {
+      return `Hit ${handValue} - you can't bust, always take another card.`;
+    }
+    if (dealerValue >= 7) {
+      return `Hit ${handValue} vs ${dealerUpCard.rank} - dealer has a strong upcard.`;
+    }
+    return `Hit ${handValue} - need to improve against dealer ${dealerUpCard.rank}.`;
+  }
+
+  return "Follow basic strategy for optimal play.";
 }
 
 /**

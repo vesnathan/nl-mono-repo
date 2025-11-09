@@ -21,6 +21,7 @@ import {
   STRATEGY_PEEK_COST,
   getStreakBonus,
 } from "@/lib/scoring";
+import { DEFAULT_GAME_SETTINGS } from "@/types/gameSettings";
 
 /**
  * Main game controller hook
@@ -120,7 +121,7 @@ export function useBlackjackGame(config?: GameConfig) {
       const canDoubleHand = canDouble(hand.cards, player.chips, hand.bet);
       const canSplitHand = canSplit(hand.cards);
 
-      return getBasicStrategyAction(hand.cards, dealerUpCard, canSplitHand, canDoubleHand);
+      return getBasicStrategyAction(hand.cards, dealerUpCard, DEFAULT_GAME_SETTINGS, canSplitHand, canDoubleHand);
     },
     [gameState]
   );

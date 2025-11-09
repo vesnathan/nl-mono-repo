@@ -1,10 +1,190 @@
-✅ Move first row of cards closer, second row can go above.
+# Card Counting Trainer - TODO List
 
-✅ Ad card deal animation.
+## Current Issues
+- [ ] Have cards fly to the actual card's location.
 
-Ad conversations engine. Conversations between AI's, between dealer and ai's, Sometimes the ai can ask us questions, even when we aren't seated, to which we have to respond. If we choose to igbore them that raises the suspicion meter, like we are concentrating to hard. Conversation bubbles to appear above avatar, can cover cards.
+## High Priority - MVP Features (Phase 1)
 
-Raising and dropping bets at certain points also raises suspicion, moreso if the count is high. Doing so with a poor count lowers suspicion.
+### Player Betting System
+- [ ] Build player betting interface (currently AI players bet automatically)
+- [ ] Chip selection UI (different denominations: 5, 10, 25, 50, 100)
+- [ ] Betting circle interaction for player
+- [ ] Min/max bet validation
+- [ ] Bet confirmation and display
 
-The ai's have a percentage for how they play in regards to perfect play.
+### Statistics Tracking
+- [ ] Session stats (hands played, wins/losses, blackjacks)
+- [ ] Net profit/loss tracking
+- [x] Current streak display
+- [ ] Highest chip count tracking
+- [ ] Win rate calculation
 
+### Count Display Enhancements
+- [x] True count display (shows in practice/timed modes)
+- [x] Deck penetration indicator (decks remaining calculated)
+- [ ] Cards dealt vs total cards visual
+- [x] Count practice mode (show/hide toggle via training modes)
+
+### Game Settings UI
+- [x] Comprehensive settings modal for rule variations
+- [x] Number of decks selector (1, 2, 4, 6, 8)
+- [x] Dealer hits/stands on soft 17 toggle
+- [x] Blackjack payout selector (3:2, 6:5, etc.)
+- [x] Double after split toggle
+- [x] Late surrender toggle
+- [ ] Preset configurations (Vegas Strip, Single Deck, European, etc.)
+
+## Medium Priority - Enhanced Features (Phase 2)
+
+### Scoring System
+- [x] Exponential scoring for correct decisions (10, 20, 40, 80...)
+- [x] Streak tracking and visual feedback
+- [x] Score multiplier system (1.0x - 2.0x)
+- [ ] Counting accuracy bonus calculations
+- [ ] Strategy decision tracking (correct vs incorrect)
+- [ ] Leaderboard integration
+
+### Count Peek Feature
+- [ ] "Show Count" button with warning
+- [ ] Confirmation dialog when multiplier >1.0x
+- [ ] Score multiplier reset penalty
+- [ ] Count reveal modal (running count, true count, decks remaining)
+- [ ] Penalty visual effects
+
+### Strategy Card System
+- [x] "Strategy Card" button during player turn
+- [ ] 10 chip cost per peek
+- [x] Strategy recommendation overlay (basic strategy chart modal)
+- [ ] Highlighted optimal action
+- [ ] Brief explanation text
+- [ ] Cooldown (once per hand)
+
+### Multiple Counting Systems
+- [x] KO (Knock-Out) counting system
+- [x] Hi-Opt I counting system
+- [x] Hi-Opt II counting system
+- [x] Omega II counting system
+- [x] Counting system selector in settings
+- [x] Side count Aces option
+
+### Training Modes
+- [x] Practice Mode (show count automatically)
+- [x] Test Mode (hide count, verify at end of shoe)
+- [x] Timed Challenge (speed + accuracy)
+- [x] Mode selector UI
+- [ ] Speed control slider (0.25s - 2s per card)
+
+### Gameplay Features
+- [ ] **Split gameplay** (splitting pairs into two hands)
+- [ ] Double down implementation
+- [ ] Surrender functionality
+- [ ] Insurance when dealer shows Ace
+- [ ] Resplit option (up to 4 hands)
+
+## Lower Priority - Polish & Future (Phase 3+)
+
+### Visual & UI Improvements
+- [ ] **Graphs for various player stats**
+- [ ] Deck/shoe visual representation
+- [ ] Cut card visual indicator
+- [ ] Betting hints based on true count
+- [ ] House edge calculator
+- [ ] Mobile responsiveness improvements
+- [ ] Touch gestures for hit/stand
+
+### Pit Boss & Suspicion System
+- [ ] Bet spread detection
+- [ ] Suspicion meter increases with large bet spreads
+- [ ] Pit boss warnings/challenges
+- [ ] Pit boss distance indicator
+- [ ] "Heat" level system
+- [ ] Camouflage betting suggestions
+
+### Audio Integration
+- [ ] Dealer voice lines (5 dealer characters)
+- [ ] Casino ambience loop
+- [ ] Card shuffling sounds
+- [ ] Slot machine background
+- [ ] Event sounds (jackpot, glass break, phone rings)
+- [ ] Character voices (mobster, boss, veteran)
+
+### Multi-Player Features
+- [ ] Table seating system (8 seats)
+- [ ] Seat selection UI
+- [ ] Turn-based play with other players
+- [ ] Real-time sync via GraphQL subscriptions
+- [ ] Spectator mode
+- [ ] Player info display at table
+- [ ] Chat system
+- [ ] Challenges and achievements
+
+### Payment & Monetization
+- [ ] Stripe payment integration
+- [ ] Chip purchase flow ($10 for 1,000 chips)
+- [ ] Transaction history
+- [ ] Patreon integration
+- [ ] Tier bonus calculations (Bronze 10%, Silver 25%, Gold 50%, Platinum 100%)
+- [ ] Monthly chip stipend for supporters
+- [ ] Early adopter lifetime unlimited chips
+
+### Leaderboards
+- [ ] All-time high score
+- [ ] Monthly high score
+- [ ] Longest streak
+- [ ] Perfect shoes count
+- [ ] Filter by counting system
+- [ ] Filter by game rules
+- [ ] Filter by time period
+
+### Advanced Features
+- [ ] Historical hand replay
+- [ ] Strategy analyzer
+- [ ] Advanced analytics dashboard
+- [ ] Custom table themes (for Platinum supporters)
+- [ ] Tournament mode
+- [ ] Friend system
+- [ ] Video tutorials integration
+
+## Documentation & Setup
+- [ ] Setup guide for local development
+- [ ] API documentation
+- [ ] Component documentation
+- [ ] Testing strategy
+
+## Completed Features
+
+### Core Gameplay
+- [x] Basic blackjack gameplay with AI players
+- [x] Hit/Stand player actions
+- [x] Dealer AI following blackjack rules
+- [x] Card dealing animations
+- [x] Win/loss detection and payouts
+- [x] Chip tracking system
+
+### Counting & Training
+- [x] Running count calculation (Hi-Lo, KO, Hi-Opt I/II, Omega II)
+- [x] True count calculation
+- [x] Count simulation on page load (realistic mid-shoe join)
+- [x] Multiple counting systems with selector
+- [x] Training modes: Practice, Test, Timed Challenge
+- [x] Side count Aces option
+
+### UI/UX
+- [x] Basic strategy card modal
+- [x] Game settings modal with rule variations
+- [x] Top bar stats display (COUNT, STREAK, CHIPS, SCORE, MULTIPLIER)
+- [x] AI banter/distraction system
+- [x] Win/loss bubble notifications
+- [x] Uniform styled stat boxes
+
+### Scoring & Progression
+- [x] Exponential scoring system (10, 20, 40, 80...)
+- [x] Streak tracking
+- [x] Score multiplier (1.0x - 2.0x)
+- [x] Real-time score updates
+
+## Notes
+- Focus on getting player betting interface working next
+- Need to implement split, double down, and surrender gameplay
+- Consider adding preset game configurations
+- Speed control slider would improve training experience

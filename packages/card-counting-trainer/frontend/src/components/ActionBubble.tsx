@@ -3,26 +3,31 @@
 import { useEffect, useState } from "react";
 
 interface ActionBubbleProps {
-  action: "HIT" | "STAND" | "DOUBLE" | "SPLIT";
+  action: "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK";
   onComplete?: () => void;
 }
 
 export default function ActionBubble({ action, onComplete }: ActionBubbleProps) {
   const [opacity, setOpacity] = useState(0);
+  const [transitionDuration, setTransitionDuration] = useState("0.15s"); // Quick fade in
 
   useEffect(() => {
     // Fade in quickly
-    const fadeInTimer = setTimeout(() => setOpacity(1), 50);
+    const fadeInTimer = setTimeout(() => {
+      setTransitionDuration("0.1s"); // Very quick fade in
+      setOpacity(0.85); // Slightly transparent
+    }, 30);
 
-    // Hold for a moment, then fade out
+    // Brief hold, then fade out
     const fadeOutTimer = setTimeout(() => {
+      setTransitionDuration("0.4s"); // Quick fade out
       setOpacity(0);
-    }, 1200);
+    }, 600); // Short display time - punchy!
 
     // Complete after fade out
     const completeTimer = setTimeout(() => {
       onComplete?.();
-    }, 1500);
+    }, 1100); // 600 + 500 (fade out duration + buffer)
 
     return () => {
       clearTimeout(fadeInTimer);
@@ -41,6 +46,10 @@ export default function ActionBubble({ action, onComplete }: ActionBubbleProps) 
         return "#FF9800"; // Orange
       case "SPLIT":
         return "#9C27B0"; // Purple
+      case "BUST":
+        return "#F44336"; // Red
+      case "BLACKJACK":
+        return "#FFD700"; // Gold
       default:
         return "#4CAF50";
     }
@@ -63,7 +72,7 @@ export default function ActionBubble({ action, onComplete }: ActionBubbleProps) 
         fontWeight: "bold",
         fontSize: "16px",
         opacity: opacity,
-        transition: "opacity 0.3s ease",
+        transition: `opacity ${transitionDuration} ease`,
         zIndex: 10,
         pointerEvents: "none",
       }}
