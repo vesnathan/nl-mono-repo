@@ -57,6 +57,7 @@ import TableSeats from "@/components/TableSeats";
 import GameOverlays from "@/components/GameOverlays";
 import DebugLogModal from "@/components/DebugLogModal";
 import GameModals from "@/components/GameModals";
+import GameTable from "@/components/GameTable";
 import { CARD_APPEAR_TIME, CARD_ANIMATION_DURATION } from "@/constants/animations";
 import {
   PlayerHand,
@@ -2138,119 +2139,37 @@ export default function GamePage() {
       />
 
 
+
       {/* Full Viewport Game Table */}
-      <div
-        style={{
-          position: "fixed",
-          top: "60px",
-          left: 0,
-          width: "100vw",
-          height: "calc(100vh - 60px)",
-          backgroundColor: "rgb(107, 0, 0)",
-          overflow: "hidden",
-        }}
-      >
-        {/* Table Background Pattern */}
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            width: "100%",
-            height: "100%",
-            opacity: 0.5,
-            backgroundImage: "url(/tableBG.webp)",
-            backgroundRepeat: "repeat",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
-        {/* Content Container */}
-        <div
-          style={{
-            position: "absolute",
-            width: "100%",
-            height: "100%",
-            top: 0,
-            left: 0,
-            zIndex: 1,
-          }}
-        >
-          {/* Shoe Component */}
-          <Shoe
-            numDecks={gameSettings.numberOfDecks}
-            cardsDealt={cardsDealt}
-            dealerCutCard={calculateCutCardPosition(
-              gameSettings.numberOfDecks,
-              gameSettings.deckPenetration,
-            )}
-          />
-
-          {/* Dealer Section - Top Center with Avatar */}
-          <DealerSection
-            currentDealer={currentDealer}
-            dealerCallout={dealerCallout}
-            phase={phase}
-            dealerHand={dealerHand}
-            dealerRevealed={dealerRevealed}
-            onDealerClick={() => setShowDealerInfo(true)}
-          />
-
-          {/* Player Spots - Using exact positions from reference project */}
-          <TableSeats
-            aiPlayers={aiPlayers}
-            playerSeat={playerSeat}
-            playerHand={playerHand}
-            phase={phase}
-            activePlayerIndex={activePlayerIndex}
-            playerActions={playerActions}
-            onSeatClick={setPlayerSeat}
-            addDebugLog={addDebugLog}
-          />
-
-          {/* Game Overlays: Action Buttons, Bubbles, Conversations, Flying Cards */}
-          <GameOverlays
-            playerSeat={playerSeat}
-            playerHand={playerHand}
-            currentBet={currentBet}
-            phase={phase}
-            speechBubbles={speechBubbles}
-            winLossBubbles={winLossBubbles}
-            activeConversation={activeConversation}
-            flyingCards={flyingCards}
-            startNewRound={startNewRound}
-            hit={hit}
-            stand={stand}
-            handleConversationResponse={handleConversationResponse}
-            handleConversationIgnore={handleConversationIgnore}
-            setWinLossBubbles={setWinLossBubbles}
-          />
-        </div>
-
-        {/* Dealer Info Modal */}
-        {showDealerInfo && currentDealer && (
-          <DealerInfo
-            dealer={currentDealer}
-            onClose={() => setShowDealerInfo(false)}
-            openAsModal
-          />
-        )}
-
-        {/* CSS Animations */}
-        <style jsx global>{`
-          @keyframes fadeInScale {
-            from {
-              opacity: 0;
-              transform: translateX(-50%) scale(0.8);
-            }
-            to {
-              opacity: 1;
-              transform: translateX(-50%) scale(1);
-            }
-          }
-        `}</style>
-      </div>
+      <GameTable
+        gameSettings={gameSettings}
+        cardsDealt={cardsDealt}
+        currentDealer={currentDealer}
+        dealerCallout={dealerCallout}
+        phase={phase}
+        dealerHand={dealerHand}
+        dealerRevealed={dealerRevealed}
+        aiPlayers={aiPlayers}
+        playerSeat={playerSeat}
+        playerHand={playerHand}
+        currentBet={currentBet}
+        activePlayerIndex={activePlayerIndex}
+        playerActions={playerActions}
+        speechBubbles={speechBubbles}
+        winLossBubbles={winLossBubbles}
+        activeConversation={activeConversation}
+        flyingCards={flyingCards}
+        showDealerInfo={showDealerInfo}
+        setPlayerSeat={setPlayerSeat}
+        addDebugLog={addDebugLog}
+        startNewRound={startNewRound}
+        hit={hit}
+        stand={stand}
+        handleConversationResponse={handleConversationResponse}
+        handleConversationIgnore={handleConversationIgnore}
+        setWinLossBubbles={setWinLossBubbles}
+        setShowDealerInfo={setShowDealerInfo}
+      />
 
 
       {/* All Game Modals */}
