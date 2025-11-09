@@ -128,8 +128,6 @@ export function useAITurnsPhase({
           `Players finished: ${Array.from(playersFinished).join(", ")}`,
         );
         addDebugLog("Moving to DEALER_TURN phase");
-        aiTurnProcessingRef.current = false;
-        addDebugLog("🔓 AI turn processing unlocked (all finished)");
         registerTimeout(() => setPhase("DEALER_TURN"), 1000);
         return;
       }
