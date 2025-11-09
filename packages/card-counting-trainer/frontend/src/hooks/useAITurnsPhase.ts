@@ -80,10 +80,12 @@ export function useAITurnsPhase({
 }: UseAITurnsPhaseParams) {
   const aiTurnProcessingRef = useRef<boolean>(false);
   const cardCounterRef = useRef(0);
+  const isTransitioningRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (phase !== "AI_TURNS") {
       aiTurnProcessingRef.current = false;
+      isTransitioningRef.current = false;
       return;
     }
 
@@ -91,7 +93,7 @@ export function useAITurnsPhase({
       return;
     }
 
-    if (aiTurnProcessingRef.current) {
+    if (aiTurnProcessingRef.current || isTransitioningRef.current) {
       return;
     }
 
@@ -150,6 +152,7 @@ export function useAITurnsPhase({
           `Players finished: ${Array.from(playersFinished).join(", ")}`,
         );
         addDebugLog("Moving to DEALER_TURN phase");
+        isTransitioningRef.current = true;
         registerTimeout(() => setPhase("DEALER_TURN"), 1000);
         return;
       }

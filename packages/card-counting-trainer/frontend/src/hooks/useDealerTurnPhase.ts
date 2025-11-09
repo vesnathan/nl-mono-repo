@@ -160,7 +160,7 @@ export function useDealerTurnPhase({
               setFlyingCards((prev) => [...prev, flyingCard]);
 
               // Add card to hand after animation
-              setTimeout(() => {
+              registerTimeout(() => {
                 setFlyingCards((prev) =>
                   prev.filter((fc) => fc.id !== flyingCard.id),
                 );
