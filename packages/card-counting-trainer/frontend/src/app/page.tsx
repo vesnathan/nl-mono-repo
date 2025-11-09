@@ -27,6 +27,7 @@ import {
   getBlackjackPayoutMultiplier,
   canDoubleDown,
   calculateCutCardPosition,
+  TrainingMode,
 } from "@/types/gameSettings";
 import { AI_CHARACTERS, AICharacter, getAIAvatarPath } from "@/data/aiCharacters";
 import {
@@ -36,6 +37,12 @@ import {
   getDealerAvatarPath,
 } from "@/data/dealerCharacters";
 import { getInitialHandReaction, getHitReaction } from "@/data/inHandReactions";
+import {
+  AI_DIALOGUE_ADDONS,
+  DEALER_PLAYER_CONVERSATIONS,
+  getDealerPlayerLine,
+  pick,
+} from "@/data/ai-dialogue-addons";
 import FlyingCard from "@/components/FlyingCard";
 import WinLossBubble from "@/components/WinLossBubble";
 import SuspicionMeter from "@/components/SuspicionMeter";
@@ -45,6 +52,9 @@ import Shoe from "@/components/Shoe";
 import PlayingCard from "@/components/PlayingCard";
 import ActionBubble from "@/components/ActionBubble";
 import TurnIndicator from "@/components/TurnIndicator";
+import ConversationPrompt from "@/components/ConversationPrompt";
+import LeaderboardModal from "@/components/LeaderboardModal";
+import GameSettingsModal from "@/components/GameSettingsModal";
 
 interface PlayerHand {
   cards: GameCard[];
@@ -64,6 +74,18 @@ interface SpeechBubble {
   message: string;
   position: { left: string; top: string };
   id: string;
+}
+
+interface ActiveConversation {
+  id: string;
+  speakerId: string; // AI character id or "dealer"
+  speakerName: string;
+  question: string;
+  choices: Array<{
+    text: string;
+    suspicionChange: number;
+  }>;
+  position: { left: string; top: string };
 }
 
 interface FlyingCardData {
@@ -87,22 +109,15 @@ export default function GamePage() {
   const { user } = useAuth();
 
   // Game settings
-  const [gameSettings] = useState<GameSettings>(DEFAULT_GAME_SETTINGS);
+  const [gameSettings, setGameSettings] = useState<GameSettings>(DEFAULT_GAME_SETTINGS);
 
   // Game state
-  const [numDecks] = useState(gameSettings.numberOfDecks);
   const [shoe, setShoe] = useState<GameCard[]>(() =>
-    createAndShuffleShoe(gameSettings.numberOfDecks)
+    createAndShuffleShoe(gameSettings.numberOfDecks, gameSettings.countingSystem)
   );
   const [cardsDealt, setCardsDealt] = useState(0);
   const [runningCount, setRunningCount] = useState(0);
   const [shoesDealt, setShoesDealt] = useState(0);
-  const [cutCardPosition] = useState(() =>
-    calculateCutCardPosition(
-      gameSettings.numberOfDecks,
-      gameSettings.deckPenetration
-    )
-  );
 
   // Player state
   const [playerChips, setPlayerChips] = useState(1000);
@@ -112,6 +127,13 @@ export default function GamePage() {
   });
   const [currentBet, setCurrentBet] = useState(10);
   const [previousBet, setPreviousBet] = useState(10); // Track previous bet for bet spread detection
+
+  // Scoring and statistics state
+  const [currentScore, setCurrentScore] = useState(0);
+  const [currentStreak, setCurrentStreak] = useState(0); // Consecutive correct decisions
+  const [longestStreak, setLongestStreak] = useState(0);
+  const [peakChips, setPeakChips] = useState(1000);
+  const [scoreMultiplier, setScoreMultiplier] = useState(1.0); // 1.0x - 2.0x based on counting accuracy
 
   // AI players state
   const [aiPlayers, setAIPlayers] = useState<AIPlayer[]>([]);
@@ -130,10 +152,14 @@ export default function GamePage() {
   // UI state
   const [phase, setPhase] = useState<GamePhase>("BETTING");
   const [suspicionLevel, setSuspicionLevel] = useState(0);
-  const [pitBossDistance, setPitBossDistance] = useState(70); // 0-100, higher = farther away (safer)
+  const [pitBossDistance, setPitBossDistance] = useState(30); // 0-100, higher = closer (more dangerous), start farther away
   const [speechBubbles, setSpeechBubbles] = useState<SpeechBubble[]>([]);
+  const [activeConversation, setActiveConversation] = useState<ActiveConversation | null>(null);
+  const [playerSociability, setPlayerSociability] = useState(50); // 0-100: how friendly/responsive player has been
   const [handNumber, setHandNumber] = useState(0);
   const [showDealerInfo, setShowDealerInfo] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [playerSeat, setPlayerSeat] = useState<number | null>(null); // null means not seated
 
@@ -147,6 +173,10 @@ export default function GamePage() {
 
   // Dealer callouts
   const [dealerCallout, setDealerCallout] = useState<string | null>(null);
+
+  // Timed challenge mode
+  const [timeRemaining, setTimeRemaining] = useState(300); // 5 minutes in seconds
+  const [timedChallengeActive, setTimedChallengeActive] = useState(false);
 
   // Track previous hand states for in-hand reactions
   const prevAIHandsRef = useRef<Map<string, number>>(new Map());
@@ -175,6 +205,35 @@ export default function GamePage() {
     return () => clearAllTimeouts();
   }, [clearAllTimeouts]);
 
+  // Timed challenge countdown timer
+  useEffect(() => {
+    if (gameSettings.trainingMode === TrainingMode.TIMED_CHALLENGE) {
+      if (!timedChallengeActive) {
+        // Start the timer
+        setTimedChallengeActive(true);
+        setTimeRemaining(300); // Reset to 5 minutes
+      }
+
+      if (timedChallengeActive && timeRemaining > 0) {
+        const timer = setInterval(() => {
+          setTimeRemaining((prev) => {
+            if (prev <= 1) {
+              // Time's up!
+              clearInterval(timer);
+              // Could show a modal or message here
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        return () => clearInterval(timer);
+      }
+    } else {
+      setTimedChallengeActive(false);
+    }
+  }, [gameSettings.trainingMode, timedChallengeActive, timeRemaining]);
+
   // Helper to calculate card positions for flying animation
   const getCardPosition = useCallback((type: "ai" | "player" | "dealer" | "shoe", index?: number, cardIndex?: number) => {
     const tablePositions = [
@@ -195,16 +254,16 @@ export default function GamePage() {
     }
 
     if (type === "dealer") {
-      // Dealer cards are at top center, above the dealer avatar
-      // Cards start at 10% and are positioned marginBottom: 4px above avatar
-      // Approximate the card area position
-      return { left: "50%", top: "8%" };
+      // Dealer cards are below the dealer avatar
+      // Dealer section is at 8%, avatar is 150px + 12px margin = 162px
+      // Cards appear below the avatar
+      return { left: "50%", top: "calc(8% + 162px)" };
     }
 
     if (type === "player" && playerSeat !== null) {
       const [x, y] = tablePositions[playerSeat];
       // Cards are positioned above the avatar
-      return { left: `${x}%`, top: `calc(${y}% - 140px)` };
+      return { left: `${x}%`, top: `calc(${y}% - 190px)` };
     }
 
     if (type === "ai" && index !== undefined) {
@@ -265,7 +324,7 @@ export default function GamePage() {
 
   // Deal a card with reshuffle handling
   const dealCardFromShoe = useCallback(() => {
-    const { card, remainingShoe, reshuffled } = dealCard(shoe, numDecks);
+    const { card, remainingShoe, reshuffled } = dealCard(shoe, gameSettings.numberOfDecks, gameSettings.countingSystem);
 
     if (reshuffled) {
       setShoe(remainingShoe);
@@ -279,7 +338,7 @@ export default function GamePage() {
     }
 
     return card;
-  }, [shoe, numDecks]);
+  }, [shoe, gameSettings.numberOfDecks, gameSettings.countingSystem]);
 
   // Change dealer every 8-10 shoes
   useEffect(() => {
@@ -290,6 +349,145 @@ export default function GamePage() {
       setCurrentDealer(newDealer);
     }
   }, [shoesDealt, dealerChangeInterval, currentDealer]);
+
+  // Conversation system functions
+  const triggerConversation = useCallback((speakerId: string, speakerName: string, position: number) => {
+    // Don't trigger if there's already an active conversation
+    if (activeConversation) return;
+
+    const tablePositions = [
+      [5, 55],   // Seat 0 - Far left
+      [16, 62],  // Seat 1 - Left
+      [29, 68],  // Seat 2 - Center-left
+      [42, 72],  // Seat 3 - Center
+      [56, 72],  // Seat 4 - Center
+      [69, 68],  // Seat 5 - Center-right
+      [82, 62],  // Seat 6 - Right
+      [93, 55],  // Seat 7 - Far right
+    ];
+
+    const [x, y] = tablePositions[position] || tablePositions[0];
+
+    // Get character-specific or dealer dialogue
+    let question: string;
+    if (speakerId === "dealer") {
+      question = getDealerPlayerLine("generic", "dealerQuestions");
+    } else {
+      question = getDealerPlayerLine(speakerId, "playerQuestions");
+    }
+
+    // Create response choices
+    const choices = [
+      { text: "Sure, yeah...", suspicionChange: -2 }, // Friendly, reduces suspicion slightly
+      { text: "*nods politely*", suspicionChange: 0 }, // Neutral
+      { text: "*focuses on cards*", suspicionChange: 5 }, // Ignoring - increases suspicion
+    ];
+
+    const conversation: ActiveConversation = {
+      id: `conv-${Date.now()}`,
+      speakerId,
+      speakerName,
+      question,
+      choices,
+      position: { left: `${x}%`, top: `${y}%` },
+    };
+
+    setActiveConversation(conversation);
+  }, [activeConversation]);
+
+  const addSpeechBubble = useCallback(
+    (playerId: string, message: string, position: number) => {
+      // Use same positions as player avatars on the table
+      const tablePositions = [
+        [5, 55],   // Seat 0 - Far left
+        [16, 62],  // Seat 1 - Left
+        [29, 68],  // Seat 2 - Center-left
+        [42, 72],  // Seat 3 - Center
+        [56, 72],  // Seat 4 - Center
+        [69, 68],  // Seat 5 - Center-right
+        [82, 62],  // Seat 6 - Right
+        [93, 55],  // Seat 7 - Far right
+      ];
+
+      const [x, y] = tablePositions[position] || tablePositions[0];
+
+      const bubble: SpeechBubble = {
+        playerId,
+        message,
+        position: { left: `${x}%`, top: `${y}%` },
+        id: playerId, // Use playerId directly as it's already unique per call
+      };
+
+      setSpeechBubbles((prev) => [...prev, bubble]);
+
+      registerTimeout(() => {
+        setSpeechBubbles((prev) => prev.filter((b) => b.id !== bubble.id));
+      }, 4000); // Doubled from 2000ms - speech bubbles stay visible longer
+    },
+    [registerTimeout],
+  );
+
+  // Periodic conversation triggers (frequency based on player sociability)
+  useEffect(() => {
+    if (!initialized || playerSeat === null || activeConversation) return;
+
+    // Sociability affects conversation frequency:
+    // Low sociability (0-30): Less frequent, people leave you alone
+    // Medium sociability (31-69): Normal frequency
+    // High sociability (70+): More frequent, people chat with you more
+    const baseTriggerChance = 0.3;
+    const sociabilityMultiplier = playerSociability / 50; // 0 = 0%, 50 = 30%, 100 = 60%
+    const triggerChance = baseTriggerChance * sociabilityMultiplier;
+
+    // Interval also affected by sociability (lower sociability = longer intervals)
+    const baseInterval = 25000; // 25 seconds base
+    const intervalVariation = 10000; // +/- 10 seconds
+    const sociabilityIntervalMultiplier = Math.max(0.5, 2 - (playerSociability / 50)); // Low sociability = longer waits
+
+    const conversationInterval = setInterval(() => {
+      const shouldTrigger = Math.random() < triggerChance;
+      if (!shouldTrigger) return;
+
+      // 60% chance it's from an AI player, 40% from dealer
+      if (Math.random() < 0.6 && aiPlayers.length > 0) {
+        // Pick random AI player
+        const randomAI = aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
+        triggerConversation(randomAI.character.id, randomAI.character.name, randomAI.position);
+      } else if (currentDealer) {
+        // Dealer asks a question (use dealer's position - center top)
+        const dealerPosition = 3; // Center position for visualization
+        triggerConversation("dealer", currentDealer.name, dealerPosition);
+      }
+    }, (baseInterval + Math.random() * intervalVariation) * sociabilityIntervalMultiplier);
+
+    return () => clearInterval(conversationInterval);
+  }, [initialized, playerSeat, activeConversation, aiPlayers, currentDealer, triggerConversation, playerSociability]);
+
+  // AI-to-AI and AI-to-Dealer banter (background conversation)
+  useEffect(() => {
+    if (!initialized || phase === "BETTING") return;
+
+    const banterInterval = setInterval(() => {
+      // 20% chance for background banter every 15-25 seconds
+      if (Math.random() < 0.2 && aiPlayers.length >= 2) {
+        const randomAI = aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
+
+        // 70% chance talking to another player, 30% to dealer
+        let message: string;
+        if (Math.random() < 0.7) {
+          message = getDealerPlayerLine(randomAI.character.id, "banterWithPlayer");
+        } else {
+          message = getDealerPlayerLine(randomAI.character.id, "banterWithDealer");
+        }
+
+        if (message) {
+          addSpeechBubble(`ai-banter-${Date.now()}`, message, randomAI.position);
+        }
+      }
+    }, 15000 + Math.random() * 10000); // 15-25 seconds
+
+    return () => clearInterval(banterInterval);
+  }, [initialized, phase, aiPlayers, addSpeechBubble]);
 
   // Pit boss randomly moves around the floor
   useEffect(() => {
@@ -398,7 +596,7 @@ export default function GamePage() {
 
     // Helper to deal from the current shoe state
     const dealFromCurrentShoe = () => {
-      const { card, remainingShoe, reshuffled } = dealCard(currentShoe, numDecks);
+      const { card, remainingShoe, reshuffled } = dealCard(currentShoe, gameSettings.numberOfDecks, gameSettings.countingSystem);
 
       if (reshuffled) {
         currentShoe = remainingShoe;
@@ -452,7 +650,7 @@ export default function GamePage() {
 
     // Now animate dealing the pre-dealt cards using managed timeouts
     // Adjust delay based on dealer's dealing speed (higher speed = shorter delay)
-    const baseDelayBetweenCards = 300; // Base delay in ms
+    const baseDelayBetweenCards = 500; // Base delay in ms (increased from 300 for better pacing)
     const dealerSpeed = currentDealer?.dealSpeed ?? 1.0;
     const delayBetweenCards = Math.round(baseDelayBetweenCards / dealerSpeed);
 
@@ -478,7 +676,7 @@ export default function GamePage() {
           toPosition
         }]);
 
-        // After animation completes (800ms per FlyingCard component), add card to hand
+        // After animation mostly completes, add card to hand (reduced from 800ms to 700ms)
         registerTimeout(() => {
           // Remove flying card
           setFlyingCards(prev => prev.filter(fc => fc.id !== flyingCardId));
@@ -508,7 +706,7 @@ export default function GamePage() {
               return newHand;
             });
           }
-        }, 800); // FlyingCard animation duration
+        }, 700); // Slightly before animation completes for smoother transition
       }, delay);
       delay += delayBetweenCards;
     });
@@ -526,7 +724,7 @@ export default function GamePage() {
         setPhase("PLAYER_TURN");
       }
     }, delay + 800 + 500);
-  }, [aiPlayers, shoe, cardsDealt, runningCount, shoesDealt, numDecks, registerTimeout, playerSeat, getCardPosition, currentDealer]);
+  }, [aiPlayers, shoe, cardsDealt, runningCount, shoesDealt, gameSettings.numberOfDecks, gameSettings.countingSystem, registerTimeout, playerSeat, getCardPosition, currentDealer]);
 
   // Check for initial hand reactions
   const checkForInitialReactions = useCallback(() => {
@@ -625,6 +823,81 @@ export default function GamePage() {
     setPhase("AI_TURNS");
   }, []);
 
+  // Basic strategy decision - returns true if should HIT, false if should STAND
+  const shouldHitBasicStrategy = useCallback((playerCards: GameCard[], dealerUpCard: GameCard): boolean => {
+    const playerValue = calculateHandValue(playerCards);
+    const dealerValue = dealerUpCard.rank === 'A' ? 11 :
+                        ['J', 'Q', 'K'].includes(dealerUpCard.rank) ? 10 :
+                        parseInt(dealerUpCard.rank);
+
+    // Check if player has soft hand (Ace counted as 11)
+    const hasAce = playerCards.some(card => card.rank === 'A');
+    const hardValue = playerCards.reduce((sum, card) => {
+      if (card.rank === 'A') return sum + 1;
+      if (['J', 'Q', 'K'].includes(card.rank)) return sum + 10;
+      return sum + parseInt(card.rank);
+    }, 0);
+    const isSoft = hasAce && hardValue + 10 === playerValue;
+
+    // Soft hand strategy (has Ace counted as 11)
+    if (isSoft) {
+      if (playerValue >= 19) return false; // Stand on soft 19+
+      if (playerValue === 18) {
+        // Soft 18: hit vs 9, 10, A; stand vs 2-8
+        return dealerValue >= 9;
+      }
+      return true; // Hit on soft 17 or less
+    }
+
+    // Hard hand strategy
+    if (playerValue >= 17) return false; // Always stand on 17+
+    if (playerValue <= 11) return true; // Always hit on 11 or less
+
+    // 12-16: depends on dealer upcard
+    if (playerValue === 12) {
+      // Hit vs 2, 3, 7+; stand vs 4-6
+      return dealerValue <= 3 || dealerValue >= 7;
+    }
+    if (playerValue >= 13 && playerValue <= 16) {
+      // Stand vs dealer 2-6, hit vs 7+
+      return dealerValue >= 7;
+    }
+
+    return false;
+  }, []);
+
+  // Calculate exponential score points: 10 × 2^(N-1) for Nth correct decision
+  const calculateStreakPoints = useCallback((streakNumber: number): number => {
+    return 10 * Math.pow(2, streakNumber - 1);
+  }, []);
+
+  // Award points for correct decision and update streak
+  const awardCorrectDecisionPoints = useCallback(() => {
+    const newStreak = currentStreak + 1;
+    const basePoints = calculateStreakPoints(newStreak);
+    const pointsWithMultiplier = Math.floor(basePoints * scoreMultiplier);
+
+    setCurrentStreak(newStreak);
+    setCurrentScore(prev => prev + pointsWithMultiplier);
+
+    // Update longest streak
+    if (newStreak > longestStreak) {
+      setLongestStreak(newStreak);
+    }
+  }, [currentStreak, scoreMultiplier, longestStreak, calculateStreakPoints]);
+
+  // Reset streak on incorrect decision
+  const resetStreak = useCallback(() => {
+    setCurrentStreak(0);
+  }, []);
+
+  // Update peak chips whenever chips change
+  useEffect(() => {
+    if (playerChips > peakChips) {
+      setPeakChips(playerChips);
+    }
+  }, [playerChips, peakChips]);
+
   // Clear playersFinished when entering AI_TURNS phase
   useEffect(() => {
     if (phase === "AI_TURNS") {
@@ -697,15 +970,22 @@ export default function GamePage() {
       // Set active player immediately
       setActivePlayerIndex(idx);
 
-      // Decide: HIT or STAND?
-      if (handValue < 17 && !isBust) {
+      // Decide: HIT or STAND using basic strategy with skill level
+      const dealerUpCard = dealerHand.cards[0]; // Dealer's face-up card
+      const basicStrategyDecision = shouldHitBasicStrategy(ai.hand.cards, dealerUpCard);
 
-        // Show HIT action
+      // Apply skill level: X% chance to follow basic strategy, (100-X)% chance to use simple "hit on < 17" rule
+      const followsBasicStrategy = Math.random() * 100 < ai.character.skillLevel;
+      const shouldHit = followsBasicStrategy ? basicStrategyDecision : handValue < 17;
+
+      if (shouldHit && !isBust) {
+
+        // Show HIT action after thinking
         registerTimeout(() => {
           setPlayerActions(prev => new Map(prev).set(idx, "HIT"));
-        }, 0);
+        }, decisionTime);
 
-        // Deal card after decision time with animation
+        // Deal card immediately after showing action with animation
         registerTimeout(() => {
           const card = dealCardFromShoe();
 
@@ -736,8 +1016,15 @@ export default function GamePage() {
               return updated;
             });
             setFlyingCards(prev => prev.filter(fc => fc.id !== flyingCard.id));
+
+            // Check if player busted or reached 21+ after receiving card
+            const newHandValue = calculateHandValue([...ai.hand.cards, card]);
+            if (newHandValue >= 21 || isBusted([...ai.hand.cards, card])) {
+              // Mark player as finished
+              setPlayersFinished(prev => new Set(prev).add(idx));
+            }
           }, 800); // Match FlyingCard animation duration
-        }, decisionTime);
+        }, decisionTime + 50); // Show action, then immediately deal card
 
         // Clear action after display (wait for card animation to complete)
         registerTimeout(() => {
@@ -746,18 +1033,18 @@ export default function GamePage() {
             newMap.delete(idx);
             return newMap;
           });
-        }, decisionTime + 800 + actionDisplay); // 800ms for card animation
+        }, decisionTime + 50 + 800 + actionDisplay); // thinking + action display + card animation
 
         // Clear active player to trigger next action
         registerTimeout(() => {
           setActivePlayerIndex(null);
-        }, decisionTime + 800 + actionDisplay + turnClear); // 800ms for card animation
+        }, decisionTime + 50 + 800 + actionDisplay + turnClear); // thinking + action display + card animation
       } else {
 
-        // Show STAND action
+        // Show STAND action after thinking
         registerTimeout(() => {
           setPlayerActions(prev => new Map(prev).set(idx, "STAND"));
-        }, 0);
+        }, decisionTime);
 
         // Clear action after display
         registerTimeout(() => {
@@ -766,13 +1053,13 @@ export default function GamePage() {
             newMap.delete(idx);
             return newMap;
           });
-        }, actionDisplay);
+        }, decisionTime + actionDisplay);
 
         // Mark player as finished and clear active to move to next player
         registerTimeout(() => {
           setPlayersFinished(prev => new Set(prev).add(idx));
           setActivePlayerIndex(null);
-        }, actionDisplay + turnClear);
+        }, decisionTime + actionDisplay + turnClear);
       }
     }
   }, [phase, aiPlayers, dealCardFromShoe, registerTimeout, activePlayerIndex, playersFinished]);
@@ -836,6 +1123,117 @@ export default function GamePage() {
     }
   }, [phase, dealerHand, dealCardFromShoe, gameSettings, registerTimeout]);
 
+  // Show end-of-hand reactions (defined here before useEffect uses it)
+  const showEndOfHandReactions = useCallback(() => {
+    const reactions: Array<{
+      playerId: string;
+      message: string;
+      outcome: string;
+      position: number;
+    }> = [];
+
+    const bjPayoutMultiplier = getBlackjackPayoutMultiplier(
+      gameSettings.blackjackPayout
+    );
+
+    aiPlayers.forEach((ai) => {
+      const result = determineHandResult(ai.hand, dealerHand);
+      const payout = calculatePayout(ai.hand, result, bjPayoutMultiplier);
+      const netGain = payout - ai.hand.bet;
+      const handValue = calculateHandValue(ai.hand.cards);
+      const dealerValue = calculateHandValue(dealerHand.cards);
+
+      // Determine the specific context
+      const isBusted = handValue > 21;
+      const isDealerBlackjack = dealerValue === 21 && dealerHand.cards.length === 2;
+      const isDealerWin = !isBusted && result === "LOSE";
+
+      let currentContext: "bust" | "dealerBlackjack" | "dealerWin" | "any" = "any";
+      if (isBusted) {
+        currentContext = "bust";
+      } else if (isDealerBlackjack && result === "LOSE") {
+        currentContext = "dealerBlackjack";
+      } else if (isDealerWin) {
+        currentContext = "dealerWin";
+      }
+
+      let outcomeType = "push";
+      let reactions_pool: Array<{ text: string; contexts: Array<string> }> = [];
+      let reactionChance = 0;
+
+      if (result === "BLACKJACK") {
+        outcomeType = "bigWin";
+        reactions_pool = ai.character.reactions.bigWin;
+        reactionChance = 0.8; // Very likely to react to blackjack
+      } else if (netGain > ai.hand.bet * 0.5) {
+        outcomeType = "bigWin";
+        reactions_pool = ai.character.reactions.bigWin;
+        reactionChance = 0.7; // Likely to react to big win
+      } else if (netGain > 0) {
+        outcomeType = "smallWin";
+        reactions_pool = ai.character.reactions.smallWin;
+        reactionChance = 0.3; // Sometimes react to small win
+      } else if (netGain === 0) {
+        outcomeType = "push";
+        reactions_pool = ai.character.reactions.push;
+        reactionChance = 0.1; // Rarely react to push
+      } else if (result === "BUST" || netGain < -ai.hand.bet * 0.5) {
+        outcomeType = "bigLoss";
+        reactions_pool = ai.character.reactions.bigLoss;
+        reactionChance = 0.7; // Likely to react to big loss
+      } else {
+        outcomeType = "smallLoss";
+        reactions_pool = ai.character.reactions.smallLoss;
+        reactionChance = 0.3; // Sometimes react to small loss
+      }
+
+      // Filter reactions by context - only show reactions appropriate for the situation
+      const validReactions = reactions_pool.filter(reaction =>
+        reaction.contexts.includes(currentContext) || reaction.contexts.includes("any")
+      );
+
+      // Only add reaction if player decides to react and there are valid messages
+      if (validReactions.length > 0 && Math.random() < reactionChance) {
+        const selectedReaction = validReactions[Math.floor(Math.random() * validReactions.length)];
+        reactions.push({
+          playerId: ai.character.id,
+          message: selectedReaction.text,
+          outcome: outcomeType,
+          position: ai.position,
+        });
+      }
+    });
+
+    // Limit to 0-2 bubbles with priority (most interesting reactions)
+    const priorityOrder = [
+      "bigWin",
+      "bigLoss",
+      "smallWin",
+      "smallLoss",
+      "push",
+    ];
+    const sortedReactions = reactions.sort((a, b) => {
+      return (
+        priorityOrder.indexOf(a.outcome) - priorityOrder.indexOf(b.outcome)
+      );
+    });
+
+    // Show 0-2 reactions max
+    const maxReactions = Math.min(reactions.length, Math.random() < 0.5 ? 1 : 2);
+    const selectedReactions = sortedReactions.slice(0, maxReactions);
+
+
+    selectedReactions.forEach((reaction, idx) => {
+      registerTimeout(() => {
+        addSpeechBubble(
+          `${reaction.playerId}-reaction-${idx}`, // Unique ID per reaction
+          reaction.message,
+          reaction.position,
+        );
+      }, idx * 1000); // Stagger by 1 second to avoid overlap
+    });
+  }, [aiPlayers, dealerHand, gameSettings, registerTimeout]);
+
   // Resolve hands
   useEffect(() => {
     if (phase === "RESOLVING") {
@@ -859,7 +1257,7 @@ export default function GamePage() {
         const isBigWin = netGain > playerHand.bet * 1.5; // Win more than 1.5x bet
 
         // Calculate true count for bet correlation detection
-        const decksRemaining = calculateDecksRemaining(numDecks * 52, cardsDealt);
+        const decksRemaining = calculateDecksRemaining(gameSettings.numberOfDecks * 52, cardsDealt);
         const trueCount = calculateTrueCount(runningCount, decksRemaining);
 
         // Determine if bet change correlates with count (sign of counting)
@@ -980,128 +1378,63 @@ export default function GamePage() {
         setPhase("ROUND_END");
       }, 3500);
     }
-  }, [phase, playerHand, dealerHand, gameSettings, aiPlayers, playerSeat, registerTimeout]);
+  }, [phase, playerHand, dealerHand, gameSettings, aiPlayers, playerSeat, registerTimeout, showEndOfHandReactions]);
 
-  const addSpeechBubble = useCallback(
-    (playerId: string, message: string, position: number) => {
-      // Use same positions as player avatars on the table
-      const tablePositions = [
-        [5, 55],   // Seat 0 - Far left
-        [16, 62],  // Seat 1 - Left
-        [29, 68],  // Seat 2 - Center-left
-        [42, 72],  // Seat 3 - Center
-        [56, 72],  // Seat 4 - Center
-        [69, 68],  // Seat 5 - Center-right
-        [82, 62],  // Seat 6 - Right
-        [93, 55],  // Seat 7 - Far right
-      ];
+  const handleConversationResponse = useCallback((choiceIndex: number) => {
+    if (!activeConversation) return;
 
-      const [x, y] = tablePositions[position] || tablePositions[0];
+    const choice = activeConversation.choices[choiceIndex];
 
-      const bubble: SpeechBubble = {
-        playerId,
-        message,
-        position: { left: `${x}%`, top: `${y}%` },
-        id: playerId, // Use playerId directly as it's already unique per call
-      };
+    // Apply suspicion change
+    if (choice.suspicionChange !== 0) {
+      setSuspicionLevel(prev => Math.max(0, Math.min(100, prev + choice.suspicionChange)));
+    }
 
-      setSpeechBubbles((prev) => [...prev, bubble]);
+    // Adjust sociability based on response type
+    if (choiceIndex === 0) {
+      // Friendly response - people want to talk to you more
+      setPlayerSociability(prev => Math.min(100, prev + 3));
+    } else if (choiceIndex === 1) {
+      // Neutral - small increase
+      setPlayerSociability(prev => Math.min(100, prev + 1));
+    } else if (choiceIndex === 2) {
+      // Dismissive response - people talk to you less
+      setPlayerSociability(prev => Math.max(0, prev - 5));
+    }
 
-      registerTimeout(() => {
-        setSpeechBubbles((prev) => prev.filter((b) => b.id !== bubble.id));
-      }, 2000); // Match WinLossBubble duration
-    },
-    [registerTimeout],
-  );
-
-  const showEndOfHandReactions = useCallback(() => {
-    const reactions: Array<{
-      playerId: string;
-      message: string;
-      outcome: string;
-      position: number;
-    }> = [];
-
-    const bjPayoutMultiplier = getBlackjackPayoutMultiplier(
-      gameSettings.blackjackPayout
-    );
-
-    aiPlayers.forEach((ai) => {
-      const result = determineHandResult(ai.hand, dealerHand);
-      const payout = calculatePayout(ai.hand, result, bjPayoutMultiplier);
-      const netGain = payout - ai.hand.bet;
-
-      let outcomeType = "push";
-      let messages: string[] = [];
-      let reactionChance = 0;
-
-      if (result === "BLACKJACK") {
-        outcomeType = "bigWin";
-        messages = ai.character.reactions.bigWin;
-        reactionChance = 0.8; // Very likely to react to blackjack
-      } else if (netGain > ai.hand.bet * 0.5) {
-        outcomeType = "bigWin";
-        messages = ai.character.reactions.bigWin;
-        reactionChance = 0.7; // Likely to react to big win
-      } else if (netGain > 0) {
-        outcomeType = "smallWin";
-        messages = ai.character.reactions.smallWin;
-        reactionChance = 0.3; // Sometimes react to small win
-      } else if (netGain === 0) {
-        outcomeType = "push";
-        messages = ai.character.reactions.push;
-        reactionChance = 0.1; // Rarely react to push
-      } else if (result === "BUST" || netGain < -ai.hand.bet * 0.5) {
-        outcomeType = "bigLoss";
-        messages = ai.character.reactions.bigLoss;
-        reactionChance = 0.7; // Likely to react to big loss
-      } else {
-        outcomeType = "smallLoss";
-        messages = ai.character.reactions.smallLoss;
-        reactionChance = 0.3; // Sometimes react to small loss
-      }
-
-      // Only add reaction if player decides to react
-      if (Math.random() < reactionChance) {
-        const message = messages[Math.floor(Math.random() * messages.length)];
-        reactions.push({
-          playerId: ai.character.id,
-          message,
-          outcome: outcomeType,
-          position: ai.position,
-        });
-      }
-    });
-
-    // Limit to 0-2 bubbles with priority (most interesting reactions)
-    const priorityOrder = [
-      "bigWin",
-      "bigLoss",
-      "smallWin",
-      "smallLoss",
-      "push",
-    ];
-    const sortedReactions = reactions.sort((a, b) => {
-      return (
-        priorityOrder.indexOf(a.outcome) - priorityOrder.indexOf(b.outcome)
+    // Show speech bubble with player's response
+    if (playerSeat !== null) {
+      addSpeechBubble(
+        "player-response",
+        choice.text,
+        playerSeat
       );
-    });
+    }
 
-    // Show 0-2 reactions max
-    const maxReactions = Math.min(reactions.length, Math.random() < 0.5 ? 1 : 2);
-    const selectedReactions = sortedReactions.slice(0, maxReactions);
+    // Clear the conversation
+    setActiveConversation(null);
+  }, [activeConversation, playerSeat, addSpeechBubble]);
 
+  const handleConversationIgnore = useCallback(() => {
+    if (!activeConversation) return;
 
-    selectedReactions.forEach((reaction, idx) => {
-      registerTimeout(() => {
-        addSpeechBubble(
-          `${reaction.playerId}-reaction-${idx}`, // Unique ID per reaction
-          reaction.message,
-          reaction.position,
-        );
-      }, idx * 1000); // Stagger by 1 second to avoid overlap
-    });
-  }, [aiPlayers, dealerHand, gameSettings, registerTimeout, addSpeechBubble]);
+    // Ignoring conversations raises suspicion significantly
+    setSuspicionLevel(prev => Math.min(100, prev + 8));
+
+    // Being unresponsive makes people avoid you
+    setPlayerSociability(prev => Math.max(0, prev - 8));
+
+    // Show that player is too focused (suspicious)
+    if (playerSeat !== null) {
+      addSpeechBubble(
+        "player-ignore",
+        "*concentrating intensely*",
+        playerSeat
+      );
+    }
+
+    setActiveConversation(null);
+  }, [activeConversation, playerSeat, addSpeechBubble]);
 
   // Next hand
   const nextHand = useCallback(() => {
@@ -1117,13 +1450,17 @@ export default function GamePage() {
       registerTimeout(() => {
 
         // Check if we need to reshuffle (cut card reached)
-        const totalCards = numDecks * 52;
+        const totalCards = gameSettings.numberOfDecks * 52;
+        const cutCardPosition = calculateCutCardPosition(
+          gameSettings.numberOfDecks,
+          gameSettings.deckPenetration
+        );
         const cardsUntilCutCard = totalCards - cutCardPosition;
 
         if (cardsDealt >= cardsUntilCutCard) {
 
           // Reshuffle the shoe
-          const newShoe = createAndShuffleShoe(numDecks);
+          const newShoe = createAndShuffleShoe(gameSettings.numberOfDecks, gameSettings.countingSystem);
           setShoe(newShoe);
           setCardsDealt(0);
           setRunningCount(0);
@@ -1141,9 +1478,60 @@ export default function GamePage() {
         }
       }, 4000); // Show results for 4 seconds before continuing
     }
-  }, [phase, cardsDealt, numDecks, cutCardPosition, nextHand, registerTimeout]);
+  }, [phase, cardsDealt, gameSettings.numberOfDecks, gameSettings.deckPenetration, nextHand, registerTimeout]);
 
-  const decksRemaining = calculateDecksRemaining(numDecks * 52, cardsDealt);
+  // Pit boss wandering - they move around the casino floor, influenced by suspicion
+  useEffect(() => {
+    const wanderInterval = setInterval(() => {
+      setPitBossDistance(prev => {
+        // Random walk: small changes up or down
+        const change = (Math.random() - 0.5) * 20; // -10 to +10
+        let newDistance = prev + change;
+
+        // Keep within bounds (10-90 range for more dynamic movement)
+        newDistance = Math.max(10, Math.min(90, newDistance));
+
+        // Suspicion influences pit boss behavior
+        // High suspicion (70+): pit boss actively approaches (targets 60-80 range = close/red)
+        // Medium suspicion (40-70): pit boss investigates (targets 40-60 range = medium/yellow)
+        // Low suspicion (0-40): pit boss patrols at distance (targets 20-40 range = far/green)
+
+        if (suspicionLevel >= 70) {
+          // High suspicion: pit boss approaches and stays close
+          if (newDistance < 60) {
+            newDistance += Math.random() * 12; // Pull toward closer
+          } else if (newDistance > 80) {
+            newDistance -= Math.random() * 10; // Don't get too close
+          }
+        } else if (suspicionLevel >= 40) {
+          // Medium suspicion: pit boss investigates, stays at medium distance
+          if (newDistance < 40) {
+            newDistance += Math.random() * 8; // Pull toward medium
+          } else if (newDistance > 60) {
+            newDistance -= Math.random() * 8; // Pull back to medium
+          }
+        } else {
+          // Low suspicion: normal patrol behavior - stay farther away
+          if (newDistance < 20) {
+            // If very close, strongly push away
+            newDistance += Math.random() * 10;
+          } else if (newDistance > 50) {
+            // If far, moderately pull back toward comfortable distance
+            newDistance -= Math.random() * 8;
+          } else if (newDistance > 40) {
+            // If slightly far, gently pull back
+            newDistance -= Math.random() * 4;
+          }
+        }
+
+        return Math.round(newDistance);
+      });
+    }, 3000); // Change every 3 seconds
+
+    return () => clearInterval(wanderInterval);
+  }, [suspicionLevel]);
+
+  const decksRemaining = calculateDecksRemaining(gameSettings.numberOfDecks * 52, cardsDealt);
   const trueCount = calculateTrueCount(runningCount, decksRemaining);
 
   return (
@@ -1178,16 +1566,85 @@ export default function GamePage() {
         }}
       >
         <div className="flex gap-6 items-center">
-          <div className="text-white font-bold" style={{ fontSize: "16px" }}>
-            COUNT: <span style={{ color: "#FFD700" }}>{runningCount}</span>
-          </div>
+          {gameSettings.trainingMode === TrainingMode.PRACTICE && (
+            <div className="text-white font-bold" style={{ fontSize: "16px" }}>
+              COUNT: <span style={{ color: "#FFD700" }}>{runningCount}</span>
+            </div>
+          )}
+          {gameSettings.trainingMode === TrainingMode.TEST && (
+            <div className="text-white font-bold" style={{ fontSize: "16px", color: "#FF6B6B" }}>
+              🧪 TEST MODE
+            </div>
+          )}
+          {gameSettings.trainingMode === TrainingMode.TIMED_CHALLENGE && (
+            <>
+              <div className="text-white font-bold" style={{ fontSize: "16px" }}>
+                COUNT: <span style={{ color: "#FFD700" }}>{runningCount}</span>
+              </div>
+              <div className="text-white font-bold" style={{ fontSize: "16px" }}>
+                ⏱️ TIME: <span style={{
+                  color: timeRemaining < 60 ? "#FF6B6B" : timeRemaining < 180 ? "#FFD700" : "#4CAF50"
+                }}>
+                  {Math.floor(timeRemaining / 60)}:{String(timeRemaining % 60).padStart(2, '0')}
+                </span>
+              </div>
+            </>
+          )}
           <div className="text-white text-sm">
-            STREAK: 0 | CHIPS: {playerChips} | SCORE: 0
+            STREAK: <span style={{ color: currentStreak > 0 ? "#4CAF50" : "#FFF" }}>{currentStreak}</span> |
+            CHIPS: <span style={{ color: "#FFD700" }}>{playerChips}</span> |
+            SCORE: <span style={{ color: "#9B59B6" }}>{currentScore.toLocaleString()}</span>
           </div>
         </div>
 
-        <div className="text-white text-sm">
-          TC: {trueCount} | Decks: {decksRemaining.toFixed(1)}
+        <div className="flex gap-4 items-center">
+          <button
+            onClick={() => setShowSettings(true)}
+            style={{
+              backgroundColor: "rgba(74, 144, 226, 0.2)",
+              color: "#FFF",
+              border: "2px solid #4A90E2",
+              borderRadius: "8px",
+              padding: "6px 16px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#4A90E2";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(74, 144, 226, 0.2)";
+            }}
+          >
+            ⚙️ Settings
+          </button>
+          <button
+            onClick={() => setShowLeaderboard(true)}
+            style={{
+              backgroundColor: "rgba(155, 89, 182, 0.2)",
+              color: "#FFF",
+              border: "2px solid #9B59B6",
+              borderRadius: "8px",
+              padding: "6px 16px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#9B59B6";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(155, 89, 182, 0.2)";
+            }}
+          >
+            🏆 Leaderboard
+          </button>
+          <div className="text-white text-sm">
+            TC: {trueCount} | Decks: {decksRemaining.toFixed(1)}
+          </div>
         </div>
       </div>
 
@@ -1232,16 +1689,16 @@ export default function GamePage() {
         >
           {/* Shoe Component */}
           <Shoe
-            numDecks={numDecks}
+            numDecks={gameSettings.numberOfDecks}
             cardsDealt={cardsDealt}
-            dealerCutCard={Math.floor(numDecks * 52 * 0.75)}
+            dealerCutCard={calculateCutCardPosition(gameSettings.numberOfDecks, gameSettings.deckPenetration)}
           />
 
           {/* Dealer Section - Top Center with Avatar */}
           <div
             style={{
               position: "absolute",
-              top: "8%",
+              top: "3%", // Moved up from 8% (approximately 50px higher on typical screens)
               left: "50%",
               transform: "translateX(-50%)",
               textAlign: "center",
@@ -1486,7 +1943,7 @@ export default function GamePage() {
                           <div
                             style={{
                               position: "absolute",
-                              bottom: "calc(100% + 4px)", // Just 4px above the avatar
+                              bottom: "calc(100% + 54px)", // 50px higher (was 4px, now 54px above avatar)
                               left: "50%",
                               transform: "translate(-50%, 0)", // Center horizontally, anchor to bottom
                               width: "230px", // 3 cards * 70px + 2 gaps * 4px
@@ -1592,11 +2049,12 @@ export default function GamePage() {
                         <div
                           style={{
                             position: "absolute",
-                            bottom: "calc(100% + 4px)", // Just 4px above the avatar
+                            bottom: "calc(100% + 54px)", // 50px higher than AI cards (was 4px, now 54px above avatar)
                             left: "50%",
                             transform: "translate(-50%, 0)", // Center horizontally, anchor to bottom
                             width: "230px", // 3 cards * 70px + 2 gaps * 4px
                             height: "210px", // Reserve space for 2 rows
+                            zIndex: 100,
                           }}
                         >
                           {/* Render each card in a fixed position - first row at bottom */}
@@ -1756,6 +2214,19 @@ export default function GamePage() {
               message={bubble.message}
             />
           ))}
+
+          {/* Active Conversation Prompt */}
+          {activeConversation && (
+            <ConversationPrompt
+              speakerId={activeConversation.speakerId}
+              speakerName={activeConversation.speakerName}
+              question={activeConversation.question}
+              choices={activeConversation.choices}
+              position={activeConversation.position}
+              onResponse={handleConversationResponse}
+              onIgnore={handleConversationIgnore}
+            />
+          )}
         </div>
 
         {/* Dealer Info Modal */}
@@ -1795,6 +2266,28 @@ export default function GamePage() {
           }
         `}</style>
       </div>
+
+      {/* Game Settings Modal */}
+      <GameSettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        currentSettings={gameSettings}
+        onSave={(newSettings) => {
+          setGameSettings({...gameSettings, ...newSettings});
+          // Note: Changing settings mid-game would require game reset
+          // For now, settings only apply to new games
+        }}
+      />
+
+      {/* Leaderboard Modal */}
+      <LeaderboardModal
+        isOpen={showLeaderboard}
+        onClose={() => setShowLeaderboard(false)}
+        currentChips={playerChips}
+        peakChips={peakChips}
+        longestStreak={longestStreak}
+        currentScore={currentScore}
+      />
     </div>
   );
 }

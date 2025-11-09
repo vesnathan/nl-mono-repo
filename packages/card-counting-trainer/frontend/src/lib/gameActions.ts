@@ -1,16 +1,19 @@
 import { Card, GameState, Hand, Player } from "@/types/game";
 import { createAndShuffleShoe } from "@/lib/deck";
+import { CountingSystem } from "@/types/gameSettings";
 
 /**
  * Deal a card from the shoe
  * If shoe is empty mid-hand, creates a new shuffled shoe (emergency reshuffle)
  * @param shoe The current shoe
  * @param numDecks Number of decks (required if shoe might be empty, defaults to 6)
+ * @param countingSystem The counting system to use for emergency reshuffles (defaults to Hi-Lo)
  * @returns The dealt card, updated shoe, and whether a reshuffle occurred
  */
 export function dealCard(
   shoe: Card[],
-  numDecks: number = 6
+  numDecks: number = 6,
+  countingSystem: CountingSystem = CountingSystem.HI_LO
 ): {
   card: Card;
   remainingShoe: Card[];
@@ -22,7 +25,7 @@ export function dealCard(
   // Emergency reshuffle if shoe is depleted mid-hand
   if (currentShoe.length === 0) {
     console.warn("⚠️ Emergency reshuffle: Shoe depleted mid-hand! Creating new shoe...");
-    currentShoe = createAndShuffleShoe(numDecks);
+    currentShoe = createAndShuffleShoe(numDecks, countingSystem);
     reshuffled = true;
   }
 

@@ -80,6 +80,7 @@ export function useAnimatedDealing(
       dealingTimeoutRef.current = null;
     }
 
+    console.log(
       "🎴 Starting turn-based game. AI positions:",
       aiPlayerPositions,
     );
