@@ -1,6 +1,6 @@
 import React from "react";
 import { AIPlayer, PlayerHand, GamePhase } from "@/types/gameState";
-import { TABLE_POSITIONS } from "@/constants/tablePositions";
+import { TABLE_POSITIONS } from "@/constants/animations";
 import PlayingCard from "@/components/PlayingCard";
 import TurnIndicator from "@/components/TurnIndicator";
 import ActionBubble from "@/components/ActionBubble";

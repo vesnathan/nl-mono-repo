@@ -1,6 +1,6 @@
 import { ActiveConversation, SpeechBubble, AIPlayer } from "@/types/gameState";
 import { getDealerPlayerLine } from "@/data/ai-dialogue-addons";
-import { TABLE_POSITIONS } from "@/constants/tablePositions";
+import { TABLE_POSITIONS } from "@/constants/animations";
 import { calculateHandValue } from "@/lib/gameActions";
 
 /**

@@ -1,5 +1,5 @@
 import { AIPlayer } from "@/types/gameState";
-import { TABLE_POSITIONS } from "@/constants/tablePositions";
+import { TABLE_POSITIONS } from "@/constants/animations";
 
 /**
  * Calculate the position for a flying card animation
