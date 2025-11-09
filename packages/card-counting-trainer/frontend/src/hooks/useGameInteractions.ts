@@ -1,13 +1,26 @@
 import { useCallback } from "react";
-import { AIPlayer, ActiveConversation, SpeechBubble, PlayerHand } from "@/types/gameState";
+import {
+  AIPlayer,
+  ActiveConversation,
+  SpeechBubble,
+  PlayerHand,
+} from "@/types/gameState";
 import { BlackjackPayout } from "@/types/gameSettings";
-import { createConversation, createSpeechBubble } from "@/utils/conversationHelpers";
-import { generateInitialReactions, generateEndOfHandReactions } from "@/utils/reactions";
+import {
+  createConversation,
+  createSpeechBubble,
+} from "@/utils/conversationHelpers";
+import {
+  generateInitialReactions,
+  generateEndOfHandReactions,
+} from "@/utils/reactions";
 
 interface UseGameInteractionsParams {
   activeConversation: ActiveConversation | null;
   setActiveConversation: (conversation: ActiveConversation | null) => void;
-  setSpeechBubbles: (bubbles: SpeechBubble[] | ((prev: SpeechBubble[]) => SpeechBubble[])) => void;
+  setSpeechBubbles: (
+    bubbles: SpeechBubble[] | ((prev: SpeechBubble[]) => SpeechBubble[]),
+  ) => void;
   registerTimeout: (callback: () => void, delay: number) => void;
   aiPlayers: AIPlayer[];
   dealerHand: PlayerHand;
@@ -91,7 +104,13 @@ export function useGameInteractions({
         );
       }, idx * 1000); // Stagger by 1 second to avoid overlap
     });
-  }, [aiPlayers, dealerHand, blackjackPayout, registerTimeout, addSpeechBubble]);
+  }, [
+    aiPlayers,
+    dealerHand,
+    blackjackPayout,
+    registerTimeout,
+    addSpeechBubble,
+  ]);
 
   return {
     triggerConversation,

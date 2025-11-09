@@ -86,6 +86,7 @@ import { useConversationTriggers } from "@/hooks/useConversationTriggers";
 import { usePitBossMovement } from "@/hooks/usePitBossMovement";
 import { useAutoStartHand } from "@/hooks/useAutoStartHand";
 import { useGameInteractions } from "@/hooks/useGameInteractions";
+import { useRoundEndPhase } from "@/hooks/useRoundEndPhase";
 import { shouldHitBasicStrategy } from "@/utils/aiStrategy";
 
 export default function GamePage() {
@@ -331,7 +332,7 @@ export default function GamePage() {
   });
 
   // Pit boss movement hook
-  usePitBossMovement(setPitBossDistance);
+  usePitBossMovement(setPitBossDistance, suspicionLevel);
 
   // Auto-start hand hook
   useAutoStartHand({
@@ -1146,200 +1147,24 @@ export default function GamePage() {
     setSpeechBubbles([]); // Clear speech bubbles from previous hand
   }, []);
 
-  // Round end - automatically progress to next hand (unless debug logs exist)
-  useEffect(() => {
-    if (phase === "ROUND_END") {
-      // If debug logs exist, wait for user to click "Clear Log & Continue"
-      if (debugLogs.length > 0) {
-        return;
-      }
-
-      registerTimeout(() => {
-        // Occasionally add or remove players (15% chance per hand)
-        const playerChangeChance = Math.random();
-
-        if (playerChangeChance < 0.15) {
-          const currentAICount = aiPlayers.length;
-          const occupiedSeats = new Set(aiPlayers.map((p) => p.position));
-          if (playerSeat !== null) occupiedSeats.add(playerSeat);
-
-          // 50/50 chance to add or remove (if possible)
-          const shouldAdd = Math.random() < 0.5;
-
-          if (shouldAdd && currentAICount < 7 && occupiedSeats.size < 8) {
-            // Add a new player
-            const availableSeats = [0, 1, 2, 3, 4, 5, 6, 7].filter(
-              (seat) => !occupiedSeats.has(seat),
-            );
-
-            if (availableSeats.length > 0) {
-              // Pick random available seat
-              const newSeat =
-                availableSeats[
-                  Math.floor(Math.random() * availableSeats.length)
-                ];
-
-              // Pick random character not already at table
-              const usedCharacterIds = new Set(
-                aiPlayers.map((p) => p.character.id),
-              );
-              const availableCharacters = AI_CHARACTERS.filter(
-                (char) => !usedCharacterIds.has(char.id),
-              );
-
-              if (availableCharacters.length > 0) {
-                const newCharacter =
-                  availableCharacters[
-                    Math.floor(Math.random() * availableCharacters.length)
-                  ];
-
-                const newPlayer: AIPlayer = {
-                  character: newCharacter,
-                  hand: { cards: [], bet: 50 },
-                  chips: 1000,
-                  position: newSeat,
-                };
-
-                setAIPlayers((prev) => [...prev, newPlayer]);
-
-                // Show dealer callout
-                setDealerCallout(`${newCharacter.name} joins the table!`);
-                registerTimeout(() => setDealerCallout(null), 2000);
-              }
-            }
-          } else if (!shouldAdd && currentAICount > 2) {
-            // Remove a random player (keep at least 2 AI players for atmosphere)
-            const removeIndex = Math.floor(Math.random() * currentAICount);
-            const removedPlayer = aiPlayers[removeIndex];
-
-            setAIPlayers((prev) =>
-              prev.filter((_, idx) => idx !== removeIndex),
-            );
-
-            // Show dealer callout
-            setDealerCallout(
-              `${removedPlayer.character.name} leaves the table.`,
-            );
-            registerTimeout(() => setDealerCallout(null), 2000);
-          }
-        }
-
-        // Check if we need to reshuffle (cut card reached)
-        const totalCards = gameSettings.numberOfDecks * 52;
-        const cutCardPosition = calculateCutCardPosition(
-          gameSettings.numberOfDecks,
-          gameSettings.deckPenetration,
-        );
-        const cardsUntilCutCard = totalCards - cutCardPosition;
-
-        // 25% chance to show random table banter between AI players
-        if (Math.random() < 0.25 && aiPlayers.length >= 2) {
-          // Pick a random AI player to speak
-          const speakerIndex = Math.floor(Math.random() * aiPlayers.length);
-          const speaker = aiPlayers[speakerIndex];
-
-          // Get their banter lines
-          const banterLines = AI_DIALOGUE_ADDONS.find(
-            (addon) => addon.id === speaker.character.id,
-          )?.banterWithPlayer;
-
-          if (banterLines && banterLines.length > 0) {
-            const randomBanter = pick(banterLines);
-            addSpeechBubble(
-              `ai-banter-${Date.now()}`,
-              randomBanter.text,
-              speaker.position,
-            );
-          }
-        }
-
-        if (cardsDealt >= cardsUntilCutCard) {
-          // Reshuffle the shoe
-          const newShoe = createAndShuffleShoe(
-            gameSettings.numberOfDecks,
-            gameSettings.countingSystem,
-          );
-          setShoe(newShoe);
-          setCardsDealt(0);
-          setRunningCount(0);
-          setShoesDealt((prev) => prev + 1);
-
-          // Show reshuffle message
-          setDealerCallout("Shuffling new shoe...");
-          registerTimeout(() => {
-            setDealerCallout(null);
-            nextHand();
-          }, 3000);
-        } else {
-          // No reshuffle needed, just continue to next hand
-          nextHand();
-        }
-      }, 4000); // Show results for 4 seconds before continuing
-    }
-  }, [
+  // Round end phase hook
+  useRoundEndPhase({
     phase,
-    cardsDealt,
-    gameSettings.numberOfDecks,
-    gameSettings.deckPenetration,
-    gameSettings.countingSystem,
-    nextHand,
-    registerTimeout,
+    debugLogs,
     aiPlayers,
     playerSeat,
-    debugLogs.length,
+    cardsDealt,
+    gameSettings,
+    registerTimeout,
+    setAIPlayers,
+    setDealerCallout,
     addSpeechBubble,
-  ]);
-
-  // Pit boss wandering - they move around the casino floor, influenced by suspicion
-  useEffect(() => {
-    const wanderInterval = setInterval(() => {
-      setPitBossDistance((prev) => {
-        // Random walk: small changes up or down
-        const change = (Math.random() - 0.5) * 20; // -10 to +10
-        let newDistance = prev + change;
-
-        // Keep within bounds (10-90 range for more dynamic movement)
-        newDistance = Math.max(10, Math.min(90, newDistance));
-
-        // Suspicion influences pit boss behavior
-        // High suspicion (70+): pit boss actively approaches (targets 60-80 range = close/red)
-        // Medium suspicion (40-70): pit boss investigates (targets 40-60 range = medium/yellow)
-        // Low suspicion (0-40): pit boss patrols at distance (targets 20-40 range = far/green)
-
-        if (suspicionLevel >= 70) {
-          // High suspicion: pit boss approaches and stays close
-          if (newDistance < 60) {
-            newDistance += Math.random() * 12; // Pull toward closer
-          } else if (newDistance > 80) {
-            newDistance -= Math.random() * 10; // Don't get too close
-          }
-        } else if (suspicionLevel >= 40) {
-          // Medium suspicion: pit boss investigates, stays at medium distance
-          if (newDistance < 40) {
-            newDistance += Math.random() * 8; // Pull toward medium
-          } else if (newDistance > 60) {
-            newDistance -= Math.random() * 8; // Pull back to medium
-          }
-        } else {
-          // Low suspicion: normal patrol behavior - stay farther away
-          if (newDistance < 20) {
-            // If very close, strongly push away
-            newDistance += Math.random() * 10;
-          } else if (newDistance > 50) {
-            // If far, moderately pull back toward comfortable distance
-            newDistance -= Math.random() * 8;
-          } else if (newDistance > 40) {
-            // If slightly far, gently pull back
-            newDistance -= Math.random() * 4;
-          }
-        }
-
-        return Math.round(newDistance);
-      });
-    }, 3000); // Change every 3 seconds
-
-    return () => clearInterval(wanderInterval);
-  }, [suspicionLevel]);
+    setShoe,
+    setCardsDealt,
+    setRunningCount,
+    setShoesDealt,
+    nextHand,
+  });
 
   const decksRemaining = calculateDecksRemaining(
     gameSettings.numberOfDecks * 52,
