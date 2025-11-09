@@ -362,7 +362,14 @@ export default function GamePage() {
           setAIPlayers((prev) => {
             const updated = [...prev];
             console.log(`    Before: AI[${index}] has ${updated[index].hand.cards.length} cards`);
-            updated[index].hand.cards.push(card);
+            // CRITICAL FIX: Don't mutate! Create new array instead of using .push()
+            updated[index] = {
+              ...updated[index],
+              hand: {
+                ...updated[index].hand,
+                cards: [...updated[index].hand.cards, card]
+              }
+            };
             console.log(`    After: AI[${index}] has ${updated[index].hand.cards.length} cards:`, updated[index].hand.cards.map(c => `${c.rank}${c.suit}`));
             return updated;
           });
