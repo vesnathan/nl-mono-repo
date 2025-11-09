@@ -350,6 +350,18 @@ export function useAITurnsPhase({
                 addDebugLog("🔓 AI turn processing unlocked (21)");
                 setActivePlayerIndex(null);
               }, 600);
+            } else {
+              // Player continues - unlock to allow next decision
+              addDebugLog(`AI Player ${idx} continues with ${newHandValue}`);
+
+              registerTimeout(
+                () => {
+                  aiTurnProcessingRef.current = false;
+                  addDebugLog("🔓 AI turn processing unlocked (continue)");
+                  setActivePlayerIndex(null);
+                },
+                800 + actionDisplay + turnClear,
+              );
             }
           }, CARD_ANIMATION_DURATION);
         }, decisionTime + 50);
@@ -365,14 +377,6 @@ export function useAITurnsPhase({
             });
           },
           decisionTime + 50 + 800 + actionDisplay,
-        );
-
-        registerTimeout(
-          () => {
-            aiTurnProcessingRef.current = false;
-            setActivePlayerIndex(null);
-          },
-          decisionTime + 50 + 800 + actionDisplay + turnClear,
         );
       } else {
         addDebugLog(`AI Player ${idx} decision: STAND`);
