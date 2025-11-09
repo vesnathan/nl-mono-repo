@@ -63,6 +63,7 @@ export function useDealerTurnPhase({
   const dealerFinishedRef = useRef(false);
   const cardCounterRef = useRef(0);
   const dealingCardRef = useRef(false);
+  const currentDealerHandRef = useRef<Card[]>([]);
 
   useEffect(() => {
     if (phase !== "DEALER_TURN") {
@@ -106,6 +107,9 @@ export function useDealerTurnPhase({
         }
       }
 
+      // Initialize ref with current dealer hand
+      currentDealerHandRef.current = dealerHand.cards;
+
       registerTimeout(() => {
         // Dealer plays according to rules - deal one card at a time with delays
         const dealNextCard = () => {
@@ -114,109 +118,116 @@ export function useDealerTurnPhase({
             return;
           }
 
-          setDealerHand((currentHand) => {
-            const handValue = calculateHandValue(currentHand.cards);
+          const currentHand = currentDealerHandRef.current;
+          const handValue = calculateHandValue(currentHand);
 
-            // Check if should hit
-            const shouldHit = () => {
-              // Always hit on 16 or less
-              if (handValue < 17) return true;
+          // Check if should hit
+          const shouldHit = () => {
+            // Always hit on 16 or less
+            if (handValue < 17) return true;
 
-              // Always stand on 18 or more
-              if (handValue >= 18) return false;
+            // Always stand on 18 or more
+            if (handValue >= 18) return false;
 
-              // On 17: depends on soft 17 rule
-              if (handValue === 17) {
-                // Check if it's a soft 17 (has an Ace counted as 11)
-                const hasAce = currentHand.cards.some((card) => card.rank === "A");
-                const hasMultipleCards = currentHand.cards.length > 2;
-                const isSoft = hasAce && hasMultipleCards;
+            // On 17: depends on soft 17 rule
+            if (handValue === 17) {
+              // Check if it's a soft 17 (has an Ace counted as 11)
+              const hasAce = currentHand.some((card) => card.rank === "A");
+              const hasMultipleCards = currentHand.length > 2;
+              const isSoft = hasAce && hasMultipleCards;
 
-                if (gameSettings.dealerHitsSoft17 && isSoft) {
-                  return true; // Hit soft 17
-                }
-                return false; // Stand on hard 17 or stand on all 17s
+              if (gameSettings.dealerHitsSoft17 && isSoft) {
+                return true; // Hit soft 17
               }
+              return false; // Stand on hard 17 or stand on all 17s
+            }
 
-              return false;
+            return false;
+          };
+
+          // Check if dealer should hit and hasn't busted
+          if (shouldHit() && !isBusted(currentHand)) {
+            dealingCardRef.current = true;
+
+            const card = dealCardFromShoe();
+            addDebugLog(
+              `Dealer HIT: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
+            );
+
+            // Update ref with new hand
+            const newHand = [...currentHand, card];
+            currentDealerHandRef.current = newHand;
+
+            // Add flying card animation
+            const shoePosition = getCardPositionForAnimation("shoe");
+            const dealerPosition = getCardPositionForAnimation(
+              "dealer",
+              undefined,
+              currentHand.length,
+            );
+
+            const flyingCard: FlyingCardData = {
+              id: `hit-dealer-${Date.now()}-${cardCounterRef.current++}`,
+              card,
+              fromPosition: shoePosition,
+              toPosition: dealerPosition,
             };
 
-            // Check if dealer should hit and hasn't busted
-            if (shouldHit() && !isBusted(currentHand.cards)) {
-              dealingCardRef.current = true;
+            setFlyingCards((prev) => [...prev, flyingCard]);
 
-              const card = dealCardFromShoe();
-              addDebugLog(
-                `Dealer HIT: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
+            // Update state for rendering
+            setDealerHand((prev) => ({
+              ...prev,
+              cards: newHand,
+            }));
+
+            // Add card to hand after animation
+            registerTimeout(() => {
+              setFlyingCards((prev) =>
+                prev.filter((fc) => fc.id !== flyingCard.id),
               );
+            }, CARD_ANIMATION_DURATION);
 
-              // Add flying card animation
-              const shoePosition = getCardPositionForAnimation("shoe");
-              const dealerPosition = getCardPositionForAnimation(
-                "dealer",
-                undefined,
-                currentHand.cards.length,
-              );
+            const newValue = calculateHandValue(newHand);
+            addDebugLog(`Dealer hand value: ${newValue}`);
 
-              const flyingCard: FlyingCardData = {
-                id: `hit-dealer-${Date.now()}-${cardCounterRef.current++}`,
-                card,
-                fromPosition: shoePosition,
-                toPosition: dealerPosition,
-              };
+            // Schedule next card after animation + delay
+            registerTimeout(() => {
+              dealingCardRef.current = false; // Reset flag before next card
+              dealNextCard();
+            }, 1000);
 
-              setFlyingCards((prev) => [...prev, flyingCard]);
+            return;
+          }
 
-              // Add card to hand after animation
-              registerTimeout(() => {
-                setFlyingCards((prev) =>
-                  prev.filter((fc) => fc.id !== flyingCard.id),
-                );
-              }, CARD_ANIMATION_DURATION);
+          // Dealer is done, announce final hand (only once)
+          if (!dealerFinishedRef.current) {
+            dealerFinishedRef.current = true;
 
-              const newHand = { ...currentHand, cards: [...currentHand.cards, card] };
-              const newValue = calculateHandValue(newHand.cards);
-              addDebugLog(`Dealer hand value: ${newValue}`);
+            const finalValue = calculateHandValue(currentHand);
+            const isBust = isBusted(currentHand);
 
-              // Schedule next card after animation + delay
-              registerTimeout(() => {
-                dealingCardRef.current = false; // Reset flag before next card
-                dealNextCard();
-              }, 1000);
+            addDebugLog(`=== DEALER FINAL HAND ===`);
+            addDebugLog(
+              `Dealer cards: ${currentHand.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+            );
+            addDebugLog(`Dealer hand value: ${finalValue}`);
+            addDebugLog(`Dealer busted: ${isBust}`);
 
-              return newHand;
-            }
-            // Dealer is done, announce final hand (only once)
-            if (!dealerFinishedRef.current) {
-              dealerFinishedRef.current = true;
-
-              const finalValue = calculateHandValue(currentHand.cards);
-              const isBust = isBusted(currentHand.cards);
-
-              addDebugLog(`=== DEALER FINAL HAND ===`);
-              addDebugLog(
-                `Dealer cards: ${currentHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-              );
-              addDebugLog(`Dealer hand value: ${finalValue}`);
-              addDebugLog(`Dealer busted: ${isBust}`);
-
-              if (isBust) {
-                setDealerCallout("Dealer busts");
-              } else {
-                setDealerCallout(`Dealer has ${finalValue}`);
-              }
-
-              // Clear callout and move to resolving
-              registerTimeout(() => {
-                setDealerCallout(null);
-                dealerTurnProcessingRef.current = false; // Unlock before moving to next phase
-                addDebugLog("🔓 Dealer turn processing unlocked (finished)");
-                setPhase("RESOLVING");
-              }, 1500); // Brief delay to show final dealer result
+            if (isBust) {
+              setDealerCallout("Dealer busts");
+            } else {
+              setDealerCallout(`Dealer has ${finalValue}`);
             }
 
-            return currentHand;
-          });
+            // Clear callout and move to resolving
+            registerTimeout(() => {
+              setDealerCallout(null);
+              dealerTurnProcessingRef.current = false; // Unlock before moving to next phase
+              addDebugLog("🔓 Dealer turn processing unlocked (finished)");
+              setPhase("RESOLVING");
+            }, 1500); // Brief delay to show final dealer result
+          }
         };
 
         // Start dealing cards
