@@ -21,6 +21,15 @@ export default function DealerSection({
   dealerRevealed,
   onDealerClick,
 }: DealerSectionProps) {
+  // Debug: Log dealer hand whenever it changes or during AI_TURNS
+  React.useEffect(() => {
+    if (phase === "AI_TURNS" || phase === "DEALER_TURN") {
+      console.log(`[DealerSection] Phase: ${phase}, Dealer cards count: ${dealerHand.cards.length}`);
+      console.log(`[DealerSection] Cards:`, dealerHand.cards.map((c, idx) => `${idx}: ${c.rank}${c.suit}`).join(", "));
+      console.log(`[DealerSection] Dealer revealed: ${dealerRevealed}`);
+    }
+  }, [phase, dealerHand.cards, dealerRevealed]);
+
   return (
     <div
       style={{
@@ -134,8 +143,25 @@ export default function DealerSection({
               width: "370px",
               height: "98px",
               marginBottom: "4px",
+              // Debug: Add visible border to see container
+              // border: "2px solid red",
             }}
           >
+            {/* Debug: Show card count */}
+            <div
+              style={{
+                position: "absolute",
+                top: "-20px",
+                left: "0",
+                color: "yellow",
+                fontSize: "12px",
+                backgroundColor: "rgba(0,0,0,0.7)",
+                padding: "2px 4px",
+                zIndex: 1000,
+              }}
+            >
+              Cards: {dealerHand.cards.length}
+            </div>
             {dealerHand.cards.map((card, idx) => (
               <div
                 key={idx}

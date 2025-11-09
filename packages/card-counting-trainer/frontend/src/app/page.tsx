@@ -137,6 +137,9 @@ export default function GamePage() {
   // Track previous hand states for in-hand reactions
   // const prevAIHandsRef = useRef<Map<string, number>>(new Map()); // TODO: Use for reaction tracking
 
+  // Store dealer's hole card separately to prevent cheating via DevTools
+  const dealerHoleCardRef = useRef<Card | null>(null);
+
   // Track previous phase to detect transitions into AI_TURNS
   const prevPhaseRef = useRef<GamePhase>("BETTING");
 
