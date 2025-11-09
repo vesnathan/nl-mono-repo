@@ -207,9 +207,6 @@ export default function GamePage() {
   // Track previous phase to detect transitions into AI_TURNS
   const prevPhaseRef = useRef<GamePhase>("BETTING");
 
-  // Track if AI turn is currently being processed (to prevent duplicate turns)
-  const aiTurnProcessingRef = useRef<boolean>(false);
-
   // Helper to calculate card positions for flying animation
   // Wrapper around utility function to provide current game state
   const getCardPositionForAnimation = useCallback(
@@ -388,7 +385,6 @@ export default function GamePage() {
       addDebugLog(`Resetting playersFinished set and activePlayerIndex`);
       setPlayersFinished(new Set());
       setActivePlayerIndex(null);
-      aiTurnProcessingRef.current = false; // Reset processing flag on phase entry
     }
     prevPhaseRef.current = phase;
   }, [phase, addDebugLog]);
