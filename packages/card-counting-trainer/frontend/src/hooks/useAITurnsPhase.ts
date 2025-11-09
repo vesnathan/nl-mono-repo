@@ -123,7 +123,7 @@ export function useAITurnsPhase({
     if (phase === "AI_TURNS" && activePlayerIndex === null) {
       const playersByPosition = aiPlayers
         .map((ai, idx) => ({ ai, idx, position: ai.position }))
-        .sort((a, b) => b.position - a.position);
+        .sort((a, b) => a.position - b.position);
 
       addDebugLog(
         `Turn order (sorted by position): ${playersByPosition.map((p) => `${p.ai.character.name} (idx:${p.idx}, seat:${p.position})`).join(", ")}`,
