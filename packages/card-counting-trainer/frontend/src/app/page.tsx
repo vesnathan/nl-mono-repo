@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Button, Card as UICard } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@nextui-org/react";
 import {
   createAndShuffleShoe,
   calculateDecksRemaining,
@@ -15,17 +13,12 @@ import {
   isBlackjack,
   isBusted,
 } from "@/lib/gameActions";
-import {
-  playDealerHand,
-  determineHandResult,
-  calculatePayout,
-} from "@/lib/dealer";
+import { determineHandResult, calculatePayout } from "@/lib/dealer";
 import { Card as GameCard, HandResult } from "@/types/game";
 import {
   GameSettings,
   DEFAULT_GAME_SETTINGS,
   getBlackjackPayoutMultiplier,
-  canDoubleDown,
   calculateCutCardPosition,
   TrainingMode,
 } from "@/types/gameSettings";
@@ -35,15 +28,13 @@ import {
   getAIAvatarPath,
 } from "@/data/aiCharacters";
 import {
-  DEALER_CHARACTERS,
   DealerCharacter,
   getRandomDealer,
   getDealerAvatarPath,
 } from "@/data/dealerCharacters";
-import { getInitialHandReaction, getHitReaction } from "@/data/inHandReactions";
+import { getInitialHandReaction } from "@/data/inHandReactions";
 import {
   AI_DIALOGUE_ADDONS,
-  DEALER_PLAYER_CONVERSATIONS,
   getDealerPlayerLine,
   pick,
 } from "@/data/ai-dialogue-addons";
@@ -51,7 +42,6 @@ import FlyingCard from "@/components/FlyingCard";
 import WinLossBubble from "@/components/WinLossBubble";
 import SuspicionMeter from "@/components/SuspicionMeter";
 import DealerInfo from "@/components/DealerInfo";
-import TableOverlay from "@/components/TableOverlay";
 import Shoe from "@/components/Shoe";
 import PlayingCard from "@/components/PlayingCard";
 import ActionBubble from "@/components/ActionBubble";
@@ -61,11 +51,7 @@ import LeaderboardModal from "@/components/LeaderboardModal";
 import GameSettingsModal from "@/components/GameSettingsModal";
 import BasicStrategyCard from "@/components/BasicStrategyCard";
 import BettingInterface from "@/components/BettingInterface";
-import {
-  CARD_ANIMATION_DURATION,
-  CARD_APPEAR_TIME,
-  TABLE_POSITIONS,
-} from "@/constants/animations";
+import { CARD_APPEAR_TIME, CARD_ANIMATION_DURATION } from "@/constants/animations";
 
 interface PlayerHand {
   cards: GameCard[];
@@ -122,9 +108,6 @@ type GamePhase =
   | "ROUND_END";
 
 export default function GamePage() {
-  const router = useRouter();
-  const { user } = useAuth();
-
   // Game settings
   const [gameSettings, setGameSettings] = useState<GameSettings>(
     DEFAULT_GAME_SETTINGS,
@@ -157,7 +140,7 @@ export default function GamePage() {
   const [currentStreak, setCurrentStreak] = useState(0); // Consecutive correct decisions
   const [longestStreak, setLongestStreak] = useState(0);
   const [peakChips, setPeakChips] = useState(1000);
-  const [scoreMultiplier, setScoreMultiplier] = useState(1.0); // 1.0x - 2.0x based on counting accuracy
+  const [scoreMultiplier] = useState(1.0); // 1.0x - 2.0x based on counting accuracy
 
   // AI players state
   const [aiPlayers, setAIPlayers] = useState<AIPlayer[]>([]);
@@ -214,7 +197,7 @@ export default function GamePage() {
   const [timedChallengeActive, setTimedChallengeActive] = useState(false);
 
   // Track previous hand states for in-hand reactions
-  const prevAIHandsRef = useRef<Map<string, number>>(new Map());
+  // const prevAIHandsRef = useRef<Map<string, number>>(new Map()); // TODO: Use for reaction tracking
 
   // Track previous phase to detect transitions into AI_TURNS
   const prevPhaseRef = useRef<GamePhase>("BETTING");
@@ -255,6 +238,7 @@ export default function GamePage() {
   const addDebugLog = useCallback((message: string) => {
     const timestamp = new Date().toISOString().split("T")[1].split(".")[0];
     const logEntry = `[${timestamp}] ${message}`;
+    // eslint-disable-next-line no-console
     console.log(logEntry);
     setDebugLogs((prev) => [...prev, logEntry]);
   }, []);
@@ -265,6 +249,7 @@ export default function GamePage() {
 
     // Clear the logs after a brief moment so the final message is visible
     setTimeout(() => {
+      // eslint-disable-next-line no-console
       console.clear();
       setDebugLogs([]);
       setShowDebugLog(false);
@@ -315,60 +300,66 @@ export default function GamePage() {
       index?: number,
       cardIndex?: number,
     ) => {
-      // Card dimensions and spacing
-      const cardWidth = 60; // px
-      const cardSpacing = 15; // px between cards
+      const tablePositions = [
+        [5, 55], // Seat 0 - Far left
+        [16, 62], // Seat 1 - Left
+        [29, 68], // Seat 2 - Center-left
+        [42, 72], // Seat 3 - Center
+        [56, 72], // Seat 4 - Center
+        [69, 68], // Seat 5 - Center-right
+        [82, 62], // Seat 6 - Right
+        [93, 55], // Seat 7 - Far right
+      ];
 
       if (type === "shoe") {
         // Shoe is positioned at right: 7%, top: 20px (from the Shoe component positioning)
-        // The shoe is rotated 90deg and cards exit from the bottom opening
-        // Adjusted 100px further left from the shoe opening
-        return { left: "calc(85% - 100px)", top: "calc(20px + 15vh)" };
+        // Convert to left position: 100% - 7% = 93%
+        return { left: "93%", top: "20px" };
       }
 
       if (type === "dealer") {
-        // Dealer cards are below the dealer avatar
-        // Dealer section is at 8%, avatar is 150px + 12px margin = 162px
-        // Cards appear below the avatar with horizontal offset for multiple cards
-        const baseLeft = 50; // Center at 50%
-        const offset =
-          cardIndex !== undefined
-            ? cardIndex * cardSpacing -
-              (cardSpacing * (cardIndex > 0 ? 1 : 0)) / 2
-            : 0;
+        // Dealer cards: rendered at idx * 74px in a 370px centered container
+        // Container is at left: calc(50% - 185px), cards are at left: idx * 74px within container
+        // So absolute position is: calc(50% - 185px + idx * 74px)
+        const containerOffset = -185; // 370px / 2
+        const cardOffset = cardIndex !== undefined ? cardIndex * 74 : 0;
         return {
-          left: `calc(${baseLeft}% + ${offset}px)`,
-          top: "calc(8% + 162px)",
+          left: `calc(50% + ${containerOffset + cardOffset}px)`,
+          top: "calc(8% + 162px + 4px)",
         };
       }
 
       if (type === "player" && playerSeat !== null) {
-        const [x, y] = TABLE_POSITIONS[playerSeat];
-        // Cards are positioned above the avatar with horizontal offset
-        const offset =
-          cardIndex !== undefined
-            ? cardIndex * cardSpacing -
-              (cardSpacing * (cardIndex > 0 ? 1 : 0)) / 2
-            : 0;
+        const [x, y] = tablePositions[playerSeat];
+        // Player cards: rendered in 230px centered container with col * 74px, row * 102px
+        // Cards use grid: 3 per row, positioned from BOTTOM (row 0 at bottom, row 1 above it)
+        const cardsPerRow = 3;
+        const col = cardIndex !== undefined ? cardIndex % cardsPerRow : 0;
+        const row = cardIndex !== undefined ? Math.floor(cardIndex / cardsPerRow) : 0;
+        const containerOffset = -115; // 230px / 2
+        const cardLeft = col * 74;
+        const cardBottomOffset = row * 102; // Higher rows need LOWER top values (subtract)
         return {
-          left: `calc(${x}% + ${offset}px)`,
-          top: `calc(${y}% - 190px)`,
+          left: `calc(${x}% + ${containerOffset + cardLeft}px)`,
+          top: `calc(${y}% - 204px - ${cardBottomOffset}px)`, // 150px avatar + 54px gap - row offset
         };
       }
 
       if (type === "ai" && index !== undefined) {
         const aiPlayer = aiPlayers[index];
         if (aiPlayer) {
-          const [x, y] = TABLE_POSITIONS[aiPlayer.position];
-          // Cards are positioned above the avatar with horizontal offset
-          const offset =
-            cardIndex !== undefined
-              ? cardIndex * cardSpacing -
-                (cardSpacing * (cardIndex > 0 ? 1 : 0)) / 2
-              : 0;
+          const [x, y] = tablePositions[aiPlayer.position];
+          // AI cards: same as player - rendered in 230px centered container with col * 74px, row * 102px
+          // Cards positioned from BOTTOM (row 0 at bottom, row 1 above it)
+          const cardsPerRow = 3;
+          const col = cardIndex !== undefined ? cardIndex % cardsPerRow : 0;
+          const row = cardIndex !== undefined ? Math.floor(cardIndex / cardsPerRow) : 0;
+          const containerOffset = -115; // 230px / 2
+          const cardLeft = col * 74;
+          const cardBottomOffset = row * 102; // Higher rows need LOWER top values (subtract)
           return {
-            left: `calc(${x}% + ${offset}px)`,
-            top: `calc(${y}% - 140px)`,
+            left: `calc(${x}% + ${containerOffset + cardLeft}px)`,
+            top: `calc(${y}% - 204px - ${cardBottomOffset}px)`, // 150px avatar + 54px gap - row offset
           };
         }
       }
@@ -460,7 +451,18 @@ export default function GamePage() {
       // Don't trigger if there's already an active conversation
       if (activeConversation) return;
 
-      const [x, y] = TABLE_POSITIONS[position] || TABLE_POSITIONS[0];
+      const tablePositions = [
+        [5, 55], // Seat 0 - Far left
+        [16, 62], // Seat 1 - Left
+        [29, 68], // Seat 2 - Center-left
+        [42, 72], // Seat 3 - Center
+        [56, 72], // Seat 4 - Center
+        [69, 68], // Seat 5 - Center-right
+        [82, 62], // Seat 6 - Right
+        [93, 55], // Seat 7 - Far right
+      ];
+
+      const [x, y] = tablePositions[position] || tablePositions[0];
 
       // Get character-specific or dealer dialogue
       let question: string;
@@ -505,7 +507,18 @@ export default function GamePage() {
       );
 
       // Use same positions as player avatars on the table
-      const [x, y] = TABLE_POSITIONS[position] || TABLE_POSITIONS[0];
+      const tablePositions = [
+        [5, 55], // Seat 0 - Far left
+        [16, 62], // Seat 1 - Left
+        [29, 68], // Seat 2 - Center-left
+        [42, 72], // Seat 3 - Center
+        [56, 72], // Seat 4 - Center
+        [69, 68], // Seat 5 - Center-right
+        [82, 62], // Seat 6 - Right
+        [93, 55], // Seat 7 - Far right
+      ];
+
+      const [x, y] = tablePositions[position] || tablePositions[0];
 
       const bubble: SpeechBubble = {
         playerId,
@@ -617,8 +630,7 @@ export default function GamePage() {
       setPitBossDistance((prev) => {
         // Random movement: -8 to +12 (tends to move away slightly over time)
         const movement = Math.random() * 20 - 8;
-        const newDistance = Math.max(0, Math.min(100, prev + movement));
-        return newDistance;
+        return Math.max(0, Math.min(100, prev + movement));
       });
     }, 8000); // Move every 8 seconds
 
@@ -774,12 +786,9 @@ export default function GamePage() {
       return card;
     };
 
-    // Sort AI players by position (right to left from dealer's perspective = ascending since seats are numbered 0=right, 7=left)
+    // Sort AI players by position (right to left from dealer's perspective = descending)
     const sortedAIPlayers = [...aiPlayers].sort(
-      (a, b) => a.position - b.position,
-    );
-    addDebugLog(
-      `Sorted dealing order: ${sortedAIPlayers.map((ai) => `${ai.character.name}(seat ${ai.position})`).join(" -> ")}`,
+      (a, b) => b.position - a.position,
     );
 
     addDebugLog("--- First card round (right to left) ---");
@@ -788,20 +797,20 @@ export default function GamePage() {
       const idx = aiPlayers.indexOf(ai);
       const card = dealFromCurrentShoe();
       addDebugLog(
-        `${ai.character.name} (Seat ${ai.position}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | RC: ${currentRunningCount}`,
+        `AI Player ${idx} (${ai.character.name}, Seat ${ai.position}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
       );
       dealtCards.push({ type: "ai", index: idx, card });
     });
     if (playerSeat !== null) {
       const card = dealFromCurrentShoe();
       addDebugLog(
-        `Player (Seat ${playerSeat}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | RC: ${currentRunningCount}`,
+        `Player (Seat ${playerSeat}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
       );
       dealtCards.push({ type: "player", index: 0, card });
     }
     const dealerCard1 = dealFromCurrentShoe();
     addDebugLog(
-      `Dealer card 1: ${dealerCard1.rank}${dealerCard1.suit} (value: ${dealerCard1.value}, count: ${dealerCard1.count}) [FACE UP] | RC: ${currentRunningCount}`,
+      `Dealer card 1: ${dealerCard1.rank}${dealerCard1.suit} (value: ${dealerCard1.value}, count: ${dealerCard1.count}) [FACE UP] | Running count: ${currentRunningCount}`,
     );
     dealtCards.push({ type: "dealer", index: 0, card: dealerCard1 });
 
@@ -811,20 +820,20 @@ export default function GamePage() {
       const idx = aiPlayers.indexOf(ai);
       const card = dealFromCurrentShoe();
       addDebugLog(
-        `${ai.character.name} (Seat ${ai.position}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | RC: ${currentRunningCount}`,
+        `AI Player ${idx} (${ai.character.name}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
       );
       dealtCards.push({ type: "ai", index: idx, card });
     });
     if (playerSeat !== null) {
       const card = dealFromCurrentShoe();
       addDebugLog(
-        `Player: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | RC: ${currentRunningCount}`,
+        `Player: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
       );
       dealtCards.push({ type: "player", index: 0, card });
     }
     const dealerCard2 = dealFromCurrentShoe();
     addDebugLog(
-      `Dealer card 2: ${dealerCard2.rank}${dealerCard2.suit} (value: ${dealerCard2.value}, count: ${dealerCard2.count}) [FACE DOWN] | RC: ${currentRunningCount}`,
+      `Dealer card 2: ${dealerCard2.rank}${dealerCard2.suit} (value: ${dealerCard2.value}, count: ${dealerCard2.count}) [FACE DOWN] | Running count: ${currentRunningCount}`,
     );
     dealtCards.push({ type: "dealer", index: 0, card: dealerCard2 });
 
@@ -872,19 +881,6 @@ export default function GamePage() {
               ? getCardPosition("player", undefined, cardIndex)
               : getCardPosition("dealer", undefined, cardIndex);
 
-        // Log card animation details
-        const playerName =
-          type === "ai"
-            ? `${aiPlayers[index]?.character.name} (AI${index}, seat ${aiPlayers[index]?.position})`
-            : type === "player"
-              ? "PLAYER"
-              : "DEALER";
-        addDebugLog(
-          `🎴 Card #${cardIndex} for ${playerName} (${card.rank}${card.suit})`,
-        );
-        addDebugLog(`   From: ${fromPosition.left}, ${fromPosition.top}`);
-        addDebugLog(`   To: ${toPosition.left}, ${toPosition.top}`);
-
         // Create flying card
         const flyingCardId = `flying-${animIdx}-${Date.now()}`;
         setFlyingCards((prev) => [
@@ -918,23 +914,21 @@ export default function GamePage() {
             });
           } else if (type === "player") {
             setPlayerHand((prev) => {
-              const newHand = { ...prev, cards: [...prev.cards, card] };
-              return newHand;
+              return { ...prev, cards: [...prev.cards, card] };
             });
           } else if (type === "dealer") {
             setDealerHand((prev) => {
-              const newHand = { ...prev, cards: [...prev.cards, card] };
-              return newHand;
+              return { ...prev, cards: [...prev.cards, card] };
             });
           }
-        }, CARD_APPEAR_TIME);
+        }, CARD_APPEAR_TIME); // Slightly before animation completes for smoother transition
       }, delay);
       delay += delayBetweenCards;
     });
 
     // Wait for all cards to finish flying and be added to hands
     // delay = time when last card STARTS flying
-    // + CARD_ANIMATION_DURATION for the last card's animation to complete
+    // + 800ms for the last card's animation to complete
     // + 500ms buffer for reactions
     registerTimeout(
       () => {
@@ -943,7 +937,7 @@ export default function GamePage() {
         // Check for blackjacks using the dealt cards
         // Build hands from dealtCards to check for blackjacks
         const aiHands: Map<number, GameCard[]> = new Map();
-        let playerCards: GameCard[] = [];
+        const playerCards: GameCard[] = [];
 
         dealtCards.forEach(({ type, index, card }) => {
           if (type === "ai") {
@@ -972,7 +966,7 @@ export default function GamePage() {
                 newMap.delete(idx);
                 return newMap;
               });
-            }, 800); // Reduced from 2000ms - show briefly
+            }, CARD_ANIMATION_DURATION); // Reduced from 2000ms - show briefly
           }
         });
 
@@ -991,7 +985,7 @@ export default function GamePage() {
                 newMap.delete(-1);
                 return newMap;
               });
-            }, 800); // Reduced from 2000ms - show briefly
+            }, CARD_ANIMATION_DURATION); // Reduced from 2000ms - show briefly
           }
         }
 
@@ -1008,7 +1002,7 @@ export default function GamePage() {
           setPhase("PLAYER_TURN");
         }
       },
-      delay + 800 + 500,
+      delay + CARD_ANIMATION_DURATION + 500,
     );
   }, [
     aiPlayers,
@@ -1187,7 +1181,7 @@ export default function GamePage() {
 
     const card = dealCardFromShoe();
     addDebugLog(
-      `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | RC: ${runningCount + card.count}`,
+      `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${runningCount + card.count}`,
     );
 
     // Add flying card animation
@@ -1238,7 +1232,7 @@ export default function GamePage() {
           setPhase("AI_TURNS");
         }, 1500); // Show BUST for 1.5s then muck cards
       }
-    }, CARD_ANIMATION_DURATION);
+    }, CARD_ANIMATION_DURATION); // Match FlyingCard animation duration
   }, [
     playerHand,
     dealCardFromShoe,
@@ -1266,14 +1260,14 @@ export default function GamePage() {
           ? 11
           : ["J", "Q", "K"].includes(dealerUpCard.rank)
             ? 10
-            : parseInt(dealerUpCard.rank);
+            : parseInt(dealerUpCard.rank, 10);
 
       // Check if player has soft hand (Ace counted as 11)
       const hasAce = playerCards.some((card) => card.rank === "A");
       const hardValue = playerCards.reduce((sum, card) => {
         if (card.rank === "A") return sum + 1;
         if (["J", "Q", "K"].includes(card.rank)) return sum + 10;
-        return sum + parseInt(card.rank);
+        return sum + parseInt(card.rank, 10);
       }, 0);
       const isSoft = hasAce && hardValue + 10 === playerValue;
 
@@ -1308,10 +1302,12 @@ export default function GamePage() {
 
   // Calculate exponential score points: 10 × 2^(N-1) for Nth correct decision
   const calculateStreakPoints = useCallback((streakNumber: number): number => {
-    return 10 * Math.pow(2, streakNumber - 1);
+    return 10 * 2 ** (streakNumber - 1);
   }, []);
 
   // Award points for correct decision and update streak
+  // TODO: Use this function when implementing decision tracking
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const awardCorrectDecisionPoints = useCallback(() => {
     const newStreak = currentStreak + 1;
     const basePoints = calculateStreakPoints(newStreak);
@@ -1327,6 +1323,8 @@ export default function GamePage() {
   }, [currentStreak, scoreMultiplier, longestStreak, calculateStreakPoints]);
 
   // Reset streak on incorrect decision
+  // TODO: Use this function when implementing decision tracking
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const resetStreak = useCallback(() => {
     setCurrentStreak(0);
   }, []);
@@ -1371,335 +1369,339 @@ export default function GamePage() {
     aiTurnProcessingRef.current = true;
     addDebugLog("🔒 AI turn processing locked");
 
-    // Players act in seat order (0-7, right to left from dealer's perspective)
-    // Sort by position ascending (0=right/first base, 7=left/third base)
-    const playersByPosition = aiPlayers
-      .map((ai, idx) => ({ ai, idx, position: ai.position }))
-      .sort((a, b) => a.position - b.position);
+    if (phase === "AI_TURNS" && activePlayerIndex === null) {
+      // Create array of players with their indices, sorted by table position
+      // Higher position numbers are closer to dealer's left (first base)
+      // Playing order: dealer's left to right (highest position to lowest)
+      const playersByPosition = aiPlayers
+        .map((ai, idx) => ({ ai, idx, position: ai.position }))
+        .sort((a, b) => b.position - a.position); // Descending: highest position (first base) acts first
 
-    // Log the turn order for debugging
-    addDebugLog(
-      `Turn order (right to left): ${playersByPosition.map((p) => `${p.ai.character.name} (seat ${p.position})`).join(" -> ")}`,
-    );
-    addDebugLog(
-      `Players finished: [${Array.from(playersFinished).join(", ")}]`,
-    );
+      // Log the sorted order for debugging
+      addDebugLog(
+        `Turn order (sorted by position): ${playersByPosition.map((p) => `${p.ai.character.name} (idx:${p.idx}, seat:${p.position})`).join(", ")}`,
+      );
+      addDebugLog(
+        `Players finished: [${Array.from(playersFinished).join(", ")}]`,
+      );
 
-    // Find the next AI player who needs to act (in index order 0-7)
-    const nextPlayer = playersByPosition.find(({ ai, idx }) => {
-      // Skip if already finished
-      if (playersFinished.has(idx)) return false;
+      // Find the next AI player who needs to act (in table order)
+      const nextPlayer = playersByPosition.find(({ ai, idx }) => {
+        // Skip if already finished
+        if (playersFinished.has(idx)) return false;
 
+        const handValue = calculateHandValue(ai.hand.cards);
+        const isBust = isBusted(ai.hand.cards);
+
+        // Skip if already busted - they should have been marked finished already
+        if (isBust) return false;
+
+        // Player needs to act if they're below 21
+        if (handValue < 21) return true;
+
+        // Player at 21 - they need to show STAND then be marked finished
+        if (handValue === 21) return true;
+
+        return false;
+      });
+
+      if (!nextPlayer) {
+        // All players finished, move to dealer turn
+        addDebugLog("=== ALL AI PLAYERS FINISHED ===");
+        addDebugLog(
+          `Players finished: ${Array.from(playersFinished).join(", ")}`,
+        );
+        addDebugLog("Moving to DEALER_TURN phase");
+        aiTurnProcessingRef.current = false; // Unlock before moving to next phase
+        addDebugLog("🔓 AI turn processing unlocked (all finished)");
+        registerTimeout(() => setPhase("DEALER_TURN"), 1000);
+        return;
+      }
+
+      // Process this player's action
+      const { ai, idx } = nextPlayer;
+
+      addDebugLog(
+        `=== AI PLAYER ${idx} TURN (${ai.character.name}, Seat ${ai.position}) ===`,
+      );
+      addDebugLog(
+        `Current hand: ${ai.hand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+      );
+
+      // Calculate hand value first to determine difficulty
       const handValue = calculateHandValue(ai.hand.cards);
       const isBust = isBusted(ai.hand.cards);
 
-      // Skip if already busted - they should have been marked finished already
-      if (isBust) return false;
+      addDebugLog(`Hand value: ${handValue}, Busted: ${isBust}`);
 
-      // Player needs to act if they're below 21
-      if (handValue < 21) return true;
-
-      // Player at 21 - they need to show STAND then be marked finished
-      if (handValue === 21) return true;
-
-      return false;
-    });
-
-    if (!nextPlayer) {
-      // All players finished, move to dealer turn
-      addDebugLog("=== ALL AI PLAYERS FINISHED ===");
-      addDebugLog("Moving to DEALER_TURN phase");
-      aiTurnProcessingRef.current = false; // Unlock before moving to next phase
-      addDebugLog("🔓 AI turn processing unlocked (all finished)");
-      registerTimeout(() => setPhase("DEALER_TURN"), 1000);
-      return;
-    }
-
-    // Process this player's action
-    const { ai, idx } = nextPlayer;
-
-    addDebugLog(`=== ${ai.character.name}'S TURN (Seat ${ai.position}) ===`);
-    addDebugLog(
-      `Hand: ${ai.hand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-    );
-
-    // Calculate hand value first to determine difficulty
-    const handValue = calculateHandValue(ai.hand.cards);
-    const isBust = isBusted(ai.hand.cards);
-
-    addDebugLog(`Hand value: ${handValue}, Busted: ${isBust}`);
-
-    // Calculate hand difficulty multiplier
-    let handDifficultyMultiplier = 1.0;
-    if (isBust || handValue >= 20) {
-      handDifficultyMultiplier = 0.5;
-    } else if (handValue >= 17) {
-      handDifficultyMultiplier = 0.8;
-    } else if (handValue >= 12 && handValue <= 16) {
-      handDifficultyMultiplier = 1.5;
-    } else {
-      handDifficultyMultiplier = 0.7;
-    }
-
-    // Calculate timing
-    const baseDecisionTime = 800; // Reduced from 1500 - faster thinking
-    const baseActionDelay = 800;
-    const baseActionDisplay = 600; // Reduced from 2000 - show action briefly
-    const baseTurnClear = 100; // Reduced from 500 - minimal delay between players
-
-    const playSpeed = ai.character.playSpeed;
-    const combinedSpeed = playSpeed / handDifficultyMultiplier;
-    const decisionTime = Math.round(baseDecisionTime / combinedSpeed);
-    const actionDelay = Math.round(baseActionDelay / combinedSpeed);
-    const actionDisplay = Math.round(baseActionDisplay / combinedSpeed);
-    const turnClear = Math.round(baseTurnClear / combinedSpeed);
-
-    // Set active player immediately
-    setActivePlayerIndex(idx);
-
-    // Decide: HIT or STAND using basic strategy with skill level
-    const dealerUpCard = dealerHand.cards[0]; // Dealer's face-up card
-    const basicStrategyDecision = shouldHitBasicStrategy(
-      ai.hand.cards,
-      dealerUpCard,
-    );
-
-    // Apply skill level: X% chance to follow basic strategy, (100-X)% chance to use simple "hit on < 17" rule
-    const followsBasicStrategy = Math.random() * 100 < ai.character.skillLevel;
-    const shouldHit = followsBasicStrategy
-      ? basicStrategyDecision
-      : handValue < 17;
-
-    addDebugLog(`Dealer up card: ${dealerUpCard.rank}${dealerUpCard.suit}`);
-    addDebugLog(
-      `Basic strategy says: ${basicStrategyDecision ? "HIT" : "STAND"}`,
-    );
-    addDebugLog(
-      `Follows basic strategy: ${followsBasicStrategy}, Decision: ${shouldHit ? "HIT" : "STAND"}`,
-    );
-
-    if (shouldHit && !isBust) {
-      // 15% chance to show banter during turn
-      if (Math.random() < 0.15) {
-        const banterLines = AI_DIALOGUE_ADDONS.find(
-          (addon) => addon.id === ai.character.id,
-        )?.banterWithPlayer;
-
-        if (banterLines && banterLines.length > 0) {
-          const randomBanter = pick(banterLines);
-          registerTimeout(() => {
-            addSpeechBubble(
-              `ai-turn-banter-${idx}-${Date.now()}`,
-              randomBanter.text,
-              ai.position,
-            );
-          }, decisionTime / 2); // Show banter halfway through thinking
-        }
+      // Calculate hand difficulty multiplier
+      let handDifficultyMultiplier = 1.0;
+      if (isBust || handValue >= 20) {
+        handDifficultyMultiplier = 0.5;
+      } else if (handValue >= 17) {
+        handDifficultyMultiplier = 0.8;
+      } else if (handValue >= 12 && handValue <= 16) {
+        handDifficultyMultiplier = 1.5;
+      } else {
+        handDifficultyMultiplier = 0.7;
       }
 
-      // Show HIT action after thinking
-      registerTimeout(() => {
-        setPlayerActions((prev) => new Map(prev).set(idx, "HIT"));
-      }, decisionTime);
+      // Calculate timing
+      const baseDecisionTime = 800; // Reduced from 1500 - faster thinking
+      // const baseActionDelay = 800; // TODO: Use for action delay timing
+      const baseActionDisplay = 600; // Reduced from 2000 - show action briefly
+      const baseTurnClear = 100; // Reduced from 500 - minimal delay between players
 
-      // Deal card immediately after showing action with animation
-      registerTimeout(() => {
-        const card = dealCardFromShoe();
-        addDebugLog(
-          `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
-        );
+      const { playSpeed } = ai.character;
+      const combinedSpeed = playSpeed / handDifficultyMultiplier;
+      const decisionTime = Math.round(baseDecisionTime / combinedSpeed);
+      // const actionDelay = Math.round(baseActionDelay / combinedSpeed); // TODO: Use for action timing
+      const actionDisplay = Math.round(baseActionDisplay / combinedSpeed);
+      const turnClear = Math.round(baseTurnClear / combinedSpeed);
 
-        // Add flying card animation
-        const shoePosition = getCardPosition("shoe");
-        const aiPosition = getCardPosition("ai", idx, ai.hand.cards.length);
+      // Set active player immediately
+      setActivePlayerIndex(idx);
 
-        const flyingCard: FlyingCardData = {
-          id: `hit-ai-${idx}-${Date.now()}`,
-          card,
-          fromPosition: shoePosition,
-          toPosition: aiPosition,
-        };
+      // Decide: HIT or STAND using basic strategy with skill level
+      const dealerUpCard = dealerHand.cards[0]; // Dealer's face-up card
+      const basicStrategyDecision = shouldHitBasicStrategy(
+        ai.hand.cards,
+        dealerUpCard,
+      );
 
-        setFlyingCards((prev) => [...prev, flyingCard]);
+      // Apply skill level: X% chance to follow basic strategy, (100-X)% chance to use simple "hit on < 17" rule
+      const followsBasicStrategy =
+        Math.random() * 100 < ai.character.skillLevel;
+      const shouldHit = followsBasicStrategy
+        ? basicStrategyDecision
+        : handValue < 17;
 
-        // Add card to hand after animation completes
-        setTimeout(() => {
-          setAIPlayers((prev) => {
-            const updated = [...prev];
-            updated[idx] = {
-              ...updated[idx],
-              hand: {
-                ...updated[idx].hand,
-                cards: [...updated[idx].hand.cards, card],
-              },
-            };
-            return updated;
-          });
-          setFlyingCards((prev) =>
-            prev.filter((fc) => fc.id !== flyingCard.id),
+      addDebugLog(`Dealer up card: ${dealerUpCard.rank}${dealerUpCard.suit}`);
+      addDebugLog(
+        `Basic strategy says: ${basicStrategyDecision ? "HIT" : "STAND"}`,
+      );
+      addDebugLog(
+        `Follows basic strategy: ${followsBasicStrategy}, Decision: ${shouldHit ? "HIT" : "STAND"}`,
+      );
+
+      if (shouldHit && !isBust) {
+        // 15% chance to show banter during turn
+        if (Math.random() < 0.15) {
+          const banterLines = AI_DIALOGUE_ADDONS.find(
+            (addon) => addon.id === ai.character.id,
+          )?.banterWithPlayer;
+
+          if (banterLines && banterLines.length > 0) {
+            const randomBanter = pick(banterLines);
+            registerTimeout(() => {
+              addSpeechBubble(
+                `ai-turn-banter-${idx}-${Date.now()}`,
+                randomBanter.text,
+                ai.position,
+              );
+            }, decisionTime / 2); // Show banter halfway through thinking
+          }
+        }
+
+        // Show HIT action after thinking
+        registerTimeout(() => {
+          setPlayerActions((prev) => new Map(prev).set(idx, "HIT"));
+        }, decisionTime);
+
+        // Deal card immediately after showing action with animation
+        registerTimeout(() => {
+          const card = dealCardFromShoe();
+          addDebugLog(
+            `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
           );
 
-          // Check if player busted or reached 21+ after receiving card
-          const newHandValue = calculateHandValue([...ai.hand.cards, card]);
-          const busted = isBusted([...ai.hand.cards, card]);
+          // Add flying card animation
+          const shoePosition = getCardPosition("shoe");
+          const aiPosition = getCardPosition("ai", idx, ai.hand.cards.length);
 
-          addDebugLog(`New hand value: ${newHandValue}, Busted: ${busted}`);
+          const flyingCard: FlyingCardData = {
+            id: `hit-ai-${idx}-${Date.now()}`,
+            card,
+            fromPosition: shoePosition,
+            toPosition: aiPosition,
+          };
 
-          if (busted) {
-            addDebugLog(`AI Player ${idx} BUSTED!`);
-            addDebugLog(`Marking AI Player ${idx} as FINISHED (busted)`);
+          setFlyingCards((prev) => [...prev, flyingCard]);
 
-            // Mark player as finished FIRST, before any async operations
-            setPlayersFinished((prev) => new Set(prev).add(idx));
-
-            // Clear HIT action first
-            setPlayerActions((prev) => {
-              const newMap = new Map(prev);
-              newMap.delete(idx);
-              return newMap;
+          // Add card to hand after animation completes
+          setTimeout(() => {
+            setAIPlayers((prev) => {
+              const updated = [...prev];
+              updated[idx] = {
+                ...updated[idx],
+                hand: {
+                  ...updated[idx].hand,
+                  cards: [...updated[idx].hand.cards, card],
+                },
+              };
+              return updated;
             });
+            setFlyingCards((prev) =>
+              prev.filter((fc) => fc.id !== flyingCard.id),
+            );
 
-            // Show BUST indicator after a brief delay
-            setTimeout(() => {
-              setPlayerActions((prev) => new Map(prev).set(idx, "BUST"));
-            }, 100);
+            // Check if player busted or reached 21+ after receiving card
+            const newHandValue = calculateHandValue([...ai.hand.cards, card]);
+            const busted = isBusted([...ai.hand.cards, card]);
 
-            // Muck (clear) the cards after showing bust indicator
-            setTimeout(() => {
-              setAIPlayers((prev) => {
-                const updated = [...prev];
-                updated[idx] = {
-                  ...updated[idx],
-                  hand: {
-                    ...updated[idx].hand,
-                    cards: [],
-                  },
-                };
-                return updated;
-              });
+            addDebugLog(`New hand value: ${newHandValue}, Busted: ${busted}`);
+
+            if (busted) {
+              addDebugLog(`AI Player ${idx} BUSTED!`);
+              addDebugLog(`Marking AI Player ${idx} as FINISHED (busted)`);
+
+              // Mark player as finished FIRST, before any async operations
+              setPlayersFinished((prev) => new Set(prev).add(idx));
+
+              // Clear HIT action first
               setPlayerActions((prev) => {
                 const newMap = new Map(prev);
                 newMap.delete(idx);
                 return newMap;
               });
-              // Move to next player immediately after mucking
-              aiTurnProcessingRef.current = false; // Unlock before next turn
-              addDebugLog("🔓 AI turn processing unlocked (bust)");
-              setActivePlayerIndex(null);
-            }, 800); // Show BUST for 0.8s then muck cards and move on
-          } else if (newHandValue >= 21) {
-            addDebugLog(`AI Player ${idx} reached 21!`);
-            addDebugLog(`Marking AI Player ${idx} as FINISHED (21)`);
 
-            // Mark player as finished FIRST (21 but not bust)
-            setPlayersFinished((prev) => new Set(prev).add(idx));
+              // Show BUST indicator after a brief delay
+              setTimeout(() => {
+                setPlayerActions((prev) => new Map(prev).set(idx, "BUST"));
+              }, 100);
 
-            // Player got 21 - clear HIT and show STAND
-            setPlayerActions((prev) => {
-              const newMap = new Map(prev);
-              newMap.delete(idx);
-              return newMap;
-            });
+              // Muck (clear) the cards after showing bust indicator
+              setTimeout(() => {
+                setAIPlayers((prev) => {
+                  const updated = [...prev];
+                  updated[idx] = {
+                    ...updated[idx],
+                    hand: {
+                      ...updated[idx].hand,
+                      cards: [],
+                    },
+                  };
+                  return updated;
+                });
+                setPlayerActions((prev) => {
+                  const newMap = new Map(prev);
+                  newMap.delete(idx);
+                  return newMap;
+                });
+                // Move to next player immediately after mucking
+                aiTurnProcessingRef.current = false; // Unlock before next turn
+                addDebugLog("🔓 AI turn processing unlocked (bust)");
+                setActivePlayerIndex(null);
+              }, CARD_ANIMATION_DURATION); // Show BUST then muck cards and move on
+            } else if (newHandValue >= 21) {
+              addDebugLog(`AI Player ${idx} reached 21!`);
+              addDebugLog(`Marking AI Player ${idx} as FINISHED (21)`);
 
-            setTimeout(() => {
-              setPlayerActions((prev) => new Map(prev).set(idx, "STAND"));
-            }, 100);
+              // Mark player as finished FIRST (21 but not bust)
+              setPlayersFinished((prev) => new Set(prev).add(idx));
 
-            // Clear STAND indicator after display and move to next player
-            setTimeout(() => {
+              // Player got 21 - clear HIT and show STAND
               setPlayerActions((prev) => {
                 const newMap = new Map(prev);
                 newMap.delete(idx);
                 return newMap;
               });
-              // Move to next player immediately
-              aiTurnProcessingRef.current = false; // Unlock before next turn
-              addDebugLog("🔓 AI turn processing unlocked (21)");
-              setActivePlayerIndex(null);
-            }, 600); // Show STAND for 0.6s then move on
+
+              setTimeout(() => {
+                setPlayerActions((prev) => new Map(prev).set(idx, "STAND"));
+              }, 100);
+
+              // Clear STAND indicator after display and move to next player
+              setTimeout(() => {
+                setPlayerActions((prev) => {
+                  const newMap = new Map(prev);
+                  newMap.delete(idx);
+                  return newMap;
+                });
+                // Move to next player immediately
+                aiTurnProcessingRef.current = false; // Unlock before next turn
+                addDebugLog("🔓 AI turn processing unlocked (21)");
+                setActivePlayerIndex(null);
+              }, 600); // Show STAND for 0.6s then move on
+            }
+          }, CARD_ANIMATION_DURATION); // Match FlyingCard animation duration
+        }, decisionTime + 50); // Show action, then immediately deal card
+
+        // Clear HIT action after display (only if player didn't bust or get 21)
+        // This timeout will be overridden by the bust/21 logic above if needed
+        registerTimeout(
+          () => {
+            setPlayerActions((prev) => {
+              const newMap = new Map(prev);
+              // Only delete if it's still "HIT" (not "BUST" or "STAND" from hitting 21)
+              if (newMap.get(idx) === "HIT") {
+                newMap.delete(idx);
+              }
+              return newMap;
+            });
+          },
+          decisionTime + 50 + 800 + actionDisplay,
+        ); // thinking + action display + card animation
+
+        // Clear active player to trigger next action (with thinking time for the new hand)
+        // Need to wait for: decision + action show + card animation + action display + turn clear + NEW THINKING TIME
+        registerTimeout(
+          () => {
+            aiTurnProcessingRef.current = false; // Unlock before next turn
+            addDebugLog("🔓 AI turn processing unlocked (hit, continuing)");
+            setActivePlayerIndex(null);
+          },
+          decisionTime + 50 + 800 + actionDisplay + turnClear + decisionTime,
+        ); // Add another decision time for thinking about new hand
+      } else {
+        addDebugLog(`AI Player ${idx} decision: STAND`);
+        addDebugLog(`Marking AI Player ${idx} as FINISHED (stand)`);
+
+        // Mark player as finished FIRST
+        setPlayersFinished((prev) => new Set(prev).add(idx));
+
+        // 15% chance to show banter during turn
+        if (Math.random() < 0.15) {
+          const banterLines = AI_DIALOGUE_ADDONS.find(
+            (addon) => addon.id === ai.character.id,
+          )?.banterWithPlayer;
+
+          if (banterLines && banterLines.length > 0) {
+            const randomBanter = pick(banterLines);
+            registerTimeout(() => {
+              addSpeechBubble(
+                `ai-turn-banter-${idx}-${Date.now()}`,
+                randomBanter.text,
+                ai.position,
+              );
+            }, decisionTime / 2); // Show banter halfway through thinking
           }
-        }, CARD_ANIMATION_DURATION);
-      }, decisionTime + 50); // Show action, then immediately deal card
+        }
 
-      // Clear HIT action after display (only if player didn't bust or get 21)
-      // This timeout will be overridden by the bust/21 logic above if needed
-      registerTimeout(
-        () => {
+        // Show STAND action after thinking
+        registerTimeout(() => {
+          setPlayerActions((prev) => new Map(prev).set(idx, "STAND"));
+        }, decisionTime);
+
+        // Clear action after display
+        registerTimeout(() => {
           setPlayerActions((prev) => {
             const newMap = new Map(prev);
-            // Only delete if it's still "HIT" (not "BUST" or "STAND" from hitting 21)
-            if (newMap.get(idx) === "HIT") {
-              newMap.delete(idx);
-            }
+            newMap.delete(idx);
             return newMap;
           });
-        },
-        decisionTime + 50 + CARD_ANIMATION_DURATION + actionDisplay,
-      );
+        }, decisionTime + actionDisplay);
 
-      // Clear active player to trigger next action (with thinking time for the new hand)
-      // Need to wait for: decision + action show + card animation + action display + turn clear + NEW THINKING TIME
-      registerTimeout(
-        () => {
-          aiTurnProcessingRef.current = false; // Unlock before next turn
-          addDebugLog("🔓 AI turn processing unlocked (hit, continuing)");
-          setActivePlayerIndex(null);
-        },
-        decisionTime +
-          50 +
-          CARD_ANIMATION_DURATION +
-          actionDisplay +
-          turnClear +
-          decisionTime,
-      );
-    } else {
-      addDebugLog(`AI Player ${idx} decision: STAND`);
-      addDebugLog(`Marking AI Player ${idx} as FINISHED (stand)`);
-
-      // Mark player as finished FIRST
-      setPlayersFinished((prev) => new Set(prev).add(idx));
-
-      // 15% chance to show banter during turn
-      if (Math.random() < 0.15) {
-        const banterLines = AI_DIALOGUE_ADDONS.find(
-          (addon) => addon.id === ai.character.id,
-        )?.banterWithPlayer;
-
-        if (banterLines && banterLines.length > 0) {
-          const randomBanter = pick(banterLines);
-          registerTimeout(() => {
-            addSpeechBubble(
-              `ai-turn-banter-${idx}-${Date.now()}`,
-              randomBanter.text,
-              ai.position,
-            );
-          }, decisionTime / 2); // Show banter halfway through thinking
-        }
+        // Clear active to move to next player
+        registerTimeout(
+          () => {
+            aiTurnProcessingRef.current = false; // Unlock before next turn
+            addDebugLog("🔓 AI turn processing unlocked (stand)");
+            setActivePlayerIndex(null);
+          },
+          decisionTime + actionDisplay + turnClear,
+        );
       }
-
-      // Show STAND action after thinking
-      registerTimeout(() => {
-        setPlayerActions((prev) => new Map(prev).set(idx, "STAND"));
-      }, decisionTime);
-
-      // Clear action after display
-      registerTimeout(() => {
-        setPlayerActions((prev) => {
-          const newMap = new Map(prev);
-          newMap.delete(idx);
-          return newMap;
-        });
-      }, decisionTime + actionDisplay);
-
-      // Clear active to move to next player
-      registerTimeout(
-        () => {
-          aiTurnProcessingRef.current = false; // Unlock before next turn
-          addDebugLog("🔓 AI turn processing unlocked (stand)");
-          setActivePlayerIndex(null);
-        },
-        decisionTime + actionDisplay + turnClear,
-      );
     }
   }, [
     phase,
@@ -1717,24 +1719,27 @@ export default function GamePage() {
   // Dealer turn
   useEffect(() => {
     if (phase !== "DEALER_TURN") {
-      // Phase changed away from DEALER_TURN
+      // Phase has changed away from DEALER_TURN, do nothing
       return;
     }
 
-    // Guard against re-entry while dealer is playing
+    // Guard against re-entry while processing
     if (dealerTurnProcessingRef.current) {
       addDebugLog("⚠️ Dealer turn already processing, skipping re-entry");
       return;
     }
 
     dealerTurnProcessingRef.current = true;
-    addDebugLog("=== PHASE: DEALER_TURN START ===");
-    addDebugLog(
-      `Dealer hand: ${dealerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-    );
-    addDebugLog(`Dealer hand value: ${calculateHandValue(dealerHand.cards)}`);
-    setDealerRevealed(true);
-    dealerFinishedRef.current = false; // Reset flag when entering dealer turn
+    addDebugLog("🔒 Dealer turn processing locked");
+
+    if (phase === "DEALER_TURN") {
+      addDebugLog("=== PHASE: DEALER_TURN START ===");
+      addDebugLog(
+        `Dealer hand: ${dealerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+      );
+      addDebugLog(`Dealer hand value: ${calculateHandValue(dealerHand.cards)}`);
+      setDealerRevealed(true);
+      dealerFinishedRef.current = false; // Reset flag when entering dealer turn
 
       // 10% chance to show dealer-directed banter when dealer reveals
       if (Math.random() < 0.1 && aiPlayers.length > 0) {
@@ -1815,7 +1820,7 @@ export default function GamePage() {
                 setFlyingCards((prev) =>
                   prev.filter((fc) => fc.id !== flyingCard.id),
                 );
-              }, 800);
+              }, CARD_ANIMATION_DURATION);
 
               const newHand = { ...prevHand, cards: [...prevHand.cards, card] };
               const newValue = calculateHandValue(newHand.cards);
@@ -1825,37 +1830,37 @@ export default function GamePage() {
               registerTimeout(() => dealNextCard(), 1000);
 
               return newHand;
-            } else {
-              // Dealer is done, announce final hand (only once)
-              if (!dealerFinishedRef.current) {
-                dealerFinishedRef.current = true;
+            }
+            // Dealer is done, announce final hand (only once)
+            if (!dealerFinishedRef.current) {
+              dealerFinishedRef.current = true;
 
-                const finalValue = calculateHandValue(prevHand.cards);
-                const isBust = isBusted(prevHand.cards);
+              const finalValue = calculateHandValue(prevHand.cards);
+              const isBust = isBusted(prevHand.cards);
 
-                addDebugLog(`=== DEALER FINAL HAND ===`);
-                addDebugLog(
-                  `Dealer cards: ${prevHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-                );
-                addDebugLog(`Dealer hand value: ${finalValue}`);
-                addDebugLog(`Dealer busted: ${isBust}`);
+              addDebugLog(`=== DEALER FINAL HAND ===`);
+              addDebugLog(
+                `Dealer cards: ${prevHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+              );
+              addDebugLog(`Dealer hand value: ${finalValue}`);
+              addDebugLog(`Dealer busted: ${isBust}`);
 
-                if (isBust) {
-                  setDealerCallout("Dealer busts");
-                } else {
-                  setDealerCallout(`Dealer has ${finalValue}`);
-                }
-
-                // Clear callout and move to resolving
-                registerTimeout(() => {
-                  setDealerCallout(null);
-                  dealerTurnProcessingRef.current = false; // Unlock dealer turn
-                  setPhase("RESOLVING");
-                }, 10000); // Increased to 10 seconds - dealer callouts stay visible longer
+              if (isBust) {
+                setDealerCallout("Dealer busts");
+              } else {
+                setDealerCallout(`Dealer has ${finalValue}`);
               }
 
-              return prevHand;
+              // Clear callout and move to resolving
+              registerTimeout(() => {
+                setDealerCallout(null);
+                dealerTurnProcessingRef.current = false; // Unlock before moving to next phase
+                addDebugLog("🔓 Dealer turn processing unlocked (finished)");
+                setPhase("RESOLVING");
+              }, 10000); // Increased to 10 seconds - dealer callouts stay visible longer
             }
+
+            return prevHand;
           });
         };
 
@@ -2123,7 +2128,18 @@ export default function GamePage() {
       // Add bubble for human player if they have cards
       if (playerSeat !== null && playerHand.cards.length > 0) {
         addDebugLog(`Player has cards, creating bubble for seat ${playerSeat}`);
-        const [x, y] = TABLE_POSITIONS[playerSeat];
+        const tablePositions = [
+          [5, 55], // Seat 0 - Far left
+          [16, 62], // Seat 1 - Left
+          [29, 68], // Seat 2 - Center-left
+          [42, 72], // Seat 3 - Center
+          [56, 72], // Seat 4 - Center
+          [69, 68], // Seat 5 - Center-right
+          [82, 62], // Seat 6 - Right
+          [93, 55], // Seat 7 - Far right
+        ];
+
+        const [x, y] = tablePositions[playerSeat];
         let result: "win" | "lose" | "push" | "blackjack" = "lose";
 
         if (playerResult === "BLACKJACK") {
@@ -2150,7 +2166,18 @@ export default function GamePage() {
           addDebugLog(
             `AI Player ${ai.character.name} has ${ai.hand.cards.length} cards`,
           );
-          const [x, y] = TABLE_POSITIONS[ai.position];
+          const tablePositions = [
+            [5, 55], // Seat 0 - Far left
+            [16, 62], // Seat 1 - Left
+            [29, 68], // Seat 2 - Center-left
+            [42, 72], // Seat 3 - Center
+            [56, 72], // Seat 4 - Center
+            [69, 68], // Seat 5 - Center-right
+            [82, 62], // Seat 6 - Right
+            [93, 55], // Seat 7 - Far right
+          ];
+
+          const [x, y] = tablePositions[ai.position];
           const aiResult = determineHandResult(ai.hand, dealerHand);
           let result: "win" | "lose" | "push" | "blackjack" = "lose";
 
@@ -2901,34 +2928,32 @@ export default function GamePage() {
               }}
             >
               {dealerHand.cards.length > 0 && (
-                <>
-                  <div
-                    style={{
-                      position: "relative",
-                      width: "370px",
-                      height: "98px",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    {dealerHand.cards.map((card, idx) => (
-                      <div
-                        key={idx}
-                        style={{
-                          position: "absolute",
-                          left: `${idx * 74}px`, // 70px card + 4px gap
-                          top: 0,
-                          width: "70px",
-                          height: "98px",
-                        }}
-                      >
-                        <PlayingCard
-                          card={card}
-                          faceDown={!dealerRevealed && idx === 1}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </>
+                <div
+                  style={{
+                    position: "relative",
+                    width: "370px",
+                    height: "98px",
+                    marginBottom: "4px",
+                  }}
+                >
+                  {dealerHand.cards.map((card, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        position: "absolute",
+                        left: `${idx * 74}px`, // 70px card + 4px gap
+                        top: 0,
+                        width: "70px",
+                        height: "98px",
+                      }}
+                    >
+                      <PlayingCard
+                        card={card}
+                        faceDown={!dealerRevealed && idx === 1}
+                      />
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
@@ -2946,7 +2971,18 @@ export default function GamePage() {
             {[0, 1, 2, 3, 4, 5, 6, 7].map((seatIndex) => {
               // Positions based on reference project: [left%, top%]
               // Extended to 8 seats with arc pattern - moved down so center seats are near bottom
-              const [x, y] = TABLE_POSITIONS[seatIndex];
+              const tablePositions = [
+                [5, 55], // Seat 0 - Far left
+                [16, 62], // Seat 1 - Left
+                [29, 68], // Seat 2 - Center-left
+                [42, 72], // Seat 3 - Center
+                [56, 72], // Seat 4 - Center
+                [69, 68], // Seat 5 - Center-right
+                [82, 62], // Seat 6 - Right
+                [93, 55], // Seat 7 - Far right
+              ];
+
+              const [x, y] = tablePositions[seatIndex];
               // Find if this seat is occupied by an AI player
               const aiPlayer = aiPlayers.find(
                 (ai) => ai.position === seatIndex,
@@ -3364,7 +3400,7 @@ export default function GamePage() {
           <DealerInfo
             dealer={currentDealer}
             onClose={() => setShowDealerInfo(false)}
-            openAsModal={true}
+            openAsModal
           />
         )}
 
