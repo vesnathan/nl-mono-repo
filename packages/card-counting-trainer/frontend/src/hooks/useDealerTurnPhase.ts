@@ -215,7 +215,7 @@ export function useDealerTurnPhase({
               }, 1500); // Brief delay to show final dealer result
             }
 
-            return prevHand;
+            return currentHand;
           });
         };
 
