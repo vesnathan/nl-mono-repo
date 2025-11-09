@@ -29,25 +29,6 @@ export default function FlyingCard({
     return () => clearTimeout(timer);
   }, [onAnimationComplete]);
 
-  const getSuitSymbol = () => {
-    switch (suit) {
-      case "hearts":
-        return "♥";
-      case "diamonds":
-        return "♦";
-      case "clubs":
-        return "♣";
-      case "spades":
-        return "♠";
-      default:
-        return "";
-    }
-  };
-
-  const getSuitColor = () => {
-    return suit === "hearts" || suit === "diamonds" ? "#FF0000" : "#000000";
-  };
-
   if (!isFlying) return null;
 
   return (
@@ -68,30 +49,12 @@ export default function FlyingCard({
           style={{
             width: "100%",
             height: "100%",
-            backgroundColor: "#FFFFFF",
-            border: "1px solid #333",
+            backgroundImage: "url(/assets/images/back.webp)",
+            backgroundSize: "100% 100%",
             borderRadius: "4px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
-            padding: "4px",
           }}
-        >
-          <div
-            style={{
-              fontSize: "20px",
-              fontWeight: "bold",
-              color: getSuitColor(),
-            }}
-          >
-            {rank}
-          </div>
-          <div style={{ fontSize: "24px", color: getSuitColor() }}>
-            {getSuitSymbol()}
-          </div>
-        </div>
+        />
       </div>
       <style jsx>{`
         @keyframes fly-to-position {

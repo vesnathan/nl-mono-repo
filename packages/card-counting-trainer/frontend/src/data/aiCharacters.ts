@@ -6,6 +6,7 @@ export interface AICharacter {
   backstory: string;
   distractions: string[]; // Things they might say/do to distract the counter
   skillLevel: number; // 0-70% chance they follow basic strategy correctly
+  playSpeed: number; // 0.6-1.5: Multiplier for decision-making speed (1.0 = normal, <1 = slow, >1 = fast)
   avatar?: string; // Path to avatar image (to be added)
   reactions: {
     bigWin: string[]; // Blackjack or big hand
@@ -23,6 +24,7 @@ export const AI_CHARACTERS: AICharacter[] = [
     nickname: "Drunk Danny",
     personality: "drunk",
     skillLevel: 15, // Terrible player - drunk decisions
+    playSpeed: 0.7, // Slow - drunk and confused
     backstory: "Danny's a retired longshoreman who spends his pension checks at the casino every Friday night. He's usually three whiskeys deep by the time he sits down, slurring his words and spilling chips. Despite being drunk, he somehow always seems to win just enough to keep coming back.",
     distractions: [
       "Hey barkeep! Another round!",
@@ -67,6 +69,7 @@ export const AI_CHARACTERS: AICharacter[] = [
     nickname: "Clumsy Claire",
     personality: "clumsy",
     skillLevel: 35, // Below average - distracted by her own clumsiness
+    playSpeed: 0.8, // Slow - keeps getting distracted
     backstory: "Claire's a sweet kindergarten teacher who comes to the casino once a month with her book club friends. She's perpetually knocking things over, dropping chips, and apologizing profusely. Her clumsiness is endearing but incredibly distracting when you're trying to count cards.",
     distractions: [
       "*drops purse spilling contents everywhere* Oh no! I'm so sorry!",
@@ -111,6 +114,7 @@ export const AI_CHARACTERS: AICharacter[] = [
     nickname: "Chatty Carlos",
     personality: "chatty",
     skillLevel: 50, // Average - knows basics but talks too much to focus
+    playSpeed: 0.6, // Very slow - keeps talking between decisions
     backstory: "Carlos owns a chain of car dealerships and treats the blackjack table like a networking event. He never stops talking about his deals, his sales numbers, his cars, or his opinions on literally everything. He's successful, loud, and completely oblivious to the fact that nobody wants to hear his life story.",
     distractions: [
       "So I just closed a deal on THREE luxury sedans! Can you believe it?",
@@ -155,6 +159,7 @@ export const AI_CHARACTERS: AICharacter[] = [
     nickname: "Lucky Susan",
     personality: "superstitious",
     skillLevel: 40, // Poor - plays based on "signs" not strategy
+    playSpeed: 0.9, // Slow - waits for "signs" before acting
     backstory: "Susan's a yoga instructor who believes the universe sends her 'signs' about when to hit or stand. She has a lucky rabbit's foot, a collection of crystals, and refuses to play if someone joins mid-shoe. She wins often enough that other players start to believe in her rituals too.",
     distractions: [
       "Wait! My crystal is telling me this isn't a good shoe.",
@@ -199,6 +204,7 @@ export const AI_CHARACTERS: AICharacter[] = [
     nickname: "Big K",
     personality: "cocky",
     skillLevel: 25, // Bad - overconfident and reckless
+    playSpeed: 1.5, // Very fast - overconfident quick decisions
     backstory: "Kyle's a 28-year-old crypto trader who made millions on Bitcoin and won't let anyone forget it. He wears designer everything, tips big to show off, and acts like he owns every table he sits at. He's actually a terrible player but his bankroll lets him stay in the game longer than he should.",
     distractions: [
       "I made more today than you'll make all year, buddy.",
@@ -243,6 +249,7 @@ export const AI_CHARACTERS: AICharacter[] = [
     nickname: "Nervous Nancy",
     personality: "nervous",
     skillLevel: 60, // Above average - studied the game but second-guesses herself
+    playSpeed: 0.7, // Slow - overthinks every decision
     backstory: "Nancy's an accountant who read one book about card counting and thinks she's going to get kicked out any second. She's constantly looking over her shoulder, sweating, and second-guessing every decision. Her anxiety is so palpable it makes everyone else nervous too.",
     distractions: [
       "*whispers* Are they watching us? I think they're watching us!",
@@ -287,6 +294,7 @@ export const AI_CHARACTERS: AICharacter[] = [
     nickname: "Lucky Larry",
     personality: "lucky",
     skillLevel: 20, // Terrible - plays on pure gut feeling
+    playSpeed: 1.2, // Fast - impulsive gut decisions
     backstory: "Larry's a retired plumber who's been on an impossible hot streak for three weeks straight. He doesn't count cards, doesn't know basic strategy, and plays completely on gut feeling - yet he keeps winning. His presence at the table makes other players wonder if luck is more important than skill.",
     distractions: [
       "I'm telling you, I can FEEL when I'm gonna win!",
@@ -331,6 +339,7 @@ export const AI_CHARACTERS: AICharacter[] = [
     nickname: "Unlucky Ursula",
     personality: "unlucky",
     skillLevel: 55, // Slightly above average - knows strategy but bad luck affects decisions
+    playSpeed: 1.0, // Normal speed
     backstory: "Ursula's a dental hygienist who has the worst luck imaginable. She gets dealt 16 constantly, busts on 20s, and loses to dealer blackjacks more than should be mathematically possible. Yet she keeps coming back with a smile, cracking jokes about her terrible luck and making everyone feel better about their own losses.",
     distractions: [
       "Of COURSE the dealer has blackjack. Why wouldn't they?",
