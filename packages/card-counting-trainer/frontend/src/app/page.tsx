@@ -300,18 +300,27 @@ export default function GamePage() {
       return card;
     };
 
-    // First card to everyone (round 1)
-    aiPlayers.forEach((_, idx) => {
+    // Sort AI players by position (right to left from dealer's perspective = descending)
+    const sortedAIPlayers = [...aiPlayers].sort((a, b) => b.position - a.position);
+
+    // Deal first card to everyone (right to left, dealer last)
+    sortedAIPlayers.forEach((ai) => {
+      const idx = aiPlayers.indexOf(ai);
       dealtCards.push({ type: "ai", index: idx, card: dealFromCurrentShoe() });
     });
-    dealtCards.push({ type: "player", index: 0, card: dealFromCurrentShoe() });
+    if (playerSeat !== null) {
+      dealtCards.push({ type: "player", index: 0, card: dealFromCurrentShoe() });
+    }
     dealtCards.push({ type: "dealer", index: 0, card: dealFromCurrentShoe() });
 
-    // Second card to everyone (round 2)
-    aiPlayers.forEach((_, idx) => {
+    // Deal second card to everyone (right to left, dealer last)
+    sortedAIPlayers.forEach((ai) => {
+      const idx = aiPlayers.indexOf(ai);
       dealtCards.push({ type: "ai", index: idx, card: dealFromCurrentShoe() });
     });
-    dealtCards.push({ type: "player", index: 0, card: dealFromCurrentShoe() });
+    if (playerSeat !== null) {
+      dealtCards.push({ type: "player", index: 0, card: dealFromCurrentShoe() });
+    }
     dealtCards.push({ type: "dealer", index: 0, card: dealFromCurrentShoe() });
 
     // Update state with final shoe state
@@ -343,7 +352,7 @@ export default function GamePage() {
       checkForInitialReactions();
       setPhase("PLAYER_TURN");
     }, delay + 500);
-  }, [aiPlayers, shoe, cardsDealt, runningCount, shoesDealt, numDecks, registerTimeout]);
+  }, [aiPlayers, shoe, cardsDealt, runningCount, shoesDealt, numDecks, registerTimeout, playerSeat]);
 
   // Check for initial hand reactions
   const checkForInitialReactions = useCallback(() => {
