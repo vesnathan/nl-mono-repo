@@ -306,7 +306,8 @@ export default function GamePage() {
       setActivePlayerIndex(null);
     }
     prevPhaseRef.current = phase;
-  }, [phase, addDebugLog]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]); // Only depend on phase, not addDebugLog
 
   // AI turns phase hook
   useAITurnsPhase({

@@ -90,12 +90,17 @@ export function useAITurnsPhase({
     }
 
     if (activePlayerIndex !== null) {
+      addDebugLog(`[AI_TURNS Effect] Skipping - activePlayerIndex is ${activePlayerIndex}`);
       return;
     }
 
     if (aiTurnProcessingRef.current || isTransitioningRef.current) {
+      addDebugLog(`[AI_TURNS Effect] Skipping - processing=${aiTurnProcessingRef.current}, transitioning=${isTransitioningRef.current}`);
       return;
     }
+
+    addDebugLog(`[AI_TURNS Effect] Starting turn logic`);
+    addDebugLog(`[AI_TURNS Effect] playersFinished size: ${playersFinished.size}, contents: [${Array.from(playersFinished).join(", ")}]`);
 
     aiTurnProcessingRef.current = true;
 
