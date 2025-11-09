@@ -77,6 +77,7 @@ import { useGameShoe } from "@/hooks/useGameShoe";
 import { usePlayerHand } from "@/hooks/usePlayerHand";
 import { useBettingActions } from "@/hooks/useBettingActions";
 import { useConversationHandlers } from "@/hooks/useConversationHandlers";
+import { useGameActions } from "@/hooks/useGameActions";
 import {
   generateInitialReactions,
   generateEndOfHandReactions,
@@ -526,295 +527,40 @@ export default function GamePage() {
     currentBet,
   ]);
 
-  // Start new round - transition to BETTING phase
-  const startNewRound = useCallback(() => {
-    setPhase("BETTING");
-    setCurrentBet(0); // Reset bet for new round
-    setDealerRevealed(false);
-    setPlayerHand({ cards: [], bet: 0 });
-    setDealerHand({ cards: [], bet: 0 });
-    setSpeechBubbles([]); // Clear any lingering speech bubbles
 
-    // Reset AI hands (they'll bet when player confirms)
-    const updatedAI = aiPlayers.map((ai) => ({
-      ...ai,
-      hand: { cards: [], bet: 0 },
-    }));
-    setAIPlayers(updatedAI);
-  }, [aiPlayers]);
 
-  const dealInitialCards = useCallback(() => {
-    addDebugLog("=== DEALING PHASE START ===");
-    addDebugLog(`Shoe cards remaining: ${shoe.length}`);
-    addDebugLog(`Cards dealt this shoe: ${cardsDealt}`);
-    addDebugLog(`Running count: ${runningCount}`);
-    addDebugLog(`Number of AI players: ${aiPlayers.length}`);
-    addDebugLog(
-      `Player seated: ${playerSeat !== null ? `Yes (Seat ${playerSeat})` : "No (observing)"}`,
-    );
-
-    // Pre-deal all cards BEFORE animations to ensure uniqueness
-    // We need to manually track the shoe state because React batches state updates
-    const dealtCards: { type: string; index: number; card: GameCard }[] = [];
-    let currentShoe = [...shoe];
-    let currentCardsDealt = cardsDealt;
-    let currentRunningCount = runningCount;
-    let currentShoesDealt = shoesDealt;
-
-    // Helper to deal from the current shoe state
-    const dealFromCurrentShoe = () => {
-      const { card, remainingShoe, reshuffled } = dealCard(
-        currentShoe,
-        gameSettings.numberOfDecks,
-        gameSettings.countingSystem,
-      );
-
-      if (reshuffled) {
-        currentShoe = remainingShoe;
-        currentCardsDealt = 1;
-        currentRunningCount = card.count;
-        currentShoesDealt += 1;
-      } else {
-        currentShoe = remainingShoe;
-        currentCardsDealt += 1;
-        currentRunningCount += card.count;
-      }
-
-      return card;
-    };
-
-    // Sort AI players by position (right to left from dealer's perspective = descending)
-    const sortedAIPlayers = [...aiPlayers].sort(
-      (a, b) => b.position - a.position,
-    );
-
-    addDebugLog("--- First card round (right to left) ---");
-    // Deal first card to everyone (right to left, dealer last)
-    sortedAIPlayers.forEach((ai) => {
-      const idx = aiPlayers.indexOf(ai);
-      const card = dealFromCurrentShoe();
-      addDebugLog(
-        `AI Player ${idx} (${ai.character.name}, Seat ${ai.position}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
-      );
-      dealtCards.push({ type: "ai", index: idx, card });
-    });
-    if (playerSeat !== null) {
-      const card = dealFromCurrentShoe();
-      addDebugLog(
-        `Player (Seat ${playerSeat}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
-      );
-      dealtCards.push({ type: "player", index: 0, card });
-    }
-    const dealerCard1 = dealFromCurrentShoe();
-    addDebugLog(
-      `Dealer card 1: ${dealerCard1.rank}${dealerCard1.suit} (value: ${dealerCard1.value}, count: ${dealerCard1.count}) [FACE UP] | Running count: ${currentRunningCount}`,
-    );
-    dealtCards.push({ type: "dealer", index: 0, card: dealerCard1 });
-
-    addDebugLog("--- Second card round (right to left) ---");
-    // Deal second card to everyone (right to left, dealer last)
-    sortedAIPlayers.forEach((ai) => {
-      const idx = aiPlayers.indexOf(ai);
-      const card = dealFromCurrentShoe();
-      addDebugLog(
-        `AI Player ${idx} (${ai.character.name}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
-      );
-      dealtCards.push({ type: "ai", index: idx, card });
-    });
-    if (playerSeat !== null) {
-      const card = dealFromCurrentShoe();
-      addDebugLog(
-        `Player: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
-      );
-      dealtCards.push({ type: "player", index: 0, card });
-    }
-    const dealerCard2 = dealFromCurrentShoe();
-    addDebugLog(
-      `Dealer card 2: ${dealerCard2.rank}${dealerCard2.suit} (value: ${dealerCard2.value}, count: ${dealerCard2.count}) [FACE DOWN] | Running count: ${currentRunningCount}`,
-    );
-    dealtCards.push({ type: "dealer", index: 0, card: dealerCard2 });
-
-    // Update state with final shoe state
-    setShoe(currentShoe);
-    setCardsDealt(currentCardsDealt);
-    setRunningCount(currentRunningCount);
-    setShoesDealt(currentShoesDealt);
-
-    // Now animate dealing the pre-dealt cards using managed timeouts
-    // Adjust delay based on dealer's dealing speed (higher speed = shorter delay)
-    const baseDelayBetweenCards = 2000; // Base delay in ms (SLOWED DOWN FOR TESTING - was 500)
-    const dealerSpeed = currentDealer?.dealSpeed ?? 1.0;
-    const delayBetweenCards = Math.round(baseDelayBetweenCards / dealerSpeed);
-
-    let delay = 0;
-    // Track card counts for each player/dealer to calculate proper positions
-    const cardCounts = {
-      ai: new Map<number, number>(), // AI player index -> card count
-      player: 0,
-      dealer: 0,
-    };
-
-    dealtCards.forEach(({ type, index, card }, animIdx) => {
-      registerTimeout(() => {
-        // Get current card index for this player/dealer
-        let cardIndex = 0;
-        if (type === "ai") {
-          cardIndex = cardCounts.ai.get(index) || 0;
-          cardCounts.ai.set(index, cardIndex + 1);
-        } else if (type === "player") {
-          cardIndex = cardCounts.player;
-          cardCounts.player++;
-        } else if (type === "dealer") {
-          cardIndex = cardCounts.dealer;
-          cardCounts.dealer++;
-        }
-
-        // Calculate positions for flying animation
-        const fromPosition = getCardPositionForAnimation("shoe");
-        const toPosition =
-          type === "ai"
-            ? getCardPositionForAnimation("ai", index, cardIndex)
-            : type === "player"
-              ? getCardPositionForAnimation("player", undefined, cardIndex)
-              : getCardPositionForAnimation("dealer", undefined, cardIndex);
-
-        // Create flying card
-        const flyingCardId = `flying-${animIdx}-${Date.now()}`;
-        setFlyingCards((prev) => [
-          ...prev,
-          {
-            id: flyingCardId,
-            card,
-            fromPosition,
-            toPosition,
-          },
-        ]);
-
-        // After animation mostly completes, add card to hand (reduced from 800ms to 700ms)
-        registerTimeout(() => {
-          // Remove flying card
-          setFlyingCards((prev) => prev.filter((fc) => fc.id !== flyingCardId));
-
-          // Add card to appropriate hand
-          if (type === "ai") {
-            setAIPlayers((prev) => {
-              const updated = [...prev];
-              // CRITICAL FIX: Don't mutate! Create new array instead of using .push()
-              updated[index] = {
-                ...updated[index],
-                hand: {
-                  ...updated[index].hand,
-                  cards: [...updated[index].hand.cards, card],
-                },
-              };
-              return updated;
-            });
-          } else if (type === "player") {
-            setPlayerHand((prev) => {
-              return { ...prev, cards: [...prev.cards, card] };
-            });
-          } else if (type === "dealer") {
-            setDealerHand((prev) => {
-              return { ...prev, cards: [...prev.cards, card] };
-            });
-          }
-        }, CARD_APPEAR_TIME); // Slightly before animation completes for smoother transition
-      }, delay);
-      delay += delayBetweenCards;
-    });
-
-    // Wait for all cards to finish flying and be added to hands
-    // delay = time when last card STARTS flying
-    // + 800ms for the last card's animation to complete
-    // + 500ms buffer for reactions
-    registerTimeout(
-      () => {
-        checkForInitialReactions();
-
-        // Check for blackjacks using the dealt cards
-        // Build hands from dealtCards to check for blackjacks
-        const aiHands: Map<number, GameCard[]> = new Map();
-        const playerCards: GameCard[] = [];
-
-        dealtCards.forEach(({ type, index, card }) => {
-          if (type === "ai") {
-            if (!aiHands.has(index)) {
-              aiHands.set(index, []);
-            }
-            aiHands.get(index)!.push(card);
-          } else if (type === "player") {
-            playerCards.push(card);
-          }
-        });
-
-        addDebugLog("--- Deal complete - checking for blackjacks ---");
-        // Check AI players for blackjack
-        aiHands.forEach((cards, idx) => {
-          const handValue = calculateHandValue(cards);
-          const hasBlackjack = isBlackjack(cards);
-          addDebugLog(
-            `AI Player ${idx}: Hand value = ${handValue}, Blackjack = ${hasBlackjack}`,
-          );
-          if (hasBlackjack) {
-            setPlayerActions((prev) => new Map(prev).set(idx, "BLACKJACK"));
-            setTimeout(() => {
-              setPlayerActions((prev) => {
-                const newMap = new Map(prev);
-                newMap.delete(idx);
-                return newMap;
-              });
-            }, CARD_ANIMATION_DURATION); // Reduced from 2000ms - show briefly
-          }
-        });
-
-        // Check player for blackjack
-        if (playerSeat !== null) {
-          const playerValue = calculateHandValue(playerCards);
-          const playerHasBlackjack = isBlackjack(playerCards);
-          addDebugLog(
-            `Player: Hand value = ${playerValue}, Blackjack = ${playerHasBlackjack}`,
-          );
-          if (playerHasBlackjack) {
-            setPlayerActions((prev) => new Map(prev).set(-1, "BLACKJACK"));
-            setTimeout(() => {
-              setPlayerActions((prev) => {
-                const newMap = new Map(prev);
-                newMap.delete(-1);
-                return newMap;
-              });
-            }, CARD_ANIMATION_DURATION); // Reduced from 2000ms - show briefly
-          }
-        }
-
-        addDebugLog(`Updated running count: ${currentRunningCount}`);
-        addDebugLog(`Shoe cards remaining: ${currentShoe.length}`);
-        addDebugLog("=== DEALING PHASE END ===");
-
-        // If player is not seated, skip PLAYER_TURN and go straight to AI_TURNS
-        if (playerSeat === null) {
-          addDebugLog("Player not seated, moving to AI_TURNS");
-          setPhase("AI_TURNS");
-        } else {
-          addDebugLog("Moving to PLAYER_TURN");
-          setPhase("PLAYER_TURN");
-        }
-      },
-      delay + CARD_ANIMATION_DURATION + 500,
-    );
-  }, [
+  // Game actions hook - provides startNewRound, dealInitialCards, hit, stand
+  const { startNewRound, dealInitialCards, hit, stand } = useGameActions({
+    phase,
+    playerSeat,
+    playerHand,
+    dealerHand,
     aiPlayers,
     shoe,
     cardsDealt,
     runningCount,
     shoesDealt,
-    gameSettings.numberOfDecks,
-    gameSettings.countingSystem,
-    registerTimeout,
-    playerSeat,
-    getCardPosition,
+    gameSettings,
     currentDealer,
+    setPhase,
+    setCurrentBet,
+    setDealerRevealed,
+    setPlayerHand,
+    setDealerHand,
+    setSpeechBubbles,
+    setAIPlayers,
+    setFlyingCards,
+    setPlayerActions,
+    setShoe,
+    setCardsDealt,
+    setRunningCount,
+    setShoesDealt,
+    dealCardFromShoe,
+    registerTimeout,
+    getCardPosition: (type: "ai" | "player" | "dealer" | "shoe", _aiPlayers?: AIPlayer[], _playerSeat?: number | null, index?: number, cardIndex?: number) => 
+      getCardPosition(type, aiPlayers, playerSeat, index, cardIndex),
     addDebugLog,
-  ]);
+  });
 
   // Betting actions hook
   const { handleConfirmBet, handleClearBet, handleBetChange } = useBettingActions({
@@ -870,85 +616,7 @@ export default function GamePage() {
     });
   }, [aiPlayers, addSpeechBubble]);
 
-  // Player actions
-  const hit = useCallback(() => {
-    addDebugLog("=== PLAYER ACTION: HIT ===");
-    addDebugLog(
-      `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-    );
-    addDebugLog(`Current hand value: ${calculateHandValue(playerHand.cards)}`);
 
-    const card = dealCardFromShoe();
-    addDebugLog(
-      `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${runningCount + card.count}`,
-    );
-
-    // Add flying card animation
-    const shoePosition = getCardPositionForAnimation("shoe");
-    const playerPosition = getCardPositionForAnimation(
-      "player",
-      undefined,
-      playerHand.cards.length,
-    );
-
-    const flyingCard: FlyingCardData = {
-      id: `hit-player-${Date.now()}`,
-      card,
-      fromPosition: shoePosition,
-      toPosition: playerPosition,
-    };
-
-    setFlyingCards((prev) => [...prev, flyingCard]);
-
-    // Add card to hand after animation completes
-    setTimeout(() => {
-      // Calculate new hand with the new card
-      const newCards = [...playerHand.cards, card];
-      const newHandValue = calculateHandValue(newCards);
-
-      addDebugLog(
-        `New hand: ${newCards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-      );
-      addDebugLog(`New hand value: ${newHandValue}`);
-
-      setPlayerHand((prev) => ({ ...prev, cards: newCards }));
-      setFlyingCards((prev) => prev.filter((fc) => fc.id !== flyingCard.id));
-
-      if (newHandValue > 21) {
-        addDebugLog("PLAYER BUSTED!");
-        // Show BUST indicator
-        setPlayerActions((prev) => new Map(prev).set(-1, "BUST"));
-
-        // Muck (clear) the cards after showing bust indicator
-        setTimeout(() => {
-          setPlayerHand((prev) => ({ ...prev, cards: [] }));
-          setPlayerActions((prev) => {
-            const newMap = new Map(prev);
-            newMap.delete(-1);
-            return newMap;
-          });
-          addDebugLog("Moving to AI_TURNS phase");
-          setPhase("AI_TURNS");
-        }, 1500); // Show BUST for 1.5s then muck cards
-      }
-    }, CARD_ANIMATION_DURATION); // Match FlyingCard animation duration
-  }, [
-    playerHand,
-    dealCardFromShoe,
-    getCardPosition,
-    addDebugLog,
-    runningCount,
-  ]);
-
-  const stand = useCallback(() => {
-    addDebugLog("=== PLAYER ACTION: STAND ===");
-    addDebugLog(
-      `Final hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-    );
-    addDebugLog(`Final hand value: ${calculateHandValue(playerHand.cards)}`);
-    addDebugLog("Moving to AI_TURNS phase");
-    setPhase("AI_TURNS");
-  }, [playerHand, addDebugLog]);
 
   // Basic strategy decision - returns true if should HIT, false if should STAND
   const shouldHitBasicStrategy = useCallback(
