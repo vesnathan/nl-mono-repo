@@ -21,14 +21,14 @@ export default function DealerSection({
   dealerRevealed,
   onDealerClick,
 }: DealerSectionProps) {
-  // Debug: Log dealer hand whenever it changes or during AI_TURNS
+  // Debug: Log dealer hand on EVERY render
   React.useEffect(() => {
-    if (phase === "AI_TURNS" || phase === "DEALER_TURN") {
-      console.log(`[DealerSection] Phase: ${phase}, Dealer cards count: ${dealerHand.cards.length}`);
-      console.log(`[DealerSection] Cards:`, dealerHand.cards.map((c, idx) => `${idx}: ${c.rank}${c.suit}`).join(", "));
-      console.log(`[DealerSection] Dealer revealed: ${dealerRevealed}`);
+    console.log(`[DealerSection RENDER] Phase: ${phase}, Dealer cards count: ${dealerHand.cards.length}`);
+    if (dealerHand.cards.length > 0) {
+      console.log(`[DealerSection RENDER] Cards:`, dealerHand.cards.map((c, idx) => `${idx}: ${c.rank}${c.suit}`).join(", "));
     }
-  }, [phase, dealerHand.cards, dealerRevealed]);
+    console.log(`[DealerSection RENDER] Dealer revealed: ${dealerRevealed}`);
+  }); // No dependencies = run on every render
 
   return (
     <div
