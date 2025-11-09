@@ -4,7 +4,6 @@ import { TABLE_POSITIONS } from "@/constants/tablePositions";
 import PlayingCard from "@/components/PlayingCard";
 import TurnIndicator from "@/components/TurnIndicator";
 import ActionBubble from "@/components/ActionBubble";
-import BettingCircle from "@/components/BettingCircle";
 import { getAIAvatarPath } from "@/data/aiCharacters";
 
 type PlayerAction = "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK";
@@ -243,17 +242,6 @@ export default function TableSeats({
                     >
                       {aiPlayer.character.name}
                     </div>
-
-                    {/* Chips */}
-                    <div className="text-yellow-300 text-xs font-semibold mt-1">
-                      ${aiPlayer.chips}
-                    </div>
-
-                    {/* Betting Circle */}
-                    <BettingCircle
-                      bet={aiPlayer.hand.bet}
-                      position={{ left: "50%", top: "100%" }}
-                    />
                   </div>
                 );
               })()}
