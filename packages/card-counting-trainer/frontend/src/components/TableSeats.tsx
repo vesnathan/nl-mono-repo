@@ -192,7 +192,7 @@ export default function TableSeats({
                       {/* Action Bubble */}
                       {playerActions.has(aiPlayerIndex) && (
                         <ActionBubble
-                          action={playerActions.get(aiPlayerIndex)!}
+                          action={playerActions.get(aiPlayerIndex)! as "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK"}
                         />
                       )}
 
@@ -311,7 +311,7 @@ export default function TableSeats({
 
                   {/* Action Bubble - shows player actions (HIT, STAND, BUST, BLACKJACK) */}
                   {playerActions.has(-1) && (
-                    <ActionBubble action={playerActions.get(-1)!} />
+                    <ActionBubble action={playerActions.get(-1)! as "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK"} />
                   )}
 
                   <div

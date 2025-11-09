@@ -59,7 +59,10 @@ import DebugLogModal from "@/components/DebugLogModal";
 import GameModals from "@/components/GameModals";
 import GameTable from "@/components/GameTable";
 import BlackjackGameUI from "@/components/BlackjackGameUI";
-import { CARD_APPEAR_TIME, CARD_ANIMATION_DURATION } from "@/constants/animations";
+import {
+  CARD_APPEAR_TIME,
+  CARD_ANIMATION_DURATION,
+} from "@/constants/animations";
 import {
   PlayerHand,
   AIPlayer,
@@ -89,6 +92,7 @@ import { useGameInteractions } from "@/hooks/useGameInteractions";
 import { useRoundEndPhase } from "@/hooks/useRoundEndPhase";
 import { useDealerTurnPhase } from "@/hooks/useDealerTurnPhase";
 import { useResolvingPhase } from "@/hooks/useResolvingPhase";
+import { useAITurnsPhase } from "@/hooks/useAITurnsPhase";
 import { shouldHitBasicStrategy } from "@/utils/aiStrategy";
 
 export default function GamePage() {
@@ -220,7 +224,12 @@ export default function GamePage() {
   );
 
   // Game interactions hook - provides conversation and speech bubble functions
-  const { triggerConversation, addSpeechBubble, checkForInitialReactions, showEndOfHandReactions } = useGameInteractions({
+  const {
+    triggerConversation,
+    addSpeechBubble,
+    checkForInitialReactions,
+    showEndOfHandReactions,
+  } = useGameInteractions({
     activeConversation,
     setActiveConversation,
     setSpeechBubbles,
@@ -259,48 +268,60 @@ export default function GamePage() {
     setShoesDealt,
     dealCardFromShoe,
     registerTimeout,
-    getCardPosition: (type: "ai" | "player" | "dealer" | "shoe", _aiPlayers?: AIPlayer[], _playerSeat?: number | null, index?: number, cardIndex?: number) => 
-      getCardPosition(type, aiPlayers, playerSeat, index, cardIndex),
+    getCardPosition: (
+      type: "ai" | "player" | "dealer" | "shoe",
+      _aiPlayers?: AIPlayer[],
+      _playerSeat?: number | null,
+      index?: number,
+      cardIndex?: number,
+    ) => getCardPosition(type, aiPlayers, playerSeat, index, cardIndex),
     addDebugLog,
   });
 
   // Betting actions hook
-  const { handleConfirmBet, handleClearBet, handleBetChange } = useBettingActions({
-    currentBet,
-    setCurrentBet,
-    minBet,
-    maxBet,
-    playerChips,
-    setPlayerChips,
-    phase,
-    playerSeat,
-    aiPlayers,
-    setPhase,
-    setDealerRevealed,
-    setPlayerHand,
-    setDealerHand,
-    setPreviousBet,
-    setSpeechBubbles,
-    setAIPlayers,
-    dealInitialCards,
-    addDebugLog,
-  });
+  const { handleConfirmBet, handleClearBet, handleBetChange } =
+    useBettingActions({
+      currentBet,
+      setCurrentBet,
+      minBet,
+      maxBet,
+      playerChips,
+      setPlayerChips,
+      phase,
+      playerSeat,
+      aiPlayers,
+      setPhase,
+      setDealerRevealed,
+      setPlayerHand,
+      setDealerHand,
+      setPreviousBet,
+      setSpeechBubbles,
+      setAIPlayers,
+      dealInitialCards,
+      addDebugLog,
+    });
 
   // Conversation handlers hook
-  const { handleConversationResponse, handleConversationIgnore } = useConversationHandlers({
-    activeConversation,
-    setActiveConversation,
-    setSuspicionLevel,
-    setPlayerSociability,
-    playerSeat,
-    addSpeechBubble,
-  });
+  const { handleConversationResponse, handleConversationIgnore } =
+    useConversationHandlers({
+      activeConversation,
+      setActiveConversation,
+      setSuspicionLevel,
+      setPlayerSociability,
+      playerSeat,
+      addSpeechBubble,
+    });
 
   // Suspicion decay hook
   useSuspicionDecay(suspicionLevel, setSuspicionLevel);
 
   // Dealer change hook
-  useDealerChange(shoesDealt, dealerChangeInterval, currentDealer, setCurrentDealer);
+  useDealerChange(
+    shoesDealt,
+    dealerChangeInterval,
+    currentDealer,
+    setCurrentDealer,
+  );
 
   // Game initialization hook
   useGameInitialization(setAIPlayers, setCurrentDealer, setInitialized);
@@ -311,7 +332,7 @@ export default function GamePage() {
     timedChallengeActive,
     setTimedChallengeActive,
     timeRemaining,
-    setTimeRemaining
+    setTimeRemaining,
   );
 
   // Conversation triggers hook
@@ -372,372 +393,29 @@ export default function GamePage() {
     prevPhaseRef.current = phase;
   }, [phase, addDebugLog]);
 
-  // AI turns - process one player at a time, allowing multiple hits
-  useEffect(() => {
-    if (phase !== "AI_TURNS") {
-      // Phase has changed away from AI_TURNS, do nothing
-      return;
-    }
-
-    if (activePlayerIndex !== null) {
-      // A player is currently active, wait for them to finish
-      return;
-    }
-
-    // Guard against re-entry while processing
-    if (aiTurnProcessingRef.current) {
-      addDebugLog("⚠️ AI turn already processing, skipping re-entry");
-      return;
-    }
-
-    aiTurnProcessingRef.current = true;
-    addDebugLog("🔒 AI turn processing locked");
-
-    if (phase === "AI_TURNS" && activePlayerIndex === null) {
-      // Create array of players with their indices, sorted by table position
-      // Higher position numbers are closer to dealer's left (first base)
-      // Playing order: dealer's left to right (highest position to lowest)
-      const playersByPosition = aiPlayers
-        .map((ai, idx) => ({ ai, idx, position: ai.position }))
-        .sort((a, b) => b.position - a.position); // Descending: highest position (first base) acts first
-
-      // Log the sorted order for debugging
-      addDebugLog(
-        `Turn order (sorted by position): ${playersByPosition.map((p) => `${p.ai.character.name} (idx:${p.idx}, seat:${p.position})`).join(", ")}`,
-      );
-      addDebugLog(
-        `Players finished: [${Array.from(playersFinished).join(", ")}]`,
-      );
-
-      // Find the next AI player who needs to act (in table order)
-      const nextPlayer = playersByPosition.find(({ ai, idx }) => {
-        // Skip if already finished
-        if (playersFinished.has(idx)) return false;
-
-        const handValue = calculateHandValue(ai.hand.cards);
-        const isBust = isBusted(ai.hand.cards);
-
-        // Skip if already busted - they should have been marked finished already
-        if (isBust) return false;
-
-        // Player needs to act if they're below 21
-        if (handValue < 21) return true;
-
-        // Player at 21 - they need to show STAND then be marked finished
-        if (handValue === 21) return true;
-
-        return false;
-      });
-
-      if (!nextPlayer) {
-        // All players finished, move to dealer turn
-        addDebugLog("=== ALL AI PLAYERS FINISHED ===");
-        addDebugLog(
-          `Players finished: ${Array.from(playersFinished).join(", ")}`,
-        );
-        addDebugLog("Moving to DEALER_TURN phase");
-        aiTurnProcessingRef.current = false; // Unlock before moving to next phase
-        addDebugLog("🔓 AI turn processing unlocked (all finished)");
-        registerTimeout(() => setPhase("DEALER_TURN"), 1000);
-        return;
-      }
-
-      // Process this player's action
-      const { ai, idx } = nextPlayer;
-
-      addDebugLog(
-        `=== AI PLAYER ${idx} TURN (${ai.character.name}, Seat ${ai.position}) ===`,
-      );
-      addDebugLog(
-        `Current hand: ${ai.hand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-      );
-
-      // Calculate hand value first to determine difficulty
-      const handValue = calculateHandValue(ai.hand.cards);
-      const isBust = isBusted(ai.hand.cards);
-
-      addDebugLog(`Hand value: ${handValue}, Busted: ${isBust}`);
-
-      // Calculate hand difficulty multiplier
-      let handDifficultyMultiplier = 1.0;
-      if (isBust || handValue >= 20) {
-        handDifficultyMultiplier = 0.5;
-      } else if (handValue >= 17) {
-        handDifficultyMultiplier = 0.8;
-      } else if (handValue >= 12 && handValue <= 16) {
-        handDifficultyMultiplier = 1.5;
-      } else {
-        handDifficultyMultiplier = 0.7;
-      }
-
-      // Calculate timing
-      const baseDecisionTime = 800; // Reduced from 1500 - faster thinking
-      // const baseActionDelay = 800; // TODO: Use for action delay timing
-      const baseActionDisplay = 600; // Reduced from 2000 - show action briefly
-      const baseTurnClear = 100; // Reduced from 500 - minimal delay between players
-
-      const { playSpeed } = ai.character;
-      const combinedSpeed = playSpeed / handDifficultyMultiplier;
-      const decisionTime = Math.round(baseDecisionTime / combinedSpeed);
-      // const actionDelay = Math.round(baseActionDelay / combinedSpeed); // TODO: Use for action timing
-      const actionDisplay = Math.round(baseActionDisplay / combinedSpeed);
-      const turnClear = Math.round(baseTurnClear / combinedSpeed);
-
-      // Set active player immediately
-      setActivePlayerIndex(idx);
-
-      // Decide: HIT or STAND using basic strategy with skill level
-      const dealerUpCard = dealerHand.cards[0]; // Dealer's face-up card
-      const basicStrategyDecision = shouldHitBasicStrategy(
-        ai.hand.cards,
-        dealerUpCard,
-      );
-
-      // Apply skill level: X% chance to follow basic strategy, (100-X)% chance to use simple "hit on < 17" rule
-      const followsBasicStrategy =
-        Math.random() * 100 < ai.character.skillLevel;
-      const shouldHit = followsBasicStrategy
-        ? basicStrategyDecision
-        : handValue < 17;
-
-      addDebugLog(`Dealer up card: ${dealerUpCard.rank}${dealerUpCard.suit}`);
-      addDebugLog(
-        `Basic strategy says: ${basicStrategyDecision ? "HIT" : "STAND"}`,
-      );
-      addDebugLog(
-        `Follows basic strategy: ${followsBasicStrategy}, Decision: ${shouldHit ? "HIT" : "STAND"}`,
-      );
-
-      if (shouldHit && !isBust) {
-        // 15% chance to show banter during turn
-        if (Math.random() < 0.15) {
-          const banterLines = AI_DIALOGUE_ADDONS.find(
-            (addon) => addon.id === ai.character.id,
-          )?.banterWithPlayer;
-
-          if (banterLines && banterLines.length > 0) {
-            const randomBanter = pick(banterLines);
-            registerTimeout(() => {
-              addSpeechBubble(
-                `ai-turn-banter-${idx}-${Date.now()}`,
-                randomBanter.text,
-                ai.position,
-              );
-            }, decisionTime / 2); // Show banter halfway through thinking
-          }
-        }
-
-        // Show HIT action after thinking
-        registerTimeout(() => {
-          setPlayerActions((prev) => new Map(prev).set(idx, "HIT"));
-        }, decisionTime);
-
-        // Deal card immediately after showing action with animation
-        registerTimeout(() => {
-          const card = dealCardFromShoe();
-          addDebugLog(
-            `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
-          );
-
-          // Add flying card animation
-          const shoePosition = getCardPositionForAnimation("shoe");
-          const aiPosition = getCardPositionForAnimation("ai", idx, ai.hand.cards.length);
-
-          const flyingCard: FlyingCardData = {
-            id: `hit-ai-${idx}-${Date.now()}`,
-            card,
-            fromPosition: shoePosition,
-            toPosition: aiPosition,
-          };
-
-          setFlyingCards((prev) => [...prev, flyingCard]);
-
-          // Add card to hand after animation completes
-          setTimeout(() => {
-            setAIPlayers((prev) => {
-              const updated = [...prev];
-              updated[idx] = {
-                ...updated[idx],
-                hand: {
-                  ...updated[idx].hand,
-                  cards: [...updated[idx].hand.cards, card],
-                },
-              };
-              return updated;
-            });
-            setFlyingCards((prev) =>
-              prev.filter((fc) => fc.id !== flyingCard.id),
-            );
-
-            // Check if player busted or reached 21+ after receiving card
-            const newHandValue = calculateHandValue([...ai.hand.cards, card]);
-            const busted = isBusted([...ai.hand.cards, card]);
-
-            addDebugLog(`New hand value: ${newHandValue}, Busted: ${busted}`);
-
-            if (busted) {
-              addDebugLog(`AI Player ${idx} BUSTED!`);
-              addDebugLog(`Marking AI Player ${idx} as FINISHED (busted)`);
-
-              // Mark player as finished FIRST, before any async operations
-              setPlayersFinished((prev) => new Set(prev).add(idx));
-
-              // Clear HIT action first
-              setPlayerActions((prev) => {
-                const newMap = new Map(prev);
-                newMap.delete(idx);
-                return newMap;
-              });
-
-              // Show BUST indicator after a brief delay
-              setTimeout(() => {
-                setPlayerActions((prev) => new Map(prev).set(idx, "BUST"));
-              }, 100);
-
-              // Muck (clear) the cards after showing bust indicator
-              setTimeout(() => {
-                setAIPlayers((prev) => {
-                  const updated = [...prev];
-                  updated[idx] = {
-                    ...updated[idx],
-                    hand: {
-                      ...updated[idx].hand,
-                      cards: [],
-                    },
-                  };
-                  return updated;
-                });
-                setPlayerActions((prev) => {
-                  const newMap = new Map(prev);
-                  newMap.delete(idx);
-                  return newMap;
-                });
-                // Move to next player immediately after mucking
-                aiTurnProcessingRef.current = false; // Unlock before next turn
-                addDebugLog("🔓 AI turn processing unlocked (bust)");
-                setActivePlayerIndex(null);
-              }, CARD_ANIMATION_DURATION); // Show BUST then muck cards and move on
-            } else if (newHandValue >= 21) {
-              addDebugLog(`AI Player ${idx} reached 21!`);
-              addDebugLog(`Marking AI Player ${idx} as FINISHED (21)`);
-
-              // Mark player as finished FIRST (21 but not bust)
-              setPlayersFinished((prev) => new Set(prev).add(idx));
-
-              // Player got 21 - clear HIT and show STAND
-              setPlayerActions((prev) => {
-                const newMap = new Map(prev);
-                newMap.delete(idx);
-                return newMap;
-              });
-
-              setTimeout(() => {
-                setPlayerActions((prev) => new Map(prev).set(idx, "STAND"));
-              }, 100);
-
-              // Clear STAND indicator after display and move to next player
-              setTimeout(() => {
-                setPlayerActions((prev) => {
-                  const newMap = new Map(prev);
-                  newMap.delete(idx);
-                  return newMap;
-                });
-                // Move to next player immediately
-                aiTurnProcessingRef.current = false; // Unlock before next turn
-                addDebugLog("🔓 AI turn processing unlocked (21)");
-                setActivePlayerIndex(null);
-              }, 600); // Show STAND for 0.6s then move on
-            }
-          }, CARD_ANIMATION_DURATION); // Match FlyingCard animation duration
-        }, decisionTime + 50); // Show action, then immediately deal card
-
-        // Clear HIT action after display (only if player didn't bust or get 21)
-        // This timeout will be overridden by the bust/21 logic above if needed
-        registerTimeout(
-          () => {
-            setPlayerActions((prev) => {
-              const newMap = new Map(prev);
-              // Only delete if it's still "HIT" (not "BUST" or "STAND" from hitting 21)
-              if (newMap.get(idx) === "HIT") {
-                newMap.delete(idx);
-              }
-              return newMap;
-            });
-          },
-          decisionTime + 50 + 800 + actionDisplay,
-        ); // thinking + action display + card animation
-
-        // Clear active player to trigger next action (with thinking time for the new hand)
-        // Need to wait for: decision + action show + card animation + action display + turn clear + NEW THINKING TIME
-        registerTimeout(
-          () => {
-            aiTurnProcessingRef.current = false; // Unlock before next turn
-            addDebugLog("🔓 AI turn processing unlocked (hit, continuing)");
-            setActivePlayerIndex(null);
-          },
-          decisionTime + 50 + 800 + actionDisplay + turnClear + decisionTime,
-        ); // Add another decision time for thinking about new hand
-      } else {
-        addDebugLog(`AI Player ${idx} decision: STAND`);
-        addDebugLog(`Marking AI Player ${idx} as FINISHED (stand)`);
-
-        // Mark player as finished FIRST
-        setPlayersFinished((prev) => new Set(prev).add(idx));
-
-        // 15% chance to show banter during turn
-        if (Math.random() < 0.15) {
-          const banterLines = AI_DIALOGUE_ADDONS.find(
-            (addon) => addon.id === ai.character.id,
-          )?.banterWithPlayer;
-
-          if (banterLines && banterLines.length > 0) {
-            const randomBanter = pick(banterLines);
-            registerTimeout(() => {
-              addSpeechBubble(
-                `ai-turn-banter-${idx}-${Date.now()}`,
-                randomBanter.text,
-                ai.position,
-              );
-            }, decisionTime / 2); // Show banter halfway through thinking
-          }
-        }
-
-        // Show STAND action after thinking
-        registerTimeout(() => {
-          setPlayerActions((prev) => new Map(prev).set(idx, "STAND"));
-        }, decisionTime);
-
-        // Clear action after display
-        registerTimeout(() => {
-          setPlayerActions((prev) => {
-            const newMap = new Map(prev);
-            newMap.delete(idx);
-            return newMap;
-          });
-        }, decisionTime + actionDisplay);
-
-        // Clear active to move to next player
-        registerTimeout(
-          () => {
-            aiTurnProcessingRef.current = false; // Unlock before next turn
-            addDebugLog("🔓 AI turn processing unlocked (stand)");
-            setActivePlayerIndex(null);
-          },
-          decisionTime + actionDisplay + turnClear,
-        );
-      }
-    }
-  }, [
+  // AI turns phase hook
+  useAITurnsPhase({
     phase,
     aiPlayers,
-    dealCardFromShoe,
-    registerTimeout,
+    dealerHand,
     activePlayerIndex,
     playersFinished,
-    dealerHand,
-    getCardPosition,
+    setActivePlayerIndex,
+    setPlayersFinished,
+    setPlayerActions,
+    setAIPlayers,
+    setFlyingCards,
+    setPhase,
+    dealCardFromShoe,
+    registerTimeout,
+    getCardPositionForAnimation: (
+      type: "shoe" | "ai",
+      aiIndex?: number,
+      cardIndex?: number,
+    ) => getCardPosition(type, aiPlayers, playerSeat, aiIndex, cardIndex),
+    addSpeechBubble,
     addDebugLog,
-  ]);
+  });
 
   // Next hand
   const nextHand = useCallback(() => {
@@ -778,8 +456,11 @@ export default function GamePage() {
     setPhase,
     dealCardFromShoe,
     registerTimeout,
-    getCardPositionForAnimation: (type: "shoe" | "dealer", aiIndex?: number, cardIndex?: number) =>
-      getCardPosition(type, aiPlayers, playerSeat, aiIndex, cardIndex),
+    getCardPositionForAnimation: (
+      type: "shoe" | "dealer",
+      aiIndex?: number,
+      cardIndex?: number,
+    ) => getCardPosition(type, aiPlayers, playerSeat, aiIndex, cardIndex),
     addSpeechBubble,
     addDebugLog,
   });

@@ -18,7 +18,7 @@ interface UseDealerTurnPhaseParams {
   setPhase: (phase: GamePhase) => void;
   dealCardFromShoe: () => Card;
   registerTimeout: (callback: () => void, delay: number) => void;
-  getCardPositionForAnimation: (type: "shoe" | "dealer", aiIndex?: number, cardIndex?: number) => { x: number; y: number };
+  getCardPositionForAnimation: (type: "shoe" | "dealer", aiIndex?: number, cardIndex?: number) => { left: string; top: string };
   addSpeechBubble: (id: string, message: string, position: number) => void;
   addDebugLog: (message: string) => void;
 }
