@@ -82,6 +82,8 @@ import { useSuspicionDecay } from "@/hooks/useSuspicionDecay";
 import { useDealerChange } from "@/hooks/useDealerChange";
 import { useGameInitialization } from "@/hooks/useGameInitialization";
 import { useTimedChallenge } from "@/hooks/useTimedChallenge";
+import { useConversationTriggers } from "@/hooks/useConversationTriggers";
+import { usePitBossMovement } from "@/hooks/usePitBossMovement";
 import {
   generateInitialReactions,
   generateEndOfHandReactions,
@@ -256,107 +258,6 @@ export default function GamePage() {
     },
     [registerTimeout, aiPlayers, addDebugLog],
   );
-
-  // Periodic conversation triggers (frequency based on player sociability)
-  useEffect(() => {
-    if (!initialized || playerSeat === null || activeConversation) return;
-
-    // Sociability affects conversation frequency:
-    // Low sociability (0-30): Less frequent, people leave you alone
-    // Medium sociability (31-69): Normal frequency
-    // High sociability (70+): More frequent, people chat with you more
-    const baseTriggerChance = 0.3;
-    const sociabilityMultiplier = playerSociability / 50; // 0 = 0%, 50 = 30%, 100 = 60%
-    const triggerChance = baseTriggerChance * sociabilityMultiplier;
-
-    // Interval also affected by sociability (lower sociability = longer intervals)
-    const baseInterval = 25000; // 25 seconds base
-    const intervalVariation = 10000; // +/- 10 seconds
-    const sociabilityIntervalMultiplier = Math.max(
-      0.5,
-      2 - playerSociability / 50,
-    ); // Low sociability = longer waits
-
-    const conversationInterval = setInterval(
-      () => {
-        const shouldTrigger = Math.random() < triggerChance;
-        if (!shouldTrigger) return;
-
-        // 60% chance it's from an AI player, 40% from dealer
-        if (Math.random() < 0.6 && aiPlayers.length > 0) {
-          // Pick random AI player
-          const randomAI =
-            aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
-          triggerConversation(
-            randomAI.character.id,
-            randomAI.character.name,
-            randomAI.position,
-          );
-        } else if (currentDealer) {
-          // Dealer asks a question (use dealer's position - center top)
-          const dealerPosition = 3; // Center position for visualization
-          triggerConversation("dealer", currentDealer.name, dealerPosition);
-        }
-      },
-      (baseInterval + Math.random() * intervalVariation) *
-        sociabilityIntervalMultiplier,
-    );
-
-    return () => clearInterval(conversationInterval);
-  }, [
-    initialized,
-    playerSeat,
-    activeConversation,
-    aiPlayers,
-    currentDealer,
-    triggerConversation,
-    playerSociability,
-  ]);
-
-  // AI-to-AI and AI-to-Dealer banter (background conversation)
-  useEffect(() => {
-    if (!initialized || phase === "BETTING") return;
-
-    const banterInterval = setInterval(
-      () => {
-        // 20% chance for background banter every 15-25 seconds
-        if (Math.random() < 0.2 && aiPlayers.length >= 2) {
-          const randomAI =
-            aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
-
-          // Get some small talk banter
-          const message = getDealerPlayerLine(
-            randomAI.character.id,
-            "smallTalk",
-          );
-
-          if (message) {
-            addSpeechBubble(
-              `ai-banter-${Date.now()}`,
-              message,
-              randomAI.position,
-            );
-          }
-        }
-      },
-      15000 + Math.random() * 10000,
-    ); // 15-25 seconds
-
-    return () => clearInterval(banterInterval);
-  }, [initialized, phase, aiPlayers, addSpeechBubble]);
-
-  // Pit boss randomly moves around the floor
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPitBossDistance((prev) => {
-        // Random movement: -8 to +12 (tends to move away slightly over time)
-        const movement = Math.random() * 20 - 8;
-        return Math.max(0, Math.min(100, prev + movement));
-      });
-    }, 8000); // Move every 8 seconds
-
-    return () => clearInterval(interval);
-  }, []);
 
   // Auto-start first hand after initialization
   useEffect(() => {
@@ -534,6 +435,22 @@ export default function GamePage() {
     timeRemaining,
     setTimeRemaining
   );
+
+  // Conversation triggers hook
+  useConversationTriggers({
+    initialized,
+    playerSeat,
+    activeConversation,
+    aiPlayers,
+    currentDealer,
+    playerSociability,
+    phase,
+    triggerConversation,
+    addSpeechBubble,
+  });
+
+  // Pit boss movement hook
+  usePitBossMovement(setPitBossDistance);
 
   // Log betting interface visibility conditions
   useEffect(() => {
