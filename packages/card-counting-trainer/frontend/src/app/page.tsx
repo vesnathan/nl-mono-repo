@@ -63,8 +63,20 @@ import {
 } from "@/types/gameState";
 import { getCardPosition } from "@/utils/cardPositions";
 import { calculateStreakPoints } from "@/utils/scoreCalculation";
+import { useGameTimeouts } from "@/hooks/useGameTimeouts";
+import { useDebugLogging } from "@/hooks/useDebugLogging";
 
 export default function GamePage() {
+  // Custom hooks
+  const { registerTimeout, clearAllTimeouts } = useGameTimeouts();
+  const {
+    debugLogs,
+    showDebugLog,
+    setShowDebugLog,
+    addDebugLog,
+    clearDebugLogs,
+  } = useDebugLogging();
+
   // Game settings
   const [gameSettings, setGameSettings] = useState<GameSettings>(
     DEFAULT_GAME_SETTINGS,
@@ -167,59 +179,6 @@ export default function GamePage() {
 
   // Track if dealer turn is currently being processed (to prevent duplicate dealer actions)
   const dealerTurnProcessingRef = useRef<boolean>(false);
-
-  // Timeout management - store all active timeouts for cleanup
-  const timeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
-
-  // Debug logging state (for testing)
-  const [debugLogs, setDebugLogs] = useState<string[]>([]);
-  const [showDebugLog, setShowDebugLog] = useState(false);
-
-  // Utility to register and auto-cleanup timeouts
-  const registerTimeout = useCallback((callback: () => void, delay: number) => {
-    const timeout = setTimeout(() => {
-      callback();
-      timeoutsRef.current.delete(timeout);
-    }, delay);
-    timeoutsRef.current.add(timeout);
-    return timeout;
-  }, []);
-
-  // Cleanup all active timeouts
-  const clearAllTimeouts = useCallback(() => {
-    timeoutsRef.current.forEach(clearTimeout);
-    timeoutsRef.current.clear();
-  }, []);
-
-  // Debug logging helper
-  const addDebugLog = useCallback((message: string) => {
-    const timestamp = new Date().toISOString().split("T")[1].split(".")[0];
-    const logEntry = `[${timestamp}] ${message}`;
-    // eslint-disable-next-line no-console
-    console.log(logEntry);
-    setDebugLogs((prev) => [...prev, logEntry]);
-  }, []);
-
-  // Clear debug logs and continue to next hand
-  const clearDebugLogs = useCallback(() => {
-    addDebugLog("=== LOG CLEARED - CONTINUING TO NEXT HAND ===");
-
-    // Clear the logs after a brief moment so the final message is visible
-    setTimeout(() => {
-      // eslint-disable-next-line no-console
-      console.clear();
-      setDebugLogs([]);
-      setShowDebugLog(false);
-    }, 100);
-
-    // The ROUND_END useEffect will now trigger and continue to next hand
-    // since debugLogs.length will become 0
-  }, [addDebugLog]);
-
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => clearAllTimeouts();
-  }, [clearAllTimeouts]);
 
   // Timed challenge countdown timer
   useEffect(() => {
