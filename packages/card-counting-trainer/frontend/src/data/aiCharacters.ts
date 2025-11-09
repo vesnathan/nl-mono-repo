@@ -408,6 +408,29 @@ export function assignCharactersToPositions(positions: number[]): Map<number, AI
   return assignments;
 }
 
+// Helper to get AI character avatar path
+export function getAIAvatarPath(character: AICharacter): string {
+  // Map character names to their actual avatar filenames
+  const nameMap: Record<string, string> = {
+    "Danny Martinez": "Danny-Martinez",
+    "Claire Thompson": "Claire-Thompson",
+    "Nancy Park": "Nancy-Park",
+    "Larry 'Lucky' Goldman": "Larry-Goldman",
+    "Kyle 'Big K' Morrison": "Kyle-Morrison",
+    "Susan Chen": "Susan-Chen",
+    "Carlos Rodriguez": "Carlos-Rodriguez",
+    "Ursula Kowalski": "Ursula-Kowalski",
+  };
+
+  const filename = nameMap[character.name];
+  if (filename) {
+    return `/avatars/${filename}.png`;
+  }
+
+  // Fallback: use name with spaces replaced by hyphens and quotes removed
+  return `/avatars/${character.name.replace(/\s+/g, "-").replace(/['"]/g, "")}.png`;
+}
+
 // Helper function to get a character's reaction based on outcome
 export function getCharacterReaction(
   character: AICharacter,

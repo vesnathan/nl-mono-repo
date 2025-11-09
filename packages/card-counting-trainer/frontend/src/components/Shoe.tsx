@@ -9,9 +9,9 @@ const Shoe = ({ numDecks, cardsDealt, dealerCutCard }: ShoeProps): JSX.Element =
     <div
       style={{
         position: "absolute",
-        width: "8%",
+        width: "6%",
         height: "25%",
-        paddingBottom: "8%",
+        paddingBottom: "6%",
         right: "7%",
         top: "20px",
         transform: "rotate(90deg)",
@@ -58,11 +58,13 @@ const Shoe = ({ numDecks, cardsDealt, dealerCutCard }: ShoeProps): JSX.Element =
               zIndex: 10000,
             }}
           />
-          {/* Remaining cards */}
+          {/* Remaining cards - striped background matching card height */}
           <div
             style={{
               width: "87%",
               backgroundImage: "url(/assets/images/cardSide.png)",
+              backgroundSize: "cover",
+              backgroundRepeat: "repeat-y",
               position: "absolute",
               bottom: "0%",
               left: "6.5%",
@@ -71,30 +73,30 @@ const Shoe = ({ numDecks, cardsDealt, dealerCutCard }: ShoeProps): JSX.Element =
           />
         </div>
 
-        {/* Card backs showing at the opening */}
+        {/* Card backs showing at the opening - maintaining proper card aspect ratio */}
         <div
           style={{
-            width: "60%",
+            width: "52%",
             height: "50%",
             backgroundImage: "url(/assets/images/back.webp)",
             backgroundSize: "100% 100%",
             transform: "rotate(90deg)",
             position: "absolute",
             top: "92%",
-            left: "20%",
+            left: "24%",
             zIndex: 999,
           }}
         />
         <div
           style={{
-            width: "60%",
+            width: "52%",
             height: "50%",
             backgroundImage: "url(/assets/images/back.webp)",
             backgroundSize: "100% 100%",
             transform: "rotate(90deg)",
             position: "absolute",
             top: "82%",
-            left: "20%",
+            left: "24%",
             zIndex: 998,
           }}
         />

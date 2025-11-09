@@ -21,7 +21,12 @@ export default function SuspicionMeter({
 
   const actualSuspicionLevel = level || suspicionLevel || 0;
 
-  console.log('🔍 SuspicionMeter rendering:', { actualSuspicionLevel, dealerName, dealerDetectionSkill, onYourSide });
+  console.log("🔍 SuspicionMeter rendering:", {
+    actualSuspicionLevel,
+    dealerName,
+    dealerDetectionSkill,
+    onYourSide,
+  });
 
   // Trigger pulse when suspicion increases significantly
   useEffect(() => {
@@ -71,14 +76,14 @@ export default function SuspicionMeter({
     <div
       style={{
         position: "fixed",
-        top: "50px",
+        top: "100px",
         left: "20px",
         width: "220px",
         backgroundColor: "rgba(0, 0, 0, 0.95)",
         border: `3px solid ${color}`,
         borderRadius: "12px",
         padding: "16px",
-        zIndex: 9999,
+        zIndex: 50,
         boxShadow: pulseAnimation
           ? `0 0 30px ${color}`
           : `0 4px 12px rgba(0, 0, 0, 0.8)`,

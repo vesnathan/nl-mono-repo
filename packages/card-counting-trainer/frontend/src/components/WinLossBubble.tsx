@@ -9,7 +9,12 @@ interface WinLossBubbleProps {
   onComplete?: () => void;
 }
 
-export default function WinLossBubble({ result, message, position, onComplete }: WinLossBubbleProps) {
+export default function WinLossBubble({
+  result,
+  message,
+  position,
+  onComplete,
+}: WinLossBubbleProps) {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {

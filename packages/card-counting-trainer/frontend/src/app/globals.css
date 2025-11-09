@@ -3,13 +3,13 @@
 @import "tailwindcss/utilities";
 
 :root {
-  --background: #0C5F38; /* Casino green */
+  --background: #6b0000; /* Casino red */
   --foreground: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #6b0000;
     --foreground: #ededed;
   }
 }
@@ -18,6 +18,24 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Red felt table with card pattern background */
+body::before {
+  content: ' ';
+  display: block;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  background-image: url(/tableBG.webp);
+  background-repeat: repeat;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .nextui-modal-container {

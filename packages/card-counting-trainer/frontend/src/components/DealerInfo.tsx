@@ -6,11 +6,12 @@ import { useState, useEffect } from "react";
 interface DealerInfoProps {
   dealer: DealerCharacter;
   onClose?: () => void;
+  openAsModal?: boolean; // If true, opens directly as modal instead of badge
 }
 
-export default function DealerInfo({ dealer, onClose }: DealerInfoProps) {
+export default function DealerInfo({ dealer, onClose, openAsModal = false }: DealerInfoProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(openAsModal);
 
   // Fade in animation
   useEffect(() => {
@@ -243,8 +244,8 @@ export default function DealerInfo({ dealer, onClose }: DealerInfoProps) {
               {dealer.dealSpeed < 1
                 ? "Slow"
                 : dealer.dealSpeed > 1.2
-                ? "Fast"
-                : "Normal"}
+                  ? "Fast"
+                  : "Normal"}
             </div>
           </div>
 
@@ -302,16 +303,16 @@ export default function DealerInfo({ dealer, onClose }: DealerInfoProps) {
                   dealer.detectionSkill < 30
                     ? "#4CAF50"
                     : dealer.detectionSkill < 70
-                    ? "#FFC107"
-                    : "#F44336",
+                      ? "#FFC107"
+                      : "#F44336",
                 fontWeight: "bold",
               }}
             >
               {dealer.detectionSkill < 30
                 ? "Low"
                 : dealer.detectionSkill < 70
-                ? "Moderate"
-                : "High"}
+                  ? "Moderate"
+                  : "High"}
             </div>
           </div>
         </div>

@@ -80,6 +80,27 @@ export const DEALER_CHARACTERS: DealerCharacter[] = [
   },
 ];
 
+// Helper to get dealer avatar filename
+export function getDealerAvatarPath(dealer: DealerCharacter): string {
+  // Map dealer names to their actual avatar filenames
+  const nameMap: Record<string, string> = {
+    "Maria Santos": "Maria-Santos",
+    "Jennifer 'Jenny' Park": "Jenny-Park",
+    "Harold Morrison": "Harold-Morrison",
+    "Marcus Thompson": "Marcus-Thompson",
+    "Frank O'Brien": "Frank-OBrien",
+    "Lisa Chen": "Lisa-Chen",
+  };
+
+  const filename = nameMap[dealer.name];
+  if (filename) {
+    return `/avatars/${filename}.png`;
+  }
+
+  // Fallback: use name with spaces replaced by hyphens
+  return `/avatars/${dealer.name.replace(/\s+/g, "-")}.png`;
+}
+
 // Helper to get a random dealer
 export function getRandomDealer(excludeIds: string[] = []): DealerCharacter {
   const availableDealers = DEALER_CHARACTERS.filter(

@@ -79,7 +79,13 @@ export default function FlyingCard({
             padding: "4px",
           }}
         >
-          <div style={{ fontSize: "20px", fontWeight: "bold", color: getSuitColor() }}>
+          <div
+            style={{
+              fontSize: "20px",
+              fontWeight: "bold",
+              color: getSuitColor(),
+            }}
+          >
             {rank}
           </div>
           <div style={{ fontSize: "24px", color: getSuitColor() }}>

@@ -29,7 +29,21 @@ export function getCardValue(rank: Rank): number {
  */
 export function createDeck(): Card[] {
   const suits: Suit[] = ["H", "D", "C", "S"];
-  const ranks: Rank[] = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+  const ranks: Rank[] = [
+    "A",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "J",
+    "Q",
+    "K",
+  ];
   const deck: Card[] = [];
 
   for (const suit of suits) {
@@ -62,17 +76,13 @@ export function createShoe(numDecks: number): Card[] {
 
 /**
  * Fisher-Yates shuffle algorithm
- * Cryptographically secure shuffle for fair card dealing
  * @param cards Array of cards to shuffle (mutates in place)
  */
 export function shuffleCards(cards: Card[]): Card[] {
   const shuffled = [...cards]; // Create a copy to avoid mutation
 
   for (let i = shuffled.length - 1; i > 0; i--) {
-    // Use crypto.getRandomValues for better randomness than Math.random()
-    const randomBytes = new Uint32Array(1);
-    crypto.getRandomValues(randomBytes);
-    const j = randomBytes[0] % (i + 1);
+    const j = Math.floor(Math.random() * (i + 1));
 
     // Swap cards[i] with cards[j]
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -96,7 +106,10 @@ export function createAndShuffleShoe(numDecks: number): Card[] {
  * @param penetration Percentage of cards to deal before shuffle (40-90)
  * @returns Number of cards from the end where cut card is placed
  */
-export function calculateCutCardPosition(numDecks: number, penetration: number): number {
+export function calculateCutCardPosition(
+  numDecks: number,
+  penetration: number,
+): number {
   const totalCards = numDecks * 52;
   const cardsToDeal = Math.floor(totalCards * (penetration / 100));
   return totalCards - cardsToDeal;
@@ -108,7 +121,10 @@ export function calculateCutCardPosition(numDecks: number, penetration: number):
  * @param cardsDealt Number of cards already dealt
  * @returns Number of decks remaining (for true count calculation)
  */
-export function calculateDecksRemaining(totalCards: number, cardsDealt: number): number {
+export function calculateDecksRemaining(
+  totalCards: number,
+  cardsDealt: number,
+): number {
   const cardsRemaining = totalCards - cardsDealt;
   return Math.max(0.5, cardsRemaining / 52); // Minimum 0.5 decks for true count calculation
 }
@@ -120,6 +136,9 @@ export function calculateDecksRemaining(totalCards: number, cardsDealt: number):
  * @param decksRemaining Number of decks remaining
  * @returns True count (rounded down)
  */
-export function calculateTrueCount(runningCount: number, decksRemaining: number): number {
+export function calculateTrueCount(
+  runningCount: number,
+  decksRemaining: number,
+): number {
   return Math.floor(runningCount / decksRemaining);
 }
