@@ -338,6 +338,36 @@ export default function GamePage() {
     }
   }, [initialized, aiPlayers.length, handNumber, phase]);
 
+  // Auto-start subsequent hands (handNumber > 0)
+  useEffect(() => {
+    if (
+      initialized &&
+      aiPlayers.length > 0 &&
+      handNumber > 0 &&
+      phase === "BETTING"
+    ) {
+      const timer = setTimeout(() => {
+        setPhase("DEALING");
+        setDealerRevealed(false);
+        setPlayerHand({ cards: [], bet: currentBet });
+        setDealerHand({ cards: [], bet: 0 });
+        setPlayerChips((prev) => prev - currentBet);
+
+        // Reset AI hands with random bets (keep same players, just clear hands and set new bets)
+        const updatedAI = aiPlayers.map((ai) => ({
+          ...ai,
+          hand: { cards: [], bet: Math.floor(Math.random() * 50) + 25 },
+        }));
+        setAIPlayers(updatedAI);
+
+        // Deal initial cards
+        setTimeout(() => dealInitialCards(), 500);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [initialized, aiPlayers.length, handNumber, phase, currentBet]);
+
   // Start new round
   const startNewRound = useCallback(() => {
     setPhase("DEALING");
