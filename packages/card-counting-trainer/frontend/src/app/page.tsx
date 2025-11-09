@@ -863,9 +863,18 @@ export default function GamePage() {
             >
               {dealerHand.cards.length > 0 && (
                 <>
-                  <div className="flex justify-center gap-2 mb-1">
+                  <div style={{ position: "relative", width: "370px", height: "98px", marginBottom: "4px" }}>
                     {dealerHand.cards.map((card, idx) => (
-                      <div key={idx} style={{ width: "70px", height: "98px" }}>
+                      <div
+                        key={idx}
+                        style={{
+                          position: "absolute",
+                          left: `${idx * 74}px`, // 70px card + 4px gap
+                          top: 0,
+                          width: "70px",
+                          height: "98px"
+                        }}
+                      >
                         <PlayingCard
                           card={card}
                           faceDown={!dealerRevealed && idx === 1}
@@ -994,7 +1003,7 @@ export default function GamePage() {
                         alignItems: "center",
                       }}
                     >
-                      {/* Cards positioned absolutely above - in rows of 3 */}
+                      {/* Cards positioned absolutely above - fixed positions */}
                       {aiPlayer.hand.cards.length > 0 && (
                         <div
                           style={{
@@ -1003,36 +1012,32 @@ export default function GamePage() {
                             left: "50%",
                             transform: "translateX(-50%)",
                             marginBottom: "8px",
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            gap: "4px",
+                            width: "230px", // 3 cards * 70px + 2 gaps * 4px
+                            height: "210px", // Reserve space for 2 rows
                           }}
                         >
-                          {/* Split cards into rows of 3 */}
-                          {Array.from({
-                            length: Math.ceil(aiPlayer.hand.cards.length / 3),
-                          }).map((_, rowIdx) => (
-                            <div
-                              key={rowIdx}
-                              style={{
-                                display: "flex",
-                                gap: "4px",
-                                justifyContent: "center",
-                              }}
-                            >
-                              {aiPlayer.hand.cards
-                                .slice(rowIdx * 3, rowIdx * 3 + 3)
-                                .map((card, cardIdx) => (
-                                  <div
-                                    key={rowIdx * 3 + cardIdx}
-                                    style={{ width: "70px", height: "98px" }}
-                                  >
-                                    <PlayingCard card={card} />
-                                  </div>
-                                ))}
-                            </div>
-                          ))}
+                          {/* Render each card in a fixed position */}
+                          {aiPlayer.hand.cards.map((card, cardIdx) => {
+                            // Calculate row and column for this card (3 cards per row)
+                            const row = Math.floor(cardIdx / 3);
+                            const col = cardIdx % 3;
+                            // Fixed positions: left = col * (70px + 4px gap)
+                            //                  top = row * (98px + 4px gap)
+                            return (
+                              <div
+                                key={cardIdx}
+                                style={{
+                                  position: "absolute",
+                                  left: `${col * 74}px`,
+                                  top: `${row * 102}px`,
+                                  width: "70px",
+                                  height: "98px",
+                                }}
+                              >
+                                <PlayingCard card={card} />
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                       {/* Avatar */}
