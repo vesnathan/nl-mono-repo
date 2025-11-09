@@ -109,7 +109,11 @@ export function useDealerTurnPhase({
       registerTimeout(() => {
         // Dealer plays according to rules - deal one card at a time with delays
         const dealNextCard = () => {
-          // Read current hand value synchronously
+          // Guard against re-entry
+          if (dealingCardRef.current) {
+            return;
+          }
+
           setDealerHand((currentHand) => {
             const handValue = calculateHandValue(currentHand.cards);
 
@@ -139,10 +143,6 @@ export function useDealerTurnPhase({
 
             // Check if dealer should hit and hasn't busted
             if (shouldHit() && !isBusted(currentHand.cards)) {
-              // Guard against dealing multiple cards (React may call updater multiple times)
-              if (dealingCardRef.current) {
-                return currentHand; // Already dealing, don't deal again
-              }
               dealingCardRef.current = true;
 
               const card = dealCardFromShoe();
@@ -190,12 +190,12 @@ export function useDealerTurnPhase({
             if (!dealerFinishedRef.current) {
               dealerFinishedRef.current = true;
 
-              const finalValue = calculateHandValue(prevHand.cards);
-              const isBust = isBusted(prevHand.cards);
+              const finalValue = calculateHandValue(currentHand.cards);
+              const isBust = isBusted(currentHand.cards);
 
               addDebugLog(`=== DEALER FINAL HAND ===`);
               addDebugLog(
-                `Dealer cards: ${prevHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+                `Dealer cards: ${currentHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
               );
               addDebugLog(`Dealer hand value: ${finalValue}`);
               addDebugLog(`Dealer busted: ${isBust}`);
