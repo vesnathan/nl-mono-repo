@@ -55,6 +55,8 @@ import TurnIndicator from "@/components/TurnIndicator";
 import ConversationPrompt from "@/components/ConversationPrompt";
 import LeaderboardModal from "@/components/LeaderboardModal";
 import GameSettingsModal from "@/components/GameSettingsModal";
+import BasicStrategyCard from "@/components/BasicStrategyCard";
+import BettingInterface from "@/components/BettingInterface";
 
 interface PlayerHand {
   cards: GameCard[];
@@ -74,6 +76,12 @@ interface SpeechBubble {
   message: string;
   position: { left: string; top: string };
   id: string;
+}
+
+interface WinLossBubbleData {
+  id: string;
+  result: "win" | "lose" | "push" | "blackjack";
+  position: { left: string; top: string };
 }
 
 interface ActiveConversation {
@@ -125,8 +133,10 @@ export default function GamePage() {
     cards: [],
     bet: 0,
   });
-  const [currentBet, setCurrentBet] = useState(10);
+  const [currentBet, setCurrentBet] = useState(0); // Temporary bet being placed
   const [previousBet, setPreviousBet] = useState(10); // Track previous bet for bet spread detection
+  const [minBet] = useState(5);
+  const [maxBet] = useState(500);
 
   // Scoring and statistics state
   const [currentScore, setCurrentScore] = useState(0);
@@ -154,18 +164,20 @@ export default function GamePage() {
   const [suspicionLevel, setSuspicionLevel] = useState(0);
   const [pitBossDistance, setPitBossDistance] = useState(30); // 0-100, higher = closer (more dangerous), start farther away
   const [speechBubbles, setSpeechBubbles] = useState<SpeechBubble[]>([]);
+  const [winLossBubbles, setWinLossBubbles] = useState<WinLossBubbleData[]>([]);
   const [activeConversation, setActiveConversation] = useState<ActiveConversation | null>(null);
   const [playerSociability, setPlayerSociability] = useState(50); // 0-100: how friendly/responsive player has been
   const [handNumber, setHandNumber] = useState(0);
   const [showDealerInfo, setShowDealerInfo] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showStrategyCard, setShowStrategyCard] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [playerSeat, setPlayerSeat] = useState<number | null>(null); // null means not seated
 
   // Action bubbles and turn tracking
   const [activePlayerIndex, setActivePlayerIndex] = useState<number | null>(null); // -1 = player, 0+ = AI index
-  const [playerActions, setPlayerActions] = useState<Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT">>(new Map());
+  const [playerActions, setPlayerActions] = useState<Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK">>(new Map());
   const [playersFinished, setPlayersFinished] = useState<Set<number>>(new Set()); // Track which AI players have finished
 
   // Flying card animations
@@ -181,8 +193,18 @@ export default function GamePage() {
   // Track previous hand states for in-hand reactions
   const prevAIHandsRef = useRef<Map<string, number>>(new Map());
 
+  // Track previous phase to detect transitions into AI_TURNS
+  const prevPhaseRef = useRef<GamePhase>("BETTING");
+
+  // Track if dealer has finished dealing (to prevent duplicate final hand announcements)
+  const dealerFinishedRef = useRef<boolean>(false);
+
   // Timeout management - store all active timeouts for cleanup
   const timeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
+
+  // Debug logging state (for testing)
+  const [debugLogs, setDebugLogs] = useState<string[]>([]);
+  const [showDebugLog, setShowDebugLog] = useState(false);
 
   // Utility to register and auto-cleanup timeouts
   const registerTimeout = useCallback((callback: () => void, delay: number) => {
@@ -199,6 +221,29 @@ export default function GamePage() {
     timeoutsRef.current.forEach(clearTimeout);
     timeoutsRef.current.clear();
   }, []);
+
+  // Debug logging helper
+  const addDebugLog = useCallback((message: string) => {
+    const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+    const logEntry = `[${timestamp}] ${message}`;
+    console.log(logEntry);
+    setDebugLogs(prev => [...prev, logEntry]);
+  }, []);
+
+  // Clear debug logs and continue to next hand
+  const clearDebugLogs = useCallback(() => {
+    addDebugLog("=== LOG CLEARED - CONTINUING TO NEXT HAND ===");
+
+    // Clear the logs after a brief moment so the final message is visible
+    setTimeout(() => {
+      console.clear();
+      setDebugLogs([]);
+      setShowDebugLog(false);
+    }, 100);
+
+    // The ROUND_END useEffect will now trigger and continue to next hand
+    // since debugLogs.length will become 0
+  }, [addDebugLog]);
 
   // Cleanup timeouts on unmount
   useEffect(() => {
@@ -397,6 +442,15 @@ export default function GamePage() {
 
   const addSpeechBubble = useCallback(
     (playerId: string, message: string, position: number) => {
+      // Find the character name and hand for logging
+      const player = aiPlayers.find(p => p.character.id === playerId);
+      const characterName = player?.character?.name || playerId;
+      const hand = player?.hand?.cards || [];
+      const handStr = hand.map(c => `${c.rank}${c.suit}`).join(', ');
+      const handValue = hand.length > 0 ? calculateHandValue(hand) : 0;
+
+      addDebugLog(`💬 ${characterName} [Hand: ${handStr} (${handValue})]: "${message}"`);
+
       // Use same positions as player avatars on the table
       const tablePositions = [
         [5, 55],   // Seat 0 - Far left
@@ -422,9 +476,9 @@ export default function GamePage() {
 
       registerTimeout(() => {
         setSpeechBubbles((prev) => prev.filter((b) => b.id !== bubble.id));
-      }, 4000); // Doubled from 2000ms - speech bubbles stay visible longer
+      }, 12000); // Increased to 12 seconds - speech bubbles stay visible longer
     },
-    [registerTimeout],
+    [registerTimeout, aiPlayers, addDebugLog],
   );
 
   // Periodic conversation triggers (frequency based on player sociability)
@@ -509,9 +563,17 @@ export default function GamePage() {
       const timer = setTimeout(() => {
         setPhase("DEALING");
         setDealerRevealed(false);
-        setPlayerHand({ cards: [], bet: currentBet });
+
+        // Player only gets cards if seated and has placed a bet
+        const playerBet = playerSeat !== null && currentBet > 0 ? currentBet : 0;
+        setPlayerHand({ cards: [], bet: playerBet });
         setDealerHand({ cards: [], bet: 0 });
-        setPlayerChips((prev) => prev - currentBet);
+
+        // Only deduct chips if player is actually playing
+        if (playerBet > 0) {
+          setPlayerChips((prev) => prev - playerBet);
+        }
+
         setSpeechBubbles([]); // Clear any lingering speech bubbles
 
         // Reset AI hands with random bets
@@ -527,7 +589,7 @@ export default function GamePage() {
 
       return () => clearTimeout(timer);
     }
-  }, [initialized, aiPlayers.length, handNumber, phase]);
+  }, [initialized, aiPlayers.length, handNumber, phase, playerSeat, currentBet]);
 
   // Auto-start subsequent hands (handNumber > 0)
   useEffect(() => {
@@ -540,9 +602,16 @@ export default function GamePage() {
       const timer = setTimeout(() => {
         setPhase("DEALING");
         setDealerRevealed(false);
-        setPlayerHand({ cards: [], bet: currentBet });
+
+        // Player only gets cards if seated and has placed a bet
+        const playerBet = playerSeat !== null && currentBet > 0 ? currentBet : 0;
+        setPlayerHand({ cards: [], bet: playerBet });
         setDealerHand({ cards: [], bet: 0 });
-        setPlayerChips((prev) => prev - currentBet);
+
+        // Only deduct chips if player is actually playing
+        if (playerBet > 0) {
+          setPlayerChips((prev) => prev - playerBet);
+        }
 
         // Reset AI hands with random bets (keep same players, just clear hands and set new bets)
         const updatedAI = aiPlayers.map((ai) => ({
@@ -557,29 +626,32 @@ export default function GamePage() {
 
       return () => clearTimeout(timer);
     }
-  }, [initialized, aiPlayers.length, handNumber, phase, currentBet]);
+  }, [initialized, aiPlayers.length, handNumber, phase, playerSeat, currentBet]);
 
-  // Start new round
+  // Start new round - transition to BETTING phase
   const startNewRound = useCallback(() => {
-    setPhase("DEALING");
+    setPhase("BETTING");
+    setCurrentBet(0); // Reset bet for new round
     setDealerRevealed(false);
-    setPlayerHand({ cards: [], bet: currentBet });
+    setPlayerHand({ cards: [], bet: 0 });
     setDealerHand({ cards: [], bet: 0 });
-    setPlayerChips((prev) => prev - currentBet);
     setSpeechBubbles([]); // Clear any lingering speech bubbles
 
-    // Reset AI hands with random bets
+    // Reset AI hands (they'll bet when player confirms)
     const updatedAI = aiPlayers.map((ai) => ({
       ...ai,
-      hand: { cards: [], bet: Math.floor(Math.random() * 50) + 25 },
+      hand: { cards: [], bet: 0 },
     }));
     setAIPlayers(updatedAI);
-
-    // Deal initial cards
-    setTimeout(() => dealInitialCards(), 500);
-  }, [currentBet, aiPlayers]);
+  }, [aiPlayers]);
 
   const dealInitialCards = useCallback(() => {
+    addDebugLog("=== DEALING PHASE START ===");
+    addDebugLog(`Shoe cards remaining: ${shoe.length}`);
+    addDebugLog(`Cards dealt this shoe: ${cardsDealt}`);
+    addDebugLog(`Running count: ${runningCount}`);
+    addDebugLog(`Number of AI players: ${aiPlayers.length}`);
+    addDebugLog(`Player seated: ${playerSeat !== null ? `Yes (Seat ${playerSeat})` : 'No (observing)'}`);
 
     // Pre-deal all cards BEFORE animations to ensure uniqueness
     // We need to manually track the shoe state because React batches state updates
@@ -610,30 +682,38 @@ export default function GamePage() {
     // Sort AI players by position (right to left from dealer's perspective = descending)
     const sortedAIPlayers = [...aiPlayers].sort((a, b) => b.position - a.position);
 
+    addDebugLog("--- First card round (right to left) ---");
     // Deal first card to everyone (right to left, dealer last)
     sortedAIPlayers.forEach((ai) => {
       const idx = aiPlayers.indexOf(ai);
       const card = dealFromCurrentShoe();
+      addDebugLog(`AI Player ${idx} (${ai.character.name}, Seat ${ai.position}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`);
       dealtCards.push({ type: "ai", index: idx, card });
     });
     if (playerSeat !== null) {
       const card = dealFromCurrentShoe();
+      addDebugLog(`Player (Seat ${playerSeat}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`);
       dealtCards.push({ type: "player", index: 0, card });
     }
     const dealerCard1 = dealFromCurrentShoe();
+    addDebugLog(`Dealer card 1: ${dealerCard1.rank}${dealerCard1.suit} (value: ${dealerCard1.value}, count: ${dealerCard1.count}) [FACE UP] | Running count: ${currentRunningCount}`);
     dealtCards.push({ type: "dealer", index: 0, card: dealerCard1 });
 
+    addDebugLog("--- Second card round (right to left) ---");
     // Deal second card to everyone (right to left, dealer last)
     sortedAIPlayers.forEach((ai) => {
       const idx = aiPlayers.indexOf(ai);
       const card = dealFromCurrentShoe();
+      addDebugLog(`AI Player ${idx} (${ai.character.name}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`);
       dealtCards.push({ type: "ai", index: idx, card });
     });
     if (playerSeat !== null) {
       const card = dealFromCurrentShoe();
+      addDebugLog(`Player: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`);
       dealtCards.push({ type: "player", index: 0, card });
     }
     const dealerCard2 = dealFromCurrentShoe();
+    addDebugLog(`Dealer card 2: ${dealerCard2.rank}${dealerCard2.suit} (value: ${dealerCard2.value}, count: ${dealerCard2.count}) [FACE DOWN] | Running count: ${currentRunningCount}`);
     dealtCards.push({ type: "dealer", index: 0, card: dealerCard2 });
 
 
@@ -712,14 +792,136 @@ export default function GamePage() {
     // + 500ms buffer for reactions
     registerTimeout(() => {
       checkForInitialReactions();
+
+      // Check for blackjacks using the dealt cards
+      // Build hands from dealtCards to check for blackjacks
+      const aiHands: Map<number, GameCard[]> = new Map();
+      let playerCards: GameCard[] = [];
+
+      dealtCards.forEach(({ type, index, card }) => {
+        if (type === "ai") {
+          if (!aiHands.has(index)) {
+            aiHands.set(index, []);
+          }
+          aiHands.get(index)!.push(card);
+        } else if (type === "player") {
+          playerCards.push(card);
+        }
+      });
+
+      addDebugLog("--- Deal complete - checking for blackjacks ---");
+      // Check AI players for blackjack
+      aiHands.forEach((cards, idx) => {
+        const handValue = calculateHandValue(cards);
+        const hasBlackjack = isBlackjack(cards);
+        addDebugLog(`AI Player ${idx}: Hand value = ${handValue}, Blackjack = ${hasBlackjack}`);
+        if (hasBlackjack) {
+          setPlayerActions(prev => new Map(prev).set(idx, "BLACKJACK"));
+          setTimeout(() => {
+            setPlayerActions(prev => {
+              const newMap = new Map(prev);
+              newMap.delete(idx);
+              return newMap;
+            });
+          }, 800); // Reduced from 2000ms - show briefly
+        }
+      });
+
+      // Check player for blackjack
+      if (playerSeat !== null) {
+        const playerValue = calculateHandValue(playerCards);
+        const playerHasBlackjack = isBlackjack(playerCards);
+        addDebugLog(`Player: Hand value = ${playerValue}, Blackjack = ${playerHasBlackjack}`);
+        if (playerHasBlackjack) {
+          setPlayerActions(prev => new Map(prev).set(-1, "BLACKJACK"));
+          setTimeout(() => {
+            setPlayerActions(prev => {
+              const newMap = new Map(prev);
+              newMap.delete(-1);
+              return newMap;
+            });
+          }, 800); // Reduced from 2000ms - show briefly
+        }
+      }
+
+      addDebugLog(`Updated running count: ${currentRunningCount}`);
+      addDebugLog(`Shoe cards remaining: ${currentShoe.length}`);
+      addDebugLog("=== DEALING PHASE END ===");
+
       // If player is not seated, skip PLAYER_TURN and go straight to AI_TURNS
       if (playerSeat === null) {
+        addDebugLog("Player not seated, moving to AI_TURNS");
         setPhase("AI_TURNS");
       } else {
+        addDebugLog("Moving to PLAYER_TURN");
         setPhase("PLAYER_TURN");
       }
     }, delay + 800 + 500);
-  }, [aiPlayers, shoe, cardsDealt, runningCount, shoesDealt, gameSettings.numberOfDecks, gameSettings.countingSystem, registerTimeout, playerSeat, getCardPosition, currentDealer]);
+  }, [aiPlayers, shoe, cardsDealt, runningCount, shoesDealt, gameSettings.numberOfDecks, gameSettings.countingSystem, registerTimeout, playerSeat, getCardPosition, currentDealer, addDebugLog]);
+
+  // Betting handlers - manual bet placement
+  const handleConfirmBet = useCallback(() => {
+    addDebugLog("=== CONFIRM BET CLICKED ===");
+    addDebugLog(`Current bet: $${currentBet}`);
+    addDebugLog(`Min bet: $${minBet}, Max bet: $${maxBet}`);
+    addDebugLog(`Player chips: $${playerChips}`);
+    addDebugLog(`Phase: ${phase}`);
+    addDebugLog(`Player seat: ${playerSeat}`);
+
+    const canBet = currentBet >= minBet && currentBet <= maxBet && currentBet <= playerChips && phase === "BETTING" && playerSeat !== null;
+    addDebugLog(`Can place bet: ${canBet}`);
+
+    if (canBet) {
+      addDebugLog("✓ BET CONFIRMED - Starting dealing phase");
+      setPhase("DEALING");
+      setDealerRevealed(false);
+      setPlayerHand({ cards: [], bet: currentBet });
+      setDealerHand({ cards: [], bet: 0 });
+      setPlayerChips((prev) => {
+        addDebugLog(`Deducting bet: $${prev} - $${currentBet} = $${prev - currentBet}`);
+        return prev - currentBet;
+      });
+      setPreviousBet(currentBet);
+      setSpeechBubbles([]); // Clear any lingering speech bubbles
+
+      // Reset AI hands with random bets
+      const updatedAI = aiPlayers.map((ai) => ({
+        ...ai,
+        hand: { cards: [], bet: Math.floor(Math.random() * 50) + 25 },
+      }));
+      setAIPlayers(updatedAI);
+
+      // Deal initial cards
+      setTimeout(() => dealInitialCards(), 500);
+    } else {
+      addDebugLog("✗ BET NOT CONFIRMED - Requirements not met");
+      if (currentBet < minBet) addDebugLog(`  - Bet too low (${currentBet} < ${minBet})`);
+      if (currentBet > maxBet) addDebugLog(`  - Bet too high (${currentBet} > ${maxBet})`);
+      if (currentBet > playerChips) addDebugLog(`  - Insufficient chips (${currentBet} > ${playerChips})`);
+      if (phase !== "BETTING") addDebugLog(`  - Wrong phase (${phase})`);
+      if (playerSeat === null) addDebugLog(`  - Player not seated`);
+    }
+  }, [currentBet, minBet, maxBet, playerChips, phase, playerSeat, aiPlayers, dealInitialCards, addDebugLog]);
+
+  const handleClearBet = useCallback(() => {
+    addDebugLog("CLEAR BET - Resetting bet to $0");
+    setCurrentBet(0);
+  }, [addDebugLog]);
+
+  const handleBetChange = useCallback((newBet: number) => {
+    addDebugLog(`BET CHANGED: $${currentBet} → $${newBet}`);
+    setCurrentBet(newBet);
+  }, [currentBet, addDebugLog]);
+
+  // Log betting interface visibility conditions
+  useEffect(() => {
+    const shouldShowBetting = phase === "BETTING" && initialized && playerSeat !== null;
+    addDebugLog(`=== BETTING INTERFACE CHECK ===`);
+    addDebugLog(`Phase: ${phase}`);
+    addDebugLog(`Initialized: ${initialized}`);
+    addDebugLog(`Player seat: ${playerSeat}`);
+    addDebugLog(`Should show betting interface: ${shouldShowBetting}`);
+  }, [phase, initialized, playerSeat, addDebugLog]);
 
   // Check for initial hand reactions
   const checkForInitialReactions = useCallback(() => {
@@ -787,7 +989,12 @@ export default function GamePage() {
 
   // Player actions
   const hit = useCallback(() => {
+    addDebugLog("=== PLAYER ACTION: HIT ===");
+    addDebugLog(`Current hand: ${playerHand.cards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
+    addDebugLog(`Current hand value: ${calculateHandValue(playerHand.cards)}`);
+
     const card = dealCardFromShoe();
+    addDebugLog(`Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${runningCount + card.count}`);
 
     // Add flying card animation
     const shoePosition = getCardPosition("shoe");
@@ -804,19 +1011,43 @@ export default function GamePage() {
 
     // Add card to hand after animation completes
     setTimeout(() => {
-      setPlayerHand((prev) => ({ ...prev, cards: [...prev.cards, card] }));
+      // Calculate new hand with the new card
+      const newCards = [...playerHand.cards, card];
+      const newHandValue = calculateHandValue(newCards);
+
+      addDebugLog(`New hand: ${newCards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
+      addDebugLog(`New hand value: ${newHandValue}`);
+
+      setPlayerHand((prev) => ({ ...prev, cards: newCards }));
       setFlyingCards(prev => prev.filter(fc => fc.id !== flyingCard.id));
 
-      const newHandValue = calculateHandValue([...playerHand.cards, card]);
       if (newHandValue > 21) {
-        setTimeout(() => setPhase("AI_TURNS"), 500);
+        addDebugLog("PLAYER BUSTED!");
+        // Show BUST indicator
+        setPlayerActions(prev => new Map(prev).set(-1, "BUST"));
+
+        // Muck (clear) the cards after showing bust indicator
+        setTimeout(() => {
+          setPlayerHand((prev) => ({ ...prev, cards: [] }));
+          setPlayerActions(prev => {
+            const newMap = new Map(prev);
+            newMap.delete(-1);
+            return newMap;
+          });
+          addDebugLog("Moving to AI_TURNS phase");
+          setPhase("AI_TURNS");
+        }, 1500); // Show BUST for 1.5s then muck cards
       }
     }, 800); // Match FlyingCard animation duration
-  }, [playerHand, dealCardFromShoe, getCardPosition]);
+  }, [playerHand, dealCardFromShoe, getCardPosition, addDebugLog, runningCount]);
 
   const stand = useCallback(() => {
+    addDebugLog("=== PLAYER ACTION: STAND ===");
+    addDebugLog(`Final hand: ${playerHand.cards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
+    addDebugLog(`Final hand value: ${calculateHandValue(playerHand.cards)}`);
+    addDebugLog("Moving to AI_TURNS phase");
     setPhase("AI_TURNS");
-  }, []);
+  }, [playerHand, addDebugLog]);
 
   // Basic strategy decision - returns true if should HIT, false if should STAND
   const shouldHitBasicStrategy = useCallback((playerCards: GameCard[], dealerUpCard: GameCard): boolean => {
@@ -893,20 +1124,30 @@ export default function GamePage() {
     }
   }, [playerChips, peakChips]);
 
-  // Clear playersFinished when entering AI_TURNS phase
+  // Reset playersFinished when entering AI_TURNS phase (only on phase transition)
   useEffect(() => {
-    if (phase === "AI_TURNS") {
+    if (phase === "AI_TURNS" && prevPhaseRef.current !== "AI_TURNS") {
+      addDebugLog("=== PHASE: AI_TURNS START ===");
+      addDebugLog(`Resetting playersFinished set and activePlayerIndex`);
       setPlayersFinished(new Set());
+      setActivePlayerIndex(null);
     }
-  }, [phase]);
+    prevPhaseRef.current = phase;
+  }, [phase, addDebugLog]);
 
   // AI turns - process one player at a time, allowing multiple hits
   useEffect(() => {
     if (phase === "AI_TURNS" && activePlayerIndex === null) {
-      // Create array of players with their indices, sorted by table position (dealer's left to right = player's right to left)
+      // Create array of players with their indices, sorted by table position
+      // Higher position numbers are closer to dealer's left (first base)
+      // Playing order: dealer's left to right (highest position to lowest)
       const playersByPosition = aiPlayers
         .map((ai, idx) => ({ ai, idx, position: ai.position }))
-        .sort((a, b) => b.position - a.position); // Reverse sort: highest position (dealer's left) goes first
+        .sort((a, b) => b.position - a.position); // Descending: highest position (first base) acts first
+
+      // Log the sorted order for debugging
+      addDebugLog(`Turn order (sorted by position): ${playersByPosition.map(p => `${p.ai.character.name} (idx:${p.idx}, seat:${p.position})`).join(', ')}`);
+      addDebugLog(`Players finished: [${Array.from(playersFinished).join(', ')}]`);
 
       // Find the next AI player who needs to act (in table order)
       const nextPlayer = playersByPosition.find(({ ai, idx }) => {
@@ -916,15 +1157,23 @@ export default function GamePage() {
         const handValue = calculateHandValue(ai.hand.cards);
         const isBust = isBusted(ai.hand.cards);
 
-        // Player needs to act if they haven't busted and are below 17
-        if (handValue < 17 && !isBust) return true;
+        // Skip if already busted - they should have been marked finished already
+        if (isBust) return false;
 
-        // Player at 17+ or bust - they need to show STAND then be marked finished
-        return true;
+        // Player needs to act if they're below 21
+        if (handValue < 21) return true;
+
+        // Player at 21 - they need to show STAND then be marked finished
+        if (handValue === 21) return true;
+
+        return false;
       });
 
       if (!nextPlayer) {
         // All players finished, move to dealer turn
+        addDebugLog("=== ALL AI PLAYERS FINISHED ===");
+        addDebugLog(`Players finished: ${Array.from(playersFinished).join(', ')}`);
+        addDebugLog("Moving to DEALER_TURN phase");
         registerTimeout(() => setPhase("DEALER_TURN"), 1000);
         return;
       }
@@ -932,9 +1181,14 @@ export default function GamePage() {
       // Process this player's action
       const { ai, idx } = nextPlayer;
 
+      addDebugLog(`=== AI PLAYER ${idx} TURN (${ai.character.name}, Seat ${ai.position}) ===`);
+      addDebugLog(`Current hand: ${ai.hand.cards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
+
       // Calculate hand value first to determine difficulty
       const handValue = calculateHandValue(ai.hand.cards);
       const isBust = isBusted(ai.hand.cards);
+
+      addDebugLog(`Hand value: ${handValue}, Busted: ${isBust}`);
 
       // Calculate hand difficulty multiplier
       let handDifficultyMultiplier = 1.0;
@@ -949,10 +1203,10 @@ export default function GamePage() {
       }
 
       // Calculate timing
-      const baseDecisionTime = 1500;
+      const baseDecisionTime = 800; // Reduced from 1500 - faster thinking
       const baseActionDelay = 800;
-      const baseActionDisplay = 2000;
-      const baseTurnClear = 500;
+      const baseActionDisplay = 600; // Reduced from 2000 - show action briefly
+      const baseTurnClear = 100; // Reduced from 500 - minimal delay between players
 
       const playSpeed = ai.character.playSpeed;
       const combinedSpeed = playSpeed / handDifficultyMultiplier;
@@ -973,7 +1227,29 @@ export default function GamePage() {
       const followsBasicStrategy = Math.random() * 100 < ai.character.skillLevel;
       const shouldHit = followsBasicStrategy ? basicStrategyDecision : handValue < 17;
 
+      addDebugLog(`Dealer up card: ${dealerUpCard.rank}${dealerUpCard.suit}`);
+      addDebugLog(`Basic strategy says: ${basicStrategyDecision ? 'HIT' : 'STAND'}`);
+      addDebugLog(`Follows basic strategy: ${followsBasicStrategy}, Decision: ${shouldHit ? 'HIT' : 'STAND'}`);
+
       if (shouldHit && !isBust) {
+
+        // 15% chance to show banter during turn
+        if (Math.random() < 0.15) {
+          const banterLines = AI_DIALOGUE_ADDONS.find(
+            addon => addon.id === ai.character.id
+          )?.banterWithPlayer;
+
+          if (banterLines && banterLines.length > 0) {
+            const randomBanter = pick(banterLines);
+            registerTimeout(() => {
+              addSpeechBubble(
+                `ai-turn-banter-${idx}-${Date.now()}`,
+                randomBanter.text,
+                ai.position
+              );
+            }, decisionTime / 2); // Show banter halfway through thinking
+          }
+        }
 
         // Show HIT action after thinking
         registerTimeout(() => {
@@ -983,6 +1259,7 @@ export default function GamePage() {
         // Deal card immediately after showing action with animation
         registerTimeout(() => {
           const card = dealCardFromShoe();
+          addDebugLog(`Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`);
 
           // Add flying card animation
           const shoePosition = getCardPosition("shoe");
@@ -1014,27 +1291,124 @@ export default function GamePage() {
 
             // Check if player busted or reached 21+ after receiving card
             const newHandValue = calculateHandValue([...ai.hand.cards, card]);
-            if (newHandValue >= 21 || isBusted([...ai.hand.cards, card])) {
-              // Mark player as finished
+            const busted = isBusted([...ai.hand.cards, card]);
+
+            addDebugLog(`New hand value: ${newHandValue}, Busted: ${busted}`);
+
+            if (busted) {
+              addDebugLog(`AI Player ${idx} BUSTED!`);
+              addDebugLog(`Marking AI Player ${idx} as FINISHED (busted)`);
+
+              // Mark player as finished FIRST, before any async operations
               setPlayersFinished(prev => new Set(prev).add(idx));
+
+              // Clear HIT action first
+              setPlayerActions(prev => {
+                const newMap = new Map(prev);
+                newMap.delete(idx);
+                return newMap;
+              });
+
+              // Show BUST indicator after a brief delay
+              setTimeout(() => {
+                setPlayerActions(prev => new Map(prev).set(idx, "BUST"));
+              }, 100);
+
+              // Muck (clear) the cards after showing bust indicator
+              setTimeout(() => {
+                setAIPlayers((prev) => {
+                  const updated = [...prev];
+                  updated[idx] = {
+                    ...updated[idx],
+                    hand: {
+                      ...updated[idx].hand,
+                      cards: []
+                    }
+                  };
+                  return updated;
+                });
+                setPlayerActions(prev => {
+                  const newMap = new Map(prev);
+                  newMap.delete(idx);
+                  return newMap;
+                });
+                // Move to next player immediately after mucking
+                setActivePlayerIndex(null);
+              }, 800); // Show BUST for 0.8s then muck cards and move on
+            } else if (newHandValue >= 21) {
+              addDebugLog(`AI Player ${idx} reached 21!`);
+              addDebugLog(`Marking AI Player ${idx} as FINISHED (21)`);
+
+              // Mark player as finished FIRST (21 but not bust)
+              setPlayersFinished(prev => new Set(prev).add(idx));
+
+              // Player got 21 - clear HIT and show STAND
+              setPlayerActions(prev => {
+                const newMap = new Map(prev);
+                newMap.delete(idx);
+                return newMap;
+              });
+
+              setTimeout(() => {
+                setPlayerActions(prev => new Map(prev).set(idx, "STAND"));
+              }, 100);
+
+              // Clear STAND indicator after display and move to next player
+              setTimeout(() => {
+                setPlayerActions(prev => {
+                  const newMap = new Map(prev);
+                  newMap.delete(idx);
+                  return newMap;
+                });
+                // Move to next player immediately
+                setActivePlayerIndex(null);
+              }, 600); // Show STAND for 0.6s then move on
             }
           }, 800); // Match FlyingCard animation duration
         }, decisionTime + 50); // Show action, then immediately deal card
 
-        // Clear action after display (wait for card animation to complete)
+        // Clear HIT action after display (only if player didn't bust or get 21)
+        // This timeout will be overridden by the bust/21 logic above if needed
         registerTimeout(() => {
           setPlayerActions(prev => {
             const newMap = new Map(prev);
-            newMap.delete(idx);
+            // Only delete if it's still "HIT" (not "BUST" or "STAND" from hitting 21)
+            if (newMap.get(idx) === "HIT") {
+              newMap.delete(idx);
+            }
             return newMap;
           });
         }, decisionTime + 50 + 800 + actionDisplay); // thinking + action display + card animation
 
-        // Clear active player to trigger next action
+        // Clear active player to trigger next action (with thinking time for the new hand)
+        // Need to wait for: decision + action show + card animation + action display + turn clear + NEW THINKING TIME
         registerTimeout(() => {
           setActivePlayerIndex(null);
-        }, decisionTime + 50 + 800 + actionDisplay + turnClear); // thinking + action display + card animation
+        }, decisionTime + 50 + 800 + actionDisplay + turnClear + decisionTime); // Add another decision time for thinking about new hand
       } else {
+        addDebugLog(`AI Player ${idx} decision: STAND`);
+        addDebugLog(`Marking AI Player ${idx} as FINISHED (stand)`);
+
+        // Mark player as finished FIRST
+        setPlayersFinished(prev => new Set(prev).add(idx));
+
+        // 15% chance to show banter during turn
+        if (Math.random() < 0.15) {
+          const banterLines = AI_DIALOGUE_ADDONS.find(
+            addon => addon.id === ai.character.id
+          )?.banterWithPlayer;
+
+          if (banterLines && banterLines.length > 0) {
+            const randomBanter = pick(banterLines);
+            registerTimeout(() => {
+              addSpeechBubble(
+                `ai-turn-banter-${idx}-${Date.now()}`,
+                randomBanter.text,
+                ai.position
+              );
+            }, decisionTime / 2); // Show banter halfway through thinking
+          }
+        }
 
         // Show STAND action after thinking
         registerTimeout(() => {
@@ -1050,70 +1424,117 @@ export default function GamePage() {
           });
         }, decisionTime + actionDisplay);
 
-        // Mark player as finished and clear active to move to next player
+        // Clear active to move to next player
         registerTimeout(() => {
-          setPlayersFinished(prev => new Set(prev).add(idx));
           setActivePlayerIndex(null);
         }, decisionTime + actionDisplay + turnClear);
       }
     }
-  }, [phase, aiPlayers, dealCardFromShoe, registerTimeout, activePlayerIndex, playersFinished]);
+  }, [phase, aiPlayers, dealCardFromShoe, registerTimeout, activePlayerIndex, playersFinished, dealerHand, shouldHitBasicStrategy, getCardPosition, addDebugLog]);
 
   // Dealer turn
   useEffect(() => {
     if (phase === "DEALER_TURN") {
+      addDebugLog("=== PHASE: DEALER_TURN START ===");
+      addDebugLog(`Dealer hand: ${dealerHand.cards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
+      addDebugLog(`Dealer hand value: ${calculateHandValue(dealerHand.cards)}`);
       setDealerRevealed(true);
+      dealerFinishedRef.current = false; // Reset flag when entering dealer turn
+
+      // 10% chance to show dealer-directed banter when dealer reveals
+      if (Math.random() < 0.10 && aiPlayers.length > 0) {
+        const randomAI = aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
+        const banterLines = AI_DIALOGUE_ADDONS.find(
+          addon => addon.id === randomAI.character.id
+        )?.banterWithDealer;
+
+        if (banterLines && banterLines.length > 0) {
+          const randomBanter = pick(banterLines);
+          registerTimeout(() => {
+            addSpeechBubble(
+              `dealer-banter-${Date.now()}`,
+              randomBanter,
+              randomAI.position
+            );
+          }, 500); // Show shortly after dealer reveals
+        }
+      }
 
       registerTimeout(() => {
-        let currentDealerHand = { ...dealerHand };
+        // Dealer plays according to rules - deal one card at a time with delays
+        const dealNextCard = () => {
+          setDealerHand((prevHand) => {
+            const handValue = calculateHandValue(prevHand.cards);
 
-        // Dealer plays according to rules
-        const shouldHit = () => {
-          const handValue = calculateHandValue(currentDealerHand.cards);
+            // Check if should hit
+            const shouldHit = () => {
+              // Always hit on 16 or less
+              if (handValue < 17) return true;
 
-          // Always hit on 16 or less
-          if (handValue < 17) return true;
+              // Always stand on 18 or more
+              if (handValue >= 18) return false;
 
-          // Always stand on 18 or more
-          if (handValue >= 18) return false;
+              // On 17: depends on soft 17 rule
+              if (handValue === 17) {
+                // Check if it's a soft 17 (has an Ace counted as 11)
+                const hasAce = prevHand.cards.some(card => card.rank === "A");
+                const hasMultipleCards = prevHand.cards.length > 2;
+                const isSoft = hasAce && hasMultipleCards;
 
-          // On 17: depends on soft 17 rule
-          if (handValue === 17) {
-            // Check if it's a soft 17 (has an Ace counted as 11)
-            const hasAce = currentDealerHand.cards.some(card => card.rank === "A");
-            const hasMultipleCards = currentDealerHand.cards.length > 2;
-            const isSoft = hasAce && hasMultipleCards;
+                if (gameSettings.dealerHitsSoft17 && isSoft) {
+                  return true; // Hit soft 17
+                }
+                return false; // Stand on hard 17 or stand on all 17s
+              }
 
-            if (gameSettings.dealerHitsSoft17 && isSoft) {
-              return true; // Hit soft 17
+              return false;
+            };
+
+            // Check if dealer should hit and hasn't busted
+            if (shouldHit() && !isBusted(prevHand.cards)) {
+              const card = dealCardFromShoe();
+              addDebugLog(`Dealer HIT: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`);
+              const newHand = { ...prevHand, cards: [...prevHand.cards, card] };
+              const newValue = calculateHandValue(newHand.cards);
+              addDebugLog(`Dealer hand value: ${newValue}`);
+
+              // Schedule next card after delay
+              registerTimeout(() => dealNextCard(), 1000);
+
+              return newHand;
+            } else {
+              // Dealer is done, announce final hand (only once)
+              if (!dealerFinishedRef.current) {
+                dealerFinishedRef.current = true;
+
+                const finalValue = calculateHandValue(prevHand.cards);
+                const isBust = isBusted(prevHand.cards);
+
+                addDebugLog(`=== DEALER FINAL HAND ===`);
+                addDebugLog(`Dealer cards: ${prevHand.cards.map(c => `${c.rank}${c.suit}`).join(', ')}`);
+                addDebugLog(`Dealer hand value: ${finalValue}`);
+                addDebugLog(`Dealer busted: ${isBust}`);
+
+                if (isBust) {
+                  setDealerCallout("Dealer busts");
+                } else {
+                  setDealerCallout(`Dealer has ${finalValue}`);
+                }
+
+                // Clear callout and move to resolving
+                registerTimeout(() => {
+                  setDealerCallout(null);
+                  setPhase("RESOLVING");
+                }, 10000); // Increased to 10 seconds - dealer callouts stay visible longer
+              }
+
+              return prevHand;
             }
-            return false; // Stand on hard 17 or stand on all 17s
-          }
-
-          return false;
+          });
         };
 
-        while (shouldHit() && !isBusted(currentDealerHand.cards)) {
-          const card = dealCardFromShoe();
-          currentDealerHand.cards.push(card);
-          setDealerHand({ ...currentDealerHand });
-        }
-
-        // Announce dealer's final hand
-        const finalValue = calculateHandValue(currentDealerHand.cards);
-        const isBust = isBusted(currentDealerHand.cards);
-
-        if (isBust) {
-          setDealerCallout("Dealer busts");
-        } else {
-          setDealerCallout(`Dealer has ${finalValue}`);
-        }
-
-        // Clear callout and move to resolving (increased delay)
-        registerTimeout(() => {
-          setDealerCallout(null);
-          setPhase("RESOLVING");
-        }, 3000);
+        // Start dealing cards
+        dealNextCard();
       }, 1500);
     }
   }, [phase, dealerHand, dealCardFromShoe, gameSettings, registerTimeout]);
@@ -1229,9 +1650,14 @@ export default function GamePage() {
     });
   }, [aiPlayers, dealerHand, gameSettings, registerTimeout]);
 
+  // Track if we've already resolved this hand
+  const hasResolvedRef = useRef(false);
+
   // Resolve hands
   useEffect(() => {
-    if (phase === "RESOLVING") {
+    if (phase === "RESOLVING" && !hasResolvedRef.current) {
+      hasResolvedRef.current = true;
+
       const playerResult = determineHandResult(playerHand, dealerHand);
       const bjPayoutMultiplier = getBlackjackPayoutMultiplier(
         gameSettings.blackjackPayout
@@ -1325,45 +1751,96 @@ export default function GamePage() {
       const dealerValue = calculateHandValue(dealerHand.cards);
       const dealerBusted = isBusted(dealerHand.cards);
 
-      // Determine what to announce
+      // Determine what to announce - dealer announces minimum winning hand value
       let callout = "";
       if (dealerBusted) {
-        // If dealer busted, paying all non-busted hands
         callout = "Paying all hands";
       } else {
-        // Count winning hands (including blackjacks and beats)
-        let winningCount = 0;
-        let maxWinningValue = 0;
-
-        // Check player hand if seated
-        if (playerSeat !== null && !isBusted(playerHand.cards)) {
-          const playerValue = calculateHandValue(playerHand.cards);
-          if (playerResult === "BLACKJACK" || playerResult === "WIN") {
-            winningCount++;
-            maxWinningValue = Math.max(maxWinningValue, playerValue);
-          }
-        }
-
-        // Check AI hands
-        aiPlayers.forEach(ai => {
-          if (!isBusted(ai.hand.cards)) {
-            const result = determineHandResult(ai.hand, dealerHand);
-            if (result === "BLACKJACK" || result === "WIN") {
-              winningCount++;
-              const aiValue = calculateHandValue(ai.hand.cards);
-              maxWinningValue = Math.max(maxWinningValue, aiValue);
-            }
-          }
-        });
-
-        if (winningCount > 0) {
-          callout = `Paying ${maxWinningValue}`;
+        // Dealer pays hands that beat their total (dealer value + 1)
+        const minWinningValue = dealerValue + 1;
+        if (minWinningValue <= 21) {
+          callout = `Paying ${minWinningValue}`;
         } else {
+          // Dealer has 21, no non-blackjack hands can beat it
           callout = "Dealer wins";
         }
       }
 
       setDealerCallout(callout);
+
+      // Create win/loss bubbles for all players
+      const newWinLossBubbles: WinLossBubbleData[] = [];
+
+      // Add bubble for human player if they have cards
+      if (playerSeat !== null && playerHand.cards.length > 0) {
+        const tablePositions = [
+          [5, 55],   // Seat 0 - Far left
+          [16, 62],  // Seat 1 - Left
+          [29, 68],  // Seat 2 - Center-left
+          [42, 72],  // Seat 3 - Center
+          [56, 72],  // Seat 4 - Center
+          [69, 68],  // Seat 5 - Center-right
+          [82, 62],  // Seat 6 - Right
+          [93, 55],  // Seat 7 - Far right
+        ];
+
+        const [x, y] = tablePositions[playerSeat];
+        let result: "win" | "lose" | "push" | "blackjack" = "lose";
+
+        if (playerResult === "BLACKJACK") {
+          result = "blackjack";
+        } else if (playerResult === "WIN") {
+          result = "win";
+        } else if (playerResult === "PUSH") {
+          result = "push";
+        } else {
+          result = "lose";
+        }
+
+        newWinLossBubbles.push({
+          id: `player-result-${Date.now()}`,
+          result,
+          position: { left: `${x}%`, top: `${y - 5}%` }, // Slightly above player position
+        });
+      }
+
+      // Add bubbles for AI players
+      aiPlayers.forEach((ai) => {
+        if (ai.hand.cards.length > 0) {
+          const tablePositions = [
+            [5, 55],   // Seat 0 - Far left
+            [16, 62],  // Seat 1 - Left
+            [29, 68],  // Seat 2 - Center-left
+            [42, 72],  // Seat 3 - Center
+            [56, 72],  // Seat 4 - Center
+            [69, 68],  // Seat 5 - Center-right
+            [82, 62],  // Seat 6 - Right
+            [93, 55],  // Seat 7 - Far right
+          ];
+
+          const [x, y] = tablePositions[ai.position];
+          const aiResult = determineHandResult(ai.hand, dealerHand);
+          let result: "win" | "lose" | "push" | "blackjack" = "lose";
+
+          if (aiResult === "BLACKJACK") {
+            result = "blackjack";
+          } else if (aiResult === "WIN") {
+            result = "win";
+          } else if (aiResult === "PUSH") {
+            result = "push";
+          } else {
+            result = "lose";
+          }
+
+          newWinLossBubbles.push({
+            id: `ai-${ai.character.id}-result-${Date.now()}`,
+            result,
+            position: { left: `${x}%`, top: `${y - 5}%` }, // Slightly above AI position
+          });
+        }
+      });
+
+      setWinLossBubbles(newWinLossBubbles);
 
       // Show end-of-hand reactions
       showEndOfHandReactions();
@@ -1371,9 +1848,12 @@ export default function GamePage() {
       registerTimeout(() => {
         setDealerCallout(null);
         setPhase("ROUND_END");
-      }, 3500);
+      }, 11000); // Increased to 11 seconds - dealer callouts stay visible longer
+    } else if (phase !== "RESOLVING") {
+      // Reset the flag when we leave RESOLVING phase
+      hasResolvedRef.current = false;
     }
-  }, [phase, playerHand, dealerHand, gameSettings, aiPlayers, playerSeat, registerTimeout, showEndOfHandReactions]);
+  }, [phase, playerHand, dealerHand, gameSettings, aiPlayers, playerSeat, registerTimeout, showEndOfHandReactions, currentDealer, previousBet, cardsDealt, runningCount]);
 
   const handleConversationResponse = useCallback((choiceIndex: number) => {
     if (!activeConversation) return;
@@ -1438,11 +1918,73 @@ export default function GamePage() {
     setSpeechBubbles([]); // Clear speech bubbles from previous hand
   }, []);
 
-  // Round end - automatically progress to next hand
+  // Round end - automatically progress to next hand (unless debug logs exist)
   useEffect(() => {
     if (phase === "ROUND_END") {
+      // If debug logs exist, wait for user to click "Clear Log & Continue"
+      if (debugLogs.length > 0) {
+        return;
+      }
 
       registerTimeout(() => {
+        // Occasionally add or remove players (15% chance per hand)
+        const playerChangeChance = Math.random();
+
+        if (playerChangeChance < 0.15) {
+          const currentAICount = aiPlayers.length;
+          const occupiedSeats = new Set(aiPlayers.map(p => p.position));
+          if (playerSeat !== null) occupiedSeats.add(playerSeat);
+
+          // 50/50 chance to add or remove (if possible)
+          const shouldAdd = Math.random() < 0.5;
+
+          if (shouldAdd && currentAICount < 7 && occupiedSeats.size < 8) {
+            // Add a new player
+            const availableSeats = [0, 1, 2, 3, 4, 5, 6, 7].filter(
+              seat => !occupiedSeats.has(seat)
+            );
+
+            if (availableSeats.length > 0) {
+              // Pick random available seat
+              const newSeat = availableSeats[Math.floor(Math.random() * availableSeats.length)];
+
+              // Pick random character not already at table
+              const usedCharacterIds = new Set(aiPlayers.map(p => p.character.id));
+              const availableCharacters = AI_CHARACTERS.filter(
+                char => !usedCharacterIds.has(char.id)
+              );
+
+              if (availableCharacters.length > 0) {
+                const newCharacter = availableCharacters[
+                  Math.floor(Math.random() * availableCharacters.length)
+                ];
+
+                const newPlayer: AIPlayer = {
+                  character: newCharacter,
+                  hand: { cards: [], bet: 50 },
+                  chips: 1000,
+                  position: newSeat,
+                };
+
+                setAIPlayers(prev => [...prev, newPlayer]);
+
+                // Show dealer callout
+                setDealerCallout(`${newCharacter.name} joins the table!`);
+                registerTimeout(() => setDealerCallout(null), 2000);
+              }
+            }
+          } else if (!shouldAdd && currentAICount > 2) {
+            // Remove a random player (keep at least 2 AI players for atmosphere)
+            const removeIndex = Math.floor(Math.random() * currentAICount);
+            const removedPlayer = aiPlayers[removeIndex];
+
+            setAIPlayers(prev => prev.filter((_, idx) => idx !== removeIndex));
+
+            // Show dealer callout
+            setDealerCallout(`${removedPlayer.character.name} leaves the table.`);
+            registerTimeout(() => setDealerCallout(null), 2000);
+          }
+        }
 
         // Check if we need to reshuffle (cut card reached)
         const totalCards = gameSettings.numberOfDecks * 52;
@@ -1451,6 +1993,27 @@ export default function GamePage() {
           gameSettings.deckPenetration
         );
         const cardsUntilCutCard = totalCards - cutCardPosition;
+
+        // 25% chance to show random table banter between AI players
+        if (Math.random() < 0.25 && aiPlayers.length >= 2) {
+          // Pick a random AI player to speak
+          const speakerIndex = Math.floor(Math.random() * aiPlayers.length);
+          const speaker = aiPlayers[speakerIndex];
+
+          // Get their banter lines
+          const banterLines = AI_DIALOGUE_ADDONS.find(
+            addon => addon.id === speaker.character.id
+          )?.banterWithPlayer;
+
+          if (banterLines && banterLines.length > 0) {
+            const randomBanter = pick(banterLines);
+            addSpeechBubble(
+              `ai-banter-${Date.now()}`,
+              randomBanter.text,
+              speaker.position
+            );
+          }
+        }
 
         if (cardsDealt >= cardsUntilCutCard) {
 
@@ -1473,7 +2036,7 @@ export default function GamePage() {
         }
       }, 4000); // Show results for 4 seconds before continuing
     }
-  }, [phase, cardsDealt, gameSettings.numberOfDecks, gameSettings.deckPenetration, nextHand, registerTimeout]);
+  }, [phase, cardsDealt, gameSettings.numberOfDecks, gameSettings.deckPenetration, gameSettings.countingSystem, nextHand, registerTimeout, aiPlayers, playerSeat, debugLogs.length, addSpeechBubble]);
 
   // Pit boss wandering - they move around the casino floor, influenced by suspicion
   useEffect(() => {
@@ -1560,23 +2123,63 @@ export default function GamePage() {
           borderBottom: "2px solid #FFD700",
         }}
       >
-        <div className="flex gap-6 items-center">
+        <div className="flex gap-3 items-center">
           {gameSettings.trainingMode === TrainingMode.PRACTICE && (
-            <div className="text-white font-bold" style={{ fontSize: "16px" }}>
-              COUNT: <span style={{ color: "#FFD700" }}>{runningCount}</span>
+            <div style={{
+              backgroundColor: "rgba(255, 215, 0, 0.1)",
+              color: "#FFF",
+              border: "2px solid #FFD700",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              width: "150px",
+              textAlign: "center",
+            }}>
+              COUNT: <span style={{ color: "#FFD700" }}>{runningCount >= 0 ? `+${runningCount}` : runningCount}</span>
             </div>
           )}
           {gameSettings.trainingMode === TrainingMode.TEST && (
-            <div className="text-white font-bold" style={{ fontSize: "16px", color: "#FF6B6B" }}>
+            <div style={{
+              backgroundColor: "rgba(255, 107, 107, 0.1)",
+              color: "#FF6B6B",
+              border: "2px solid #FF6B6B",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              width: "150px",
+              textAlign: "center",
+            }}>
               🧪 TEST MODE
             </div>
           )}
           {gameSettings.trainingMode === TrainingMode.TIMED_CHALLENGE && (
             <>
-              <div className="text-white font-bold" style={{ fontSize: "16px" }}>
-                COUNT: <span style={{ color: "#FFD700" }}>{runningCount}</span>
+              <div style={{
+                backgroundColor: "rgba(255, 215, 0, 0.1)",
+                color: "#FFF",
+                border: "2px solid #FFD700",
+                borderRadius: "8px",
+                padding: "6px 12px",
+                fontSize: "14px",
+                fontWeight: "bold",
+                width: "150px",
+                textAlign: "center",
+              }}>
+                COUNT: <span style={{ color: "#FFD700" }}>{runningCount >= 0 ? `+${runningCount}` : runningCount}</span>
               </div>
-              <div className="text-white font-bold" style={{ fontSize: "16px" }}>
+              <div style={{
+                backgroundColor: timeRemaining < 60 ? "rgba(255, 107, 107, 0.1)" : timeRemaining < 180 ? "rgba(255, 215, 0, 0.1)" : "rgba(76, 175, 80, 0.1)",
+                color: "#FFF",
+                border: `2px solid ${timeRemaining < 60 ? "#FF6B6B" : timeRemaining < 180 ? "#FFD700" : "#4CAF50"}`,
+                borderRadius: "8px",
+                padding: "6px 12px",
+                fontSize: "14px",
+                fontWeight: "bold",
+                width: "150px",
+                textAlign: "center",
+              }}>
                 ⏱️ TIME: <span style={{
                   color: timeRemaining < 60 ? "#FF6B6B" : timeRemaining < 180 ? "#FFD700" : "#4CAF50"
                 }}>
@@ -1585,10 +2188,57 @@ export default function GamePage() {
               </div>
             </>
           )}
-          <div className="text-white text-sm">
-            STREAK: <span style={{ color: currentStreak > 0 ? "#4CAF50" : "#FFF" }}>{currentStreak}</span> |
-            CHIPS: <span style={{ color: "#FFD700" }}>{playerChips}</span> |
+          <div style={{
+            backgroundColor: "rgba(76, 175, 80, 0.1)",
+            color: "#FFF",
+            border: "2px solid #4CAF50",
+            borderRadius: "8px",
+            padding: "6px 12px",
+            fontSize: "14px",
+            fontWeight: "bold",
+            width: "150px",
+            textAlign: "center",
+          }}>
+            STREAK: <span style={{ color: currentStreak > 0 ? "#4CAF50" : "#AAA" }}>{currentStreak}</span>
+          </div>
+          <div style={{
+            backgroundColor: "rgba(255, 215, 0, 0.1)",
+            color: "#FFF",
+            border: "2px solid #FFD700",
+            borderRadius: "8px",
+            padding: "6px 12px",
+            fontSize: "14px",
+            fontWeight: "bold",
+            width: "150px",
+            textAlign: "center",
+          }}>
+            CHIPS: <span style={{ color: "#FFD700" }}>{playerChips.toLocaleString()}</span>
+          </div>
+          <div style={{
+            backgroundColor: "rgba(155, 89, 182, 0.1)",
+            color: "#FFF",
+            border: "2px solid #9B59B6",
+            borderRadius: "8px",
+            padding: "6px 12px",
+            fontSize: "14px",
+            fontWeight: "bold",
+            width: "150px",
+            textAlign: "center",
+          }}>
             SCORE: <span style={{ color: "#9B59B6" }}>{currentScore.toLocaleString()}</span>
+          </div>
+          <div style={{
+            backgroundColor: scoreMultiplier > 1.0 ? "rgba(76, 175, 80, 0.1)" : "rgba(128, 128, 128, 0.1)",
+            color: "#FFF",
+            border: `2px solid ${scoreMultiplier > 1.0 ? "#4CAF50" : "#808080"}`,
+            borderRadius: "8px",
+            padding: "6px 12px",
+            fontSize: "14px",
+            fontWeight: "bold",
+            width: "150px",
+            textAlign: "center",
+          }}>
+            MULTIPLIER: <span style={{ color: scoreMultiplier > 1.0 ? "#4CAF50" : "#808080" }}>{scoreMultiplier.toFixed(1)}x</span>
           </div>
         </div>
 
@@ -1637,9 +2287,30 @@ export default function GamePage() {
           >
             🏆 Leaderboard
           </button>
-          <div className="text-white text-sm">
-            TC: {trueCount} | Decks: {decksRemaining.toFixed(1)}
-          </div>
+          <button
+            onClick={() => setShowStrategyCard(true)}
+            style={{
+              backgroundColor: "rgba(255, 215, 0, 0.2)",
+              color: "#FFD700",
+              border: "2px solid #FFD700",
+              borderRadius: "8px",
+              padding: "6px 16px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#FFD700";
+              e.currentTarget.style.color = "#000";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.2)";
+              e.currentTarget.style.color = "#FFD700";
+            }}
+          >
+            📊 Strategy
+          </button>
         </div>
       </div>
 
@@ -1867,9 +2538,15 @@ export default function GamePage() {
                   {/* Empty Seat - Clickable */}
                   {isEmpty && (
                     <div
-                      onClick={() =>
-                        playerSeat === null && setPlayerSeat(seatIndex)
-                      }
+                      onClick={() => {
+                        if (playerSeat === null) {
+                          addDebugLog(`=== PLAYER SITTING AT SEAT ${seatIndex} ===`);
+                          addDebugLog(`Phase before sitting: ${phase}`);
+                          setPlayerSeat(seatIndex);
+                        } else {
+                          addDebugLog(`Cannot sit - player already seated at ${playerSeat}`);
+                        }
+                      }}
                       style={{
                         width: "150px",
                         height: "150px",
@@ -2089,7 +2766,10 @@ export default function GamePage() {
                         {/* Turn Indicator - active during PLAYER_TURN phase */}
                         <TurnIndicator isActive={phase === "PLAYER_TURN"} />
 
-                        {/* Action Bubble - could be added here for player actions if needed */}
+                        {/* Action Bubble - shows player actions (HIT, STAND, BUST, BLACKJACK) */}
+                        {playerActions.has(-1) && (
+                          <ActionBubble action={playerActions.get(-1)!} />
+                        )}
 
                         <div
                           style={{
@@ -2210,6 +2890,20 @@ export default function GamePage() {
             />
           ))}
 
+          {/* Win/Loss Result Bubbles */}
+          {winLossBubbles.map((bubble) => (
+            <WinLossBubble
+              key={bubble.id}
+              position={bubble.position}
+              result={bubble.result}
+              onComplete={() => {
+                setWinLossBubbles((prev) =>
+                  prev.filter((b) => b.id !== bubble.id)
+                );
+              }}
+            />
+          ))}
+
           {/* Active Conversation Prompt */}
           {activeConversation && (
             <ConversationPrompt
@@ -2262,6 +2956,19 @@ export default function GamePage() {
         `}</style>
       </div>
 
+      {/* Betting Interface - shown during BETTING phase when player is seated */}
+      {phase === "BETTING" && initialized && playerSeat !== null && (
+        <BettingInterface
+          playerChips={playerChips}
+          currentBet={currentBet}
+          minBet={minBet}
+          maxBet={maxBet}
+          onBetChange={handleBetChange}
+          onConfirmBet={handleConfirmBet}
+          onClearBet={handleClearBet}
+        />
+      )}
+
       {/* Game Settings Modal */}
       <GameSettingsModal
         isOpen={showSettings}
@@ -2283,6 +2990,168 @@ export default function GamePage() {
         longestStreak={longestStreak}
         currentScore={currentScore}
       />
+
+      {/* Basic Strategy Card Modal */}
+      <BasicStrategyCard
+        isOpen={showStrategyCard}
+        onClose={() => setShowStrategyCard(false)}
+        settings={gameSettings}
+      />
+
+      {/* Debug Log Button - shows when logs exist and hand is finished */}
+      {debugLogs.length > 0 && phase === "ROUND_END" && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 10000,
+          }}
+        >
+          <button
+            onClick={() => setShowDebugLog(true)}
+            style={{
+              backgroundColor: "#FFD700",
+              color: "#000",
+              border: "none",
+              borderRadius: "8px",
+              padding: "12px 24px",
+              fontSize: "16px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
+            }}
+          >
+            📋 View Debug Log ({debugLogs.length} entries)
+          </button>
+        </div>
+      )}
+
+      {/* Debug Log Modal */}
+      {showDebugLog && (
+        <>
+          <div
+            onClick={() => setShowDebugLog(false)}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.75)",
+              zIndex: 10001,
+            }}
+          />
+
+          <div
+            style={{
+              position: "fixed",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "90%",
+              maxWidth: "900px",
+              maxHeight: "80vh",
+              backgroundColor: "#1a1a1a",
+              borderRadius: "16px",
+              padding: "24px",
+              zIndex: 10002,
+              border: "2px solid #FFD700",
+            }}
+          >
+            <div style={{ marginBottom: "20px", borderBottom: "2px solid #333", paddingBottom: "12px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h2 style={{ fontSize: "24px", fontWeight: "bold", color: "#FFD700", margin: 0 }}>
+                  Debug Log ({debugLogs.length} entries)
+                </h2>
+                <button
+                  onClick={() => setShowDebugLog(false)}
+                  style={{
+                    backgroundColor: "transparent",
+                    color: "#AAA",
+                    border: "none",
+                    fontSize: "28px",
+                    cursor: "pointer",
+                    padding: "0 8px",
+                  }}
+                >
+                  &times;
+                </button>
+              </div>
+            </div>
+
+            <div
+              style={{
+                maxHeight: "calc(80vh - 180px)",
+                overflowY: "auto",
+                backgroundColor: "#000",
+                padding: "16px",
+                borderRadius: "8px",
+                fontFamily: "monospace",
+                fontSize: "13px",
+                color: "#0F0",
+              }}
+            >
+              {debugLogs.map((log, idx) => (
+                <div key={idx} style={{ marginBottom: "4px" }}>
+                  {log}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: "20px", display: "flex", gap: "12px", justifyContent: "center" }}>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(debugLogs.join('\n'));
+                }}
+                style={{
+                  backgroundColor: "#3B82F6",
+                  color: "#FFF",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "12px 32px",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+              >
+                Copy Logs
+              </button>
+              <button
+                onClick={clearDebugLogs}
+                style={{
+                  backgroundColor: "#EF4444",
+                  color: "#FFF",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "12px 32px",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+              >
+                Clear Log & Continue
+              </button>
+              <button
+                onClick={() => setShowDebugLog(false)}
+                style={{
+                  backgroundColor: "#6B7280",
+                  color: "#FFF",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "12px 32px",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
