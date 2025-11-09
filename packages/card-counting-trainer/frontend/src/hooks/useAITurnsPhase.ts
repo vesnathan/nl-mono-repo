@@ -179,9 +179,9 @@ export function useAITurnsPhase({
         handDifficultyMultiplier = 0.7;
       }
 
-      const baseDecisionTime = 800;
-      const baseActionDisplay = 600;
-      const baseTurnClear = 100;
+      const baseDecisionTime = 1200;
+      const baseActionDisplay = 1000;
+      const baseTurnClear = 300;
 
       const { playSpeed } = ai.character;
       const combinedSpeed = playSpeed / handDifficultyMultiplier;
@@ -359,10 +359,9 @@ export function useAITurnsPhase({
         registerTimeout(
           () => {
             aiTurnProcessingRef.current = false;
-            addDebugLog("🔓 AI turn processing unlocked (hit, continuing)");
             setActivePlayerIndex(null);
           },
-          decisionTime + 50 + 800 + actionDisplay + turnClear + decisionTime,
+          decisionTime + 50 + 800 + actionDisplay + turnClear,
         );
       } else {
         addDebugLog(`AI Player ${idx} decision: STAND`);
@@ -402,7 +401,6 @@ export function useAITurnsPhase({
         registerTimeout(
           () => {
             aiTurnProcessingRef.current = false;
-            addDebugLog("🔓 AI turn processing unlocked (stand)");
             setActivePlayerIndex(null);
           },
           decisionTime + actionDisplay + turnClear,
