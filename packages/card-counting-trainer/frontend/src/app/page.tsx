@@ -67,6 +67,10 @@ import { useGameTimeouts } from "@/hooks/useGameTimeouts";
 import { useDebugLogging } from "@/hooks/useDebugLogging";
 import { useGameShoe } from "@/hooks/useGameShoe";
 import { usePlayerHand } from "@/hooks/usePlayerHand";
+import {
+  generateInitialReactions,
+  generateEndOfHandReactions,
+} from "@/utils/reactions";
 
 export default function GamePage() {
   // Game settings
@@ -948,50 +952,7 @@ export default function GamePage() {
 
   // Check for initial hand reactions
   const checkForInitialReactions = useCallback(() => {
-    const reactions: Array<{
-      playerId: string;
-      message: string;
-      outcome: string;
-    }> = [];
-
-    aiPlayers.forEach((ai) => {
-      const handValue = calculateHandValue(ai.hand.cards);
-      const hasBlackjack = isBlackjack(ai.hand.cards);
-      const reaction = getInitialHandReaction(
-        ai.character,
-        handValue,
-        hasBlackjack,
-      );
-
-      if (reaction) {
-        const outcomeType = hasBlackjack
-          ? "bigWin"
-          : handValue <= 12
-            ? "bigLoss"
-            : "smallWin";
-        reactions.push({
-          playerId: ai.character.id,
-          message: reaction,
-          outcome: outcomeType,
-        });
-      }
-    });
-
-    // Limit to 1-2 bubbles with priority
-    const priorityOrder = [
-      "bigWin",
-      "bigLoss",
-      "smallWin",
-      "smallLoss",
-      "push",
-    ];
-    const sortedReactions = reactions.sort((a, b) => {
-      return (
-        priorityOrder.indexOf(a.outcome) - priorityOrder.indexOf(b.outcome)
-      );
-    });
-    const numBubbles = Math.random() < 0.6 ? 1 : 2;
-    const selectedReactions = sortedReactions.slice(0, numBubbles);
+    const selectedReactions = generateInitialReactions(aiPlayers);
 
     // Show speech bubbles
     selectedReactions.forEach((reaction, idx) => {
@@ -1008,7 +969,7 @@ export default function GamePage() {
         }
       }, idx * 600);
     });
-  }, [aiPlayers]);
+  }, [aiPlayers, addSpeechBubble]);
 
   // Player actions
   const hit = useCallback(() => {
@@ -1675,110 +1636,11 @@ export default function GamePage() {
 
   // Show end-of-hand reactions (defined here before useEffect uses it)
   const showEndOfHandReactions = useCallback(() => {
-    const reactions: Array<{
-      playerId: string;
-      message: string;
-      outcome: string;
-      position: number;
-    }> = [];
-
-    const bjPayoutMultiplier = getBlackjackPayoutMultiplier(
+    const selectedReactions = generateEndOfHandReactions(
+      aiPlayers,
+      dealerHand,
       gameSettings.blackjackPayout,
     );
-
-    aiPlayers.forEach((ai) => {
-      const result = determineHandResult(ai.hand, dealerHand);
-      const payout = calculatePayout(ai.hand, result, bjPayoutMultiplier);
-      const netGain = payout - ai.hand.bet;
-      const handValue = calculateHandValue(ai.hand.cards);
-      const dealerValue = calculateHandValue(dealerHand.cards);
-
-      // Determine the specific context
-      const isBusted = handValue > 21;
-      const isDealerBlackjack =
-        dealerValue === 21 && dealerHand.cards.length === 2;
-      const isDealerWin = !isBusted && result === "LOSE";
-
-      let currentContext: "bust" | "dealerBlackjack" | "dealerWin" | "any" =
-        "any";
-      if (isBusted) {
-        currentContext = "bust";
-      } else if (isDealerBlackjack && result === "LOSE") {
-        currentContext = "dealerBlackjack";
-      } else if (isDealerWin) {
-        currentContext = "dealerWin";
-      }
-
-      let outcomeType = "push";
-      let reactions_pool: Array<{ text: string; contexts: Array<string> }> = [];
-      let reactionChance = 0;
-
-      if (result === "BLACKJACK") {
-        outcomeType = "bigWin";
-        reactions_pool = ai.character.reactions.bigWin;
-        reactionChance = 0.8; // Very likely to react to blackjack
-      } else if (netGain > ai.hand.bet * 0.5) {
-        outcomeType = "bigWin";
-        reactions_pool = ai.character.reactions.bigWin;
-        reactionChance = 0.7; // Likely to react to big win
-      } else if (netGain > 0) {
-        outcomeType = "smallWin";
-        reactions_pool = ai.character.reactions.smallWin;
-        reactionChance = 0.3; // Sometimes react to small win
-      } else if (netGain === 0) {
-        outcomeType = "push";
-        reactions_pool = ai.character.reactions.push;
-        reactionChance = 0.1; // Rarely react to push
-      } else if (result === "BUST" || netGain < -ai.hand.bet * 0.5) {
-        outcomeType = "bigLoss";
-        reactions_pool = ai.character.reactions.bigLoss;
-        reactionChance = 0.7; // Likely to react to big loss
-      } else {
-        outcomeType = "smallLoss";
-        reactions_pool = ai.character.reactions.smallLoss;
-        reactionChance = 0.3; // Sometimes react to small loss
-      }
-
-      // Filter reactions by context - only show reactions appropriate for the situation
-      const validReactions = reactions_pool.filter(
-        (reaction) =>
-          reaction.contexts.includes(currentContext) ||
-          reaction.contexts.includes("any"),
-      );
-
-      // Only add reaction if player decides to react and there are valid messages
-      if (validReactions.length > 0 && Math.random() < reactionChance) {
-        const selectedReaction =
-          validReactions[Math.floor(Math.random() * validReactions.length)];
-        reactions.push({
-          playerId: ai.character.id,
-          message: selectedReaction.text,
-          outcome: outcomeType,
-          position: ai.position,
-        });
-      }
-    });
-
-    // Limit to 0-2 bubbles with priority (most interesting reactions)
-    const priorityOrder = [
-      "bigWin",
-      "bigLoss",
-      "smallWin",
-      "smallLoss",
-      "push",
-    ];
-    const sortedReactions = reactions.sort((a, b) => {
-      return (
-        priorityOrder.indexOf(a.outcome) - priorityOrder.indexOf(b.outcome)
-      );
-    });
-
-    // Show 0-2 reactions max
-    const maxReactions = Math.min(
-      reactions.length,
-      Math.random() < 0.5 ? 1 : 2,
-    );
-    const selectedReactions = sortedReactions.slice(0, maxReactions);
 
     selectedReactions.forEach((reaction, idx) => {
       registerTimeout(() => {
@@ -1789,7 +1651,7 @@ export default function GamePage() {
         );
       }, idx * 1000); // Stagger by 1 second to avoid overlap
     });
-  }, [aiPlayers, dealerHand, gameSettings, registerTimeout]);
+  }, [aiPlayers, dealerHand, gameSettings.blackjackPayout, registerTimeout, addSpeechBubble]);
 
   // Track if we've already resolved this hand
   const hasResolvedRef = useRef(false);
