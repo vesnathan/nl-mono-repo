@@ -201,7 +201,7 @@ export function useDealerTurnPhase({
                 dealerTurnProcessingRef.current = false; // Unlock before moving to next phase
                 addDebugLog("🔓 Dealer turn processing unlocked (finished)");
                 setPhase("RESOLVING");
-              }, 10000); // Increased to 10 seconds - dealer callouts stay visible longer
+              }, 1500); // Brief delay to show final dealer result
             }
 
             return prevHand;

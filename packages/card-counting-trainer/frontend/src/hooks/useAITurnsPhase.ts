@@ -110,14 +110,36 @@ export function useAITurnsPhase({
       );
 
       const nextPlayer = playersByPosition.find(({ ai, idx }) => {
-        if (playersFinished.has(idx)) return false;
+        if (playersFinished.has(idx)) {
+          addDebugLog(
+            `  ${ai.character.name} (idx:${idx}) - SKIPPED (already finished)`,
+          );
+          return false;
+        }
 
         const handValue = calculateHandValue(ai.hand.cards);
         const isBust = isBusted(ai.hand.cards);
 
-        if (isBust) return false;
-        if (handValue < 21) return true;
-        if (handValue === 21) return true;
+        addDebugLog(
+          `  ${ai.character.name} (idx:${idx}) - Hand: ${ai.hand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")} (value: ${handValue}, busted: ${isBust})`,
+        );
+
+        if (isBust) {
+          addDebugLog(`  ${ai.character.name} (idx:${idx}) - SKIPPED (busted)`);
+          return false;
+        }
+        if (handValue < 21) {
+          addDebugLog(
+            `  ${ai.character.name} (idx:${idx}) - SELECTED (hand < 21)`,
+          );
+          return true;
+        }
+        if (handValue === 21) {
+          addDebugLog(
+            `  ${ai.character.name} (idx:${idx}) - SELECTED (hand = 21)`,
+          );
+          return true;
+        }
 
         return false;
       });
