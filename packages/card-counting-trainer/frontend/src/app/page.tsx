@@ -51,6 +51,7 @@ import LeaderboardModal from "@/components/LeaderboardModal";
 import GameSettingsModal from "@/components/GameSettingsModal";
 import BasicStrategyCard from "@/components/BasicStrategyCard";
 import BettingInterface from "@/components/BettingInterface";
+import StatsBar from "@/components/StatsBar";
 import { CARD_APPEAR_TIME, CARD_ANIMATION_DURATION } from "@/constants/animations";
 import {
   PlayerHand,
@@ -2117,267 +2118,20 @@ export default function GamePage() {
         level={suspicionLevel}
         pitBossDistance={pitBossDistance}
       />
-
       {/* Stats Bar at Top */}
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "60px",
-          backgroundColor: "rgba(0, 0, 0, 0.8)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0 20px",
-          zIndex: 1000,
-          borderBottom: "2px solid #FFD700",
-        }}
-      >
-        <div className="flex gap-3 items-center">
-          {gameSettings.trainingMode === TrainingMode.PRACTICE && (
-            <div
-              style={{
-                backgroundColor: "rgba(255, 215, 0, 0.1)",
-                color: "#FFF",
-                border: "2px solid #FFD700",
-                borderRadius: "8px",
-                padding: "6px 12px",
-                fontSize: "14px",
-                fontWeight: "bold",
-                width: "150px",
-                textAlign: "center",
-              }}
-            >
-              COUNT:{" "}
-              <span style={{ color: "#FFD700" }}>
-                {runningCount >= 0 ? `+${runningCount}` : runningCount}
-              </span>
-            </div>
-          )}
-          {gameSettings.trainingMode === TrainingMode.TEST && (
-            <div
-              style={{
-                backgroundColor: "rgba(255, 107, 107, 0.1)",
-                color: "#FF6B6B",
-                border: "2px solid #FF6B6B",
-                borderRadius: "8px",
-                padding: "6px 12px",
-                fontSize: "14px",
-                fontWeight: "bold",
-                width: "150px",
-                textAlign: "center",
-              }}
-            >
-              🧪 TEST MODE
-            </div>
-          )}
-          {gameSettings.trainingMode === TrainingMode.TIMED_CHALLENGE && (
-            <>
-              <div
-                style={{
-                  backgroundColor: "rgba(255, 215, 0, 0.1)",
-                  color: "#FFF",
-                  border: "2px solid #FFD700",
-                  borderRadius: "8px",
-                  padding: "6px 12px",
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  width: "150px",
-                  textAlign: "center",
-                }}
-              >
-                COUNT:{" "}
-                <span style={{ color: "#FFD700" }}>
-                  {runningCount >= 0 ? `+${runningCount}` : runningCount}
-                </span>
-              </div>
-              <div
-                style={{
-                  backgroundColor:
-                    timeRemaining < 60
-                      ? "rgba(255, 107, 107, 0.1)"
-                      : timeRemaining < 180
-                        ? "rgba(255, 215, 0, 0.1)"
-                        : "rgba(76, 175, 80, 0.1)",
-                  color: "#FFF",
-                  border: `2px solid ${timeRemaining < 60 ? "#FF6B6B" : timeRemaining < 180 ? "#FFD700" : "#4CAF50"}`,
-                  borderRadius: "8px",
-                  padding: "6px 12px",
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  width: "150px",
-                  textAlign: "center",
-                }}
-              >
-                ⏱️ TIME:{" "}
-                <span
-                  style={{
-                    color:
-                      timeRemaining < 60
-                        ? "#FF6B6B"
-                        : timeRemaining < 180
-                          ? "#FFD700"
-                          : "#4CAF50",
-                  }}
-                >
-                  {Math.floor(timeRemaining / 60)}:
-                  {String(timeRemaining % 60).padStart(2, "0")}
-                </span>
-              </div>
-            </>
-          )}
-          <div
-            style={{
-              backgroundColor: "rgba(76, 175, 80, 0.1)",
-              color: "#FFF",
-              border: "2px solid #4CAF50",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              width: "150px",
-              textAlign: "center",
-            }}
-          >
-            STREAK:{" "}
-            <span style={{ color: currentStreak > 0 ? "#4CAF50" : "#AAA" }}>
-              {currentStreak}
-            </span>
-          </div>
-          <div
-            style={{
-              backgroundColor: "rgba(255, 215, 0, 0.1)",
-              color: "#FFF",
-              border: "2px solid #FFD700",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              width: "150px",
-              textAlign: "center",
-            }}
-          >
-            CHIPS:{" "}
-            <span style={{ color: "#FFD700" }}>
-              {playerChips.toLocaleString()}
-            </span>
-          </div>
-          <div
-            style={{
-              backgroundColor: "rgba(155, 89, 182, 0.1)",
-              color: "#FFF",
-              border: "2px solid #9B59B6",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              width: "150px",
-              textAlign: "center",
-            }}
-          >
-            SCORE:{" "}
-            <span style={{ color: "#9B59B6" }}>
-              {currentScore.toLocaleString()}
-            </span>
-          </div>
-          <div
-            style={{
-              backgroundColor:
-                scoreMultiplier > 1.0
-                  ? "rgba(76, 175, 80, 0.1)"
-                  : "rgba(128, 128, 128, 0.1)",
-              color: "#FFF",
-              border: `2px solid ${scoreMultiplier > 1.0 ? "#4CAF50" : "#808080"}`,
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              width: "150px",
-              textAlign: "center",
-            }}
-          >
-            MULTIPLIER:{" "}
-            <span
-              style={{ color: scoreMultiplier > 1.0 ? "#4CAF50" : "#808080" }}
-            >
-              {scoreMultiplier.toFixed(1)}x
-            </span>
-          </div>
-        </div>
+      <StatsBar
+        gameSettings={gameSettings}
+        runningCount={runningCount}
+        timeRemaining={timeRemaining}
+        currentStreak={currentStreak}
+        playerChips={playerChips}
+        currentScore={currentScore}
+        scoreMultiplier={scoreMultiplier}
+        onSettingsClick={() => setShowSettings(true)}
+        onLeaderboardClick={() => setShowLeaderboard(true)}
+        onStrategyClick={() => setShowStrategyCard(true)}
+      />
 
-        <div className="flex gap-4 items-center">
-          <button
-            onClick={() => setShowSettings(true)}
-            style={{
-              backgroundColor: "rgba(74, 144, 226, 0.2)",
-              color: "#FFF",
-              border: "2px solid #4A90E2",
-              borderRadius: "8px",
-              padding: "6px 16px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#4A90E2";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(74, 144, 226, 0.2)";
-            }}
-          >
-            ⚙️ Settings
-          </button>
-          <button
-            onClick={() => setShowLeaderboard(true)}
-            style={{
-              backgroundColor: "rgba(155, 89, 182, 0.2)",
-              color: "#FFF",
-              border: "2px solid #9B59B6",
-              borderRadius: "8px",
-              padding: "6px 16px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#9B59B6";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(155, 89, 182, 0.2)";
-            }}
-          >
-            🏆 Leaderboard
-          </button>
-          <button
-            onClick={() => setShowStrategyCard(true)}
-            style={{
-              backgroundColor: "rgba(255, 215, 0, 0.2)",
-              color: "#FFD700",
-              border: "2px solid #FFD700",
-              borderRadius: "8px",
-              padding: "6px 16px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#FFD700";
-              e.currentTarget.style.color = "#000";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.2)";
-              e.currentTarget.style.color = "#FFD700";
-            }}
-          >
-            📊 Strategy
-          </button>
-        </div>
-      </div>
 
       {/* Full Viewport Game Table */}
       <div
