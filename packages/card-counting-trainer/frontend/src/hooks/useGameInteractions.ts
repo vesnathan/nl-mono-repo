@@ -1,7 +1,8 @@
 import { useCallback } from "react";
-import { AIPlayer, ActiveConversation, SpeechBubble } from "@/types/gameState";
+import { AIPlayer, ActiveConversation, SpeechBubble, PlayerHand } from "@/types/gameState";
+import { BlackjackPayout } from "@/types/gameSettings";
 import { createConversation, createSpeechBubble } from "@/utils/conversationHelpers";
-import { generateInitialReactions } from "@/utils/reactions";
+import { generateInitialReactions, generateEndOfHandReactions } from "@/utils/reactions";
 
 interface UseGameInteractionsParams {
   activeConversation: ActiveConversation | null;
@@ -9,6 +10,8 @@ interface UseGameInteractionsParams {
   setSpeechBubbles: (bubbles: SpeechBubble[] | ((prev: SpeechBubble[]) => SpeechBubble[])) => void;
   registerTimeout: (callback: () => void, delay: number) => void;
   aiPlayers: AIPlayer[];
+  dealerHand: PlayerHand;
+  blackjackPayout: BlackjackPayout;
   addDebugLog: (message: string) => void;
 }
 
@@ -18,6 +21,8 @@ export function useGameInteractions({
   setSpeechBubbles,
   registerTimeout,
   aiPlayers,
+  dealerHand,
+  blackjackPayout,
   addDebugLog,
 }: UseGameInteractionsParams) {
   const triggerConversation = useCallback(
@@ -70,9 +75,28 @@ export function useGameInteractions({
     });
   }, [aiPlayers, addSpeechBubble]);
 
+  const showEndOfHandReactions = useCallback(() => {
+    const selectedReactions = generateEndOfHandReactions(
+      aiPlayers,
+      dealerHand,
+      blackjackPayout,
+    );
+
+    selectedReactions.forEach((reaction, idx) => {
+      registerTimeout(() => {
+        addSpeechBubble(
+          `${reaction.playerId}-reaction-${idx}`, // Unique ID per reaction
+          reaction.message,
+          reaction.position,
+        );
+      }, idx * 1000); // Stagger by 1 second to avoid overlap
+    });
+  }, [aiPlayers, dealerHand, blackjackPayout, registerTimeout, addSpeechBubble]);
+
   return {
     triggerConversation,
     addSpeechBubble,
     checkForInitialReactions,
+    showEndOfHandReactions,
   };
 }
