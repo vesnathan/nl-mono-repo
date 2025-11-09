@@ -10,7 +10,7 @@ export function useTimedChallenge(
   timedChallengeActive: boolean,
   setTimedChallengeActive: (active: boolean) => void,
   timeRemaining: number,
-  setTimeRemaining: (time: number | ((prev: number) => number)) => void
+  setTimeRemaining: (time: number | ((prev: number) => number)) => void,
 ) {
   useEffect(() => {
     if (trainingMode === TrainingMode.TIMED_CHALLENGE) {
@@ -38,5 +38,11 @@ export function useTimedChallenge(
     } else {
       setTimedChallengeActive(false);
     }
-  }, [trainingMode, timedChallengeActive, timeRemaining, setTimedChallengeActive, setTimeRemaining]);
+  }, [
+    trainingMode,
+    timedChallengeActive,
+    timeRemaining,
+    setTimedChallengeActive,
+    setTimeRemaining,
+  ]);
 }

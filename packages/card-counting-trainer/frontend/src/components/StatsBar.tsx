@@ -215,8 +215,7 @@ export default function StatsBar({
             e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.2)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(255, 255, 255, 0.1)";
+            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
           }}
         >
           ⚙️ Settings
@@ -238,8 +237,7 @@ export default function StatsBar({
             e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.2)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(255, 255, 255, 0.1)";
+            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
           }}
         >
           🏆 Leaderboard
@@ -261,8 +259,7 @@ export default function StatsBar({
             e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.2)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor =
-              "rgba(255, 255, 255, 0.1)";
+            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
           }}
         >
           📊 Strategy

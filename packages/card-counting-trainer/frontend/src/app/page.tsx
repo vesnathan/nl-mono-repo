@@ -1,68 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Button } from "@nextui-org/react";
-import {
-  createAndShuffleShoe,
-  calculateDecksRemaining,
-  calculateTrueCount,
-} from "@/lib/deck";
-import {
-  dealCard,
-  calculateHandValue,
-  isBlackjack,
-  isBusted,
-} from "@/lib/gameActions";
-import { determineHandResult, calculatePayout } from "@/lib/dealer";
-import { Card as GameCard, HandResult } from "@/types/game";
-import {
-  GameSettings,
-  DEFAULT_GAME_SETTINGS,
-  getBlackjackPayoutMultiplier,
-  calculateCutCardPosition,
-  TrainingMode,
-} from "@/types/gameSettings";
-import {
-  AI_CHARACTERS,
-  AICharacter,
-  getAIAvatarPath,
-} from "@/data/aiCharacters";
-import {
-  DealerCharacter,
-  getRandomDealer,
-  getDealerAvatarPath,
-} from "@/data/dealerCharacters";
-import { getInitialHandReaction } from "@/data/inHandReactions";
-import {
-  AI_DIALOGUE_ADDONS,
-  getDealerPlayerLine,
-  pick,
-} from "@/data/ai-dialogue-addons";
-import FlyingCard from "@/components/FlyingCard";
-import WinLossBubble from "@/components/WinLossBubble";
-import SuspicionMeter from "@/components/SuspicionMeter";
-import DealerInfo from "@/components/DealerInfo";
-import Shoe from "@/components/Shoe";
-import PlayingCard from "@/components/PlayingCard";
-import ActionBubble from "@/components/ActionBubble";
-import TurnIndicator from "@/components/TurnIndicator";
-import ConversationPrompt from "@/components/ConversationPrompt";
-import LeaderboardModal from "@/components/LeaderboardModal";
-import GameSettingsModal from "@/components/GameSettingsModal";
-import BasicStrategyCard from "@/components/BasicStrategyCard";
-import BettingInterface from "@/components/BettingInterface";
-import StatsBar from "@/components/StatsBar";
-import DealerSection from "@/components/DealerSection";
-import TableSeats from "@/components/TableSeats";
-import GameOverlays from "@/components/GameOverlays";
-import DebugLogModal from "@/components/DebugLogModal";
-import GameModals from "@/components/GameModals";
-import GameTable from "@/components/GameTable";
-import BlackjackGameUI from "@/components/BlackjackGameUI";
-import {
-  CARD_APPEAR_TIME,
-  CARD_ANIMATION_DURATION,
-} from "@/constants/animations";
+import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
+import { GameSettings, DEFAULT_GAME_SETTINGS } from "@/types/gameSettings";
+import { DealerCharacter } from "@/data/dealerCharacters";
 import {
   PlayerHand,
   AIPlayer,
@@ -73,7 +14,6 @@ import {
   GamePhase,
 } from "@/types/gameState";
 import { getCardPosition } from "@/utils/cardPositions";
-import { calculateStreakPoints } from "@/utils/scoreCalculation";
 import { useGameTimeouts } from "@/hooks/useGameTimeouts";
 import { useDebugLogging } from "@/hooks/useDebugLogging";
 import { useGameShoe } from "@/hooks/useGameShoe";
@@ -93,7 +33,7 @@ import { useRoundEndPhase } from "@/hooks/useRoundEndPhase";
 import { useDealerTurnPhase } from "@/hooks/useDealerTurnPhase";
 import { useResolvingPhase } from "@/hooks/useResolvingPhase";
 import { useAITurnsPhase } from "@/hooks/useAITurnsPhase";
-import { shouldHitBasicStrategy } from "@/utils/aiStrategy";
+import BlackjackGameUI from "@/components/BlackjackGameUI";
 
 export default function GamePage() {
   // Game settings

@@ -1,6 +1,14 @@
 import { useEffect, useRef } from "react";
-import { GamePhase, AIPlayer, PlayerHand, WinLossBubbleData } from "@/types/gameState";
-import { GameSettings, getBlackjackPayoutMultiplier } from "@/types/gameSettings";
+import {
+  GamePhase,
+  AIPlayer,
+  PlayerHand,
+  WinLossBubbleData,
+} from "@/types/gameState";
+import {
+  GameSettings,
+  getBlackjackPayoutMultiplier,
+} from "@/types/gameSettings";
 import { DealerCharacter } from "@/data/dealerCharacters";
 import { determineHandResult, calculatePayout } from "@/lib/dealer";
 import { calculateHandValue, isBusted } from "@/lib/gameActions";
@@ -19,7 +27,9 @@ interface UseResolvingPhaseParams {
   cardsDealt: number;
   runningCount: number;
   setPlayerChips: (chips: number | ((prev: number) => number)) => void;
-  setPlayerHand: (hand: PlayerHand | ((prev: PlayerHand) => PlayerHand)) => void;
+  setPlayerHand: (
+    hand: PlayerHand | ((prev: PlayerHand) => PlayerHand),
+  ) => void;
   setPitBossDistance: (distance: number | ((prev: number) => number)) => void;
   setSuspicionLevel: (level: number | ((prev: number) => number)) => void;
   setPreviousBet: (bet: number) => void;

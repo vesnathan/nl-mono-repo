@@ -1,5 +1,10 @@
 import { useEffect, useRef } from "react";
-import { GamePhase, AIPlayer, PlayerHand, FlyingCardData } from "@/types/gameState";
+import {
+  GamePhase,
+  AIPlayer,
+  PlayerHand,
+  FlyingCardData,
+} from "@/types/gameState";
 import { Card } from "@/types/game";
 import { calculateHandValue, isBusted } from "@/lib/gameActions";
 import { AI_DIALOGUE_ADDONS, pick } from "@/data/ai-dialogue-addons";
@@ -13,14 +18,36 @@ interface UseAITurnsPhaseParams {
   activePlayerIndex: number | null;
   playersFinished: Set<number>;
   setActivePlayerIndex: (index: number | null) => void;
-  setPlayersFinished: (finished: Set<number> | ((prev: Set<number>) => Set<number>)) => void;
-  setPlayerActions: (actions: Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK"> | ((prev: Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK">) => Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK">)) => void;
-  setAIPlayers: (players: AIPlayer[] | ((prev: AIPlayer[]) => AIPlayer[])) => void;
-  setFlyingCards: (cards: FlyingCardData[] | ((prev: FlyingCardData[]) => FlyingCardData[])) => void;
+  setPlayersFinished: (
+    finished: Set<number> | ((prev: Set<number>) => Set<number>),
+  ) => void;
+  setPlayerActions: (
+    actions:
+      | Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK">
+      | ((
+          prev: Map<
+            number,
+            "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK"
+          >,
+        ) => Map<
+          number,
+          "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK"
+        >),
+  ) => void;
+  setAIPlayers: (
+    players: AIPlayer[] | ((prev: AIPlayer[]) => AIPlayer[]),
+  ) => void;
+  setFlyingCards: (
+    cards: FlyingCardData[] | ((prev: FlyingCardData[]) => FlyingCardData[]),
+  ) => void;
   setPhase: (phase: GamePhase) => void;
   dealCardFromShoe: () => Card;
   registerTimeout: (callback: () => void, delay: number) => void;
-  getCardPositionForAnimation: (type: "shoe" | "ai", aiIndex?: number, cardIndex?: number) => { left: string; top: string };
+  getCardPositionForAnimation: (
+    type: "shoe" | "ai",
+    aiIndex?: number,
+    cardIndex?: number,
+  ) => { left: string; top: string };
   addSpeechBubble: (id: string, message: string, position: number) => void;
   addDebugLog: (message: string) => void;
 }
@@ -193,7 +220,11 @@ export function useAITurnsPhase({
           );
 
           const shoePosition = getCardPositionForAnimation("shoe");
-          const aiPosition = getCardPositionForAnimation("ai", idx, ai.hand.cards.length);
+          const aiPosition = getCardPositionForAnimation(
+            "ai",
+            idx,
+            ai.hand.cards.length,
+          );
 
           const flyingCard: FlyingCardData = {
             id: `hit-ai-${idx}-${Date.now()}`,

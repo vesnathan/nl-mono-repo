@@ -1,6 +1,19 @@
 // Card types
 export type Suit = "H" | "D" | "C" | "S"; // Hearts, Diamonds, Clubs, Spades
-export type Rank = "A" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "J" | "Q" | "K";
+export type Rank =
+  | "A"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9"
+  | "10"
+  | "J"
+  | "Q"
+  | "K";
 
 export interface Card {
   suit: Suit;
@@ -28,7 +41,13 @@ export interface Player {
 }
 
 // Game state types
-export type GamePhase = "BETTING" | "DEALING" | "PLAYER_TURN" | "DEALER_TURN" | "RESOLVING" | "GAME_OVER";
+export type GamePhase =
+  | "BETTING"
+  | "DEALING"
+  | "PLAYER_TURN"
+  | "DEALER_TURN"
+  | "RESOLVING"
+  | "GAME_OVER";
 
 export interface GameState {
   // Deck management

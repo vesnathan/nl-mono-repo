@@ -17,5 +17,5 @@ export const TABLE_POSITIONS: readonly [number, number][] = [
   [42, 72], // Seat 4 - Center
   [29, 68], // Seat 5 - Center-left
   [16, 62], // Seat 6 - Left
-  [5, 55],  // Seat 7 - Far left (third base)
+  [5, 55], // Seat 7 - Far left (third base)
 ] as const;

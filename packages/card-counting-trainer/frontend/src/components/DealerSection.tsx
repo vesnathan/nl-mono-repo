@@ -1,7 +1,6 @@
 import React from "react";
 import { DealerCharacter, getDealerAvatarPath } from "@/data/dealerCharacters";
-import { PlayerHand } from "@/types/gameState";
-import { GamePhase } from "@/types/gameState";
+import { PlayerHand, GamePhase } from "@/types/gameState";
 import TurnIndicator from "@/components/TurnIndicator";
 import PlayingCard from "@/components/PlayingCard";
 

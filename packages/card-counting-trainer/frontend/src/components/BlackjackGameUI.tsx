@@ -39,7 +39,10 @@ interface BlackjackGameUIProps {
   playerHand: PlayerHand;
   currentBet: number;
   activePlayerIndex: number | null;
-  playerActions: Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK">;
+  playerActions: Map<
+    number,
+    "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK"
+  >;
   speechBubbles: SpeechBubble[];
   winLossBubbles: WinLossBubbleData[];
   activeConversation: ActiveConversation | null;

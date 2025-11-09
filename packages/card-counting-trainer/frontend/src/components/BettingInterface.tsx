@@ -40,7 +40,8 @@ export default function BettingInterface({
     }
   };
 
-  const canPlaceBet = currentBet >= minBet && currentBet <= maxBet && currentBet <= playerChips;
+  const canPlaceBet =
+    currentBet >= minBet && currentBet <= maxBet && currentBet <= playerChips;
   const canAddChip = (value: number) => {
     const newBet = currentBet + value;
     return newBet <= maxBet && newBet <= playerChips;
@@ -189,7 +190,10 @@ export default function BettingInterface({
             padding: "10px 24px",
             borderRadius: "8px",
             border: "2px solid #EF4444",
-            backgroundColor: currentBet > 0 ? "rgba(239, 68, 68, 0.2)" : "rgba(100, 100, 100, 0.2)",
+            backgroundColor:
+              currentBet > 0
+                ? "rgba(239, 68, 68, 0.2)"
+                : "rgba(100, 100, 100, 0.2)",
             color: currentBet > 0 ? "#EF4444" : "#666",
             fontSize: "14px",
             fontWeight: "bold",
@@ -217,7 +221,9 @@ export default function BettingInterface({
             padding: "10px 32px",
             borderRadius: "8px",
             border: "2px solid #10B981",
-            backgroundColor: canPlaceBet ? "rgba(16, 185, 129, 0.2)" : "rgba(100, 100, 100, 0.2)",
+            backgroundColor: canPlaceBet
+              ? "rgba(16, 185, 129, 0.2)"
+              : "rgba(100, 100, 100, 0.2)",
             color: canPlaceBet ? "#10B981" : "#666",
             fontSize: "14px",
             fontWeight: "bold",

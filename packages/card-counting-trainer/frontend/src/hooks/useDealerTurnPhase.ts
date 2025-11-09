@@ -1,5 +1,10 @@
 import { useEffect, useRef } from "react";
-import { GamePhase, AIPlayer, PlayerHand, FlyingCardData } from "@/types/gameState";
+import {
+  GamePhase,
+  AIPlayer,
+  PlayerHand,
+  FlyingCardData,
+} from "@/types/gameState";
 import { GameSettings } from "@/types/gameSettings";
 import { Card } from "@/types/game";
 import { calculateHandValue, isBusted } from "@/lib/gameActions";
@@ -12,13 +17,21 @@ interface UseDealerTurnPhaseParams {
   aiPlayers: AIPlayer[];
   gameSettings: GameSettings;
   setDealerRevealed: (revealed: boolean) => void;
-  setDealerHand: (hand: PlayerHand | ((prev: PlayerHand) => PlayerHand)) => void;
+  setDealerHand: (
+    hand: PlayerHand | ((prev: PlayerHand) => PlayerHand),
+  ) => void;
   setDealerCallout: (callout: string | null) => void;
-  setFlyingCards: (cards: FlyingCardData[] | ((prev: FlyingCardData[]) => FlyingCardData[])) => void;
+  setFlyingCards: (
+    cards: FlyingCardData[] | ((prev: FlyingCardData[]) => FlyingCardData[]),
+  ) => void;
   setPhase: (phase: GamePhase) => void;
   dealCardFromShoe: () => Card;
   registerTimeout: (callback: () => void, delay: number) => void;
-  getCardPositionForAnimation: (type: "shoe" | "dealer", aiIndex?: number, cardIndex?: number) => { left: string; top: string };
+  getCardPositionForAnimation: (
+    type: "shoe" | "dealer",
+    aiIndex?: number,
+    cardIndex?: number,
+  ) => { left: string; top: string };
   addSpeechBubble: (id: string, message: string, position: number) => void;
   addDebugLog: (message: string) => void;
 }
@@ -200,5 +213,20 @@ export function useDealerTurnPhase({
         dealNextCard();
       }, 1500);
     }
-  }, [phase, dealerHand, dealCardFromShoe, gameSettings, registerTimeout, addDebugLog, setDealerRevealed, aiPlayers, addSpeechBubble, setDealerHand, getCardPositionForAnimation, setFlyingCards, setDealerCallout, setPhase]);
+  }, [
+    phase,
+    dealerHand,
+    dealCardFromShoe,
+    gameSettings,
+    registerTimeout,
+    addDebugLog,
+    setDealerRevealed,
+    aiPlayers,
+    addSpeechBubble,
+    setDealerHand,
+    getCardPositionForAnimation,
+    setFlyingCards,
+    setDealerCallout,
+    setPhase,
+  ]);
 }

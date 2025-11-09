@@ -10,7 +10,7 @@ import { calculateHandValue } from "@/lib/gameActions";
  */
 export function shouldHitBasicStrategy(
   playerCards: GameCard[],
-  dealerUpCard: GameCard
+  dealerUpCard: GameCard,
 ): boolean {
   const playerValue = calculateHandValue(playerCards);
   const dealerValue =

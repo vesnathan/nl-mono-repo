@@ -1,8 +1,7 @@
 import { useEffect } from "react";
 import { AI_CHARACTERS } from "@/data/aiCharacters";
-import { getRandomDealer } from "@/data/dealerCharacters";
+import { getRandomDealer, DealerCharacter } from "@/data/dealerCharacters";
 import { AIPlayer } from "@/types/gameState";
-import { DealerCharacter } from "@/data/dealerCharacters";
 
 /**
  * Hook to handle game initialization on mount
@@ -13,13 +12,13 @@ import { DealerCharacter } from "@/data/dealerCharacters";
 export function useGameInitialization(
   setAIPlayers: (players: AIPlayer[]) => void,
   setCurrentDealer: (dealer: DealerCharacter) => void,
-  setInitialized: (initialized: boolean) => void
+  setInitialized: (initialized: boolean) => void,
 ) {
   useEffect(() => {
     // Randomly select 3-4 AI players
     const numAIPlayers = Math.floor(Math.random() * 2) + 3; // 3 or 4 AI players
     const shuffledCharacters = [...AI_CHARACTERS].sort(
-      () => Math.random() - 0.5
+      () => Math.random() - 0.5,
     );
     const selectedCharacters = shuffledCharacters.slice(0, numAIPlayers);
 

@@ -6,7 +6,7 @@ import { useEffect } from "react";
  */
 export function useSuspicionDecay(
   suspicionLevel: number,
-  setSuspicionLevel: (level: number | ((prev: number) => number)) => void
+  setSuspicionLevel: (level: number | ((prev: number) => number)) => void,
 ) {
   useEffect(() => {
     if (suspicionLevel > 0) {

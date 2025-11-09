@@ -11,7 +11,11 @@ interface UseConversationTriggersParams {
   currentDealer: DealerCharacter | null;
   playerSociability: number;
   phase: GamePhase;
-  triggerConversation: (speakerId: string, speakerName: string, position: number) => void;
+  triggerConversation: (
+    speakerId: string,
+    speakerName: string,
+    position: number,
+  ) => void;
   addSpeechBubble: (id: string, message: string, position: number) => void;
 }
 
@@ -41,7 +45,7 @@ export function useConversationTriggers({
     const intervalVariation = 10000;
     const sociabilityIntervalMultiplier = Math.max(
       0.5,
-      2 - playerSociability / 50
+      2 - playerSociability / 50,
     );
 
     const conversationInterval = setInterval(
@@ -55,7 +59,7 @@ export function useConversationTriggers({
           triggerConversation(
             randomAI.character.id,
             randomAI.character.name,
-            randomAI.position
+            randomAI.position,
           );
         } else if (currentDealer) {
           const dealerPosition = 3;
@@ -63,7 +67,7 @@ export function useConversationTriggers({
         }
       },
       (baseInterval + Math.random() * intervalVariation) *
-        sociabilityIntervalMultiplier
+        sociabilityIntervalMultiplier,
     );
 
     return () => clearInterval(conversationInterval);
@@ -89,19 +93,19 @@ export function useConversationTriggers({
 
           const message = getDealerPlayerLine(
             randomAI.character.id,
-            "smallTalk"
+            "smallTalk",
           );
 
           if (message) {
             addSpeechBubble(
               `ai-banter-${Date.now()}`,
               message,
-              randomAI.position
+              randomAI.position,
             );
           }
         }
       },
-      15000 + Math.random() * 10000
+      15000 + Math.random() * 10000,
     );
 
     return () => clearInterval(banterInterval);

@@ -9,7 +9,11 @@ interface DealerInfoProps {
   openAsModal?: boolean; // If true, opens directly as modal instead of badge
 }
 
-export default function DealerInfo({ dealer, onClose, openAsModal = false }: DealerInfoProps) {
+export default function DealerInfo({
+  dealer,
+  onClose,
+  openAsModal = false,
+}: DealerInfoProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [showModal, setShowModal] = useState(openAsModal);
 

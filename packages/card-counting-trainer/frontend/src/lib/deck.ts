@@ -107,7 +107,9 @@ export function getCardValue(rank: Rank): number {
  * Create a single deck of 52 cards
  * @param countingSystem The counting system to use for count values (defaults to Hi-Lo)
  */
-export function createDeck(countingSystem: CountingSystem = CountingSystem.HI_LO): Card[] {
+export function createDeck(
+  countingSystem: CountingSystem = CountingSystem.HI_LO,
+): Card[] {
   const suits: Suit[] = ["H", "D", "C", "S"];
   const ranks: Rank[] = [
     "A",
@@ -145,7 +147,10 @@ export function createDeck(countingSystem: CountingSystem = CountingSystem.HI_LO
  * @param numDecks Number of decks (1, 2, 4, 6, or 8)
  * @param countingSystem The counting system to use for count values (defaults to Hi-Lo)
  */
-export function createShoe(numDecks: number, countingSystem: CountingSystem = CountingSystem.HI_LO): Card[] {
+export function createShoe(
+  numDecks: number,
+  countingSystem: CountingSystem = CountingSystem.HI_LO,
+): Card[] {
   const shoe: Card[] = [];
 
   for (let i = 0; i < numDecks; i++) {
@@ -177,7 +182,10 @@ export function shuffleCards(cards: Card[]): Card[] {
  * @param numDecks Number of decks (1, 2, 4, 6, or 8)
  * @param countingSystem The counting system to use for count values (defaults to Hi-Lo)
  */
-export function createAndShuffleShoe(numDecks: number, countingSystem: CountingSystem = CountingSystem.HI_LO): Card[] {
+export function createAndShuffleShoe(
+  numDecks: number,
+  countingSystem: CountingSystem = CountingSystem.HI_LO,
+): Card[] {
   const shoe = createShoe(numDecks, countingSystem);
   return shuffleCards(shoe);
 }

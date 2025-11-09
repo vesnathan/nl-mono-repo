@@ -2,8 +2,10 @@ import { AIPlayer, PlayerHand } from "@/types/gameState";
 import { calculateHandValue, isBlackjack } from "@/lib/gameActions";
 import { getInitialHandReaction } from "@/data/inHandReactions";
 import { determineHandResult, calculatePayout } from "@/lib/dealer";
-import { getBlackjackPayoutMultiplier } from "@/types/gameSettings";
-import { BlackjackPayout } from "@/types/gameSettings";
+import {
+  getBlackjackPayoutMultiplier,
+  BlackjackPayout,
+} from "@/types/gameSettings";
 
 export interface Reaction {
   playerId: string;

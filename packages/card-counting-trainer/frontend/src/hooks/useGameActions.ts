@@ -1,5 +1,10 @@
 import { useCallback } from "react";
-import { AIPlayer, PlayerHand, GamePhase, FlyingCardData } from "@/types/gameState";
+import {
+  AIPlayer,
+  PlayerHand,
+  GamePhase,
+  FlyingCardData,
+} from "@/types/gameState";
 import { Card as GameCard } from "@/types/game";
 import { DealerCharacter } from "@/data/dealerCharacters";
 import { dealCard, calculateHandValue } from "@/lib/gameActions";
@@ -24,12 +29,32 @@ interface UseGameActionsParams {
   setPhase: (phase: GamePhase) => void;
   setCurrentBet: (bet: number) => void;
   setDealerRevealed: (revealed: boolean) => void;
-  setPlayerHand: (hand: PlayerHand | ((prev: PlayerHand) => PlayerHand)) => void;
-  setDealerHand: (hand: PlayerHand | ((prev: PlayerHand) => PlayerHand)) => void;
+  setPlayerHand: (
+    hand: PlayerHand | ((prev: PlayerHand) => PlayerHand),
+  ) => void;
+  setDealerHand: (
+    hand: PlayerHand | ((prev: PlayerHand) => PlayerHand),
+  ) => void;
   setSpeechBubbles: (bubbles: any[]) => void;
-  setAIPlayers: (players: AIPlayer[] | ((prev: AIPlayer[]) => AIPlayer[])) => void;
-  setFlyingCards: (cards: FlyingCardData[] | ((prev: FlyingCardData[]) => FlyingCardData[])) => void;
-  setPlayerActions: (actions: Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK"> | ((prev: Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK">) => Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK">)) => void;
+  setAIPlayers: (
+    players: AIPlayer[] | ((prev: AIPlayer[]) => AIPlayer[]),
+  ) => void;
+  setFlyingCards: (
+    cards: FlyingCardData[] | ((prev: FlyingCardData[]) => FlyingCardData[]),
+  ) => void;
+  setPlayerActions: (
+    actions:
+      | Map<number, "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK">
+      | ((
+          prev: Map<
+            number,
+            "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK"
+          >,
+        ) => Map<
+          number,
+          "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK"
+        >),
+  ) => void;
   setShoe: (shoe: GameCard[]) => void;
   setCardsDealt: (cards: number) => void;
   setRunningCount: (count: number) => void;
@@ -43,7 +68,7 @@ interface UseGameActionsParams {
     aiPlayers: AIPlayer[],
     playerSeat: number | null,
     index?: number,
-    cardIndex?: number
+    cardIndex?: number,
   ) => { left: string; top: string };
   addDebugLog: (message: string) => void;
 }
@@ -92,7 +117,16 @@ export function useGameActions({
       hand: { cards: [], bet: 0 },
     }));
     setAIPlayers(updatedAI);
-  }, [aiPlayers, setPhase, setCurrentBet, setDealerRevealed, setPlayerHand, setDealerHand, setSpeechBubbles, setAIPlayers]);
+  }, [
+    aiPlayers,
+    setPhase,
+    setCurrentBet,
+    setDealerRevealed,
+    setPlayerHand,
+    setDealerHand,
+    setSpeechBubbles,
+    setAIPlayers,
+  ]);
 
   const dealInitialCards = useCallback(() => {
     addDebugLog("=== DEALING PHASE START ===");
@@ -235,7 +269,9 @@ export function useGameActions({
 
         // Remove flying card and update hand after animation
         registerTimeout(() => {
-          setFlyingCards((prev) => prev.filter((fc) => fc.id !== flyingCard.id));
+          setFlyingCards((prev) =>
+            prev.filter((fc) => fc.id !== flyingCard.id),
+          );
 
           if (dealData.type === "dealer") {
             setDealerHand((prev) => ({
@@ -284,7 +320,9 @@ export function useGameActions({
           registerTimeout(() => setPhase("RESOLVING"), 2000);
         } else {
           addDebugLog(`Dealer showing: ${dealerCard1.rank}${dealerCard1.suit}`);
-          addDebugLog(`Dealer hole card: ${dealerCard2.rank}${dealerCard2.suit} [hidden]`);
+          addDebugLog(
+            `Dealer hole card: ${dealerCard2.rank}${dealerCard2.suit} [hidden]`,
+          );
         }
 
         addDebugLog(`Running count after dealing: ${currentRunningCount}`);

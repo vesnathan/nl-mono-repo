@@ -1,5 +1,11 @@
 import { GameState, Hand, HandResult } from "@/types/game";
-import { calculateHandValue, isBlackjack, isBusted, dealCard, isSoftHand } from "./gameActions";
+import {
+  calculateHandValue,
+  isBlackjack,
+  isBusted,
+  dealCard,
+  isSoftHand,
+} from "./gameActions";
 
 /**
  * Dealer Rules Configuration
@@ -20,7 +26,10 @@ export const DEFAULT_DEALER_RULES: DealerRules = {
  * @param rules Dealer rules configuration
  * @returns True if dealer should hit
  */
-export function shouldDealerHit(dealerHand: Hand, rules: DealerRules = DEFAULT_DEALER_RULES): boolean {
+export function shouldDealerHit(
+  dealerHand: Hand,
+  rules: DealerRules = DEFAULT_DEALER_RULES,
+): boolean {
   const handValue = calculateHandValue(dealerHand.cards);
 
   // Always hit on 16 or less
@@ -48,7 +57,7 @@ export function shouldDealerHit(dealerHand: Hand, rules: DealerRules = DEFAULT_D
  */
 export function playDealerHand(
   gameState: GameState,
-  rules: DealerRules = DEFAULT_DEALER_RULES
+  rules: DealerRules = DEFAULT_DEALER_RULES,
 ): GameState {
   let updatedState = { ...gameState };
   const dealerIndex = 0; // Dealer is always at position 0
@@ -68,7 +77,10 @@ export function playDealerHand(
 
   // Play dealer hand
   while (shouldDealerHit(dealer.hands[0], rules)) {
-    const { card, remainingShoe, reshuffled } = dealCard(updatedState.shoe, updatedState.numDecks);
+    const { card, remainingShoe, reshuffled } = dealCard(
+      updatedState.shoe,
+      updatedState.numDecks,
+    );
 
     // Add card to dealer's hand
     const updatedPlayers = [...updatedState.players];
@@ -79,7 +91,9 @@ export function playDealerHand(
       ...updatedState,
       shoe: remainingShoe,
       cardsDealt: reshuffled ? 1 : updatedState.cardsDealt + 1,
-      runningCount: reshuffled ? card.count : updatedState.runningCount + card.count,
+      runningCount: reshuffled
+        ? card.count
+        : updatedState.runningCount + card.count,
       players: updatedPlayers,
     };
 
@@ -98,7 +112,10 @@ export function playDealerHand(
  * @param dealerHand Dealer's hand
  * @returns Hand result
  */
-export function determineHandResult(playerHand: Hand, dealerHand: Hand): HandResult {
+export function determineHandResult(
+  playerHand: Hand,
+  dealerHand: Hand,
+): HandResult {
   const playerValue = calculateHandValue(playerHand.cards);
   const dealerValue = calculateHandValue(dealerHand.cards);
   const playerBJ = isBlackjack(playerHand.cards);
@@ -130,11 +147,11 @@ export function determineHandResult(playerHand: Hand, dealerHand: Hand): HandRes
   // Compare values
   if (playerValue > dealerValue) {
     return "WIN";
-  } else if (playerValue < dealerValue) {
-    return "LOSE";
-  } else {
-    return "PUSH";
   }
+  if (playerValue < dealerValue) {
+    return "LOSE";
+  }
+  return "PUSH";
 }
 
 /**
@@ -147,9 +164,9 @@ export function determineHandResult(playerHand: Hand, dealerHand: Hand): HandRes
 export function calculatePayout(
   hand: Hand,
   result: HandResult,
-  blackjackPayout: number = 1.5 // 3:2 payout
+  blackjackPayout: number = 1.5, // 3:2 payout
 ): number {
-  const bet = hand.bet;
+  const { bet } = hand;
 
   switch (result) {
     case "BLACKJACK":
@@ -178,7 +195,7 @@ export function calculatePayout(
  */
 export function resolveHands(
   gameState: GameState,
-  blackjackPayout: number = 1.5
+  blackjackPayout: number = 1.5,
 ): GameState {
   const dealerHand = gameState.players[0].hands[0];
   const updatedPlayers = [...gameState.players];
@@ -230,7 +247,10 @@ export function shouldPeekForBlackjack(dealerUpCard: string): boolean {
  * @param revealed Whether hole card is revealed
  * @returns Description string
  */
-export function getDealerHandDescription(hand: Hand, revealed: boolean): string {
+export function getDealerHandDescription(
+  hand: Hand,
+  revealed: boolean,
+): string {
   if (!revealed && hand.cards.length >= 2) {
     // Show only first card
     const upCard = hand.cards[0];

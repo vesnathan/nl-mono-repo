@@ -13,7 +13,7 @@ import { CountingSystem } from "@/types/gameSettings";
 export function dealCard(
   shoe: Card[],
   numDecks: number = 6,
-  countingSystem: CountingSystem = CountingSystem.HI_LO
+  countingSystem: CountingSystem = CountingSystem.HI_LO,
 ): {
   card: Card;
   remainingShoe: Card[];
@@ -24,7 +24,9 @@ export function dealCard(
 
   // Emergency reshuffle if shoe is depleted mid-hand
   if (currentShoe.length === 0) {
-    console.warn("⚠️ Emergency reshuffle: Shoe depleted mid-hand! Creating new shoe...");
+    console.warn(
+      "⚠️ Emergency reshuffle: Shoe depleted mid-hand! Creating new shoe...",
+    );
     currentShoe = createAndShuffleShoe(numDecks, countingSystem);
     reshuffled = true;
   }
@@ -137,16 +139,19 @@ export function canDouble(cards: Card[], chips: number, bet: number): boolean {
  */
 export function dealInitialCards(
   gameState: GameState,
-  playerIndices: number[]
+  playerIndices: number[],
 ): GameState {
   let { shoe } = gameState;
   const updatedPlayers = [...gameState.players];
-  let cardsDealt = gameState.cardsDealt;
-  let runningCount = gameState.runningCount;
+  let { cardsDealt } = gameState;
+  let { runningCount } = gameState;
 
   // First card to each player (face up)
   for (const playerIndex of playerIndices) {
-    const { card, remainingShoe, reshuffled } = dealCard(shoe, gameState.numDecks);
+    const { card, remainingShoe, reshuffled } = dealCard(
+      shoe,
+      gameState.numDecks,
+    );
     shoe = remainingShoe;
     cardsDealt++;
 
@@ -170,7 +175,10 @@ export function dealInitialCards(
 
   // Second card to each player (face up)
   for (const playerIndex of playerIndices) {
-    const { card, remainingShoe, reshuffled } = dealCard(shoe, gameState.numDecks);
+    const { card, remainingShoe, reshuffled } = dealCard(
+      shoe,
+      gameState.numDecks,
+    );
     shoe = remainingShoe;
     cardsDealt++;
 
@@ -210,9 +218,12 @@ export function dealInitialCards(
 export function hit(
   gameState: GameState,
   playerIndex: number,
-  handIndex: number
+  handIndex: number,
 ): GameState {
-  const { card, remainingShoe, reshuffled } = dealCard(gameState.shoe, gameState.numDecks);
+  const { card, remainingShoe, reshuffled } = dealCard(
+    gameState.shoe,
+    gameState.numDecks,
+  );
   const updatedPlayers = [...gameState.players];
 
   updatedPlayers[playerIndex].hands[handIndex].cards.push(card);
@@ -236,7 +247,7 @@ export function hit(
 export function doubleDown(
   gameState: GameState,
   playerIndex: number,
-  handIndex: number
+  handIndex: number,
 ): GameState {
   const player = gameState.players[playerIndex];
   const hand = player.hands[handIndex];
@@ -245,7 +256,10 @@ export function doubleDown(
   const doubleBet = hand.bet;
 
   // Deal one card
-  const { card, remainingShoe, reshuffled } = dealCard(gameState.shoe, gameState.numDecks);
+  const { card, remainingShoe, reshuffled } = dealCard(
+    gameState.shoe,
+    gameState.numDecks,
+  );
   const updatedPlayers = [...gameState.players];
 
   updatedPlayers[playerIndex].hands[handIndex].cards.push(card);
@@ -272,7 +286,7 @@ export function doubleDown(
 export function split(
   gameState: GameState,
   playerIndex: number,
-  handIndex: number
+  handIndex: number,
 ): GameState {
   const player = gameState.players[playerIndex];
   const hand = player.hands[handIndex];
@@ -282,15 +296,23 @@ export function split(
   }
 
   const [card1, card2] = hand.cards;
-  const bet = hand.bet;
+  const { bet } = hand;
 
   // Create two new hands
   const newHand1: Hand = { cards: [card1], bet };
   const newHand2: Hand = { cards: [card2], bet };
 
   // Deal one card to each new hand
-  const { card: newCard1, remainingShoe: shoe1, reshuffled: reshuffled1 } = dealCard(gameState.shoe, gameState.numDecks);
-  const { card: newCard2, remainingShoe: shoe2, reshuffled: reshuffled2 } = dealCard(shoe1, gameState.numDecks);
+  const {
+    card: newCard1,
+    remainingShoe: shoe1,
+    reshuffled: reshuffled1,
+  } = dealCard(gameState.shoe, gameState.numDecks);
+  const {
+    card: newCard2,
+    remainingShoe: shoe2,
+    reshuffled: reshuffled2,
+  } = dealCard(shoe1, gameState.numDecks);
 
   newHand1.cards.push(newCard1);
   newHand2.cards.push(newCard2);
@@ -306,11 +328,14 @@ export function split(
 
   // Handle reshuffles
   let newCardsDealt = gameState.cardsDealt + 2;
-  let newRunningCount = gameState.runningCount + newCard1.count + newCard2.count;
+  let newRunningCount =
+    gameState.runningCount + newCard1.count + newCard2.count;
 
   if (reshuffled1 || reshuffled2) {
     newCardsDealt = reshuffled2 ? 1 : 2;
-    newRunningCount = reshuffled1 ? newCard1.count + (reshuffled2 ? 0 : newCard2.count) : newCard2.count;
+    newRunningCount = reshuffled1
+      ? newCard1.count + (reshuffled2 ? 0 : newCard2.count)
+      : newCard2.count;
   }
 
   return {
@@ -333,7 +358,7 @@ export function split(
 export function placeBet(
   gameState: GameState,
   playerIndex: number,
-  betAmount: number
+  betAmount: number,
 ): GameState {
   const player = gameState.players[playerIndex];
 

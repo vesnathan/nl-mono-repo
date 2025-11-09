@@ -7,7 +7,10 @@ interface ActionBubbleProps {
   onComplete?: () => void;
 }
 
-export default function ActionBubble({ action, onComplete }: ActionBubbleProps) {
+export default function ActionBubble({
+  action,
+  onComplete,
+}: ActionBubbleProps) {
   const [opacity, setOpacity] = useState(0);
   const [transitionDuration, setTransitionDuration] = useState("0.15s"); // Quick fade in
 
@@ -71,7 +74,7 @@ export default function ActionBubble({ action, onComplete }: ActionBubbleProps) 
         color: "white",
         fontWeight: "bold",
         fontSize: "16px",
-        opacity: opacity,
+        opacity,
         transition: `opacity ${transitionDuration} ease`,
         zIndex: 10,
         pointerEvents: "none",

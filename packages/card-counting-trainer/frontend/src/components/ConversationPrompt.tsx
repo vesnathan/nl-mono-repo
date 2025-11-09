@@ -78,7 +78,8 @@ export default function ConversationPrompt({
           border: "3px solid #4A90E2",
           borderRadius: "16px",
           padding: "16px",
-          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.8), 0 0 0 2px rgba(74, 144, 226, 0.3)",
+          boxShadow:
+            "0 8px 24px rgba(0, 0, 0, 0.8), 0 0 0 2px rgba(74, 144, 226, 0.3)",
           animation: "fadeInScale 0.3s ease-out",
         }}
       >
@@ -120,8 +121,8 @@ export default function ConversationPrompt({
                   selectedIndex === index
                     ? "#4A90E2"
                     : selectedIndex !== null
-                    ? "rgba(255, 255, 255, 0.1)"
-                    : "rgba(255, 255, 255, 0.15)",
+                      ? "rgba(255, 255, 255, 0.1)"
+                      : "rgba(255, 255, 255, 0.15)",
                 color: selectedIndex === index ? "#FFF" : "#DDD",
                 border: "2px solid",
                 borderColor:
@@ -133,18 +134,22 @@ export default function ConversationPrompt({
                 cursor: selectedIndex === null ? "pointer" : "default",
                 transition: "all 0.2s ease",
                 textAlign: "left",
-                opacity: selectedIndex !== null && selectedIndex !== index ? 0.4 : 1,
+                opacity:
+                  selectedIndex !== null && selectedIndex !== index ? 0.4 : 1,
               }}
               onMouseEnter={(e) => {
                 if (selectedIndex === null) {
-                  e.currentTarget.style.backgroundColor = "rgba(74, 144, 226, 0.3)";
+                  e.currentTarget.style.backgroundColor =
+                    "rgba(74, 144, 226, 0.3)";
                   e.currentTarget.style.borderColor = "#4A90E2";
                 }
               }}
               onMouseLeave={(e) => {
                 if (selectedIndex === null) {
-                  e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.15)";
-                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.3)";
+                  e.currentTarget.style.backgroundColor =
+                    "rgba(255, 255, 255, 0.15)";
+                  e.currentTarget.style.borderColor =
+                    "rgba(255, 255, 255, 0.3)";
                 }
               }}
             >
@@ -171,8 +176,8 @@ export default function ConversationPrompt({
                 progressPercent > 50
                   ? "#4CAF50"
                   : progressPercent > 20
-                  ? "#FFC107"
-                  : "#F44336",
+                    ? "#FFC107"
+                    : "#F44336",
               transition: "width 0.1s linear, background-color 0.3s ease",
             }}
           />

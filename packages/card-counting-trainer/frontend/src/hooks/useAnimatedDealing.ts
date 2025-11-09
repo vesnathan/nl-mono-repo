@@ -73,7 +73,7 @@ export function useAnimatedDealing(
     if (dealingState.isDealing || aiPlayerPositions.length === 0) return;
 
     // Clear ALL existing timeouts from previous hands
-    allTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+    allTimeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
     allTimeoutsRef.current = [];
     if (dealingTimeoutRef.current) {
       clearTimeout(dealingTimeoutRef.current);
@@ -129,9 +129,12 @@ export function useAnimatedDealing(
       const dealNext = () => {
         if (dealIndex >= totalCards) {
           // Initial deal complete, pause then start player turns
-          trackTimeout(() => {
-            startPlayerTurns();
-          }, Math.floor(3000 / dealSpeed));
+          trackTimeout(
+            () => {
+              startPlayerTurns();
+            },
+            Math.floor(3000 / dealSpeed),
+          );
           return;
         }
 
@@ -154,16 +157,22 @@ export function useAnimatedDealing(
             liveCardsDealt: totalCardsDealt,
           }));
 
-          trackTimeout(() => {
-            aiHands[playerIndex].cards.push(card);
-            setDealingState((prev) => ({
-              ...prev,
-              aiHands: [...aiHands],
-              flyingCard: null,
-            }));
-            dealIndex++;
-            dealingTimeoutRef.current = trackTimeout(dealNext, Math.floor(400 / dealSpeed));
-          }, Math.floor(400 / dealSpeed));
+          trackTimeout(
+            () => {
+              aiHands[playerIndex].cards.push(card);
+              setDealingState((prev) => ({
+                ...prev,
+                aiHands: [...aiHands],
+                flyingCard: null,
+              }));
+              dealIndex++;
+              dealingTimeoutRef.current = trackTimeout(
+                dealNext,
+                Math.floor(400 / dealSpeed),
+              );
+            },
+            Math.floor(400 / dealSpeed),
+          );
         } else {
           // Deal to dealer
           const { card, remainingShoe } = dealCard(currentShoe);
@@ -177,20 +186,29 @@ export function useAnimatedDealing(
           setDealingState((prev) => ({
             ...prev,
             flyingCard: { card, toPosition: 0 },
-            currentAction: round === 0 ? "Dealing dealer's up card" : "Dealing dealer's hole card",
+            currentAction:
+              round === 0
+                ? "Dealing dealer's up card"
+                : "Dealing dealer's hole card",
             liveCardsDealt: totalCardsDealt,
           }));
 
-          trackTimeout(() => {
-            dealerCards.push(card);
-            setDealingState((prev) => ({
-              ...prev,
-              dealerCards: [...dealerCards],
-              flyingCard: null,
-            }));
-            dealIndex++;
-            dealingTimeoutRef.current = trackTimeout(dealNext, Math.floor(400 / dealSpeed));
-          }, Math.floor(400 / dealSpeed));
+          trackTimeout(
+            () => {
+              dealerCards.push(card);
+              setDealingState((prev) => ({
+                ...prev,
+                dealerCards: [...dealerCards],
+                flyingCard: null,
+              }));
+              dealIndex++;
+              dealingTimeoutRef.current = trackTimeout(
+                dealNext,
+                Math.floor(400 / dealSpeed),
+              );
+            },
+            Math.floor(400 / dealSpeed),
+          );
         }
       };
 
@@ -204,14 +222,17 @@ export function useAnimatedDealing(
       const playNextPlayer = () => {
         if (currentPlayerIndex >= decisionOrder.length) {
           // All players done, dealer's turn
-          trackTimeout(() => {
-            dealerTurn();
-          }, Math.floor(2000 / dealSpeed));
+          trackTimeout(
+            () => {
+              dealerTurn();
+            },
+            Math.floor(2000 / dealSpeed),
+          );
           return;
         }
 
         const position = decisionOrder[currentPlayerIndex];
-        const handIndex = aiHands.findIndex(h => h.position === position);
+        const handIndex = aiHands.findIndex((h) => h.position === position);
         if (handIndex === -1) {
           currentPlayerIndex++;
           playNextPlayer();
@@ -311,19 +332,27 @@ export function useAnimatedDealing(
 
               trackTimeout(() => {
                 // Check if player should go again
-                const newHandValue = aiHands[handIndex].cards.reduce((sum, c) => {
-                  if (c.rank === "A") return sum + 11;
-                  if (["J", "Q", "K"].includes(c.rank)) return sum + 10;
-                  return sum + parseInt(c.rank);
-                }, 0);
+                const newHandValue = aiHands[handIndex].cards.reduce(
+                  (sum, c) => {
+                    if (c.rank === "A") return sum + 11;
+                    if (["J", "Q", "K"].includes(c.rank)) return sum + 10;
+                    return sum + parseInt(c.rank);
+                  },
+                  0,
+                );
 
                 if (newHandValue >= 17 || newHandValue > 21) {
                   // Player busts or reaches 17+ - show appropriate bubble then move on
                   const isBust = newHandValue > 21;
                   setDealingState((prev) => ({
                     ...prev,
-                    actionBubble: { position, action: isBust ? "BUST" : "STAND" },
-                    currentAction: isBust ? `Spot ${position} busts!` : `Spot ${position} stands`,
+                    actionBubble: {
+                      position,
+                      action: isBust ? "BUST" : "STAND",
+                    },
+                    currentAction: isBust
+                      ? `Spot ${position} busts!`
+                      : `Spot ${position} stands`,
                   }));
 
                   trackTimeout(() => {
@@ -357,18 +386,24 @@ export function useAnimatedDealing(
       }));
 
       // Reveal hole card
-      trackTimeout(() => {
-        setDealingState((prev) => ({
-          ...prev,
-          dealerRevealed: true,
-          currentAction: "Dealer reveals hole card",
-        }));
-        currentRunningCount += dealerCards[1].count; // Count the hole card now
+      trackTimeout(
+        () => {
+          setDealingState((prev) => ({
+            ...prev,
+            dealerRevealed: true,
+            currentAction: "Dealer reveals hole card",
+          }));
+          currentRunningCount += dealerCards[1].count; // Count the hole card now
 
-        trackTimeout(() => {
-          dealerHits();
-        }, Math.floor(3000 / dealSpeed));
-      }, Math.floor(2000 / dealSpeed));
+          trackTimeout(
+            () => {
+              dealerHits();
+            },
+            Math.floor(3000 / dealSpeed),
+          );
+        },
+        Math.floor(2000 / dealSpeed),
+      );
     };
 
     const calculateDealerValue = (cards: Card[]) => {
@@ -400,34 +435,43 @@ export function useAnimatedDealing(
           currentAction: `Dealer hits (${dealerValue})`,
         }));
 
-        trackTimeout(() => {
-          const { card, remainingShoe } = dealCard(currentShoe);
-          currentShoe = remainingShoe;
-          totalCardsDealt++;
-          currentRunningCount += card.count;
+        trackTimeout(
+          () => {
+            const { card, remainingShoe } = dealCard(currentShoe);
+            currentShoe = remainingShoe;
+            totalCardsDealt++;
+            currentRunningCount += card.count;
 
-          setDealingState((prev) => ({
-            ...prev,
-            flyingCard: { card, toPosition: 0 },
-            liveCardsDealt: totalCardsDealt,
-          }));
-
-          trackTimeout(() => {
-            dealerCards.push(card);
             setDealingState((prev) => ({
               ...prev,
-              dealerCards: [...dealerCards],
-              flyingCard: null,
+              flyingCard: { card, toPosition: 0 },
+              liveCardsDealt: totalCardsDealt,
             }));
 
-            trackTimeout(dealerHits, Math.floor(1000 / dealSpeed));
-          }, Math.floor(500 / dealSpeed));
-        }, Math.floor(800 / dealSpeed));
+            trackTimeout(
+              () => {
+                dealerCards.push(card);
+                setDealingState((prev) => ({
+                  ...prev,
+                  dealerCards: [...dealerCards],
+                  flyingCard: null,
+                }));
+
+                trackTimeout(dealerHits, Math.floor(1000 / dealSpeed));
+              },
+              Math.floor(500 / dealSpeed),
+            );
+          },
+          Math.floor(800 / dealSpeed),
+        );
       } else {
         // Dealer stands
         setDealingState((prev) => ({
           ...prev,
-          currentAction: dealerValue > 21 ? `Dealer busts (${dealerValue})` : `Dealer stands (${dealerValue})`,
+          currentAction:
+            dealerValue > 21
+              ? `Dealer busts (${dealerValue})`
+              : `Dealer stands (${dealerValue})`,
         }));
 
         trackTimeout(() => {
@@ -438,7 +482,10 @@ export function useAnimatedDealing(
 
     // ============ PHASE 4: RESULTS ============
     const determineResults = (dealerValue: number) => {
-      const results: { position: number; result: "win" | "lose" | "push" | "blackjack" }[] = [];
+      const results: {
+        position: number;
+        result: "win" | "lose" | "push" | "blackjack";
+      }[] = [];
 
       aiHands.forEach((hand) => {
         const handValue = calculateDealerValue(hand.cards);
@@ -447,9 +494,15 @@ export function useAnimatedDealing(
         if (handValue > 21) {
           results.push({ position: hand.position, result: "lose" });
         } else if (dealerValue > 21) {
-          results.push({ position: hand.position, result: isBlackjack ? "blackjack" : "win" });
+          results.push({
+            position: hand.position,
+            result: isBlackjack ? "blackjack" : "win",
+          });
         } else if (handValue > dealerValue) {
-          results.push({ position: hand.position, result: isBlackjack ? "blackjack" : "win" });
+          results.push({
+            position: hand.position,
+            result: isBlackjack ? "blackjack" : "win",
+          });
         } else if (handValue < dealerValue) {
           results.push({ position: hand.position, result: "lose" });
         } else {
@@ -470,7 +523,10 @@ export function useAnimatedDealing(
 
     const completeDeal = () => {
       const totalCards = numDecks * 52;
-      const decksRemaining = calculateDecksRemaining(totalCards, totalCardsDealt);
+      const decksRemaining = calculateDecksRemaining(
+        totalCards,
+        totalCardsDealt,
+      );
       const trueCount = calculateTrueCount(currentRunningCount, decksRemaining);
 
       setDealingState((prev) => ({
@@ -505,13 +561,21 @@ export function useAnimatedDealing(
     };
 
     dealInitialCards();
-  }, [dealingState.isDealing, aiPlayerPositions, shoe, cardsDealt, runningCount, numDecks, onDealingComplete]);
+  }, [
+    dealingState.isDealing,
+    aiPlayerPositions,
+    shoe,
+    cardsDealt,
+    runningCount,
+    numDecks,
+    onDealingComplete,
+  ]);
 
   // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
       // Clear all tracked timeouts
-      allTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+      allTimeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
       allTimeoutsRef.current = [];
       if (dealingTimeoutRef.current) {
         clearTimeout(dealingTimeoutRef.current);

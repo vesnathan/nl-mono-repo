@@ -14,7 +14,9 @@ interface UseRoundEndPhaseParams {
   cardsDealt: number;
   gameSettings: GameSettings;
   registerTimeout: (callback: () => void, delay: number) => void;
-  setAIPlayers: (players: AIPlayer[] | ((prev: AIPlayer[]) => AIPlayer[])) => void;
+  setAIPlayers: (
+    players: AIPlayer[] | ((prev: AIPlayer[]) => AIPlayer[]),
+  ) => void;
   setDealerCallout: (callout: string | null) => void;
   addSpeechBubble: (id: string, message: string, position: number) => void;
   setShoe: (shoe: Card[]) => void;

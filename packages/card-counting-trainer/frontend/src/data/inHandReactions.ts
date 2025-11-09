@@ -3,7 +3,11 @@ import { AICharacter } from "./aiCharacters";
 /**
  * Get character reaction when dealt initial hand
  */
-export function getInitialHandReaction(character: AICharacter, handValue: number, hasBlackjack: boolean): string | null {
+export function getInitialHandReaction(
+  character: AICharacter,
+  handValue: number,
+  hasBlackjack: boolean,
+): string | null {
   // Only react to notably good or bad hands
   if (hasBlackjack) {
     const reactions = [
@@ -40,7 +44,12 @@ export function getInitialHandReaction(character: AICharacter, handValue: number
 /**
  * Get character reaction when hitting and receiving a card
  */
-export function getHitReaction(character: AICharacter, newCard: string, oldHandValue: number, newHandValue: number): string | null {
+export function getHitReaction(
+  character: AICharacter,
+  newCard: string,
+  oldHandValue: number,
+  newHandValue: number,
+): string | null {
   // Busted
   if (newHandValue > 21) {
     const reactions = [
@@ -91,7 +100,10 @@ export function getHitReaction(character: AICharacter, newCard: string, oldHandV
 /**
  * Get character-specific personality reactions
  */
-export function getPersonalityReaction(character: AICharacter, situation: "bust" | "hit21" | "goodHit" | "badStart"): string {
+export function getPersonalityReaction(
+  character: AICharacter,
+  situation: "bust" | "hit21" | "goodHit" | "badStart",
+): string {
   switch (character.personality) {
     case "drunk":
       if (situation === "bust") return "*hiccup* BUSTED! Fuck!";
@@ -106,9 +118,11 @@ export function getPersonalityReaction(character: AICharacter, situation: "bust"
       return "Oh dear... this isn't good...";
 
     case "chatty":
-      if (situation === "bust") return "BUSTED! Just like that deal I lost last month!";
+      if (situation === "bust")
+        return "BUSTED! Just like that deal I lost last month!";
       if (situation === "hit21") return "TWENTY-ONE! That's how you DO IT!";
-      if (situation === "goodHit") return "Nice! Reminds me of this one time...";
+      if (situation === "goodHit")
+        return "Nice! Reminds me of this one time...";
       return "Not great, but you know what I always say...";
 
     case "superstitious":
@@ -125,8 +139,10 @@ export function getPersonalityReaction(character: AICharacter, situation: "bust"
 
     case "nervous":
       if (situation === "bust") return "BUSTED! Oh god, is that bad?!";
-      if (situation === "hit21") return "Twenty-one! *nervous sweat* Did I win?!";
-      if (situation === "goodHit") return "Oh! Is that good? That's good right?!";
+      if (situation === "hit21")
+        return "Twenty-one! *nervous sweat* Did I win?!";
+      if (situation === "goodHit")
+        return "Oh! Is that good? That's good right?!";
       return "*sweating* This feels illegal...";
 
     case "lucky":
@@ -137,7 +153,8 @@ export function getPersonalityReaction(character: AICharacter, situation: "bust"
 
     case "unlucky":
       if (situation === "bust") return "BUST! Of COURSE! *laughs*";
-      if (situation === "hit21") return "Twenty-one?! Did that actually happen?!";
+      if (situation === "hit21")
+        return "Twenty-one?! Did that actually happen?!";
       if (situation === "goodHit") return "Wait, I got a GOOD card?!";
       return "And here we go... classic me...";
 

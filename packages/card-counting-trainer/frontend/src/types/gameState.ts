@@ -1,5 +1,5 @@
-import { Card, HandResult } from "./game";
 import { AICharacter } from "@/data/aiCharacters";
+import { Card, HandResult } from "./game";
 
 /**
  * Represents a hand of cards for a player, AI, or dealer

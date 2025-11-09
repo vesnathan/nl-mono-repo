@@ -45,13 +45,13 @@ export default function Leaderboard({
 }: LeaderboardProps) {
   const formatValue = (value: number): string => {
     if (category === "current-chips" || category === "peak-chips") {
-      return value.toLocaleString() + " chips";
-    } else if (category === "longest-streak") {
-      return value.toLocaleString() + " decisions";
-    } else {
-      // high-score
-      return value.toLocaleString() + " pts";
+      return `${value.toLocaleString()} chips`;
     }
+    if (category === "longest-streak") {
+      return `${value.toLocaleString()} decisions`;
+    }
+    // high-score
+    return `${value.toLocaleString()} pts`;
   };
 
   const getRankColor = (rank: number): string => {
@@ -175,7 +175,10 @@ export default function Leaderboard({
                       style={{
                         fontSize: "11px",
                         fontWeight: "bold",
-                        color: TIER_COLORS[entry.patreonTier as keyof typeof TIER_COLORS] || "#AAA",
+                        color:
+                          TIER_COLORS[
+                            entry.patreonTier as keyof typeof TIER_COLORS
+                          ] || "#AAA",
                         backgroundColor: "rgba(0, 0, 0, 0.5)",
                         padding: "2px 8px",
                         borderRadius: "6px",
@@ -206,7 +209,13 @@ export default function Leaderboard({
 
       {/* Current user's rank (if not in top entries) */}
       {currentUserRank && currentUserRank > entries.length && (
-        <div style={{ marginTop: "24px", paddingTop: "24px", borderTop: "2px solid rgba(255, 255, 255, 0.1)" }}>
+        <div
+          style={{
+            marginTop: "24px",
+            paddingTop: "24px",
+            borderTop: "2px solid rgba(255, 255, 255, 0.1)",
+          }}
+        >
           <div
             style={{
               backgroundColor: "rgba(74, 144, 226, 0.2)",

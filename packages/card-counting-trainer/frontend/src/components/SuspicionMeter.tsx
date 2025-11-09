@@ -41,28 +41,29 @@ export default function SuspicionMeter({
         status: "CLEAR",
         message: "No heat",
       };
-    } else if (actualSuspicionLevel < 40) {
+    }
+    if (actualSuspicionLevel < 40) {
       return {
         color: "#FFC107", // Yellow
         bgColor: "rgba(255, 193, 7, 0.2)",
         status: "WATCHED",
         message: "Dealer watching",
       };
-    } else if (actualSuspicionLevel < 60) {
+    }
+    if (actualSuspicionLevel < 60) {
       return {
         color: "#FF9800", // Orange
         bgColor: "rgba(255, 152, 0, 0.2)",
         status: "NOTICED",
         message: "Pit boss aware",
       };
-    } else {
-      return {
-        color: "#F44336", // Red
-        bgColor: "rgba(244, 67, 54, 0.3)",
-        status: "CRITICAL",
-        message: "Risk of backoff!",
-      };
     }
+    return {
+      color: "#F44336", // Red
+      bgColor: "rgba(244, 67, 54, 0.3)",
+      status: "CRITICAL",
+      message: "Risk of backoff!",
+    };
   };
 
   const { color, bgColor, status, message } = getStatusInfo();
@@ -101,7 +102,7 @@ export default function SuspicionMeter({
         <div
           style={{
             fontSize: "16px",
-            color: color,
+            color,
             fontWeight: "bold",
           }}
         >
@@ -181,7 +182,12 @@ export default function SuspicionMeter({
               style={{
                 height: "100%",
                 width: `${pitBossDistance}%`,
-                backgroundColor: pitBossDistance < 30 ? "#4CAF50" : pitBossDistance < 60 ? "#FFC107" : "#F44336",
+                backgroundColor:
+                  pitBossDistance < 30
+                    ? "#4CAF50"
+                    : pitBossDistance < 60
+                      ? "#FFC107"
+                      : "#F44336",
                 transition: "width 0.8s ease-out, background-color 0.3s ease",
                 boxShadow: `0 0 10px ${pitBossDistance < 30 ? "#4CAF50" : pitBossDistance < 60 ? "#FFC107" : "#F44336"}`,
               }}

@@ -134,13 +134,31 @@ export const AI_DIALOGUE_ADDONS: CharacterDialogueAddons[] = [
     ],
     banterWithPlayer: [
       { text: "You counting? I'm discounting.", isPatreon: false },
-      { text: "Buddy, if I win, we win. That's friendship math.", isPatreon: false },
-      { text: "Swap seats? Mine's haunted by bad decisions.", isPatreon: false },
-      { text: "Advice? Never trust even numbers. Or odd ones.", isPatreon: false },
+      {
+        text: "Buddy, if I win, we win. That's friendship math.",
+        isPatreon: false,
+      },
+      {
+        text: "Swap seats? Mine's haunted by bad decisions.",
+        isPatreon: false,
+      },
+      {
+        text: "Advice? Never trust even numbers. Or odd ones.",
+        isPatreon: false,
+      },
       { text: "You got a system? I got a symptom.", isPatreon: false },
-      { text: "Hold my drink—no don't, I'll lose track of both.", isPatreon: false },
-      { text: "Someone here's got unlimited chips? Must be nice!", isPatreon: true },
-      { text: "I heard about those founding member badges—shiny!", isPatreon: true },
+      {
+        text: "Hold my drink—no don't, I'll lose track of both.",
+        isPatreon: false,
+      },
+      {
+        text: "Someone here's got unlimited chips? Must be nice!",
+        isPatreon: true,
+      },
+      {
+        text: "I heard about those founding member badges—shiny!",
+        isPatreon: true,
+      },
     ],
     banterWithDealer: [
       "I tip in jokes and occasional chips.",
@@ -228,10 +246,16 @@ export const AI_DIALOGUE_ADDONS: CharacterDialogueAddons[] = [
       { text: "If I knock anything of yours, I replace it!", isPatreon: false },
       { text: "Tell me if I'm in your space—I do that.", isPatreon: false },
       { text: "You look composed. Teach me your ways!", isPatreon: false },
-      { text: "What's your system? Mine is 'don't drop things'.", isPatreon: false },
+      {
+        text: "What's your system? Mine is 'don't drop things'.",
+        isPatreon: false,
+      },
       { text: "We're in this together—me and my apologies.", isPatreon: false },
       { text: "I'll cheer loudly… but softly.", isPatreon: false },
-      { text: "Those supporter badges are so pretty—I want one!", isPatreon: true },
+      {
+        text: "Those supporter badges are so pretty—I want one!",
+        isPatreon: true,
+      },
       { text: "Monthly chip bonuses sound like a dream…", isPatreon: true },
     ],
     banterWithDealer: [
@@ -317,15 +341,27 @@ export const AI_DIALOGUE_ADDONS: CharacterDialogueAddons[] = [
       "Risk adjusted expectations… lowering.",
     ],
     banterWithPlayer: [
-      { text: "You play often? What's your conversion rate?", isPatreon: false },
+      {
+        text: "You play often? What's your conversion rate?",
+        isPatreon: false,
+      },
       { text: "I celebrate your wins—rising tide stuff.", isPatreon: false },
       { text: "You count? I count cars. Fair trade.", isPatreon: false },
       { text: "Your table presence says 'ops manager'.", isPatreon: false },
       { text: "Need a pep talk? I've got a catalog.", isPatreon: false },
       { text: "We're co-pilots. You call the turbulence.", isPatreon: false },
-      { text: "ROI on that Platinum tier is impressive—smart investment.", isPatreon: true },
-      { text: "Those lifetime chips for early adopters? Brilliant retention strategy.", isPatreon: true },
-      { text: "100% chip bonus? That's a strong value proposition.", isPatreon: true },
+      {
+        text: "ROI on that Platinum tier is impressive—smart investment.",
+        isPatreon: true,
+      },
+      {
+        text: "Those lifetime chips for early adopters? Brilliant retention strategy.",
+        isPatreon: true,
+      },
+      {
+        text: "100% chip bonus? That's a strong value proposition.",
+        isPatreon: true,
+      },
     ],
     banterWithDealer: [
       "That shuffle is premium—German engineering vibes.",
@@ -416,8 +452,14 @@ export const AI_DIALOGUE_ADDONS: CharacterDialogueAddons[] = [
       { text: "I celebrate your win—it raises all boats.", isPatreon: false },
       { text: "Your laugh just broke the bad pattern.", isPatreon: false },
       { text: "Want a mini sage spray? It's gentle.", isPatreon: false },
-      { text: "Your supporter aura glows—the universe notices generosity.", isPatreon: true },
-      { text: "That badge carries good energy into the table.", isPatreon: true },
+      {
+        text: "Your supporter aura glows—the universe notices generosity.",
+        isPatreon: true,
+      },
+      {
+        text: "That badge carries good energy into the table.",
+        isPatreon: true,
+      },
     ],
     banterWithDealer: [
       "Your shuffle is rhythmic—grounding.",
@@ -509,8 +551,14 @@ export const AI_DIALOGUE_ADDONS: CharacterDialogueAddons[] = [
       { text: "You bring strategy, I bring spectacle.", isPatreon: false },
       { text: "Smile—this is content.", isPatreon: false },
       { text: "Platinum tier? That's influencer energy.", isPatreon: true },
-      { text: "Those exclusive features are fire—limited access is the flex.", isPatreon: true },
-      { text: "3000 monthly chips? That's sustainable bankroll management.", isPatreon: true },
+      {
+        text: "Those exclusive features are fire—limited access is the flex.",
+        isPatreon: true,
+      },
+      {
+        text: "3000 monthly chips? That's sustainable bankroll management.",
+        isPatreon: true,
+      },
     ],
     banterWithDealer: [
       "Deal me a story worth retelling.",
@@ -597,12 +645,21 @@ export const AI_DIALOGUE_ADDONS: CharacterDialogueAddons[] = [
     banterWithPlayer: [
       { text: "If I seem weird, I promise I'm nice.", isPatreon: false },
       { text: "You look confident—can I borrow some?", isPatreon: false },
-      { text: "If I win big, will you stand in front of me?", isPatreon: false },
+      {
+        text: "If I win big, will you stand in front of me?",
+        isPatreon: false,
+      },
       { text: "I'll celebrate you loudly… in a whisper.", isPatreon: false },
       { text: "If you need space, I'll shrink. Like this.", isPatreon: false },
       { text: "Thanks for being patient with me.", isPatreon: false },
-      { text: "Those founding member badges… they're watching me more…", isPatreon: true },
-      { text: "Unlimited chips would stress me out—what if I lose track?", isPatreon: true },
+      {
+        text: "Those founding member badges… they're watching me more…",
+        isPatreon: true,
+      },
+      {
+        text: "Unlimited chips would stress me out—what if I lose track?",
+        isPatreon: true,
+      },
     ],
     banterWithDealer: [
       "Sorry for asking things twice. Or thrice.",
@@ -693,8 +750,14 @@ export const AI_DIALOGUE_ADDONS: CharacterDialogueAddons[] = [
       { text: "If I cool off, I buy coffees.", isPatreon: false },
       { text: "Your smile added three percent to odds.", isPatreon: false },
       { text: "We're all lucky tonight—promise.", isPatreon: false },
-      { text: "Those monthly chip stipends? Luck loves recurring gifts.", isPatreon: true },
-      { text: "Support the house and the house supports you—karma!", isPatreon: true },
+      {
+        text: "Those monthly chip stipends? Luck loves recurring gifts.",
+        isPatreon: true,
+      },
+      {
+        text: "Support the house and the house supports you—karma!",
+        isPatreon: true,
+      },
     ],
     banterWithDealer: [
       "You deal like fate’s favorite cousin.",
@@ -785,8 +848,14 @@ export const AI_DIALOGUE_ADDONS: CharacterDialogueAddons[] = [
       { text: "I'm here to make your stats look good.", isPatreon: false },
       { text: "If I win, we'll name it a miracle.", isPatreon: false },
       { text: "Advice? Expect the opposite of me.", isPatreon: false },
-      { text: "Chip bonuses wouldn't save me—but they'd slow the doom.", isPatreon: true },
-      { text: "Even with Gold tier perks, I'd still find a way to lose.", isPatreon: true },
+      {
+        text: "Chip bonuses wouldn't save me—but they'd slow the doom.",
+        isPatreon: true,
+      },
+      {
+        text: "Even with Gold tier perks, I'd still find a way to lose.",
+        isPatreon: true,
+      },
     ],
     banterWithDealer: [
       "Deal me hope with a side of reality.",

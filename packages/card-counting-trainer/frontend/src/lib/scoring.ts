@@ -32,10 +32,13 @@ const MULTIPLIER_INCREMENT = 0.1; // Increase per correct action without peeking
  * @param multiplier Current score multiplier
  * @returns Points earned
  */
-export function calculatePoints(streakPosition: number, multiplier: number): number {
+export function calculatePoints(
+  streakPosition: number,
+  multiplier: number,
+): number {
   if (streakPosition < 1) return 0;
 
-  const exponentialBonus = Math.pow(2, streakPosition - 1);
+  const exponentialBonus = 2 ** (streakPosition - 1);
   const points = BASE_POINTS * exponentialBonus * multiplier;
 
   return Math.round(points);
@@ -77,7 +80,7 @@ export function resetMultiplier(): number {
  */
 export function isCorrectAction(
   playerAction: StrategyAction,
-  optimalAction: StrategyAction
+  optimalAction: StrategyAction,
 ): boolean {
   // Direct match
   if (playerAction === optimalAction) return true;
@@ -103,7 +106,7 @@ export function calculateScoreUpdate(
   playerAction: StrategyAction,
   optimalAction: StrategyAction,
   currentStreak: number,
-  currentMultiplier: number
+  currentMultiplier: number,
 ): {
   scoreDelta: number;
   newStreak: number;
@@ -123,16 +126,15 @@ export function calculateScoreUpdate(
       newMultiplier,
       isCorrect: true,
     };
-  } else {
-    const scoreDelta = calculateIncorrectPenalty(currentStreak + 1);
-
-    return {
-      scoreDelta,
-      newStreak: 0, // Reset streak
-      newMultiplier: currentMultiplier, // Keep multiplier (only resets on peek)
-      isCorrect: false,
-    };
   }
+  const scoreDelta = calculateIncorrectPenalty(currentStreak + 1);
+
+  return {
+    scoreDelta,
+    newStreak: 0, // Reset streak
+    newMultiplier: currentMultiplier, // Keep multiplier (only resets on peek)
+    isCorrect: false,
+  };
 }
 
 /**
@@ -215,7 +217,7 @@ export function formatMultiplier(multiplier: number): string {
  */
 export function calculateExpectedValue(
   playerAction: StrategyAction,
-  optimalAction: StrategyAction
+  optimalAction: StrategyAction,
 ): number {
   // Simplified EV calculation
   // Optimal action has EV of 0 (break-even or slight advantage)

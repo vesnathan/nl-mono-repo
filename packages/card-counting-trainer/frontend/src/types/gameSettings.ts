@@ -202,7 +202,7 @@ export const PRESET_BAD_RULES: GameSettings = {
  */
 export function canDoubleDown(
   handValue: number,
-  rule: DoubleDownRule
+  rule: DoubleDownRule,
 ): boolean {
   switch (rule) {
     case DoubleDownRule.ANY_TWO_CARDS:
@@ -223,7 +223,7 @@ export function canDoubleDown(
  */
 export function calculateCutCardPosition(
   numberOfDecks: number,
-  penetrationPercent: number
+  penetrationPercent: number,
 ): number {
   const totalCards = numberOfDecks * 52;
   const penetrationDecimal = penetrationPercent / 100;

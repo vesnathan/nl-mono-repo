@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback } from "react";
-import { useGameState, GameConfig } from "./useGameState";
 import { PlayerAction, StrategyAction } from "@/types/game";
 import {
   placeBet,
@@ -22,6 +21,7 @@ import {
   getStreakBonus,
 } from "@/lib/scoring";
 import { DEFAULT_GAME_SETTINGS } from "@/types/gameSettings";
+import { useGameState, GameConfig } from "./useGameState";
 
 /**
  * Main game controller hook
@@ -97,7 +97,7 @@ export function useBlackjackGame(config?: GameConfig) {
 
       setGameState(newState);
     },
-    [gameState, setGameState]
+    [gameState, setGameState],
   );
 
   /**
@@ -106,7 +106,12 @@ export function useBlackjackGame(config?: GameConfig) {
   const getSuggestedBetAmount = useCallback(() => {
     const minBet = 10; // From config
     const maxBet = 500; // From config
-    return getSuggestedBet(gameState.trueCount, minBet, maxBet, gameState.chips);
+    return getSuggestedBet(
+      gameState.trueCount,
+      minBet,
+      maxBet,
+      gameState.chips,
+    );
   }, [gameState.trueCount, gameState.chips]);
 
   /**
@@ -121,9 +126,15 @@ export function useBlackjackGame(config?: GameConfig) {
       const canDoubleHand = canDouble(hand.cards, player.chips, hand.bet);
       const canSplitHand = canSplit(hand.cards);
 
-      return getBasicStrategyAction(hand.cards, dealerUpCard, DEFAULT_GAME_SETTINGS, canSplitHand, canDoubleHand);
+      return getBasicStrategyAction(
+        hand.cards,
+        dealerUpCard,
+        DEFAULT_GAME_SETTINGS,
+        canSplitHand,
+        canDoubleHand,
+      );
     },
-    [gameState]
+    [gameState],
   );
 
   /**
@@ -140,14 +151,23 @@ export function useBlackjackGame(config?: GameConfig) {
       const optimalAction = getStrategyRecommendation(playerIndex, handIndex);
 
       // Map player action to strategy action for comparison
-      const playerStrategyAction: StrategyAction = action === "HIT" ? "H" : action === "STAND" ? "S" : action === "DOUBLE" ? "D" : action === "SPLIT" ? "SP" : "H";
+      const playerStrategyAction: StrategyAction =
+        action === "HIT"
+          ? "H"
+          : action === "STAND"
+            ? "S"
+            : action === "DOUBLE"
+              ? "D"
+              : action === "SPLIT"
+                ? "SP"
+                : "H";
 
       // Calculate score update
       const scoreUpdate = calculateScoreUpdate(
         playerStrategyAction,
         optimalAction,
         gameState.streak,
-        gameState.scoreMultiplier
+        gameState.scoreMultiplier,
       );
 
       let newState = gameState;
@@ -186,7 +206,9 @@ export function useBlackjackGame(config?: GameConfig) {
       }
 
       // Check if hand is complete
-      const handValue = calculateHandValue(newState.players[playerIndex].hands[handIndex].cards);
+      const handValue = calculateHandValue(
+        newState.players[playerIndex].hands[handIndex].cards,
+      );
       const isBusted = handValue > 21;
       const isDoubled = action === "DOUBLE";
 
@@ -199,7 +221,7 @@ export function useBlackjackGame(config?: GameConfig) {
 
       setGameState(newState);
     },
-    [gameState, getStrategyRecommendation, setGameState]
+    [gameState, getStrategyRecommendation, setGameState],
   );
 
   /**
@@ -258,7 +280,7 @@ export function useBlackjackGame(config?: GameConfig) {
           return false;
       }
     },
-    [gameState]
+    [gameState],
   );
 
   return {

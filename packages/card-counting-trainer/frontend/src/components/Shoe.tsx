@@ -4,7 +4,11 @@ type ShoeProps = {
   dealerCutCard: number;
 };
 
-const Shoe = ({ numDecks, cardsDealt, dealerCutCard }: ShoeProps): JSX.Element => {
+const Shoe = ({
+  numDecks,
+  cardsDealt,
+  dealerCutCard,
+}: ShoeProps): JSX.Element => {
   return (
     <div
       style={{
@@ -53,7 +57,7 @@ const Shoe = ({ numDecks, cardsDealt, dealerCutCard }: ShoeProps): JSX.Element =
               position: "absolute",
               width: "87%",
               left: "6.5%",
-              bottom: `${(((numDecks * 52) - cardsDealt - dealerCutCard) / 4.16)}%`,
+              bottom: `${(numDecks * 52 - cardsDealt - dealerCutCard) / 4.16}%`,
               border: "1px solid rgb(0, 0, 0)",
               zIndex: 10000,
             }}
@@ -68,7 +72,7 @@ const Shoe = ({ numDecks, cardsDealt, dealerCutCard }: ShoeProps): JSX.Element =
               position: "absolute",
               bottom: "0%",
               left: "6.5%",
-              height: `${(((numDecks * 52) - cardsDealt) / 4.16)}%`,
+              height: `${(numDecks * 52 - cardsDealt) / 4.16}%`,
             }}
           />
         </div>

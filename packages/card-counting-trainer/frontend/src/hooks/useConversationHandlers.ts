@@ -51,7 +51,14 @@ export function useConversationHandlers({
       // Clear the conversation
       setActiveConversation(null);
     },
-    [activeConversation, playerSeat, addSpeechBubble, setSuspicionLevel, setPlayerSociability, setActiveConversation],
+    [
+      activeConversation,
+      playerSeat,
+      addSpeechBubble,
+      setSuspicionLevel,
+      setPlayerSociability,
+      setActiveConversation,
+    ],
   );
 
   const handleConversationIgnore = useCallback(() => {
@@ -69,7 +76,14 @@ export function useConversationHandlers({
     }
 
     setActiveConversation(null);
-  }, [activeConversation, playerSeat, addSpeechBubble, setSuspicionLevel, setPlayerSociability, setActiveConversation]);
+  }, [
+    activeConversation,
+    playerSeat,
+    addSpeechBubble,
+    setSuspicionLevel,
+    setPlayerSociability,
+    setActiveConversation,
+  ]);
 
   return {
     handleConversationResponse,

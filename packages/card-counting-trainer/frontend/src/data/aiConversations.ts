@@ -184,9 +184,9 @@ export const RESPONSE_OPTIONS: { [type: string]: ResponseOption[] } = {
 
 // Pit boss attention thresholds
 export const SUSPICION_THRESHOLDS = {
-  LOW: 0,      // 0-20: No attention
-  MEDIUM: 20,  // 20-40: Dealer starts watching more carefully
-  HIGH: 40,    // 40-60: Pit boss notices you
+  LOW: 0, // 0-20: No attention
+  MEDIUM: 20, // 20-40: Dealer starts watching more carefully
+  HIGH: 40, // 40-60: Pit boss notices you
   CRITICAL: 60, // 60+: Pit boss approaches, may ask you to leave
 };
 
@@ -208,7 +208,7 @@ export function getPlayerEngagement(characterId: string): string | null {
 // Helper to determine if conversation should happen this hand
 export function shouldTriggerConversation(
   handNumber: number,
-  suspicionLevel: number
+  suspicionLevel: number,
 ): boolean {
   // More conversations when suspicion is high (trying to distract the counter)
   const baseChance = 0.3; // 30% chance per hand

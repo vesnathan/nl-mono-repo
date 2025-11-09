@@ -8,12 +8,12 @@ export function useDealerChange(
   shoesDealt: number,
   dealerChangeInterval: number,
   currentDealer: DealerCharacter | null,
-  setCurrentDealer: (dealer: DealerCharacter) => void
+  setCurrentDealer: (dealer: DealerCharacter) => void,
 ) {
   useEffect(() => {
     if (shoesDealt > 0 && shoesDealt % dealerChangeInterval === 0) {
       const newDealer = getRandomDealer(
-        currentDealer ? [currentDealer.id] : []
+        currentDealer ? [currentDealer.id] : [],
       );
       setCurrentDealer(newDealer);
     }

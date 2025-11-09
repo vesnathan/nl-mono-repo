@@ -1,6 +1,6 @@
 import { Card, StrategyAction } from "@/types/game";
-import { calculateHandValue, isSoftHand, canSplit } from "./gameActions";
 import { GameSettings, DoubleDownRule } from "@/types/gameSettings";
+import { calculateHandValue, isSoftHand, canSplit } from "./gameActions";
 
 /**
  * Basic Strategy Tables
@@ -164,7 +164,7 @@ export function getBasicStrategyAction(
   dealerUpCard: Card,
   settings: GameSettings,
   canSplitHand: boolean = false,
-  canDoubleHand: boolean = false
+  canDoubleHand: boolean = false,
 ): StrategyAction {
   const dealerIndex = getDealerIndex(dealerUpCard);
   const handValue = calculateHandValue(playerCards);
@@ -199,7 +199,11 @@ export function getBasicStrategyAction(
       if (handValue === 18 && dealerIndex === 0 && !settings.dealerHitsSoft17) {
         // A-7 vs 2: Stand if dealer stands on soft 17 (S17)
         softAction = "S";
-      } else if (handValue === 19 && dealerIndex === 4 && settings.dealerHitsSoft17) {
+      } else if (
+        handValue === 19 &&
+        dealerIndex === 4 &&
+        settings.dealerHitsSoft17
+      ) {
         // A-8 vs 6: Double if dealer hits soft 17 (H17)
         if (canDoubleHand && canDoubleByRules(handValue, settings)) {
           softAction = "D";
@@ -225,7 +229,11 @@ export function getBasicStrategyAction(
       if (canDoubleHand && canDoubleByRules(handValue, settings)) {
         hardAction = "D";
       }
-    } else if (handValue === 15 && dealerIndex === 8 && !settings.dealerHitsSoft17) {
+    } else if (
+      handValue === 15 &&
+      dealerIndex === 8 &&
+      !settings.dealerHitsSoft17
+    ) {
       // 15 vs 10: Don't surrender if dealer stands on soft 17 (S17)
       if (hardAction === "SU") {
         hardAction = "H";
@@ -282,16 +290,17 @@ export function getStrategyExplanation(
   action: StrategyAction,
   playerCards: Card[],
   dealerUpCard: Card,
-  settings: GameSettings
+  settings: GameSettings,
 ): string {
   const handValue = calculateHandValue(playerCards);
   const dealerValue = dealerUpCard.rank === "A" ? 11 : dealerUpCard.value;
   const isSoft = isSoftHand(playerCards);
-  const isPair = playerCards.length === 2 && playerCards[0].rank === playerCards[1].rank;
+  const isPair =
+    playerCards.length === 2 && playerCards[0].rank === playerCards[1].rank;
 
   // Pair splits
   if (action === "SP" && isPair) {
-    const rank = playerCards[0].rank;
+    const { rank } = playerCards[0];
     if (rank === "A") {
       return "Always split Aces - gives you two chances at blackjack!";
     }
@@ -358,7 +367,7 @@ export function getSuggestedBet(
   trueCount: number,
   minBet: number,
   maxBet: number,
-  bankroll: number
+  bankroll: number,
 ): number {
   // Basic betting spread based on true count
   // TC <= 0: Min bet

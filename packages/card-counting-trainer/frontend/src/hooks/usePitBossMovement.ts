@@ -9,7 +9,7 @@ import { useEffect } from "react";
  */
 export function usePitBossMovement(
   setPitBossDistance: (distance: number | ((prev: number) => number)) => void,
-  suspicionLevel: number
+  suspicionLevel: number,
 ) {
   useEffect(() => {
     const wanderInterval = setInterval(() => {

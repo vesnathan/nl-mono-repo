@@ -15,7 +15,8 @@ export default function TurnIndicator({ isActive }: TurnIndicatorProps) {
           position: "absolute",
           inset: "-8px",
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, transparent 70%)",
+          background:
+            "radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, transparent 70%)",
           animation: "pulse-glow 2s ease-in-out infinite",
           pointerEvents: "none",
           zIndex: -1,
@@ -38,7 +39,8 @@ export default function TurnIndicator({ isActive }: TurnIndicatorProps) {
 
       <style jsx>{`
         @keyframes pulse-glow {
-          0%, 100% {
+          0%,
+          100% {
             opacity: 0.6;
             transform: scale(1);
           }
