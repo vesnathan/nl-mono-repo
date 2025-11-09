@@ -171,9 +171,9 @@ export function useGameActions({
       return card;
     };
 
-    // Sort AI players by position (right to left from dealer's perspective = descending)
+    // Sort AI players by position (first base to third base = ascending, since seat 0=first base)
     const sortedAIPlayers = [...aiPlayers].sort(
-      (a, b) => b.position - a.position,
+      (a, b) => a.position - b.position,
     );
 
     addDebugLog("--- First card round (right to left) ---");
