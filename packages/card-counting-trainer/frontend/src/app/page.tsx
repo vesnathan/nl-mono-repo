@@ -78,6 +78,8 @@ import { usePlayerHand } from "@/hooks/usePlayerHand";
 import { useBettingActions } from "@/hooks/useBettingActions";
 import { useConversationHandlers } from "@/hooks/useConversationHandlers";
 import { useGameActions } from "@/hooks/useGameActions";
+import { useSuspicionDecay } from "@/hooks/useSuspicionDecay";
+import { useDealerChange } from "@/hooks/useDealerChange";
 import {
   generateInitialReactions,
   generateEndOfHandReactions,
@@ -283,26 +285,6 @@ export default function GamePage() {
     setCurrentDealer(initialDealer);
     setInitialized(true);
   }, []);
-
-  // Suspicion meter decay
-  useEffect(() => {
-    if (suspicionLevel > 0) {
-      const decayInterval = setInterval(() => {
-        setSuspicionLevel((prev) => Math.max(0, prev - 1));
-      }, 3000);
-      return () => clearInterval(decayInterval);
-    }
-  }, [suspicionLevel]);
-
-  // Change dealer every 8-10 shoes
-  useEffect(() => {
-    if (shoesDealt > 0 && shoesDealt % dealerChangeInterval === 0) {
-      const newDealer = getRandomDealer(
-        currentDealer ? [currentDealer.id] : [],
-      );
-      setCurrentDealer(newDealer);
-    }
-  }, [shoesDealt, dealerChangeInterval, currentDealer]);
 
   // Conversation system functions
   const triggerConversation = useCallback(
@@ -594,6 +576,12 @@ export default function GamePage() {
     playerSeat,
     addSpeechBubble,
   });
+
+  // Suspicion decay hook
+  useSuspicionDecay(suspicionLevel, setSuspicionLevel);
+
+  // Dealer change hook
+  useDealerChange(shoesDealt, dealerChangeInterval, currentDealer, setCurrentDealer);
 
   // Log betting interface visibility conditions
   useEffect(() => {
