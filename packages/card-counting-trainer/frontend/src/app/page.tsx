@@ -597,13 +597,31 @@ export default function GamePage() {
   // Player actions
   const hit = useCallback(() => {
     const card = dealCardFromShoe();
-    setPlayerHand((prev) => ({ ...prev, cards: [...prev.cards, card] }));
 
-    const newHandValue = calculateHandValue([...playerHand.cards, card]);
-    if (newHandValue > 21) {
-      setTimeout(() => setPhase("AI_TURNS"), 500);
-    }
-  }, [playerHand, dealCardFromShoe]);
+    // Add flying card animation
+    const shoePosition = getCardPosition("shoe");
+    const playerPosition = getCardPosition("player", undefined, playerHand.cards.length);
+
+    const flyingCard: FlyingCardData = {
+      id: `hit-player-${Date.now()}`,
+      card,
+      fromPosition: shoePosition,
+      toPosition: playerPosition,
+    };
+
+    setFlyingCards(prev => [...prev, flyingCard]);
+
+    // Add card to hand after animation completes
+    setTimeout(() => {
+      setPlayerHand((prev) => ({ ...prev, cards: [...prev.cards, card] }));
+      setFlyingCards(prev => prev.filter(fc => fc.id !== flyingCard.id));
+
+      const newHandValue = calculateHandValue([...playerHand.cards, card]);
+      if (newHandValue > 21) {
+        setTimeout(() => setPhase("AI_TURNS"), 500);
+      }
+    }, 800); // Match FlyingCard animation duration
+  }, [playerHand, dealCardFromShoe, getCardPosition]);
 
   const stand = useCallback(() => {
     setPhase("AI_TURNS");
@@ -689,35 +707,53 @@ export default function GamePage() {
           setPlayerActions(prev => new Map(prev).set(idx, "HIT"));
         }, 0);
 
-        // Deal card after decision time
+        // Deal card after decision time with animation
         registerTimeout(() => {
           const card = dealCardFromShoe();
-          setAIPlayers((prev) => {
-            const updated = [...prev];
-            updated[idx] = {
-              ...updated[idx],
-              hand: {
-                ...updated[idx].hand,
-                cards: [...updated[idx].hand.cards, card]
-              }
-            };
-            return updated;
-          });
+
+          // Add flying card animation
+          const shoePosition = getCardPosition("shoe");
+          const aiPosition = getCardPosition("ai", idx, ai.hand.cards.length);
+
+          const flyingCard: FlyingCardData = {
+            id: `hit-ai-${idx}-${Date.now()}`,
+            card,
+            fromPosition: shoePosition,
+            toPosition: aiPosition,
+          };
+
+          setFlyingCards(prev => [...prev, flyingCard]);
+
+          // Add card to hand after animation completes
+          setTimeout(() => {
+            setAIPlayers((prev) => {
+              const updated = [...prev];
+              updated[idx] = {
+                ...updated[idx],
+                hand: {
+                  ...updated[idx].hand,
+                  cards: [...updated[idx].hand.cards, card]
+                }
+              };
+              return updated;
+            });
+            setFlyingCards(prev => prev.filter(fc => fc.id !== flyingCard.id));
+          }, 800); // Match FlyingCard animation duration
         }, decisionTime);
 
-        // Clear action after display
+        // Clear action after display (wait for card animation to complete)
         registerTimeout(() => {
           setPlayerActions(prev => {
             const newMap = new Map(prev);
             newMap.delete(idx);
             return newMap;
           });
-        }, decisionTime + actionDisplay);
+        }, decisionTime + 800 + actionDisplay); // 800ms for card animation
 
         // Clear active player to trigger next action
         registerTimeout(() => {
           setActivePlayerIndex(null);
-        }, decisionTime + actionDisplay + turnClear);
+        }, decisionTime + 800 + actionDisplay + turnClear); // 800ms for card animation
       } else {
 
         // Show STAND action
