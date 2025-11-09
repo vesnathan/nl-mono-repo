@@ -15,8 +15,8 @@ export function useGameInitialization(
   setInitialized: (initialized: boolean) => void,
 ) {
   useEffect(() => {
-    // TESTING: Just 1 AI player for easier debugging
-    const numAIPlayers = 1; // Was: Math.floor(Math.random() * 2) + 3; // 3 or 4 AI players
+    // Randomly select 3-4 AI players
+    const numAIPlayers = Math.floor(Math.random() * 2) + 3; // 3 or 4 AI players
     const shuffledCharacters = [...AI_CHARACTERS].sort(
       () => Math.random() - 0.5,
     );
