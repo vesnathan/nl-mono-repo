@@ -22,13 +22,7 @@ export default function DealerSection({
   onDealerClick,
 }: DealerSectionProps) {
   // Debug: Log dealer hand on EVERY render
-  React.useEffect(() => {
-    console.log(`[DealerSection RENDER] Phase: ${phase}, Dealer cards count: ${dealerHand.cards.length}`);
-    if (dealerHand.cards.length > 0) {
-      console.log(`[DealerSection RENDER] Cards:`, dealerHand.cards.map((c, idx) => `${idx}: ${c.rank}${c.suit}`).join(", "));
-    }
-    console.log(`[DealerSection RENDER] Dealer revealed: ${dealerRevealed}`);
-  }); // No dependencies = run on every render
+  console.warn(`🎴 DEALER SECTION: Phase=${phase}, Cards=${dealerHand.cards.length}, Revealed=${dealerRevealed}`);
 
   return (
     <div
