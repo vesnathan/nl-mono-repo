@@ -58,6 +58,7 @@ import GameOverlays from "@/components/GameOverlays";
 import DebugLogModal from "@/components/DebugLogModal";
 import GameModals from "@/components/GameModals";
 import GameTable from "@/components/GameTable";
+import BlackjackGameUI from "@/components/BlackjackGameUI";
 import { CARD_APPEAR_TIME, CARD_ANIMATION_DURATION } from "@/constants/animations";
 import {
   PlayerHand,
@@ -2109,97 +2110,61 @@ export default function GamePage() {
   const trueCount = calculateTrueCount(runningCount, decksRemaining);
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-      }}
-    >
-      {/* Suspicion Meter - Fixed position */}
-      <SuspicionMeter
-        level={suspicionLevel}
-        pitBossDistance={pitBossDistance}
-      />
-      {/* Stats Bar at Top */}
-      <StatsBar
-        gameSettings={gameSettings}
-        runningCount={runningCount}
-        timeRemaining={timeRemaining}
-        currentStreak={currentStreak}
-        playerChips={playerChips}
-        currentScore={currentScore}
-        scoreMultiplier={scoreMultiplier}
-        onSettingsClick={() => setShowSettings(true)}
-        onLeaderboardClick={() => setShowLeaderboard(true)}
-        onStrategyClick={() => setShowStrategyCard(true)}
-      />
-
-
-
-      {/* Full Viewport Game Table */}
-      <GameTable
-        gameSettings={gameSettings}
-        cardsDealt={cardsDealt}
-        currentDealer={currentDealer}
-        dealerCallout={dealerCallout}
-        phase={phase}
-        dealerHand={dealerHand}
-        dealerRevealed={dealerRevealed}
-        aiPlayers={aiPlayers}
-        playerSeat={playerSeat}
-        playerHand={playerHand}
-        currentBet={currentBet}
-        activePlayerIndex={activePlayerIndex}
-        playerActions={playerActions}
-        speechBubbles={speechBubbles}
-        winLossBubbles={winLossBubbles}
-        activeConversation={activeConversation}
-        flyingCards={flyingCards}
-        showDealerInfo={showDealerInfo}
-        setPlayerSeat={setPlayerSeat}
-        addDebugLog={addDebugLog}
-        startNewRound={startNewRound}
-        hit={hit}
-        stand={stand}
-        handleConversationResponse={handleConversationResponse}
-        handleConversationIgnore={handleConversationIgnore}
-        setWinLossBubbles={setWinLossBubbles}
-        setShowDealerInfo={setShowDealerInfo}
-      />
-
-
-      {/* All Game Modals */}
-      <GameModals
-        phase={phase}
-        initialized={initialized}
-        playerSeat={playerSeat}
-        playerChips={playerChips}
-        currentBet={currentBet}
-        minBet={minBet}
-        maxBet={maxBet}
-        handleBetChange={handleBetChange}
-        handleConfirmBet={handleConfirmBet}
-        handleClearBet={handleClearBet}
-        showSettings={showSettings}
-        setShowSettings={setShowSettings}
-        gameSettings={gameSettings}
-        setGameSettings={setGameSettings}
-        showLeaderboard={showLeaderboard}
-        setShowLeaderboard={setShowLeaderboard}
-        peakChips={peakChips}
-        longestStreak={longestStreak}
-        currentScore={currentScore}
-        showStrategyCard={showStrategyCard}
-        setShowStrategyCard={setShowStrategyCard}
-        debugLogs={debugLogs}
-        showDebugLog={showDebugLog}
-        setShowDebugLog={setShowDebugLog}
-        clearDebugLogs={clearDebugLogs}
-      />
-    </div>
+    <BlackjackGameUI
+      suspicionLevel={suspicionLevel}
+      pitBossDistance={pitBossDistance}
+      gameSettings={gameSettings}
+      runningCount={runningCount}
+      timeRemaining={timeRemaining}
+      currentStreak={currentStreak}
+      playerChips={playerChips}
+      currentScore={currentScore}
+      scoreMultiplier={scoreMultiplier}
+      cardsDealt={cardsDealt}
+      currentDealer={currentDealer}
+      dealerCallout={dealerCallout}
+      phase={phase}
+      dealerHand={dealerHand}
+      dealerRevealed={dealerRevealed}
+      aiPlayers={aiPlayers}
+      playerSeat={playerSeat}
+      playerHand={playerHand}
+      currentBet={currentBet}
+      activePlayerIndex={activePlayerIndex}
+      playerActions={playerActions}
+      speechBubbles={speechBubbles}
+      winLossBubbles={winLossBubbles}
+      activeConversation={activeConversation}
+      flyingCards={flyingCards}
+      showDealerInfo={showDealerInfo}
+      initialized={initialized}
+      minBet={minBet}
+      maxBet={maxBet}
+      showSettings={showSettings}
+      showLeaderboard={showLeaderboard}
+      peakChips={peakChips}
+      longestStreak={longestStreak}
+      showStrategyCard={showStrategyCard}
+      debugLogs={debugLogs}
+      showDebugLog={showDebugLog}
+      setShowSettings={setShowSettings}
+      setShowLeaderboard={setShowLeaderboard}
+      setShowStrategyCard={setShowStrategyCard}
+      setPlayerSeat={setPlayerSeat}
+      addDebugLog={addDebugLog}
+      startNewRound={startNewRound}
+      hit={hit}
+      stand={stand}
+      handleConversationResponse={handleConversationResponse}
+      handleConversationIgnore={handleConversationIgnore}
+      setWinLossBubbles={setWinLossBubbles}
+      setShowDealerInfo={setShowDealerInfo}
+      handleBetChange={handleBetChange}
+      handleConfirmBet={handleConfirmBet}
+      handleClearBet={handleClearBet}
+      setGameSettings={setGameSettings}
+      setShowDebugLog={setShowDebugLog}
+      clearDebugLogs={clearDebugLogs}
+    />
   );
 }
