@@ -62,6 +62,7 @@ export function useDealerTurnPhase({
   const dealerTurnProcessingRef = useRef(false);
   const dealerFinishedRef = useRef(false);
   const cardCounterRef = useRef(0);
+  const dealingCardRef = useRef(false);
 
   useEffect(() => {
     if (phase !== "DEALER_TURN") {
@@ -108,8 +109,9 @@ export function useDealerTurnPhase({
       registerTimeout(() => {
         // Dealer plays according to rules - deal one card at a time with delays
         const dealNextCard = () => {
-          setDealerHand((prevHand) => {
-            const handValue = calculateHandValue(prevHand.cards);
+          // Read current hand value synchronously
+          setDealerHand((currentHand) => {
+            const handValue = calculateHandValue(currentHand.cards);
 
             // Check if should hit
             const shouldHit = () => {
@@ -122,8 +124,8 @@ export function useDealerTurnPhase({
               // On 17: depends on soft 17 rule
               if (handValue === 17) {
                 // Check if it's a soft 17 (has an Ace counted as 11)
-                const hasAce = prevHand.cards.some((card) => card.rank === "A");
-                const hasMultipleCards = prevHand.cards.length > 2;
+                const hasAce = currentHand.cards.some((card) => card.rank === "A");
+                const hasMultipleCards = currentHand.cards.length > 2;
                 const isSoft = hasAce && hasMultipleCards;
 
                 if (gameSettings.dealerHitsSoft17 && isSoft) {
@@ -136,7 +138,13 @@ export function useDealerTurnPhase({
             };
 
             // Check if dealer should hit and hasn't busted
-            if (shouldHit() && !isBusted(prevHand.cards)) {
+            if (shouldHit() && !isBusted(currentHand.cards)) {
+              // Guard against dealing multiple cards (React may call updater multiple times)
+              if (dealingCardRef.current) {
+                return currentHand; // Already dealing, don't deal again
+              }
+              dealingCardRef.current = true;
+
               const card = dealCardFromShoe();
               addDebugLog(
                 `Dealer HIT: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
@@ -147,7 +155,7 @@ export function useDealerTurnPhase({
               const dealerPosition = getCardPositionForAnimation(
                 "dealer",
                 undefined,
-                prevHand.cards.length,
+                currentHand.cards.length,
               );
 
               const flyingCard: FlyingCardData = {
@@ -166,12 +174,15 @@ export function useDealerTurnPhase({
                 );
               }, CARD_ANIMATION_DURATION);
 
-              const newHand = { ...prevHand, cards: [...prevHand.cards, card] };
+              const newHand = { ...currentHand, cards: [...currentHand.cards, card] };
               const newValue = calculateHandValue(newHand.cards);
               addDebugLog(`Dealer hand value: ${newValue}`);
 
               // Schedule next card after animation + delay
-              registerTimeout(() => dealNextCard(), 1000);
+              registerTimeout(() => {
+                dealingCardRef.current = false; // Reset flag before next card
+                dealNextCard();
+              }, 1000);
 
               return newHand;
             }
