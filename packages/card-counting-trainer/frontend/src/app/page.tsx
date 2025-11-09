@@ -71,6 +71,10 @@ import {
   generateInitialReactions,
   generateEndOfHandReactions,
 } from "@/utils/reactions";
+import {
+  createConversation,
+  createSpeechBubble,
+} from "@/utils/conversationHelpers";
 
 export default function GamePage() {
   // Game settings
@@ -294,43 +298,7 @@ export default function GamePage() {
       // Don't trigger if there's already an active conversation
       if (activeConversation) return;
 
-      const tablePositions = [
-        [5, 55], // Seat 0 - Far left
-        [16, 62], // Seat 1 - Left
-        [29, 68], // Seat 2 - Center-left
-        [42, 72], // Seat 3 - Center
-        [56, 72], // Seat 4 - Center
-        [69, 68], // Seat 5 - Center-right
-        [82, 62], // Seat 6 - Right
-        [93, 55], // Seat 7 - Far right
-      ];
-
-      const [x, y] = tablePositions[position] || tablePositions[0];
-
-      // Get character-specific or dealer dialogue
-      let question: string;
-      if (speakerId === "dealer") {
-        question = getDealerPlayerLine("generic", "dealerQuestions");
-      } else {
-        question = getDealerPlayerLine(speakerId, "playerQuestions");
-      }
-
-      // Create response choices
-      const choices = [
-        { text: "Sure, yeah...", suspicionChange: -2 }, // Friendly, reduces suspicion slightly
-        { text: "*nods politely*", suspicionChange: 0 }, // Neutral
-        { text: "*focuses on cards*", suspicionChange: 5 }, // Ignoring - increases suspicion
-      ];
-
-      const conversation: ActiveConversation = {
-        id: `conv-${Date.now()}`,
-        speakerId,
-        speakerName,
-        question,
-        choices,
-        position: { left: `${x}%`, top: `${y}%` },
-      };
-
+      const conversation = createConversation(speakerId, speakerName, position);
       setActiveConversation(conversation);
     },
     [activeConversation],
@@ -338,37 +306,13 @@ export default function GamePage() {
 
   const addSpeechBubble = useCallback(
     (playerId: string, message: string, position: number) => {
-      // Find the character name and hand for logging
-      const player = aiPlayers.find((p) => p.character.id === playerId);
-      const characterName = player?.character?.name || playerId;
-      const hand = player?.hand?.cards || [];
-      const handStr = hand.map((c) => `${c.rank}${c.suit}`).join(", ");
-      const handValue = hand.length > 0 ? calculateHandValue(hand) : 0;
-
-      addDebugLog(
-        `💬 ${characterName} [Hand: ${handStr} (${handValue})]: "${message}"`,
-      );
-
-      // Use same positions as player avatars on the table
-      const tablePositions = [
-        [5, 55], // Seat 0 - Far left
-        [16, 62], // Seat 1 - Left
-        [29, 68], // Seat 2 - Center-left
-        [42, 72], // Seat 3 - Center
-        [56, 72], // Seat 4 - Center
-        [69, 68], // Seat 5 - Center-right
-        [82, 62], // Seat 6 - Right
-        [93, 55], // Seat 7 - Far right
-      ];
-
-      const [x, y] = tablePositions[position] || tablePositions[0];
-
-      const bubble: SpeechBubble = {
+      const bubble = createSpeechBubble(
         playerId,
         message,
-        position: { left: `${x}%`, top: `${y}%` },
-        id: playerId, // Use playerId directly as it's already unique per call
-      };
+        position,
+        aiPlayers,
+        addDebugLog,
+      );
 
       setSpeechBubbles((prev) => [...prev, bubble]);
 
