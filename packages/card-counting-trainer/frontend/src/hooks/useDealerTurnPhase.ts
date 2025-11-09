@@ -61,6 +61,7 @@ export function useDealerTurnPhase({
 }: UseDealerTurnPhaseParams) {
   const dealerTurnProcessingRef = useRef(false);
   const dealerFinishedRef = useRef(false);
+  const cardCounterRef = useRef(0);
 
   useEffect(() => {
     if (phase !== "DEALER_TURN") {
@@ -70,12 +71,10 @@ export function useDealerTurnPhase({
 
     // Guard against re-entry while processing
     if (dealerTurnProcessingRef.current) {
-      addDebugLog("⚠️ Dealer turn already processing, skipping re-entry");
       return;
     }
 
     dealerTurnProcessingRef.current = true;
-    addDebugLog("🔒 Dealer turn processing locked");
 
     if (phase === "DEALER_TURN") {
       addDebugLog("=== PHASE: DEALER_TURN START ===");
@@ -152,7 +151,7 @@ export function useDealerTurnPhase({
               );
 
               const flyingCard: FlyingCardData = {
-                id: `hit-dealer-${Date.now()}`,
+                id: `hit-dealer-${Date.now()}-${cardCounterRef.current++}`,
                 card,
                 fromPosition: shoePosition,
                 toPosition: dealerPosition,

@@ -79,6 +79,7 @@ export function useAITurnsPhase({
   addDebugLog,
 }: UseAITurnsPhaseParams) {
   const aiTurnProcessingRef = useRef<boolean>(false);
+  const cardCounterRef = useRef(0);
 
   useEffect(() => {
     if (phase !== "AI_TURNS") {
@@ -227,7 +228,7 @@ export function useAITurnsPhase({
           );
 
           const flyingCard: FlyingCardData = {
-            id: `hit-ai-${idx}-${Date.now()}`,
+            id: `hit-ai-${idx}-${Date.now()}-${cardCounterRef.current++}`,
             card,
             fromPosition: shoePosition,
             toPosition: aiPosition,

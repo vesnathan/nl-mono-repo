@@ -11,6 +11,9 @@ import { dealCard, calculateHandValue } from "@/lib/gameActions";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 import { GameSettings } from "@/types/gameSettings";
 
+// Module-level counter for unique card IDs
+let cardIdCounter = 0;
+
 interface UseGameActionsParams {
   // State
   phase: GamePhase;
@@ -259,7 +262,7 @@ export function useGameActions({
         }
 
         const flyingCard: FlyingCardData = {
-          id: `deal-${dealData.type}-${dealData.index}-${Date.now()}`,
+          id: `deal-${dealData.type}-${dealData.index}-${Date.now()}-${cardIdCounter++}`,
           card: dealData.card,
           fromPosition: shoePosition,
           toPosition: targetPosition,
@@ -388,7 +391,7 @@ export function useGameActions({
     );
 
     const flyingCard: FlyingCardData = {
-      id: `hit-player-${Date.now()}`,
+      id: `hit-player-${Date.now()}-${cardIdCounter++}`,
       card,
       fromPosition: shoePosition,
       toPosition: playerPosition,
