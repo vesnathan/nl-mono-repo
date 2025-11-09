@@ -425,20 +425,10 @@ export function useAITurnsPhase({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     phase,
-    aiPlayers,
-    dealCardFromShoe,
-    registerTimeout,
     activePlayerIndex,
     playersFinished,
-    dealerHand,
-    getCardPositionForAnimation,
-    // addDebugLog intentionally omitted - it changes on every render
-    setActivePlayerIndex,
-    setPlayersFinished,
-    setPlayerActions,
-    setAIPlayers,
-    setFlyingCards,
-    setPhase,
-    addSpeechBubble,
+    // Functions and complex objects intentionally omitted - they change on every render:
+    // aiPlayers, dealerHand, dealCardFromShoe, registerTimeout,
+    // getCardPositionForAnimation, addDebugLog, addSpeechBubble
   ]);
 }
