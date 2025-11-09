@@ -854,11 +854,41 @@ export default function GamePage() {
       setPlayerChips((prev) => prev + playerPayout);
       setPlayerHand((prev) => ({ ...prev, result: playerResult }));
 
-      // Update pit boss distance based on player behavior
+      // Update pit boss distance and suspicion based on player behavior
       if (playerSeat !== null && playerHand.bet > 0) {
         const betVariation = Math.abs(playerHand.bet - previousBet) / previousBet;
         const netGain = playerPayout - playerHand.bet;
         const isBigWin = netGain > playerHand.bet * 1.5; // Win more than 1.5x bet
+
+        // Calculate true count for bet correlation detection
+        const decksRemaining = calculateDecksRemaining(numDecks * 52, cardsDealt);
+        const trueCount = calculateTrueCount(runningCount, decksRemaining);
+
+        // Determine if bet change correlates with count (sign of counting)
+        const betIncreased = playerHand.bet > previousBet;
+        const countIsFavorable = trueCount >= 2; // Count of +2 or higher favors player
+        const countIsUnfavorable = trueCount <= -1;
+        const suspiciousBetting = (betIncreased && countIsFavorable) || (!betIncreased && countIsUnfavorable);
+
+        // Calculate suspicion from bet variation
+        let suspicionIncrease = 0;
+        if (betVariation > 0.3 && currentDealer) { // 30%+ bet change
+          // Base suspicion from bet size change
+          const baseSuspicion = betVariation * 15; // Max ~15 for 100% change
+
+          // Multiply by dealer detection skill
+          const detectionMultiplier = currentDealer.detectionSkill / 100;
+
+          // If betting correlates with count, it's MORE suspicious
+          // If betting goes against count (camouflage), it's LESS suspicious
+          const correlationMultiplier = suspiciousBetting ? 1.5 : 0.5;
+
+          // Count extremity multiplier - more extreme counts = more suspicious to vary bet
+          const countMultiplier = 1 + (Math.abs(trueCount) * 0.2); // +20% per count point
+
+          suspicionIncrease = baseSuspicion * detectionMultiplier * correlationMultiplier * countMultiplier;
+          suspicionIncrease = Math.min(suspicionIncrease, 25); // Cap at 25 points
+        }
 
         // Calculate proximity change
         let proximityChange = 0;
@@ -884,12 +914,17 @@ export default function GamePage() {
 
           // If pit boss is very close, increase suspicion more
           if (newDistance < 30 && (isBigWin || betVariation > 0.5)) {
-            const suspicionIncrease = isBigWin ? 5 : Math.floor(betVariation * 10);
-            setSuspicionLevel(s => Math.min(100, s + suspicionIncrease));
+            const proximityBonus = isBigWin ? 5 : Math.floor(betVariation * 10);
+            suspicionIncrease += proximityBonus;
           }
 
           return newDistance;
         });
+
+        // Apply suspicion increase
+        if (suspicionIncrease > 0) {
+          setSuspicionLevel(s => Math.min(100, s + suspicionIncrease));
+        }
 
         // Update previous bet for next hand
         setPreviousBet(playerHand.bet);
