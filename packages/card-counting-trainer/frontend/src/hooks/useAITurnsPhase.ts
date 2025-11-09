@@ -110,6 +110,9 @@ export function useAITurnsPhase({
       addDebugLog(
         `Players finished: [${Array.from(playersFinished).join(", ")}]`,
       );
+      addDebugLog(
+        `Dealer hand cards: ${dealerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")} (${dealerHand.cards.length} cards)`,
+      );
 
       const nextPlayer = playersByPosition.find(({ ai, idx }) => {
         if (playersFinished.has(idx)) {
