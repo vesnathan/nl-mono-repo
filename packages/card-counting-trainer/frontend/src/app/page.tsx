@@ -65,8 +65,15 @@ import { getCardPosition } from "@/utils/cardPositions";
 import { calculateStreakPoints } from "@/utils/scoreCalculation";
 import { useGameTimeouts } from "@/hooks/useGameTimeouts";
 import { useDebugLogging } from "@/hooks/useDebugLogging";
+import { useGameShoe } from "@/hooks/useGameShoe";
+import { usePlayerHand } from "@/hooks/usePlayerHand";
 
 export default function GamePage() {
+  // Game settings
+  const [gameSettings, setGameSettings] = useState<GameSettings>(
+    DEFAULT_GAME_SETTINGS,
+  );
+
   // Custom hooks
   const { registerTimeout, clearAllTimeouts } = useGameTimeouts();
   const {
@@ -77,39 +84,41 @@ export default function GamePage() {
     clearDebugLogs,
   } = useDebugLogging();
 
-  // Game settings
-  const [gameSettings, setGameSettings] = useState<GameSettings>(
-    DEFAULT_GAME_SETTINGS,
-  );
+  const {
+    shoe,
+    setShoe,
+    cardsDealt,
+    setCardsDealt,
+    runningCount,
+    setRunningCount,
+    shoesDealt,
+    setShoesDealt,
+    dealCardFromShoe,
+  } = useGameShoe(gameSettings);
 
-  // Game state
-  const [shoe, setShoe] = useState<GameCard[]>(() =>
-    createAndShuffleShoe(
-      gameSettings.numberOfDecks,
-      gameSettings.countingSystem,
-    ),
-  );
-  const [cardsDealt, setCardsDealt] = useState(0);
-  const [runningCount, setRunningCount] = useState(0);
-  const [shoesDealt, setShoesDealt] = useState(0);
-
-  // Player state
-  const [playerChips, setPlayerChips] = useState(1000);
-  const [playerHand, setPlayerHand] = useState<PlayerHand>({
-    cards: [],
-    bet: 0,
-  });
-  const [currentBet, setCurrentBet] = useState(0); // Temporary bet being placed
-  const [previousBet, setPreviousBet] = useState(10); // Track previous bet for bet spread detection
-  const [minBet] = useState(5);
-  const [maxBet] = useState(500);
-
-  // Scoring and statistics state
-  const [currentScore, setCurrentScore] = useState(0);
-  const [currentStreak, setCurrentStreak] = useState(0); // Consecutive correct decisions
-  const [longestStreak, setLongestStreak] = useState(0);
-  const [peakChips, setPeakChips] = useState(1000);
-  const [scoreMultiplier] = useState(1.0); // 1.0x - 2.0x based on counting accuracy
+  const {
+    playerChips,
+    setPlayerChips,
+    playerHand,
+    setPlayerHand,
+    currentBet,
+    setCurrentBet,
+    previousBet,
+    setPreviousBet,
+    minBet,
+    maxBet,
+    currentScore,
+    setCurrentScore,
+    currentStreak,
+    setCurrentStreak,
+    longestStreak,
+    setLongestStreak,
+    peakChips,
+    setPeakChips,
+    scoreMultiplier,
+    awardCorrectDecisionPoints,
+    resetStreak,
+  } = usePlayerHand();
 
   // AI players state
   const [aiPlayers, setAIPlayers] = useState<AIPlayer[]>([]);
@@ -264,28 +273,6 @@ export default function GamePage() {
       return () => clearInterval(decayInterval);
     }
   }, [suspicionLevel]);
-
-  // Deal a card with reshuffle handling
-  const dealCardFromShoe = useCallback(() => {
-    const { card, remainingShoe, reshuffled } = dealCard(
-      shoe,
-      gameSettings.numberOfDecks,
-      gameSettings.countingSystem,
-    );
-
-    if (reshuffled) {
-      setShoe(remainingShoe);
-      setCardsDealt(1);
-      setRunningCount(card.count);
-      setShoesDealt((prev) => prev + 1);
-    } else {
-      setShoe(remainingShoe);
-      setCardsDealt((prev) => prev + 1);
-      setRunningCount((prev) => prev + card.count);
-    }
-
-    return card;
-  }, [shoe, gameSettings.numberOfDecks, gameSettings.countingSystem]);
 
   // Change dealer every 8-10 shoes
   useEffect(() => {
@@ -1151,37 +1138,6 @@ export default function GamePage() {
     },
     [],
   );
-
-  // Award points for correct decision and update streak
-  // TODO: Use this function when implementing decision tracking
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const awardCorrectDecisionPoints = useCallback(() => {
-    const newStreak = currentStreak + 1;
-    const basePoints = calculateStreakPoints(newStreak);
-    const pointsWithMultiplier = Math.floor(basePoints * scoreMultiplier);
-
-    setCurrentStreak(newStreak);
-    setCurrentScore((prev) => prev + pointsWithMultiplier);
-
-    // Update longest streak
-    if (newStreak > longestStreak) {
-      setLongestStreak(newStreak);
-    }
-  }, [currentStreak, scoreMultiplier, longestStreak]);
-
-  // Reset streak on incorrect decision
-  // TODO: Use this function when implementing decision tracking
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const resetStreak = useCallback(() => {
-    setCurrentStreak(0);
-  }, []);
-
-  // Update peak chips whenever chips change
-  useEffect(() => {
-    if (playerChips > peakChips) {
-      setPeakChips(playerChips);
-    }
-  }, [playerChips, peakChips]);
 
   // Reset playersFinished when entering AI_TURNS phase (only on phase transition)
   useEffect(() => {
