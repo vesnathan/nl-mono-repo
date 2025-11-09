@@ -8,21 +8,26 @@ interface ActionBubbleProps {
 }
 
 export default function ActionBubble({ action, onComplete }: ActionBubbleProps) {
-  const [isVisible, setIsVisible] = useState(false);
+  const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
-    // Fade in
-    const fadeInTimer = setTimeout(() => setIsVisible(true), 50);
+    // Fade in quickly
+    const fadeInTimer = setTimeout(() => setOpacity(1), 50);
 
-    // Fade out and complete after 1.5 seconds
+    // Hold for a moment, then fade out
     const fadeOutTimer = setTimeout(() => {
-      setIsVisible(false);
-      setTimeout(() => onComplete?.(), 300);
+      setOpacity(0);
+    }, 1200);
+
+    // Complete after fade out
+    const completeTimer = setTimeout(() => {
+      onComplete?.();
     }, 1500);
 
     return () => {
       clearTimeout(fadeInTimer);
       clearTimeout(fadeOutTimer);
+      clearTimeout(completeTimer);
     };
   }, [onComplete]);
 
@@ -45,20 +50,21 @@ export default function ActionBubble({ action, onComplete }: ActionBubbleProps) 
     <div
       style={{
         position: "absolute",
-        top: "-40px",
-        left: "50%",
-        transform: `translateX(-50%) scale(${isVisible ? 1 : 0.8})`,
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        borderRadius: "50%",
         backgroundColor: getActionColor(),
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         color: "white",
-        padding: "8px 16px",
-        borderRadius: "20px",
         fontWeight: "bold",
-        fontSize: "14px",
-        whiteSpace: "nowrap",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-        opacity: isVisible ? 1 : 0,
-        transition: "all 0.3s ease",
-        zIndex: 1000,
+        fontSize: "16px",
+        opacity: opacity,
+        transition: "opacity 0.3s ease",
+        zIndex: 10,
         pointerEvents: "none",
       }}
     >
