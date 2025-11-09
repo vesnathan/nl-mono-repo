@@ -75,6 +75,7 @@ import { useGameTimeouts } from "@/hooks/useGameTimeouts";
 import { useDebugLogging } from "@/hooks/useDebugLogging";
 import { useGameShoe } from "@/hooks/useGameShoe";
 import { usePlayerHand } from "@/hooks/usePlayerHand";
+import { useBettingActions } from "@/hooks/useBettingActions";
 import {
   generateInitialReactions,
   generateEndOfHandReactions,
@@ -814,82 +815,27 @@ export default function GamePage() {
     addDebugLog,
   ]);
 
-  // Betting handlers - manual bet placement
-  const handleConfirmBet = useCallback(() => {
-    addDebugLog("=== CONFIRM BET CLICKED ===");
-    addDebugLog(`Current bet: $${currentBet}`);
-    addDebugLog(`Min bet: $${minBet}, Max bet: $${maxBet}`);
-    addDebugLog(`Player chips: $${playerChips}`);
-    addDebugLog(`Phase: ${phase}`);
-    addDebugLog(`Player seat: ${playerSeat}`);
-
-    const canBet =
-      currentBet >= minBet &&
-      currentBet <= maxBet &&
-      currentBet <= playerChips &&
-      phase === "BETTING" &&
-      playerSeat !== null;
-    addDebugLog(`Can place bet: ${canBet}`);
-
-    if (canBet) {
-      addDebugLog("✓ BET CONFIRMED - Starting dealing phase");
-      setPhase("DEALING");
-      setDealerRevealed(false);
-      setPlayerHand({ cards: [], bet: currentBet });
-      setDealerHand({ cards: [], bet: 0 });
-      setPlayerChips((prev) => {
-        addDebugLog(
-          `Deducting bet: $${prev} - $${currentBet} = $${prev - currentBet}`,
-        );
-        return prev - currentBet;
-      });
-      setPreviousBet(currentBet);
-      setSpeechBubbles([]); // Clear any lingering speech bubbles
-
-      // Reset AI hands with random bets
-      const updatedAI = aiPlayers.map((ai) => ({
-        ...ai,
-        hand: { cards: [], bet: Math.floor(Math.random() * 50) + 25 },
-      }));
-      setAIPlayers(updatedAI);
-
-      // Deal initial cards
-      setTimeout(() => dealInitialCards(), 500);
-    } else {
-      addDebugLog("✗ BET NOT CONFIRMED - Requirements not met");
-      if (currentBet < minBet)
-        addDebugLog(`  - Bet too low (${currentBet} < ${minBet})`);
-      if (currentBet > maxBet)
-        addDebugLog(`  - Bet too high (${currentBet} > ${maxBet})`);
-      if (currentBet > playerChips)
-        addDebugLog(`  - Insufficient chips (${currentBet} > ${playerChips})`);
-      if (phase !== "BETTING") addDebugLog(`  - Wrong phase (${phase})`);
-      if (playerSeat === null) addDebugLog(`  - Player not seated`);
-    }
-  }, [
+  // Betting actions hook
+  const { handleConfirmBet, handleClearBet, handleBetChange } = useBettingActions({
     currentBet,
+    setCurrentBet,
     minBet,
     maxBet,
     playerChips,
+    setPlayerChips,
     phase,
     playerSeat,
     aiPlayers,
+    setPhase,
+    setDealerRevealed,
+    setPlayerHand,
+    setDealerHand,
+    setPreviousBet,
+    setSpeechBubbles,
+    setAIPlayers,
     dealInitialCards,
     addDebugLog,
-  ]);
-
-  const handleClearBet = useCallback(() => {
-    addDebugLog("CLEAR BET - Resetting bet to $0");
-    setCurrentBet(0);
-  }, [addDebugLog]);
-
-  const handleBetChange = useCallback(
-    (newBet: number) => {
-      addDebugLog(`BET CHANGED: $${currentBet} → $${newBet}`);
-      setCurrentBet(newBet);
-    },
-    [currentBet, addDebugLog],
-  );
+  });
 
   // Log betting interface visibility conditions
   useEffect(() => {
