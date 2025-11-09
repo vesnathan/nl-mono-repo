@@ -203,18 +203,16 @@ export default function GamePage() {
 
     if (type === "player" && playerSeat !== null) {
       const [x, y] = tablePositions[playerSeat];
-      // Cards are positioned calc(100% + 4px) above the avatar
-      // Approximate by reducing y by ~12% (avatar height + gap)
-      return { left: `${x}%`, top: `calc(${y}% - 120px)` };
+      // Cards are positioned above the avatar
+      return { left: `${x}%`, top: `calc(${y}% - 140px)` };
     }
 
     if (type === "ai" && index !== undefined) {
       const aiPlayer = aiPlayers[index];
       if (aiPlayer) {
         const [x, y] = tablePositions[aiPlayer.position];
-        // Cards are positioned calc(100% + 4px) above the avatar
-        // Approximate by reducing y by ~12% (avatar height + gap)
-        return { left: `${x}%`, top: `calc(${y}% - 120px)` };
+        // Cards are positioned above the avatar
+        return { left: `${x}%`, top: `calc(${y}% - 140px)` };
       }
     }
 
