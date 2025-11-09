@@ -235,7 +235,7 @@ export function useAITurnsPhase({
 
           setFlyingCards((prev) => [...prev, flyingCard]);
 
-          setTimeout(() => {
+          registerTimeout(() => {
             setAIPlayers((prev) => {
               const updated = [...prev];
               updated[idx] = {
@@ -268,11 +268,11 @@ export function useAITurnsPhase({
                 return newMap;
               });
 
-              setTimeout(() => {
+              registerTimeout(() => {
                 setPlayerActions((prev) => new Map(prev).set(idx, "BUST"));
               }, 100);
 
-              setTimeout(() => {
+              registerTimeout(() => {
                 setAIPlayers((prev) => {
                   const updated = [...prev];
                   updated[idx] = {
@@ -305,11 +305,11 @@ export function useAITurnsPhase({
                 return newMap;
               });
 
-              setTimeout(() => {
+              registerTimeout(() => {
                 setPlayerActions((prev) => new Map(prev).set(idx, "STAND"));
               }, 100);
 
-              setTimeout(() => {
+              registerTimeout(() => {
                 setPlayerActions((prev) => {
                   const newMap = new Map(prev);
                   newMap.delete(idx);
