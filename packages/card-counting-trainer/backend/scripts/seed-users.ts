@@ -55,7 +55,7 @@ async function seed() {
         new PutCommand({
           TableName: TABLE_NAME,
           Item: item,
-        })
+        }),
       );
       console.log(`✓ Seeded user: ${user.username} (${user.email})`);
     } catch (error) {

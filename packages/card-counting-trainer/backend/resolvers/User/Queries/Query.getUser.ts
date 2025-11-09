@@ -8,7 +8,10 @@ export function request(ctx: CTX) {
   const userId = identity.sub;
 
   if (!userId) {
-    return util.error("Unauthorized: No user ID found", "UnauthorizedException");
+    return util.error(
+      "Unauthorized: No user ID found",
+      "UnauthorizedException",
+    );
   }
 
   console.log(`Getting user for userId: ${userId}`);

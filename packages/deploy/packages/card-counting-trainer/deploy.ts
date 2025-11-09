@@ -83,7 +83,9 @@ export async function deployCardCountingTrainer(
 
     if (stack) {
       stackExists = true;
-      logger.debug(`Stack ${stackName} exists with status: ${stack.StackStatus}`);
+      logger.debug(
+        `Stack ${stackName} exists with status: ${stack.StackStatus}`,
+      );
     }
   } catch (error: any) {
     if (
@@ -136,7 +138,9 @@ export async function deployCardCountingTrainer(
       const relativePath = path.relative(templatePath, filePath);
       const s3Key = relativePath.replace(/\\/g, "/"); // Ensure forward slashes for S3
 
-      logger.debug(`Uploading ${relativePath} to s3://${templateBucketName}/${s3Key}`);
+      logger.debug(
+        `Uploading ${relativePath} to s3://${templateBucketName}/${s3Key}`,
+      );
 
       await s3.send(
         new PutObjectCommand({
@@ -213,7 +217,9 @@ export async function deployCardCountingTrainer(
     const resolverDir = path.join(backendPath, "resolvers");
 
     if (!existsSync(resolverDir)) {
-      logger.warning("No resolvers directory found - skipping resolver compilation");
+      logger.warning(
+        "No resolvers directory found - skipping resolver compilation",
+      );
       resolversBuildHash = "none";
     } else {
       logger.success(`Resolver directory found: ${resolverDir}`);
@@ -268,8 +274,7 @@ export async function deployCardCountingTrainer(
           constantsDir: constantsDir,
         });
 
-        resolversBuildHash =
-          await resolverCompiler.compileAndUploadResolvers();
+        resolversBuildHash = await resolverCompiler.compileAndUploadResolvers();
         logger.success("✓ Resolvers compiled and uploaded successfully");
       }
     }
@@ -373,10 +378,7 @@ export async function deployCardCountingTrainer(
         break;
       }
 
-      if (
-        stackStatus.includes("FAILED") ||
-        stackStatus.includes("ROLLBACK")
-      ) {
+      if (stackStatus.includes("FAILED") || stackStatus.includes("ROLLBACK")) {
         throw new Error(`Stack deployment failed with status: ${stackStatus}`);
       }
 
@@ -423,7 +425,10 @@ export async function deployCardCountingTrainer(
   );
 
   // Check if frontend needs to be built (out directory doesn't exist)
-  if (!require("fs").existsSync(frontendOutPath) && !options.skipFrontendBuild) {
+  if (
+    !require("fs").existsSync(frontendOutPath) &&
+    !options.skipFrontendBuild
+  ) {
     try {
       // Verify stack is now healthy (has required outputs)
       const postDeployStackData = await cfn.send(

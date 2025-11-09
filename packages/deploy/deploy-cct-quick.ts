@@ -225,7 +225,10 @@ async function main() {
 
       // Delete existing stack if it exists
       const region = process.env.AWS_REGION || "ap-southeast-2";
-      const stackName = getStackName(StackType.CardCountingTrainer, options.stage);
+      const stackName = getStackName(
+        StackType.CardCountingTrainer,
+        options.stage,
+      );
       const cfClient = new CloudFormationClient({ region });
 
       try {
