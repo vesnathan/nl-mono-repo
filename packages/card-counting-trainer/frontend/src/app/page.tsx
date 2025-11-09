@@ -140,9 +140,6 @@ export default function GamePage() {
   // Store dealer's hole card separately to prevent cheating via DevTools
   const dealerHoleCardRef = useRef<Card | null>(null);
 
-  // Track previous phase to detect transitions into AI_TURNS
-  const prevPhaseRef = useRef<GamePhase>("BETTING");
-
   // Game interactions hook - provides conversation and speech bubble functions
   const { triggerConversation, addSpeechBubble, showEndOfHandReactions } =
     useGameInteractions({
@@ -297,19 +294,7 @@ export default function GamePage() {
     addDebugLog(`Should show betting interface: ${shouldShowBetting}`);
   }, [phase, initialized, playerSeat, addDebugLog]);
 
-  // Reset playersFinished when entering AI_TURNS phase (only on phase transition)
-  useEffect(() => {
-    if (phase === "AI_TURNS" && prevPhaseRef.current !== "AI_TURNS") {
-      addDebugLog("=== PHASE: AI_TURNS START ===");
-      addDebugLog(`Resetting playersFinished set and activePlayerIndex`);
-      setPlayersFinished(new Set());
-      setActivePlayerIndex(null);
-    }
-    prevPhaseRef.current = phase;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]); // Only depend on phase, not addDebugLog
-
-  // AI turns phase hook
+  // AI turns phase hook (handles its own reset logic internally)
   useAITurnsPhase({
     phase,
     aiPlayers,

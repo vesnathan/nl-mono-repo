@@ -81,13 +81,29 @@ export function useAITurnsPhase({
   const aiTurnProcessingRef = useRef<boolean>(false);
   const cardCounterRef = useRef(0);
   const isTransitioningRef = useRef<boolean>(false);
+  const prevPhaseRef = useRef<GamePhase | null>(null);
+  const hasResetRef = useRef<boolean>(false);
 
   useEffect(() => {
+    // Reset playersFinished when entering AI_TURNS phase for the first time
+    if (phase === "AI_TURNS" && prevPhaseRef.current !== "AI_TURNS" && !hasResetRef.current) {
+      addDebugLog("[AI_TURNS] Resetting playersFinished on phase entry");
+      setPlayersFinished(new Set());
+      setActivePlayerIndex(null);
+      hasResetRef.current = true;
+      prevPhaseRef.current = phase;
+      return; // Exit early, let next render handle the logic
+    }
+
     if (phase !== "AI_TURNS") {
       aiTurnProcessingRef.current = false;
       isTransitioningRef.current = false;
+      hasResetRef.current = false;
+      prevPhaseRef.current = phase;
       return;
     }
+
+    prevPhaseRef.current = phase;
 
     if (activePlayerIndex !== null) {
       addDebugLog(`[AI_TURNS Effect] Skipping - activePlayerIndex is ${activePlayerIndex}`);
