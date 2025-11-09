@@ -76,6 +76,7 @@ import { useDebugLogging } from "@/hooks/useDebugLogging";
 import { useGameShoe } from "@/hooks/useGameShoe";
 import { usePlayerHand } from "@/hooks/usePlayerHand";
 import { useBettingActions } from "@/hooks/useBettingActions";
+import { useConversationHandlers } from "@/hooks/useConversationHandlers";
 import {
   generateInitialReactions,
   generateEndOfHandReactions,
