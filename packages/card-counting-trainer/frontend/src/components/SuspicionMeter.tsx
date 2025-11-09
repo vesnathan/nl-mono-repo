@@ -23,13 +23,6 @@ export default function SuspicionMeter({
 
   const actualSuspicionLevel = level || suspicionLevel || 0;
 
-  console.log("🔍 SuspicionMeter rendering:", {
-    actualSuspicionLevel,
-    dealerName,
-    dealerDetectionSkill,
-    onYourSide,
-  });
-
   // Trigger pulse when suspicion increases significantly
   useEffect(() => {
     if (actualSuspicionLevel >= 60) {

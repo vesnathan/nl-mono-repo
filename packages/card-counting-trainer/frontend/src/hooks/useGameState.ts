@@ -584,7 +584,6 @@ export function useGameState(config: GameConfig = DEFAULT_CONFIG) {
     );
     setAIPlayerPositions(updatedPositions);
 
-    console.log(`🎰 New player joined at spot ${newPosition}!`);
     return newPosition;
   }, [aiPlayerPositions]);
 

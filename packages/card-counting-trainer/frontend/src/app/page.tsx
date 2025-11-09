@@ -389,9 +389,6 @@ export default function GamePage() {
   }, [currentBet, aiPlayers]);
 
   const dealInitialCards = useCallback(() => {
-    console.log("🎴 Starting dealInitialCards");
-    console.log("  AI Players:", aiPlayers.length, aiPlayers.map(ai => ({ pos: ai.position, name: ai.character.name })));
-    console.log("  Player Seat:", playerSeat);
 
     // Pre-deal all cards BEFORE animations to ensure uniqueness
     // We need to manually track the shoe state because React batches state updates
@@ -416,50 +413,38 @@ export default function GamePage() {
         currentRunningCount += card.count;
       }
 
-      console.log(`  📤 Dealt: ${card.rank}${card.suit}`);
       return card;
     };
 
     // Sort AI players by position (right to left from dealer's perspective = descending)
     const sortedAIPlayers = [...aiPlayers].sort((a, b) => b.position - a.position);
-    console.log("  Sorted AI order:", sortedAIPlayers.map(ai => `${ai.character.name} (pos ${ai.position})`));
 
-    console.log("🎴 ROUND 1 - First card to everyone:");
     // Deal first card to everyone (right to left, dealer last)
     sortedAIPlayers.forEach((ai) => {
       const idx = aiPlayers.indexOf(ai);
       const card = dealFromCurrentShoe();
-      console.log(`    → AI[${idx}] ${ai.character.name} (pos ${ai.position}): ${card.rank}${card.suit}`);
       dealtCards.push({ type: "ai", index: idx, card });
     });
     if (playerSeat !== null) {
       const card = dealFromCurrentShoe();
-      console.log(`    → PLAYER: ${card.rank}${card.suit}`);
       dealtCards.push({ type: "player", index: 0, card });
     }
     const dealerCard1 = dealFromCurrentShoe();
-    console.log(`    → DEALER: ${dealerCard1.rank}${dealerCard1.suit}`);
     dealtCards.push({ type: "dealer", index: 0, card: dealerCard1 });
 
-    console.log("🎴 ROUND 2 - Second card to everyone:");
     // Deal second card to everyone (right to left, dealer last)
     sortedAIPlayers.forEach((ai) => {
       const idx = aiPlayers.indexOf(ai);
       const card = dealFromCurrentShoe();
-      console.log(`    → AI[${idx}] ${ai.character.name} (pos ${ai.position}): ${card.rank}${card.suit}`);
       dealtCards.push({ type: "ai", index: idx, card });
     });
     if (playerSeat !== null) {
       const card = dealFromCurrentShoe();
-      console.log(`    → PLAYER: ${card.rank}${card.suit}`);
       dealtCards.push({ type: "player", index: 0, card });
     }
     const dealerCard2 = dealFromCurrentShoe();
-    console.log(`    → DEALER: ${dealerCard2.rank}${dealerCard2.suit}`);
     dealtCards.push({ type: "dealer", index: 0, card: dealerCard2 });
 
-    console.log("🎴 Total cards dealt:", dealtCards.length);
-    console.log("🎴 Card summary:", dealtCards.map(c => `${c.type}[${c.index}]: ${c.card.rank}${c.card.suit}`));
 
     // Update state with final shoe state
     setShoe(currentShoe);
@@ -473,13 +458,10 @@ export default function GamePage() {
     const dealerSpeed = currentDealer?.dealSpeed ?? 1.0;
     const delayBetweenCards = Math.round(baseDelayBetweenCards / dealerSpeed);
 
-    console.log("🎬 Starting card animations...");
-    console.log(`  Dealer: ${currentDealer?.name}, Speed: ${dealerSpeed}, Delay between cards: ${delayBetweenCards}ms`);
 
     let delay = 0;
     dealtCards.forEach(({ type, index, card }, animIdx) => {
       registerTimeout(() => {
-        console.log(`  🎬 [${animIdx}] Flying ${type}[${index}]: ${card.rank}${card.suit} (delay: ${delay}ms)`);
 
         // Calculate positions for flying animation
         const fromPosition = getCardPosition("shoe");
@@ -507,7 +489,6 @@ export default function GamePage() {
           if (type === "ai") {
             setAIPlayers((prev) => {
               const updated = [...prev];
-              console.log(`    Before: AI[${index}] has ${updated[index].hand.cards.length} cards`);
               // CRITICAL FIX: Don't mutate! Create new array instead of using .push()
               updated[index] = {
                 ...updated[index],
@@ -516,21 +497,16 @@ export default function GamePage() {
                   cards: [...updated[index].hand.cards, card]
                 }
               };
-              console.log(`    After: AI[${index}] has ${updated[index].hand.cards.length} cards:`, updated[index].hand.cards.map(c => `${c.rank}${c.suit}`));
               return updated;
             });
           } else if (type === "player") {
             setPlayerHand((prev) => {
-              console.log(`    Before: Player has ${prev.cards.length} cards`);
               const newHand = { ...prev, cards: [...prev.cards, card] };
-              console.log(`    After: Player has ${newHand.cards.length} cards:`, newHand.cards.map(c => `${c.rank}${c.suit}`));
               return newHand;
             });
           } else if (type === "dealer") {
             setDealerHand((prev) => {
-              console.log(`    Before: Dealer has ${prev.cards.length} cards`);
               const newHand = { ...prev, cards: [...prev.cards, card] };
-              console.log(`    After: Dealer has ${newHand.cards.length} cards:`, newHand.cards.map(c => `${c.rank}${c.suit}`));
               return newHand;
             });
           }
@@ -547,10 +523,8 @@ export default function GamePage() {
       checkForInitialReactions();
       // If player is not seated, skip PLAYER_TURN and go straight to AI_TURNS
       if (playerSeat === null) {
-        console.log("🎮 Player not seated, skipping to AI_TURNS");
         setPhase("AI_TURNS");
       } else {
-        console.log("🎮 Player seated, going to PLAYER_TURN");
         setPhase("PLAYER_TURN");
       }
     }, delay + 800 + 500);
@@ -667,14 +641,12 @@ export default function GamePage() {
 
       if (!nextPlayer) {
         // All players finished, move to dealer turn
-        console.log("✅ All AI players done, moving to DEALER_TURN");
         registerTimeout(() => setPhase("DEALER_TURN"), 1000);
         return;
       }
 
       // Process this player's action
       const { ai, idx } = nextPlayer;
-      console.log(`\n🎮 Processing AI[${idx}] ${ai.character.name} at position ${ai.position}`);
 
       // Calculate hand value first to determine difficulty
       const handValue = calculateHandValue(ai.hand.cards);
@@ -705,15 +677,12 @@ export default function GamePage() {
       const actionDisplay = Math.round(baseActionDisplay / combinedSpeed);
       const turnClear = Math.round(baseTurnClear / combinedSpeed);
 
-      console.log(`  Hand: ${handValue}, Speed: ${playSpeed}, Difficulty: ${handDifficultyMultiplier.toFixed(1)}`);
-      console.log(`  Timing: decision=${decisionTime}ms, action=${actionDelay}ms, display=${actionDisplay}ms`);
 
       // Set active player immediately
       setActivePlayerIndex(idx);
 
       // Decide: HIT or STAND?
       if (handValue < 17 && !isBust) {
-        console.log(`  → Action: HIT`);
 
         // Show HIT action
         registerTimeout(() => {
@@ -747,11 +716,9 @@ export default function GamePage() {
 
         // Clear active player to trigger next action
         registerTimeout(() => {
-          console.log(`  ⏹️ Clearing active player for next action`);
           setActivePlayerIndex(null);
         }, decisionTime + actionDisplay + turnClear);
       } else {
-        console.log(`  → Action: STAND (handValue=${handValue}, bust=${isBust})`);
 
         // Show STAND action
         registerTimeout(() => {
@@ -769,7 +736,6 @@ export default function GamePage() {
 
         // Mark player as finished and clear active to move to next player
         registerTimeout(() => {
-          console.log(`  ✅ Player ${idx} finished`);
           setPlayersFinished(prev => new Set(prev).add(idx));
           setActivePlayerIndex(null);
         }, actionDisplay + turnClear);
@@ -864,14 +830,12 @@ export default function GamePage() {
         // Big wins attract attention
         if (isBigWin) {
           proximityChange -= 15; // Pit boss moves closer
-          console.log("💰 Big win! Pit boss attention +15");
         }
 
         // Large bet variations attract attention
         if (betVariation > 0.5) { // 50%+ bet change
           const variationPenalty = Math.min(betVariation * 20, 20);
           proximityChange -= variationPenalty;
-          console.log(`📊 Large bet variation (${(betVariation * 100).toFixed(0)}%)! Pit boss attention +${variationPenalty.toFixed(0)}`);
         }
 
         // Small random drift (pit boss walking around)
@@ -886,7 +850,6 @@ export default function GamePage() {
           if (newDistance < 30 && (isBigWin || betVariation > 0.5)) {
             const suspicionIncrease = isBigWin ? 5 : Math.floor(betVariation * 10);
             setSuspicionLevel(s => Math.min(100, s + suspicionIncrease));
-            console.log(`⚠️ Pit boss is close! Extra suspicion +${suspicionIncrease}`);
           }
 
           return newDistance;
@@ -1059,7 +1022,6 @@ export default function GamePage() {
     const maxReactions = Math.min(reactions.length, Math.random() < 0.5 ? 1 : 2);
     const selectedReactions = sortedReactions.slice(0, maxReactions);
 
-    console.log(`💬 Showing ${selectedReactions.length} end-of-hand reactions out of ${reactions.length} possible`);
 
     selectedReactions.forEach((reaction, idx) => {
       registerTimeout(() => {
@@ -1074,7 +1036,6 @@ export default function GamePage() {
 
   // Next hand
   const nextHand = useCallback(() => {
-    console.log("🆕 nextHand() called - starting new hand");
     setHandNumber((prev) => prev + 1);
     setPhase("BETTING");
     setSpeechBubbles([]); // Clear speech bubbles from previous hand
@@ -1083,18 +1044,14 @@ export default function GamePage() {
   // Round end - automatically progress to next hand
   useEffect(() => {
     if (phase === "ROUND_END") {
-      console.log("🎯 ROUND_END phase reached - scheduling auto-progression in 4 seconds");
 
       registerTimeout(() => {
-        console.log("⏰ Auto-progression timer fired");
 
         // Check if we need to reshuffle (cut card reached)
         const totalCards = numDecks * 52;
         const cardsUntilCutCard = totalCards - cutCardPosition;
 
         if (cardsDealt >= cardsUntilCutCard) {
-          console.log("🔄 Cut card reached! Reshuffling shoe...");
-          console.log(`  Cards dealt: ${cardsDealt}, Cut card at: ${cardsUntilCutCard}`);
 
           // Reshuffle the shoe
           const newShoe = createAndShuffleShoe(numDecks);
@@ -1107,12 +1064,10 @@ export default function GamePage() {
           setDealerCallout("Shuffling new shoe...");
           registerTimeout(() => {
             setDealerCallout(null);
-            console.log("📞 Calling nextHand() after reshuffle");
             nextHand();
           }, 3000);
         } else {
           // No reshuffle needed, just continue to next hand
-          console.log("📞 Calling nextHand() directly (no reshuffle needed)");
           nextHand();
         }
       }, 4000); // Show results for 4 seconds before continuing
@@ -1266,7 +1221,6 @@ export default function GamePage() {
 
                 <div
                   onClick={() => {
-                    console.log("Dealer avatar clicked!");
                     setShowDealerInfo(true);
                   }}
                   style={{
