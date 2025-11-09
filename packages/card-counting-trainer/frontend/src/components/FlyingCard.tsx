@@ -20,11 +20,11 @@ export default function FlyingCard({
   const [isFlying, setIsFlying] = useState(true);
 
   useEffect(() => {
-    // Animation duration is 800ms
+    // Animation duration is 1500ms (SLOWED DOWN FOR TESTING - was 800ms)
     const timer = setTimeout(() => {
       setIsFlying(false);
       onAnimationComplete?.();
-    }, 800);
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, [onAnimationComplete]);
@@ -41,7 +41,7 @@ export default function FlyingCard({
           width: "60px",
           height: "84px",
           zIndex: 9999,
-          animation: `fly-to-position 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
+          animation: `fly-to-position 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
           pointerEvents: "none",
         }}
       >

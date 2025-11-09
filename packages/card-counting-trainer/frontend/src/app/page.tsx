@@ -292,6 +292,10 @@ export default function GamePage() {
       [93, 55], // Seat 7 - Far right
     ];
 
+    // Card dimensions and spacing
+    const cardWidth = 60; // px
+    const cardSpacing = 15; // px between cards
+
     if (type === "shoe") {
       // Shoe is positioned at right: 7%, top: 20px (from the Shoe component positioning)
       // Convert to left position: 100% - 7% = 93%
@@ -301,22 +305,26 @@ export default function GamePage() {
     if (type === "dealer") {
       // Dealer cards are below the dealer avatar
       // Dealer section is at 8%, avatar is 150px + 12px margin = 162px
-      // Cards appear below the avatar
-      return { left: "50%", top: "calc(8% + 162px)" };
+      // Cards appear below the avatar with horizontal offset for multiple cards
+      const baseLeft = 50; // Center at 50%
+      const offset = cardIndex !== undefined ? (cardIndex * cardSpacing) - ((cardSpacing * (cardIndex > 0 ? 1 : 0)) / 2) : 0;
+      return { left: `calc(${baseLeft}% + ${offset}px)`, top: "calc(8% + 162px)" };
     }
 
     if (type === "player" && playerSeat !== null) {
       const [x, y] = tablePositions[playerSeat];
-      // Cards are positioned above the avatar
-      return { left: `${x}%`, top: `calc(${y}% - 190px)` };
+      // Cards are positioned above the avatar with horizontal offset
+      const offset = cardIndex !== undefined ? (cardIndex * cardSpacing) - ((cardSpacing * (cardIndex > 0 ? 1 : 0)) / 2) : 0;
+      return { left: `calc(${x}% + ${offset}px)`, top: `calc(${y}% - 190px)` };
     }
 
     if (type === "ai" && index !== undefined) {
       const aiPlayer = aiPlayers[index];
       if (aiPlayer) {
         const [x, y] = tablePositions[aiPlayer.position];
-        // Cards are positioned above the avatar
-        return { left: `${x}%`, top: `calc(${y}% - 140px)` };
+        // Cards are positioned above the avatar with horizontal offset
+        const offset = cardIndex !== undefined ? (cardIndex * cardSpacing) - ((cardSpacing * (cardIndex > 0 ? 1 : 0)) / 2) : 0;
+        return { left: `calc(${x}% + ${offset}px)`, top: `calc(${y}% - 140px)` };
       }
     }
 
@@ -725,22 +733,41 @@ export default function GamePage() {
 
     // Now animate dealing the pre-dealt cards using managed timeouts
     // Adjust delay based on dealer's dealing speed (higher speed = shorter delay)
-    const baseDelayBetweenCards = 500; // Base delay in ms (increased from 300 for better pacing)
+    const baseDelayBetweenCards = 2000; // Base delay in ms (SLOWED DOWN FOR TESTING - was 500)
     const dealerSpeed = currentDealer?.dealSpeed ?? 1.0;
     const delayBetweenCards = Math.round(baseDelayBetweenCards / dealerSpeed);
 
 
     let delay = 0;
+    // Track card counts for each player/dealer to calculate proper positions
+    const cardCounts = {
+      ai: new Map<number, number>(), // AI player index -> card count
+      player: 0,
+      dealer: 0
+    };
+
     dealtCards.forEach(({ type, index, card }, animIdx) => {
       registerTimeout(() => {
+        // Get current card index for this player/dealer
+        let cardIndex = 0;
+        if (type === "ai") {
+          cardIndex = cardCounts.ai.get(index) || 0;
+          cardCounts.ai.set(index, cardIndex + 1);
+        } else if (type === "player") {
+          cardIndex = cardCounts.player;
+          cardCounts.player++;
+        } else if (type === "dealer") {
+          cardIndex = cardCounts.dealer;
+          cardCounts.dealer++;
+        }
 
         // Calculate positions for flying animation
         const fromPosition = getCardPosition("shoe");
         const toPosition = type === "ai"
-          ? getCardPosition("ai", index)
+          ? getCardPosition("ai", index, cardIndex)
           : type === "player"
-          ? getCardPosition("player")
-          : getCardPosition("dealer");
+          ? getCardPosition("player", undefined, cardIndex)
+          : getCardPosition("dealer", undefined, cardIndex);
 
         // Create flying card
         const flyingCardId = `flying-${animIdx}-${Date.now()}`;
@@ -1494,11 +1521,30 @@ export default function GamePage() {
             if (shouldHit() && !isBusted(prevHand.cards)) {
               const card = dealCardFromShoe();
               addDebugLog(`Dealer HIT: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`);
+
+              // Add flying card animation
+              const shoePosition = getCardPosition("shoe");
+              const dealerPosition = getCardPosition("dealer", undefined, prevHand.cards.length);
+
+              const flyingCard: FlyingCardData = {
+                id: `hit-dealer-${Date.now()}`,
+                card,
+                fromPosition: shoePosition,
+                toPosition: dealerPosition,
+              };
+
+              setFlyingCards(prev => [...prev, flyingCard]);
+
+              // Add card to hand after animation
+              setTimeout(() => {
+                setFlyingCards(prev => prev.filter(fc => fc.id !== flyingCard.id));
+              }, 800);
+
               const newHand = { ...prevHand, cards: [...prevHand.cards, card] };
               const newValue = calculateHandValue(newHand.cards);
               addDebugLog(`Dealer hand value: ${newValue}`);
 
-              // Schedule next card after delay
+              // Schedule next card after animation + delay
               registerTimeout(() => dealNextCard(), 1000);
 
               return newHand;
@@ -1769,10 +1815,12 @@ export default function GamePage() {
       setDealerCallout(callout);
 
       // Create win/loss bubbles for all players
+      addDebugLog("=== CREATING WIN/LOSS BUBBLES ===");
       const newWinLossBubbles: WinLossBubbleData[] = [];
 
       // Add bubble for human player if they have cards
       if (playerSeat !== null && playerHand.cards.length > 0) {
+        addDebugLog(`Player has cards, creating bubble for seat ${playerSeat}`);
         const tablePositions = [
           [5, 55],   // Seat 0 - Far left
           [16, 62],  // Seat 1 - Left
@@ -1805,8 +1853,10 @@ export default function GamePage() {
       }
 
       // Add bubbles for AI players
+      addDebugLog(`Checking ${aiPlayers.length} AI players for bubbles`);
       aiPlayers.forEach((ai) => {
         if (ai.hand.cards.length > 0) {
+          addDebugLog(`AI Player ${ai.character.name} has ${ai.hand.cards.length} cards`);
           const tablePositions = [
             [5, 55],   // Seat 0 - Far left
             [16, 62],  // Seat 1 - Left
@@ -1837,9 +1887,11 @@ export default function GamePage() {
             result,
             position: { left: `${x}%`, top: `${y - 5}%` }, // Slightly above AI position
           });
+          addDebugLog(`Added ${result} bubble for ${ai.character.name} at seat ${ai.position}`);
         }
       });
 
+      addDebugLog(`Created ${newWinLossBubbles.length} total win/loss bubbles`);
       setWinLossBubbles(newWinLossBubbles);
 
       // Show end-of-hand reactions
