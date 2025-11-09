@@ -422,6 +422,7 @@ export function useAITurnsPhase({
         );
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     phase,
     aiPlayers,
@@ -431,7 +432,7 @@ export function useAITurnsPhase({
     playersFinished,
     dealerHand,
     getCardPositionForAnimation,
-    addDebugLog,
+    // addDebugLog intentionally omitted - it changes on every render
     setActivePlayerIndex,
     setPlayersFinished,
     setPlayerActions,
