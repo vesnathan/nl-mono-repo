@@ -184,20 +184,20 @@ export function useGameActions({
       addDebugLog(
         `AI Player ${idx} (${ai.character.name}, Seat ${ai.position}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
       );
-      dealtCards.push({ type: "ai", index: idx, card });
+      dealtCards.push({ type: "ai", index: idx, card, cardIndex: 0 });
     });
     if (playerSeat !== null) {
       const card = dealFromCurrentShoe();
       addDebugLog(
         `Player (Seat ${playerSeat}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
       );
-      dealtCards.push({ type: "player", index: 0, card });
+      dealtCards.push({ type: "player", index: 0, card, cardIndex: 0 });
     }
     const dealerCard1 = dealFromCurrentShoe();
     addDebugLog(
       `Dealer card 1: ${dealerCard1.rank}${dealerCard1.suit} (value: ${dealerCard1.value}, count: ${dealerCard1.count}) [FACE UP] | Running count: ${currentRunningCount}`,
     );
-    dealtCards.push({ type: "dealer", index: 0, card: dealerCard1 });
+    dealtCards.push({ type: "dealer", index: 0, card: dealerCard1, cardIndex: 0 });
 
     addDebugLog("--- Second card round (right to left) ---");
     // Deal second card to everyone (right to left, dealer last)
@@ -207,20 +207,20 @@ export function useGameActions({
       addDebugLog(
         `AI Player ${idx} (${ai.character.name}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
       );
-      dealtCards.push({ type: "ai", index: idx, card });
+      dealtCards.push({ type: "ai", index: idx, card, cardIndex: 1 });
     });
     if (playerSeat !== null) {
       const card = dealFromCurrentShoe();
       addDebugLog(
         `Player: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
       );
-      dealtCards.push({ type: "player", index: 0, card });
+      dealtCards.push({ type: "player", index: 0, card, cardIndex: 1 });
     }
     const dealerCard2 = dealFromCurrentShoe();
     addDebugLog(
       `Dealer card 2: ${dealerCard2.rank}${dealerCard2.suit} (value: ${dealerCard2.value}, count: ${dealerCard2.count}) [FACE DOWN - not counting] | Running count: ${currentRunningCount}`,
     );
-    dealtCards.push({ type: "dealer", index: 1, card: dealerCard2 });
+    dealtCards.push({ type: "dealer", index: 1, card: dealerCard2, cardIndex: 1 });
 
     // Update state with all pre-dealt cards
     setShoe(currentShoe);
@@ -241,7 +241,7 @@ export function useGameActions({
             aiPlayers,
             playerSeat,
             undefined,
-            dealData.index,
+            dealData.cardIndex,
           );
         } else if (dealData.type === "player") {
           targetPosition = getCardPosition(
@@ -249,7 +249,7 @@ export function useGameActions({
             aiPlayers,
             playerSeat,
             undefined,
-            dealData.index,
+            dealData.cardIndex,
           );
         } else {
           targetPosition = getCardPosition(
@@ -257,7 +257,7 @@ export function useGameActions({
             aiPlayers,
             playerSeat,
             dealData.index,
-            dealData.index === 0 || dealData.index === 1 ? 0 : 1,
+            dealData.cardIndex,
           );
         }
 
