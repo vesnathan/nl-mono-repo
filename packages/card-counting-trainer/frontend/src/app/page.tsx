@@ -84,6 +84,7 @@ import { useGameInitialization } from "@/hooks/useGameInitialization";
 import { useTimedChallenge } from "@/hooks/useTimedChallenge";
 import { useConversationTriggers } from "@/hooks/useConversationTriggers";
 import { usePitBossMovement } from "@/hooks/usePitBossMovement";
+import { useAutoStartHand } from "@/hooks/useAutoStartHand";
 import {
   generateInitialReactions,
   generateEndOfHandReactions,
@@ -259,100 +260,6 @@ export default function GamePage() {
     [registerTimeout, aiPlayers, addDebugLog],
   );
 
-  // Auto-start first hand after initialization
-  useEffect(() => {
-    if (
-      initialized &&
-      aiPlayers.length > 0 &&
-      handNumber === 0 &&
-      phase === "BETTING"
-    ) {
-      const timer = setTimeout(() => {
-        setPhase("DEALING");
-        setDealerRevealed(false);
-
-        // Player only gets cards if seated and has placed a bet
-        const playerBet =
-          playerSeat !== null && currentBet > 0 ? currentBet : 0;
-        setPlayerHand({ cards: [], bet: playerBet });
-        setDealerHand({ cards: [], bet: 0 });
-
-        // Only deduct chips if player is actually playing
-        if (playerBet > 0) {
-          setPlayerChips((prev) => prev - playerBet);
-        }
-
-        setSpeechBubbles([]); // Clear any lingering speech bubbles
-
-        // Reset AI hands with random bets
-        const updatedAI = aiPlayers.map((ai) => ({
-          ...ai,
-          hand: { cards: [], bet: Math.floor(Math.random() * 50) + 25 },
-        }));
-        setAIPlayers(updatedAI);
-
-        // Deal initial cards
-        setTimeout(() => dealInitialCards(), 500);
-      }, 500);
-
-      return () => clearTimeout(timer);
-    }
-  }, [
-    initialized,
-    aiPlayers.length,
-    handNumber,
-    phase,
-    playerSeat,
-    currentBet,
-  ]);
-
-  // Auto-start subsequent hands (handNumber > 0)
-  useEffect(() => {
-    if (
-      initialized &&
-      aiPlayers.length > 0 &&
-      handNumber > 0 &&
-      phase === "BETTING"
-    ) {
-      const timer = setTimeout(() => {
-        setPhase("DEALING");
-        setDealerRevealed(false);
-
-        // Player only gets cards if seated and has placed a bet
-        const playerBet =
-          playerSeat !== null && currentBet > 0 ? currentBet : 0;
-        setPlayerHand({ cards: [], bet: playerBet });
-        setDealerHand({ cards: [], bet: 0 });
-
-        // Only deduct chips if player is actually playing
-        if (playerBet > 0) {
-          setPlayerChips((prev) => prev - playerBet);
-        }
-
-        // Reset AI hands with random bets (keep same players, just clear hands and set new bets)
-        const updatedAI = aiPlayers.map((ai) => ({
-          ...ai,
-          hand: { cards: [], bet: Math.floor(Math.random() * 50) + 25 },
-        }));
-        setAIPlayers(updatedAI);
-
-        // Deal initial cards
-        setTimeout(() => dealInitialCards(), 500);
-      }, 500);
-
-      return () => clearTimeout(timer);
-    }
-  }, [
-    initialized,
-    aiPlayers.length,
-    handNumber,
-    phase,
-    playerSeat,
-    currentBet,
-  ]);
-
-
-
   // Game actions hook - provides startNewRound, dealInitialCards, hit, stand
   const { startNewRound, dealInitialCards, hit, stand } = useGameActions({
     phase,
@@ -451,6 +358,25 @@ export default function GamePage() {
 
   // Pit boss movement hook
   usePitBossMovement(setPitBossDistance);
+
+  // Auto-start hand hook
+  useAutoStartHand({
+    initialized,
+    aiPlayersLength: aiPlayers.length,
+    handNumber,
+    phase,
+    playerSeat,
+    currentBet,
+    setPhase,
+    setDealerRevealed,
+    setPlayerHand,
+    setDealerHand,
+    setPlayerChips,
+    setSpeechBubbles,
+    setAIPlayers,
+    aiPlayers,
+    dealInitialCards,
+  });
 
   // Log betting interface visibility conditions
   useEffect(() => {
