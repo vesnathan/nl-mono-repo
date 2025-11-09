@@ -1,3 +1,10 @@
+export type ReactionContext = "bust" | "dealerWin" | "dealerBlackjack" | "any";
+
+export interface Reaction {
+  text: string;
+  contexts: ReactionContext[]; // Which situations this reaction applies to
+}
+
 export interface AICharacter {
   id: string;
   name: string;
@@ -9,11 +16,11 @@ export interface AICharacter {
   playSpeed: number; // 0.6-1.5: Multiplier for decision-making speed (1.0 = normal, <1 = slow, >1 = fast)
   avatar?: string; // Path to avatar image (to be added)
   reactions: {
-    bigWin: string[]; // Blackjack or big hand
-    smallWin: string[]; // Regular win
-    push: string[]; // Tie
-    smallLoss: string[]; // Regular loss
-    bigLoss: string[]; // Bust or dealer blackjack
+    bigWin: Reaction[]; // Blackjack or big hand
+    smallWin: Reaction[]; // Regular win
+    push: Reaction[]; // Tie
+    smallLoss: Reaction[]; // Regular loss
+    bigLoss: Reaction[]; // Bust or dealer blackjack/win
   };
 }
 
@@ -37,29 +44,31 @@ export const AI_CHARACTERS: AICharacter[] = [
     ],
     reactions: {
       bigWin: [
-        "BLACKJACK BABY! *hiccup* Drinks are on me!",
-        "I TOLD YOU! I got the magic touch tonight!",
-        "Twenty-one! *slams table* THIS is how you do it!"
+        { text: "BLACKJACK BABY! *hiccup* Drinks are on me!", contexts: ["any"] },
+        { text: "I TOLD YOU! I got the magic touch tonight!", contexts: ["any"] },
+        { text: "Twenty-one! *slams table* THIS is how you do it!", contexts: ["any"] }
       ],
       smallWin: [
-        "Haha! Still got it! *hiccup*",
-        "Not too shabby for a drunk old man, huh?",
-        "I'll drink to that! Another win!"
+        { text: "Haha! Still got it! *hiccup*", contexts: ["any"] },
+        { text: "Not too shabby for a drunk old man, huh?", contexts: ["any"] },
+        { text: "I'll drink to that! Another win!", contexts: ["any"] }
       ],
       push: [
-        "Tie? Shit, I'll take it I guess...",
-        "*squints at cards* Wait... is that good or bad?",
-        "Eh, at least I didn't lose!"
+        { text: "Tie? Shit, I'll take it I guess...", contexts: ["any"] },
+        { text: "*squints at cards* Wait... is that good or bad?", contexts: ["any"] },
+        { text: "Eh, at least I didn't lose!", contexts: ["any"] }
       ],
       smallLoss: [
-        "Ah hell... where'd my chips go?",
-        "Son of a... *hiccup* ...I had that!",
-        "Dammit. Dealer got lucky that time."
+        { text: "Ah hell... where'd my chips go?", contexts: ["any"] },
+        { text: "Son of a... *hiccup* ...I had that!", contexts: ["any"] },
+        { text: "Dammit. Dealer got lucky that time.", contexts: ["dealerWin"] }
       ],
       bigLoss: [
-        "BUSTED! Story of my damn life!",
-        "Fuck! How did I... *looks at cards confused*",
-        "Well THAT was stupid. Bartender! Another round!"
+        { text: "BUSTED! Story of my damn life!", contexts: ["bust"] },
+        { text: "Fuck! How did I... *looks at cards confused*", contexts: ["bust"] },
+        { text: "Well THAT was stupid. Bartender! Another round!", contexts: ["any"] },
+        { text: "Dealer blackjack?! This night just gets worse!", contexts: ["dealerBlackjack"] },
+        { text: "Of course the dealer pulls 21. OF COURSE!", contexts: ["dealerBlackjack"] }
       ]
     }
   },
@@ -82,29 +91,30 @@ export const AI_CHARACTERS: AICharacter[] = [
     ],
     reactions: {
       bigWin: [
-        "OH MY GOSH! I WON! *knocks over chips* Oops!",
-        "Blackjack?! Did I really get blackjack?!",
-        "I can't believe it! *spills drink in excitement*"
+        { text: "OH MY GOSH! I WON! *knocks over chips* Oops!", contexts: ["any"] },
+        { text: "Blackjack?! Did I really get blackjack?!", contexts: ["any"] },
+        { text: "I can't believe it! *spills drink in excitement*", contexts: ["any"] }
       ],
       smallWin: [
-        "Oh! I won? That's wonderful!",
-        "Yay! *accidentally bumps table*",
-        "I did it! Without messing up this time!"
+        { text: "Oh! I won? That's wonderful!", contexts: ["any"] },
+        { text: "Yay! *accidentally bumps table*", contexts: ["any"] },
+        { text: "I did it! Without messing up this time!", contexts: ["any"] }
       ],
       push: [
-        "A tie? Is that okay? Did I do something wrong?",
-        "Oh... so nobody wins? Interesting!",
-        "Well, at least I didn't lose!"
+        { text: "A tie? Is that okay? Did I do something wrong?", contexts: ["any"] },
+        { text: "Oh... so nobody wins? Interesting!", contexts: ["any"] },
+        { text: "Well, at least I didn't lose!", contexts: ["any"] }
       ],
       smallLoss: [
-        "Oh no... I thought I had that...",
-        "*sighs* I really need to focus better.",
-        "Darn it! Sorry, sorry everyone!"
+        { text: "Oh no... I thought I had that...", contexts: ["any"] },
+        { text: "*sighs* I really need to focus better.", contexts: ["any"] },
+        { text: "Darn it! Sorry, sorry everyone!", contexts: ["any"] }
       ],
       bigLoss: [
-        "Busted?! Oh shoot! *drops cards*",
-        "No no no! How did that happen?!",
-        "Ugh! I'm so bad at this! *knocks over chip stack*"
+        { text: "Busted?! Oh shoot! *drops cards*", contexts: ["bust"] },
+        { text: "No no no! How did that happen?!", contexts: ["any"] },
+        { text: "Ugh! I'm so bad at this! *knocks over chip stack*", contexts: ["any"] },
+        { text: "The dealer got blackjack?! Oh my goodness!", contexts: ["dealerBlackjack"] }
       ]
     }
   },
@@ -127,29 +137,29 @@ export const AI_CHARACTERS: AICharacter[] = [
     ],
     reactions: {
       bigWin: [
-        "BLACKJACK! That's how it's DONE! Let me tell you about the time I won $5000!",
-        "Twenty-one baby! This reminds me of my biggest sale!",
-        "Oh YEAH! Now THIS is what I'm talking about!"
+        { text: "BLACKJACK! That's how it's DONE! Let me tell you about the time I won $5000!", contexts: ["any"] },
+        { text: "Twenty-one baby! This reminds me of my biggest sale!", contexts: ["any"] },
+        { text: "Oh YEAH! Now THIS is what I'm talking about!", contexts: ["any"] }
       ],
       smallWin: [
-        "Nice! Reminds me of this deal I closed last week...",
-        "That's what I'm talking about! Hard work pays off!",
-        "See? You play smart, you win smart! Like in business!"
+        { text: "Nice! Reminds me of this deal I closed last week...", contexts: ["any"] },
+        { text: "That's what I'm talking about! Hard work pays off!", contexts: ["any"] },
+        { text: "See? You play smart, you win smart! Like in business!", contexts: ["any"] }
       ],
       push: [
-        "Tie? Well, not losing is still winning in my book!",
-        "Hey, at least we didn't lose! That's what I tell my salesmen!",
-        "Push? Interesting. Did I ever tell you about..."
+        { text: "Tie? Well, not losing is still winning in my book!", contexts: ["any"] },
+        { text: "Hey, at least we didn't lose! That's what I tell my salesmen!", contexts: ["any"] },
+        { text: "Push? Interesting. Did I ever tell you about...", contexts: ["any"] }
       ],
       smallLoss: [
-        "Eh, you win some you lose some. Like my Q3 numbers!",
-        "Dealer got lucky. Happens in business too!",
-        "Well shit. Can't win 'em all I suppose."
+        { text: "Eh, you win some you lose some. Like my Q3 numbers!", contexts: ["any"] },
+        { text: "Dealer got lucky. Happens in business too!", contexts: ["dealerWin"] },
+        { text: "Well shit. Can't win 'em all I suppose.", contexts: ["any"] }
       ],
       bigLoss: [
-        "BUSTED! Dammit! That's like losing a $50k sale!",
-        "Oh come ON! The dealer always wins when it counts!",
-        "Fuck! Okay okay, I'm not tilting. Deep breaths..."
+        { text: "BUSTED! Dammit! That's like losing a $50k sale!", contexts: ["bust"] },
+        { text: "Oh come ON! The dealer always wins when it counts!", contexts: ["dealerWin", "dealerBlackjack"] },
+        { text: "Fuck! Okay okay, I'm not tilting. Deep breaths...", contexts: ["any"] }
       ]
     }
   },
@@ -172,29 +182,30 @@ export const AI_CHARACTERS: AICharacter[] = [
     ],
     reactions: {
       bigWin: [
-        "BLACKJACK! The universe REWARDS those who align with positive energy!",
-        "I KNEW IT! My rose quartz was glowing! The signs were all there!",
-        "Twenty-one! *clutches crystals* The cosmic energy is PERFECT tonight!"
+        { text: "BLACKJACK! The universe REWARDS those who align with positive energy!", contexts: ["any"] },
+        { text: "I KNEW IT! My rose quartz was glowing! The signs were all there!", contexts: ["any"] },
+        { text: "Twenty-one! *clutches crystals* The cosmic energy is PERFECT tonight!", contexts: ["any"] }
       ],
       smallWin: [
-        "Yes! My rabbit's foot never lies!",
-        "The energy is flowing my way! I can feel it!",
-        "See? When you trust the universe, good things happen!"
+        { text: "Yes! My rabbit's foot never lies!", contexts: ["any"] },
+        { text: "The energy is flowing my way! I can feel it!", contexts: ["any"] },
+        { text: "See? When you trust the universe, good things happen!", contexts: ["any"] }
       ],
       push: [
-        "A tie... the universe is telling me to be patient.",
-        "Interesting. The cosmic balance is maintaining equilibrium.",
-        "Neither win nor loss... the energy is neutral here."
+        { text: "A tie... the universe is telling me to be patient.", contexts: ["any"] },
+        { text: "Interesting. The cosmic balance is maintaining equilibrium.", contexts: ["any"] },
+        { text: "Neither win nor loss... the energy is neutral here.", contexts: ["any"] }
       ],
       smallLoss: [
-        "Hmm... my aura must be slightly off today.",
-        "The cards were clouded... I should have cleansed my crystals first.",
-        "Not aligned with the universe on that hand."
+        { text: "Hmm... my aura must be slightly off today.", contexts: ["any"] },
+        { text: "The cards were clouded... I should have cleansed my crystals first.", contexts: ["dealerWin"] },
+        { text: "Not aligned with the universe on that hand.", contexts: ["any"] }
       ],
       bigLoss: [
-        "BUSTED! Mercury retrograde strikes again! I KNEW I should've stayed home!",
-        "This table has bad energy! Someone walked through my aura!",
-        "Fuck! The universe is testing me... I need to realign my chakras!"
+        { text: "BUSTED! Mercury retrograde strikes again! I KNEW I should've stayed home!", contexts: ["bust"] },
+        { text: "This table has bad energy! Someone walked through my aura!", contexts: ["any"] },
+        { text: "Fuck! The universe is testing me... I need to realign my chakras!", contexts: ["bust"] },
+        { text: "The dealer pulled blackjack?! The cosmic signs betrayed me!", contexts: ["dealerBlackjack"] }
       ]
     }
   },
@@ -217,29 +228,30 @@ export const AI_CHARACTERS: AICharacter[] = [
     ],
     reactions: {
       bigWin: [
-        "BLACKJACK BABY! *throws $500 chip to dealer* That's how the BIG players do it!",
-        "Twenty-one! Too easy! I make this much in my SLEEP!",
-        "Oh YEAH! This is what happens when you bet BIG! You amateurs taking notes?"
+        { text: "BLACKJACK BABY! *throws $500 chip to dealer* That's how the BIG players do it!", contexts: ["any"] },
+        { text: "Twenty-one! Too easy! I make this much in my SLEEP!", contexts: ["any"] },
+        { text: "Oh YEAH! This is what happens when you bet BIG! You amateurs taking notes?", contexts: ["any"] }
       ],
       smallWin: [
-        "Money in the bank! Like I needed MORE though!",
-        "Easiest win of my life. That's $2000 I'll never miss.",
-        "Told you! Big K doesn't lose! *adjusts designer sunglasses*"
+        { text: "Money in the bank! Like I needed MORE though!", contexts: ["any"] },
+        { text: "Easiest win of my life. That's $2000 I'll never miss.", contexts: ["any"] },
+        { text: "Told you! Big K doesn't lose! *adjusts designer sunglasses*", contexts: ["any"] }
       ],
       push: [
-        "A push? Whatever. I wipe my ass with this bet amount.",
-        "Tie? Fine. At least none of you peasants beat me.",
-        "Meh. Break even. I make more than this in interest every hour."
+        { text: "A push? Whatever. I wipe my ass with this bet amount.", contexts: ["any"] },
+        { text: "Tie? Fine. At least none of you peasants beat me.", contexts: ["any"] },
+        { text: "Meh. Break even. I make more than this in interest every hour.", contexts: ["any"] }
       ],
       smallLoss: [
-        "Dealer got lucky. Doesn't matter, I'll make it back in one hand.",
-        "Eh, pocket change. I lose more in my couch cushions.",
-        "Whatever. That's like 0.001% of my portfolio."
+        { text: "Dealer got lucky. Doesn't matter, I'll make it back in one hand.", contexts: ["dealerWin"] },
+        { text: "Eh, pocket change. I lose more in my couch cushions.", contexts: ["any"] },
+        { text: "Whatever. That's like 0.001% of my portfolio.", contexts: ["any"] }
       ],
       bigLoss: [
-        "BUSTED?! How the FUCK?! This dealer is clearly rigging it!",
-        "Oh come on! I've lost more on a bad NFT trade but still!",
-        "Fuck this! *throws chips* You know what? I don't even care! Dealer! Double my bet!"
+        { text: "BUSTED?! How the FUCK?! This dealer is clearly rigging it!", contexts: ["bust"] },
+        { text: "Oh come on! I've lost more on a bad NFT trade but still!", contexts: ["any"] },
+        { text: "Fuck this! *throws chips* You know what? I don't even care! Dealer! Double my bet!", contexts: ["bust"] },
+        { text: "Dealer blackjack?! RIGGED! This whole casino is RIGGED!", contexts: ["dealerBlackjack"] }
       ]
     }
   },
@@ -262,29 +274,30 @@ export const AI_CHARACTERS: AICharacter[] = [
     ],
     reactions: {
       bigWin: [
-        "Blackjack?! Oh god, oh god! *looks around nervously* Is this suspicious? Am I being too lucky?!",
-        "I WON?! Wait, did I win legally? I didn't do anything wrong, right?!",
-        "Twenty-one! *sweating* Why is everyone looking at me? Do they think I'm cheating?!"
+        { text: "Blackjack?! Oh god, oh god! *looks around nervously* Is this suspicious? Am I being too lucky?!", contexts: ["any"] },
+        { text: "I WON?! Wait, did I win legally? I didn't do anything wrong, right?!", contexts: ["any"] },
+        { text: "Twenty-one! *sweating* Why is everyone looking at me? Do they think I'm cheating?!", contexts: ["any"] }
       ],
       smallWin: [
-        "I won! *glances at cameras* But not TOO much, right? That's okay?",
-        "Oh thank goodness! A small win. Not suspicious at all!",
-        "Yes! *nervous laugh* I mean... is this normal? Am I winning too often?"
+        { text: "I won! *glances at cameras* But not TOO much, right? That's okay?", contexts: ["any"] },
+        { text: "Oh thank goodness! A small win. Not suspicious at all!", contexts: ["any"] },
+        { text: "Yes! *nervous laugh* I mean... is this normal? Am I winning too often?", contexts: ["any"] }
       ],
       push: [
-        "A tie? Is that... is that legal? Of course it is, why wouldn't it be?",
-        "Oh good. Nobody won. Nobody lost. I'm safe. We're all safe.",
-        "Push... *breathes* Okay. That's fine. That's totally normal and fine."
+        { text: "A tie? Is that... is that legal? Of course it is, why wouldn't it be?", contexts: ["any"] },
+        { text: "Oh good. Nobody won. Nobody lost. I'm safe. We're all safe.", contexts: ["any"] },
+        { text: "Push... *breathes* Okay. That's fine. That's totally normal and fine.", contexts: ["any"] }
       ],
       smallLoss: [
-        "I lost. That's... actually that's good! Now they won't suspect me!",
-        "Damn it. But also... *nervous relief* ...at least I'm not winning TOO much.",
-        "Well, there goes that hand. *looking around* See? I'm losing! I'm not counting!"
+        { text: "I lost. That's... actually that's good! Now they won't suspect me!", contexts: ["any"] },
+        { text: "Damn it. But also... *nervous relief* ...at least I'm not winning TOO much.", contexts: ["dealerWin"] },
+        { text: "Well, there goes that hand. *looking around* See? I'm losing! I'm not counting!", contexts: ["any"] }
       ],
       bigLoss: [
-        "BUSTED! Oh no! *panicking* Wait, is it bad that I busted? Do they think I'm bad at this?!",
-        "Fuck! No wait, sorry! *to dealer* I didn't mean to swear! Please don't call security!",
-        "I KNEW I should've stood! *sweating profusely* Why do I second-guess everything?!"
+        { text: "BUSTED! Oh no! *panicking* Wait, is it bad that I busted? Do they think I'm bad at this?!", contexts: ["bust"] },
+        { text: "Fuck! No wait, sorry! *to dealer* I didn't mean to swear! Please don't call security!", contexts: ["any"] },
+        { text: "I KNEW I should've stood! *sweating profusely* Why do I second-guess everything?!", contexts: ["bust"] },
+        { text: "Dealer blackjack?! *panicking* This looks suspicious doesn't it? Me losing to blackjack?!", contexts: ["dealerBlackjack"] }
       ]
     }
   },
@@ -307,29 +320,30 @@ export const AI_CHARACTERS: AICharacter[] = [
     ],
     reactions: {
       bigWin: [
-        "BLACKJACK AGAIN?! I called it! I FELT it in my bones! My lucky streak continues!",
-        "Twenty-one! I don't even know HOW I keep doing this! It's like magic!",
-        "YES! My gut said 'this is the one Larry' and my gut is NEVER wrong!"
+        { text: "BLACKJACK AGAIN?! I called it! I FELT it in my bones! My lucky streak continues!", contexts: ["any"] },
+        { text: "Twenty-one! I don't even know HOW I keep doing this! It's like magic!", contexts: ["any"] },
+        { text: "YES! My gut said 'this is the one Larry' and my gut is NEVER wrong!", contexts: ["any"] }
       ],
       smallWin: [
-        "Another win! Folks, I'm telling you, it's all about the FEELING!",
-        "Ha! I knew I'd win that one! Don't ask me how, I just KNEW!",
-        "That's what I'm talking about! Lucky Larry strikes again!"
+        { text: "Another win! Folks, I'm telling you, it's all about the FEELING!", contexts: ["any"] },
+        { text: "Ha! I knew I'd win that one! Don't ask me how, I just KNEW!", contexts: ["any"] },
+        { text: "That's what I'm talking about! Lucky Larry strikes again!", contexts: ["any"] }
       ],
       push: [
-        "A tie? Hmm... my gut didn't say anything about THIS!",
-        "Well, at least I didn't lose! Still lucky in my book!",
-        "Push? Interesting! My lucky streak took a little break there!"
+        { text: "A tie? Hmm... my gut didn't say anything about THIS!", contexts: ["any"] },
+        { text: "Well, at least I didn't lose! Still lucky in my book!", contexts: ["any"] },
+        { text: "Push? Interesting! My lucky streak took a little break there!", contexts: ["any"] }
       ],
       smallLoss: [
-        "Aw man! My first loss in... what, twenty minutes?",
-        "Lost that one. But you know what? I FEEL a big win coming!",
-        "Eh, you can't win 'em all! Wait, yes I can! Watch this next hand!"
+        { text: "Aw man! My first loss in... what, twenty minutes?", contexts: ["any"] },
+        { text: "Lost that one. But you know what? I FEEL a big win coming!", contexts: ["dealerWin"] },
+        { text: "Eh, you can't win 'em all! Wait, yes I can! Watch this next hand!", contexts: ["any"] }
       ],
       bigLoss: [
-        "BUSTED?! That's... that's the first time in HOURS! What the hell?!",
-        "No way! My gut was WRONG?! That never happens!",
-        "Well shit! Even a lucky man loses sometimes! But just you wait!"
+        { text: "BUSTED?! That's... that's the first time in HOURS! What the hell?!", contexts: ["bust"] },
+        { text: "No way! My gut was WRONG?! That never happens!", contexts: ["bust"] },
+        { text: "Well shit! Even a lucky man loses sometimes! But just you wait!", contexts: ["any"] },
+        { text: "Dealer blackjack?! My lucky streak has LIMITS apparently!", contexts: ["dealerBlackjack"] }
       ]
     }
   },
@@ -352,29 +366,30 @@ export const AI_CHARACTERS: AICharacter[] = [
     ],
     reactions: {
       bigWin: [
-        "BLACKJACK?! Did I... did I actually GET a blackjack?! Is this real life?!",
-        "Wait, I WON?! Twenty-one?! Someone check the cards, this can't be right!",
-        "Holy shit! I got blackjack! *laughs* Quick! Someone take a picture before my luck runs out!"
+        { text: "BLACKJACK?! Did I... did I actually GET a blackjack?! Is this real life?!", contexts: ["any"] },
+        { text: "Wait, I WON?! Twenty-one?! Someone check the cards, this can't be right!", contexts: ["any"] },
+        { text: "Holy shit! I got blackjack! *laughs* Quick! Someone take a picture before my luck runs out!", contexts: ["any"] }
       ],
       smallWin: [
-        "I won? I actually won?! *checks cards twice* Nobody switched these?",
-        "A win! For ME! Mark this day on the calendar folks!",
-        "Well I'll be damned! Unlucky Ursula wins one! Hell must've frozen over!"
+        { text: "I won? I actually won?! *checks cards twice* Nobody switched these?", contexts: ["any"] },
+        { text: "A win! For ME! Mark this day on the calendar folks!", contexts: ["any"] },
+        { text: "Well I'll be damned! Unlucky Ursula wins one! Hell must've frozen over!", contexts: ["any"] }
       ],
       push: [
-        "A tie. Of course. Not lucky enough to win, not unlucky enough to lose. Story of my life!",
-        "*laughs* A push? That's almost like winning for me!",
-        "Tie? I'll take it! At least I didn't lose for once!"
+        { text: "A tie. Of course. Not lucky enough to win, not unlucky enough to lose. Story of my life!", contexts: ["any"] },
+        { text: "*laughs* A push? That's almost like winning for me!", contexts: ["any"] },
+        { text: "Tie? I'll take it! At least I didn't lose for once!", contexts: ["any"] }
       ],
       smallLoss: [
-        "And there it is. Back to normal! *laughs*",
-        "Ah well, that brief moment of hope was nice while it lasted!",
-        "Lost. Yep. The universe is balanced again!"
+        { text: "And there it is. Back to normal! *laughs*", contexts: ["any"] },
+        { text: "Ah well, that brief moment of hope was nice while it lasted!", contexts: ["dealerWin"] },
+        { text: "Lost. Yep. The universe is balanced again!", contexts: ["any"] }
       ],
       bigLoss: [
-        "BUSTED! *laughs* Of COURSE I busted! You could've bet your house on it!",
-        "There we go! NOW it feels right! I was worried I was turning lucky there!",
-        "Fuck! Busted AGAIN! You know what? At this point it's almost impressive!"
+        { text: "BUSTED! *laughs* Of COURSE I busted! You could've bet your house on it!", contexts: ["bust"] },
+        { text: "There we go! NOW it feels right! I was worried I was turning lucky there!", contexts: ["bust"] },
+        { text: "Fuck! Busted AGAIN! You know what? At this point it's almost impressive!", contexts: ["bust"] },
+        { text: "Dealer blackjack. Of COURSE it's blackjack! Why would it be anything else?!", contexts: ["dealerBlackjack"] }
       ]
     }
   },
@@ -446,5 +461,6 @@ export function getCharacterReaction(
   outcome: "bigWin" | "smallWin" | "push" | "smallLoss" | "bigLoss"
 ): string {
   const reactions = character.reactions[outcome];
-  return reactions[Math.floor(Math.random() * reactions.length)];
+  const reaction = reactions[Math.floor(Math.random() * reactions.length)];
+  return reaction.text;
 }

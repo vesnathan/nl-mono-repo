@@ -472,13 +472,8 @@ export default function GamePage() {
       if (Math.random() < 0.2 && aiPlayers.length >= 2) {
         const randomAI = aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
 
-        // 70% chance talking to another player, 30% to dealer
-        let message: string;
-        if (Math.random() < 0.7) {
-          message = getDealerPlayerLine(randomAI.character.id, "banterWithPlayer");
-        } else {
-          message = getDealerPlayerLine(randomAI.character.id, "banterWithDealer");
-        }
+        // Get some small talk banter
+        const message = getDealerPlayerLine(randomAI.character.id, "smallTalk");
 
         if (message) {
           addSpeechBubble(`ai-banter-${Date.now()}`, message, randomAI.position);
