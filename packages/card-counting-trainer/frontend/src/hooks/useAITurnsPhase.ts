@@ -83,6 +83,7 @@ export function useAITurnsPhase({
 
   useEffect(() => {
     if (phase !== "AI_TURNS") {
+      aiTurnProcessingRef.current = false;
       return;
     }
 
@@ -91,12 +92,10 @@ export function useAITurnsPhase({
     }
 
     if (aiTurnProcessingRef.current) {
-      addDebugLog("⚠️ AI turn already processing, skipping re-entry");
       return;
     }
 
     aiTurnProcessingRef.current = true;
-    addDebugLog("🔒 AI turn processing locked");
 
     if (phase === "AI_TURNS" && activePlayerIndex === null) {
       const playersByPosition = aiPlayers
