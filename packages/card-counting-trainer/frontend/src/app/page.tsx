@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
 import { GameSettings, DEFAULT_GAME_SETTINGS } from "@/types/gameSettings";
 import { DealerCharacter } from "@/data/dealerCharacters";
 import {
@@ -42,7 +41,7 @@ export default function GamePage() {
   );
 
   // Custom hooks
-  const { registerTimeout, clearAllTimeouts } = useGameTimeouts();
+  const { registerTimeout } = useGameTimeouts();
   const {
     debugLogs,
     showDebugLog,
@@ -75,16 +74,10 @@ export default function GamePage() {
     minBet,
     maxBet,
     currentScore,
-    setCurrentScore,
     currentStreak,
-    setCurrentStreak,
     longestStreak,
-    setLongestStreak,
     peakChips,
-    setPeakChips,
     scoreMultiplier,
-    awardCorrectDecisionPoints,
-    resetStreak,
   } = usePlayerHand();
 
   // AI players state
@@ -147,35 +140,18 @@ export default function GamePage() {
   // Track previous phase to detect transitions into AI_TURNS
   const prevPhaseRef = useRef<GamePhase>("BETTING");
 
-  // Helper to calculate card positions for flying animation
-  // Wrapper around utility function to provide current game state
-  const getCardPositionForAnimation = useCallback(
-    (
-      type: "ai" | "player" | "dealer" | "shoe",
-      index?: number,
-      cardIndex?: number,
-    ) => {
-      return getCardPosition(type, aiPlayers, playerSeat, index, cardIndex);
-    },
-    [aiPlayers, playerSeat],
-  );
-
   // Game interactions hook - provides conversation and speech bubble functions
-  const {
-    triggerConversation,
-    addSpeechBubble,
-    checkForInitialReactions,
-    showEndOfHandReactions,
-  } = useGameInteractions({
-    activeConversation,
-    setActiveConversation,
-    setSpeechBubbles,
-    registerTimeout,
-    aiPlayers,
-    dealerHand,
-    blackjackPayout: gameSettings.blackjackPayout,
-    addDebugLog,
-  });
+  const { triggerConversation, addSpeechBubble, showEndOfHandReactions } =
+    useGameInteractions({
+      activeConversation,
+      setActiveConversation,
+      setSpeechBubbles,
+      registerTimeout,
+      aiPlayers,
+      dealerHand,
+      blackjackPayout: gameSettings.blackjackPayout,
+      addDebugLog,
+    });
 
   // Game actions hook - provides startNewRound, dealInitialCards, hit, stand
   const { startNewRound, dealInitialCards, hit, stand } = useGameActions({
@@ -425,12 +401,6 @@ export default function GamePage() {
     showEndOfHandReactions,
     addDebugLog,
   });
-
-  const decksRemaining = calculateDecksRemaining(
-    gameSettings.numberOfDecks * 52,
-    cardsDealt,
-  );
-  const trueCount = calculateTrueCount(runningCount, decksRemaining);
 
   return (
     <BlackjackGameUI
