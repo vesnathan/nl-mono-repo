@@ -1004,7 +1004,7 @@ export default function GamePage() {
         playerId,
         message,
         position: { left: `${x}%`, top: `${y}%` },
-        id: `${playerId}-${Date.now()}`,
+        id: playerId, // Use playerId directly as it's already unique per call
       };
 
       setSpeechBubbles((prev) => [...prev, bubble]);
@@ -1097,11 +1097,11 @@ export default function GamePage() {
     selectedReactions.forEach((reaction, idx) => {
       registerTimeout(() => {
         addSpeechBubble(
-          reaction.playerId,
+          `${reaction.playerId}-reaction-${idx}`, // Unique ID per reaction
           reaction.message,
           reaction.position,
         );
-      }, idx * 800); // Slightly stagger multiple reactions
+      }, idx * 1000); // Stagger by 1 second to avoid overlap
     });
   }, [aiPlayers, dealerHand, gameSettings, registerTimeout, addSpeechBubble]);
 
