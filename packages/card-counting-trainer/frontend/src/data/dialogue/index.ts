@@ -2453,12 +2453,16 @@ export function getEndOfHandReaction(
  */
 function addDecisionComments(
   commentPool: string[],
-  decision: "hit" | "stand",
+  decision: "hit" | "stand" | "double" | "split",
   commentary: NonNullable<CharacterDialogue["decisionCommentary"]>,
   maxCount?: number,
 ) {
+  // Add comments for hit/stand/split - double doesn't have specific commentary (AI doesn't use it)
   const comments =
-    decision === "hit" ? commentary.shouldHit : commentary.shouldStand;
+    decision === "hit" ? commentary.shouldHit :
+    decision === "stand" ? commentary.shouldStand :
+    decision === "split" ? commentary.shouldSplit :
+    undefined;
   if (comments) {
     const toAdd = maxCount ? comments.slice(0, maxCount) : comments;
     commentPool.push(...toAdd);
@@ -2470,7 +2474,7 @@ function addDecisionComments(
  */
 function buildHighSkillComments(
   isCorrectPlay: boolean,
-  decision: "hit" | "stand",
+  decision: "hit" | "stand" | "double" | "split",
   commentary: NonNullable<CharacterDialogue["decisionCommentary"]>,
 ): string[] {
   const pool: string[] = [];
@@ -2494,7 +2498,7 @@ function buildHighSkillComments(
  */
 function buildLowSkillComments(
   isCorrectPlay: boolean,
-  decision: "hit" | "stand",
+  decision: "hit" | "stand" | "double" | "split",
   commentary: NonNullable<CharacterDialogue["decisionCommentary"]>,
 ): string[] {
   const pool: string[] = [];
@@ -2522,7 +2526,7 @@ function buildLowSkillComments(
 function buildMediumSkillComments(
   isCorrectPlay: boolean,
   handValue: number,
-  decision: "hit" | "stand",
+  decision: "hit" | "stand" | "double" | "split",
   commentary: NonNullable<CharacterDialogue["decisionCommentary"]>,
 ): string[] {
   const pool: string[] = [];
@@ -2553,7 +2557,7 @@ function buildMediumSkillComments(
  */
 export function getDecisionCommentary(
   characterId: string,
-  decision: "hit" | "stand",
+  decision: "hit" | "stand" | "double" | "split",
   skillLevel: number,
   handValue: number,
   isCorrectPlay: boolean,

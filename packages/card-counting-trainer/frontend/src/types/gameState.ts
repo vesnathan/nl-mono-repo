@@ -8,6 +8,9 @@ export interface PlayerHand {
   cards: Card[];
   bet: number;
   result?: HandResult;
+  isSplit?: boolean; // True if this is a split hand
+  splitHands?: PlayerHand[]; // For split hands - array of individual hands
+  activeSplitHandIndex?: number; // Which split hand is currently being played
 }
 
 /**

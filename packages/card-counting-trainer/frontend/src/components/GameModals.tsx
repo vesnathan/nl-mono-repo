@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { GameSettings } from "@/types/gameSettings";
 import { GamePhase, PlayerHand } from "@/types/gameState";
 import BettingInterface from "@/components/BettingInterface";
 import InsuranceUI from "@/components/InsuranceUI";
 import PlayerActionsModal from "@/components/PlayerActionsModal";
+import SplitHandsModal from "@/components/SplitHandsModal";
 import GameSettingsModal from "@/components/GameSettingsModal";
 import LeaderboardModal from "@/components/LeaderboardModal";
 import BasicStrategyCard from "@/components/BasicStrategyCard";
@@ -32,6 +33,8 @@ interface GameModalsProps {
   playerFinished: boolean;
   hit: () => void;
   stand: () => void;
+  doubleDown: () => void;
+  split: () => void;
 
   // Settings
   showSettings: boolean;
@@ -75,6 +78,8 @@ export default function GameModals({
   playerFinished,
   hit,
   stand,
+  doubleDown,
+  split,
   showSettings,
   setShowSettings,
   gameSettings,
@@ -96,6 +101,24 @@ export default function GameModals({
     const value = cards.reduce((sum, card) => sum + card.value, 0);
     return value > 21;
   };
+
+  // Helper functions to check if player can split or double
+  const canSplitHand = playerHand.cards.length === 2 &&
+    playerHand.cards[0].rank === playerHand.cards[1].rank &&
+    playerChips >= playerHand.bet;
+
+  const canDoubleHand = playerHand.cards.length === 2 &&
+    playerChips >= playerHand.bet;
+
+  // State for split hands modal
+  const [showSplitModal, setShowSplitModal] = useState(false);
+
+  // Show split modal when player has split hands
+  const hasSplitHands = playerHand.isSplit && playerHand.splitHands && playerHand.splitHands.length > 0;
+
+  // Calculate if split hands can be minimized (when it's not player's turn)
+  const canMinimizeSplit = playerFinished || phase !== "PLAYER_TURN";
+
   return (
     <>
       {/* Betting Interface - shown during BETTING phase when player is seated */}
@@ -121,12 +144,51 @@ export default function GameModals({
         />
       )}
 
-      {/* Player Actions Modal - shown during PLAYER_TURN when player has cards and hasn't finished */}
-      {phase === "PLAYER_TURN" &&
+      {/* Split Hands Modal - shown when player has split hands */}
+      {hasSplitHands && (
+        <SplitHandsModal
+          isOpen={true}
+          hands={playerHand.splitHands!.map((hand, index) => {
+            const activeIndex = playerHand.activeSplitHandIndex ?? 0;
+            const handValue = hand.cards.reduce((sum, card) => {
+              let value = sum + card.value;
+              // Handle ace adjustment
+              let aces = hand.cards.filter(c => c.rank === "A").length;
+              while (value > 21 && aces > 0) {
+                value -= 10;
+                aces--;
+              }
+              return value;
+            }, 0);
+            return {
+              cards: hand.cards,
+              bet: hand.bet,
+              finished: index < activeIndex || handValue > 21,
+              busted: handValue > 21,
+            };
+          })}
+          activeHandIndex={playerHand.activeSplitHandIndex ?? 0}
+          onHit={hit}
+          onStand={stand}
+          onClose={() => setShowSplitModal(false)}
+          canMinimize={canMinimizeSplit}
+        />
+      )}
+
+      {/* Player Actions Modal - shown during PLAYER_TURN when player has cards and hasn't finished (non-split) */}
+      {!hasSplitHands &&
+        phase === "PLAYER_TURN" &&
         playerHand.cards.length > 0 &&
         !playerFinished &&
         !isBusted(playerHand.cards) && (
-          <PlayerActionsModal onHit={hit} onStand={stand} />
+          <PlayerActionsModal
+            onHit={hit}
+            onStand={stand}
+            onDouble={doubleDown}
+            onSplit={split}
+            canDouble={canDoubleHand}
+            canSplit={canSplitHand}
+          />
         )}
 
       {/* Game Settings Modal */}

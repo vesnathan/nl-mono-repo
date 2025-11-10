@@ -6,7 +6,7 @@ import {
   FlyingCardData,
 } from "@/types/gameState";
 import { Card } from "@/types/game";
-import { calculateHandValue, isBusted, isSoftHand } from "@/lib/gameActions";
+import { calculateHandValue, isBusted, isSoftHand, canSplit as canSplitCards } from "@/lib/gameActions";
 import {
   CHARACTER_DIALOGUE,
   pick,
@@ -15,8 +15,9 @@ import {
   getRandomDistraction,
   getDecisionCommentary,
 } from "@/data/dialogue";
-import { shouldHitBasicStrategy } from "@/utils/aiStrategy";
+import { getBasicStrategyAction } from "@/lib/basicStrategy";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
+import { DEFAULT_GAME_SETTINGS } from "@/types/gameSettings";
 import { generateBustReaction } from "@/utils/reactions";
 
 interface UseAITurnsPhaseParams {
@@ -261,29 +262,48 @@ export function useAITurnsPhase({
       setActivePlayerIndex(idx);
 
       const dealerUpCard = dealerHand.cards[0];
-      const basicStrategyDecision = shouldHitBasicStrategy(
+
+      // Check if AI can split (AI has unlimited chips, but we skip double since bet size doesn't matter)
+      const canSplitHand = ai.hand.cards.length === 2 && canSplitCards(ai.hand.cards);
+
+      // Get basic strategy action (considers split, hit, stand - skip double for AI)
+      const basicStrategyAction = getBasicStrategyAction(
         ai.hand.cards,
         dealerUpCard,
+        DEFAULT_GAME_SETTINGS,
+        canSplitHand,
+        false, // Don't suggest double for AI - bet size doesn't matter
       );
 
-      const followsBasicStrategy =
-        Math.random() * 100 < ai.character.skillLevel;
-      const shouldHit = followsBasicStrategy
-        ? basicStrategyDecision
-        : handValue < 17;
+      // Determine if AI follows basic strategy based on skill level
+      const followsBasicStrategy = Math.random() * 100 < ai.character.skillLevel;
+
+      // If not following basic strategy, fall back to simple rule
+      let action = basicStrategyAction;
+      if (!followsBasicStrategy) {
+        // Simple fallback: hit if < 17, stand otherwise
+        action = handValue < 17 ? "H" : "S";
+      }
+
+      // Convert double to hit for AI (in case basic strategy still suggests it)
+      if (action === "D") {
+        action = "H";
+      }
 
       addDebugLog(`Dealer up card: ${dealerUpCard.rank}${dealerUpCard.suit}`);
+      addDebugLog(`Can split: ${canSplitHand}`);
+      addDebugLog(`Basic strategy says: ${basicStrategyAction} (converted D to H for AI)`);
       addDebugLog(
-        `Basic strategy says: ${basicStrategyDecision ? "HIT" : "STAND"}`,
-      );
-      addDebugLog(
-        `Follows basic strategy: ${followsBasicStrategy}, Decision: ${shouldHit ? "HIT" : "STAND"}`,
+        `Follows basic strategy: ${followsBasicStrategy}, Final decision: ${action}`,
       );
 
       // Show strategy-aware decision commentary BEFORE the action (30% chance)
       if (Math.random() < 0.30) {
-        const isCorrectPlay = (shouldHit === basicStrategyDecision);
-        const decisionText = shouldHit ? "hit" : "stand";
+        const isCorrectPlay = (action === basicStrategyAction);
+        let decisionText: "hit" | "stand" | "double" | "split" = "hit";
+        if (action === "S") decisionText = "stand";
+        else if (action === "SP") decisionText = "split";
+
         const commentary = getDecisionCommentary(
           ai.character.id,
           decisionText,
@@ -304,7 +324,73 @@ export function useAITurnsPhase({
         }
       }
 
-      if (shouldHit && !isBust) {
+      // Handle SPLIT action
+      if (action === "SP" && canSplitHand) {
+        addDebugLog(`AI Player ${idx} decision: SPLIT`);
+
+        // Show SPLIT action indicator
+        registerTimeout(() => {
+          setPlayerActions((prev) => new Map(prev).set(idx, "SPLIT"));
+        }, decisionTime);
+
+        // Execute split after short delay
+        registerTimeout(() => {
+          const [card1, card2] = ai.hand.cards;
+          addDebugLog(`Splitting ${card1.rank}${card1.suit} and ${card2.rank}${card2.suit}`);
+
+          // Create two hands
+          const hand1: PlayerHand = { cards: [card1], bet: ai.hand.bet };
+          const hand2: PlayerHand = { cards: [card2], bet: ai.hand.bet };
+
+          // Deal card to first hand
+          registerTimeout(() => {
+            const newCard1 = dealCardFromShoe();
+            hand1.cards.push(newCard1);
+            addDebugLog(`Dealt to first hand: ${newCard1.rank}${newCard1.suit}`);
+
+            // Deal card to second hand
+            registerTimeout(() => {
+              const newCard2 = dealCardFromShoe();
+              hand2.cards.push(newCard2);
+              addDebugLog(`Dealt to second hand: ${newCard2.rank}${newCard2.suit}`);
+
+              // Update AI player with split hands
+              setAIPlayers((prev) => {
+                const updated = [...prev];
+                updated[idx] = {
+                  ...updated[idx],
+                  hand: {
+                    cards: [],
+                    bet: ai.hand.bet,
+                    isSplit: true,
+                    splitHands: [hand1, hand2],
+                    activeSplitHandIndex: 0,
+                  },
+                };
+                return updated;
+              });
+
+              addDebugLog("AI split complete - will play both hands");
+
+              // Clear action indicator and continue
+              registerTimeout(() => {
+                setPlayerActions((prev) => {
+                  const newMap = new Map(prev);
+                  newMap.delete(idx);
+                  return newMap;
+                });
+                aiTurnProcessingRef.current = false;
+                setActivePlayerIndex(null);
+              }, 1000);
+            }, CARD_ANIMATION_DURATION + 200);
+          }, 500);
+        }, decisionTime + 50);
+
+        return; // Exit early for split
+      }
+
+      // Handle HIT action
+      if (action === "H" && !isBust) {
         // Show hand-based dialogue with higher frequency (25%)
         if (Math.random() < 0.25) {
           let dialogue: string | null = null;

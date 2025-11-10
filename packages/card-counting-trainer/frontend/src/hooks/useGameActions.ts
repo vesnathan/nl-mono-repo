@@ -28,6 +28,7 @@ interface UseGameActionsParams {
   shoesDealt: number;
   gameSettings: GameSettings;
   currentDealer: DealerCharacter | null;
+  playerChips: number;
 
   // Setters
   setPhase: (phase: GamePhase) => void;
@@ -67,6 +68,7 @@ interface UseGameActionsParams {
   setInsuranceOffered: (offered: boolean) => void;
   setActivePlayerIndex: (index: number | null) => void;
   setPlayerFinished: (finished: boolean) => void;
+  setPlayerChips: (chips: number | ((prev: number) => number)) => void;
 
   // Functions
   dealCardFromShoe: () => GameCard;
@@ -89,6 +91,8 @@ export interface GameActionsReturn {
   dealInitialCards: (playerBetAmount?: number) => void;
   hit: () => void;
   stand: () => void;
+  doubleDown: () => void;
+  split: () => void;
 }
 
 export function useGameActions({
@@ -103,6 +107,7 @@ export function useGameActions({
   shoesDealt,
   gameSettings,
   currentDealer,
+  playerChips,
   setPhase,
   setCurrentBet,
   setDealerRevealed,
@@ -120,6 +125,7 @@ export function useGameActions({
   setInsuranceOffered,
   setActivePlayerIndex,
   setPlayerFinished,
+  setPlayerChips,
   dealCardFromShoe,
   registerTimeout,
   getCardPosition,
@@ -520,6 +526,65 @@ export function useGameActions({
 
   const hit = useCallback(() => {
     addDebugLog("=== PLAYER ACTION: HIT ===");
+
+    // Check if we're playing split hands
+    if (playerHand.isSplit && playerHand.splitHands) {
+      const activeIndex = playerHand.activeSplitHandIndex ?? 0;
+      const activeHand = playerHand.splitHands[activeIndex];
+
+      addDebugLog(`Playing split hand ${activeIndex + 1}`);
+      addDebugLog(
+        `Current hand: ${activeHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+      );
+      addDebugLog(`Current hand value: ${calculateHandValue(activeHand.cards)}`);
+
+      const card = dealCardFromShoe();
+      addDebugLog(
+        `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
+      );
+
+      // Update split hand with new card
+      const newSplitHands = [...playerHand.splitHands];
+      newSplitHands[activeIndex] = {
+        ...activeHand,
+        cards: [...activeHand.cards, card],
+      };
+
+      const newHandValue = calculateHandValue(newSplitHands[activeIndex].cards);
+      addDebugLog(`New hand value: ${newHandValue}`);
+
+      if (newHandValue > 21) {
+        addDebugLog(`Hand ${activeIndex + 1} BUSTED!`);
+        // Mark this hand as busted and finished
+        setPlayerHand((prev) => ({
+          ...prev,
+          splitHands: newSplitHands,
+        }));
+
+        // Move to next hand or finish
+        registerTimeout(() => {
+          if (activeIndex === 0) {
+            addDebugLog("Moving to second hand");
+            setPlayerHand((prev) => ({
+              ...prev,
+              activeSplitHandIndex: 1,
+            }));
+          } else {
+            addDebugLog("Both hands complete - moving to DEALER_TURN");
+            setPlayerFinished(true);
+            setPhase("DEALER_TURN");
+          }
+        }, 1000);
+      } else {
+        setPlayerHand((prev) => ({
+          ...prev,
+          splitHands: newSplitHands,
+        }));
+      }
+      return;
+    }
+
+    // Normal (non-split) hit logic
     addDebugLog(
       `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
     );
@@ -610,6 +675,35 @@ export function useGameActions({
 
   const stand = useCallback(() => {
     addDebugLog("=== PLAYER ACTION: STAND ===");
+
+    // Check if we're playing split hands
+    if (playerHand.isSplit && playerHand.splitHands) {
+      const activeIndex = playerHand.activeSplitHandIndex ?? 0;
+      const activeHand = playerHand.splitHands[activeIndex];
+
+      addDebugLog(`Standing on split hand ${activeIndex + 1}`);
+      addDebugLog(
+        `Final hand: ${activeHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+      );
+      addDebugLog(`Final hand value: ${calculateHandValue(activeHand.cards)}`);
+
+      if (activeIndex === 0) {
+        // Move to second hand
+        addDebugLog("Moving to second hand");
+        setPlayerHand((prev) => ({
+          ...prev,
+          activeSplitHandIndex: 1,
+        }));
+      } else {
+        // Both hands complete
+        addDebugLog("Both hands complete - moving to DEALER_TURN");
+        setPlayerFinished(true);
+        setPhase("DEALER_TURN");
+      }
+      return;
+    }
+
+    // Normal (non-split) stand logic
     addDebugLog(
       `Final hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
     );
@@ -620,10 +714,199 @@ export function useGameActions({
     setPhase("DEALER_TURN");
   }, [playerHand, addDebugLog, setPhase, setPlayerFinished]);
 
+  const doubleDown = useCallback(() => {
+    addDebugLog("=== PLAYER ACTION: DOUBLE DOWN ===");
+    addDebugLog(
+      `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+    );
+    addDebugLog(`Current hand value: ${calculateHandValue(playerHand.cards)}`);
+    addDebugLog(`Current bet: $${playerHand.bet}`);
+    addDebugLog(`Doubling bet to: $${playerHand.bet * 2}`);
+
+    // Mark player as finished to hide the action modal immediately
+    setPlayerFinished(true);
+
+    // Double the bet and deduct from chips
+    setPlayerHand((prev) => ({ ...prev, bet: prev.bet * 2 }));
+    setPlayerChips((prev) => prev - playerHand.bet);
+    setPlayerActions((prev) => new Map(prev).set(-1, "DOUBLE"));
+
+    // Add a delay before dealing the card
+    registerTimeout(() => {
+      const card = dealCardFromShoe();
+      addDebugLog(
+        `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${runningCount + card.count}`,
+      );
+
+      // Add flying card animation
+      const shoePosition = getCardPosition("shoe", aiPlayers, playerSeat);
+      const playerPosition = getCardPosition(
+        "player",
+        aiPlayers,
+        playerSeat,
+        undefined,
+        playerHand.cards.length,
+      );
+
+      const flyingCard: FlyingCardData = {
+        id: `double-player-${Date.now()}-${cardIdCounter++}`,
+        card,
+        fromPosition: shoePosition,
+        toPosition: playerPosition,
+      };
+
+      setFlyingCards((prev) => [...prev, flyingCard]);
+
+      // Add card to hand after animation completes
+      setTimeout(() => {
+        const newCards = [...playerHand.cards, card];
+        const newHandValue = calculateHandValue(newCards);
+
+        addDebugLog(
+          `Final hand: ${newCards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+        );
+        addDebugLog(`Final hand value: ${newHandValue}`);
+
+        setPlayerHand((prev) => ({ ...prev, cards: newCards }));
+        setFlyingCards((prev) => prev.filter((fc) => fc.id !== flyingCard.id));
+
+        if (newHandValue > 21) {
+          addDebugLog("PLAYER BUSTED!");
+          // Show BUST indicator
+          setPlayerActions((prev) => new Map(prev).set(-1, "BUST"));
+
+          // Muck cards after showing bust indicator
+          setTimeout(() => {
+            setPlayerHand((prev) => ({ ...prev, cards: [] }));
+            setPlayerActions((prev) => {
+              const newMap = new Map(prev);
+              newMap.delete(-1);
+              return newMap;
+            });
+            addDebugLog("Moving to DEALER_TURN phase");
+            setPhase("DEALER_TURN");
+          }, 1500);
+        } else {
+          // Player didn't bust, automatically stand (double down only gets one card)
+          addDebugLog("Player stands after double down");
+          setTimeout(() => {
+            setPlayerActions((prev) => {
+              const newMap = new Map(prev);
+              newMap.delete(-1);
+              return newMap;
+            });
+            setPhase("DEALER_TURN");
+          }, 500);
+        }
+      }, CARD_ANIMATION_DURATION);
+    }, 500);
+  }, [
+    playerHand,
+    dealCardFromShoe,
+    getCardPosition,
+    addDebugLog,
+    runningCount,
+    aiPlayers,
+    playerSeat,
+    registerTimeout,
+    setFlyingCards,
+    setPlayerHand,
+    setPlayerChips,
+    setPlayerActions,
+    setPhase,
+    setPlayerFinished,
+  ]);
+
+  const split = useCallback(() => {
+    addDebugLog("=== PLAYER ACTION: SPLIT ===");
+    addDebugLog(
+      `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+    );
+    addDebugLog(`Current bet: $${playerHand.bet}`);
+
+    // Verify player has enough chips for second bet
+    if (playerChips < playerHand.bet) {
+      addDebugLog("ERROR: Not enough chips to split!");
+      return;
+    }
+
+    // Split the two cards into two hands
+    const [card1, card2] = playerHand.cards;
+
+    addDebugLog(`Splitting ${card1.rank}${card1.suit} and ${card2.rank}${card2.suit}`);
+    addDebugLog(`Deducting $${playerHand.bet} from chips for second hand`);
+
+    // Deduct chips for the second bet
+    setPlayerChips((prev) => prev - playerHand.bet);
+
+    // Create two hands, each with one card
+    const hand1: PlayerHand = {
+      cards: [card1],
+      bet: playerHand.bet,
+    };
+
+    const hand2: PlayerHand = {
+      cards: [card2],
+      bet: playerHand.bet,
+    };
+
+    // Deal a card to the first hand
+    registerTimeout(() => {
+      const newCard1 = dealCardFromShoe();
+      addDebugLog(
+        `Dealing to first hand: ${newCard1.rank}${newCard1.suit} (value: ${newCard1.value})`,
+      );
+
+      hand1.cards.push(newCard1);
+
+      // Deal a card to the second hand
+      registerTimeout(() => {
+        const newCard2 = dealCardFromShoe();
+        addDebugLog(
+          `Dealing to second hand: ${newCard2.rank}${newCard2.suit} (value: ${newCard2.value})`,
+        );
+
+        hand2.cards.push(newCard2);
+
+        // Update player hand to split state
+        setPlayerHand({
+          cards: [], // Clear main hand
+          bet: playerHand.bet,
+          isSplit: true,
+          splitHands: [hand1, hand2],
+          activeSplitHandIndex: 0,
+        });
+
+        addDebugLog("Split complete - starting with first hand");
+
+        // Check if first hand is blackjack (Ace + 10-value card after split)
+        const hand1Value = calculateHandValue(hand1.cards);
+        if (hand1Value === 21) {
+          addDebugLog("First hand has 21 - automatically standing");
+          // Move to second hand
+          setPlayerHand((prev) => ({
+            ...prev,
+            activeSplitHandIndex: 1,
+          }));
+        }
+      }, CARD_ANIMATION_DURATION + 200);
+    }, 500);
+  }, [
+    playerHand,
+    playerChips,
+    dealCardFromShoe,
+    addDebugLog,
+    registerTimeout,
+    setPlayerHand,
+    setPlayerChips,
+  ]);
+
   return {
     startNewRound,
     dealInitialCards,
     hit,
     stand,
+    doubleDown,
+    split,
   };
 }

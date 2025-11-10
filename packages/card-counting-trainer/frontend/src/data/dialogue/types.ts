@@ -33,6 +33,7 @@ export interface CharacterDialogue {
   decisionCommentary?: {
     shouldHit?: string[]; // "Should I hit this?"
     shouldStand?: string[]; // "Better stand here"
+    shouldSplit?: string[]; // "Time to split these"
     confident?: string[]; // "Easy decision"
     uncertain?: string[]; // "Not sure about this..."
   };
