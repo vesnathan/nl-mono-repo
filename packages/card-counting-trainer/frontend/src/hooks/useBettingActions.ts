@@ -18,8 +18,11 @@ interface UseBettingActionsParams {
   setPreviousBet: (bet: number) => void;
   setSpeechBubbles: (bubbles: any[]) => void;
   setAIPlayers: (players: AIPlayer[]) => void;
-  dealInitialCards: () => void;
+  dealInitialCards: (playerBetAmount?: number) => void;
+  registerTimeout: (callback: () => void, delay: number) => void;
   addDebugLog: (message: string) => void;
+  trueCount: number;
+  setBetHistory: (history: Array<{bet: number, trueCount: number}> | ((prev: Array<{bet: number, trueCount: number}>) => Array<{bet: number, trueCount: number}>)) => void;
 }
 
 export function useBettingActions({
@@ -40,7 +43,10 @@ export function useBettingActions({
   setSpeechBubbles,
   setAIPlayers,
   dealInitialCards,
+  registerTimeout,
   addDebugLog,
+  trueCount,
+  setBetHistory,
 }: UseBettingActionsParams) {
   const handleConfirmBet = useCallback(() => {
     addDebugLog("=== CONFIRM BET CLICKED ===");
@@ -60,6 +66,18 @@ export function useBettingActions({
 
     if (canBet) {
       addDebugLog("✓ BET CONFIRMED - Starting dealing phase");
+
+      // Track bet history for counting detection
+      setBetHistory((prev) => {
+        const newHistory = [...prev, { bet: currentBet, trueCount }];
+        // Keep only last 10 bets
+        if (newHistory.length > 10) {
+          return newHistory.slice(-10);
+        }
+        return newHistory;
+      });
+      addDebugLog(`Bet tracked: $${currentBet} at true count ${trueCount.toFixed(2)}`);
+
       setPhase("DEALING");
       setDealerRevealed(false);
       setPlayerHand({ cards: [], bet: currentBet });
@@ -73,15 +91,15 @@ export function useBettingActions({
       setPreviousBet(currentBet);
       setSpeechBubbles([]); // Clear any lingering speech bubbles
 
-      // Reset AI hands with random bets
+      // Reset AI hands (bet amount irrelevant for counting training)
       const updatedAI = aiPlayers.map((ai) => ({
         ...ai,
-        hand: { cards: [], bet: Math.floor(Math.random() * 50) + 25 },
+        hand: { cards: [], bet: 0 },
       }));
       setAIPlayers(updatedAI);
 
-      // Deal initial cards
-      setTimeout(() => dealInitialCards(), 500);
+      // Deal initial cards, passing the bet amount directly to avoid stale closure
+      registerTimeout(() => dealInitialCards(currentBet), 0);
     } else {
       addDebugLog("✗ BET NOT CONFIRMED - Requirements not met");
       if (currentBet < minBet)
@@ -101,6 +119,7 @@ export function useBettingActions({
     phase,
     playerSeat,
     aiPlayers,
+    trueCount,
     setPhase,
     setDealerRevealed,
     setPlayerHand,
@@ -109,7 +128,9 @@ export function useBettingActions({
     setPreviousBet,
     setSpeechBubbles,
     setAIPlayers,
+    setBetHistory,
     dealInitialCards,
+    registerTimeout,
     addDebugLog,
   ]);
 

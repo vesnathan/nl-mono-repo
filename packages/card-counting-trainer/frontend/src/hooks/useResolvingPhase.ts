@@ -45,6 +45,7 @@ interface UseResolvingPhaseParams {
   setPhase: (phase: GamePhase) => void;
   registerTimeout: (callback: () => void, delay: number) => void;
   showEndOfHandReactions: () => void;
+  addSpeechBubble: (id: string, message: string, position: number) => void;
   addDebugLog: (message: string) => void;
 }
 
@@ -81,6 +82,7 @@ export function useResolvingPhase({
   setPhase,
   registerTimeout,
   showEndOfHandReactions,
+  addSpeechBubble,
   addDebugLog,
 }: UseResolvingPhaseParams) {
   const hasResolvedRef = useRef(false);
@@ -271,7 +273,8 @@ export function useResolvingPhase({
         }
       }
 
-      setDealerCallout(callout);
+      // Show dealer's callout in speech bubble instead of callout display
+      addSpeechBubble("dealer-payout", callout, -1);
 
       // Create win/loss bubbles for all players
       addDebugLog("=== CREATING WIN/LOSS BUBBLES ===");

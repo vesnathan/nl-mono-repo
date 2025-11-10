@@ -83,37 +83,6 @@ export default function GameOverlays({
             </div>
           )}
 
-          {phase === "PLAYER_TURN" && !isBusted(playerHand.cards) && (
-            <div className="flex gap-4 justify-center">
-              <Button
-                size="lg"
-                onPress={hit}
-                style={{
-                  backgroundColor: "#4CAF50",
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: "16px",
-                  padding: "12px 24px",
-                }}
-              >
-                HIT
-              </Button>
-              <Button
-                size="lg"
-                onPress={stand}
-                style={{
-                  backgroundColor: "#4CAF50",
-                  color: "white",
-                  fontWeight: "bold",
-                  fontSize: "16px",
-                  padding: "12px 24px",
-                }}
-              >
-                STAND
-              </Button>
-            </div>
-          )}
-
           {phase === "ROUND_END" && (
             <div className="flex gap-4 justify-center flex-col items-center">
               <div className="text-white text-xl">
@@ -137,6 +106,7 @@ export default function GameOverlays({
             position={bubble.position}
             message={bubble.message}
             playerId={bubble.playerId}
+            isDealer={bubble.isDealer}
           />
         ))}
 

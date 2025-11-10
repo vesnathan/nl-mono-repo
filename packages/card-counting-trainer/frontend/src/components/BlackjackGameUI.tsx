@@ -39,6 +39,7 @@ interface BlackjackGameUIProps {
   aiPlayers: AIPlayer[];
   playerSeat: number | null;
   playerHand: PlayerHand;
+  playerFinished: boolean;
   currentBet: number;
   activePlayerIndex: number | null;
   playerActions: Map<
@@ -113,6 +114,7 @@ export default function BlackjackGameUI({
   aiPlayers,
   playerSeat,
   playerHand,
+  playerFinished,
   currentBet,
   activePlayerIndex,
   playerActions,
@@ -237,6 +239,10 @@ export default function BlackjackGameUI({
         insuranceOffered={insuranceOffered}
         handleTakeInsurance={handleTakeInsurance}
         handleDeclineInsurance={handleDeclineInsurance}
+        playerHand={playerHand}
+        playerFinished={playerFinished}
+        hit={hit}
+        stand={stand}
         showSettings={showSettings}
         setShowSettings={setShowSettings}
         gameSettings={gameSettings}

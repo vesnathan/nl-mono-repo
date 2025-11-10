@@ -51,29 +51,44 @@ export default function BettingInterface({
     <div
       style={{
         position: "fixed",
-        bottom: "20px",
+        top: "50%",
         left: "50%",
-        transform: "translateX(-50%)",
+        transform: "translate(-50%, -50%)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         gap: "16px",
-        backgroundColor: "rgba(0, 0, 0, 0.85)",
-        padding: "24px 32px",
+        backgroundColor: "rgba(0, 0, 0, 0.95)",
+        padding: "32px",
         borderRadius: "16px",
-        border: "2px solid #FFD700",
-        zIndex: 1000,
+        border: "3px solid #FFD700",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.8)",
+        zIndex: 10000,
+        minWidth: "400px",
       }}
     >
+      {/* Title */}
+      <h2
+        style={{
+          fontSize: "28px",
+          fontWeight: "bold",
+          color: "#FFD700",
+          marginBottom: "8px",
+          textAlign: "center",
+        }}
+      >
+        Place Your Bet
+      </h2>
+
       {/* Current Bet Display */}
       <div style={{ textAlign: "center" }}>
-        <div style={{ color: "#AAA", fontSize: "14px", marginBottom: "4px" }}>
+        <div style={{ color: "#FFF", fontSize: "18px", marginBottom: "8px" }}>
           Current Bet
         </div>
         <div style={{ color: "#FFD700", fontSize: "32px", fontWeight: "bold" }}>
           ${currentBet}
         </div>
-        <div style={{ color: "#888", fontSize: "12px", marginTop: "4px" }}>
+        <div style={{ color: "#888", fontSize: "12px", marginTop: "8px" }}>
           Min: ${minBet} | Max: ${maxBet}
         </div>
       </div>

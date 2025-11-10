@@ -89,7 +89,8 @@ export function useInsurancePhase({
     }
 
     // Check if we can proceed (player has decided or is not seated)
-    const playerDecided = playerSeat === null || playerInsuranceBet > 0 || insuranceOffered;
+    // Player has decided if: not seated, or insurance offer was withdrawn (insuranceOffered became false)
+    const playerDecided = playerSeat === null || !insuranceOffered;
 
     if (playerDecided && hasProcessedAI.current) {
       registerTimeout(() => {

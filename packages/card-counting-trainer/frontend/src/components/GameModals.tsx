@@ -1,8 +1,9 @@
 import React from "react";
 import { GameSettings } from "@/types/gameSettings";
-import { GamePhase } from "@/types/gameState";
+import { GamePhase, PlayerHand } from "@/types/gameState";
 import BettingInterface from "@/components/BettingInterface";
 import InsuranceUI from "@/components/InsuranceUI";
+import PlayerActionsModal from "@/components/PlayerActionsModal";
 import GameSettingsModal from "@/components/GameSettingsModal";
 import LeaderboardModal from "@/components/LeaderboardModal";
 import BasicStrategyCard from "@/components/BasicStrategyCard";
@@ -25,6 +26,12 @@ interface GameModalsProps {
   insuranceOffered: boolean;
   handleTakeInsurance: () => void;
   handleDeclineInsurance: () => void;
+
+  // Player actions
+  playerHand: PlayerHand;
+  playerFinished: boolean;
+  hit: () => void;
+  stand: () => void;
 
   // Settings
   showSettings: boolean;
@@ -64,6 +71,10 @@ export default function GameModals({
   insuranceOffered,
   handleTakeInsurance,
   handleDeclineInsurance,
+  playerHand,
+  playerFinished,
+  hit,
+  stand,
   showSettings,
   setShowSettings,
   gameSettings,
@@ -80,6 +91,11 @@ export default function GameModals({
   setShowDebugLog,
   clearDebugLogs,
 }: GameModalsProps) {
+  // Helper function to check if player is busted
+  const isBusted = (cards: any[]) => {
+    const value = cards.reduce((sum, card) => sum + card.value, 0);
+    return value > 21;
+  };
   return (
     <>
       {/* Betting Interface - shown during BETTING phase when player is seated */}
@@ -104,6 +120,14 @@ export default function GameModals({
           onDeclineInsurance={handleDeclineInsurance}
         />
       )}
+
+      {/* Player Actions Modal - shown during PLAYER_TURN when player has cards and hasn't finished */}
+      {phase === "PLAYER_TURN" &&
+        playerHand.cards.length > 0 &&
+        !playerFinished &&
+        !isBusted(playerHand.cards) && (
+          <PlayerActionsModal onHit={hit} onStand={stand} />
+        )}
 
       {/* Game Settings Modal */}
       <GameSettingsModal

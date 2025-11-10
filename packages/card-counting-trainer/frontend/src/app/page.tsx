@@ -23,6 +23,7 @@ import { useConversationHandlers } from "@/hooks/useConversationHandlers";
 import { useGameActions } from "@/hooks/useGameActions";
 import { useSuspicionDecay } from "@/hooks/useSuspicionDecay";
 import { useDealerSuspicion } from "@/hooks/useDealerSuspicion";
+import { useWongingDetection } from "@/hooks/useWongingDetection";
 import { useDealerChange } from "@/hooks/useDealerChange";
 import { useGameInitialization } from "@/hooks/useGameInitialization";
 import { useConversationTriggers } from "@/hooks/useConversationTriggers";
@@ -116,6 +117,9 @@ export default function GamePage() {
     useState<ActiveConversation | null>(null);
   const [playerSociability, setPlayerSociability] = useState(50); // 0-100: how friendly/responsive player has been
   const [handNumber, setHandNumber] = useState(0);
+
+  // Bet history tracking for counting detection (last 10 bets)
+  const [betHistory, setBetHistory] = useState<Array<{bet: number, trueCount: number}>>([]);
   const [showDealerInfo, setShowDealerInfo] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -134,6 +138,7 @@ export default function GamePage() {
   const [playersFinished, setPlayersFinished] = useState<Set<number>>(
     new Set(),
   ); // Track which AI players have finished
+  const [playerFinished, setPlayerFinished] = useState<boolean>(false); // Track if human player has finished
 
   // Flying card animations
   const [flyingCards, setFlyingCards] = useState<FlyingCardData[]>([]);
@@ -192,6 +197,8 @@ export default function GamePage() {
     setRunningCount,
     setShoesDealt,
     setInsuranceOffered,
+    setActivePlayerIndex,
+    setPlayerFinished,
     dealCardFromShoe,
     registerTimeout,
     getCardPosition: (
@@ -205,6 +212,12 @@ export default function GamePage() {
     showEndOfHandReactions,
     addDebugLog,
   });
+
+  // Calculate true count for bet tracking
+  const decksRemaining = calculateDecksRemaining(gameSettings.numberOfDecks * 52, cardsDealt);
+  const trueCount = decksRemaining > 0
+    ? calculateTrueCount(runningCount, decksRemaining)
+    : 0;
 
   // Betting actions hook
   const { handleConfirmBet, handleClearBet, handleBetChange } =
@@ -226,8 +239,36 @@ export default function GamePage() {
       setSpeechBubbles,
       setAIPlayers,
       dealInitialCards,
+      registerTimeout,
       addDebugLog,
+      trueCount,
+      setBetHistory,
     });
+
+  // Detect if player is counting cards (varying bet with count)
+  // Check correlation between bet size and true count over last 10 hands
+  const isPlayerCounting = betHistory.length >= 5 && (() => {
+    // Calculate correlation between bets and true counts
+    const avgBet = betHistory.reduce((sum, h) => sum + h.bet, 0) / betHistory.length;
+    const avgCount = betHistory.reduce((sum, h) => sum + h.trueCount, 0) / betHistory.length;
+
+    let correlation = 0;
+    for (const hand of betHistory) {
+      const betDiff = hand.bet - avgBet;
+      const countDiff = hand.trueCount - avgCount;
+      correlation += betDiff * countDiff;
+    }
+
+    // Positive correlation > threshold = counting
+    // If player consistently bets more when count is higher, they're counting
+    const isCorrelated = correlation > (minBet * betHistory.length * 0.5);
+
+    if (isCorrelated) {
+      addDebugLog(`Player IS counting (correlation: ${correlation.toFixed(2)})`);
+    }
+
+    return isCorrelated;
+  })();
 
   // Conversation handlers hook
   const { handleConversationResponse, handleConversationIgnore } =
@@ -236,8 +277,12 @@ export default function GamePage() {
       setActiveConversation,
       setSuspicionLevel,
       setPlayerSociability,
+      setDealerSuspicion,
       playerSeat,
+      currentDealer,
+      isPlayerCounting,
       addSpeechBubble,
+      addDebugLog,
     });
 
   // Insurance handlers
@@ -275,6 +320,18 @@ export default function GamePage() {
     setSuspicionLevel,
     setPitBossDistance,
     addSpeechBubble,
+  });
+
+  // Wonging detection hook - detects betting high count / sitting out low count
+  useWongingDetection({
+    handNumber,
+    playerSeat,
+    playerBet: currentBet,
+    trueCount,
+    currentDealer,
+    initialized,
+    phase,
+    setDealerSuspicion,
   });
 
   // Dealer change hook
@@ -333,6 +390,8 @@ export default function GamePage() {
     setAIPlayers,
     aiPlayers,
     dealInitialCards,
+    addSpeechBubble,
+    registerTimeout,
   });
 
   // Log betting interface visibility conditions
@@ -353,6 +412,9 @@ export default function GamePage() {
     dealerHand,
     activePlayerIndex,
     playersFinished,
+    playerSeat,
+    playerHand,
+    playerFinished,
     setActivePlayerIndex,
     setPlayersFinished,
     setPlayerActions,
@@ -402,7 +464,20 @@ export default function GamePage() {
     setPhase("BETTING");
     setSpeechBubbles([]); // Clear speech bubbles from previous hand
     clearDebugLogs(); // Clear debug logs at start of new hand
-  }, [clearDebugLogs]);
+
+    // Clear cards from previous hand
+    setPlayerHand({ cards: [], bet: 0 });
+    setDealerHand({ cards: [], bet: 0 });
+    setCurrentBet(0);
+    setDealerRevealed(false);
+    setPlayerFinished(false);
+
+    // Clear AI player cards
+    setAIPlayers(prev => prev.map(ai => ({
+      ...ai,
+      hand: { cards: [], bet: 0 }
+    })));
+  }, [clearDebugLogs, setPlayerHand, setDealerHand, setCurrentBet, setDealerRevealed, setPlayerFinished, setAIPlayers]);
 
   // Round end phase hook
   useRoundEndPhase({
@@ -471,6 +546,7 @@ export default function GamePage() {
     setPhase,
     registerTimeout,
     showEndOfHandReactions,
+    addSpeechBubble,
     addDebugLog,
   });
 
@@ -494,6 +570,7 @@ export default function GamePage() {
       aiPlayers={aiPlayers}
       playerSeat={playerSeat}
       playerHand={playerHand}
+      playerFinished={playerFinished}
       currentBet={currentBet}
       activePlayerIndex={activePlayerIndex}
       playerActions={playerActions}

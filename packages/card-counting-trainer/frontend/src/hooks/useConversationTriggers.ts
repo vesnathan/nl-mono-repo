@@ -66,7 +66,7 @@ export function useConversationTriggers({
             randomAI.position,
           );
         } else if (currentDealer) {
-          const dealerPosition = 3;
+          const dealerPosition = -1; // -1 indicates dealer position
           triggerConversation("dealer", currentDealer.name, dealerPosition);
         }
       },
