@@ -226,16 +226,6 @@ export default function SuspicionMeter({
               {dealerSuspicion}%
             </div>
           </div>
-          <div
-            style={{
-              fontSize: "10px",
-              color: "#999",
-              marginTop: "4px",
-              fontStyle: "italic",
-            }}
-          >
-            {currentDealer.name} ({currentDealer.personality})
-          </div>
         </div>
       )}
 
