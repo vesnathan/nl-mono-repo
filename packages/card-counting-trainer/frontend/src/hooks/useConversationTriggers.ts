@@ -91,24 +91,29 @@ export function useConversationTriggers({
 
     const conversationInterval = setInterval(
       () => {
-        // 15% chance for AI-to-AI conversation
-        if (Math.random() < 0.15 && aiPlayers.length >= 2) {
-          const conversation = getRandomAIConversation();
+        // 30% chance for AI-to-AI conversation (increased from 15% for better visibility)
+        if (Math.random() < 0.30 && aiPlayers.length >= 2) {
+          const conversation = getRandomAIConversation(aiPlayers);
 
-          // Play out the conversation turns with timing
-          conversation.forEach((turn, index) => {
-            setTimeout(() => {
-              // Find the AI player with this characterId
-              const speaker = aiPlayers.find(ai => ai.character.id === turn.characterId);
-              if (speaker) {
-                addSpeechBubble(
-                  `ai-conversation-${Date.now()}-${index}`,
-                  turn.text,
-                  speaker.position,
+          // Only proceed if we got a valid conversation (all participants are at table)
+          if (conversation) {
+            // Play out the conversation turns with timing
+            conversation.forEach((turn, index) => {
+              setTimeout(() => {
+                // Find the AI player with this characterId
+                const speaker = aiPlayers.find(
+                  (ai) => ai.character.id === turn.characterId,
                 );
-              }
-            }, index * 3500); // 3.5 seconds between conversation turns
-          });
+                if (speaker) {
+                  addSpeechBubble(
+                    `ai-conversation-${Date.now()}-${index}`,
+                    turn.text,
+                    speaker.position,
+                  );
+                }
+              }, index * 3500); // 3.5 seconds between conversation turns
+            });
+          }
         }
         // 10% chance for simple banter (fallback)
         else if (Math.random() < 0.10) {
@@ -129,7 +134,7 @@ export function useConversationTriggers({
           }
         }
       },
-      20000 + Math.random() * 15000, // Every 20-35 seconds
+      15000 + Math.random() * 10000, // Every 15-25 seconds (increased frequency)
     );
 
     return () => clearInterval(conversationInterval);

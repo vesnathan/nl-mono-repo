@@ -223,10 +223,43 @@ export const AI_TO_AI_CONVERSATIONS: ConversationTurn[][] = [
 ];
 
 /**
- * Helper to get random AI-to-AI conversation
+ * Helper to get random AI-to-AI conversation that includes only characters currently at the table
+ * @param aiPlayers - Array of AI players currently seated at the table
+ * @returns A random conversation where all participants are at the table, or null if none available
  */
-export function getRandomAIConversation(): ConversationTurn[] {
-  return AI_TO_AI_CONVERSATIONS[
-    Math.floor(Math.random() * AI_TO_AI_CONVERSATIONS.length)
+export function getRandomAIConversation(
+  aiPlayers?: Array<{ character: { id: string } }>,
+): ConversationTurn[] | null {
+  // If no aiPlayers provided, return random conversation (for backward compatibility)
+  if (!aiPlayers) {
+    return AI_TO_AI_CONVERSATIONS[
+      Math.floor(Math.random() * AI_TO_AI_CONVERSATIONS.length)
+    ];
+  }
+
+  // Get set of character IDs currently at the table
+  const seatedCharacterIds = new Set(aiPlayers.map((ai) => ai.character.id));
+
+  // Filter conversations where ALL participants are at the table
+  const availableConversations = AI_TO_AI_CONVERSATIONS.filter(
+    (conversation) => {
+      const participantIds = new Set(
+        conversation.map((turn) => turn.characterId),
+      );
+      // Check if all participants are seated
+      return Array.from(participantIds).every((id) =>
+        seatedCharacterIds.has(id),
+      );
+    },
+  );
+
+  // Return null if no valid conversations
+  if (availableConversations.length === 0) {
+    return null;
+  }
+
+  // Return random conversation from available ones
+  return availableConversations[
+    Math.floor(Math.random() * availableConversations.length)
   ];
 }
