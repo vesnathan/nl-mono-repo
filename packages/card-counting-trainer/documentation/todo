@@ -6,8 +6,10 @@
 - [x] player comments need to stay up for longer
 - [x] Player reaction comments when they bust need to happen when they bust, not at the end of the shoe. Also as soon as BJ is dealt if they have a comment for blackjack.
 - [x] pit boss attention, distance, needs to work with the dealer personality. It will be the dealer that alerts the pit boss to a counter. Also add some dealer comments saying to the player, "Counting boss? Don't worry, I got you!" etc depending on the dealers personality. Should we also have a dealer suspicion as well as pit boss attention?
-- [ ] a heat map that shows where the pit boss is when the count is high. this will indicate whether the player is being discreet. Under a charts button.
-- [ ] I don't like the styling of the leaderboard, settings modals
+- [x] a heat map that shows where the pit boss is when the count is high. this will indicate whether the player is being discreet. Under a charts button.
+- [x] I don't like the styling of the leaderboard, settings modals
+- [x] When AI peeks and wins, players don't say anything.
+- [x] Need to show bet minimun on table. No max.
 
 
 ## High Priority - MVP Features (Phase 1)
@@ -29,7 +31,6 @@
 ### Count Display Enhancements
 - [x] True count display (shows in practice/timed modes)
 - [x] Deck penetration indicator (decks remaining calculated)
-- [ ] Cards dealt vs total cards visual
 - [x] Count practice mode (show/hide toggle via training modes)
 
 ### Game Settings UI

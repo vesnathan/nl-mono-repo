@@ -2,6 +2,7 @@ import React from "react";
 import { GameSettings } from "@/types/gameSettings";
 import { GamePhase } from "@/types/gameState";
 import BettingInterface from "@/components/BettingInterface";
+import InsuranceUI from "@/components/InsuranceUI";
 import GameSettingsModal from "@/components/GameSettingsModal";
 import LeaderboardModal from "@/components/LeaderboardModal";
 import BasicStrategyCard from "@/components/BasicStrategyCard";
@@ -19,6 +20,11 @@ interface GameModalsProps {
   handleBetChange: (amount: number) => void;
   handleConfirmBet: () => void;
   handleClearBet: () => void;
+
+  // Insurance
+  insuranceOffered: boolean;
+  handleTakeInsurance: () => void;
+  handleDeclineInsurance: () => void;
 
   // Settings
   showSettings: boolean;
@@ -55,6 +61,9 @@ export default function GameModals({
   handleBetChange,
   handleConfirmBet,
   handleClearBet,
+  insuranceOffered,
+  handleTakeInsurance,
+  handleDeclineInsurance,
   showSettings,
   setShowSettings,
   gameSettings,
@@ -83,6 +92,16 @@ export default function GameModals({
           onBetChange={handleBetChange}
           onConfirmBet={handleConfirmBet}
           onClearBet={handleClearBet}
+        />
+      )}
+
+      {/* Insurance UI - shown during INSURANCE phase when insurance is offered */}
+      {phase === "INSURANCE" && insuranceOffered && playerSeat !== null && (
+        <InsuranceUI
+          currentBet={currentBet}
+          playerChips={playerChips}
+          onTakeInsurance={handleTakeInsurance}
+          onDeclineInsurance={handleDeclineInsurance}
         />
       )}
 

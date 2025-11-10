@@ -4,7 +4,6 @@ import { useState } from "react";
 import {
   GameSettings,
   CountingSystem,
-  TrainingMode,
   BlackjackPayout,
 } from "@/types/gameSettings";
 
@@ -61,7 +60,6 @@ export default function GameSettingsModal({
       dealerHitsSoft17: settings.dealerHitsSoft17,
       blackjackPayout: settings.blackjackPayout,
       countingSystem: settings.countingSystem,
-      trainingMode: settings.trainingMode,
     });
     onClose();
   };
@@ -642,57 +640,6 @@ export default function GameSettingsModal({
                   >
                     {COUNTING_SYSTEMS[system].values}
                   </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Training Mode */}
-          <div style={{ marginBottom: "32px" }}>
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "bold",
-                color: "#FFF",
-                marginBottom: "12px",
-              }}
-            >
-              🎯 Training Mode
-            </h3>
-
-            <div style={{ display: "flex", gap: "8px" }}>
-              {[
-                { value: TrainingMode.PRACTICE, label: "Practice" },
-                { value: TrainingMode.TEST, label: "Test" },
-                { value: TrainingMode.TIMED_CHALLENGE, label: "Timed" },
-              ].map(({ value, label }) => (
-                <button
-                  key={value}
-                  onClick={() =>
-                    setSettings({ ...settings, trainingMode: value })
-                  }
-                  style={{
-                    backgroundColor:
-                      settings.trainingMode === value
-                        ? "#4A90E2"
-                        : "rgba(255, 255, 255, 0.1)",
-                    color: settings.trainingMode === value ? "#FFF" : "#AAA",
-                    border: "2px solid",
-                    borderColor:
-                      settings.trainingMode === value
-                        ? "#FFF"
-                        : "rgba(255, 255, 255, 0.2)",
-                    borderRadius: "8px",
-                    padding: "10px 16px",
-                    fontSize: "13px",
-                    fontWeight:
-                      settings.trainingMode === value ? "bold" : "normal",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    flex: 1,
-                  }}
-                >
-                  {label}
                 </button>
               ))}
             </div>

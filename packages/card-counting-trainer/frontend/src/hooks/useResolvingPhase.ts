@@ -27,6 +27,11 @@ interface UseResolvingPhaseParams {
   previousBet: number;
   cardsDealt: number;
   runningCount: number;
+  playerInsuranceBet: number;
+  setPlayerInsuranceBet: (bet: number) => void;
+  setAIPlayers: (
+    players: AIPlayer[] | ((prev: AIPlayer[]) => AIPlayer[]),
+  ) => void;
   setPlayerChips: (chips: number | ((prev: number) => number)) => void;
   setPlayerHand: (
     hand: PlayerHand | ((prev: PlayerHand) => PlayerHand),
@@ -62,6 +67,9 @@ export function useResolvingPhase({
   previousBet,
   cardsDealt,
   runningCount,
+  playerInsuranceBet,
+  setPlayerInsuranceBet,
+  setAIPlayers,
   setPlayerChips,
   setPlayerHand,
   setPitBossDistance,
@@ -80,6 +88,65 @@ export function useResolvingPhase({
   useEffect(() => {
     if (phase === "RESOLVING" && !hasResolvedRef.current) {
       hasResolvedRef.current = true;
+
+      // Check if dealer has blackjack for insurance payouts
+      const dealerHasBlackjack =
+        dealerHand.cards.length === 2 &&
+        calculateHandValue(dealerHand.cards) === 21;
+
+      if (dealerHasBlackjack) {
+        addDebugLog("=== DEALER HAS BLACKJACK - INSURANCE PAYOUTS ===");
+
+        // Pay player insurance at 2:1
+        if (playerInsuranceBet > 0) {
+          const insurancePayout = playerInsuranceBet * 3; // Get back bet + 2:1 payout
+          addDebugLog(
+            `Player wins insurance: ${playerInsuranceBet} bet pays ${insurancePayout}`,
+          );
+          setPlayerChips((prev) => prev + insurancePayout);
+          setPlayerInsuranceBet(0);
+        } else {
+          addDebugLog("Player did not take insurance");
+        }
+
+        // Pay AI insurance at 2:1
+        setAIPlayers((prevPlayers) => {
+          return prevPlayers.map((ai) => {
+            if (ai.insuranceBet && ai.insuranceBet > 0) {
+              const insurancePayout = ai.insuranceBet * 3;
+              addDebugLog(
+                `AI ${ai.character.name} wins insurance: ${ai.insuranceBet} bet pays ${insurancePayout}`,
+              );
+              return {
+                ...ai,
+                chips: ai.chips + insurancePayout,
+                insuranceBet: 0,
+              };
+            }
+            return { ...ai, insuranceBet: 0 };
+          });
+        });
+      } else {
+        // Dealer doesn't have blackjack - insurance bets are lost
+        if (playerInsuranceBet > 0) {
+          addDebugLog(
+            `Dealer does not have blackjack - player loses insurance bet of ${playerInsuranceBet}`,
+          );
+          setPlayerInsuranceBet(0);
+        }
+
+        // Clear AI insurance bets (already deducted from chips)
+        setAIPlayers((prevPlayers) => {
+          return prevPlayers.map((ai) => {
+            if (ai.insuranceBet && ai.insuranceBet > 0) {
+              addDebugLog(
+                `Dealer does not have blackjack - AI ${ai.character.name} loses insurance bet of ${ai.insuranceBet}`,
+              );
+            }
+            return { ...ai, insuranceBet: 0 };
+          });
+        });
+      }
 
       const playerResult = determineHandResult(playerHand, dealerHand);
       const bjPayoutMultiplier = getBlackjackPayoutMultiplier(
@@ -297,6 +364,9 @@ export function useResolvingPhase({
     previousBet,
     cardsDealt,
     runningCount,
+    playerInsuranceBet,
+    setPlayerInsuranceBet,
+    setAIPlayers,
     setPlayerChips,
     setPlayerHand,
     setPitBossDistance,

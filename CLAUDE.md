@@ -2,8 +2,9 @@
 
 ## Important Notes
 - **DO NOT start dev servers** - They are already running in the background
-- **DO NOT run builds** - Builds take a long time, avoid running them unless absolutely necessary
-- **Type checking**: Use `cd packages/card-counting-trainer/frontend && npx tsc --noEmit` to check for TypeScript errors without building
+- **NEVER BUILD** - DO NOT run `npm run build`, `yarn build`, or any build commands. Builds take too long and background builds are already running.
+- **Type checking**: ALWAYS use `yarn workspace cctfrontend tsc --noEmit` to check for TypeScript errors. This is fast and sufficient.
+- **Testing changes**: The dev server is already running, just check with tsc and test in browser
 
 ## Fixed Issues
 
@@ -34,6 +35,33 @@
   - [page.tsx:345-360](packages/card-counting-trainer/frontend/src/app/page.tsx#L345-L360) - Player positions
   - [page.tsx:363-377](packages/card-counting-trainer/frontend/src/app/page.tsx#L363-L377) - AI player positions
 - **Status**: ✅ Fixed - cards now animate to their exact final positions
+
+## Recent Changes
+
+### Training Modes Removed (Latest)
+- **What**: Removed all training mode functionality (Practice, Test, Timed Challenge)
+- **Why**: User requested to keep only the default mode (always showing running count)
+- **Changed files**:
+  - [gameSettings.ts](packages/card-counting-trainer/frontend/src/types/gameSettings.ts) - Removed TrainingMode enum and related fields
+  - [StatsBar.tsx](packages/card-counting-trainer/frontend/src/components/StatsBar.tsx) - Simplified to always show COUNT, removed timeRemaining
+  - [BlackjackGameUI.tsx](packages/card-counting-trainer/frontend/src/components/BlackjackGameUI.tsx) - Removed timeRemaining prop
+  - [GameSettingsModal.tsx](packages/card-counting-trainer/frontend/src/components/GameSettingsModal.tsx) - Removed training mode selector UI
+  - [page.tsx](packages/card-counting-trainer/frontend/src/app/page.tsx) - Removed useTimedChallenge hook and timeRemaining state
+- **Note**: useTimedChallenge.ts still exists but is unused
+
+### Bet Minimum Display Added
+- **What**: Added "$25 MINIMUM" text to the table rules display
+- **Location**: [TableRules.tsx](packages/card-counting-trainer/frontend/src/components/TableRules.tsx)
+- **Implementation**: Added third curved arc below the existing table rules text
+
+### AI Player Reactions to Dealer Blackjack (Latest)
+- **What**: AI players now react when dealer peeks and reveals blackjack
+- **Problem**: When dealer peeked for blackjack and won, AI players remained silent
+- **Fix**: Added `showEndOfHandReactions()` call when dealer reveals blackjack after peeking
+- **Changes**:
+  - [useGameActions.ts](packages/card-counting-trainer/frontend/src/hooks/useGameActions.ts#L372-L374) - Call showEndOfHandReactions() with 500ms delay
+  - [page.tsx](packages/card-counting-trainer/frontend/src/app/page.tsx#L199) - Pass showEndOfHandReactions to useGameActions
+- **Result**: AI players now show appropriate loss reactions when dealer gets blackjack
 
 ## Recent Commits
 

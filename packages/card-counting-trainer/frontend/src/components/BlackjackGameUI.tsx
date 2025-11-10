@@ -24,7 +24,6 @@ interface BlackjackGameUIProps {
   pitBossDistance: number;
   gameSettings: GameSettings;
   runningCount: number;
-  timeRemaining: number;
   currentStreak: number;
   playerChips: number;
   currentScore: number;
@@ -68,6 +67,11 @@ interface BlackjackGameUIProps {
   debugLogs: string[];
   showDebugLog: boolean;
 
+  // Insurance
+  insuranceOffered: boolean;
+  handleTakeInsurance: () => void;
+  handleDeclineInsurance: () => void;
+
   // Actions
   setShowSettings: (show: boolean) => void;
   setShowLeaderboard: (show: boolean) => void;
@@ -96,7 +100,6 @@ export default function BlackjackGameUI({
   pitBossDistance,
   gameSettings,
   runningCount,
-  timeRemaining,
   currentStreak,
   playerChips,
   currentScore,
@@ -132,6 +135,9 @@ export default function BlackjackGameUI({
   heatMapDataPointCount,
   debugLogs,
   showDebugLog,
+  insuranceOffered,
+  handleTakeInsurance,
+  handleDeclineInsurance,
   setShowSettings,
   setShowLeaderboard,
   setShowStrategyCard,
@@ -175,7 +181,6 @@ export default function BlackjackGameUI({
       <StatsBar
         gameSettings={gameSettings}
         runningCount={runningCount}
-        timeRemaining={timeRemaining}
         currentStreak={currentStreak}
         playerChips={playerChips}
         currentScore={currentScore}
@@ -229,6 +234,9 @@ export default function BlackjackGameUI({
         handleBetChange={handleBetChange}
         handleConfirmBet={handleConfirmBet}
         handleClearBet={handleClearBet}
+        insuranceOffered={insuranceOffered}
+        handleTakeInsurance={handleTakeInsurance}
+        handleDeclineInsurance={handleDeclineInsurance}
         showSettings={showSettings}
         setShowSettings={setShowSettings}
         gameSettings={gameSettings}

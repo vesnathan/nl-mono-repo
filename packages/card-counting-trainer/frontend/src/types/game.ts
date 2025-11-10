@@ -44,6 +44,7 @@ export interface Player {
 export type GamePhase =
   | "BETTING"
   | "DEALING"
+  | "INSURANCE"
   | "PLAYER_TURN"
   | "DEALER_TURN"
   | "RESOLVING"

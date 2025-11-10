@@ -25,7 +25,6 @@ import { useSuspicionDecay } from "@/hooks/useSuspicionDecay";
 import { useDealerSuspicion } from "@/hooks/useDealerSuspicion";
 import { useDealerChange } from "@/hooks/useDealerChange";
 import { useGameInitialization } from "@/hooks/useGameInitialization";
-import { useTimedChallenge } from "@/hooks/useTimedChallenge";
 import { useConversationTriggers } from "@/hooks/useConversationTriggers";
 import { usePitBossMovement } from "@/hooks/usePitBossMovement";
 import { useAutoStartHand } from "@/hooks/useAutoStartHand";
@@ -35,6 +34,7 @@ import { useDealerTurnPhase } from "@/hooks/useDealerTurnPhase";
 import { useResolvingPhase } from "@/hooks/useResolvingPhase";
 import { useAITurnsPhase } from "@/hooks/useAITurnsPhase";
 import { useDealingPhase } from "@/hooks/useDealingPhase";
+import { useInsurancePhase } from "@/hooks/useInsurancePhase";
 import { useHeatMap } from "@/hooks/useHeatMap";
 import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
 import BlackjackGameUI from "@/components/BlackjackGameUI";
@@ -101,6 +101,10 @@ export default function GamePage() {
     () => Math.floor(Math.random() * 3) + 8,
   ); // 8-10 shoes
 
+  // Insurance state
+  const [playerInsuranceBet, setPlayerInsuranceBet] = useState(0);
+  const [insuranceOffered, setInsuranceOffered] = useState(false);
+
   // UI state
   const [phase, setPhase] = useState<GamePhase>("BETTING");
   const [suspicionLevel, setSuspicionLevel] = useState(0); // Pit boss attention (0-100)
@@ -136,10 +140,6 @@ export default function GamePage() {
 
   // Dealer callouts
   const [dealerCallout, setDealerCallout] = useState<string | null>(null);
-
-  // Timed challenge mode
-  const [timeRemaining, setTimeRemaining] = useState(300); // 5 minutes in seconds
-  const [timedChallengeActive, setTimedChallengeActive] = useState(false);
 
   // Track previous hand states for in-hand reactions
   // const prevAIHandsRef = useRef<Map<string, number>>(new Map()); // TODO: Use for reaction tracking
@@ -191,6 +191,7 @@ export default function GamePage() {
     setCardsDealt,
     setRunningCount,
     setShoesDealt,
+    setInsuranceOffered,
     dealCardFromShoe,
     registerTimeout,
     getCardPosition: (
@@ -201,6 +202,7 @@ export default function GamePage() {
       cardIndex?: number,
     ) => getCardPosition(type, aiPlayers, playerSeat, index, cardIndex),
     addSpeechBubble,
+    showEndOfHandReactions,
     addDebugLog,
   });
 
@@ -238,6 +240,27 @@ export default function GamePage() {
       addSpeechBubble,
     });
 
+  // Insurance handlers
+  const handleTakeInsurance = useCallback(() => {
+    const insuranceCost = Math.floor(currentBet / 2);
+    addDebugLog(`=== PLAYER TAKES INSURANCE for $${insuranceCost} ===`);
+
+    if (playerChips >= insuranceCost) {
+      setPlayerInsuranceBet(insuranceCost);
+      setPlayerChips(playerChips - insuranceCost);
+      setInsuranceOffered(false);
+      addDebugLog(`Player chips after insurance: $${playerChips - insuranceCost}`);
+    } else {
+      addDebugLog("Player cannot afford insurance!");
+    }
+  }, [currentBet, playerChips, setPlayerChips, setPlayerInsuranceBet, setInsuranceOffered, addDebugLog]);
+
+  const handleDeclineInsurance = useCallback(() => {
+    addDebugLog("=== PLAYER DECLINES INSURANCE ===");
+    setPlayerInsuranceBet(0);
+    setInsuranceOffered(false);
+  }, [setPlayerInsuranceBet, setInsuranceOffered, addDebugLog]);
+
   // Suspicion decay hook
   useSuspicionDecay(suspicionLevel, setSuspicionLevel);
 
@@ -264,15 +287,6 @@ export default function GamePage() {
 
   // Game initialization hook
   useGameInitialization(setAIPlayers, setCurrentDealer, setInitialized);
-
-  // Timed challenge hook
-  useTimedChallenge(
-    gameSettings.trainingMode,
-    timedChallengeActive,
-    setTimedChallengeActive,
-    timeRemaining,
-    setTimeRemaining,
-  );
 
   // Conversation triggers hook
   useConversationTriggers({
@@ -367,6 +381,21 @@ export default function GamePage() {
     addDebugLog,
   });
 
+  // Insurance phase hook - handles insurance decisions
+  useInsurancePhase({
+    phase,
+    gameSettings,
+    insuranceOffered,
+    setInsuranceOffered,
+    aiPlayers,
+    setAIPlayers,
+    playerSeat,
+    playerInsuranceBet,
+    setPhase,
+    registerTimeout,
+    addDebugLog,
+  });
+
   // Next hand
   const nextHand = useCallback(() => {
     setHandNumber((prev) => prev + 1);
@@ -428,6 +457,9 @@ export default function GamePage() {
     previousBet,
     cardsDealt,
     runningCount,
+    playerInsuranceBet,
+    setPlayerInsuranceBet,
+    setAIPlayers,
     setPlayerChips,
     setPlayerHand,
     setPitBossDistance,
@@ -449,7 +481,6 @@ export default function GamePage() {
       pitBossDistance={pitBossDistance}
       gameSettings={gameSettings}
       runningCount={runningCount}
-      timeRemaining={timeRemaining}
       currentStreak={currentStreak}
       playerChips={playerChips}
       currentScore={currentScore}
@@ -485,6 +516,9 @@ export default function GamePage() {
       heatMapDataPointCount={dataPointCount}
       debugLogs={debugLogs}
       showDebugLog={showDebugLog}
+      insuranceOffered={insuranceOffered}
+      handleTakeInsurance={handleTakeInsurance}
+      handleDeclineInsurance={handleDeclineInsurance}
       setShowSettings={setShowSettings}
       setShowLeaderboard={setShowLeaderboard}
       setShowStrategyCard={setShowStrategyCard}

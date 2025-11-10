@@ -1,9 +1,8 @@
-import { GameSettings, TrainingMode } from "@/types/gameSettings";
+import { GameSettings } from "@/types/gameSettings";
 
 interface StatsBarProps {
   gameSettings: GameSettings;
   runningCount: number;
-  timeRemaining: number;
   currentStreak: number;
   playerChips: number;
   currentScore: number;
@@ -17,7 +16,6 @@ interface StatsBarProps {
 export default function StatsBar({
   gameSettings,
   runningCount,
-  timeRemaining,
   currentStreak,
   playerChips,
   currentScore,
@@ -27,11 +25,6 @@ export default function StatsBar({
   onStrategyClick,
   onChartsClick,
 }: StatsBarProps) {
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
 
   return (
     <div
@@ -50,92 +43,24 @@ export default function StatsBar({
       }}
     >
       <div className="flex gap-3 items-center">
-        {gameSettings.trainingMode === TrainingMode.PRACTICE && (
-          <div
-            style={{
-              backgroundColor: "rgba(0, 0, 0, 0.8)",
-              color: "#FFF",
-              border: "2px solid #FFD700",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              width: "150px",
-              textAlign: "center",
-            }}
-          >
-            COUNT:{" "}
-            <span style={{ color: "#FFD700" }}>
-              {runningCount >= 0 ? `+${runningCount}` : runningCount}
-            </span>
-          </div>
-        )}
-        {gameSettings.trainingMode === TrainingMode.TEST && (
-          <div
-            style={{
-              backgroundColor: "rgba(0, 0, 0, 0.8)",
-              color: "#FF6B6B",
-              border: "2px solid #FF6B6B",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              width: "150px",
-              textAlign: "center",
-            }}
-          >
-            🧪 TEST MODE
-          </div>
-        )}
-        {gameSettings.trainingMode === TrainingMode.TIMED_CHALLENGE && (
-          <>
-            <div
-              style={{
-                backgroundColor: "rgba(0, 0, 0, 0.8)",
-                color: "#FFF",
-                border: "2px solid #FFD700",
-                borderRadius: "8px",
-                padding: "6px 12px",
-                fontSize: "14px",
-                fontWeight: "bold",
-                width: "150px",
-                textAlign: "center",
-              }}
-            >
-              COUNT:{" "}
-              <span style={{ color: "#FFD700" }}>
-                {runningCount >= 0 ? `+${runningCount}` : runningCount}
-              </span>
-            </div>
-            <div
-              style={{
-                backgroundColor: "rgba(0, 0, 0, 0.8)",
-                color: "#FFF",
-                border: `2px solid ${timeRemaining < 60 ? "#FF6B6B" : timeRemaining < 180 ? "#FFD700" : "#4CAF50"}`,
-                borderRadius: "8px",
-                padding: "6px 12px",
-                fontSize: "14px",
-                fontWeight: "bold",
-                width: "150px",
-                textAlign: "center",
-              }}
-            >
-              ⏱️ TIME:{" "}
-              <span
-                style={{
-                  color:
-                    timeRemaining < 60
-                      ? "#FF6B6B"
-                      : timeRemaining < 180
-                        ? "#FFD700"
-                        : "#4CAF50",
-                }}
-              >
-                {formatTime(timeRemaining)}
-              </span>
-            </div>
-          </>
-        )}
+        <div
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            color: "#FFF",
+            border: "2px solid #FFD700",
+            borderRadius: "8px",
+            padding: "6px 12px",
+            fontSize: "14px",
+            fontWeight: "bold",
+            width: "150px",
+            textAlign: "center",
+          }}
+        >
+          COUNT:{" "}
+          <span style={{ color: "#FFD700" }}>
+            {runningCount >= 0 ? `+${runningCount}` : runningCount}
+          </span>
+        </div>
         <div
           style={{
             backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -172,26 +97,24 @@ export default function StatsBar({
             ${playerChips.toLocaleString()}
           </span>
         </div>
-        {gameSettings.trainingMode !== TrainingMode.TEST && (
-          <div
-            style={{
-              backgroundColor: "rgba(0, 0, 0, 0.8)",
-              color: "#9C27B0",
-              border: "2px solid #9C27B0",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              width: "150px",
-              textAlign: "center",
-            }}
-          >
-            SCORE:{" "}
-            <span style={{ color: "#FFF" }}>
-              {currentScore.toLocaleString()}
-            </span>
-          </div>
-        )}
+        <div
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            color: "#9C27B0",
+            border: "2px solid #9C27B0",
+            borderRadius: "8px",
+            padding: "6px 12px",
+            fontSize: "14px",
+            fontWeight: "bold",
+            width: "150px",
+            textAlign: "center",
+          }}
+        >
+          SCORE:{" "}
+          <span style={{ color: "#FFF" }}>
+            {currentScore.toLocaleString()}
+          </span>
+        </div>
       </div>
       <div className="flex gap-4 items-center">
         <button

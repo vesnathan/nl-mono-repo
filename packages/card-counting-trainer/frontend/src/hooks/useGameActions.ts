@@ -64,6 +64,7 @@ interface UseGameActionsParams {
   setCardsDealt: (cards: number) => void;
   setRunningCount: (count: number) => void;
   setShoesDealt: (shoes: number) => void;
+  setInsuranceOffered: (offered: boolean) => void;
 
   // Functions
   dealCardFromShoe: () => GameCard;
@@ -76,6 +77,7 @@ interface UseGameActionsParams {
     cardIndex?: number,
   ) => { left: string; top: string };
   addSpeechBubble: (playerId: string, message: string, position: number) => void;
+  showEndOfHandReactions: () => void;
   addDebugLog: (message: string) => void;
 }
 
@@ -105,10 +107,12 @@ export function useGameActions({
   setCardsDealt,
   setRunningCount,
   setShoesDealt,
+  setInsuranceOffered,
   dealCardFromShoe,
   registerTimeout,
   getCardPosition,
   addSpeechBubble,
+  showEndOfHandReactions,
   addDebugLog,
 }: UseGameActionsParams) {
   const startNewRound = useCallback(() => {
@@ -339,7 +343,7 @@ export function useGameActions({
       delay += CARD_ANIMATION_DURATION + 200; // Stagger cards with 200ms gap
     });
 
-    // After all cards are dealt, check for dealer blackjack and transition phase
+    // After all cards are dealt, check for insurance and dealer blackjack
     registerTimeout(
       () => {
         addDebugLog("All cards dealt and animations complete");
@@ -349,8 +353,23 @@ export function useGameActions({
         const dealerUpCard = dealerCard1;
         const canHaveBlackjack = dealerUpCard.rank === "A" || dealerUpCard.value === 10;
 
+        // Offer insurance if enabled and dealer shows Ace
+        const shouldOfferInsurance =
+          gameSettings.insuranceAvailable && dealerUpCard.rank === "A";
+
+        if (shouldOfferInsurance) {
+          addDebugLog("Dealer showing Ace - OFFERING INSURANCE");
+          setInsuranceOffered(true);
+          setPhase("INSURANCE");
+          // Insurance phase hook will handle the flow
+          return;
+        }
+
         if (shouldPeek && canHaveBlackjack) {
           // Show "Peeking..." callout
+          addDebugLog(
+            `Dealer showing ${dealerUpCard.rank} - checking for blackjack...`,
+          );
           setDealerCallout("Peeking...");
 
           registerTimeout(() => {
@@ -365,6 +384,11 @@ export function useGameActions({
               );
               setDealerRevealed(true);
               setDealerCallout("Blackjack!");
+
+              // Trigger AI player reactions to dealer blackjack
+              registerTimeout(() => {
+                showEndOfHandReactions();
+              }, 500);
 
               // Skip player turn and AI turns, go straight to resolving
               registerTimeout(() => {
@@ -412,6 +436,8 @@ export function useGameActions({
     shoesDealt,
     gameSettings.numberOfDecks,
     gameSettings.countingSystem,
+    gameSettings.insuranceAvailable,
+    gameSettings.dealerPeekRule,
     registerTimeout,
     playerSeat,
     getCardPosition,
@@ -421,12 +447,15 @@ export function useGameActions({
     setCardsDealt,
     setRunningCount,
     setShoesDealt,
+    setInsuranceOffered,
     setFlyingCards,
     setDealerHand,
     setPlayerHand,
     setAIPlayers,
     setDealerRevealed,
     setPhase,
+    setDealerCallout,
+    showEndOfHandReactions,
   ]);
 
   const hit = useCallback(() => {

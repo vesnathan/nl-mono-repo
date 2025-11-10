@@ -18,6 +18,7 @@ export interface AIPlayer {
   hand: PlayerHand;
   chips: number;
   position: number; // Seat position (0-7)
+  insuranceBet?: number; // Insurance bet amount (if taken)
 }
 
 /**
@@ -72,6 +73,7 @@ export interface FlyingCardData {
 export type GamePhase =
   | "BETTING" // Players placing bets
   | "DEALING" // Initial cards being dealt
+  | "INSURANCE" // Offering insurance when dealer shows Ace
   | "PLAYER_TURN" // Human player's turn (if seated)
   | "AI_TURNS" // AI players taking their turns
   | "DEALER_TURN" // Dealer playing their hand

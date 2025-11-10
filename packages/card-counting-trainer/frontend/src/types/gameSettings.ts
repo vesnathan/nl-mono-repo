@@ -31,18 +31,6 @@ export enum CountingSystem {
   OMEGA_II = "OMEGA_II",
 }
 
-export enum TrainingMode {
-  PRACTICE = "PRACTICE",
-  TEST = "TEST",
-  TIMED_CHALLENGE = "TIMED_CHALLENGE",
-}
-
-export enum StrategyHintLevel {
-  NONE = "NONE",
-  AFTER_MISTAKE = "AFTER_MISTAKE",
-  ALWAYS = "ALWAYS",
-}
-
 export interface GameSettings {
   // Deck Configuration
   numberOfDecks: number; // 1, 2, 4, 6, 8
@@ -70,13 +58,6 @@ export interface GameSettings {
   // Counting System
   countingSystem: CountingSystem;
   sideCountAces: boolean;
-
-  // Training Configuration
-  trainingMode: TrainingMode;
-  cardSpeed: number; // seconds per card
-  showTrueCount: boolean;
-  showBettingHints: boolean;
-  strategyHints: StrategyHintLevel;
 }
 
 /**
@@ -109,13 +90,6 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   // Counting System
   countingSystem: CountingSystem.HI_LO,
   sideCountAces: false,
-
-  // Training Configuration
-  trainingMode: TrainingMode.PRACTICE,
-  cardSpeed: 1.0, // 1 second per card
-  showTrueCount: true,
-  showBettingHints: true,
-  strategyHints: StrategyHintLevel.AFTER_MISTAKE,
 };
 
 /**

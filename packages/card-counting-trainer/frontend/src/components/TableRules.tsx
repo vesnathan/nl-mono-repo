@@ -1,5 +1,5 @@
 import React from "react";
-import { GameSettings, DealerPeekRule, BlackjackPayout } from "@/types/gameSettings";
+import { GameSettings, DealerPeekRule, BlackjackPayout, CountingSystem } from "@/types/gameSettings";
 
 interface TableRulesProps {
   gameSettings: GameSettings;
@@ -34,8 +34,27 @@ export default function TableRules({ gameSettings }: TableRulesProps) {
     }
   };
 
+  const getCountingSystemText = (system: CountingSystem): string => {
+    switch (system) {
+      case CountingSystem.HI_LO:
+        return "Hi-Lo Count";
+      case CountingSystem.KO:
+        return "KO Count";
+      case CountingSystem.HI_OPT_I:
+        return "Hi-Opt I Count";
+      case CountingSystem.HI_OPT_II:
+        return "Hi-Opt II Count";
+      case CountingSystem.OMEGA_II:
+        return "Omega II Count";
+      default:
+        return "Hi-Lo Count";
+    }
+  };
+
   const mainText = `BLACKJACK PAYS ${getPayoutText(gameSettings.blackjackPayout)}`;
   const subText = `Dealer ${gameSettings.dealerHitsSoft17 ? "Hits" : "Stands"} Soft 17 • ${getPeekRuleText(gameSettings.dealerPeekRule)} • ${gameSettings.numberOfDecks} Deck${gameSettings.numberOfDecks > 1 ? "s" : ""}${gameSettings.insuranceAvailable ? " • Insurance Available" : ""}`;
+  const minBetText = "$25 MINIMUM";
+  const countingSystemText = getCountingSystemText(gameSettings.countingSystem);
 
   return (
     <svg
@@ -63,6 +82,18 @@ export default function TableRules({ gameSettings }: TableRulesProps) {
         <path
           id="subTextArc"
           d="M 100,130 Q 600,75 1100,130"
+          fill="transparent"
+        />
+        {/* Arc path for minimum bet - curves upward below subtitle */}
+        <path
+          id="minBetArc"
+          d="M 100,155 Q 600,105 1100,155"
+          fill="transparent"
+        />
+        {/* Arc path for counting system - curves upward below minimum bet */}
+        <path
+          id="countingSystemArc"
+          d="M 100,175 Q 600,130 1100,175"
           fill="transparent"
         />
       </defs>
@@ -96,6 +127,38 @@ export default function TableRules({ gameSettings }: TableRulesProps) {
       >
         <textPath href="#subTextArc" startOffset="50%" textAnchor="middle">
           {subText}
+        </textPath>
+      </text>
+
+      {/* Minimum bet text */}
+      <text
+        fontFamily="serif"
+        fontSize="18"
+        fontWeight="bold"
+        fill="rgba(255, 215, 0, 0.30)"
+        letterSpacing="2"
+        style={{
+          filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
+        }}
+      >
+        <textPath href="#minBetArc" startOffset="50%" textAnchor="middle">
+          {minBetText}
+        </textPath>
+      </text>
+
+      {/* Counting system text */}
+      <text
+        fontFamily="serif"
+        fontSize="16"
+        fontWeight="bold"
+        fill="rgba(255, 215, 0, 0.25)"
+        letterSpacing="2"
+        style={{
+          filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
+        }}
+      >
+        <textPath href="#countingSystemArc" startOffset="50%" textAnchor="middle">
+          {countingSystemText}
         </textPath>
       </text>
     </svg>
