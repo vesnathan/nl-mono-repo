@@ -1,6 +1,6 @@
 import { AIPlayer, PlayerHand } from "@/types/gameState";
 import { calculateHandValue, isBlackjack } from "@/lib/gameActions";
-import { getInitialHandReaction } from "@/data/inHandReactions";
+import { getInitialHandReaction } from "@/data/dialogue";
 import { determineHandResult, calculatePayout } from "@/lib/dealer";
 import {
   getBlackjackPayoutMultiplier,
