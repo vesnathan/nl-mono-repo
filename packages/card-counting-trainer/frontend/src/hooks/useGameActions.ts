@@ -7,9 +7,10 @@ import {
 } from "@/types/gameState";
 import { Card as GameCard } from "@/types/game";
 import { DealerCharacter } from "@/data/dealerCharacters";
-import { dealCard, calculateHandValue } from "@/lib/gameActions";
+import { dealCard, calculateHandValue, isBlackjack } from "@/lib/gameActions";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 import { GameSettings } from "@/types/gameSettings";
+import { getInitialHandReaction } from "@/data/dialogue";
 
 // Module-level counter for unique card IDs
 let cardIdCounter = 0;
@@ -74,6 +75,7 @@ interface UseGameActionsParams {
     index?: number,
     cardIndex?: number,
   ) => { left: string; top: string };
+  addSpeechBubble: (playerId: string, message: string, position: number) => void;
   addDebugLog: (message: string) => void;
 }
 
@@ -106,6 +108,7 @@ export function useGameActions({
   dealCardFromShoe,
   registerTimeout,
   getCardPosition,
+  addSpeechBubble,
   addDebugLog,
 }: UseGameActionsParams) {
   const startNewRound = useCallback(() => {
@@ -300,6 +303,35 @@ export function useGameActions({
               };
               return updated;
             });
+
+            // Show initial reaction after AI receives their second card
+            if (dealData.cardIndex === 1) {
+              registerTimeout(() => {
+                const ai = aiPlayers[dealData.index];
+                // Get the two cards this AI has now
+                const firstCard = dealtCards.find(
+                  (d) => d.type === "ai" && d.index === dealData.index && d.cardIndex === 0
+                )?.card;
+
+                if (firstCard) {
+                  const twoCards = [firstCard, dealData.card];
+                  const handValue = calculateHandValue(twoCards);
+                  const hasBlackjack = isBlackjack(twoCards);
+                  const dealerUpCard = dealerCard1;
+
+                  const reaction = getInitialHandReaction(
+                    ai.character,
+                    handValue,
+                    hasBlackjack,
+                    dealerUpCard
+                  );
+
+                  if (reaction) {
+                    addSpeechBubble(ai.character.id, reaction, ai.position);
+                  }
+                }
+              }, 800); // Short delay after card arrives
+            }
           }
         }, CARD_ANIMATION_DURATION);
       }, delay);

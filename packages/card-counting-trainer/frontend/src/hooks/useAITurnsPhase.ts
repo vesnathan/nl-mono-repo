@@ -6,8 +6,14 @@ import {
   FlyingCardData,
 } from "@/types/gameState";
 import { Card } from "@/types/game";
-import { calculateHandValue, isBusted } from "@/lib/gameActions";
-import { CHARACTER_DIALOGUE, pick } from "@/data/dialogue";
+import { calculateHandValue, isBusted, isSoftHand } from "@/lib/gameActions";
+import {
+  CHARACTER_DIALOGUE,
+  pick,
+  getRandomSayingForTotal,
+  getRandomSoftHandSaying,
+  getRandomDistraction,
+} from "@/data/dialogue";
 import { shouldHitBasicStrategy } from "@/utils/aiStrategy";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 import { generateBustReaction } from "@/utils/reactions";
@@ -240,16 +246,45 @@ export function useAITurnsPhase({
       );
 
       if (shouldHit && !isBust) {
-        if (Math.random() < 0.15) {
-          const characterDialogue = CHARACTER_DIALOGUE[ai.character.id];
-          const banterLines = characterDialogue?.banterWithPlayer;
+        // Show hand-based dialogue with higher frequency (25%)
+        if (Math.random() < 0.25) {
+          let dialogue: string | null = null;
 
-          if (banterLines && banterLines.length > 0) {
-            const randomBanter = pick(banterLines);
+          // Try to get hand-specific dialogue
+          const isSoft = isSoftHand(ai.hand.cards);
+
+          if (isSoft && ai.hand.cards.length === 2) {
+            // Get soft hand saying (A,2 through A,9)
+            const aceCard = ai.hand.cards.find(c => c.rank === 'A');
+            const otherCard = ai.hand.cards.find(c => c.rank !== 'A');
+            if (aceCard && otherCard && otherCard.rank !== 'A' && otherCard.rank !== '10' && otherCard.rank !== 'J' && otherCard.rank !== 'Q' && otherCard.rank !== 'K') {
+              dialogue = getRandomSoftHandSaying(ai.character.id, otherCard.rank);
+            }
+          }
+
+          // If no soft hand saying, try regular hand total saying
+          if (!dialogue && handValue >= 12 && handValue <= 21) {
+            dialogue = getRandomSayingForTotal(ai.character.id, handValue);
+          }
+
+          // Fallback to distraction (5% chance) or banter
+          if (!dialogue) {
+            if (Math.random() < 0.2) {
+              dialogue = getRandomDistraction(ai.character.id);
+            } else {
+              const characterDialogue = CHARACTER_DIALOGUE[ai.character.id];
+              const banterLines = characterDialogue?.banterWithPlayer;
+              if (banterLines && banterLines.length > 0) {
+                dialogue = pick(banterLines).text;
+              }
+            }
+          }
+
+          if (dialogue) {
             registerTimeout(() => {
               addSpeechBubble(
-                `ai-turn-banter-${idx}-${Date.now()}`,
-                randomBanter.text,
+                `ai-turn-dialogue-${idx}-${Date.now()}`,
+                dialogue!,
                 ai.position,
               );
             }, decisionTime / 2);
@@ -307,7 +342,7 @@ export function useAITurnsPhase({
               addDebugLog(`AI Player ${idx} BUSTED!`);
               addDebugLog(`Marking AI Player ${idx} as FINISHED (busted)`);
 
-              // Generate and show immediate bust reaction
+              // Generate and show bust reaction with delay (after card lands)
               const updatedAI = {
                 ...ai,
                 hand: {
@@ -318,11 +353,13 @@ export function useAITurnsPhase({
               const bustReaction = generateBustReaction(updatedAI);
               if (bustReaction) {
                 addDebugLog(`Showing bust reaction: ${bustReaction.message}`);
-                addSpeechBubble(
-                  `bust-reaction-${idx}-${Date.now()}`,
-                  bustReaction.message,
-                  bustReaction.position,
-                );
+                registerTimeout(() => {
+                  addSpeechBubble(
+                    `bust-reaction-${idx}-${Date.now()}`,
+                    bustReaction.message,
+                    bustReaction.position,
+                  );
+                }, 800); // Delay 800ms after card lands
               }
 
               setPlayersFinished((prev) => new Set(prev).add(idx));
@@ -418,19 +455,44 @@ export function useAITurnsPhase({
 
         setPlayersFinished((prev) => new Set(prev).add(idx));
 
-        if (Math.random() < 0.15) {
-          const characterDialogue = CHARACTER_DIALOGUE[ai.character.id];
-          const banterLines = characterDialogue?.banterWithPlayer;
+        // Show hand-based dialogue when standing (20% chance)
+        if (Math.random() < 0.20) {
+          let dialogue: string | null = null;
 
-          if (banterLines && banterLines.length > 0) {
-            const randomBanter = pick(banterLines);
+          // Try to get hand-specific dialogue
+          const isSoft = isSoftHand(ai.hand.cards);
+
+          if (isSoft && ai.hand.cards.length === 2) {
+            // Get soft hand saying (A,7 through A,9 typically stand)
+            const aceCard = ai.hand.cards.find(c => c.rank === 'A');
+            const otherCard = ai.hand.cards.find(c => c.rank !== 'A');
+            if (aceCard && otherCard && otherCard.rank !== 'A' && otherCard.rank !== '10' && otherCard.rank !== 'J' && otherCard.rank !== 'Q' && otherCard.rank !== 'K') {
+              dialogue = getRandomSoftHandSaying(ai.character.id, otherCard.rank);
+            }
+          }
+
+          // If no soft hand saying, try regular hand total saying
+          if (!dialogue && handValue >= 12 && handValue <= 21) {
+            dialogue = getRandomSayingForTotal(ai.character.id, handValue);
+          }
+
+          // Fallback to banter
+          if (!dialogue) {
+            const characterDialogue = CHARACTER_DIALOGUE[ai.character.id];
+            const banterLines = characterDialogue?.banterWithPlayer;
+            if (banterLines && banterLines.length > 0) {
+              dialogue = pick(banterLines).text;
+            }
+          }
+
+          if (dialogue) {
             registerTimeout(() => {
               addSpeechBubble(
-                `ai-turn-banter-${idx}-${Date.now()}`,
-                randomBanter.text,
+                `ai-stand-dialogue-${idx}-${Date.now()}`,
+                dialogue!,
                 ai.position,
               );
-            }, decisionTime / 2);
+            }, decisionTime + 800); // Delay 800ms after stand decision shows
           }
         }
 

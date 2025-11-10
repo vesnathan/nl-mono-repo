@@ -1,7 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { AIPlayer, ActiveConversation, GamePhase } from "@/types/gameState";
 import { DealerCharacter } from "@/data/dealerCharacters";
-import { getDealerPlayerLine } from "@/data/dialogue";
+import {
+  getDealerPlayerLine,
+  getRandomAIConversation,
+  getPlayerEngagement,
+} from "@/data/dialogue";
 
 interface UseConversationTriggersParams {
   initialized: boolean;
@@ -81,13 +85,33 @@ export function useConversationTriggers({
     playerSociability,
   ]);
 
-  // AI-to-AI and AI-to-Dealer banter (background conversation)
+  // AI-to-AI conversations (multi-turn exchanges)
   useEffect(() => {
-    if (!initialized || phase === "BETTING") return;
+    if (!initialized || phase === "BETTING" || aiPlayers.length < 2) return;
 
-    const banterInterval = setInterval(
+    const conversationInterval = setInterval(
       () => {
-        if (Math.random() < 0.2 && aiPlayers.length >= 2) {
+        // 15% chance for AI-to-AI conversation
+        if (Math.random() < 0.15 && aiPlayers.length >= 2) {
+          const conversation = getRandomAIConversation();
+
+          // Play out the conversation turns with timing
+          conversation.forEach((turn, index) => {
+            setTimeout(() => {
+              // Find the AI player with this characterId
+              const speaker = aiPlayers.find(ai => ai.character.id === turn.characterId);
+              if (speaker) {
+                addSpeechBubble(
+                  `ai-conversation-${Date.now()}-${index}`,
+                  turn.text,
+                  speaker.position,
+                );
+              }
+            }, index * 3500); // 3.5 seconds between conversation turns
+          });
+        }
+        // 10% chance for simple banter (fallback)
+        else if (Math.random() < 0.10) {
           const randomAI =
             aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
 
@@ -105,9 +129,9 @@ export function useConversationTriggers({
           }
         }
       },
-      15000 + Math.random() * 10000,
+      20000 + Math.random() * 15000, // Every 20-35 seconds
     );
 
-    return () => clearInterval(banterInterval);
+    return () => clearInterval(conversationInterval);
   }, [initialized, phase, aiPlayers, addSpeechBubble]);
 }

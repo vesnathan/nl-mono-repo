@@ -63,13 +63,15 @@ export function useGameInteractions({
 
       registerTimeout(() => {
         setSpeechBubbles((prev) => prev.filter((b) => b.id !== bubble.id));
-      }, 12000); // Increased to 12 seconds - speech bubbles stay visible longer
+      }, 5000); // 5 seconds
     },
     [registerTimeout, aiPlayers, addDebugLog, setSpeechBubbles],
   );
 
   const checkForInitialReactions = useCallback(() => {
-    const selectedReactions = generateInitialReactions(aiPlayers);
+    // Pass dealer's up card for context-aware reactions
+    const dealerUpCard = dealerHand.cards.length > 0 ? dealerHand.cards[0] : undefined;
+    const selectedReactions = generateInitialReactions(aiPlayers, dealerUpCard);
 
     // Show speech bubbles
     selectedReactions.forEach((reaction, idx) => {
@@ -86,7 +88,7 @@ export function useGameInteractions({
         }
       }, idx * 600);
     });
-  }, [aiPlayers, addSpeechBubble]);
+  }, [aiPlayers, dealerHand.cards, addSpeechBubble]);
 
   const showEndOfHandReactions = useCallback(() => {
     const selectedReactions = generateEndOfHandReactions(

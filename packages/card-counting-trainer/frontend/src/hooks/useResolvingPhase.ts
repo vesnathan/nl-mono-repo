@@ -270,10 +270,13 @@ export function useResolvingPhase({
       // Show end-of-hand reactions
       showEndOfHandReactions();
 
+      addDebugLog("Scheduling transition to ROUND_END in 5 seconds...");
       registerTimeout(() => {
+        addDebugLog("Timeout fired - moving to ROUND_END");
         setDealerCallout(null);
         setPhase("ROUND_END");
-      }, 11000); // Increased to 11 seconds - dealer callouts stay visible longer
+      }, 5000);
+      addDebugLog("Timeout registered successfully");
     } else if (phase !== "RESOLVING") {
       // Reset the flag when we leave RESOLVING phase
       hasResolvedRef.current = false;

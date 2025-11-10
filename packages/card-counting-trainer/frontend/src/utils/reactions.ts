@@ -1,6 +1,9 @@
 import { AIPlayer, PlayerHand } from "@/types/gameState";
 import { calculateHandValue, isBlackjack } from "@/lib/gameActions";
-import { getInitialHandReaction } from "@/data/dialogue";
+import {
+  getInitialHandReaction,
+  getRandomDealerUpCardSaying,
+} from "@/data/dialogue";
 import { determineHandResult, calculatePayout } from "@/lib/dealer";
 import {
   getBlackjackPayoutMultiplier,
@@ -31,10 +34,12 @@ const REACTION_PRIORITY_ORDER = [
  * Called after initial cards are dealt
  *
  * @param aiPlayers - Array of AI players
+ * @param dealerUpCard - Optional dealer's up card for context-aware reactions
  * @returns Array of reactions to display
  */
 export function generateInitialReactions(
   aiPlayers: AIPlayer[],
+  dealerUpCard?: { rank: string; suit: string },
 ): Array<{ playerId: string; message: string; outcome: string }> {
   const reactions: Array<{
     playerId: string;
@@ -45,11 +50,22 @@ export function generateInitialReactions(
   aiPlayers.forEach((ai) => {
     const handValue = calculateHandValue(ai.hand.cards);
     const hasBlackjack = isBlackjack(ai.hand.cards);
-    const reaction = getInitialHandReaction(
-      ai.character,
-      handValue,
-      hasBlackjack,
-    );
+
+    // Try dealer upcard reaction first (15% chance when dealer card is provided)
+    let reaction: string | null = null;
+    if (dealerUpCard && Math.random() < 0.15) {
+      reaction = getRandomDealerUpCardSaying(ai.character.id, dealerUpCard.rank);
+    }
+
+    // Fallback to hand reaction
+    if (!reaction) {
+      reaction = getInitialHandReaction(
+        ai.character,
+        handValue,
+        hasBlackjack,
+        dealerUpCard,
+      );
+    }
 
     if (reaction) {
       const outcomeType = hasBlackjack
@@ -134,14 +150,21 @@ export function generateEndOfHandReactions(
     if (isBusted) {
       return;
     }
+    const isPlayerBlackjack = result === "BLACKJACK";
     const isDealerBlackjack =
       dealerValue === 21 && dealerHand.cards.length === 2;
     const isDealerWin = !isBusted && result === "LOSE";
 
-    let currentContext: "bust" | "dealerBlackjack" | "dealerWin" | "any" =
-      "any";
+    let currentContext:
+      | "bust"
+      | "blackjack"
+      | "dealerBlackjack"
+      | "dealerWin"
+      | "any" = "any";
     if (isBusted) {
       currentContext = "bust";
+    } else if (isPlayerBlackjack) {
+      currentContext = "blackjack";
     } else if (isDealerBlackjack && result === "LOSE") {
       currentContext = "dealerBlackjack";
     } else if (isDealerWin) {

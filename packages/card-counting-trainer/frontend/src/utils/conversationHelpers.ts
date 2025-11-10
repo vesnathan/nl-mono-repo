@@ -1,5 +1,5 @@
 import { ActiveConversation, SpeechBubble, AIPlayer } from "@/types/gameState";
-import { getDealerPlayerLine } from "@/data/dialogue";
+import { getDealerPlayerLine, getPlayerEngagement } from "@/data/dialogue";
 import { TABLE_POSITIONS } from "@/constants/animations";
 import { calculateHandValue } from "@/lib/gameActions";
 
@@ -23,7 +23,15 @@ export function createConversation(
   if (speakerId === "dealer") {
     question = getDealerPlayerLine("generic", "dealerQuestions");
   } else {
-    question = getDealerPlayerLine(speakerId, "playerQuestions");
+    // Try to get player engagement prompt first (30% chance)
+    const engagementPrompt = Math.random() < 0.3 ? getPlayerEngagement(speakerId) : null;
+
+    if (engagementPrompt) {
+      question = engagementPrompt;
+    } else {
+      // Fallback to playerQuestions from dealer-player conversations
+      question = getDealerPlayerLine(speakerId, "playerQuestions");
+    }
   }
 
   // Create response choices

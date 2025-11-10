@@ -21,9 +21,6 @@ export default function DealerSection({
   dealerRevealed,
   onDealerClick,
 }: DealerSectionProps) {
-  // Debug: Log dealer hand on EVERY render
-  console.warn(`🎴 DEALER SECTION: Phase=${phase}, Cards=${dealerHand.cards.length}, Revealed=${dealerRevealed}`);
-
   return (
     <div
       style={{

@@ -34,30 +34,70 @@ export default function TableRules({ gameSettings }: TableRulesProps) {
     }
   };
 
+  const mainText = `BLACKJACK PAYS ${getPayoutText(gameSettings.blackjackPayout)}`;
+  const subText = `Dealer ${gameSettings.dealerHitsSoft17 ? "Hits" : "Stands"} Soft 17 • ${getPeekRuleText(gameSettings.dealerPeekRule)} • ${gameSettings.numberOfDecks} Deck${gameSettings.numberOfDecks > 1 ? "s" : ""}${gameSettings.insuranceAvailable ? " • Insurance Available" : ""}`;
+
   return (
-    <div
+    <svg
       style={{
         position: "absolute",
-        top: "calc(50% - 20px)",
+        top: "45%",
         left: "50%",
         transform: "translate(-50%, -50%)",
-        color: "rgba(255, 215, 0, 0.35)",
-        fontSize: "24px",
-        fontFamily: "serif",
-        fontWeight: "bold",
-        textAlign: "center",
+        width: "1200px",
+        height: "200px",
         zIndex: 0,
         pointerEvents: "none",
-        textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)",
       }}
+      viewBox="0 0 1200 200"
+      preserveAspectRatio="xMidYMid meet"
     >
-      <div style={{ marginBottom: "12px", fontSize: "32px", letterSpacing: "3px" }}>
-        BLACKJACK PAYS {getPayoutText(gameSettings.blackjackPayout)}
-      </div>
-      <div style={{ fontSize: "20px", letterSpacing: "2px" }}>
-        Dealer {gameSettings.dealerHitsSoft17 ? "Hits" : "Stands"} Soft 17 • {getPeekRuleText(gameSettings.dealerPeekRule)} • {gameSettings.numberOfDecks} Deck{gameSettings.numberOfDecks > 1 ? "s" : ""}
-        {gameSettings.insuranceAvailable && " • Insurance Available"}
-      </div>
-    </div>
+      <defs>
+        {/* Arc path for main text - curves upward */}
+        <path
+          id="mainTextArc"
+          d="M 100,100 Q 600,40 1100,100"
+          fill="transparent"
+        />
+        {/* Arc path for subtitle - curves upward below main text */}
+        <path
+          id="subTextArc"
+          d="M 100,130 Q 600,75 1100,130"
+          fill="transparent"
+        />
+      </defs>
+
+      {/* Main text */}
+      <text
+        fontFamily="serif"
+        fontSize="32"
+        fontWeight="bold"
+        fill="rgba(255, 215, 0, 0.35)"
+        letterSpacing="3"
+        style={{
+          filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
+        }}
+      >
+        <textPath href="#mainTextArc" startOffset="50%" textAnchor="middle">
+          {mainText}
+        </textPath>
+      </text>
+
+      {/* Subtitle text */}
+      <text
+        fontFamily="serif"
+        fontSize="20"
+        fontWeight="bold"
+        fill="rgba(255, 215, 0, 0.35)"
+        letterSpacing="2"
+        style={{
+          filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
+        }}
+      >
+        <textPath href="#subTextArc" startOffset="50%" textAnchor="middle">
+          {subText}
+        </textPath>
+      </text>
+    </svg>
   );
 }

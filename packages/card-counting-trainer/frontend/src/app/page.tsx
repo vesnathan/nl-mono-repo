@@ -33,6 +33,7 @@ import { useRoundEndPhase } from "@/hooks/useRoundEndPhase";
 import { useDealerTurnPhase } from "@/hooks/useDealerTurnPhase";
 import { useResolvingPhase } from "@/hooks/useResolvingPhase";
 import { useAITurnsPhase } from "@/hooks/useAITurnsPhase";
+import { useDealingPhase } from "@/hooks/useDealingPhase";
 import BlackjackGameUI from "@/components/BlackjackGameUI";
 
 export default function GamePage() {
@@ -142,17 +143,21 @@ export default function GamePage() {
   const dealerHoleCardRef = useRef<Card | null>(null);
 
   // Game interactions hook - provides conversation and speech bubble functions
-  const { triggerConversation, addSpeechBubble, showEndOfHandReactions } =
-    useGameInteractions({
-      activeConversation,
-      setActiveConversation,
-      setSpeechBubbles,
-      registerTimeout,
-      aiPlayers,
-      dealerHand,
-      blackjackPayout: gameSettings.blackjackPayout,
-      addDebugLog,
-    });
+  const {
+    triggerConversation,
+    addSpeechBubble,
+    checkForInitialReactions,
+    showEndOfHandReactions,
+  } = useGameInteractions({
+    activeConversation,
+    setActiveConversation,
+    setSpeechBubbles,
+    registerTimeout,
+    aiPlayers,
+    dealerHand,
+    blackjackPayout: gameSettings.blackjackPayout,
+    addDebugLog,
+  });
 
   // Game actions hook - provides startNewRound, dealInitialCards, hit, stand
   const { startNewRound, dealInitialCards, hit, stand } = useGameActions({
@@ -190,6 +195,7 @@ export default function GamePage() {
       index?: number,
       cardIndex?: number,
     ) => getCardPosition(type, aiPlayers, playerSeat, index, cardIndex),
+    addSpeechBubble,
     addDebugLog,
   });
 
@@ -317,6 +323,17 @@ export default function GamePage() {
       cardIndex?: number,
     ) => getCardPosition(type, aiPlayers, playerSeat, aiIndex, cardIndex),
     addSpeechBubble,
+    addDebugLog,
+  });
+
+  // Dealing phase hook - marks blackjack hands as finished
+  useDealingPhase({
+    phase,
+    aiPlayers,
+    dealerHand,
+    setPlayersFinished,
+    setPlayerActions,
+    registerTimeout,
     addDebugLog,
   });
 

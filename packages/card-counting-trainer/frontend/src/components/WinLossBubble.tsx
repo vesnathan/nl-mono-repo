@@ -18,8 +18,11 @@ export default function WinLossBubble({
   const [visible, setVisible] = useState(true);
 
   const handleAnimationEnd = () => {
-    setVisible(false);
-    onComplete?.();
+    // Only hide and call onComplete for win/loss bubbles, not speech bubbles
+    if (!message) {
+      setVisible(false);
+      onComplete?.();
+    }
   };
 
   const getMessage = () => {
