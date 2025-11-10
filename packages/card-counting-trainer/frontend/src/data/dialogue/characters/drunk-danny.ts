@@ -147,39 +147,39 @@ export const drunkDanny: CharacterDialogue = {
   },
   softHandSayings: {
     "A,2": [
-      "Soft 13? I can't even feel the floor—hit me.",
-      "Soft 13's like karaoke—one more round sounds right.",
+      "Got an Ace and a 2—I can't even feel the floor. Hit me.",
+      "Ace-2's like karaoke—one more round sounds right.",
     ],
     "A,3": [
-      "Soft 14—training wheels. Give me a push.",
-      "Soft 14—another sip, another card.",
+      "Ace and a 3—training wheels. Give me a push.",
+      "Got an Ace-three—another sip, another card.",
     ],
     "A,4": [
-      "Soft 15? I'm feeling brave and slightly sideways. Hit.",
-      "Soft 15's a 'why not' number. Why not? Hit.",
+      "Ace-four? I'm feeling brave and slightly sideways. Hit.",
+      "Got an Ace with a 4—'why not' number. Hit!",
     ],
     "A,5": [
-      "Soft 16—worst hard, best soft. I'll drink to that. Hit.",
-      "Soft 16? Send it and sip.",
+      "Ace-five—I'll drink to that. Hit.",
+      "Got an Ace and 5? Send it and sip.",
     ],
     "A,6": [
-      "Soft 17—the great debate. I vote chaos: hit.",
-      "Soft 17—more card, more courage.",
+      "Ace with a 6—the great debate. I vote chaos: hit.",
+      "Ace-six—more card, more courage.",
     ],
     "A,7": [
-      "Soft 18—feels strong till the dealer flexes. I'll stand… or not.",
-      "Soft 18—stand steady unless the dealer's mean.",
+      "Ace-seven—feels strong till the dealer flexes. I'll stand… or not.",
+      "Got Ace with a 7—stand steady unless the dealer's mean.",
     ],
     "A,8": [
-      "Soft 19? I stand tall—no hero shots needed.",
-      "Soft 19—no touching, no trouble.",
+      "Ace and an 8? I stand tall—no hero shots needed.",
+      "Ace-eight—no touching, no trouble.",
     ],
     "A,9": [
-      "Soft 20—chef's kiss. I'm not moving.",
-      "Soft 20—hands off, heart on.",
+      "Ace with a 9—chef's kiss. I'm not moving.",
+      "Ace-nine—hands off, heart on.",
     ],
     "A,10": [
-      "Soft 21? That's just called 'I'm a genius.'",
+      "Ace with a face? That's just called 'I'm a genius.'",
       "Twenty-one! Bartender, narrate my victory.",
     ],
   },
