@@ -3,6 +3,7 @@
 ## Important Notes
 - **DO NOT start dev servers** - They are already running in the background
 - **DO NOT run builds** - Builds take a long time, avoid running them unless absolutely necessary
+- **Type checking**: Use `cd packages/card-counting-trainer/frontend && npx tsc --noEmit` to check for TypeScript errors without building
 
 ## Fixed Issues
 

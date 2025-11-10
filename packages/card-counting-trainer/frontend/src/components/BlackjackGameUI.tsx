@@ -85,6 +85,7 @@ interface BlackjackGameUIProps {
 
 export default function BlackjackGameUI({
   suspicionLevel,
+  dealerSuspicion,
   pitBossDistance,
   gameSettings,
   runningCount,

@@ -14,6 +14,7 @@ import { determineHandResult, calculatePayout } from "@/lib/dealer";
 import { calculateHandValue, isBusted } from "@/lib/gameActions";
 import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
 import { TABLE_POSITIONS } from "@/constants/animations";
+import { increaseDealerSuspicion } from "./useDealerSuspicion";
 
 interface UseResolvingPhaseParams {
   phase: GamePhase;
@@ -32,6 +33,7 @@ interface UseResolvingPhaseParams {
   ) => void;
   setPitBossDistance: (distance: number | ((prev: number) => number)) => void;
   setSuspicionLevel: (level: number | ((prev: number) => number)) => void;
+  setDealerSuspicion: (level: number | ((prev: number) => number)) => void;
   setPreviousBet: (bet: number) => void;
   setDealerCallout: (callout: string | null) => void;
   setWinLossBubbles: (bubbles: WinLossBubbleData[]) => void;
@@ -64,6 +66,7 @@ export function useResolvingPhase({
   setPlayerHand,
   setPitBossDistance,
   setSuspicionLevel,
+  setDealerSuspicion,
   setPreviousBet,
   setDealerCallout,
   setWinLossBubbles,
@@ -173,9 +176,9 @@ export function useResolvingPhase({
           return newDistance;
         });
 
-        // Apply suspicion increase
+        // Apply suspicion increase to dealer suspicion (which feeds to pit boss when dealer reports)
         if (suspicionIncrease > 0) {
-          setSuspicionLevel((s) => Math.min(100, s + suspicionIncrease));
+          increaseDealerSuspicion(currentDealer, suspicionIncrease, setDealerSuspicion);
         }
 
         // Update previous bet for next hand
@@ -298,6 +301,7 @@ export function useResolvingPhase({
     setPlayerHand,
     setPitBossDistance,
     setSuspicionLevel,
+    setDealerSuspicion,
     setPreviousBet,
     setDealerCallout,
     setWinLossBubbles,

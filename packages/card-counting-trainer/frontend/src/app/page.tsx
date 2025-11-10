@@ -22,6 +22,7 @@ import { useBettingActions } from "@/hooks/useBettingActions";
 import { useConversationHandlers } from "@/hooks/useConversationHandlers";
 import { useGameActions } from "@/hooks/useGameActions";
 import { useSuspicionDecay } from "@/hooks/useSuspicionDecay";
+import { useDealerSuspicion } from "@/hooks/useDealerSuspicion";
 import { useDealerChange } from "@/hooks/useDealerChange";
 import { useGameInitialization } from "@/hooks/useGameInitialization";
 import { useTimedChallenge } from "@/hooks/useTimedChallenge";
@@ -237,6 +238,19 @@ export default function GamePage() {
   // Suspicion decay hook
   useSuspicionDecay(suspicionLevel, setSuspicionLevel);
 
+  // Dealer suspicion hook - manages dealer-level detection and pit boss reporting
+  useDealerSuspicion({
+    currentDealer,
+    dealerSuspicion,
+    suspicionLevel,
+    playerSeat,
+    initialized,
+    setDealerSuspicion,
+    setSuspicionLevel,
+    setPitBossDistance,
+    addSpeechBubble,
+  });
+
   // Dealer change hook
   useDealerChange(
     shoesDealt,
@@ -403,6 +417,7 @@ export default function GamePage() {
     setPlayerHand,
     setPitBossDistance,
     setSuspicionLevel,
+    setDealerSuspicion,
     setPreviousBet,
     setDealerCallout,
     setWinLossBubbles,
