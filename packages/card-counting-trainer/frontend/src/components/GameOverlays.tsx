@@ -127,14 +127,16 @@ export default function GameOverlays({
         </div>
       )}
 
-      {/* Speech Bubbles */}
-      {speechBubbles.map((bubble) => (
-        <WinLossBubble
-          key={bubble.id}
-          position={bubble.position}
-          message={bubble.message}
-        />
-      ))}
+      {/* Speech Bubbles - only render visible ones */}
+      {speechBubbles
+        .filter((bubble) => bubble.visible)
+        .map((bubble) => (
+          <WinLossBubble
+            key={bubble.playerId}
+            position={bubble.position}
+            message={bubble.message}
+          />
+        ))}
 
       {/* Win/Loss Result Bubbles */}
       {winLossBubbles.map((bubble) => (

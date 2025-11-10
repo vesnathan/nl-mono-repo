@@ -22,12 +22,14 @@ export interface AIPlayer {
 
 /**
  * Speech bubble shown above a player/dealer
+ * Each player has one persistent bubble that shows/hides
  */
 export interface SpeechBubble {
-  playerId: string; // "dealer" or AI player index as string
+  playerId: string; // "dealer" or AI player character ID
   message: string;
   position: { left: string; top: string };
-  id: string;
+  visible: boolean; // Whether the bubble is currently visible
+  hideTimeoutId?: number; // Timeout ID for hiding the bubble
 }
 
 /**

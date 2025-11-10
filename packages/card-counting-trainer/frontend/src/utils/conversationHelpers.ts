@@ -87,6 +87,6 @@ export function createSpeechBubble(
     playerId,
     message,
     position: { left: `${x}%`, top: `${y}%` },
-    id: playerId, // Use playerId directly as it's already unique per call
+    visible: true,
   };
 }

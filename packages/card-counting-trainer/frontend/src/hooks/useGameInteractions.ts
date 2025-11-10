@@ -51,21 +51,60 @@ export function useGameInteractions({
 
   const addSpeechBubble = useCallback(
     (playerId: string, message: string, position: number) => {
-      const bubble = createSpeechBubble(
-        playerId,
-        message,
-        position,
-        aiPlayers,
-        addDebugLog,
-      );
+      setSpeechBubbles((prev) => {
+        const existingBubble = prev.find((b) => b.playerId === playerId);
 
-      setSpeechBubbles((prev) => [...prev, bubble]);
+        // If player already has a visible bubble, skip this message
+        if (existingBubble && existingBubble.visible) {
+          addDebugLog(`Skipping message for ${playerId} - bubble already active`);
+          return prev;
+        }
 
-      registerTimeout(() => {
-        setSpeechBubbles((prev) => prev.filter((b) => b.id !== bubble.id));
-      }, 5000); // 5 seconds
+        // Create position for the bubble
+        const bubblePosition = createSpeechBubble(
+          playerId,
+          message,
+          position,
+          aiPlayers,
+          addDebugLog,
+        ).position;
+
+        // Clear any existing hide timeout
+        if (existingBubble?.hideTimeoutId) {
+          clearTimeout(existingBubble.hideTimeoutId);
+        }
+
+        // Schedule hide after 5 seconds
+        const timeoutId = window.setTimeout(() => {
+          setSpeechBubbles((bubbles) =>
+            bubbles.map((b) =>
+              b.playerId === playerId ? { ...b, visible: false } : b
+            )
+          );
+        }, 5000);
+
+        // Update or create the bubble
+        if (existingBubble) {
+          return prev.map((b) =>
+            b.playerId === playerId
+              ? { ...b, message, visible: true, hideTimeoutId: timeoutId }
+              : b
+          );
+        } else {
+          return [
+            ...prev,
+            {
+              playerId,
+              message,
+              position: bubblePosition,
+              visible: true,
+              hideTimeoutId: timeoutId,
+            },
+          ];
+        }
+      });
     },
-    [registerTimeout, aiPlayers, addDebugLog, setSpeechBubbles],
+    [aiPlayers, addDebugLog, setSpeechBubbles],
   );
 
   const checkForInitialReactions = useCallback(() => {
