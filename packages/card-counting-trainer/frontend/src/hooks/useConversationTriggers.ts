@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { AIPlayer, ActiveConversation, GamePhase } from "@/types/gameState";
 import { DealerCharacter } from "@/data/dealerCharacters";
-import { getDealerPlayerLine } from "@/data/tableSayings";
+import { getDealerPlayerLine } from "@/data/ai-dialogue-addons";
 
 interface UseConversationTriggersParams {
   initialized: boolean;

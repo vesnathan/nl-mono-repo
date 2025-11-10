@@ -3,17 +3,17 @@
  * Handles conversation triggers, response options, and suspicion thresholds
  *
  * Note: All dialogue content (conversations, prompts, distractions) has been
- * moved to tableSayings.ts for consolidation. This file now focuses on the
+ * moved to dialogue for consolidation. This file now focuses on the
  * conversation system mechanics.
  */
 
-// Re-export conversation content from tableSayings for backwards compatibility
+// Re-export conversation content from dialogue for backwards compatibility
 export {
   AI_TO_AI_CONVERSATIONS,
   PLAYER_ENGAGEMENT_PROMPTS,
   getRandomAIConversation,
   getPlayerEngagement,
-} from "./tableSayings";
+} from "./dialogue";
 
 export interface Conversation {
   speaker: string; // character ID or "player"

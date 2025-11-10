@@ -748,8 +748,8 @@ export function getRandomCharacter(excludeIds: string[] = []): AICharacter {
 }
 
 // Helper function to get a random distraction for a character
-// Note: Now re-exports from tableSayings.ts where all dialogue is consolidated
-export { getRandomDistraction } from "./tableSayings";
+// Note: Now re-exports from dialogue where all dialogue is consolidated
+export { getRandomDistraction } from "./dialogue";
 
 // Helper function to assign characters to AI positions
 export function assignCharactersToPositions(

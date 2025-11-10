@@ -9,7 +9,7 @@ import { GameSettings } from "@/types/gameSettings";
 import { DealerCharacter } from "@/data/dealerCharacters";
 import { Card } from "@/types/game";
 import { calculateHandValue, isBusted } from "@/lib/gameActions";
-import { CHARACTER_DIALOGUE, pick } from "@/data/tableSayings";
+import { CHARACTER_DIALOGUE, pick } from "@/data/dialogue";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 
 interface UseDealerTurnPhaseParams {

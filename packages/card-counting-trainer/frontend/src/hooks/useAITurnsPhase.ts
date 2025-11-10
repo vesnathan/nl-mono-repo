@@ -7,7 +7,7 @@ import {
 } from "@/types/gameState";
 import { Card } from "@/types/game";
 import { calculateHandValue, isBusted } from "@/lib/gameActions";
-import { CHARACTER_DIALOGUE, pick } from "@/data/tableSayings";
+import { CHARACTER_DIALOGUE, pick } from "@/data/dialogue";
 import { shouldHitBasicStrategy } from "@/utils/aiStrategy";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 import { generateBustReaction } from "@/utils/reactions";

@@ -1,7 +1,7 @@
 /**
  * In-hand reactions for AI characters
  *
- * Note: All reaction content has been moved to tableSayings.ts
+ * Note: All reaction content has been moved to dialogue
  * This file now re-exports functions for backwards compatibility
  */
 
@@ -10,7 +10,7 @@ import {
   getGenericInitialReaction,
   getGenericHitReaction,
   getPersonalityReaction as getPersonalityReactionFromSayings,
-} from "./tableSayings";
+} from "./dialogue";
 
 /**
  * Get character reaction when dealt initial hand
@@ -33,7 +33,7 @@ export function getInitialHandReaction(
     }
   }
 
-  // For other hands, use generic reactions from tableSayings
+  // For other hands, use generic reactions from dialogue
   return getGenericInitialReaction(handValue);
 }
 

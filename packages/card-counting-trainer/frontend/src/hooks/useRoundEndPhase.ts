@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { GamePhase, AIPlayer } from "@/types/gameState";
 import { GameSettings, calculateCutCardPosition } from "@/types/gameSettings";
 import { AI_CHARACTERS } from "@/data/aiCharacters";
-import { CHARACTER_DIALOGUE, pick } from "@/data/tableSayings";
+import { CHARACTER_DIALOGUE, pick } from "@/data/dialogue";
 import { createAndShuffleShoe } from "@/lib/deck";
 import { Card } from "@/types/game";
 

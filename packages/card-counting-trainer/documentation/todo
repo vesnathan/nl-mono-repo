@@ -5,6 +5,7 @@
 - [ ] Card  animatin length needs to change based on player spot so the cards all move at the same speed
 - [ ] player comments need to stay up for longer
 - [ ] Player reaction comments when they bust need to happen when they bust, not at the end of the shoe. Also as soon as BJ is dealt iof they have a comment for blackjack.
+- [ ] pit boss attention, distance, needs to work with the dealer personality. It will be the dealer that alerts the pit boss to a counter. Also add some dealer comments saying to the player, "Counting boss? Don't worry, I got you!" etc depending on the dealers personality. Should we als have a dealer suspicion as well as pit boss attention?
 
 
 ## High Priority - MVP Features (Phase 1)
@@ -189,6 +190,6 @@
 
 ## Notes
 - Focus on getting player betting interface working next
-- Need to implement split, double down, and surrender gameplay
+- Need to implement split, double down, and surrender, and insurance gameplay
 - Consider adding preset game configurations
 - Speed control slider would improve training experience
