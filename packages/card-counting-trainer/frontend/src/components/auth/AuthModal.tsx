@@ -205,7 +205,7 @@ export function AuthModal({
   const renderRegistrationForm = () => (
     <>
       <p className="text-gray-400 text-center mb-4">
-        Join Card Counting Trainer and start mastering your skills
+        Join Backroom Blackjack and start mastering your skills
       </p>
       <div className="space-y-4">
         <Input
@@ -353,7 +353,7 @@ export function AuthModal({
           <>
             <ModalHeader className="flex flex-col items-center gap-4 text-white pt-6">
               <h2 className="text-2xl font-bold chip-gold">
-                Card Counting Trainer
+                Backroom Blackjack
               </h2>
               <Tabs
                 selectedKey={selectedTab}

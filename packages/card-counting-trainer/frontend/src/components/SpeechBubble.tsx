@@ -4,12 +4,14 @@ interface SpeechBubbleProps {
   message: string;
   position: { left: string; top: string };
   playerId: string;
+  isDealer?: boolean;
 }
 
 export default function SpeechBubble({
   message,
   position,
   playerId,
+  isDealer = false,
 }: SpeechBubbleProps) {
   return (
     <div
@@ -18,7 +20,7 @@ export default function SpeechBubble({
         position: "fixed",
         left: position.left,
         top: position.top,
-        transform: "translate(-50%, -100%)",
+        transform: isDealer ? "translate(-50%, 0%)" : "translate(-50%, -100%)",
         zIndex: 1000,
         animation: "speechFadeIn 0.3s ease-out",
       }}
@@ -43,19 +45,35 @@ export default function SpeechBubble({
       >
         {message}
         {/* Speech bubble pointer */}
-        <div
-          style={{
-            position: "absolute",
-            bottom: "-14px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: 0,
-            height: 0,
-            borderLeft: "14px solid transparent",
-            borderRight: "14px solid transparent",
-            borderTop: "14px solid rgba(255, 255, 255, 0.98)",
-          }}
-        />
+        {isDealer ? (
+          <div
+            style={{
+              position: "absolute",
+              top: "-14px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 0,
+              height: 0,
+              borderLeft: "14px solid transparent",
+              borderRight: "14px solid transparent",
+              borderBottom: "14px solid rgba(255, 255, 255, 0.98)",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "-14px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 0,
+              height: 0,
+              borderLeft: "14px solid transparent",
+              borderRight: "14px solid transparent",
+              borderTop: "14px solid rgba(255, 255, 255, 0.98)",
+            }}
+          />
+        )}
       </div>
 
       <style jsx>{`

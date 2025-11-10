@@ -17,9 +17,7 @@
 ### Player Betting System
 - [ ] Build player betting interface (currently AI players bet automatically)
 - [ ] Chip selection UI (different denominations: 5, 10, 25, 50, 100)
-- [ ] Betting circle interaction for player
-- [ ] Min/max bet validation
-- [ ] Bet confirmation and display
+- [ ] Min bet validation
 
 ### Statistics Tracking
 - [ ] Session stats (hands played, wins/losses, blackjacks)
@@ -40,7 +38,7 @@
 - [x] Blackjack payout selector (3:2, 6:5, etc.)
 - [x] Double after split toggle
 - [x] Late surrender toggle
-- [ ] Preset configurations (Vegas Strip, Single Deck, European, etc.)
+- [x] Preset configurations (Vegas Strip, Single Deck, European, etc.)
 
 ## Medium Priority - Enhanced Features (Phase 2)
 

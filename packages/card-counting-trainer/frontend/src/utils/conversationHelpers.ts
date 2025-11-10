@@ -1,6 +1,6 @@
 import { ActiveConversation, SpeechBubble, AIPlayer } from "@/types/gameState";
 import { getDealerPlayerLine, getPlayerEngagement } from "@/data/dialogue";
-import { TABLE_POSITIONS } from "@/constants/animations";
+import { TABLE_POSITIONS, DEALER_POSITION } from "@/constants/animations";
 import { calculateHandValue } from "@/lib/gameActions";
 
 /**
@@ -56,7 +56,7 @@ export function createConversation(
  *
  * @param playerId - Unique ID for this speech bubble
  * @param message - Message text to display
- * @param position - Table position (0-7)
+ * @param position - Table position (0-7, or -1 for dealer)
  * @param aiPlayers - Array of AI players (for logging purposes)
  * @param addDebugLog - Debug logging function
  * @returns SpeechBubble object ready to display
@@ -81,12 +81,14 @@ export function createSpeechBubble(
     );
   }
 
-  const [x, y] = TABLE_POSITIONS[position] || TABLE_POSITIONS[0];
+  // Use dealer position if position is -1, otherwise use table seat position
+  const [x, y] = position === -1 ? DEALER_POSITION : (TABLE_POSITIONS[position] || TABLE_POSITIONS[0]);
 
   return {
     playerId,
     message,
     position: { left: `${x}%`, top: `${y}%` },
     visible: true,
+    isDealer: position === -1,
   };
 }

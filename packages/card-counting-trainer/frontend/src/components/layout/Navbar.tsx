@@ -59,7 +59,7 @@ export function Navbar() {
           <div className="flex justify-between items-center">
             <Link href="/" className="flex items-center">
               <span className="text-2xl font-bold chip-gold">
-                Card Counting Trainer
+                Backroom Blackjack
               </span>
             </Link>
             <div className="flex items-center gap-4">

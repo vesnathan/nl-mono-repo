@@ -45,7 +45,7 @@ export default function DebugLogModal({
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
             }}
           >
-            📋 Copy Log
+            📋 Copy Log ({debugLogs.length} lines)
           </button>
         </div>
       )}

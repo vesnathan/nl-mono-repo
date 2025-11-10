@@ -20,3 +20,7 @@ export const TABLE_POSITIONS: readonly [number, number][] = [
   [19, 66], // Seat 6 - Left
   [7, 59], // Seat 7 - Far left (third base)
 ] as const;
+
+// Dealer position for speech bubbles (top center of screen, below dealer)
+// Use position -1 to indicate dealer speech bubble
+export const DEALER_POSITION: readonly [number, number] = [50, 25] as const;

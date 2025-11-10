@@ -25,6 +25,9 @@ interface UseAITurnsPhaseParams {
   dealerHand: PlayerHand;
   activePlayerIndex: number | null;
   playersFinished: Set<number>;
+  playerSeat: number | null;
+  playerHand: PlayerHand;
+  playerFinished: boolean;
   setActivePlayerIndex: (index: number | null) => void;
   setPlayersFinished: (
     finished: Set<number> | ((prev: Set<number>) => Set<number>),
@@ -74,6 +77,9 @@ export function useAITurnsPhase({
   dealerHand,
   activePlayerIndex,
   playersFinished,
+  playerSeat,
+  playerHand,
+  playerFinished,
   setActivePlayerIndex,
   setPlayersFinished,
   setPlayerActions,
@@ -183,6 +189,15 @@ export function useAITurnsPhase({
         addDebugLog(
           `Players finished: ${Array.from(playersFinished).join(", ")}`,
         );
+
+        // Check if human player needs to act
+        if (playerSeat !== null && !playerFinished && playerHand.cards.length > 0) {
+          addDebugLog(`Player in seat ${playerSeat} has not finished yet - transitioning to PLAYER_TURN`);
+          isTransitioningRef.current = true;
+          registerTimeout(() => setPhase("PLAYER_TURN"), 1000);
+          return;
+        }
+
         addDebugLog("Moving to DEALER_TURN phase");
         isTransitioningRef.current = true;
         registerTimeout(() => setPhase("DEALER_TURN"), 1000);
@@ -190,6 +205,25 @@ export function useAITurnsPhase({
       }
 
       const { ai, idx } = nextPlayer;
+
+      // Check if human player's turn comes before this AI player
+      addDebugLog(`=== CHECKING IF PLAYER SHOULD GO BEFORE AI ${idx} ===`);
+      addDebugLog(`  Player seat: ${playerSeat}`);
+      addDebugLog(`  Player finished: ${playerFinished}`);
+      addDebugLog(`  Player has cards: ${playerHand.cards.length > 0}`);
+      addDebugLog(`  AI player seat: ${ai.position}`);
+      addDebugLog(`  Player seat < AI seat: ${playerSeat !== null && ai.position > playerSeat}`);
+
+      if (playerSeat !== null && !playerFinished && playerHand.cards.length > 0 && ai.position > playerSeat) {
+        addDebugLog(`✓ Player in seat ${playerSeat} should act BEFORE AI player in seat ${ai.position}`);
+        addDebugLog("→ Transitioning to PLAYER_TURN");
+        isTransitioningRef.current = true;
+        aiTurnProcessingRef.current = false;
+        registerTimeout(() => setPhase("PLAYER_TURN"), 1000);
+        return;
+      } else {
+        addDebugLog(`✗ Player does NOT need to act before AI ${idx}`);
+      }
 
       addDebugLog(
         `=== AI PLAYER ${idx} TURN (${ai.character.name}, Seat ${ai.position}) ===`,

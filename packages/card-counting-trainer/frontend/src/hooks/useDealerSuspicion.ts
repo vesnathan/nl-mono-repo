@@ -64,8 +64,8 @@ export function useDealerSuspicion({
       );
 
       if (comment) {
-        // Dealer position is always at position 3 (top center)
-        addSpeechBubble(`dealer-suspicion-${Date.now()}`, comment, 3);
+        // Dealer position is -1 (top center)
+        addSpeechBubble(`dealer-suspicion-${Date.now()}`, comment, -1);
       }
     }
   }, [
@@ -98,7 +98,7 @@ export function useDealerSuspicion({
         dealerSuspicion,
       );
       if (comment) {
-        addSpeechBubble(`dealer-report-${Date.now()}`, comment, 3);
+        addSpeechBubble(`dealer-report-${Date.now()}`, comment, -1);
       }
 
       // Transfer dealer suspicion to pit boss attention

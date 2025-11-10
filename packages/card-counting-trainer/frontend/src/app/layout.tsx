@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="dark">
       <head>
-        <title>Card Counting Trainer</title>
+        <title>Backroom Blackjack</title>
         <meta
           name="description"
           content="Master card counting in a simulated casino environment"
