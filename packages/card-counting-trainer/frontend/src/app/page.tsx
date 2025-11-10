@@ -39,6 +39,7 @@ import { useInsurancePhase } from "@/hooks/useInsurancePhase";
 import { useHeatMap } from "@/hooks/useHeatMap";
 import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
 import BlackjackGameUI from "@/components/BlackjackGameUI";
+import BackgroundMusic from "@/components/BackgroundMusic";
 
 export default function GamePage() {
   // Game settings
@@ -169,8 +170,8 @@ export default function GamePage() {
     addDebugLog,
   });
 
-  // Game actions hook - provides startNewRound, dealInitialCards, hit, stand
-  const { startNewRound, dealInitialCards, hit, stand } = useGameActions({
+  // Game actions hook - provides startNewRound, dealInitialCards, hit, stand, doubleDown, split
+  const { startNewRound, dealInitialCards, hit, stand, doubleDown, split } = useGameActions({
     phase,
     playerSeat,
     playerHand,
@@ -182,6 +183,7 @@ export default function GamePage() {
     shoesDealt,
     gameSettings,
     currentDealer,
+    playerChips,
     setPhase,
     setCurrentBet,
     setDealerRevealed,
@@ -199,6 +201,7 @@ export default function GamePage() {
     setInsuranceOffered,
     setActivePlayerIndex,
     setPlayerFinished,
+    setPlayerChips,
     dealCardFromShoe,
     registerTimeout,
     getCardPosition: (
@@ -551,70 +554,75 @@ export default function GamePage() {
   });
 
   return (
-    <BlackjackGameUI
-      suspicionLevel={suspicionLevel}
-      dealerSuspicion={dealerSuspicion}
-      pitBossDistance={pitBossDistance}
-      gameSettings={gameSettings}
-      runningCount={runningCount}
-      currentStreak={currentStreak}
-      playerChips={playerChips}
-      currentScore={currentScore}
-      scoreMultiplier={scoreMultiplier}
-      cardsDealt={cardsDealt}
-      currentDealer={currentDealer}
-      dealerCallout={dealerCallout}
-      phase={phase}
-      dealerHand={dealerHand}
-      dealerRevealed={dealerRevealed}
-      aiPlayers={aiPlayers}
-      playerSeat={playerSeat}
-      playerHand={playerHand}
-      playerFinished={playerFinished}
-      currentBet={currentBet}
-      activePlayerIndex={activePlayerIndex}
-      playerActions={playerActions}
-      speechBubbles={speechBubbles}
-      winLossBubbles={winLossBubbles}
-      activeConversation={activeConversation}
-      flyingCards={flyingCards}
-      showDealerInfo={showDealerInfo}
-      initialized={initialized}
-      minBet={minBet}
-      maxBet={maxBet}
-      showSettings={showSettings}
-      showLeaderboard={showLeaderboard}
-      peakChips={peakChips}
-      longestStreak={longestStreak}
-      showStrategyCard={showStrategyCard}
-      showHeatMap={showHeatMap}
-      heatMapBuckets={getHeatMapBuckets()}
-      discretionScore={getDiscretionScore()}
-      heatMapDataPointCount={dataPointCount}
-      debugLogs={debugLogs}
-      showDebugLog={showDebugLog}
-      insuranceOffered={insuranceOffered}
-      handleTakeInsurance={handleTakeInsurance}
-      handleDeclineInsurance={handleDeclineInsurance}
-      setShowSettings={setShowSettings}
-      setShowLeaderboard={setShowLeaderboard}
-      setShowStrategyCard={setShowStrategyCard}
-      setShowHeatMap={setShowHeatMap}
-      setPlayerSeat={setPlayerSeat}
-      addDebugLog={addDebugLog}
-      startNewRound={startNewRound}
-      hit={hit}
-      stand={stand}
-      handleConversationResponse={handleConversationResponse}
-      handleConversationIgnore={handleConversationIgnore}
-      setWinLossBubbles={setWinLossBubbles}
-      setShowDealerInfo={setShowDealerInfo}
-      handleBetChange={handleBetChange}
-      handleConfirmBet={handleConfirmBet}
-      handleClearBet={handleClearBet}
-      setGameSettings={setGameSettings}
-      setShowDebugLog={setShowDebugLog}
-      clearDebugLogs={clearDebugLogs}
-    />
+    <>
+      <BlackjackGameUI
+        suspicionLevel={suspicionLevel}
+        dealerSuspicion={dealerSuspicion}
+        pitBossDistance={pitBossDistance}
+        gameSettings={gameSettings}
+        runningCount={runningCount}
+        currentStreak={currentStreak}
+        playerChips={playerChips}
+        currentScore={currentScore}
+        scoreMultiplier={scoreMultiplier}
+        cardsDealt={cardsDealt}
+        currentDealer={currentDealer}
+        dealerCallout={dealerCallout}
+        phase={phase}
+        dealerHand={dealerHand}
+        dealerRevealed={dealerRevealed}
+        aiPlayers={aiPlayers}
+        playerSeat={playerSeat}
+        playerHand={playerHand}
+        playerFinished={playerFinished}
+        currentBet={currentBet}
+        activePlayerIndex={activePlayerIndex}
+        playerActions={playerActions}
+        speechBubbles={speechBubbles}
+        winLossBubbles={winLossBubbles}
+        activeConversation={activeConversation}
+        flyingCards={flyingCards}
+        showDealerInfo={showDealerInfo}
+        initialized={initialized}
+        minBet={minBet}
+        maxBet={maxBet}
+        showSettings={showSettings}
+        showLeaderboard={showLeaderboard}
+        peakChips={peakChips}
+        longestStreak={longestStreak}
+        showStrategyCard={showStrategyCard}
+        showHeatMap={showHeatMap}
+        heatMapBuckets={getHeatMapBuckets()}
+        discretionScore={getDiscretionScore()}
+        heatMapDataPointCount={dataPointCount}
+        debugLogs={debugLogs}
+        showDebugLog={showDebugLog}
+        insuranceOffered={insuranceOffered}
+        handleTakeInsurance={handleTakeInsurance}
+        handleDeclineInsurance={handleDeclineInsurance}
+        setShowSettings={setShowSettings}
+        setShowLeaderboard={setShowLeaderboard}
+        setShowStrategyCard={setShowStrategyCard}
+        setShowHeatMap={setShowHeatMap}
+        setPlayerSeat={setPlayerSeat}
+        addDebugLog={addDebugLog}
+        startNewRound={startNewRound}
+        hit={hit}
+        stand={stand}
+        doubleDown={doubleDown}
+        split={split}
+        handleConversationResponse={handleConversationResponse}
+        handleConversationIgnore={handleConversationIgnore}
+        setWinLossBubbles={setWinLossBubbles}
+        setShowDealerInfo={setShowDealerInfo}
+        handleBetChange={handleBetChange}
+        handleConfirmBet={handleConfirmBet}
+        handleClearBet={handleClearBet}
+        setGameSettings={setGameSettings}
+        setShowDebugLog={setShowDebugLog}
+        clearDebugLogs={clearDebugLogs}
+      />
+      <BackgroundMusic />
+    </>
   );
 }
