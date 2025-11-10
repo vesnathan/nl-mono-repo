@@ -166,6 +166,7 @@ export default function TableSeats({
                                 bottom: `${row * 102}px`, // Row 0 at bottom, higher rows stack above
                                 width: "70px",
                                 height: "98px",
+                                zIndex: 10,
                               }}
                             >
                               <PlayingCard card={card} />

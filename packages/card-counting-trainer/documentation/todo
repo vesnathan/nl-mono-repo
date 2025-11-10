@@ -2,6 +2,10 @@
 
 ## Current Issues
 - [ ] Have cards fly to the actual card's location.
+- [ ] Card  animatin length needs to change based on player spot so the cards all move at the same speed
+- [ ] player comments need to stay up for longer
+- [ ] Player reaction comments when they bust need to happen when they bust, not at the end of the shoe. Also as soon as BJ is dealt iof they have a comment for blackjack.
+
 
 ## High Priority - MVP Features (Phase 1)
 

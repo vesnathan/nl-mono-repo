@@ -7,9 +7,10 @@ import {
 } from "@/types/gameState";
 import { Card } from "@/types/game";
 import { calculateHandValue, isBusted } from "@/lib/gameActions";
-import { AI_DIALOGUE_ADDONS, pick } from "@/data/ai-dialogue-addons";
+import { CHARACTER_DIALOGUE, pick } from "@/data/tableSayings";
 import { shouldHitBasicStrategy } from "@/utils/aiStrategy";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
+import { generateBustReaction } from "@/utils/reactions";
 
 interface UseAITurnsPhaseParams {
   phase: GamePhase;
@@ -240,9 +241,8 @@ export function useAITurnsPhase({
 
       if (shouldHit && !isBust) {
         if (Math.random() < 0.15) {
-          const banterLines = AI_DIALOGUE_ADDONS.find(
-            (addon) => addon.id === ai.character.id,
-          )?.banterWithPlayer;
+          const characterDialogue = CHARACTER_DIALOGUE[ai.character.id];
+          const banterLines = characterDialogue?.banterWithPlayer;
 
           if (banterLines && banterLines.length > 0) {
             const randomBanter = pick(banterLines);
@@ -306,6 +306,24 @@ export function useAITurnsPhase({
             if (busted) {
               addDebugLog(`AI Player ${idx} BUSTED!`);
               addDebugLog(`Marking AI Player ${idx} as FINISHED (busted)`);
+
+              // Generate and show immediate bust reaction
+              const updatedAI = {
+                ...ai,
+                hand: {
+                  ...ai.hand,
+                  cards: [...ai.hand.cards, card],
+                },
+              };
+              const bustReaction = generateBustReaction(updatedAI);
+              if (bustReaction) {
+                addDebugLog(`Showing bust reaction: ${bustReaction.message}`);
+                addSpeechBubble(
+                  `bust-reaction-${idx}-${Date.now()}`,
+                  bustReaction.message,
+                  bustReaction.position,
+                );
+              }
 
               setPlayersFinished((prev) => new Set(prev).add(idx));
 
@@ -401,9 +419,8 @@ export function useAITurnsPhase({
         setPlayersFinished((prev) => new Set(prev).add(idx));
 
         if (Math.random() < 0.15) {
-          const banterLines = AI_DIALOGUE_ADDONS.find(
-            (addon) => addon.id === ai.character.id,
-          )?.banterWithPlayer;
+          const characterDialogue = CHARACTER_DIALOGUE[ai.character.id];
+          const banterLines = characterDialogue?.banterWithPlayer;
 
           if (banterLines && banterLines.length > 0) {
             const randomBanter = pick(banterLines);

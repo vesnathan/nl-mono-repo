@@ -141,21 +141,6 @@ export default function DealerSection({
               // border: "2px solid red",
             }}
           >
-            {/* Debug: Show card count */}
-            <div
-              style={{
-                position: "absolute",
-                top: "-20px",
-                left: "0",
-                color: "yellow",
-                fontSize: "12px",
-                backgroundColor: "rgba(0,0,0,0.7)",
-                padding: "2px 4px",
-                zIndex: 1000,
-              }}
-            >
-              Cards: {dealerHand.cards.length}
-            </div>
             {dealerHand.cards.map((card, idx) => (
               <div
                 key={idx}
@@ -165,6 +150,7 @@ export default function DealerSection({
                   top: 0,
                   width: "70px",
                   height: "98px",
+                  zIndex: 10,
                 }}
               >
                 <PlayingCard

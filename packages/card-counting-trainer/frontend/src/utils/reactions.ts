@@ -77,6 +77,32 @@ export function generateInitialReactions(
 }
 
 /**
+ * Generate immediate bust reaction for a player who just busted
+ * @param ai - AI player who busted
+ * @returns Reaction or null
+ */
+export function generateBustReaction(ai: AIPlayer): Reaction | null {
+  const reactions_pool = ai.character.reactions.bigLoss;
+  const validReactions = reactions_pool.filter(
+    (reaction) =>
+      reaction.contexts.includes("bust") || reaction.contexts.includes("any"),
+  );
+
+  // 70% chance to react to bust
+  if (validReactions.length > 0 && Math.random() < 0.7) {
+    const selectedReaction =
+      validReactions[Math.floor(Math.random() * validReactions.length)];
+    return {
+      playerId: ai.character.id,
+      message: selectedReaction.text,
+      outcome: "bigLoss",
+      position: ai.position,
+    };
+  }
+  return null;
+}
+
+/**
  * Generate end-of-hand reactions for AI players
  * Called after dealer turn completes and results are determined
  *
@@ -103,6 +129,11 @@ export function generateEndOfHandReactions(
 
     // Determine the specific context
     const isBusted = handValue > 21;
+
+    // Skip bust reactions - they were already shown when the player busted
+    if (isBusted) {
+      return;
+    }
     const isDealerBlackjack =
       dealerValue === 21 && dealerHand.cards.length === 2;
     const isDealerWin = !isBusted && result === "LOSE";

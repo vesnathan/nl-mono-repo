@@ -15,6 +15,7 @@ import DealerSection from "@/components/DealerSection";
 import TableSeats from "@/components/TableSeats";
 import GameOverlays from "@/components/GameOverlays";
 import DealerInfo from "@/components/DealerInfo";
+import TableRules from "@/components/TableRules";
 
 interface GameTableProps {
   // Game state
@@ -85,10 +86,10 @@ export default function GameTable({
     <div
       style={{
         position: "fixed",
-        top: "60px",
+        top: 0,
         left: 0,
         width: "100vw",
-        height: "calc(100vh - 60px)",
+        height: "100vh",
         backgroundColor: "rgb(107, 0, 0)",
         overflow: "hidden",
       }}
@@ -151,6 +152,9 @@ export default function GameTable({
           onSeatClick={setPlayerSeat}
           addDebugLog={addDebugLog}
         />
+
+        {/* Table Rules Placard */}
+        <TableRules gameSettings={gameSettings} />
 
         {/* Game Overlays: Action Buttons, Bubbles, Conversations, Flying Cards */}
         <GameOverlays

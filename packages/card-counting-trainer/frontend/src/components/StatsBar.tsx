@@ -39,20 +39,19 @@ export default function StatsBar({
         left: 0,
         width: "100%",
         height: "60px",
-        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        backgroundColor: "transparent",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         padding: "0 20px",
         zIndex: 1000,
-        borderBottom: "2px solid #FFD700",
       }}
     >
       <div className="flex gap-3 items-center">
         {gameSettings.trainingMode === TrainingMode.PRACTICE && (
           <div
             style={{
-              backgroundColor: "rgba(255, 215, 0, 0.1)",
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
               color: "#FFF",
               border: "2px solid #FFD700",
               borderRadius: "8px",
@@ -72,7 +71,7 @@ export default function StatsBar({
         {gameSettings.trainingMode === TrainingMode.TEST && (
           <div
             style={{
-              backgroundColor: "rgba(255, 107, 107, 0.1)",
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
               color: "#FF6B6B",
               border: "2px solid #FF6B6B",
               borderRadius: "8px",
@@ -90,7 +89,7 @@ export default function StatsBar({
           <>
             <div
               style={{
-                backgroundColor: "rgba(255, 215, 0, 0.1)",
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
                 color: "#FFF",
                 border: "2px solid #FFD700",
                 borderRadius: "8px",
@@ -108,12 +107,7 @@ export default function StatsBar({
             </div>
             <div
               style={{
-                backgroundColor:
-                  timeRemaining < 60
-                    ? "rgba(255, 107, 107, 0.1)"
-                    : timeRemaining < 180
-                      ? "rgba(255, 215, 0, 0.1)"
-                      : "rgba(76, 175, 80, 0.1)",
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
                 color: "#FFF",
                 border: `2px solid ${timeRemaining < 60 ? "#FF6B6B" : timeRemaining < 180 ? "#FFD700" : "#4CAF50"}`,
                 borderRadius: "8px",
@@ -142,7 +136,7 @@ export default function StatsBar({
         )}
         <div
           style={{
-            backgroundColor: "rgba(76, 175, 80, 0.1)",
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
             color: "#4CAF50",
             border: "2px solid #4CAF50",
             borderRadius: "8px",
@@ -160,7 +154,7 @@ export default function StatsBar({
         </div>
         <div
           style={{
-            backgroundColor: "rgba(33, 150, 243, 0.1)",
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
             color: "#2196F3",
             border: "2px solid #2196F3",
             borderRadius: "8px",
@@ -179,7 +173,7 @@ export default function StatsBar({
         {gameSettings.trainingMode !== TrainingMode.TEST && (
           <div
             style={{
-              backgroundColor: "rgba(156, 39, 176, 0.1)",
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
               color: "#9C27B0",
               border: "2px solid #9C27B0",
               borderRadius: "8px",
@@ -201,7 +195,7 @@ export default function StatsBar({
         <button
           onClick={onSettingsClick}
           style={{
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
             color: "#FFF",
             border: "2px solid #FFD700",
             borderRadius: "8px",
@@ -212,10 +206,10 @@ export default function StatsBar({
             transition: "all 0.2s",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.2)";
+            e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+            e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
           }}
         >
           ⚙️ Settings
@@ -223,7 +217,7 @@ export default function StatsBar({
         <button
           onClick={onLeaderboardClick}
           style={{
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
             color: "#FFF",
             border: "2px solid #FFD700",
             borderRadius: "8px",
@@ -234,10 +228,10 @@ export default function StatsBar({
             transition: "all 0.2s",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.2)";
+            e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+            e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
           }}
         >
           🏆 Leaderboard
@@ -245,7 +239,7 @@ export default function StatsBar({
         <button
           onClick={onStrategyClick}
           style={{
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
             color: "#FFF",
             border: "2px solid #FFD700",
             borderRadius: "8px",
@@ -256,10 +250,10 @@ export default function StatsBar({
             transition: "all 0.2s",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.2)";
+            e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+            e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
           }}
         >
           📊 Strategy

@@ -32,6 +32,7 @@ interface UseGameActionsParams {
   setPhase: (phase: GamePhase) => void;
   setCurrentBet: (bet: number) => void;
   setDealerRevealed: (revealed: boolean) => void;
+  setDealerCallout: (callout: string | null) => void;
   setPlayerHand: (
     hand: PlayerHand | ((prev: PlayerHand) => PlayerHand),
   ) => void;
@@ -91,6 +92,7 @@ export function useGameActions({
   setPhase,
   setCurrentBet,
   setDealerRevealed,
+  setDealerCallout,
   setPlayerHand,
   setDealerHand,
   setSpeechBubbles,
@@ -143,7 +145,7 @@ export function useGameActions({
 
     // Pre-deal all cards BEFORE animations to ensure uniqueness
     // We need to manually track the shoe state because React batches state updates
-    const dealtCards: { type: string; index: number; card: GameCard }[] = [];
+    const dealtCards: { type: string; index: number; card: GameCard; cardIndex: number }[] = [];
     let currentShoe = [...shoe];
     let currentCardsDealt = cardsDealt;
     let currentRunningCount = runningCount;
@@ -310,35 +312,62 @@ export function useGameActions({
       () => {
         addDebugLog("All cards dealt and animations complete");
 
-        // Check for dealer blackjack (natural 21 with 2 cards)
-        const dealerCards = [dealerCard1, dealerCard2];
-        const dealerValue = calculateHandValue(dealerCards);
-        if (dealerValue === 21) {
-          addDebugLog(
-            "DEALER BLACKJACK! Revealing hole card and moving to RESOLVING",
-          );
-          setDealerRevealed(true);
+        // Check if dealer should peek for blackjack (American rules)
+        const shouldPeek = gameSettings.dealerPeekRule === "AMERICAN_PEEK";
+        const dealerUpCard = dealerCard1;
+        const canHaveBlackjack = dealerUpCard.rank === "A" || dealerUpCard.value === 10;
 
-          // Skip player turn and AI turns, go straight to resolving
-          registerTimeout(() => setPhase("RESOLVING"), 2000);
-        } else {
-          addDebugLog(`Dealer showing: ${dealerCard1.rank}${dealerCard1.suit}`);
-          addDebugLog(
-            `Dealer hole card: ${dealerCard2.rank}${dealerCard2.suit} [hidden]`,
-          );
+        if (shouldPeek && canHaveBlackjack) {
+          // Show "Peeking..." callout
+          setDealerCallout("Peeking...");
+
+          registerTimeout(() => {
+            setDealerCallout(null);
+
+            // Check for dealer blackjack (natural 21 with 2 cards)
+            const dealerCards = [dealerCard1, dealerCard2];
+            const dealerValue = calculateHandValue(dealerCards);
+            if (dealerValue === 21) {
+              addDebugLog(
+                "DEALER BLACKJACK! Revealing hole card and moving to RESOLVING",
+              );
+              setDealerRevealed(true);
+              setDealerCallout("Blackjack!");
+
+              // Skip player turn and AI turns, go straight to resolving
+              registerTimeout(() => {
+                setDealerCallout(null);
+                setPhase("RESOLVING");
+              }, 2000);
+            } else {
+              addDebugLog(`Dealer showing: ${dealerCard1.rank}${dealerCard1.suit}`);
+              addDebugLog(
+                `Dealer hole card: ${dealerCard2.rank}${dealerCard2.suit} [hidden]`,
+              );
+
+              // Move to next phase after peek
+              proceedAfterPeek();
+            }
+          }, 1500); // Peek delay
+          return; // Exit early, will continue after peek
         }
 
-        addDebugLog(`Running count after dealing: ${currentRunningCount}`);
-        addDebugLog(`Shoe cards remaining: ${currentShoe.length}`);
-        addDebugLog("=== DEALING PHASE END ===");
+        // No peek needed
+        proceedAfterPeek();
 
-        // If player is not seated, skip PLAYER_TURN and go straight to AI_TURNS
-        if (playerSeat === null) {
-          addDebugLog("Player not seated, moving to AI_TURNS");
-          setPhase("AI_TURNS");
-        } else {
-          addDebugLog("Moving to PLAYER_TURN");
-          setPhase("PLAYER_TURN");
+        function proceedAfterPeek() {
+          addDebugLog(`Running count after dealing: ${currentRunningCount}`);
+          addDebugLog(`Shoe cards remaining: ${currentShoe.length}`);
+          addDebugLog("=== DEALING PHASE END ===");
+
+          // If player is not seated, skip PLAYER_TURN and go straight to AI_TURNS
+          if (playerSeat === null) {
+            addDebugLog("Player not seated, moving to AI_TURNS");
+            setPhase("AI_TURNS");
+          } else {
+            addDebugLog("Moving to PLAYER_TURN");
+            setPhase("PLAYER_TURN");
+          }
         }
       },
       delay + CARD_ANIMATION_DURATION + 500,

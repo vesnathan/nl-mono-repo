@@ -6,9 +6,10 @@ import {
   FlyingCardData,
 } from "@/types/gameState";
 import { GameSettings } from "@/types/gameSettings";
+import { DealerCharacter } from "@/data/dealerCharacters";
 import { Card } from "@/types/game";
 import { calculateHandValue, isBusted } from "@/lib/gameActions";
-import { AI_DIALOGUE_ADDONS, pick } from "@/data/ai-dialogue-addons";
+import { CHARACTER_DIALOGUE, pick } from "@/data/tableSayings";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 
 interface UseDealerTurnPhaseParams {
@@ -16,6 +17,7 @@ interface UseDealerTurnPhaseParams {
   dealerHand: PlayerHand;
   aiPlayers: AIPlayer[];
   gameSettings: GameSettings;
+  currentDealer: DealerCharacter | null;
   setDealerRevealed: (revealed: boolean) => void;
   setDealerHand: (
     hand: PlayerHand | ((prev: PlayerHand) => PlayerHand),
@@ -48,6 +50,7 @@ export function useDealerTurnPhase({
   dealerHand,
   aiPlayers,
   gameSettings,
+  currentDealer,
   setDealerRevealed,
   setDealerHand,
   setDealerCallout,
@@ -64,19 +67,34 @@ export function useDealerTurnPhase({
   const cardCounterRef = useRef(0);
   const dealingCardRef = useRef(false);
   const currentDealerHandRef = useRef<Card[]>([]);
+  const prevPhaseRef = useRef<GamePhase | null>(null);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
+    // Detect phase entry
+    const isEnteringDealerTurn = phase === "DEALER_TURN" && prevPhaseRef.current !== "DEALER_TURN";
+
+    if (isEnteringDealerTurn) {
+      // Reset flags when entering dealer turn phase
+      dealerTurnProcessingRef.current = false;
+      dealerFinishedRef.current = false;
+      hasStartedRef.current = false;
+      prevPhaseRef.current = phase;
+    }
+
     if (phase !== "DEALER_TURN") {
-      // Phase has changed away from DEALER_TURN, do nothing
+      // Phase has changed away from DEALER_TURN
+      prevPhaseRef.current = phase;
       return;
     }
 
-    // Guard against re-entry while processing
-    if (dealerTurnProcessingRef.current) {
+    // Guard against re-entry while processing or already started
+    if (dealerTurnProcessingRef.current || hasStartedRef.current) {
       return;
     }
 
     dealerTurnProcessingRef.current = true;
+    hasStartedRef.current = true;
 
     if (phase === "DEALER_TURN") {
       addDebugLog("=== PHASE: DEALER_TURN START ===");
@@ -91,9 +109,8 @@ export function useDealerTurnPhase({
       if (Math.random() < 0.1 && aiPlayers.length > 0) {
         const randomAI =
           aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
-        const banterLines = AI_DIALOGUE_ADDONS.find(
-          (addon) => addon.id === randomAI.character.id,
-        )?.banterWithDealer;
+        const characterDialogue = CHARACTER_DIALOGUE[randomAI.character.id];
+        const banterLines = characterDialogue?.banterWithDealer;
 
         if (banterLines && banterLines.length > 0) {
           const randomBanter = pick(banterLines);
@@ -175,27 +192,36 @@ export function useDealerTurnPhase({
 
             setFlyingCards((prev) => [...prev, flyingCard]);
 
-            // Update state for rendering
-            setDealerHand((prev) => ({
-              ...prev,
-              cards: newHand,
-            }));
+            // Apply dealer speed to animation duration
+            const dealerSpeedMultiplier = currentDealer?.dealSpeed || 1.0;
+            const adjustedAnimationDuration = CARD_ANIMATION_DURATION / dealerSpeedMultiplier;
 
-            // Add card to hand after animation
+            // Add card to hand after animation completes
             registerTimeout(() => {
               setFlyingCards((prev) =>
                 prev.filter((fc) => fc.id !== flyingCard.id),
               );
-            }, CARD_ANIMATION_DURATION);
+
+              // Update dealer hand state after animation
+              setDealerHand((prev) => ({
+                ...prev,
+                cards: newHand,
+              }));
+            }, adjustedAnimationDuration);
 
             const newValue = calculateHandValue(newHand);
             addDebugLog(`Dealer hand value: ${newValue}`);
 
-            // Schedule next card after animation + delay
+            // Wait for card animation to complete, then add fixed pause before next card
             registerTimeout(() => {
-              dealingCardRef.current = false; // Reset flag before next card
-              dealNextCard();
-            }, 1000);
+              // Card has landed, now pause before dealing next card (fixed pause regardless of dealer speed)
+              const pauseBetweenCards = 800; // Fixed 800ms pause between dealer hit cards
+
+              registerTimeout(() => {
+                dealingCardRef.current = false; // Reset flag before next card
+                dealNextCard();
+              }, pauseBetweenCards);
+            }, adjustedAnimationDuration); // Wait for speed-adjusted animation to complete first
 
             return;
           }
@@ -236,18 +262,9 @@ export function useDealerTurnPhase({
     }
   }, [
     phase,
-    dealerHand,
-    dealCardFromShoe,
-    gameSettings,
-    registerTimeout,
-    addDebugLog,
-    setDealerRevealed,
-    aiPlayers,
-    addSpeechBubble,
-    setDealerHand,
-    getCardPositionForAnimation,
-    setFlyingCards,
-    setDealerCallout,
-    setPhase,
+    // Removed unstable dependencies to prevent duplicate card dealing:
+    // dealCardFromShoe, registerTimeout, addDebugLog, setDealerRevealed,
+    // addSpeechBubble, setDealerHand, getCardPositionForAnimation,
+    // setFlyingCards, setDealerCallout, setPhase, aiPlayers, dealerHand, gameSettings
   ]);
 }

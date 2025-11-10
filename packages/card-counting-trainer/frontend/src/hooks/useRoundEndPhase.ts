@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { GamePhase, AIPlayer } from "@/types/gameState";
 import { GameSettings, calculateCutCardPosition } from "@/types/gameSettings";
 import { AI_CHARACTERS } from "@/data/aiCharacters";
-import { AI_DIALOGUE_ADDONS, pick } from "@/data/ai-dialogue-addons";
+import { CHARACTER_DIALOGUE, pick } from "@/data/tableSayings";
 import { createAndShuffleShoe } from "@/lib/deck";
 import { Card } from "@/types/game";
 
@@ -142,9 +142,8 @@ export function useRoundEndPhase({
           const speaker = aiPlayers[speakerIndex];
 
           // Get their banter lines
-          const banterLines = AI_DIALOGUE_ADDONS.find(
-            (addon) => addon.id === speaker.character.id,
-          )?.banterWithPlayer;
+          const characterDialogue = CHARACTER_DIALOGUE[speaker.character.id];
+          const banterLines = characterDialogue?.banterWithPlayer;
 
           if (banterLines && banterLines.length > 0) {
             const randomBanter = pick(banterLines);

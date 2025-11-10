@@ -208,6 +208,8 @@ export default function PlayingCard({ card, faceDown }: PlayingCardProps) {
           backgroundImage: "url(/back.webp)",
           backgroundSize: "100% 100%",
           borderRadius: "5px",
+          position: "relative",
+          zIndex: 10,
         }}
       />
     );
@@ -242,6 +244,7 @@ export default function PlayingCard({ card, faceDown }: PlayingCardProps) {
         width: "100%",
         height: "100%",
         position: "relative",
+        zIndex: 10,
       }}
     >
       <div

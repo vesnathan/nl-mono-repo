@@ -23,7 +23,7 @@ export const DEALER_CHARACTERS: DealerCharacter[] = [
     name: "Maria Santos",
     nickname: "Sharp Maria",
     personality: "counter",
-    dealSpeed: 1.0,
+    dealSpeed: 1.5,
     detectionSkill: 95,
     onYourSide: true,
     bio: "Former card counter from Atlantic City. She knows every trick in the book and can read players like a newspaper. Has a soft spot for skilled players and might even help you out. Don't worry - she'll never rat you out to management.",
@@ -35,7 +35,7 @@ export const DEALER_CHARACTERS: DealerCharacter[] = [
     name: "Jennifer 'Jenny' Park",
     nickname: "Rookie Jenny",
     personality: "rookie",
-    dealSpeed: 0.8, // Slow dealer
+    dealSpeed: 1.0, // Slowest dealer
     detectionSkill: 15,
     onYourSide: false,
     bio: "Brand new dealer, only two months on the job. She's so focused on not making mistakes that she barely notices what players are doing. Deals slowly and methodically. Sweet kid, but completely oblivious to advantage play.",
@@ -47,7 +47,7 @@ export const DEALER_CHARACTERS: DealerCharacter[] = [
     name: "Harold Morrison",
     nickname: "Hardass Harold",
     personality: "strict",
-    dealSpeed: 1.3, // Fast dealer
+    dealSpeed: 2.2, // Fastest dealer
     detectionSkill: 85,
     onYourSide: false,
     bio: "30-year veteran who takes his job VERY seriously. Hates advantage players with a passion and has backed off dozens of counters over the years. Watches bet spreads like a hawk and deals fast to make counting harder. Stay on your toes with this one.",
@@ -59,7 +59,7 @@ export const DEALER_CHARACTERS: DealerCharacter[] = [
     name: "Marcus Thompson",
     nickname: "Friendly Marcus",
     personality: "friendly",
-    dealSpeed: 1.1,
+    dealSpeed: 1.6,
     detectionSkill: 40,
     onYourSide: true,
     bio: "Everyone's favorite dealer. Former bartender who's more interested in telling jokes and making people laugh than policing the game. Philosophy: 'If you're smart enough to beat the house, more power to ya!' Chill vibes all around.",
@@ -71,7 +71,7 @@ export const DEALER_CHARACTERS: DealerCharacter[] = [
     name: "Frank O'Brien",
     nickname: "Oblivious Frank",
     personality: "oblivious",
-    dealSpeed: 0.9,
+    dealSpeed: 1.3,
     detectionSkill: 10,
     onYourSide: false,
     bio: "40-year veteran counting down to retirement. Deals on complete autopilot while daydreaming about his fishing boat. Barely makes eye contact and his mind wanders constantly. You could wear a 'I COUNT CARDS' t-shirt and he wouldn't notice.",
@@ -83,7 +83,7 @@ export const DEALER_CHARACTERS: DealerCharacter[] = [
     name: "Lisa Chen",
     nickname: "The Veteran",
     personality: "veteran",
-    dealSpeed: 1.2,
+    dealSpeed: 1.9,
     detectionSkill: 70,
     onYourSide: false,
     bio: "25 years of experience, she's seen it all. Knows the math of the game and can usually tell when something's off. Not paranoid like Harold, but she's competent. Only calls pit boss if she's absolutely certain AND you're being obvious. Stay subtle and you'll be fine.",

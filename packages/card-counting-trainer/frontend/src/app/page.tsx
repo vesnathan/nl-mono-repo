@@ -12,6 +12,7 @@ import {
   FlyingCardData,
   GamePhase,
 } from "@/types/gameState";
+import { Card } from "@/types/game";
 import { getCardPosition } from "@/utils/cardPositions";
 import { useGameTimeouts } from "@/hooks/useGameTimeouts";
 import { useDebugLogging } from "@/hooks/useDebugLogging";
@@ -169,6 +170,7 @@ export default function GamePage() {
     setPhase,
     setCurrentBet,
     setDealerRevealed,
+    setDealerCallout,
     setPlayerHand,
     setDealerHand,
     setSpeechBubbles,
@@ -350,6 +352,7 @@ export default function GamePage() {
     dealerHand,
     aiPlayers,
     gameSettings,
+    currentDealer,
     setDealerRevealed,
     setDealerHand,
     setDealerCallout,

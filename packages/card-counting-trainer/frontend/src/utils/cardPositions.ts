@@ -33,7 +33,7 @@ export function getCardPosition(
     const cardOffset = cardIndex !== undefined ? cardIndex * 74 : 0;
     return {
       left: `calc(50% + ${containerOffset + cardOffset}px)`,
-      top: "calc(8% + 162px + 24px)",
+      top: "calc(3% + 162px + 4px)",
     };
   }
 
@@ -50,7 +50,7 @@ export function getCardPosition(
     const cardBottomOffset = row * 102; // Higher rows need LOWER top values (subtract)
     return {
       left: `calc(${x}% + ${containerOffset + cardLeft}px)`,
-      top: `calc(${y}% - 131px - ${cardBottomOffset}px)`, // 150px avatar + 54px gap - 98px card height - 25px adjustment - row offset
+      top: `calc(${y}% - 151px - ${cardBottomOffset}px)`, // 150px avatar + 54px gap - 98px card height - 45px adjustment - row offset
     };
   }
 
@@ -69,7 +69,7 @@ export function getCardPosition(
       const cardBottomOffset = row * 102; // Higher rows need LOWER top values (subtract)
       return {
         left: `calc(${x}% + ${containerOffset + cardLeft}px)`,
-        top: `calc(${y}% - 131px - ${cardBottomOffset}px)`, // 150px avatar + 54px gap - 98px card height - 25px adjustment - row offset
+        top: `calc(${y}% - 151px - ${cardBottomOffset}px)`, // 150px avatar + 54px gap - 98px card height - 45px adjustment - row offset
       };
     }
   }
