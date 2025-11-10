@@ -1,11 +1,13 @@
 # Card Counting Trainer - TODO List
 
 ## Current Issues
-- [ ] Have cards fly to the actual card's location.
-- [ ] Card  animatin length needs to change based on player spot so the cards all move at the same speed
+- [x] Have cards fly to the actual card's location.
+- [ ] Card animation length needs to change based on player spot so the cards all move at the same speed
 - [ ] player comments need to stay up for longer
-- [ ] Player reaction comments when they bust need to happen when they bust, not at the end of the shoe. Also as soon as BJ is dealt iof they have a comment for blackjack.
-- [ ] pit boss attention, distance, needs to work with the dealer personality. It will be the dealer that alerts the pit boss to a counter. Also add some dealer comments saying to the player, "Counting boss? Don't worry, I got you!" etc depending on the dealers personality. Should we als have a dealer suspicion as well as pit boss attention?
+- [ ] Player reaction comments when they bust need to happen when they bust, not at the end of the shoe. Also as soon as BJ is dealt if they have a comment for blackjack.
+- [x] pit boss attention, distance, needs to work with the dealer personality. It will be the dealer that alerts the pit boss to a counter. Also add some dealer comments saying to the player, "Counting boss? Don't worry, I got you!" etc depending on the dealers personality. Should we also have a dealer suspicion as well as pit boss attention?
+- [ ] a heat map that shows where the pit boss is when the count is high. this will indicate whether the player is being discreet. Under a charts button.
+- [ ] I don't like the styling of the leaderboard, settings modals
 
 
 ## High Priority - MVP Features (Phase 1)
@@ -98,12 +100,18 @@
 - [ ] Touch gestures for hit/stand
 
 ### Pit Boss & Suspicion System
-- [ ] Bet spread detection
-- [ ] Suspicion meter increases with large bet spreads
-- [ ] Pit boss warnings/challenges
-- [ ] Pit boss distance indicator
-- [ ] "Heat" level system
+- [x] Bet spread detection (implemented in useResolvingPhase)
+- [x] Suspicion meter increases with large bet spreads
+- [x] Two-tier system: Dealer suspicion → Pit boss attention
+- [x] Dealer personality-based detection thresholds
+- [x] Dealer suspicion dialogue (low, medium, high, reporting)
+- [x] Pit boss distance indicator
+- [x] Detection skill multipliers per dealer personality
+- [x] Suspicion decay over time
+- [ ] Pit boss warnings/challenges when suspicion very high
+- [ ] "Heat" level visual indicators
 - [ ] Camouflage betting suggestions
+- [ ] Game over/"backed off" mechanic when suspicion reaches 100%
 
 ### Audio Integration
 - [ ] Dealer voice lines (5 dealer characters)
@@ -187,6 +195,17 @@
 - [x] Streak tracking
 - [x] Score multiplier (1.0x - 2.0x)
 - [x] Real-time score updates
+
+### Dealer & Detection System
+- [x] Six dealer personalities with unique behaviors
+- [x] Dealer detection skill system (10-95 skill levels)
+- [x] Dealer suspicion tracking (0-100)
+- [x] Personality-based suspicion thresholds (25% strict to 100% friendly)
+- [x] Dealer reporting thresholds (60% strict, 999% friendly/rookie/oblivious)
+- [x] Dealer dialogue system for suspicion levels
+- [x] "On your side" dealer mechanic (Maria the counter)
+- [x] Suspicion transfer to pit boss when dealer reports
+- [x] Dealer suspicion UI meter (hides dealer name/personality for player discovery)
 
 ## Notes
 - Focus on getting player betting interface working next
