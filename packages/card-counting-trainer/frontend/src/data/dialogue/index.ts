@@ -146,6 +146,266 @@ export const PERSONALITY_REACTIONS: Record<
 };
 
 /**
+ * End-of-hand reactions for wins (non-blackjack)
+ */
+export const PERSONALITY_WIN_REACTIONS: Record<
+  AICharacter["personality"],
+  string[]
+> = {
+  drunk: [
+    "Haha! Still got it! *hiccup*",
+    "Not too shabby for a drunk old man, huh?",
+    "I'll drink to that! Another win!",
+    "Winner winner! *waves glass*",
+    "Bartender! Victory round!",
+  ],
+  clumsy: [
+    "I won! I actually won! *nervously excited*",
+    "Oh! Did I do it right? I think I won!",
+    "Yay! *carefully stacks chips*",
+    "Is this real? I'm not dreaming?",
+    "I didn't mess up! Hooray!",
+  ],
+  chatty: [
+    "Nice! That reminds me of this one time...",
+    "See? Confidence pays off!",
+    "Another win! Just like last Tuesday!",
+    "You know, winning's all about attitude...",
+    "Victory! Let me tell you about my strategy...",
+  ],
+  superstitious: [
+    "My crystals KNEW it! Thank you universe!",
+    "The energy shift! I felt it coming!",
+    "Mercury's in retrograde but I STILL won!",
+    "My lucky ritual worked! As always!",
+    "Positive vibes! I manifested this!",
+  ],
+  cocky: [
+    "Of course I won. Did you expect otherwise?",
+    "Too easy. Next?",
+    "And THAT'S how it's done.",
+    "Did anyone doubt me? Anyone?",
+    "I could do this in my sleep.",
+  ],
+  nervous: [
+    "I won?! Oh my gosh! *sweating*",
+    "Wait, really?! I did it?!",
+    "Is this allowed? Am I in trouble?",
+    "*nervously celebrates* Yay...?",
+    "I won! Why am I still shaking?!",
+  ],
+  lucky: [
+    "Called it! Lucky Larry strikes again!",
+    "My streak continues! Boom!",
+    "Luck's on my side tonight!",
+    "I FELT this win coming!",
+    "Can't stop won't stop!",
+  ],
+  unlucky: [
+    "Wait, I WON?! Actually won?!",
+    "Did the dealer make a mistake?",
+    "I... I won? Is this a trick?",
+    "Finally! FINALLY!",
+    "A win! Mark your calendars!",
+  ],
+};
+
+/**
+ * End-of-hand reactions for pushes (ties)
+ */
+export const PERSONALITY_PUSH_REACTIONS: Record<
+  AICharacter["personality"],
+  string[]
+> = {
+  drunk: [
+    "Tie? Shit, I'll take it I guess...",
+    "*squints at cards* Wait... is that good or bad?",
+    "Eh, at least I didn't lose!",
+    "Push? Bartender explains pushy to me again...",
+    "I'll call that a moral victory *hiccup*",
+  ],
+  clumsy: [
+    "A tie? Oh! That's okay I think!",
+    "At least I didn't knock anything over!",
+    "Push! That means I get my chips back right?",
+    "Phew! Nobody loses! *sighs with relief*",
+    "Tie! I'll take it! *carefully protects chips*",
+  ],
+  chatty: [
+    "Push! You know, ties are underrated...",
+    "Tie game! Reminds me of that board meeting...",
+    "A push! Better than a loss, am I right?",
+    "Split decision! Like my fantasy league draft...",
+    "We'll call it even! No harm no foul!",
+  ],
+  superstitious: [
+    "A tie... the universe balances all things.",
+    "Push! The energies are in equilibrium!",
+    "Neutral outcome! My aura's balanced!",
+    "The cards reflect cosmic harmony!",
+    "A tie! As the stars predicted!",
+  ],
+  cocky: [
+    "A push? I'll allow it.",
+    "Tie? Fine. I'm feeling generous.",
+    "Push. Could've won but whatever.",
+    "I'll take the tie. This time.",
+    "Meh. At least I didn't lose.",
+  ],
+  nervous: [
+    "A push?! Is that okay?! Nobody's mad?!",
+    "*nervously* So... we're good? Tie?",
+    "Push! Thank goodness! *wipes sweat*",
+    "Tie! Nobody gets hurt! Perfect!",
+    "Is a push bad? It feels neutral? Okay!",
+  ],
+  lucky: [
+    "Push! I'll call that half a win!",
+    "Tie! My luck held just enough!",
+    "Push! Could be worse!",
+    "Tie game! Still in the game!",
+    "A push! Good vibes sustained!",
+  ],
+  unlucky: [
+    "A push? I'll take it! That's HUGE for me!",
+    "Tie?! That's basically a win in my book!",
+    "Push! I didn't lose! This is amazing!",
+    "A tie! I'll count this as progress!",
+    "Push? I was SURE I'd lose!",
+  ],
+};
+
+/**
+ * End-of-hand reactions for losses (dealer beats player)
+ */
+export const PERSONALITY_LOSS_REACTIONS: Record<
+  AICharacter["personality"],
+  string[]
+> = {
+  drunk: [
+    "Ah hell... where'd my chips go?",
+    "Son of a... *hiccup* ...I had that!",
+    "Dammit. Dealer got lucky that time.",
+    "*slurs* That was MY hand!",
+    "Bartender! I need another drink!",
+  ],
+  clumsy: [
+    "Oh no... I lost... *sad face*",
+    "Aww... did I do something wrong?",
+    "I tried my best... *sighs*",
+    "*carefully collects remaining chips*",
+    "Maybe next time... *hopeful*",
+  ],
+  chatty: [
+    "Well THAT'S frustrating! You know what though...",
+    "Loss! But here's the thing about losses...",
+    "Dealer wins! Reminds me of Q3 earnings...",
+    "Ah well! As my mentor always said...",
+    "Lost that one! But perspective is key...",
+  ],
+  superstitious: [
+    "The dealer's energy was too strong!",
+    "I KNEW I should've cleansed before this hand!",
+    "The moon's phase was against me!",
+    "Negative vibes! I felt them!",
+    "My crystals need recharging!",
+  ],
+  cocky: [
+    "Dealer got lucky. That's all.",
+    "Fluke. Pure fluke.",
+    "Whatever. Next hand's mine.",
+    "That shouldn't have happened.",
+    "Luck. Nothing but luck.",
+  ],
+  nervous: [
+    "Oh no oh no! I KNEW it!",
+    "*panicking* I lost! Is everyone mad?!",
+    "I'm so sorry! *to nobody in particular*",
+    "I should've known! *sweating*",
+    "This is bad! This is really bad!",
+  ],
+  lucky: [
+    "Lost? Huh. Doesn't happen often!",
+    "Dealer got one over on me! Rare!",
+    "Well that's unusual for me...",
+    "Lost! But my luck'll turn around!",
+    "A loss! But I'll bounce back!",
+  ],
+  unlucky: [
+    "Of course! Why would I expect anything else?!",
+    "Classic me! *laughs bitterly*",
+    "Lost again! Story of my life!",
+    "Yep. There it is. As expected.",
+    "I called it! Knew I'd lose!",
+  ],
+};
+
+/**
+ * End-of-hand reactions when dealer gets blackjack
+ */
+export const PERSONALITY_DEALER_BLACKJACK_REACTIONS: Record<
+  AICharacter["personality"],
+  string[]
+> = {
+  drunk: [
+    "Dealer blackjack?! This night just gets worse!",
+    "Of course the dealer pulls 21. OF COURSE!",
+    "*hiccup* Blackjack? Really?!",
+    "That's just... *waves hand* ...unfair!",
+    "Dealer blackjack! Bartender! NOW!",
+  ],
+  clumsy: [
+    "Dealer got blackjack?! Oh my!",
+    "Oh no! Natural 21! *gasps*",
+    "Blackjack! Well... okay then...",
+    "The dealer got blackjack? *nervous laugh*",
+    "*sighs* Dealer blackjack... of course...",
+  ],
+  chatty: [
+    "Dealer blackjack! You know, statistically...",
+    "Natural 21! That's like when my client...",
+    "Dealer blackjack! Reminds me of this seminar...",
+    "Blackjack! But here's an interesting fact...",
+    "Dealer 21! Well THAT'S a conversation starter!",
+  ],
+  superstitious: [
+    "Dealer blackjack! The universe is testing me!",
+    "Natural 21! Dark energy at work!",
+    "Dealer blackjack! Mercury retrograde strikes!",
+    "The dealer's aura is TOO strong!",
+    "Blackjack! The cosmos are against me!",
+  ],
+  cocky: [
+    "Dealer blackjack?! That's BULLSHIT!",
+    "How?! HOW does the dealer get blackjack?!",
+    "Dealer 21! That's just lucky!",
+    "Blackjack! Unbelievable!",
+    "Of COURSE the dealer gets blackjack!",
+  ],
+  nervous: [
+    "DEALER BLACKJACK?! *panics*",
+    "Oh god! Natural 21! We're doomed!",
+    "*hyperventilating* Blackjack! Blackjack!",
+    "Dealer blackjack! I KNEW this would happen!",
+    "Natural 21! This is my nightmare!",
+  ],
+  lucky: [
+    "Dealer blackjack?! My luck ran out!",
+    "Natural 21! Well that's rare!",
+    "Dealer blackjack! Even I can't beat that!",
+    "Blackjack! The streak ends here!",
+    "Dealer 21! That's... actually impressive!",
+  ],
+  unlucky: [
+    "Dealer blackjack! OF COURSE! *laughs*",
+    "Natural 21! Because WHY NOT?!",
+    "Dealer blackjack! That's so ME!",
+    "Blackjack! This is my life in a nutshell!",
+    "Dealer 21! I should've bet on the dealer!",
+  ],
+};
+
+/**
  * Helper function to get personality-specific reaction
  */
 export function getPersonalityReaction(
@@ -2078,20 +2338,49 @@ export function getInitialHandReaction(
   hasBlackjack: boolean,
   dealerUpCard?: { rank: string; suit: string },
 ): string | null {
-  // Blackjack - use character-specific bigWin reactions
+  // Blackjack - use generic celebration
   if (hasBlackjack) {
-    const validReactions = character.reactions.bigWin.filter((reaction) =>
-      reaction.contexts.includes("any"),
-    );
-    if (validReactions.length > 0) {
-      const selectedReaction =
-        validReactions[Math.floor(Math.random() * validReactions.length)];
-      return selectedReaction.text;
-    }
+    const blackjackReactions = [
+      "BLACKJACK! YES!",
+      "Twenty-one baby!",
+      "Blackjack! That's what I'm talking about!",
+      "Natural blackjack! Love it!",
+    ];
+    return blackjackReactions[
+      Math.floor(Math.random() * blackjackReactions.length)
+    ];
   }
 
-  // For other hands, use generic reactions from dialogue
-  return getGenericInitialReaction(handValue, dealerUpCard);
+  // Twenty - use generic celebration (not personality-specific)
+  if (handValue === 20) {
+    const reactions = GENERIC_INITIAL_REACTIONS.twenty;
+    return reactions[Math.floor(Math.random() * reactions.length)];
+  }
+
+  // Bad hands - use personality-specific reactions for more variety
+  const dealerRank = dealerUpCard?.rank;
+  const isDealerStrong =
+    dealerRank &&
+    ["7", "8", "9", "10", "J", "Q", "K", "A"].includes(dealerRank);
+
+  // Very weak hands (5-8): Always bad
+  if (handValue >= 5 && handValue <= 8) {
+    return getPersonalityReaction(character.personality, "badStart");
+  }
+
+  // Stiff hands (12-16): Bad, especially vs strong dealer
+  // Only show reaction if dealer is showing strength or if hand is very stiff (14-16)
+  if (
+    handValue >= 12 &&
+    handValue <= 16 &&
+    (isDealerStrong || handValue >= 14)
+  ) {
+    return getPersonalityReaction(character.personality, "badStart");
+  }
+
+  // Note: 9-11 are good/neutral (can't bust, double-down candidates) so no reaction
+  // Note: 17-19 are solid hands, no reaction needed
+  return null;
 }
 
 /**
@@ -2104,6 +2393,59 @@ export function getHitReaction(
   newHandValue: number,
 ): string | null {
   return getGenericHitReaction(oldHandValue, newHandValue);
+}
+
+/**
+ * Get character reaction at end of hand based on outcome
+ */
+export function getEndOfHandReaction(
+  character: AICharacter,
+  outcome: "bigWin" | "smallWin" | "push" | "smallLoss" | "bigLoss",
+  context: "bust" | "blackjack" | "dealerBlackjack" | "dealerWin" | "any",
+): string | null {
+  // Map outcomes to personality situations
+  if (outcome === "bigWin" && context === "blackjack") {
+    // Use generic blackjack celebration for big wins
+    const blackjackReactions = [
+      "BLACKJACK! YES!",
+      "Twenty-one baby!",
+      "Blackjack! That's what I'm talking about!",
+      "Natural blackjack! Love it!",
+    ];
+    return blackjackReactions[
+      Math.floor(Math.random() * blackjackReactions.length)
+    ];
+  }
+
+  if (outcome === "smallWin") {
+    // Small win personality reactions
+    const winReactions = PERSONALITY_WIN_REACTIONS[character.personality];
+    return winReactions[Math.floor(Math.random() * winReactions.length)];
+  }
+
+  if (outcome === "push") {
+    // Push personality reactions
+    const pushReactions = PERSONALITY_PUSH_REACTIONS[character.personality];
+    return pushReactions[Math.floor(Math.random() * pushReactions.length)];
+  }
+
+  if (outcome === "smallLoss" && context === "dealerWin") {
+    // Dealer beat us reactions
+    const lossReactions = PERSONALITY_LOSS_REACTIONS[character.personality];
+    return lossReactions[Math.floor(Math.random() * lossReactions.length)];
+  }
+
+  if (outcome === "bigLoss" && context === "dealerBlackjack") {
+    // Dealer got blackjack reactions
+    const dealerBJReactions =
+      PERSONALITY_DEALER_BLACKJACK_REACTIONS[character.personality];
+    return dealerBJReactions[
+      Math.floor(Math.random() * dealerBJReactions.length)
+    ];
+  }
+
+  // Don't show bust reactions at end of hand - they were already shown during the turn
+  return null;
 }
 
 /**

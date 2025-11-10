@@ -455,8 +455,8 @@ export function useAITurnsPhase({
 
         setPlayersFinished((prev) => new Set(prev).add(idx));
 
-        // Show hand-based dialogue when standing (20% chance)
-        if (Math.random() < 0.20) {
+        // Show hand-based dialogue when standing (50% chance)
+        if (Math.random() < 0.50) {
           let dialogue: string | null = null;
 
           // Try to get hand-specific dialogue

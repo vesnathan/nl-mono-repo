@@ -8,7 +8,6 @@ import { Card } from "@/types/game";
 
 interface UseRoundEndPhaseParams {
   phase: GamePhase;
-  debugLogs: string[];
   aiPlayers: AIPlayer[];
   playerSeat: number | null;
   cardsDealt: number;
@@ -35,7 +34,6 @@ interface UseRoundEndPhaseParams {
  */
 export function useRoundEndPhase({
   phase,
-  debugLogs,
   aiPlayers,
   playerSeat,
   cardsDealt,
@@ -52,11 +50,6 @@ export function useRoundEndPhase({
 }: UseRoundEndPhaseParams) {
   useEffect(() => {
     if (phase === "ROUND_END") {
-      // If debug logs exist, wait for user to click "Clear Log & Continue"
-      if (debugLogs.length > 0) {
-        return;
-      }
-
       registerTimeout(() => {
         // Occasionally add or remove players (15% chance per hand)
         const playerChangeChance = Math.random();
@@ -188,7 +181,6 @@ export function useRoundEndPhase({
     registerTimeout,
     aiPlayers,
     playerSeat,
-    debugLogs.length,
     addSpeechBubble,
     setAIPlayers,
     setDealerCallout,

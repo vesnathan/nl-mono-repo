@@ -342,12 +342,12 @@ export default function GamePage() {
     setHandNumber((prev) => prev + 1);
     setPhase("BETTING");
     setSpeechBubbles([]); // Clear speech bubbles from previous hand
-  }, []);
+    clearDebugLogs(); // Clear debug logs at start of new hand
+  }, [clearDebugLogs]);
 
   // Round end phase hook
   useRoundEndPhase({
     phase,
-    debugLogs,
     aiPlayers,
     playerSeat,
     cardsDealt,

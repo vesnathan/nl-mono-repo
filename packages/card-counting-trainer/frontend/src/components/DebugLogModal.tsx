@@ -18,7 +18,7 @@ export default function DebugLogModal({
 }: DebugLogModalProps) {
   return (
     <>
-      {/* Debug Action Buttons - shows when logs exist and hand is finished */}
+      {/* Debug Action Button - shows when logs exist and hand is finished */}
       {debugLogs.length > 0 && phase === "ROUND_END" && (
         <div
           style={{
@@ -27,8 +27,6 @@ export default function DebugLogModal({
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 10000,
-            display: "flex",
-            gap: "12px",
           }}
         >
           <button
@@ -48,38 +46,6 @@ export default function DebugLogModal({
             }}
           >
             📋 Copy Log
-          </button>
-          <button
-            onClick={onClearDebugLogs}
-            style={{
-              backgroundColor: "#10B981",
-              color: "#FFF",
-              border: "none",
-              borderRadius: "8px",
-              padding: "12px 24px",
-              fontSize: "16px",
-              fontWeight: "bold",
-              cursor: "pointer",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
-            }}
-          >
-            ▶️ Continue
-          </button>
-          <button
-            onClick={onClearDebugLogs}
-            style={{
-              backgroundColor: "#EF4444",
-              color: "#FFF",
-              border: "none",
-              borderRadius: "8px",
-              padding: "12px 24px",
-              fontSize: "16px",
-              fontWeight: "bold",
-              cursor: "pointer",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
-            }}
-          >
-            🗑️ Clear Log
           </button>
         </div>
       )}

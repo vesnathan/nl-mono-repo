@@ -3,6 +3,8 @@ import { calculateHandValue, isBlackjack } from "@/lib/gameActions";
 import {
   getInitialHandReaction,
   getRandomDealerUpCardSaying,
+  getPersonalityReaction,
+  getEndOfHandReaction,
 } from "@/data/dialogue";
 import { determineHandResult, calculatePayout } from "@/lib/dealer";
 import {
@@ -98,19 +100,13 @@ export function generateInitialReactions(
  * @returns Reaction or null
  */
 export function generateBustReaction(ai: AIPlayer): Reaction | null {
-  const reactions_pool = ai.character.reactions.bigLoss;
-  const validReactions = reactions_pool.filter(
-    (reaction) =>
-      reaction.contexts.includes("bust") || reaction.contexts.includes("any"),
-  );
-
+  // Use personality-specific bust reaction from dialogue system
   // 70% chance to react to bust
-  if (validReactions.length > 0 && Math.random() < 0.7) {
-    const selectedReaction =
-      validReactions[Math.floor(Math.random() * validReactions.length)];
+  if (Math.random() < 0.7) {
+    const bustMessage = getPersonalityReaction(ai.character.personality, "bust");
     return {
       playerId: ai.character.id,
-      message: selectedReaction.text,
+      message: bustMessage,
       outcome: "bigLoss",
       position: ai.position,
     };
@@ -171,53 +167,47 @@ export function generateEndOfHandReactions(
       currentContext = "dealerWin";
     }
 
-    let outcomeType = "push";
-    let reactions_pool: Array<{ text: string; contexts: Array<string> }> = [];
+    // Determine outcome type and reaction chance
+    let outcomeType: "bigWin" | "smallWin" | "push" | "smallLoss" | "bigLoss" =
+      "push";
     let reactionChance = 0;
 
     if (result === "BLACKJACK") {
       outcomeType = "bigWin";
-      reactions_pool = ai.character.reactions.bigWin;
       reactionChance = 0.8; // Very likely to react to blackjack
     } else if (netGain > ai.hand.bet * 0.5) {
       outcomeType = "bigWin";
-      reactions_pool = ai.character.reactions.bigWin;
       reactionChance = 0.7; // Likely to react to big win
     } else if (netGain > 0) {
       outcomeType = "smallWin";
-      reactions_pool = ai.character.reactions.smallWin;
       reactionChance = 0.3; // Sometimes react to small win
     } else if (netGain === 0) {
       outcomeType = "push";
-      reactions_pool = ai.character.reactions.push;
       reactionChance = 0.1; // Rarely react to push
     } else if (result === "BUST" || netGain < -ai.hand.bet * 0.5) {
       outcomeType = "bigLoss";
-      reactions_pool = ai.character.reactions.bigLoss;
       reactionChance = 0.7; // Likely to react to big loss
     } else {
       outcomeType = "smallLoss";
-      reactions_pool = ai.character.reactions.smallLoss;
       reactionChance = 0.3; // Sometimes react to small loss
     }
 
-    // Filter reactions by context - only show reactions appropriate for the situation
-    const validReactions = reactions_pool.filter(
-      (reaction) =>
-        reaction.contexts.includes(currentContext) ||
-        reaction.contexts.includes("any"),
-    );
+    // Get reaction from dialogue system
+    if (Math.random() < reactionChance) {
+      const reactionMessage = getEndOfHandReaction(
+        ai.character,
+        outcomeType,
+        currentContext,
+      );
 
-    // Only add reaction if player decides to react and there are valid messages
-    if (validReactions.length > 0 && Math.random() < reactionChance) {
-      const selectedReaction =
-        validReactions[Math.floor(Math.random() * validReactions.length)];
-      reactions.push({
-        playerId: ai.character.id,
-        message: selectedReaction.text,
-        outcome: outcomeType,
-        position: ai.position,
-      });
+      if (reactionMessage) {
+        reactions.push({
+          playerId: ai.character.id,
+          message: reactionMessage,
+          outcome: outcomeType,
+          position: ai.position,
+        });
+      }
     }
   });
 
