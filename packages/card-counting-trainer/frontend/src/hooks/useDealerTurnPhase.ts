@@ -241,14 +241,13 @@ export function useDealerTurnPhase({
             addDebugLog(`Dealer busted: ${isBust}`);
 
             if (isBust) {
-              setDealerCallout("Dealer busts");
+              addSpeechBubble("dealer-result", "Dealer busts", -1);
             } else {
-              setDealerCallout(`Dealer has ${finalValue}`);
+              addSpeechBubble("dealer-result", `Dealer has ${finalValue}`, -1);
             }
 
-            // Clear callout and move to resolving
+            // Move to resolving after brief delay
             registerTimeout(() => {
-              setDealerCallout(null);
               dealerTurnProcessingRef.current = false; // Unlock before moving to next phase
               addDebugLog("🔓 Dealer turn processing unlocked (finished)");
               setPhase("RESOLVING");
