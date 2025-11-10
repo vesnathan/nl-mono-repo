@@ -50,14 +50,14 @@ export default function SpeechBubble({
           <div
             style={{
               position: "absolute",
-              top: "-14px",
+              bottom: "-14px",
               left: "50%",
               transform: "translateX(-50%)",
               width: 0,
               height: 0,
               borderLeft: "14px solid transparent",
               borderRight: "14px solid transparent",
-              borderBottom: "14px solid rgba(255, 255, 255, 0.98)",
+              borderTop: "14px solid rgba(255, 255, 255, 0.98)",
             }}
           />
         ) : (
