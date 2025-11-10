@@ -89,6 +89,7 @@ export function createSpeechBubble(
     message,
     position: { left: `${x}%`, top: `${y}%` },
     visible: true,
-    isDealer: position === -1,
+    // Positions 0 and 7 (far left/right) need arrow on top like dealer to avoid covering cards
+    isDealer: position === -1 || position === 0 || position === 7,
   };
 }

@@ -20,6 +20,7 @@ export default function SpeechBubble({
         position: "fixed",
         left: position.left,
         top: position.top,
+        // isDealer includes dealer (-1) and positions 0,7 - bubble below with arrow on top
         transform: isDealer ? "translate(-50%, 0%)" : "translate(-50%, -100%)",
         zIndex: 1000,
         animation: "speechFadeIn 0.3s ease-out",
