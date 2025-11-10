@@ -10,7 +10,11 @@
 - [x] I don't like the styling of the leaderboard, settings modals
 - [x] When AI peeks and wins, players don't say anything.
 - [x] Need to show bet minimun on table. No max.
-
+- [x] Dealer just had two aces and didn't split. (AI players now split based on basic strategy)
+- [x] How do I double? (Double down and split buttons now show in player actions modal)
+- [ ] Fix image sizes
+- [ ] Set up ddb to track high scores etc, chip count, score etc.
+- [x] Logo and audio added (Background music with volume controls implemented)
 
 ## High Priority - MVP Features (Phase 1)
 
@@ -81,13 +85,16 @@
 - [ ] Speed control slider (0.25s - 2s per card)
 
 ### Gameplay Features
-- [ ] **Split gameplay** (splitting pairs into two hands)
-- [ ] Double down implementation
+- [x] **Split gameplay** (splitting pairs into two hands)
+- [x] Double down implementation
 - [ ] Surrender functionality
-- [ ] Insurance when dealer shows Ace
+- [x] Insurance when dealer shows Ace
 - [ ] Resplit option (up to 4 hands)
 
 ## Lower Priority - Polish & Future (Phase 3+)
+
+### Code Quality & Architecture
+- [ ] **Refactor prop drilling in root component** - Move game state/actions to React Context to reduce 60+ props passed through BlackjackGameUI. Create contexts for: game state, modal state, player actions, dealer state. This will improve maintainability and make the component tree cleaner.
 
 ### Visual & UI Improvements
 - [ ] **Graphs for various player stats**

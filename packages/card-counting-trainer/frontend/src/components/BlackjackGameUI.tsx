@@ -83,6 +83,8 @@ interface BlackjackGameUIProps {
   startNewRound: () => void;
   hit: () => void;
   stand: () => void;
+  doubleDown: () => void;
+  split: () => void;
   handleConversationResponse: (suspicionChange: number) => void;
   handleConversationIgnore: () => void;
   setWinLossBubbles: React.Dispatch<React.SetStateAction<WinLossBubbleData[]>>;
@@ -149,6 +151,8 @@ export default function BlackjackGameUI({
   startNewRound,
   hit,
   stand,
+  doubleDown,
+  split,
   handleConversationResponse,
   handleConversationIgnore,
   setWinLossBubbles,
@@ -243,6 +247,8 @@ export default function BlackjackGameUI({
         playerFinished={playerFinished}
         hit={hit}
         stand={stand}
+        doubleDown={doubleDown}
+        split={split}
         showSettings={showSettings}
         setShowSettings={setShowSettings}
         gameSettings={gameSettings}
