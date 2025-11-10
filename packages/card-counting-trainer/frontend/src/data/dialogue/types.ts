@@ -2,7 +2,7 @@
  * Type definitions for character dialogue system
  */
 
-import { AICharacter } from "../aiCharacters";
+import type { AICharacter } from "../aiCharacters";
 
 export interface TableSaying {
   characterId: AICharacter["id"];
