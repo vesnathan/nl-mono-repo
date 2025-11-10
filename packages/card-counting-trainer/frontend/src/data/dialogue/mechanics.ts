@@ -1,19 +1,7 @@
 /**
- * AI Conversation Management
+ * Conversation System Mechanics
  * Handles conversation triggers, response options, and suspicion thresholds
- *
- * Note: All dialogue content (conversations, prompts, distractions) has been
- * moved to dialogue for consolidation. This file now focuses on the
- * conversation system mechanics.
  */
-
-// Re-export conversation content from dialogue for backwards compatibility
-export {
-  AI_TO_AI_CONVERSATIONS,
-  PLAYER_ENGAGEMENT_PROMPTS,
-  getRandomAIConversation,
-  getPlayerEngagement,
-} from "./dialogue";
 
 export interface Conversation {
   speaker: string; // character ID or "player"
@@ -22,7 +10,9 @@ export interface Conversation {
   targetPlayer?: boolean; // If true, directed at the player
 }
 
-// Player response options (these will be buttons)
+/**
+ * Player response options (these will be buttons)
+ */
 export interface ResponseOption {
   text: string;
   suspicionIncrease: number; // How much ignoring adds to suspicion (0-10)

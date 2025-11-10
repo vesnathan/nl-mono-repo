@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ResponseOption } from "@/data/aiConversations";
+import { ResponseOption } from "@/data/dialogue";
 
 interface ConversationBubbleProps {
   speaker: string; // Character name

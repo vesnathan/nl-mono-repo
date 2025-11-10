@@ -165,6 +165,29 @@ export function getPlayerEngagement(characterId: string): string | null {
 export { pick };
 
 // ============================================================================
+// DEALER DIALOGUE
+// ============================================================================
+
+export {
+  DEALER_PLAYER_CONVERSATIONS,
+  getDealerPlayerLine,
+  type DealerPlayerConversationTemplate,
+} from "./dealer";
+
+// ============================================================================
+// CONVERSATION MECHANICS
+// ============================================================================
+
+export {
+  RESPONSE_OPTIONS,
+  SUSPICION_THRESHOLDS,
+  shouldTriggerConversation,
+  shouldTargetPlayer,
+  type Conversation,
+  type ResponseOption,
+} from "./mechanics";
+
+// ============================================================================
 // IN-HAND REACTION HELPERS
 // ============================================================================
 
