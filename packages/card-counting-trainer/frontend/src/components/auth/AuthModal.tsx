@@ -352,6 +352,11 @@ export function AuthModal({
         {(closeModal) => (
           <>
             <ModalHeader className="flex flex-col items-center gap-4 text-white pt-6">
+              <img
+                src="/logo.png"
+                alt="Backroom Blackjack"
+                className="w-32 h-32 mb-2"
+              />
               <h2 className="text-2xl font-bold chip-gold">
                 Backroom Blackjack
               </h2>

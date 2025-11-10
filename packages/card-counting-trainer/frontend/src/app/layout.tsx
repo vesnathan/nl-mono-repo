@@ -42,6 +42,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           content="Master card counting in a simulated casino environment"
         />
         <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/logo.png" />
       </head>
       <body className="felt-background">
         <QueryProvider>

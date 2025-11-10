@@ -1,5 +1,10 @@
 import React from "react";
-import { GameSettings, DealerPeekRule, BlackjackPayout, CountingSystem } from "@/types/gameSettings";
+import {
+  GameSettings,
+  DealerPeekRule,
+  BlackjackPayout,
+  CountingSystem,
+} from "@/types/gameSettings";
 
 interface TableRulesProps {
   gameSettings: GameSettings;
@@ -57,110 +62,133 @@ export default function TableRules({ gameSettings }: TableRulesProps) {
   const countingSystemText = getCountingSystemText(gameSettings.countingSystem);
 
   return (
-    <svg
-      style={{
-        position: "absolute",
-        top: "45%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: "1200px",
-        height: "200px",
-        zIndex: 0,
-        pointerEvents: "none",
-      }}
-      viewBox="0 0 1200 200"
-      preserveAspectRatio="xMidYMid meet"
-    >
-      <defs>
-        {/* Arc path for main text - curves upward */}
-        <path
-          id="mainTextArc"
-          d="M 100,100 Q 600,40 1100,100"
-          fill="transparent"
-        />
-        {/* Arc path for subtitle - curves upward below main text */}
-        <path
-          id="subTextArc"
-          d="M 100,130 Q 600,75 1100,130"
-          fill="transparent"
-        />
-        {/* Arc path for minimum bet - curves upward below subtitle */}
-        <path
-          id="minBetArc"
-          d="M 100,155 Q 600,105 1100,155"
-          fill="transparent"
-        />
-        {/* Arc path for counting system - curves upward below minimum bet */}
-        <path
-          id="countingSystemArc"
-          d="M 100,175 Q 600,130 1100,175"
-          fill="transparent"
-        />
-      </defs>
-
-      {/* Main text */}
-      <text
-        fontFamily="serif"
-        fontSize="32"
-        fontWeight="bold"
-        fill="rgba(255, 215, 0, 0.35)"
-        letterSpacing="3"
+    <>
+      {/* Logo on the table */}
+      <img
+        src="/logo.png"
+        alt="Backroom Blackjack"
         style={{
-          filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
+          position: "absolute",
+          top: "calc(20% + 80px)",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "180px",
+          height: "180px",
+          zIndex: 0,
+          pointerEvents: "none",
+          opacity: 0.4,
+          filter: "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5))",
         }}
-      >
-        <textPath href="#mainTextArc" startOffset="50%" textAnchor="middle">
-          {mainText}
-        </textPath>
-      </text>
-
-      {/* Subtitle text */}
-      <text
-        fontFamily="serif"
-        fontSize="20"
-        fontWeight="bold"
-        fill="rgba(255, 215, 0, 0.35)"
-        letterSpacing="2"
+      />
+      <svg
         style={{
-          filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
+          position: "absolute",
+          top: "45%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "1200px",
+          height: "200px",
+          zIndex: 0,
+          pointerEvents: "none",
         }}
+        viewBox="0 0 1200 200"
+        preserveAspectRatio="xMidYMid meet"
       >
-        <textPath href="#subTextArc" startOffset="50%" textAnchor="middle">
-          {subText}
-        </textPath>
-      </text>
+        <defs>
+          {/* Arc path for main text - curves upward */}
+          <path
+            id="mainTextArc"
+            d="M 100,100 Q 600,40 1100,100"
+            fill="transparent"
+          />
+          {/* Arc path for subtitle - curves upward below main text */}
+          <path
+            id="subTextArc"
+            d="M 100,130 Q 600,75 1100,130"
+            fill="transparent"
+          />
+          {/* Arc path for minimum bet - curves upward below subtitle */}
+          <path
+            id="minBetArc"
+            d="M 100,155 Q 600,105 1100,155"
+            fill="transparent"
+          />
+          {/* Arc path for counting system - curves upward below minimum bet */}
+          <path
+            id="countingSystemArc"
+            d="M 100,175 Q 600,130 1100,175"
+            fill="transparent"
+          />
+        </defs>
 
-      {/* Minimum bet text */}
-      <text
-        fontFamily="serif"
-        fontSize="18"
-        fontWeight="bold"
-        fill="rgba(255, 215, 0, 0.30)"
-        letterSpacing="2"
-        style={{
-          filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
-        }}
-      >
-        <textPath href="#minBetArc" startOffset="50%" textAnchor="middle">
-          {minBetText}
-        </textPath>
-      </text>
+        {/* Main text */}
+        <text
+          fontFamily="serif"
+          fontSize="32"
+          fontWeight="bold"
+          fill="rgba(255, 215, 0, 0.35)"
+          letterSpacing="3"
+          style={{
+            filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
+          }}
+        >
+          <textPath href="#mainTextArc" startOffset="50%" textAnchor="middle">
+            {mainText}
+          </textPath>
+        </text>
 
-      {/* Counting system text */}
-      <text
-        fontFamily="serif"
-        fontSize="16"
-        fontWeight="bold"
-        fill="rgba(255, 215, 0, 0.25)"
-        letterSpacing="2"
-        style={{
-          filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
-        }}
-      >
-        <textPath href="#countingSystemArc" startOffset="50%" textAnchor="middle">
-          {countingSystemText}
-        </textPath>
-      </text>
-    </svg>
+        {/* Subtitle text */}
+        <text
+          fontFamily="serif"
+          fontSize="20"
+          fontWeight="bold"
+          fill="rgba(255, 215, 0, 0.35)"
+          letterSpacing="2"
+          style={{
+            filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
+          }}
+        >
+          <textPath href="#subTextArc" startOffset="50%" textAnchor="middle">
+            {subText}
+          </textPath>
+        </text>
+
+        {/* Minimum bet text */}
+        <text
+          fontFamily="serif"
+          fontSize="18"
+          fontWeight="bold"
+          fill="rgba(255, 215, 0, 0.30)"
+          letterSpacing="2"
+          style={{
+            filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
+          }}
+        >
+          <textPath href="#minBetArc" startOffset="50%" textAnchor="middle">
+            {minBetText}
+          </textPath>
+        </text>
+
+        {/* Counting system text */}
+        <text
+          fontFamily="serif"
+          fontSize="16"
+          fontWeight="bold"
+          fill="rgba(255, 215, 0, 0.25)"
+          letterSpacing="2"
+          style={{
+            filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
+          }}
+        >
+          <textPath
+            href="#countingSystemArc"
+            startOffset="50%"
+            textAnchor="middle"
+          >
+            {countingSystemText}
+          </textPath>
+        </text>
+      </svg>
+    </>
   );
 }
