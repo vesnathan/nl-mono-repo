@@ -11,6 +11,7 @@ interface StatsBarProps {
   onSettingsClick: () => void;
   onLeaderboardClick: () => void;
   onStrategyClick: () => void;
+  onChartsClick: () => void;
 }
 
 export default function StatsBar({
@@ -24,6 +25,7 @@ export default function StatsBar({
   onSettingsClick,
   onLeaderboardClick,
   onStrategyClick,
+  onChartsClick,
 }: StatsBarProps) {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -257,6 +259,28 @@ export default function StatsBar({
           }}
         >
           📊 Strategy
+        </button>
+        <button
+          onClick={onChartsClick}
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            color: "#FFF",
+            border: "2px solid #FFD700",
+            borderRadius: "8px",
+            padding: "8px 16px",
+            fontSize: "14px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            transition: "all 0.2s",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+          }}
+        >
+          📈 Charts
         </button>
       </div>
     </div>

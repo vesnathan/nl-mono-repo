@@ -35,6 +35,8 @@ import { useDealerTurnPhase } from "@/hooks/useDealerTurnPhase";
 import { useResolvingPhase } from "@/hooks/useResolvingPhase";
 import { useAITurnsPhase } from "@/hooks/useAITurnsPhase";
 import { useDealingPhase } from "@/hooks/useDealingPhase";
+import { useHeatMap } from "@/hooks/useHeatMap";
+import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
 import BlackjackGameUI from "@/components/BlackjackGameUI";
 
 export default function GamePage() {
@@ -114,6 +116,7 @@ export default function GamePage() {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showStrategyCard, setShowStrategyCard] = useState(false);
+  const [showHeatMap, setShowHeatMap] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [playerSeat, setPlayerSeat] = useState<number | null>(null); // null means not seated
 
@@ -286,6 +289,18 @@ export default function GamePage() {
 
   // Pit boss movement hook
   usePitBossMovement(setPitBossDistance, suspicionLevel);
+
+  // Heat map tracking hook - tracks pit boss proximity vs count for discretion analysis
+  const { getHeatMapBuckets, getDiscretionScore, dataPointCount } = useHeatMap({
+    trueCount: calculateDecksRemaining(gameSettings.numberOfDecks * 52, cardsDealt) > 0
+      ? calculateTrueCount(runningCount, calculateDecksRemaining(gameSettings.numberOfDecks * 52, cardsDealt))
+      : 0,
+    pitBossDistance,
+    currentBet,
+    suspicionLevel,
+    phase,
+    initialized,
+  });
 
   // Auto-start hand hook
   useAutoStartHand({
@@ -464,11 +479,16 @@ export default function GamePage() {
       peakChips={peakChips}
       longestStreak={longestStreak}
       showStrategyCard={showStrategyCard}
+      showHeatMap={showHeatMap}
+      heatMapBuckets={getHeatMapBuckets()}
+      discretionScore={getDiscretionScore()}
+      heatMapDataPointCount={dataPointCount}
       debugLogs={debugLogs}
       showDebugLog={showDebugLog}
       setShowSettings={setShowSettings}
       setShowLeaderboard={setShowLeaderboard}
       setShowStrategyCard={setShowStrategyCard}
+      setShowHeatMap={setShowHeatMap}
       setPlayerSeat={setPlayerSeat}
       addDebugLog={addDebugLog}
       startNewRound={startNewRound}

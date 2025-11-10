@@ -10,10 +10,12 @@ import {
 } from "@/types/gameState";
 import { GameSettings } from "@/types/gameSettings";
 import { DealerCharacter } from "@/data/dealerCharacters";
+import { HeatMapBucket } from "@/hooks/useHeatMap";
 import SuspicionMeter from "@/components/SuspicionMeter";
 import StatsBar from "@/components/StatsBar";
 import GameTable from "@/components/GameTable";
 import GameModals from "@/components/GameModals";
+import HeatMapModal from "@/components/HeatMapModal";
 
 interface BlackjackGameUIProps {
   // Display state
@@ -59,6 +61,10 @@ interface BlackjackGameUIProps {
   peakChips: number;
   longestStreak: number;
   showStrategyCard: boolean;
+  showHeatMap: boolean;
+  heatMapBuckets: HeatMapBucket[];
+  discretionScore: number;
+  heatMapDataPointCount: number;
   debugLogs: string[];
   showDebugLog: boolean;
 
@@ -66,6 +72,7 @@ interface BlackjackGameUIProps {
   setShowSettings: (show: boolean) => void;
   setShowLeaderboard: (show: boolean) => void;
   setShowStrategyCard: (show: boolean) => void;
+  setShowHeatMap: (show: boolean) => void;
   setPlayerSeat: (seat: number) => void;
   addDebugLog: (message: string) => void;
   startNewRound: () => void;
@@ -119,11 +126,16 @@ export default function BlackjackGameUI({
   peakChips,
   longestStreak,
   showStrategyCard,
+  showHeatMap,
+  heatMapBuckets,
+  discretionScore,
+  heatMapDataPointCount,
   debugLogs,
   showDebugLog,
   setShowSettings,
   setShowLeaderboard,
   setShowStrategyCard,
+  setShowHeatMap,
   setPlayerSeat,
   addDebugLog,
   startNewRound,
@@ -171,6 +183,7 @@ export default function BlackjackGameUI({
         onSettingsClick={() => setShowSettings(true)}
         onLeaderboardClick={() => setShowLeaderboard(true)}
         onStrategyClick={() => setShowStrategyCard(true)}
+        onChartsClick={() => setShowHeatMap(true)}
       />
 
       {/* Full Viewport Game Table */}
@@ -231,6 +244,15 @@ export default function BlackjackGameUI({
         showDebugLog={showDebugLog}
         setShowDebugLog={setShowDebugLog}
         clearDebugLogs={clearDebugLogs}
+      />
+
+      {/* Heat Map Modal */}
+      <HeatMapModal
+        isOpen={showHeatMap}
+        onClose={() => setShowHeatMap(false)}
+        heatMapBuckets={heatMapBuckets}
+        discretionScore={discretionScore}
+        dataPointCount={heatMapDataPointCount}
       />
     </div>
   );

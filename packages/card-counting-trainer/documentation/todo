@@ -3,8 +3,8 @@
 ## Current Issues
 - [x] Have cards fly to the actual card's location.
 - [ ] Card animation length needs to change based on player spot so the cards all move at the same speed
-- [ ] player comments need to stay up for longer
-- [ ] Player reaction comments when they bust need to happen when they bust, not at the end of the shoe. Also as soon as BJ is dealt if they have a comment for blackjack.
+- [x] player comments need to stay up for longer
+- [x] Player reaction comments when they bust need to happen when they bust, not at the end of the shoe. Also as soon as BJ is dealt if they have a comment for blackjack.
 - [x] pit boss attention, distance, needs to work with the dealer personality. It will be the dealer that alerts the pit boss to a counter. Also add some dealer comments saying to the player, "Counting boss? Don't worry, I got you!" etc depending on the dealers personality. Should we also have a dealer suspicion as well as pit boss attention?
 - [ ] a heat map that shows where the pit boss is when the count is high. this will indicate whether the player is being discreet. Under a charts button.
 - [ ] I don't like the styling of the leaderboard, settings modals
