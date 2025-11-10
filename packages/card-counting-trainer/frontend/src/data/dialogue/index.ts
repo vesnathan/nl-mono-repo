@@ -8,6 +8,7 @@ export * from "./types";
 
 // Import types and utilities
 import { pick, TableSaying } from "./types";
+import type { AICharacter } from "../aiCharacters";
 
 // Import all character dialogues
 import { drunkDanny } from "./characters/drunk-danny";
@@ -1991,8 +1992,6 @@ export {
 // ============================================================================
 // IN-HAND REACTION HELPERS
 // ============================================================================
-
-import { AICharacter } from "../aiCharacters";
 
 /**
  * Get character reaction when dealt initial hand
