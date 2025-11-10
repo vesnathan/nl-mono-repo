@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DealerCharacter } from "@/data/dealerCharacters";
 
 interface SuspicionMeterProps {
-  level: number; // 0-100 (alternate prop name)
-  suspicionLevel?: number; // 0-100
+  level: number; // 0-100 (alternate prop name) - Pit boss attention
+  suspicionLevel?: number; // 0-100 - Pit boss attention (alternate)
+  dealerSuspicion?: number; // 0-100 - Dealer's awareness
   pitBossDistance?: number; // 0-100, higher = closer (more dangerous)
+  currentDealer?: DealerCharacter | null; // Current dealer info
   dealerName?: string;
   dealerDetectionSkill?: number; // 0-100
   onYourSide?: boolean;
@@ -14,7 +17,9 @@ interface SuspicionMeterProps {
 export default function SuspicionMeter({
   level,
   suspicionLevel,
+  dealerSuspicion = 0,
   pitBossDistance,
+  currentDealer,
   dealerName,
   dealerDetectionSkill,
   onYourSide,
@@ -154,6 +159,85 @@ export default function SuspicionMeter({
           {actualSuspicionLevel}%
         </div>
       </div>
+
+      {/* Dealer Suspicion */}
+      {currentDealer && (
+        <div style={{ marginTop: "12px" }}>
+          <div
+            style={{
+              fontSize: "11px",
+              color: "#AAA",
+              fontWeight: "bold",
+              marginBottom: "4px",
+            }}
+          >
+            DEALER SUSPICION
+            {currentDealer.onYourSide && (
+              <span
+                style={{
+                  color: "#4CAF50",
+                  marginLeft: "6px",
+                  fontSize: "10px",
+                }}
+              >
+                (On Your Side)
+              </span>
+            )}
+          </div>
+          <div
+            style={{
+              height: "20px",
+              backgroundColor: "#222",
+              borderRadius: "10px",
+              overflow: "hidden",
+              border: "1px solid #444",
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                height: "100%",
+                width: `${dealerSuspicion}%`,
+                backgroundColor: currentDealer.onYourSide
+                  ? "#4CAF50"
+                  : dealerSuspicion < 30
+                    ? "#4CAF50"
+                    : dealerSuspicion < 60
+                      ? "#FFC107"
+                      : "#F44336",
+                transition: "width 0.5s ease-out, background-color 0.3s ease",
+                boxShadow: currentDealer.onYourSide
+                  ? "0 0 8px #4CAF50"
+                  : `0 0 8px ${dealerSuspicion < 30 ? "#4CAF50" : dealerSuspicion < 60 ? "#FFC107" : "#F44336"}`,
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                fontSize: "10px",
+                fontWeight: "bold",
+                color: "#FFF",
+                textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+              }}
+            >
+              {dealerSuspicion}%
+            </div>
+          </div>
+          <div
+            style={{
+              fontSize: "10px",
+              color: "#999",
+              marginTop: "4px",
+              fontStyle: "italic",
+            }}
+          >
+            {currentDealer.name} ({currentDealer.personality})
+          </div>
+        </div>
+      )}
 
       {/* Pit Boss Distance */}
       {pitBossDistance !== undefined && (

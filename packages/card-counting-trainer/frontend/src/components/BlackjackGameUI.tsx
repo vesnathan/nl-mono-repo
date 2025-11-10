@@ -18,6 +18,7 @@ import GameModals from "@/components/GameModals";
 interface BlackjackGameUIProps {
   // Display state
   suspicionLevel: number;
+  dealerSuspicion: number;
   pitBossDistance: number;
   gameSettings: GameSettings;
   runningCount: number;
@@ -152,7 +153,9 @@ export default function BlackjackGameUI({
       {/* Suspicion Meter - Fixed position */}
       <SuspicionMeter
         level={suspicionLevel}
+        dealerSuspicion={dealerSuspicion}
         pitBossDistance={pitBossDistance}
+        currentDealer={currentDealer}
       />
 
       {/* Stats Bar at Top */}

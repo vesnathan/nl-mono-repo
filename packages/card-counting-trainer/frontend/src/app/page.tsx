@@ -100,7 +100,8 @@ export default function GamePage() {
 
   // UI state
   const [phase, setPhase] = useState<GamePhase>("BETTING");
-  const [suspicionLevel, setSuspicionLevel] = useState(0);
+  const [suspicionLevel, setSuspicionLevel] = useState(0); // Pit boss attention (0-100)
+  const [dealerSuspicion, setDealerSuspicion] = useState(0); // Dealer suspicion (0-100) - feeds into pit boss attention
   const [pitBossDistance, setPitBossDistance] = useState(30); // 0-100, higher = closer (more dangerous), start farther away
   const [speechBubbles, setSpeechBubbles] = useState<SpeechBubble[]>([]);
   const [winLossBubbles, setWinLossBubbles] = useState<WinLossBubbleData[]>([]);
@@ -414,6 +415,7 @@ export default function GamePage() {
   return (
     <BlackjackGameUI
       suspicionLevel={suspicionLevel}
+      dealerSuspicion={dealerSuspicion}
       pitBossDistance={pitBossDistance}
       gameSettings={gameSettings}
       runningCount={runningCount}
