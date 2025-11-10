@@ -98,9 +98,8 @@ export function useRoundEndPhase({
 
                 setAIPlayers((prev) => [...prev, newPlayer]);
 
-                // Show dealer callout
-                setDealerCallout(`${newCharacter.name} joins the table!`);
-                registerTimeout(() => setDealerCallout(null), 2000);
+                // Show dealer speech bubble
+                addSpeechBubble("dealer-join", `${newCharacter.name} joins the table!`, -1);
               }
             }
           } else if (!shouldAdd && currentAICount > 2) {
@@ -112,11 +111,8 @@ export function useRoundEndPhase({
               prev.filter((_, idx) => idx !== removeIndex),
             );
 
-            // Show dealer callout
-            setDealerCallout(
-              `${removedPlayer.character.name} leaves the table.`,
-            );
-            registerTimeout(() => setDealerCallout(null), 2000);
+            // Show dealer speech bubble
+            addSpeechBubble("dealer-leave", `${removedPlayer.character.name} leaves the table.`, -1);
           }
         }
 
@@ -159,10 +155,9 @@ export function useRoundEndPhase({
           setRunningCount(0);
           setShoesDealt((prev) => prev + 1);
 
-          // Show reshuffle message
-          setDealerCallout("Shuffling new shoe...");
+          // Show reshuffle message in speech bubble
+          addSpeechBubble("dealer-shuffle", "Shuffling new shoe...", -1);
           registerTimeout(() => {
-            setDealerCallout(null);
             nextHand();
           }, 3000);
         } else {

@@ -23,7 +23,7 @@ export default function SpeechBubble({
         // isDealer includes dealer (-1) and positions 0,7 - bubble below with arrow on top
         transform: isDealer ? "translate(-50%, 0%)" : "translate(-50%, -100%)",
         zIndex: 1000,
-        animation: "speechFadeIn 0.3s ease-out",
+        animation: isDealer ? "speechFadeInDealer 0.3s ease-out" : "speechFadeIn 0.3s ease-out",
       }}
     >
       <div
@@ -86,6 +86,16 @@ export default function SpeechBubble({
           to {
             opacity: 1;
             transform: translate(-50%, -100%) scale(1);
+          }
+        }
+        @keyframes speechFadeInDealer {
+          from {
+            opacity: 0;
+            transform: translate(-50%, 0%) scale(0.8);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0%) scale(1);
           }
         }
       `}</style>

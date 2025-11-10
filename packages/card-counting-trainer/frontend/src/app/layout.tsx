@@ -10,7 +10,6 @@ import { useLogoutFn } from "@/hooks/useLogoutFn";
 import { GlobalMessage } from "@/components/common/GlobalMessage";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Navbar } from "@/components/layout/Navbar";
 import { AMPLIFY_CONFIG } from "../config/amplifyConfig";
 import "./globals.css";
 
@@ -33,7 +32,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     pathname?.startsWith("/game");
 
   const isUnprotectedPage = !isProtectedPage;
-  const isHomePage = pathname === "/";
 
   return (
     <html lang="en" className="dark">
@@ -51,16 +49,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <AuthProvider>
               <GlobalMessage />
               {isUnprotectedPage ? (
-                <div className="flex flex-col min-h-screen">
-                  {!isHomePage && <Navbar />}
-                  <main className="flex-grow">{children}</main>
-                </div>
+                <main>{children}</main>
               ) : (
                 <RequireAuth>
-                  <div className="flex flex-col min-h-screen">
-                    <Navbar />
-                    <main className="flex-grow">{children}</main>
-                  </div>
+                  <main>{children}</main>
                 </RequireAuth>
               )}
             </AuthProvider>

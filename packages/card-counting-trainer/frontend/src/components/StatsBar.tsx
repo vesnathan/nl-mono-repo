@@ -1,4 +1,8 @@
+import { useState } from "react";
 import { GameSettings } from "@/types/gameSettings";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
+import { signOut } from "aws-amplify/auth";
 
 interface StatsBarProps {
   gameSettings: GameSettings;
@@ -25,6 +29,13 @@ export default function StatsBar({
   onStrategyClick,
   onChartsClick,
 }: StatsBarProps) {
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { isAuthenticated, isLoading, user, refresh } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    await refresh();
+  };
 
   return (
     <div
@@ -205,7 +216,60 @@ export default function StatsBar({
         >
           📈 Charts
         </button>
+        {!isLoading &&
+          (isAuthenticated ? (
+            <button
+              onClick={handleLogout}
+              style={{
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                color: "#FFF",
+                border: "2px solid #FFD700",
+                borderRadius: "8px",
+                padding: "8px 16px",
+                fontSize: "14px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+              }}
+            >
+              👤 {user?.username || "Logout"}
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowAuthModal(true)}
+              style={{
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                color: "#FFF",
+                border: "2px solid #FFD700",
+                borderRadius: "8px",
+                padding: "8px 16px",
+                fontSize: "14px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+              }}
+            >
+              🔑 Login / Register
+            </button>
+          ))}
       </div>
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthSuccess={refresh}
+      />
     </div>
   );
 }

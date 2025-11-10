@@ -386,15 +386,13 @@ export function useGameActions({
         }
 
         if (shouldPeek && canHaveBlackjack) {
-          // Show "Peeking..." callout
+          // Show "Peeking..." in speech bubble
           addDebugLog(
             `Dealer showing ${dealerUpCard.rank} - checking for blackjack...`,
           );
-          setDealerCallout("Peeking...");
+          addSpeechBubble("dealer-peek", "Peeking...", -1);
 
           registerTimeout(() => {
-            setDealerCallout(null);
-
             // Check for dealer blackjack (natural 21 with 2 cards)
             const dealerCards = [dealerCard1, dealerCard2];
             const dealerValue = calculateHandValue(dealerCards);
@@ -403,7 +401,7 @@ export function useGameActions({
                 "DEALER BLACKJACK! Revealing hole card and moving to RESOLVING",
               );
               setDealerRevealed(true);
-              setDealerCallout("Blackjack!");
+              addSpeechBubble("dealer-blackjack", "Blackjack!", -1);
 
               // Trigger AI player reactions to dealer blackjack
               registerTimeout(() => {
@@ -412,7 +410,6 @@ export function useGameActions({
 
               // Skip player turn and AI turns, go straight to resolving
               registerTimeout(() => {
-                setDealerCallout(null);
                 setPhase("RESOLVING");
               }, 2000);
             } else {
