@@ -20,9 +20,10 @@ export function getCardPosition(
   cardIndex?: number,
 ): { left: string; top: string } {
   if (type === "shoe") {
-    // Shoe is positioned at right: 7%, top: 20px (from the Shoe component positioning)
-    // Convert to left position: 100% - 7% = 93%
-    return { left: "93%", top: "20px" };
+    // Flying card animation start position - offset from actual shoe for better visibility
+    // Shoe component is at right: 7% (left: 93%), top: 20px
+    // Cards start 20px left and 20px down from there
+    return { left: "calc(93% - 20px)", top: "40px" };
   }
 
   if (type === "dealer") {

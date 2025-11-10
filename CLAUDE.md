@@ -2,6 +2,7 @@
 
 ## Important Notes
 - **DO NOT start dev servers** - They are already running in the background
+- **DO NOT run builds** - Builds take a long time, avoid running them unless absolutely necessary
 
 ## Fixed Issues
 

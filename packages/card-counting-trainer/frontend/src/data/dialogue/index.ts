@@ -2449,6 +2449,155 @@ export function getEndOfHandReaction(
 }
 
 /**
+ * Helper: Add decision-specific comments to pool
+ */
+function addDecisionComments(
+  commentPool: string[],
+  decision: "hit" | "stand",
+  commentary: NonNullable<CharacterDialogue["decisionCommentary"]>,
+  maxCount?: number,
+) {
+  const comments =
+    decision === "hit" ? commentary.shouldHit : commentary.shouldStand;
+  if (comments) {
+    const toAdd = maxCount ? comments.slice(0, maxCount) : comments;
+    commentPool.push(...toAdd);
+  }
+}
+
+/**
+ * Helper: Build comment pool for high skill players
+ */
+function buildHighSkillComments(
+  isCorrectPlay: boolean,
+  decision: "hit" | "stand",
+  commentary: NonNullable<CharacterDialogue["decisionCommentary"]>,
+): string[] {
+  const pool: string[] = [];
+
+  if (isCorrectPlay) {
+    // High skill making correct play = confident
+    if (commentary.confident) {
+      pool.push(...commentary.confident);
+    }
+    addDecisionComments(pool, decision, commentary, 2);
+  } else if (commentary.uncertain) {
+    // High skill making incorrect play = uncertain/conflicted
+    pool.push(...commentary.uncertain);
+  }
+
+  return pool;
+}
+
+/**
+ * Helper: Build comment pool for low skill players
+ */
+function buildLowSkillComments(
+  isCorrectPlay: boolean,
+  decision: "hit" | "stand",
+  commentary: NonNullable<CharacterDialogue["decisionCommentary"]>,
+): string[] {
+  const pool: string[] = [];
+
+  if (isCorrectPlay) {
+    // Low skill making correct play = uncertain (got lucky)
+    if (commentary.uncertain) {
+      pool.push(...commentary.uncertain);
+    }
+    addDecisionComments(pool, decision, commentary);
+  } else {
+    // Low skill making incorrect play = overconfident
+    if (commentary.confident) {
+      pool.push(...commentary.confident);
+    }
+    addDecisionComments(pool, decision, commentary);
+  }
+
+  return pool;
+}
+
+/**
+ * Helper: Build comment pool for medium skill players
+ */
+function buildMediumSkillComments(
+  isCorrectPlay: boolean,
+  handValue: number,
+  decision: "hit" | "stand",
+  commentary: NonNullable<CharacterDialogue["decisionCommentary"]>,
+): string[] {
+  const pool: string[] = [];
+  const toughHand = handValue >= 12 && handValue <= 16;
+
+  // Medium skill = mix of everything, lean uncertain on tough hands
+  if (toughHand && commentary.uncertain) {
+    pool.push(...commentary.uncertain);
+  }
+  addDecisionComments(pool, decision, commentary);
+  if (isCorrectPlay && commentary.confident) {
+    pool.push(...commentary.confident.slice(0, 2));
+  }
+
+  return pool;
+}
+
+/**
+ * Get strategy-aware decision commentary for an AI player
+ * Shows their thinking process before making a decision
+ *
+ * @param characterId - The character's ID
+ * @param decision - What they're about to do ("hit" or "stand")
+ * @param skillLevel - Character's skill level (0-100)
+ * @param handValue - Current hand value
+ * @param isCorrectPlay - Whether this follows basic strategy
+ * @returns A decision commentary string or null
+ */
+export function getDecisionCommentary(
+  characterId: string,
+  decision: "hit" | "stand",
+  skillLevel: number,
+  handValue: number,
+  isCorrectPlay: boolean,
+): string | null {
+  const characterDialogue = CHARACTER_DIALOGUE[characterId];
+  if (!characterDialogue?.decisionCommentary) {
+    return null;
+  }
+
+  const commentary = characterDialogue.decisionCommentary;
+
+  // Strategy-aware logic:
+  // - High skill (>=70) + correct = confident
+  // - High skill + incorrect = uncertain
+  // - Low skill (<50) + correct = uncertain (lucky)
+  // - Low skill + incorrect = overconfident
+  // - Medium skill (50-69) = mixed
+
+  const highSkill = skillLevel >= 70;
+  const lowSkill = skillLevel < 50;
+
+  let commentPool: string[];
+  if (highSkill) {
+    commentPool = buildHighSkillComments(isCorrectPlay, decision, commentary);
+  } else if (lowSkill) {
+    commentPool = buildLowSkillComments(isCorrectPlay, decision, commentary);
+  } else {
+    commentPool = buildMediumSkillComments(
+      isCorrectPlay,
+      handValue,
+      decision,
+      commentary,
+    );
+  }
+
+  // Return random comment from pool
+  if (commentPool.length > 0) {
+    return commentPool[Math.floor(Math.random() * commentPool.length)];
+  }
+
+  return null;
+}
+
+/**
  * Get character-specific personality reactions
  * @deprecated Use getPersonalityReaction directly
  */

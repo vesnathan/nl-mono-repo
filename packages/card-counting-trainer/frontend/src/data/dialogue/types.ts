@@ -28,6 +28,14 @@ export interface CharacterDialogue {
   banterWithPlayer?: { text: string; isPatreon: boolean }[]; // directed at other players
   banterWithDealer?: string[]; // directed at dealer only
   quirkyActions?: string[]; // short stage directions for UI flavor
+
+  // Strategy-aware decision commentary (shows thinking before action)
+  decisionCommentary?: {
+    shouldHit?: string[]; // "Should I hit this?"
+    shouldStand?: string[]; // "Better stand here"
+    confident?: string[]; // "Easy decision"
+    uncertain?: string[]; // "Not sure about this..."
+  };
 }
 
 /**

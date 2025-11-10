@@ -3,13 +3,14 @@ import { Button } from "@nextui-org/react";
 import {
   GamePhase,
   PlayerHand,
-  SpeechBubble,
+  SpeechBubble as SpeechBubbleType,
   WinLossBubbleData,
   ActiveConversation,
   FlyingCardData,
 } from "@/types/gameState";
 import { isBusted } from "@/lib/gameActions";
 import WinLossBubble from "@/components/WinLossBubble";
+import SpeechBubble from "@/components/SpeechBubble";
 import ConversationPrompt from "@/components/ConversationPrompt";
 import FlyingCard from "@/components/FlyingCard";
 
@@ -21,7 +22,7 @@ interface GameOverlaysProps {
   phase: GamePhase;
 
   // Overlays
-  speechBubbles: SpeechBubble[];
+  speechBubbles: SpeechBubbleType[];
   winLossBubbles: WinLossBubbleData[];
   activeConversation: ActiveConversation | null;
   flyingCards: FlyingCardData[];
@@ -131,10 +132,11 @@ export default function GameOverlays({
       {speechBubbles
         .filter((bubble) => bubble.visible)
         .map((bubble) => (
-          <WinLossBubble
+          <SpeechBubble
             key={bubble.playerId}
             position={bubble.position}
             message={bubble.message}
+            playerId={bubble.playerId}
           />
         ))}
 

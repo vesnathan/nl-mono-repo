@@ -13,6 +13,7 @@ import {
   getRandomSayingForTotal,
   getRandomSoftHandSaying,
   getRandomDistraction,
+  getDecisionCommentary,
 } from "@/data/dialogue";
 import { shouldHitBasicStrategy } from "@/utils/aiStrategy";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
@@ -244,6 +245,30 @@ export function useAITurnsPhase({
       addDebugLog(
         `Follows basic strategy: ${followsBasicStrategy}, Decision: ${shouldHit ? "HIT" : "STAND"}`,
       );
+
+      // Show strategy-aware decision commentary BEFORE the action (30% chance)
+      if (Math.random() < 0.30) {
+        const isCorrectPlay = (shouldHit === basicStrategyDecision);
+        const decisionText = shouldHit ? "hit" : "stand";
+        const commentary = getDecisionCommentary(
+          ai.character.id,
+          decisionText,
+          ai.character.skillLevel,
+          handValue,
+          isCorrectPlay,
+        );
+
+        if (commentary) {
+          // Show commentary early in decision time (before action displays)
+          registerTimeout(() => {
+            addSpeechBubble(
+              `decision-commentary-${idx}-${Date.now()}`,
+              commentary,
+              ai.position,
+            );
+          }, decisionTime / 3); // Show 1/3 into decision time
+        }
+      }
 
       if (shouldHit && !isBust) {
         // Show hand-based dialogue with higher frequency (25%)
