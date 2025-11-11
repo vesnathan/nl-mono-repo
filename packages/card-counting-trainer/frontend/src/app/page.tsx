@@ -38,11 +38,13 @@ import { useDealingPhase } from "@/hooks/useDealingPhase";
 import { useInsurancePhase } from "@/hooks/useInsurancePhase";
 import { useHeatMap } from "@/hooks/useHeatMap";
 import { useAudioQueue } from "@/hooks/useAudioQueue";
+import { useDealerVoice } from "@/hooks/useDealerVoice";
 import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
 import BlackjackGameUI from "@/components/BlackjackGameUI";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import { WelcomeModal } from "@/components/WelcomeModal";
 import { AuthModal } from "@/components/auth/AuthModal";
+import AdminSettingsModal from "@/components/AdminSettingsModal";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function GamePage() {
@@ -136,6 +138,7 @@ export default function GamePage() {
   const [showDealerInfo, setShowDealerInfo] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAdminSettings, setShowAdminSettings] = useState(false);
   const [showStrategyCard, setShowStrategyCard] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -262,6 +265,8 @@ export default function GamePage() {
       addDebugLog,
       trueCount,
       setBetHistory,
+      currentDealer,
+      audioQueue,
     });
 
   // Detect if player is counting cards (varying bet with count)
@@ -379,6 +384,13 @@ export default function GamePage() {
 
   // Pit boss movement hook
   usePitBossMovement(setPitBossDistance, suspicionLevel);
+
+  // Dealer voice callouts hook - plays dealer audio when entering phases
+  useDealerVoice({
+    phase,
+    currentDealer,
+    audioQueue,
+  });
 
   // Heat map tracking hook - tracks pit boss proximity vs count for discretion analysis
   const { getHeatMapBuckets, getDiscretionScore, dataPointCount } = useHeatMap({
@@ -537,6 +549,7 @@ export default function GamePage() {
     ) => getCardPosition(type, aiPlayers, playerSeat, aiIndex, cardIndex),
     addSpeechBubble,
     addDebugLog,
+    audioQueue,
   });
 
   // Resolving phase hook
@@ -591,6 +604,10 @@ export default function GamePage() {
         onClose={() => setShowAuthModal(false)}
         initialMode="login"
       />
+      <AdminSettingsModal
+        isOpen={showAdminSettings}
+        onClose={() => setShowAdminSettings(false)}
+      />
       <BlackjackGameUI
         suspicionLevel={suspicionLevel}
         dealerSuspicion={dealerSuspicion}
@@ -637,6 +654,7 @@ export default function GamePage() {
         handleTakeInsurance={handleTakeInsurance}
         handleDeclineInsurance={handleDeclineInsurance}
         setShowSettings={setShowSettings}
+        setShowAdminSettings={setShowAdminSettings}
         setShowLeaderboard={setShowLeaderboard}
         setShowStrategyCard={setShowStrategyCard}
         setShowHeatMap={setShowHeatMap}

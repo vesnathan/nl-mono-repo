@@ -1,5 +1,8 @@
 import { useCallback } from "react";
 import { AIPlayer, GamePhase } from "@/types/gameState";
+import { DealerCharacter } from "@/data/dealerCharacters";
+import { AudioQueueHook, AudioPriority } from "@/hooks/useAudioQueue";
+import { getDealerAudioPath } from "@/utils/audioHelpers";
 
 interface UseBettingActionsParams {
   currentBet: number;
@@ -23,6 +26,8 @@ interface UseBettingActionsParams {
   addDebugLog: (message: string) => void;
   trueCount: number;
   setBetHistory: (history: Array<{bet: number, trueCount: number}> | ((prev: Array<{bet: number, trueCount: number}>) => Array<{bet: number, trueCount: number}>)) => void;
+  currentDealer: DealerCharacter | null;
+  audioQueue: AudioQueueHook;
 }
 
 export function useBettingActions({
@@ -47,6 +52,8 @@ export function useBettingActions({
   addDebugLog,
   trueCount,
   setBetHistory,
+  currentDealer,
+  audioQueue,
 }: UseBettingActionsParams) {
   const handleConfirmBet = useCallback(() => {
     addDebugLog("=== CONFIRM BET CLICKED ===");
@@ -77,6 +84,18 @@ export function useBettingActions({
         return newHistory;
       });
       addDebugLog(`Bet tracked: $${currentBet} at true count ${trueCount.toFixed(2)}`);
+
+      // Dealer says "No more bets"
+      if (currentDealer) {
+        const audioPath = getDealerAudioPath(currentDealer.id, "no_more_bets");
+        audioQueue.queueAudio({
+          id: `dealer-no-more-bets-${Date.now()}`,
+          audioPath,
+          priority: AudioPriority.NORMAL,
+          playerId: "dealer",
+          message: "No more bets",
+        });
+      }
 
       setPhase("DEALING");
       setDealerRevealed(false);
@@ -132,6 +151,8 @@ export function useBettingActions({
     dealInitialCards,
     registerTimeout,
     addDebugLog,
+    currentDealer,
+    audioQueue,
   ]);
 
   const handleClearBet = useCallback(() => {

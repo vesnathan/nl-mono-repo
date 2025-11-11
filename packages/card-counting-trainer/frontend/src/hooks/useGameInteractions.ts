@@ -16,6 +16,7 @@ import {
 } from "@/utils/reactions";
 import { AudioQueueHook, AudioPriority } from "@/hooks/useAudioQueue";
 import { getPlayerAudioPath, mapOutcomeToAudioType } from "@/utils/audioHelpers";
+import { getOrGenerateAudio } from "@/utils/dynamicTTS";
 
 interface UseGameInteractionsParams {
   activeConversation: ActiveConversation | null;
@@ -79,18 +80,40 @@ export function useGameInteractions({
           addDebugLog,
         ).position;
 
-        // Queue audio if reaction type provided
-        if (reactionType && playerId !== "dealer") {
-          const audioPath = getPlayerAudioPath(playerId, reactionType);
-          console.log(`[Audio Queue] Queueing audio for ${playerId}: ${audioPath} (priority: ${priority})`);
-          audioQueue.queueAudio({
-            id: `${playerId}-${Date.now()}`,
-            audioPath,
-            priority,
-            playerId,
-            message,
-            position: bubblePosition,
-          });
+        // Queue audio for reactions (pre-generated) or generate dynamically for dialogue
+        if (playerId !== "dealer") {
+          if (reactionType) {
+            // Use pre-generated audio for reactions
+            const audioPath = getPlayerAudioPath(playerId, reactionType);
+            console.log(`[Audio Queue] Queueing pre-generated audio for ${playerId}: ${audioPath} (priority: ${priority})`);
+            audioQueue.queueAudio({
+              id: `${playerId}-${Date.now()}`,
+              audioPath,
+              priority,
+              playerId,
+              message,
+              position: bubblePosition,
+            });
+          } else {
+            // Generate audio dynamically for dialogue/conversations
+            getOrGenerateAudio(message, playerId)
+              .then((audioUrl) => {
+                if (audioUrl) {
+                  console.log(`[Audio Queue] Queueing dynamic audio for ${playerId}: ${audioUrl} (priority: ${priority})`);
+                  audioQueue.queueAudio({
+                    id: `${playerId}-${Date.now()}`,
+                    audioPath: audioUrl,
+                    priority,
+                    playerId,
+                    message,
+                    position: bubblePosition,
+                  });
+                }
+              })
+              .catch((error) => {
+                console.error(`[Audio Queue] Failed to generate audio for ${playerId}:`, error);
+              });
+          }
         }
 
         // Clear any existing hide timeout

@@ -75,6 +75,7 @@ interface BlackjackGameUIProps {
 
   // Actions
   setShowSettings: (show: boolean) => void;
+  setShowAdminSettings: (show: boolean) => void;
   setShowLeaderboard: (show: boolean) => void;
   setShowStrategyCard: (show: boolean) => void;
   setShowHeatMap: (show: boolean) => void;
@@ -143,6 +144,7 @@ export default function BlackjackGameUI({
   handleTakeInsurance,
   handleDeclineInsurance,
   setShowSettings,
+  setShowAdminSettings,
   setShowLeaderboard,
   setShowStrategyCard,
   setShowHeatMap,
@@ -192,6 +194,7 @@ export default function BlackjackGameUI({
         currentScore={currentScore}
         scoreMultiplier={scoreMultiplier}
         onSettingsClick={() => setShowSettings(true)}
+        onAdminClick={() => setShowAdminSettings(true)}
         onLeaderboardClick={() => setShowLeaderboard(true)}
         onStrategyClick={() => setShowStrategyCard(true)}
         onChartsClick={() => setShowHeatMap(true)}

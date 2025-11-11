@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import { getPlayerSpeechVolume, getDealerSpeechVolume } from "@/components/AdminSettingsModal";
 
 /**
  * Priority levels for audio playback
@@ -72,6 +73,12 @@ export function useAudioQueue(): AudioQueueHook {
     // Create and play audio element
     const audio = new Audio(nextItem.audioPath);
     audioRef.current = audio;
+
+    // Set volume based on whether it's a dealer or player
+    const volume = nextItem.playerId === "dealer"
+      ? getDealerSpeechVolume()
+      : getPlayerSpeechVolume();
+    audio.volume = volume;
 
     audio.onended = () => {
       setIsPlaying(false);

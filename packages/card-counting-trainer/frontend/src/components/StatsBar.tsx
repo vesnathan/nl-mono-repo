@@ -12,6 +12,7 @@ interface StatsBarProps {
   currentScore: number;
   scoreMultiplier: number;
   onSettingsClick: () => void;
+  onAdminClick: () => void;
   onLeaderboardClick: () => void;
   onStrategyClick: () => void;
   onChartsClick: () => void;
@@ -25,6 +26,7 @@ export default function StatsBar({
   currentScore,
   scoreMultiplier,
   onSettingsClick,
+  onAdminClick,
   onLeaderboardClick,
   onStrategyClick,
   onChartsClick,
@@ -149,6 +151,28 @@ export default function StatsBar({
           }}
         >
           ⚙️ Settings
+        </button>
+        <button
+          onClick={onAdminClick}
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            color: "#FFF",
+            border: "2px solid #9C27B0",
+            borderRadius: "8px",
+            padding: "8px 16px",
+            fontSize: "14px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            transition: "all 0.2s",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(156, 39, 176, 0.3)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+          }}
+        >
+          🎛️ Admin
         </button>
         <button
           onClick={onLeaderboardClick}

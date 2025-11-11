@@ -11,6 +11,8 @@ import { Card } from "@/types/game";
 import { calculateHandValue, isBusted } from "@/lib/gameActions";
 import { CHARACTER_DIALOGUE, pick } from "@/data/dialogue";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
+import { AudioQueueHook, AudioPriority } from "@/hooks/useAudioQueue";
+import { getDealerAudioPath } from "@/utils/audioHelpers";
 
 interface UseDealerTurnPhaseParams {
   phase: GamePhase;
@@ -36,6 +38,7 @@ interface UseDealerTurnPhaseParams {
   ) => { left: string; top: string };
   addSpeechBubble: (id: string, message: string, position: number) => void;
   addDebugLog: (message: string) => void;
+  audioQueue: AudioQueueHook;
 }
 
 /**
@@ -61,6 +64,7 @@ export function useDealerTurnPhase({
   getCardPositionForAnimation,
   addSpeechBubble,
   addDebugLog,
+  audioQueue,
 }: UseDealerTurnPhaseParams) {
   const dealerTurnProcessingRef = useRef(false);
   const dealerFinishedRef = useRef(false);
@@ -242,8 +246,39 @@ export function useDealerTurnPhase({
 
             if (isBust) {
               addSpeechBubble("dealer-result", "Dealer busts", -1);
+
+              // Play dealer bust audio
+              if (currentDealer) {
+                const audioPath = getDealerAudioPath(currentDealer.id, "dealer_busts");
+                audioQueue.queueAudio({
+                  id: `dealer-busts-${Date.now()}`,
+                  audioPath,
+                  priority: AudioPriority.HIGH,
+                  playerId: "dealer",
+                  message: "Dealer busts",
+                });
+              }
             } else {
               addSpeechBubble("dealer-result", `Dealer has ${finalValue}`, -1);
+
+              // Play dealer result audio
+              if (currentDealer) {
+                let voiceLine: "dealer_has_17" | "dealer_has_18" | "dealer_has_19" | "dealer_has_20" | "dealer_has_21";
+                if (finalValue === 17) voiceLine = "dealer_has_17";
+                else if (finalValue === 18) voiceLine = "dealer_has_18";
+                else if (finalValue === 19) voiceLine = "dealer_has_19";
+                else if (finalValue === 20) voiceLine = "dealer_has_20";
+                else voiceLine = "dealer_has_21";
+
+                const audioPath = getDealerAudioPath(currentDealer.id, voiceLine);
+                audioQueue.queueAudio({
+                  id: `dealer-result-${Date.now()}`,
+                  audioPath,
+                  priority: AudioPriority.HIGH,
+                  playerId: "dealer",
+                  message: `Dealer has ${finalValue}`,
+                });
+              }
             }
 
             // Move to resolving after brief delay
