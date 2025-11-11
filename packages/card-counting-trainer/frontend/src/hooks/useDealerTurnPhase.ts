@@ -239,7 +239,6 @@ export function useDealerTurnPhase({
             const finalValue = calculateHandValue(currentHand);
             const isBust = isBusted(currentHand);
 
-            addDebugLog(`🎯 dealerFinishedRef set to true - should only see this once`);
             addDebugLog(`=== DEALER FINAL HAND ===`);
             addDebugLog(
               `Dealer cards: ${currentHand.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
@@ -250,7 +249,6 @@ export function useDealerTurnPhase({
             // Only announce and queue audio once
             if (!audioQueuedRef.current) {
               audioQueuedRef.current = true;
-              addDebugLog(`🔊 audioQueuedRef set to true - queueing dealer audio`);
 
               // Play dealer result audio (audio queue will handle speech bubble)
               if (currentDealer) {
