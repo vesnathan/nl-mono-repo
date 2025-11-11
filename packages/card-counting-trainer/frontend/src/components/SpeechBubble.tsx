@@ -16,12 +16,11 @@ export default function SpeechBubble({
   playerPosition,
 }: SpeechBubbleProps) {
   // Determine bubble placement:
-  // - Dealer (isDealer=true): bubble ABOVE, arrow pointing DOWN
-  // - Players 0 & 7 (corners): bubble BELOW, arrow pointing UP
-  // - Players 1-6 (sides): bubble ABOVE, arrow pointing DOWN
-  const isCornerPlayer = playerPosition === 0 || playerPosition === 7;
-  const bubbleBelow = !isDealer && isCornerPlayer;
-  const arrowPointsUp = bubbleBelow;
+  // - Dealer (isDealer=true): bubble BELOW dealer position, arrow pointing UP
+  // - Players 0 & 7 (bottom corners): bubble ABOVE them, arrow pointing DOWN
+  // - Players 1-6 (sides): bubble ABOVE them, arrow pointing DOWN
+  const bubbleBelow = isDealer;
+  const arrowPointsUp = isDealer;
 
   return (
     <div
