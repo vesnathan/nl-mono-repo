@@ -65,7 +65,9 @@ export default function AdminSettingsModal({
   const [debugSettings, setDebugSettings] = useState<DebugSettings>({
     ...DEBUG,
   });
-  const [saveGlobalStatus, setSaveGlobalStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [saveGlobalStatus, setSaveGlobalStatus] = useState<
+    "idle" | "saving" | "success" | "error"
+  >("idle");
 
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -143,7 +145,7 @@ export default function AdminSettingsModal({
       // });
 
       // Placeholder: Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       console.log("Saving global audio settings:", audioSettings);
 
       setSaveGlobalStatus("success");
@@ -580,54 +582,62 @@ export default function AdminSettingsModal({
                 }}
               >
                 Save these audio levels as the global default for all users.
-                Users will receive these settings when they first visit the site.
+                Users will receive these settings when they first visit the
+                site.
               </div>
               <button
                 onClick={handleSaveGlobal}
                 disabled={saveGlobalStatus === "saving"}
                 style={{
                   width: "100%",
-                  backgroundColor: saveGlobalStatus === "success"
-                    ? "rgba(76, 175, 80, 0.3)"
-                    : saveGlobalStatus === "error"
-                    ? "rgba(244, 67, 54, 0.3)"
-                    : "rgba(33, 150, 243, 0.2)",
-                  color: saveGlobalStatus === "success"
-                    ? "#4CAF50"
-                    : saveGlobalStatus === "error"
-                    ? "#F44336"
-                    : "#2196F3",
-                  border: `2px solid ${saveGlobalStatus === "success"
-                    ? "#4CAF50"
-                    : saveGlobalStatus === "error"
-                    ? "#F44336"
-                    : "#2196F3"}`,
+                  backgroundColor:
+                    saveGlobalStatus === "success"
+                      ? "rgba(76, 175, 80, 0.3)"
+                      : saveGlobalStatus === "error"
+                        ? "rgba(244, 67, 54, 0.3)"
+                        : "rgba(33, 150, 243, 0.2)",
+                  color:
+                    saveGlobalStatus === "success"
+                      ? "#4CAF50"
+                      : saveGlobalStatus === "error"
+                        ? "#F44336"
+                        : "#2196F3",
+                  border: `2px solid ${
+                    saveGlobalStatus === "success"
+                      ? "#4CAF50"
+                      : saveGlobalStatus === "error"
+                        ? "#F44336"
+                        : "#2196F3"
+                  }`,
                   borderRadius: "8px",
                   padding: "10px",
                   fontSize: "14px",
                   fontWeight: "bold",
-                  cursor: saveGlobalStatus === "saving" ? "not-allowed" : "pointer",
+                  cursor:
+                    saveGlobalStatus === "saving" ? "not-allowed" : "pointer",
                   transition: "all 0.2s ease",
                   opacity: saveGlobalStatus === "saving" ? 0.6 : 1,
                 }}
                 onMouseEnter={(e) => {
                   if (saveGlobalStatus === "idle") {
-                    e.currentTarget.style.backgroundColor = "rgba(33, 150, 243, 0.3)";
+                    e.currentTarget.style.backgroundColor =
+                      "rgba(33, 150, 243, 0.3)";
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (saveGlobalStatus === "idle") {
-                    e.currentTarget.style.backgroundColor = "rgba(33, 150, 243, 0.2)";
+                    e.currentTarget.style.backgroundColor =
+                      "rgba(33, 150, 243, 0.2)";
                   }
                 }}
               >
                 {saveGlobalStatus === "saving"
                   ? "⏳ Saving Global Settings..."
                   : saveGlobalStatus === "success"
-                  ? "✓ Saved Successfully!"
-                  : saveGlobalStatus === "error"
-                  ? "✗ Failed to Save"
-                  : "💾 Save as Global Default (All Users)"}
+                    ? "✓ Saved Successfully!"
+                    : saveGlobalStatus === "error"
+                      ? "✗ Failed to Save"
+                      : "💾 Save as Global Default (All Users)"}
               </button>
             </div>
           )}

@@ -1,7 +1,13 @@
 import { util, Context } from "@aws-appsync/utils";
 import { LeaderboardEntry, LeaderboardType } from "gqlTypes";
 
-type CTX = Context<{ type: LeaderboardType; limit?: number }, object, object, object, LeaderboardEntry[]>;
+type CTX = Context<
+  { type: LeaderboardType; limit?: number },
+  object,
+  object,
+  object,
+  LeaderboardEntry[]
+>;
 
 export function request(ctx: CTX) {
   const type = ctx.args.type;

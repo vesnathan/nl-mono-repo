@@ -1,7 +1,13 @@
 import { util, AppSyncIdentityCognito, Context } from "@aws-appsync/utils";
 import { UpdateStatsInput, PlayerStats } from "gqlTypes";
 
-type CTX = Context<{ input: UpdateStatsInput }, object, object, object, PlayerStats>;
+type CTX = Context<
+  { input: UpdateStatsInput },
+  object,
+  object,
+  object,
+  PlayerStats
+>;
 
 export function request(ctx: CTX) {
   const identity = ctx.identity as AppSyncIdentityCognito;
@@ -17,7 +23,10 @@ export function request(ctx: CTX) {
   const input = ctx.args.input;
   const now = util.time.nowISO8601();
 
-  console.log(`Updating player stats for userId: ${userId}`, JSON.stringify(input));
+  console.log(
+    `Updating player stats for userId: ${userId}`,
+    JSON.stringify(input),
+  );
 
   // Build update expression dynamically based on what fields are provided
   const updates: string[] = [];
@@ -27,7 +36,9 @@ export function request(ctx: CTX) {
   // Track hands
   if (input.handsWon !== undefined && input.handsWon > 0) {
     updates.push("#handsWon = if_not_exists(#handsWon, :zero) + :handsWon");
-    updates.push("#totalHandsPlayed = if_not_exists(#totalHandsPlayed, :zero) + :handsWon");
+    updates.push(
+      "#totalHandsPlayed = if_not_exists(#totalHandsPlayed, :zero) + :handsWon",
+    );
     expressionAttributeNames["#handsWon"] = "handsWon";
     expressionAttributeNames["#totalHandsPlayed"] = "totalHandsPlayed";
     expressionAttributeValues[":handsWon"] = input.handsWon;
@@ -35,28 +46,38 @@ export function request(ctx: CTX) {
 
   if (input.handsLost !== undefined && input.handsLost > 0) {
     updates.push("#handsLost = if_not_exists(#handsLost, :zero) + :handsLost");
-    updates.push("#totalHandsPlayed = if_not_exists(#totalHandsPlayed, :zero) + :handsLost");
+    updates.push(
+      "#totalHandsPlayed = if_not_exists(#totalHandsPlayed, :zero) + :handsLost",
+    );
     expressionAttributeNames["#handsLost"] = "handsLost";
     expressionAttributeNames["#totalHandsPlayed"] = "totalHandsPlayed";
     expressionAttributeValues[":handsLost"] = input.handsLost;
   }
 
   if (input.handsPushed !== undefined && input.handsPushed > 0) {
-    updates.push("#handsPushed = if_not_exists(#handsPushed, :zero) + :handsPushed");
-    updates.push("#totalHandsPlayed = if_not_exists(#totalHandsPlayed, :zero) + :handsPushed");
+    updates.push(
+      "#handsPushed = if_not_exists(#handsPushed, :zero) + :handsPushed",
+    );
+    updates.push(
+      "#totalHandsPlayed = if_not_exists(#totalHandsPlayed, :zero) + :handsPushed",
+    );
     expressionAttributeNames["#handsPushed"] = "handsPushed";
     expressionAttributeNames["#totalHandsPlayed"] = "totalHandsPlayed";
     expressionAttributeValues[":handsPushed"] = input.handsPushed;
   }
 
   if (input.blackjacksHit !== undefined && input.blackjacksHit > 0) {
-    updates.push("#blackjacksHit = if_not_exists(#blackjacksHit, :zero) + :blackjacksHit");
+    updates.push(
+      "#blackjacksHit = if_not_exists(#blackjacksHit, :zero) + :blackjacksHit",
+    );
     expressionAttributeNames["#blackjacksHit"] = "blackjacksHit";
     expressionAttributeValues[":blackjacksHit"] = input.blackjacksHit;
   }
 
   if (input.wagered !== undefined && input.wagered > 0) {
-    updates.push("#totalWagered = if_not_exists(#totalWagered, :zero) + :wagered");
+    updates.push(
+      "#totalWagered = if_not_exists(#totalWagered, :zero) + :wagered",
+    );
     expressionAttributeNames["#totalWagered"] = "totalWagered";
     expressionAttributeValues[":wagered"] = input.wagered;
   }
