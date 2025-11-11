@@ -457,10 +457,7 @@ export async function deployTheStoryHub(
   // Logging is set up in the deploy menu in index.ts
 
   const stackName = getStackName(StackType.TheStoryHub, options.stage);
-  const templateBucketName = getTemplateBucketName(
-    StackType.TheStoryHub,
-    options.stage,
-  );
+  const templateBucketName = getTemplateBucketName(options.stage);
 
   const stopSpinner = logger.infoWithSpinner(
     "Starting AWS Example stack deployment in ap-southeast-2",

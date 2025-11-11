@@ -725,10 +725,9 @@ class DeploymentManager {
 
     // Add parameters based on stack type
     if (stackType !== StackType.WAF) {
-      // Corrected: Pass both stackType and stage
       allParameters.push({
         ParameterKey: "TemplateBucketName",
-        ParameterValue: getTemplateBucketName(stackType, stage),
+        ParameterValue: getTemplateBucketName(stage),
       });
     }
 

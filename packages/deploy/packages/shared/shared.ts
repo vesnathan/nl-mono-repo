@@ -67,10 +67,7 @@ async function retryOperation<T>(
 
 export async function deployShared(options: DeploymentOptions): Promise<void> {
   const stackName = getStackName(StackType.Shared, options.stage);
-  const templateBucketName = getTemplateBucketName(
-    StackType.Shared,
-    options.stage,
-  );
+  const templateBucketName = getTemplateBucketName(options.stage);
   const region = options.region || process.env.AWS_REGION || "ap-southeast-2"; // Ensure region is available
 
   const stopSpinner = logger.infoWithSpinner(
