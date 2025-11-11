@@ -1,0 +1,37 @@
+# Global Admin Settings (affects all users)
+
+type AudioSettings {
+  musicVolume: Int!
+  playerSpeechVolume: Int!
+  dealerSpeechVolume: Int!
+  masterVolume: Int!
+  updatedAt: AWSDateTime!
+  updatedBy: String!
+}
+
+type AdminSettings {
+  audio: AudioSettings!
+  maintenanceMode: Boolean!
+  announcementMessage: String
+  updatedAt: AWSDateTime!
+}
+
+input AudioSettingsInput {
+  musicVolume: Int!
+  playerSpeechVolume: Int!
+  dealerSpeechVolume: Int!
+  masterVolume: Int!
+}
+
+extend type Query {
+  getAdminSettings: AdminSettings @aws_cognito_user_pools @aws_iam
+  getGlobalAudioSettings: AudioSettings @aws_cognito_user_pools @aws_iam
+}
+
+extend type Mutation {
+  updateGlobalAudioSettings(input: AudioSettingsInput!): AudioSettings! @aws_cognito_user_pools(cognito_groups: ["Admins"])
+  updateAdminSettings(
+    maintenanceMode: Boolean
+    announcementMessage: String
+  ): AdminSettings! @aws_cognito_user_pools(cognito_groups: ["Admins"])
+}

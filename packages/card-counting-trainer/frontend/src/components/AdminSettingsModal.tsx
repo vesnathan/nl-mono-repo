@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { DEBUG } from "@/utils/debug";
+import { useUserStore } from "@/stores/userStore";
+// TODO: Import GraphQL client when authentication is set up
+// import { generateClient } from "aws-amplify/api";
 
 interface AudioSettings {
   musicVolume: number;
@@ -9,6 +12,33 @@ interface AudioSettings {
   dealerSpeechVolume: number;
   masterVolume: number;
 }
+
+// GraphQL queries and mutations
+const GET_GLOBAL_AUDIO_SETTINGS = /* GraphQL */ `
+  query GetGlobalAudioSettings {
+    getGlobalAudioSettings {
+      musicVolume
+      playerSpeechVolume
+      dealerSpeechVolume
+      masterVolume
+      updatedAt
+      updatedBy
+    }
+  }
+`;
+
+const UPDATE_GLOBAL_AUDIO_SETTINGS = /* GraphQL */ `
+  mutation UpdateGlobalAudioSettings($input: AudioSettingsInput!) {
+    updateGlobalAudioSettings(input: $input) {
+      musicVolume
+      playerSpeechVolume
+      dealerSpeechVolume
+      masterVolume
+      updatedAt
+      updatedBy
+    }
+  }
+`;
 
 type DebugSettings = typeof DEBUG;
 
@@ -28,12 +58,14 @@ export default function AdminSettingsModal({
   isOpen,
   onClose,
 }: AdminSettingsModalProps) {
+  const { isAdmin } = useUserStore();
   const [audioSettings, setAudioSettings] = useState<AudioSettings>(
     DEFAULT_AUDIO_SETTINGS,
   );
   const [debugSettings, setDebugSettings] = useState<DebugSettings>({
     ...DEBUG,
   });
+  const [saveGlobalStatus, setSaveGlobalStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
 
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -86,6 +118,41 @@ export default function AdminSettingsModal({
 
   const handleReset = () => {
     setAudioSettings(DEFAULT_AUDIO_SETTINGS);
+  };
+
+  const handleSaveGlobal = async () => {
+    if (!isAdmin) {
+      alert("Only admins can save global settings");
+      return;
+    }
+
+    setSaveGlobalStatus("saving");
+    try {
+      // TODO: Implement GraphQL mutation when Amplify client is set up
+      // const client = generateClient();
+      // await client.graphql({
+      //   query: UPDATE_GLOBAL_AUDIO_SETTINGS,
+      //   variables: {
+      //     input: {
+      //       musicVolume: audioSettings.musicVolume,
+      //       playerSpeechVolume: audioSettings.playerSpeechVolume,
+      //       dealerSpeechVolume: audioSettings.dealerSpeechVolume,
+      //       masterVolume: audioSettings.masterVolume,
+      //     },
+      //   },
+      // });
+
+      // Placeholder: Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log("Saving global audio settings:", audioSettings);
+
+      setSaveGlobalStatus("success");
+      setTimeout(() => setSaveGlobalStatus("idle"), 3000);
+    } catch (error) {
+      console.error("Failed to save global settings:", error);
+      setSaveGlobalStatus("error");
+      setTimeout(() => setSaveGlobalStatus("idle"), 3000);
+    }
   };
 
   return (
@@ -487,6 +554,83 @@ export default function AdminSettingsModal({
               </div>
             </div>
           </div>
+
+          {/* Admin Global Settings Section */}
+          {isAdmin && (
+            <div
+              style={{
+                backgroundColor: "rgba(33, 150, 243, 0.1)",
+                border: "2px solid rgba(33, 150, 243, 0.3)",
+                borderRadius: "12px",
+                padding: "16px",
+                marginBottom: "24px",
+              }}
+            >
+              <div style={{ marginBottom: "12px" }}>
+                <strong style={{ color: "#2196F3", fontSize: "14px" }}>
+                  🔐 Admin Controls
+                </strong>
+              </div>
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "#AAA",
+                  marginBottom: "12px",
+                  lineHeight: "1.5",
+                }}
+              >
+                Save these audio levels as the global default for all users.
+                Users will receive these settings when they first visit the site.
+              </div>
+              <button
+                onClick={handleSaveGlobal}
+                disabled={saveGlobalStatus === "saving"}
+                style={{
+                  width: "100%",
+                  backgroundColor: saveGlobalStatus === "success"
+                    ? "rgba(76, 175, 80, 0.3)"
+                    : saveGlobalStatus === "error"
+                    ? "rgba(244, 67, 54, 0.3)"
+                    : "rgba(33, 150, 243, 0.2)",
+                  color: saveGlobalStatus === "success"
+                    ? "#4CAF50"
+                    : saveGlobalStatus === "error"
+                    ? "#F44336"
+                    : "#2196F3",
+                  border: `2px solid ${saveGlobalStatus === "success"
+                    ? "#4CAF50"
+                    : saveGlobalStatus === "error"
+                    ? "#F44336"
+                    : "#2196F3"}`,
+                  borderRadius: "8px",
+                  padding: "10px",
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  cursor: saveGlobalStatus === "saving" ? "not-allowed" : "pointer",
+                  transition: "all 0.2s ease",
+                  opacity: saveGlobalStatus === "saving" ? 0.6 : 1,
+                }}
+                onMouseEnter={(e) => {
+                  if (saveGlobalStatus === "idle") {
+                    e.currentTarget.style.backgroundColor = "rgba(33, 150, 243, 0.3)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (saveGlobalStatus === "idle") {
+                    e.currentTarget.style.backgroundColor = "rgba(33, 150, 243, 0.2)";
+                  }
+                }}
+              >
+                {saveGlobalStatus === "saving"
+                  ? "⏳ Saving Global Settings..."
+                  : saveGlobalStatus === "success"
+                  ? "✓ Saved Successfully!"
+                  : saveGlobalStatus === "error"
+                  ? "✗ Failed to Save"
+                  : "💾 Save as Global Default (All Users)"}
+              </button>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div style={{ display: "flex", gap: "12px" }}>

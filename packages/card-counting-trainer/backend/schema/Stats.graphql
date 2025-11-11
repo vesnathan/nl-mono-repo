@@ -1,0 +1,93 @@
+# Player Statistics and Game Session tracking
+
+type PlayerStats {
+  userId: ID!
+  chips: Int!
+  totalHandsPlayed: Int!
+  handsWon: Int!
+  handsLost: Int!
+  handsPushed: Int!
+  blackjacksHit: Int!
+  totalWagered: Int!
+  totalWon: Int!
+  winRate: Float!
+  bestChipCount: Int!
+  worstChipCount: Int!
+  currentStreak: Int!
+  longestWinStreak: Int!
+  longestLoseStreak: Int!
+  lastPlayed: AWSDateTime!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type GameSession {
+  sessionId: ID!
+  userId: ID!
+  startChips: Int!
+  endChips: Int!
+  handsPlayed: Int!
+  handsWon: Int!
+  handsLost: Int!
+  handsPushed: Int!
+  duration: Int! # in seconds
+  startedAt: AWSDateTime!
+  endedAt: AWSDateTime!
+}
+
+type LeaderboardEntry {
+  userId: ID!
+  username: String!
+  chips: Int!
+  winRate: Float!
+  handsPlayed: Int!
+  rank: Int!
+}
+
+input UpdateStatsInput {
+  handsWon: Int
+  handsLost: Int
+  handsPushed: Int
+  blackjacksHit: Int
+  wagered: Int
+  won: Int
+  newChipCount: Int
+}
+
+input CreateGameSessionInput {
+  startChips: Int!
+}
+
+input EndGameSessionInput {
+  sessionId: ID!
+  endChips: Int!
+  handsPlayed: Int!
+  handsWon: Int!
+  handsLost: Int!
+  handsPushed: Int!
+  duration: Int!
+}
+
+extend type Query {
+  getPlayerStats: PlayerStats @aws_cognito_user_pools
+  getGameSession(sessionId: ID!): GameSession @aws_cognito_user_pools
+  getPlayerSessions(limit: Int, nextToken: String): GameSessionConnection @aws_cognito_user_pools
+  getLeaderboard(type: LeaderboardType!, limit: Int): [LeaderboardEntry!]! @aws_cognito_user_pools @aws_iam
+}
+
+extend type Mutation {
+  updatePlayerStats(input: UpdateStatsInput!): PlayerStats! @aws_cognito_user_pools
+  startGameSession(input: CreateGameSessionInput!): GameSession! @aws_cognito_user_pools
+  endGameSession(input: EndGameSessionInput!): GameSession! @aws_cognito_user_pools
+}
+
+type GameSessionConnection {
+  items: [GameSession!]!
+  nextToken: String
+}
+
+enum LeaderboardType {
+  CHIPS
+  WIN_RATE
+  HANDS_PLAYED
+}
