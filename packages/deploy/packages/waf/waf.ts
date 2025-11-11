@@ -75,7 +75,7 @@ async function uploadWafTemplates(
 export async function deployWaf(options: DeploymentOptions): Promise<void> {
   const { stage } = options;
   const stackName = getStackName(StackType.WAF, stage);
-  const templateBucketName = getTemplateBucketName(StackType.WAF, stage);
+  const templateBucketName = getTemplateBucketName(stage);
   const s3Client = new S3Client({ region: WAF_REGION });
   const awsUtils = new AwsUtils(WAF_REGION);
 

@@ -1,0 +1,222 @@
+# Card Counting Trainer - TODO List
+
+## Current Issues
+- [x] Have cards fly to the actual card's location.
+- [ ] Card animation length needs to change based on player spot so the cards all move at the same speed
+- [x] player comments need to stay up for longer
+- [x] Player reaction comments when they bust need to happen when they bust, not at the end of the shoe. Also as soon as BJ is dealt if they have a comment for blackjack.
+- [x] pit boss attention, distance, needs to work with the dealer personality. It will be the dealer that alerts the pit boss to a counter. Also add some dealer comments saying to the player, "Counting boss? Don't worry, I got you!" etc depending on the dealers personality. Should we also have a dealer suspicion as well as pit boss attention?
+- [x] a heat map that shows where the pit boss is when the count is high. this will indicate whether the player is being discreet. Under a charts button.
+- [x] I don't like the styling of the leaderboard, settings modals
+- [x] When AI peeks and wins, players don't say anything.
+- [x] Need to show bet minimun on table. No max.
+- [x] Dealer just had two aces and didn't split. (AI players now split based on basic strategy)
+- [x] How do I double? (Double down and split buttons now show in player actions modal)
+- [ ] Fix image sizes
+- [ ] Set up ddb to track high scores etc, chip count, score etc.
+- [x] Logo and audio added (Background music with volume controls implemented)
+- [ ] Dealer speech bubble still has arrow pointing down. Position 0 and 7 still arent below the player. And card animations are still starting in the wrong spot. "Dealer has 20" displayed in bubble instead of dealer speech bubble.
+- [ ] We don't need to say place your bets when our human player isn't seated.
+
+## High Priority - MVP Features (Phase 1)
+
+### Player Betting System
+- [ ] Build player betting interface (currently AI players bet automatically)
+- [ ] Chip selection UI (different denominations: 5, 10, 25, 50, 100)
+- [ ] Min bet validation
+
+### Statistics Tracking
+- [ ] Session stats (hands played, wins/losses, blackjacks)
+- [ ] Net profit/loss tracking
+- [x] Current streak display
+- [ ] Highest chip count tracking
+- [ ] Win rate calculation
+
+### Count Display Enhancements
+- [x] True count display (shows in practice/timed modes)
+- [x] Deck penetration indicator (decks remaining calculated)
+- [x] Count practice mode (show/hide toggle via training modes)
+
+### Game Settings UI
+- [x] Comprehensive settings modal for rule variations
+- [x] Number of decks selector (1, 2, 4, 6, 8)
+- [x] Dealer hits/stands on soft 17 toggle
+- [x] Blackjack payout selector (3:2, 6:5, etc.)
+- [x] Double after split toggle
+- [x] Late surrender toggle
+- [x] Preset configurations (Vegas Strip, Single Deck, European, etc.)
+
+## Medium Priority - Enhanced Features (Phase 2)
+
+### Scoring System
+- [x] Exponential scoring for correct decisions (10, 20, 40, 80...)
+- [x] Streak tracking and visual feedback
+- [x] Score multiplier system (1.0x - 2.0x)
+- [ ] Counting accuracy bonus calculations
+- [ ] Strategy decision tracking (correct vs incorrect)
+- [ ] Leaderboard integration
+
+### Count Peek Feature
+- [ ] "Show Count" button with warning
+- [ ] Confirmation dialog when multiplier >1.0x
+- [ ] Score multiplier reset penalty
+- [ ] Count reveal modal (running count, true count, decks remaining)
+- [ ] Penalty visual effects
+
+### Strategy Card System
+- [x] "Strategy Card" button during player turn
+- [ ] 10 chip cost per peek
+- [x] Strategy recommendation overlay (basic strategy chart modal)
+- [ ] Highlighted optimal action
+- [ ] Brief explanation text
+- [ ] Cooldown (once per hand)
+
+### Multiple Counting Systems
+- [x] KO (Knock-Out) counting system
+- [x] Hi-Opt I counting system
+- [x] Hi-Opt II counting system
+- [x] Omega II counting system
+- [x] Counting system selector in settings
+- [x] Side count Aces option
+
+### Training Modes
+- [x] Practice Mode (show count automatically)
+- [x] Test Mode (hide count, verify at end of shoe)
+- [x] Timed Challenge (speed + accuracy)
+- [x] Mode selector UI
+- [ ] Speed control slider (0.25s - 2s per card)
+
+### Gameplay Features
+- [x] **Split gameplay** (splitting pairs into two hands)
+- [x] Double down implementation
+- [ ] Surrender functionality
+- [x] Insurance when dealer shows Ace
+- [ ] Resplit option (up to 4 hands)
+
+## Lower Priority - Polish & Future (Phase 3+)
+
+### Code Quality & Architecture
+- [ ] **Refactor prop drilling in root component** - Move game state/actions to React Context to reduce 60+ props passed through BlackjackGameUI. Create contexts for: game state, modal state, player actions, dealer state. This will improve maintainability and make the component tree cleaner.
+
+### Visual & UI Improvements
+- [ ] **Graphs for various player stats**
+- [ ] Deck/shoe visual representation
+- [ ] Cut card visual indicator
+- [ ] Betting hints based on true count
+- [ ] House edge calculator
+- [ ] Mobile responsiveness improvements
+- [ ] Touch gestures for hit/stand
+
+### Pit Boss & Suspicion System
+- [x] Bet spread detection (implemented in useResolvingPhase)
+- [x] Suspicion meter increases with large bet spreads
+- [x] Two-tier system: Dealer suspicion → Pit boss attention
+- [x] Dealer personality-based detection thresholds
+- [x] Dealer suspicion dialogue (low, medium, high, reporting)
+- [x] Pit boss distance indicator
+- [x] Detection skill multipliers per dealer personality
+- [x] Suspicion decay over time
+- [ ] Pit boss warnings/challenges when suspicion very high
+- [ ] "Heat" level visual indicators
+- [ ] Camouflage betting suggestions
+- [ ] Game over/"backed off" mechanic when suspicion reaches 100%
+
+### Audio Integration
+- [ ] Dealer voice lines (5 dealer characters)
+- [ ] Casino ambience loop
+- [ ] Card shuffling sounds
+- [ ] Slot machine background
+- [ ] Event sounds (jackpot, glass break, phone rings)
+- [ ] Character voices (mobster, boss, veteran)
+
+### Multi-Player Features
+- [ ] Table seating system (8 seats)
+- [ ] Seat selection UI
+- [ ] Turn-based play with other players
+- [ ] Real-time sync via GraphQL subscriptions
+- [ ] Spectator mode
+- [ ] Player info display at table
+- [ ] Chat system
+- [ ] Challenges and achievements
+
+### Payment & Monetization
+- [ ] Stripe payment integration
+- [ ] Chip purchase flow ($10 for 1,000 chips)
+- [ ] Transaction history
+- [ ] Patreon integration
+- [ ] Tier bonus calculations (Bronze 10%, Silver 25%, Gold 50%, Platinum 100%)
+- [ ] Monthly chip stipend for supporters
+- [ ] Early adopter lifetime unlimited chips
+
+### Leaderboards
+- [ ] All-time high score
+- [ ] Monthly high score
+- [ ] Longest streak
+- [ ] Perfect shoes count
+- [ ] Filter by counting system
+- [ ] Filter by game rules
+- [ ] Filter by time period
+
+### Advanced Features
+- [ ] Historical hand replay
+- [ ] Strategy analyzer
+- [ ] Advanced analytics dashboard
+- [ ] Custom table themes (for Platinum supporters)
+- [ ] Tournament mode
+- [ ] Friend system
+- [ ] Video tutorials integration
+
+## Documentation & Setup
+- [ ] Setup guide for local development
+- [ ] API documentation
+- [ ] Component documentation
+- [ ] Testing strategy
+
+## Completed Features
+
+### Core Gameplay
+- [x] Basic blackjack gameplay with AI players
+- [x] Hit/Stand player actions
+- [x] Dealer AI following blackjack rules
+- [x] Card dealing animations
+- [x] Win/loss detection and payouts
+- [x] Chip tracking system
+
+### Counting & Training
+- [x] Running count calculation (Hi-Lo, KO, Hi-Opt I/II, Omega II)
+- [x] True count calculation
+- [x] Count simulation on page load (realistic mid-shoe join)
+- [x] Multiple counting systems with selector
+- [x] Training modes: Practice, Test, Timed Challenge
+- [x] Side count Aces option
+
+### UI/UX
+- [x] Basic strategy card modal
+- [x] Game settings modal with rule variations
+- [x] Top bar stats display (COUNT, STREAK, CHIPS, SCORE, MULTIPLIER)
+- [x] AI banter/distraction system
+- [x] Win/loss bubble notifications
+- [x] Uniform styled stat boxes
+
+### Scoring & Progression
+- [x] Exponential scoring system (10, 20, 40, 80...)
+- [x] Streak tracking
+- [x] Score multiplier (1.0x - 2.0x)
+- [x] Real-time score updates
+
+### Dealer & Detection System
+- [x] Six dealer personalities with unique behaviors
+- [x] Dealer detection skill system (10-95 skill levels)
+- [x] Dealer suspicion tracking (0-100)
+- [x] Personality-based suspicion thresholds (25% strict to 100% friendly)
+- [x] Dealer reporting thresholds (60% strict, 999% friendly/rookie/oblivious)
+- [x] Dealer dialogue system for suspicion levels
+- [x] "On your side" dealer mechanic (Maria the counter)
+- [x] Suspicion transfer to pit boss when dealer reports
+- [x] Dealer suspicion UI meter (hides dealer name/personality for player discovery)
+
+## Notes
+- Focus on getting player betting interface working next
+- Need to implement split, double down, and surrender, and insurance gameplay
+- Consider adding preset game configurations
+- Speed control slider would improve training experience

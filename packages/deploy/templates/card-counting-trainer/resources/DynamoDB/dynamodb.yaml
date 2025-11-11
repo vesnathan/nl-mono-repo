@@ -1,0 +1,127 @@
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage
+  AppName:
+    Type: String
+    Description: Application Name
+    Default: bjcct
+
+Resources:
+  DynamoDBRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub nlmonorepo-${AppName}-dynamodb-${Stage}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: DynamoDBTableManagement
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:*
+                Resource: "*"
+
+  AppSyncDynamoDBRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub nlmonorepo-${AppName}-appsync-dynamodb-${Stage}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: appsync.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AppSyncDynamoDBAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource:
+                  - !GetAtt CCTDataTable.Arn
+                  - !Sub "${CCTDataTable.Arn}/*"
+
+  # Single-table design for card counting trainer
+  # Access Patterns:
+  # 1. Get User: PK=USER#{userId}, SK=METADATA
+  # 2. Get User's Game Sessions: PK=USER#{userId}, SK begins_with SESSION#
+  # 3. Get User's Purchase History: PK=USER#{userId}, SK begins_with PURCHASE#
+  # 4. Get User's Strategy Card Usage: PK=USER#{userId}, SK begins_with STRATEGY#
+  # 5. Get User's Count Peeks: PK=USER#{userId}, SK begins_with COUNT_PEEK#
+  # 6. Get Game Session by ID: PK=SESSION#{sessionId}, SK=METADATA
+  # 7. Get Leaderboard: GSI1PK=LEADERBOARD#{type}, GSI1SK={score}#{userId}
+  CCTDataTable:
+    Type: AWS::DynamoDB::Table
+    DependsOn: DynamoDBRole
+    Properties:
+      TableName: !Sub "nlmonorepo-${AppName}-datatable-${Stage}"
+      AttributeDefinitions:
+        - AttributeName: "PK"
+          AttributeType: "S"
+        - AttributeName: "SK"
+          AttributeType: "S"
+        - AttributeName: "GSI1PK"
+          AttributeType: "S"
+        - AttributeName: "GSI1SK"
+          AttributeType: "S"
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: "PK"
+          KeyType: "HASH"
+        - AttributeName: "SK"
+          KeyType: "RANGE"
+      GlobalSecondaryIndexes:
+        - IndexName: "GSI1"
+          KeySchema:
+            - AttributeName: "GSI1PK"
+              KeyType: "HASH"
+            - AttributeName: "GSI1SK"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+      SSESpecification:
+        SSEEnabled: false
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      Tags:
+        - Key: "Project"
+          Value: "CardCountingTrainer"
+        - Key: "Stage"
+          Value: !Ref Stage
+
+Outputs:
+  DataTableName:
+    Description: "Name of the DynamoDB table"
+    Value: !Ref CCTDataTable
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-datatable-name-${Stage}"
+
+  DataTableArn:
+    Description: "ARN of the DynamoDB table"
+    Value: !GetAtt CCTDataTable.Arn
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-datatable-arn-${Stage}"
+
+  AppSyncDynamoDBRoleArn:
+    Description: "ARN of the IAM role for AppSync to access DynamoDB"
+    Value: !GetAtt AppSyncDynamoDBRole.Arn
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-appsync-dynamodb-role-arn-${Stage}"

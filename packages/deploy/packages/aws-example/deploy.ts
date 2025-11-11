@@ -177,10 +177,7 @@ export async function deployAwsExample(
   options: DeploymentOptions,
 ): Promise<void> {
   const stackName = getStackName(StackType.AwsExample, options.stage);
-  const templateBucketName = getTemplateBucketName(
-    StackType.AwsExample,
-    options.stage,
-  );
+  const templateBucketName = getTemplateBucketName(options.stage);
 
   const stopSpinner = logger.infoWithSpinner(
     "Starting AWS Example stack deployment in ap-southeast-2",

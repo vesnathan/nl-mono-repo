@@ -28,10 +28,11 @@ import { OutputsManager } from "../outputs-manager";
 import { candidateExportNames } from "../utils/export-names";
 import { getAppNameForStackType } from "../utils/stack-utils";
 import { COGNITO_GROUPS as TSH_COGNITO_GROUPS } from "../../the-story-hub/backend/constants/ClientTypes";
+import { COGNITO_GROUPS as CCT_COGNITO_GROUPS } from "../../card-counting-trainer/backend/constants/ClientTypes";
 
 // NOTE: Add your stack's short name here when bootstrapping a new package
 // This type is used for Cognito user setup - add the short name (e.g., "tsf" for The Story Forge)
-export type StackTypeForUser = "cwl" | "awse" | "tsh";
+export type StackTypeForUser = "cwl" | "awse" | "tsh" | "cct";
 
 // STACK_TYPE_CONFIG: Configuration mapping for user setup per stack type
 // When bootstrapping a new package, add an entry here with the stack's configuration
@@ -63,6 +64,13 @@ const STACK_TYPE_CONFIG: Record<StackTypeForUser, StackTypeConfig> = {
     cognitoGroups: TSH_COGNITO_GROUPS,
     outputKey: "UserPoolId",
     adminGroup: "SiteAdmin",
+    usesSimpleSchema: true,
+  },
+  cct: {
+    stackTypeEnum: StackType.CardCountingTrainer,
+    cognitoGroups: CCT_COGNITO_GROUPS,
+    outputKey: "UserPoolId",
+    adminGroup: "admin",
     usesSimpleSchema: true,
   },
 };

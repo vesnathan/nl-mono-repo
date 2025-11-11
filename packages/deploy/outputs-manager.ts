@@ -71,7 +71,7 @@ export class OutputsManager {
         ExportName: output.ExportName,
       }));
 
-      // Load existing outputs
+      // Load existing outputs (handles nested stages structure)
       let deploymentOutputs: DeploymentOutputs;
       try {
         const existingContent = await readFile(this.outputsFilePath, "utf8");

@@ -436,10 +436,7 @@ async function waitForStackCompletion(
 
 export async function deployCwl(options: DeploymentOptions): Promise<void> {
   const stackName = getStackName(StackType.CWL, options.stage);
-  const templateBucketName = getTemplateBucketName(
-    StackType.CWL,
-    options.stage,
-  );
+  const templateBucketName = getTemplateBucketName(options.stage);
 
   const stopSpinner = logger.infoWithSpinner(
     "Starting CloudWatch Live stack deployment in ap-southeast-2",

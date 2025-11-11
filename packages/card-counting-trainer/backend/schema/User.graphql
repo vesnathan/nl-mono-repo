@@ -1,0 +1,25 @@
+type User {
+  id: ID!
+  email: String!
+  username: String!
+  chips: Int!
+  totalChipsPurchased: Int!
+  patreonInfo: PatreonInfo
+  earlyAdopter: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type PatreonInfo {
+  tier: PatreonTier!
+  patreonUserId: String
+  lastSynced: AWSDateTime
+}
+
+enum PatreonTier {
+  NONE
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+}

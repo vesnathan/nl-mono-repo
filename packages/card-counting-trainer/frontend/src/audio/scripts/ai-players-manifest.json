@@ -1,0 +1,2294 @@
+{
+  "model_id": "eleven_multilingual_v2",
+  "output_format": "mp3_44100",
+  "items": [
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Hey barkeep! Another round!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/distraction_01.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Did I tell you about my ex-wife? She took EVERYTHING...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/distraction_02.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "What was I betting again?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/distraction_03.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "You're a counter aren't ya? I can always tell!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/distraction_04.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "*knocks over chip stack* Oops! My bad buddy!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/distraction_05.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "The room's spinning... is it hot in here?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/distraction_06.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "I once won $10,000 on this very table! Or was it $1,000?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/distraction_07.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "*hiccup* BUSTED! Fuck!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/bust_01.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "TWENTY-ONE BABY! *slams table*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/hit21_01.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Haha! Not bad!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/goodHit_01.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Ah shit... *squints at cards*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/badStart_01.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Haha! Still got it! *hiccup*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/win_01.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Not too shabby for a drunk old man, huh?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/win_02.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "I'll drink to that! Another win!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/win_03.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Winner winner! *waves glass*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/win_04.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Bartender! Victory round!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/win_05.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Ah hell... where'd my chips go?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/loss_01.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Son of a... *hiccup* ...I had that!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/loss_02.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Dammit. Dealer got lucky that time.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/loss_03.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "*slurs* That was MY hand!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/loss_04.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Bartender! I need another drink!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/loss_05.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Dealer blackjack?! This night just gets worse!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/dealer_blackjack_01.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Of course the dealer pulls 21. OF COURSE!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/dealer_blackjack_02.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "*hiccup* Blackjack? Really?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/dealer_blackjack_03.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "That's just... *waves hand* ...unfair!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/dealer_blackjack_04.mp3"
+    },
+    {
+      "voice_id": "Vr1ZyHpAtTpW6DEVZwwI",
+      "text": "Dealer blackjack! Bartender! NOW!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/drunk-danny/dealer_blackjack_05.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "*drops purse spilling contents everywhere* Oh no! I'm so sorry!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/distraction_01.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "*knocks drink over* I am SO sorry! Does anyone have napkins?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/distraction_02.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Oops! Did I just hit the wrong button?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/distraction_03.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "*bumps into you* Oh my goodness, excuse me!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/distraction_04.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Is this chip mine or yours? I can never keep track!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/distraction_05.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "*drops phone* Why do I always do this?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/distraction_06.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Sorry, sorry! I'm such a klutz!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/distraction_07.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Oh no! I busted! *drops cards*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/bust_01.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Twenty-one?! Really?! *knocks drink*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/hit21_01.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Oh! That's good right?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/goodHit_01.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Oh dear... this isn't good...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/badStart_01.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "I won! I actually won! *nervously excited*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/win_01.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Oh! Did I do it right? I think I won!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/win_02.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Yay! *carefully stacks chips*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/win_03.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Is this real? I'm not dreaming?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/win_04.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "I didn't mess up! Hooray!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/win_05.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Oh no... I lost... *sad face*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/loss_01.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Aww... did I do something wrong?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/loss_02.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "I tried my best... *sighs*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/loss_03.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "*carefully collects remaining chips*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/loss_04.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Maybe next time... *hopeful*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/loss_05.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Dealer got blackjack?! Oh my!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/dealer_blackjack_01.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Oh no! Natural 21! *gasps*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/dealer_blackjack_02.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "Blackjack! Well... okay then...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/dealer_blackjack_03.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "The dealer got blackjack? *nervous laugh*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/dealer_blackjack_04.mp3"
+    },
+    {
+      "voice_id": "ef1T91Fo2YqVYGug3C2p",
+      "text": "*sighs* Dealer blackjack... of course...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/clumsy-claire/dealer_blackjack_05.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "So I just closed a deal on THREE luxury sedans! Can you believe it?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/distraction_01.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "My son's in medical school now. I'm paying $60K a year!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/distraction_02.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Let me tell you about interest rates these days...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/distraction_03.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "You look smart! What do you do for a living?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/distraction_04.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "I've been coming here for 15 years. I know ALL the dealers!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/distraction_05.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "The secret to success is simple: work hard, play hard!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/distraction_06.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Did you see the game last night? UNBELIEVABLE!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/distraction_07.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "BUSTED! Just like that deal I lost last month!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/bust_01.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "TWENTY-ONE! That's how you DO IT!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/hit21_01.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Nice! Reminds me of this one time...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/goodHit_01.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Not great, but you know what I always say...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/badStart_01.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Nice! That reminds me of this one time...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/win_01.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "See? Confidence pays off!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/win_02.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Another win! Just like last Tuesday!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/win_03.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "You know, winning's all about attitude...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/win_04.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Victory! Let me tell you about my strategy...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/win_05.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Well THAT'S frustrating! You know what though...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/loss_01.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Loss! But here's the thing about losses...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/loss_02.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Dealer wins! Reminds me of Q3 earnings...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/loss_03.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Ah well! As my mentor always said...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/loss_04.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Lost that one! But perspective is key...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/loss_05.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Dealer blackjack! You know, statistically...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/dealer_blackjack_01.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Natural 21! That's like when my client...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/dealer_blackjack_02.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Dealer blackjack! Reminds me of this seminar...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/dealer_blackjack_03.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Blackjack! But here's an interesting fact...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/dealer_blackjack_04.mp3"
+    },
+    {
+      "voice_id": "MnqYh9UZerXWcrKflGOg",
+      "text": "Dealer 21! Well THAT'S a conversation starter!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/chatty-carlos/dealer_blackjack_05.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "Wait! My crystal is telling me this isn't a good shoe.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/distraction_01.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "No, no, no! You can't sit there - that's my lucky seat!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/distraction_02.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "The energy at this table feels OFF today.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/distraction_03.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "Mercury is in retrograde, we should all be careful!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/distraction_04.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "I need to sage this table before we continue.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/distraction_05.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "*touching rabbit's foot* Okay universe, show me a sign!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/distraction_06.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "Did anyone else feel that? The energy just shifted!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/distraction_07.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "BUST! The energy was OFF! I knew it!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/bust_01.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "TWENTY-ONE! The universe provides!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/hit21_01.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "My crystals were RIGHT!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/goodHit_01.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "Bad energy... I should've cleansed first...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/badStart_01.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "My crystals KNEW it! Thank you universe!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/win_01.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "The energy shift! I felt it coming!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/win_02.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "Mercury's in retrograde but I STILL won!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/win_03.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "My lucky ritual worked! As always!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/win_04.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "Positive vibes! I manifested this!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/win_05.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "The dealer's energy was too strong!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/loss_01.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "I KNEW I should've cleansed before this hand!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/loss_02.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "The moon's phase was against me!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/loss_03.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "Negative vibes! I felt them!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/loss_04.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "My crystals need recharging!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/loss_05.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "Dealer blackjack! The universe is testing me!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/dealer_blackjack_01.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "Natural 21! Dark energy at work!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/dealer_blackjack_02.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "Dealer blackjack! Mercury retrograde strikes!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/dealer_blackjack_03.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "The dealer's aura is TOO strong!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/dealer_blackjack_04.mp3"
+    },
+    {
+      "voice_id": "8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc",
+      "text": "Blackjack! The cosmos are against me!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/superstitious-susan/dealer_blackjack_05.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "I made more today than you'll make all year, buddy.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/distraction_01.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "This? Oh it's just a $3,000 watch. No big deal.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/distraction_02.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "I bet more on breakfast than most people bet all night.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/distraction_03.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "*tips dealer $100* Keep the change, sweetheart.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/distraction_04.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "You playing scared money? That's why you'll never win big.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/distraction_05.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "I could buy this casino if I wanted to.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/distraction_06.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Amateur hour at this table, I see.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/distraction_07.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "BUST?! How the FUCK?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/bust_01.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "TWENTY-ONE! Too easy!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/hit21_01.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Of course. I called it.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/goodHit_01.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Whatever, I've had worse hands...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/badStart_01.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Of course I won. Did you expect otherwise?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/win_01.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Too easy. Next?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/win_02.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "And THAT'S how it's done.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/win_03.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Did anyone doubt me? Anyone?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/win_04.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "I could do this in my sleep.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/win_05.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Dealer got lucky. That's all.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/loss_01.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Fluke. Pure fluke.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/loss_02.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Whatever. Next hand's mine.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/loss_03.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "That shouldn't have happened.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/loss_04.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Luck. Nothing but luck.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/loss_05.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Dealer blackjack?! That's BULLSHIT!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/dealer_blackjack_01.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "How?! HOW does the dealer get blackjack?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/dealer_blackjack_02.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Dealer 21! That's just lucky!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/dealer_blackjack_03.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Blackjack! Unbelievable!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/dealer_blackjack_04.mp3"
+    },
+    {
+      "voice_id": "XiPuSi02djl3mdNjSaio",
+      "text": "Of COURSE the dealer gets blackjack!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/cocky-kyle/dealer_blackjack_05.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "*whispers* Are they watching us? I think they're watching us!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/distraction_01.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "Is it legal to... never mind, forget I asked!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/distraction_02.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "What if I'm doing this wrong? What if I get banned?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/distraction_03.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "*looking around nervously* Does that camera move?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/distraction_04.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "Should I leave? I feel like I should leave.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/distraction_05.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "My heart is racing. Is this normal?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/distraction_06.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "What happens if security comes over here?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/distraction_07.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "BUSTED! Oh god, is that bad?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/bust_01.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "Twenty-one! *nervous sweat* Did I win?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/hit21_01.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "Oh! Is that good? That's good right?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/goodHit_01.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "*sweating* This feels illegal...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/badStart_01.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "I won?! Oh my gosh! *sweating*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/win_01.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "Wait, really?! I did it?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/win_02.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "Is this allowed? Am I in trouble?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/win_03.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "*nervously celebrates* Yay...?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/win_04.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "I won! Why am I still shaking?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/win_05.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "Oh no oh no! I KNEW it!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/loss_01.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "*panicking* I lost! Is everyone mad?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/loss_02.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "I'm so sorry! *to nobody in particular*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/loss_03.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "I should've known! *sweating*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/loss_04.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "This is bad! This is really bad!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/loss_05.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "DEALER BLACKJACK?! *panics*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/dealer_blackjack_01.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "Oh god! Natural 21! We're doomed!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/dealer_blackjack_02.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "*hyperventilating* Blackjack! Blackjack!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/dealer_blackjack_03.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "Dealer blackjack! I KNEW this would happen!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/dealer_blackjack_04.mp3"
+    },
+    {
+      "voice_id": "lo7AgX1athQfnbY9sVMj",
+      "text": "Natural 21! This is my nightmare!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/nervous-nancy/dealer_blackjack_05.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "I'm telling you, I can FEEL when I'm gonna win!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/distraction_01.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "This is my seventh blackjack today! SEVEN!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/distraction_02.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "I never lose on Tuesdays. It's my lucky day!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/distraction_03.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Should I hit on 17? Last time I did, I got a 4!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/distraction_04.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "*wins again* I don't know how I do it folks!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/distraction_05.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "My wife says I should quit while I'm ahead. But why?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/distraction_06.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Lightning DOES strike twice! I'm proof!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/distraction_07.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "BUST?! My streak is OVER?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/bust_01.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "TWENTY-ONE! I FELT it coming!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/hit21_01.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Called it! Lucky Larry strikes!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/goodHit_01.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Hmm, my gut says this'll work out...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/badStart_01.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Called it! Lucky Larry strikes again!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/win_01.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "My streak continues! Boom!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/win_02.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Luck's on my side tonight!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/win_03.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "I FELT this win coming!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/win_04.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Can't stop won't stop!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/win_05.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Lost? Huh. Doesn't happen often!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/loss_01.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Dealer got one over on me! Rare!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/loss_02.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Well that's unusual for me...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/loss_03.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Lost! But my luck'll turn around!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/loss_04.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "A loss! But I'll bounce back!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/loss_05.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Dealer blackjack?! My luck ran out!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/dealer_blackjack_01.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Natural 21! Well that's rare!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/dealer_blackjack_02.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Dealer blackjack! Even I can't beat that!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/dealer_blackjack_03.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Blackjack! The streak ends here!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/dealer_blackjack_04.mp3"
+    },
+    {
+      "voice_id": "xefN48Dq40rKHHpNo8gn",
+      "text": "Dealer 21! That's... actually impressive!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/lucky-larry/dealer_blackjack_05.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Of COURSE the dealer has blackjack. Why wouldn't they?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/distraction_01.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "I bust on 12. That's just... that's my life.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/distraction_02.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Anyone else would've won that hand. Not me though!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/distraction_03.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "I could have a 20 and the dealer would pull a 21.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/distraction_04.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "*laughs* At least I'm consistent! Consistently unlucky!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/distraction_05.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "You think YOUR luck is bad? Let me tell you...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/distraction_06.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "If it wasn't for bad luck, I'd have no luck at all!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/distraction_07.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "BUST! Of COURSE! *laughs*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/bust_01.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Twenty-one?! Did that actually happen?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/hit21_01.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Wait, I got a GOOD card?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/goodHit_01.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "And here we go... classic me...",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/badStart_01.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Wait, I WON?! Actually won?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/win_01.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Did the dealer make a mistake?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/win_02.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "I... I won? Is this a trick?",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/win_03.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Finally! FINALLY!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/win_04.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "A win! Mark your calendars!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/win_05.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Of course! Why would I expect anything else?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/loss_01.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Classic me! *laughs bitterly*",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/loss_02.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Lost again! Story of my life!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/loss_03.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Yep. There it is. As expected.",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/loss_04.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "I called it! Knew I'd lose!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/loss_05.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Dealer blackjack! Of course! CLASSIC!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/dealer_blackjack_01.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Natural 21! Because why WOULDN'T they?!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/dealer_blackjack_02.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Dealer blackjack! This is SO on-brand for my luck!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/dealer_blackjack_03.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "*laughs* Dealer blackjack! I CALLED IT!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/dealer_blackjack_04.mp3"
+    },
+    {
+      "voice_id": "ADk3UhQjkXzfOux4ovHq",
+      "text": "Blackjack! The universe hates me!",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.82,
+        "style": 0.15,
+        "use_speaker_boost": true
+      },
+      "filename": "audio/players/unlucky-ursula/dealer_blackjack_05.mp3"
+    }
+  ]
+}

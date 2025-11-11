@@ -1,0 +1,91 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root {
+  --background: #6b0000; /* Casino red */
+  --foreground: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #6b0000;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Red felt table with card pattern background */
+body::before {
+  content: ' ';
+  display: block;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  background-image: url(/tableBG.webp);
+  background-repeat: repeat;
+  z-index: -10;
+  pointer-events: none;
+}
+
+.nextui-modal-container {
+  position: fixed !important;
+  z-index: 9999 !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+}
+
+/* Casino-themed styles */
+.felt-background {
+  background: linear-gradient(135deg, #0C5F38 0%, #0A4F2E 100%);
+}
+
+.chip-gold {
+  color: #FFD700;
+}
+
+.chip-red {
+  color: #D32F2F;
+}
+
+/* Player spot styles */
+.player-spot:hover {
+  font-weight: bold;
+  color: rgba(255, 255, 255, 1) !important;
+  border: 1px solid rgba(255, 255, 255, 1) !important;
+}
+
+/* Pulse animation for active player spot */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 1);
+    transform: scale(1.05);
+  }
+}
+
+/* Pulse animation for decision text indicator */
+@keyframes pulse-text {
+  0%, 100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateX(-50%) scale(1.03);
+  }
+}
