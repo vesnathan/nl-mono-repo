@@ -5,6 +5,7 @@ interface SpeechBubbleProps {
   position: { left: string; top: string };
   playerId: string;
   isDealer?: boolean;
+  playerPosition?: number; // Seat position (0-7), undefined for dealer
 }
 
 export default function SpeechBubble({
@@ -12,7 +13,16 @@ export default function SpeechBubble({
   position,
   playerId,
   isDealer = false,
+  playerPosition,
 }: SpeechBubbleProps) {
+  // Determine bubble placement:
+  // - Dealer (isDealer=true): bubble ABOVE, arrow pointing DOWN
+  // - Players 0 & 7 (corners): bubble BELOW, arrow pointing UP
+  // - Players 1-6 (sides): bubble ABOVE, arrow pointing DOWN
+  const isCornerPlayer = playerPosition === 0 || playerPosition === 7;
+  const bubbleBelow = !isDealer && isCornerPlayer;
+  const arrowPointsUp = bubbleBelow;
+
   return (
     <div
       key={playerId}
@@ -20,10 +30,11 @@ export default function SpeechBubble({
         position: "fixed",
         left: position.left,
         top: position.top,
-        // isDealer includes dealer (-1) and positions 0,7 - bubble below with arrow on top
-        transform: isDealer ? "translate(-50%, 0%)" : "translate(-50%, -100%)",
+        transform: bubbleBelow ? "translate(-50%, 0%)" : "translate(-50%, -100%)",
         zIndex: 1000,
-        animation: isDealer ? "speechFadeInDealer 0.3s ease-out" : "speechFadeIn 0.3s ease-out",
+        animation: bubbleBelow
+          ? "speechFadeInBelow 0.3s ease-out"
+          : "speechFadeInAbove 0.3s ease-out",
       }}
     >
       <div
@@ -46,39 +57,32 @@ export default function SpeechBubble({
       >
         {message}
         {/* Speech bubble pointer */}
-        {isDealer ? (
-          <div
-            style={{
-              position: "absolute",
-              bottom: "-14px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: 0,
-              height: 0,
-              borderLeft: "14px solid transparent",
-              borderRight: "14px solid transparent",
-              borderTop: "14px solid rgba(255, 255, 255, 0.98)",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              position: "absolute",
-              bottom: "-14px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: 0,
-              height: 0,
-              borderLeft: "14px solid transparent",
-              borderRight: "14px solid transparent",
-              borderTop: "14px solid rgba(255, 255, 255, 0.98)",
-            }}
-          />
-        )}
+        <div
+          style={{
+            position: "absolute",
+            ...(arrowPointsUp
+              ? {
+                  // Arrow pointing UP (at top of bubble)
+                  top: "-14px",
+                  borderBottom: "14px solid rgba(255, 255, 255, 0.98)",
+                }
+              : {
+                  // Arrow pointing DOWN (at bottom of bubble)
+                  bottom: "-14px",
+                  borderTop: "14px solid rgba(255, 255, 255, 0.98)",
+                }),
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 0,
+            height: 0,
+            borderLeft: "14px solid transparent",
+            borderRight: "14px solid transparent",
+          }}
+        />
       </div>
 
       <style jsx>{`
-        @keyframes speechFadeIn {
+        @keyframes speechFadeInAbove {
           from {
             opacity: 0;
             transform: translate(-50%, -100%) scale(0.8);
@@ -88,7 +92,7 @@ export default function SpeechBubble({
             transform: translate(-50%, -100%) scale(1);
           }
         }
-        @keyframes speechFadeInDealer {
+        @keyframes speechFadeInBelow {
           from {
             opacity: 0;
             transform: translate(-50%, 0%) scale(0.8);

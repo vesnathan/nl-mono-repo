@@ -107,6 +107,7 @@ export default function GameOverlays({
             message={bubble.message}
             playerId={bubble.playerId}
             isDealer={bubble.isDealer}
+            playerPosition={bubble.playerPosition}
           />
         ))}
 

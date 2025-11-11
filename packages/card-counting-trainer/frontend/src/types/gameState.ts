@@ -35,6 +35,7 @@ export interface SpeechBubble {
   visible: boolean; // Whether the bubble is currently visible
   hideTimeoutId?: number; // Timeout ID for hiding the bubble
   isDealer?: boolean; // True if this is a dealer speech bubble (changes pointer direction)
+  playerPosition?: number; // Seat position (0-7), undefined for dealer
 }
 
 /**

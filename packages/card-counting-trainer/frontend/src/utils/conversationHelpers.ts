@@ -82,20 +82,14 @@ export function createSpeechBubble(
   }
 
   // Use dealer position if position is -1, otherwise use table seat position
-  let [x, y] = position === -1 ? DEALER_POSITION : (TABLE_POSITIONS[position] || TABLE_POSITIONS[0]);
-
-  // For positions 0 and 7, adjust Y to place bubble below avatar (avatar is at y%, bubble needs to be at y% + avatar height)
-  // Avatar is 150px tall, ~20vh. Add offset to position bubble below.
-  if (position === 0 || position === 7) {
-    y = y + 15; // Move bubble down by ~15% to position it below the avatar
-  }
+  const [x, y] = position === -1 ? DEALER_POSITION : (TABLE_POSITIONS[position] || TABLE_POSITIONS[0]);
 
   return {
     playerId,
     message,
     position: { left: `${x}%`, top: `${y}%` },
     visible: true,
-    // Positions 0 and 7 (far left/right) need arrow on top like dealer to avoid covering cards
-    isDealer: position === -1 || position === 0 || position === 7,
+    isDealer: position === -1,
+    playerPosition: position === -1 ? undefined : position,
   };
 }
