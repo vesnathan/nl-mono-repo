@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { getPlayerSpeechVolume, getDealerSpeechVolume } from "@/components/AdminSettingsModal";
+import { getOrGenerateAudio } from "@/utils/dynamicTTS";
 
 /**
  * Priority levels for audio playback
@@ -49,7 +50,7 @@ export function useAudioQueue(): AudioQueueHook {
   /**
    * Process the next item in the queue
    */
-  const processQueue = useCallback(() => {
+  const processQueue = useCallback(async () => {
     if (processingRef.current) return;
     if (queue.length === 0) {
       setCurrentItem(null);
@@ -70,56 +71,118 @@ export function useAudioQueue(): AudioQueueHook {
     setCurrentItem(nextItem);
     setIsPlaying(true);
 
-    // Create and play audio element
-    const audio = new Audio(nextItem.audioPath);
-    audioRef.current = audio;
+    /**
+     * Try to play audio, falling back to ElevenLabs if file is missing
+     */
+    const tryPlayAudio = async (audioPath: string, usedFallback = false): Promise<void> => {
+      // Pre-flight check: verify the file exists before trying to play it
+      // This prevents 404 errors in the browser console
+      if (!usedFallback && !audioPath.startsWith('blob:')) {
+        try {
+          const checkResponse = await fetch(audioPath, { method: 'HEAD' });
+          if (!checkResponse.ok) {
+            console.warn(`[Audio Queue] Pre-flight check failed for: ${audioPath} (${checkResponse.status}), trying ElevenLabs fallback...`);
 
-    // Set volume based on whether it's a dealer or player
-    const volume = nextItem.playerId === "dealer"
-      ? getDealerSpeechVolume()
-      : getPlayerSpeechVolume();
-    audio.volume = volume;
+            // Try to generate with ElevenLabs
+            const generatedAudioUrl = await getOrGenerateAudio(nextItem.message, nextItem.playerId);
 
-    audio.onended = () => {
-      setIsPlaying(false);
-      setCurrentItem(null);
-      processingRef.current = false;
-
-      // Call onComplete callback if provided
-      if (nextItem.onComplete) {
-        nextItem.onComplete();
+            if (generatedAudioUrl) {
+              console.log(`[Audio Queue] Generated audio from ElevenLabs for: "${nextItem.message.substring(0, 50)}..."`);
+              // Retry with the generated URL
+              return await tryPlayAudio(generatedAudioUrl, true);
+            } else {
+              console.error(`[Audio Queue] ElevenLabs fallback failed to generate audio`);
+              // Skip this audio and move to next
+              setIsPlaying(false);
+              setCurrentItem(null);
+              processingRef.current = false;
+              setTimeout(() => processQueue(), 100);
+              return;
+            }
+          }
+        } catch (checkError) {
+          console.warn(`[Audio Queue] Pre-flight check error for: ${audioPath}`, checkError);
+          // Continue to try playing anyway - might be a CORS issue with HEAD
+        }
       }
 
-      // Process next item after a small delay
-      setTimeout(() => {
-        processQueue();
-      }, 300); // 300ms gap between audio clips
+      return new Promise((resolve, reject) => {
+        const audio = new Audio(audioPath);
+        audioRef.current = audio;
+
+        // Set volume based on whether it's a dealer or player
+        const volume = nextItem.playerId === "dealer"
+          ? getDealerSpeechVolume()
+          : getPlayerSpeechVolume();
+        audio.volume = volume;
+
+        audio.onended = () => {
+          setIsPlaying(false);
+          setCurrentItem(null);
+          processingRef.current = false;
+
+          // Call onComplete callback if provided
+          if (nextItem.onComplete) {
+            nextItem.onComplete();
+          }
+
+          // Process next item after a small delay
+          setTimeout(() => {
+            processQueue();
+          }, 300); // 300ms gap between audio clips
+
+          resolve();
+        };
+
+        audio.onerror = async (e) => {
+          // If we haven't tried fallback yet, try to generate with ElevenLabs
+          if (!usedFallback) {
+            console.warn(`[Audio Queue] Audio error for: ${audioPath}, trying ElevenLabs fallback...`);
+
+            try {
+              const generatedAudioUrl = await getOrGenerateAudio(nextItem.message, nextItem.playerId);
+
+              if (generatedAudioUrl) {
+                console.log(`[Audio Queue] Generated audio from ElevenLabs for: "${nextItem.message.substring(0, 50)}..."`);
+                // Retry with the generated URL
+                await tryPlayAudio(generatedAudioUrl, true);
+                resolve();
+                return;
+              }
+            } catch (fallbackError) {
+              console.error(`[Audio Queue] ElevenLabs fallback failed:`, fallbackError);
+            }
+          }
+
+          // No fallback worked, skip this audio
+          console.error(`Failed to load audio (no fallback available): ${audioPath}`, e);
+          setIsPlaying(false);
+          setCurrentItem(null);
+          processingRef.current = false;
+
+          // Try next item
+          setTimeout(() => {
+            processQueue();
+          }, 100);
+
+          reject(e);
+        };
+
+        console.log(`[Audio Queue] Playing: ${audioPath}${usedFallback ? ' (from ElevenLabs)' : ''}`);
+        audio.play().catch(async (err) => {
+          console.error(`[Audio Queue] Failed to play audio: ${audioPath}`, err);
+
+          // Trigger error handler for fallback
+          audio.onerror?.(new ErrorEvent('error'));
+        });
+      });
     };
 
-    audio.onerror = (e) => {
-      console.error(`Failed to load audio: ${nextItem.audioPath}`, e);
-      setIsPlaying(false);
-      setCurrentItem(null);
-      processingRef.current = false;
-
-      // Try next item
-      setTimeout(() => {
-        processQueue();
-      }, 100);
-    };
-
-    console.log(`[Audio Queue] Playing: ${nextItem.audioPath}`);
-    audio.play().catch((err) => {
-      console.error(`[Audio Queue] Failed to play audio: ${nextItem.audioPath}`, err);
-      setIsPlaying(false);
-      setCurrentItem(null);
-      processingRef.current = false;
-
-      // Try next item
-      setTimeout(() => {
-        processQueue();
-      }, 100);
-    });
+    try {
+      await tryPlayAudio(nextItem.audioPath);
+    } catch (error) {
+      // Error already handled in tryPlayAudio
+    }
   }, [queue]);
 
   /**

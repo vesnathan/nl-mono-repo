@@ -396,7 +396,7 @@ export function useGameActions({
           addDebugLog(
             `Dealer showing ${dealerUpCard.rank} - checking for blackjack...`,
           );
-          addSpeechBubble("dealer-peek", "Peeking...", -1);
+          addSpeechBubble("dealer", "Peeking...", -1);
 
           registerTimeout(() => {
             // Check for dealer blackjack (natural 21 with 2 cards)

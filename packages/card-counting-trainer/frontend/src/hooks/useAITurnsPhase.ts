@@ -436,7 +436,7 @@ export function useAITurnsPhase({
           if (dialogue) {
             registerTimeout(() => {
               addSpeechBubble(
-                `ai-turn-dialogue-${idx}-${Date.now()}`,
+                ai.character.id, // Use actual character ID for audio lookup
                 dialogue!,
                 ai.position,
                 "distraction", // Audio type for banter
@@ -645,7 +645,7 @@ export function useAITurnsPhase({
           if (dialogue) {
             registerTimeout(() => {
               addSpeechBubble(
-                `ai-stand-dialogue-${idx}-${Date.now()}`,
+                ai.character.id, // Use actual character ID for audio lookup
                 dialogue!,
                 ai.position,
                 "distraction", // Audio type for stand dialogue
