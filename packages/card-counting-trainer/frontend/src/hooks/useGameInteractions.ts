@@ -14,6 +14,8 @@ import {
   generateInitialReactions,
   generateEndOfHandReactions,
 } from "@/utils/reactions";
+import { AudioQueueHook, AudioPriority } from "@/hooks/useAudioQueue";
+import { getPlayerAudioPath, mapOutcomeToAudioType } from "@/utils/audioHelpers";
 
 interface UseGameInteractionsParams {
   activeConversation: ActiveConversation | null;
@@ -26,6 +28,7 @@ interface UseGameInteractionsParams {
   dealerHand: PlayerHand;
   blackjackPayout: BlackjackPayout;
   addDebugLog: (message: string) => void;
+  audioQueue: AudioQueueHook;
 }
 
 export function useGameInteractions({
@@ -37,6 +40,7 @@ export function useGameInteractions({
   dealerHand,
   blackjackPayout,
   addDebugLog,
+  audioQueue,
 }: UseGameInteractionsParams) {
   const triggerConversation = useCallback(
     (speakerId: string, speakerName: string, position: number) => {
@@ -50,7 +54,13 @@ export function useGameInteractions({
   );
 
   const addSpeechBubble = useCallback(
-    (playerId: string, message: string, position: number) => {
+    (
+      playerId: string,
+      message: string,
+      position: number,
+      reactionType?: "bust" | "hit21" | "goodHit" | "badStart" | "win" | "loss" | "dealer_blackjack" | "distraction",
+      priority: AudioPriority = AudioPriority.NORMAL
+    ) => {
       setSpeechBubbles((prev) => {
         const existingBubble = prev.find((b) => b.playerId === playerId);
 
@@ -68,6 +78,20 @@ export function useGameInteractions({
           aiPlayers,
           addDebugLog,
         ).position;
+
+        // Queue audio if reaction type provided
+        if (reactionType && playerId !== "dealer") {
+          const audioPath = getPlayerAudioPath(playerId, reactionType);
+          console.log(`[Audio Queue] Queueing audio for ${playerId}: ${audioPath} (priority: ${priority})`);
+          audioQueue.queueAudio({
+            id: `${playerId}-${Date.now()}`,
+            audioPath,
+            priority,
+            playerId,
+            message,
+            position: bubblePosition,
+          });
+        }
 
         // Clear any existing hide timeout
         if (existingBubble?.hideTimeoutId) {
@@ -104,7 +128,7 @@ export function useGameInteractions({
         }
       });
     },
-    [aiPlayers, addDebugLog, setSpeechBubbles],
+    [aiPlayers, addDebugLog, setSpeechBubbles, audioQueue],
   );
 
   const checkForInitialReactions = useCallback(() => {
@@ -123,6 +147,8 @@ export function useGameInteractions({
             reaction.playerId,
             reaction.message,
             aiPlayer.position,
+            reaction.audioType, // Pass audio type
+            reaction.audioPriority, // Pass priority
           );
         }
       }, idx * 600);
@@ -139,9 +165,11 @@ export function useGameInteractions({
     selectedReactions.forEach((reaction, idx) => {
       registerTimeout(() => {
         addSpeechBubble(
-          `${reaction.playerId}-reaction-${idx}`, // Unique ID per reaction
+          reaction.playerId, // Use playerId directly
           reaction.message,
           reaction.position,
+          reaction.audioType, // Pass audio type from reaction
+          reaction.audioPriority, // Pass priority from reaction
         );
       }, idx * 1000); // Stagger by 1 second to avoid overlap
     });

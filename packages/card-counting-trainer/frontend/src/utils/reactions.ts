@@ -17,6 +17,8 @@ export interface Reaction {
   message: string;
   outcome: string;
   position: number;
+  audioType?: "bust" | "win" | "loss" | "dealer_blackjack" | "distraction";
+  audioPriority?: number; // AudioPriority enum value
 }
 
 /**
@@ -42,11 +44,13 @@ const REACTION_PRIORITY_ORDER = [
 export function generateInitialReactions(
   aiPlayers: AIPlayer[],
   dealerUpCard?: { rank: string; suit: string },
-): Array<{ playerId: string; message: string; outcome: string }> {
+): Array<{ playerId: string; message: string; outcome: string; audioType?: "badStart" | "goodHit"; audioPriority?: number }> {
   const reactions: Array<{
     playerId: string;
     message: string;
     outcome: string;
+    audioType?: "badStart" | "goodHit";
+    audioPriority?: number;
   }> = [];
 
   aiPlayers.forEach((ai) => {
@@ -75,10 +79,21 @@ export function generateInitialReactions(
         : handValue <= 12
           ? "bigLoss"
           : "smallWin";
+
+      // Determine audio type based on hand value
+      let audioType: "badStart" | "goodHit" | undefined = undefined;
+      if (handValue <= 12) {
+        audioType = "badStart";
+      } else if (handValue >= 19) {
+        audioType = "goodHit";
+      }
+
       reactions.push({
         playerId: ai.character.id,
         message: reaction,
         outcome: outcomeType,
+        audioType,
+        audioPriority: 0, // LOW priority for initial reactions
       });
     }
   });
@@ -201,11 +216,28 @@ export function generateEndOfHandReactions(
       );
 
       if (reactionMessage) {
+        // Determine audio type and priority based on outcome and context
+        let audioType: "win" | "loss" | "dealer_blackjack" = "loss";
+        let audioPriority = 1; // NORMAL
+
+        if (currentContext === "dealerBlackjack") {
+          audioType = "dealer_blackjack";
+          audioPriority = 2; // HIGH
+        } else if (outcomeType === "bigWin" || outcomeType === "smallWin") {
+          audioType = "win";
+          audioPriority = 1; // NORMAL
+        } else {
+          audioType = "loss";
+          audioPriority = 1; // NORMAL
+        }
+
         reactions.push({
           playerId: ai.character.id,
           message: reactionMessage,
           outcome: outcomeType,
           position: ai.position,
+          audioType,
+          audioPriority,
         });
       }
     }

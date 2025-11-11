@@ -37,6 +37,7 @@ import { useAITurnsPhase } from "@/hooks/useAITurnsPhase";
 import { useDealingPhase } from "@/hooks/useDealingPhase";
 import { useInsurancePhase } from "@/hooks/useInsurancePhase";
 import { useHeatMap } from "@/hooks/useHeatMap";
+import { useAudioQueue } from "@/hooks/useAudioQueue";
 import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
 import BlackjackGameUI from "@/components/BlackjackGameUI";
 import BackgroundMusic from "@/components/BackgroundMusic";
@@ -164,6 +165,9 @@ export default function GamePage() {
   // Store dealer's hole card separately to prevent cheating via DevTools
   const dealerHoleCardRef = useRef<Card | null>(null);
 
+  // Audio queue hook - manages audio playback with priority
+  const audioQueue = useAudioQueue();
+
   // Game interactions hook - provides conversation and speech bubble functions
   const {
     triggerConversation,
@@ -179,6 +183,7 @@ export default function GamePage() {
     dealerHand,
     blackjackPayout: gameSettings.blackjackPayout,
     addDebugLog,
+    audioQueue, // Pass audio queue to game interactions
   });
 
   // Game actions hook - provides startNewRound, dealInitialCards, hit, stand, doubleDown, split

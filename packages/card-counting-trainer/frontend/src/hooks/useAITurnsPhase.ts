@@ -60,7 +60,13 @@ interface UseAITurnsPhaseParams {
     aiIndex?: number,
     cardIndex?: number,
   ) => { left: string; top: string };
-  addSpeechBubble: (id: string, message: string, position: number) => void;
+  addSpeechBubble: (
+    id: string,
+    message: string,
+    position: number,
+    reactionType?: "bust" | "hit21" | "goodHit" | "badStart" | "win" | "loss" | "dealer_blackjack" | "distraction",
+    priority?: number
+  ) => void;
   addDebugLog: (message: string) => void;
 }
 
@@ -319,6 +325,8 @@ export function useAITurnsPhase({
               `decision-commentary-${idx}-${Date.now()}`,
               commentary,
               ai.position,
+              "distraction", // Audio type for commentary
+              0, // LOW priority
             );
           }, decisionTime / 3); // Show 1/3 into decision time
         }
@@ -431,6 +439,8 @@ export function useAITurnsPhase({
                 `ai-turn-dialogue-${idx}-${Date.now()}`,
                 dialogue!,
                 ai.position,
+                "distraction", // Audio type for banter
+                0, // LOW priority
               );
             }, decisionTime / 2);
           }
@@ -503,6 +513,8 @@ export function useAITurnsPhase({
                     `bust-reaction-${idx}-${Date.now()}`,
                     bustReaction.message,
                     bustReaction.position,
+                    "bust", // Audio type for bust reaction
+                    3, // IMMEDIATE priority - interrupts everything
                   );
                 }, 800); // Delay 800ms after card lands
               }
@@ -636,6 +648,8 @@ export function useAITurnsPhase({
                 `ai-stand-dialogue-${idx}-${Date.now()}`,
                 dialogue!,
                 ai.position,
+                "distraction", // Audio type for stand dialogue
+                0, // LOW priority
               );
             }, decisionTime + 800); // Delay 800ms after stand decision shows
           }

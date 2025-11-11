@@ -20,7 +20,13 @@ interface UseConversationTriggersParams {
     speakerName: string,
     position: number,
   ) => void;
-  addSpeechBubble: (id: string, message: string, position: number) => void;
+  addSpeechBubble: (
+    id: string,
+    message: string,
+    position: number,
+    reactionType?: "bust" | "hit21" | "goodHit" | "badStart" | "win" | "loss" | "dealer_blackjack" | "distraction",
+    priority?: number
+  ) => void;
 }
 
 /**
@@ -109,6 +115,8 @@ export function useConversationTriggers({
                     `ai-conversation-${Date.now()}-${index}`,
                     turn.text,
                     speaker.position,
+                    "distraction", // Conversation audio
+                    1, // NORMAL priority for conversations
                   );
                 }
               }, index * 3500); // 3.5 seconds between conversation turns
