@@ -17,6 +17,7 @@ import {
 import { AudioQueueHook, AudioPriority } from "@/hooks/useAudioQueue";
 import { getPlayerAudioPath, mapOutcomeToAudioType } from "@/utils/audioHelpers";
 import { getOrGenerateAudio } from "@/utils/dynamicTTS";
+import { debugLog } from "@/utils/debug";
 
 interface UseGameInteractionsParams {
   activeConversation: ActiveConversation | null;
@@ -45,11 +46,14 @@ export function useGameInteractions({
 }: UseGameInteractionsParams) {
   const triggerConversation = useCallback(
     (speakerId: string, speakerName: string, position: number) => {
-      // Don't trigger if there's already an active conversation
-      if (activeConversation) return;
+      // DISABLED FOR TESTING: All player conversations disabled
+      return;
 
-      const conversation = createConversation(speakerId, speakerName, position);
-      setActiveConversation(conversation);
+      // Don't trigger if there's already an active conversation
+      // if (activeConversation) return;
+
+      // const conversation = createConversation(speakerId, speakerName, position);
+      // setActiveConversation(conversation);
     },
     [activeConversation, setActiveConversation],
   );
@@ -62,6 +66,12 @@ export function useGameInteractions({
       reactionType?: "bust" | "hit21" | "goodHit" | "badStart" | "win" | "loss" | "dealer_blackjack" | "distraction",
       priority: AudioPriority = AudioPriority.NORMAL
     ) => {
+      // DISABLED FOR TESTING: Block all player speech bubbles and audio
+      if (playerId !== "dealer") {
+        debugLog('playerSpeech', `[DISABLED] Blocked player speech bubble: ${playerId} - "${message}"`);
+        return;
+      }
+
       setSpeechBubbles((prev) => {
         const existingBubble = prev.find((b) => b.playerId === playerId);
 
@@ -85,7 +95,7 @@ export function useGameInteractions({
           if (reactionType) {
             // Use pre-generated audio for reactions
             const audioPath = getPlayerAudioPath(playerId, reactionType);
-            console.log(`[Audio Queue] Queueing pre-generated audio for ${playerId}: ${audioPath} (priority: ${priority})`);
+            debugLog('audioQueue', `[Audio Queue] Queueing pre-generated audio for ${playerId}: ${audioPath} (priority: ${priority})`);
             audioQueue.queueAudio({
               id: `${playerId}-${Date.now()}`,
               audioPath,
@@ -99,7 +109,7 @@ export function useGameInteractions({
             getOrGenerateAudio(message, playerId)
               .then((audioUrl) => {
                 if (audioUrl) {
-                  console.log(`[Audio Queue] Queueing dynamic audio for ${playerId}: ${audioUrl} (priority: ${priority})`);
+                  debugLog('audioQueue', `[Audio Queue] Queueing dynamic audio for ${playerId}: ${audioUrl} (priority: ${priority})`);
                   audioQueue.queueAudio({
                     id: `${playerId}-${Date.now()}`,
                     audioPath: audioUrl,
@@ -155,47 +165,55 @@ export function useGameInteractions({
   );
 
   const checkForInitialReactions = useCallback(() => {
-    // Pass dealer's up card for context-aware reactions
-    const dealerUpCard = dealerHand.cards.length > 0 ? dealerHand.cards[0] : undefined;
-    const selectedReactions = generateInitialReactions(aiPlayers, dealerUpCard);
+    // DISABLED FOR TESTING: No initial reactions
+    debugLog('playerSpeech', `[DISABLED] Blocked initial reactions`);
+    return;
 
-    // Show speech bubbles
-    selectedReactions.forEach((reaction, idx) => {
-      setTimeout(() => {
-        const aiPlayer = aiPlayers.find(
-          (ai) => ai.character.id === reaction.playerId,
-        );
-        if (aiPlayer) {
-          addSpeechBubble(
-            reaction.playerId,
-            reaction.message,
-            aiPlayer.position,
-            reaction.audioType, // Pass audio type
-            reaction.audioPriority, // Pass priority
-          );
-        }
-      }, idx * 600);
-    });
+    // Pass dealer's up card for context-aware reactions
+    // const dealerUpCard = dealerHand.cards.length > 0 ? dealerHand.cards[0] : undefined;
+    // const selectedReactions = generateInitialReactions(aiPlayers, dealerUpCard);
+
+    // // Show speech bubbles
+    // selectedReactions.forEach((reaction, idx) => {
+    //   setTimeout(() => {
+    //     const aiPlayer = aiPlayers.find(
+    //       (ai) => ai.character.id === reaction.playerId,
+    //     );
+    //     if (aiPlayer) {
+    //       addSpeechBubble(
+    //         reaction.playerId,
+    //         reaction.message,
+    //         aiPlayer.position,
+    //         reaction.audioType, // Pass audio type
+    //         reaction.audioPriority, // Pass priority
+    //       );
+    //     }
+    //   }, idx * 600);
+    // });
   }, [aiPlayers, dealerHand.cards, addSpeechBubble]);
 
   const showEndOfHandReactions = useCallback(() => {
-    const selectedReactions = generateEndOfHandReactions(
-      aiPlayers,
-      dealerHand,
-      blackjackPayout,
-    );
+    // DISABLED FOR TESTING: No end-of-hand reactions
+    debugLog('playerSpeech', `[DISABLED] Blocked end-of-hand reactions`);
+    return;
 
-    selectedReactions.forEach((reaction, idx) => {
-      registerTimeout(() => {
-        addSpeechBubble(
-          reaction.playerId, // Use playerId directly
-          reaction.message,
-          reaction.position,
-          reaction.audioType, // Pass audio type from reaction
-          reaction.audioPriority, // Pass priority from reaction
-        );
-      }, idx * 1000); // Stagger by 1 second to avoid overlap
-    });
+    // const selectedReactions = generateEndOfHandReactions(
+    //   aiPlayers,
+    //   dealerHand,
+    //   blackjackPayout,
+    // );
+
+    // selectedReactions.forEach((reaction, idx) => {
+    //   registerTimeout(() => {
+    //     addSpeechBubble(
+    //       reaction.playerId, // Use playerId directly
+    //       reaction.message,
+    //       reaction.position,
+    //       reaction.audioType, // Pass audio type from reaction
+    //       reaction.audioPriority, // Pass priority from reaction
+    //     );
+    //   }, idx * 1000); // Stagger by 1 second to avoid overlap
+    // });
   }, [
     aiPlayers,
     dealerHand,

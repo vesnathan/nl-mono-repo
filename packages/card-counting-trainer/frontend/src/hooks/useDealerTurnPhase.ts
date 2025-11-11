@@ -13,6 +13,7 @@ import { CHARACTER_DIALOGUE, pick } from "@/data/dialogue";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 import { AudioQueueHook, AudioPriority } from "@/hooks/useAudioQueue";
 import { getDealerAudioPath } from "@/utils/audioHelpers";
+import { debugLog } from "@/utils/debug";
 
 interface UseDealerTurnPhaseParams {
   phase: GamePhase;
@@ -81,10 +82,13 @@ export function useDealerTurnPhase({
 
     if (isEnteringDealerTurn) {
       // Reset flags when entering dealer turn phase
+      addDebugLog(`🔄 ENTERING DEALER_TURN - Resetting all flags`);
       dealerTurnProcessingRef.current = false;
       dealerFinishedRef.current = false;
       hasStartedRef.current = false;
       audioQueuedRef.current = false; // Reset audio flag
+      addDebugLog(`   dealerFinishedRef: ${dealerFinishedRef.current}`);
+      addDebugLog(`   audioQueuedRef: ${audioQueuedRef.current}`);
       prevPhaseRef.current = phase;
     }
 
@@ -96,9 +100,11 @@ export function useDealerTurnPhase({
 
     // Guard against re-entry while processing or already started
     if (dealerTurnProcessingRef.current || hasStartedRef.current) {
+      addDebugLog(`⛔ DEALER_TURN re-entry blocked (processing: ${dealerTurnProcessingRef.current}, started: ${hasStartedRef.current})`);
       return;
     }
 
+    addDebugLog(`✅ DEALER_TURN effect starting (processing: false → true, started: false → true)`);
     dealerTurnProcessingRef.current = true;
     hasStartedRef.current = true;
 
@@ -249,11 +255,15 @@ export function useDealerTurnPhase({
             // Only announce and queue audio once
             if (!audioQueuedRef.current) {
               audioQueuedRef.current = true;
+              debugLog('dealerSpeech', `🔊 Queueing dealer audio (guard passed)`);
+              addDebugLog(`🔊 Queueing dealer audio (guard passed)`);
 
               // Play dealer result audio (audio queue will handle speech bubble)
               if (currentDealer) {
                 if (isBust) {
                   const audioPath = getDealerAudioPath(currentDealer.id, "dealer_busts");
+                  debugLog('dealerSpeech', `🎵 Queueing: ${audioPath}`);
+                  addDebugLog(`🎵 Queueing: ${audioPath}`);
                   audioQueue.queueAudio({
                     id: `dealer-busts-${Date.now()}`,
                     audioPath,
@@ -270,6 +280,8 @@ export function useDealerTurnPhase({
                   else voiceLine = "dealer_has_21";
 
                   const audioPath = getDealerAudioPath(currentDealer.id, voiceLine);
+                  debugLog('dealerSpeech', `🎵 Queueing: ${audioPath} - "Dealer has ${finalValue}"`);
+                  addDebugLog(`🎵 Queueing: ${audioPath} - "Dealer has ${finalValue}"`);
                   audioQueue.queueAudio({
                     id: `dealer-result-${Date.now()}`,
                     audioPath,
@@ -279,6 +291,9 @@ export function useDealerTurnPhase({
                   });
                 }
               }
+            } else {
+              debugLog('dealerSpeech', `⛔ Audio queue BLOCKED by guard (already queued)`);
+              addDebugLog(`⛔ Audio queue BLOCKED by guard (already queued)`);
             }
 
             // Move to resolving after brief delay

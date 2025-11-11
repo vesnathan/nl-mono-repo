@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { AIPlayer, GamePhase } from "@/types/gameState";
+import { debugLog } from "@/utils/debug";
 
 interface UseAutoStartHandParams {
   initialized: boolean;
@@ -62,15 +63,15 @@ export function useAutoStartHand({
     ) {
       // If player is seated, give them 10 seconds to bet. Otherwise start immediately.
       const delay = playerSeat !== null ? 10000 : 500;
-      console.log(`[useAutoStartHand] Setting timer for first hand: ${delay}ms`);
+      debugLog('gamePhases', `[useAutoStartHand] Setting timer for first hand: ${delay}ms`);
 
       const timer = setTimeout(() => {
         // Check if phase is still BETTING (user didn't manually confirm)
         if (phaseRef.current !== "BETTING") {
-          console.log('[useAutoStartHand] Phase already changed, skipping auto-start');
+          debugLog('gamePhases', '[useAutoStartHand] Phase already changed, skipping auto-start');
           return;
         }
-        console.log('[useAutoStartHand] Timer fired - starting dealing phase');
+        debugLog('gamePhases', '[useAutoStartHand] Timer fired - starting dealing phase');
         setPhase("DEALING");
         setDealerRevealed(false);
 
@@ -122,15 +123,15 @@ export function useAutoStartHand({
     ) {
       // If player is seated, give them 10 seconds to bet. Otherwise start immediately.
       const delay = playerSeat !== null ? 10000 : 500;
-      console.log(`[useAutoStartHand] Setting timer for hand ${handNumber}: ${delay}ms`);
+      debugLog('gamePhases', `[useAutoStartHand] Setting timer for hand ${handNumber}: ${delay}ms`);
 
       const timer = setTimeout(() => {
         // Check if phase is still BETTING (user didn't manually confirm)
         if (phaseRef.current !== "BETTING") {
-          console.log(`[useAutoStartHand] Phase already changed for hand ${handNumber}, skipping auto-start`);
+          debugLog('gamePhases', `[useAutoStartHand] Phase already changed for hand ${handNumber}, skipping auto-start`);
           return;
         }
-        console.log(`[useAutoStartHand] Timer fired for hand ${handNumber} - starting dealing phase`);
+        debugLog('gamePhases', `[useAutoStartHand] Timer fired for hand ${handNumber} - starting dealing phase`);
         setPhase("DEALING");
         setDealerRevealed(false);
 

@@ -15,6 +15,8 @@
  *   - No persistent caching (session only)
  */
 
+import { debugLog } from "@/utils/debug";
+
 interface TTSResponse {
   audioUrl: string;
   cached: boolean;
@@ -60,17 +62,17 @@ async function generateAudioInBrowser(text: string, voiceId: string): Promise<st
 
   // Check session cache first
   if (audioCache.has(cacheKey)) {
-    console.log(`[Dynamic TTS] Using session cache for: "${text.substring(0, 50)}..."`);
+    debugLog('audioQueue', `[Dynamic TTS] Using session cache for: "${text.substring(0, 50)}..."`);
     return audioCache.get(cacheKey)!;
   }
 
   // Check if this audio is already being generated
   if (inFlightGenerations.has(cacheKey)) {
-    console.log(`[Dynamic TTS] Waiting for in-flight generation: "${text.substring(0, 50)}..."`);
+    debugLog('audioQueue', `[Dynamic TTS] Waiting for in-flight generation: "${text.substring(0, 50)}..."`);
     return await inFlightGenerations.get(cacheKey)!;
   }
 
-  console.log(`[Dynamic TTS] Generating audio in browser for: "${text.substring(0, 50)}..."`);
+  debugLog('audioQueue', `[Dynamic TTS] Generating audio in browser for: "${text.substring(0, 50)}..."`);
 
   // Create the generation promise
   const generationPromise = (async () => {
@@ -133,6 +135,7 @@ export async function getOrGenerateAudio(
 ): Promise<string> {
   const voiceId = VOICE_IDS[characterId];
   if (!voiceId) {
+    // eslint-disable-next-line no-console
     console.error(`[Dynamic TTS] Unknown character: ${characterId}`);
     return '';
   }
@@ -142,6 +145,7 @@ export async function getOrGenerateAudio(
     try {
       return await generateAudioInBrowser(text, voiceId);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('[Dynamic TTS] Browser generation failed:', error);
       return '';
     }
@@ -152,7 +156,7 @@ export async function getOrGenerateAudio(
 
   // Check if this audio is already being generated
   if (inFlightGenerations.has(cacheKey)) {
-    console.log(`[Dynamic TTS] Waiting for in-flight API request: "${text.substring(0, 50)}..."`);
+    debugLog('audioQueue', `[Dynamic TTS] Waiting for in-flight API request: "${text.substring(0, 50)}..."`);
     return await inFlightGenerations.get(cacheKey)!;
   }
 
@@ -171,6 +175,7 @@ export async function getOrGenerateAudio(
 
       if (!response.ok) {
         const error = await response.json();
+        // eslint-disable-next-line no-console
         console.error('[Dynamic TTS] API error:', error);
         throw new Error(error.error || 'TTS generation failed');
       }
@@ -178,13 +183,14 @@ export async function getOrGenerateAudio(
       const data: TTSResponse = await response.json();
 
       if (data.cached) {
-        console.log(`[Dynamic TTS] Using cached audio for: "${text.substring(0, 50)}..."`);
+        debugLog('audioQueue', `[Dynamic TTS] Using cached audio for: "${text.substring(0, 50)}..."`);
       } else {
-        console.log(`[Dynamic TTS] Generated new audio for: "${text.substring(0, 50)}..."`);
+        debugLog('audioQueue', `[Dynamic TTS] Generated new audio for: "${text.substring(0, 50)}..."`);
       }
 
       return data.audioUrl;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('[Dynamic TTS] Failed to get/generate audio:', error);
       return '';
     } finally {
@@ -208,14 +214,15 @@ export async function getOrGenerateAudio(
 export async function preloadAudio(
   phrases: Array<{ text: string; characterId: string }>
 ): Promise<void> {
-  console.log(`[Dynamic TTS] Preloading ${phrases.length} audio files...`);
+  debugLog('audioQueue', `[Dynamic TTS] Preloading ${phrases.length} audio files...`);
 
   const promises = phrases.map(({ text, characterId }) =>
     getOrGenerateAudio(text, characterId).catch((error) => {
+      // eslint-disable-next-line no-console
       console.warn(`[Dynamic TTS] Failed to preload: "${text}"`, error);
     })
   );
 
   await Promise.all(promises);
-  console.log(`[Dynamic TTS] Preload complete`);
+  debugLog('audioQueue', `[Dynamic TTS] Preload complete`);
 }

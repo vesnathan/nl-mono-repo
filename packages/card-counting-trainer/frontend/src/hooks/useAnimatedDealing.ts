@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { dealCard } from "@/lib/gameActions";
 import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
+import { debugLog } from "@/utils/debug";
 
 interface Card {
   rank: string;
@@ -80,7 +81,8 @@ export function useAnimatedDealing(
       dealingTimeoutRef.current = null;
     }
 
-    console.log(
+    debugLog(
+      'dealCards',
       "🎴 Starting turn-based game. AI positions:",
       aiPlayerPositions,
     );

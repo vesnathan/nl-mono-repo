@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { GameSettings, DEFAULT_GAME_SETTINGS } from "@/types/gameSettings";
 import { DealerCharacter } from "@/data/dealerCharacters";
 import {
@@ -12,7 +12,6 @@ import {
   FlyingCardData,
   GamePhase,
 } from "@/types/gameState";
-import { Card } from "@/types/game";
 import { getCardPosition } from "@/utils/cardPositions";
 import { useGameTimeouts } from "@/hooks/useGameTimeouts";
 import { useDebugLogging } from "@/hooks/useDebugLogging";
@@ -134,7 +133,9 @@ export default function GamePage() {
   const [handNumber, setHandNumber] = useState(0);
 
   // Bet history tracking for counting detection (last 10 bets)
-  const [betHistory, setBetHistory] = useState<Array<{bet: number, trueCount: number}>>([]);
+  const [betHistory, setBetHistory] = useState<
+    Array<{ bet: number; trueCount: number }>
+  >([]);
   const [showDealerInfo, setShowDealerInfo] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -165,81 +166,77 @@ export default function GamePage() {
   // Track previous hand states for in-hand reactions
   // const prevAIHandsRef = useRef<Map<string, number>>(new Map()); // TODO: Use for reaction tracking
 
-  // Store dealer's hole card separately to prevent cheating via DevTools
-  const dealerHoleCardRef = useRef<Card | null>(null);
-
   // Audio queue hook - manages audio playback with priority
   const audioQueue = useAudioQueue();
 
   // Game interactions hook - provides conversation and speech bubble functions
-  const {
-    triggerConversation,
-    addSpeechBubble,
-    checkForInitialReactions,
-    showEndOfHandReactions,
-  } = useGameInteractions({
-    activeConversation,
-    setActiveConversation,
-    setSpeechBubbles,
-    registerTimeout,
-    aiPlayers,
-    dealerHand,
-    blackjackPayout: gameSettings.blackjackPayout,
-    addDebugLog,
-    audioQueue, // Pass audio queue to game interactions
-  });
+  const { triggerConversation, addSpeechBubble, showEndOfHandReactions } =
+    useGameInteractions({
+      activeConversation,
+      setActiveConversation,
+      setSpeechBubbles,
+      registerTimeout,
+      aiPlayers,
+      dealerHand,
+      blackjackPayout: gameSettings.blackjackPayout,
+      addDebugLog,
+      audioQueue, // Pass audio queue to game interactions
+    });
 
   // Game actions hook - provides startNewRound, dealInitialCards, hit, stand, doubleDown, split
-  const { startNewRound, dealInitialCards, hit, stand, doubleDown, split } = useGameActions({
-    phase,
-    playerSeat,
-    playerHand,
-    dealerHand,
-    aiPlayers,
-    shoe,
-    cardsDealt,
-    runningCount,
-    shoesDealt,
-    gameSettings,
-    currentDealer,
-    playerChips,
-    setPhase,
-    setCurrentBet,
-    setDealerRevealed,
-    setDealerCallout,
-    setPlayerHand,
-    setDealerHand,
-    setSpeechBubbles,
-    setAIPlayers,
-    setFlyingCards,
-    setPlayerActions,
-    setShoe,
-    setCardsDealt,
-    setRunningCount,
-    setShoesDealt,
-    setInsuranceOffered,
-    setActivePlayerIndex,
-    setPlayerFinished,
-    setPlayerChips,
-    dealCardFromShoe,
-    registerTimeout,
-    getCardPosition: (
-      type: "ai" | "player" | "dealer" | "shoe",
-      _aiPlayers?: AIPlayer[],
-      _playerSeat?: number | null,
-      index?: number,
-      cardIndex?: number,
-    ) => getCardPosition(type, aiPlayers, playerSeat, index, cardIndex),
-    addSpeechBubble,
-    showEndOfHandReactions,
-    addDebugLog,
-  });
+  const { startNewRound, dealInitialCards, hit, stand, doubleDown, split } =
+    useGameActions({
+      phase,
+      playerSeat,
+      playerHand,
+      dealerHand,
+      aiPlayers,
+      shoe,
+      cardsDealt,
+      runningCount,
+      shoesDealt,
+      gameSettings,
+      currentDealer,
+      playerChips,
+      setPhase,
+      setCurrentBet,
+      setDealerRevealed,
+      setDealerCallout,
+      setPlayerHand,
+      setDealerHand,
+      setSpeechBubbles,
+      setAIPlayers,
+      setFlyingCards,
+      setPlayerActions,
+      setShoe,
+      setCardsDealt,
+      setRunningCount,
+      setShoesDealt,
+      setInsuranceOffered,
+      setActivePlayerIndex,
+      setPlayerFinished,
+      setPlayerChips,
+      dealCardFromShoe,
+      registerTimeout,
+      getCardPosition: (
+        type: "ai" | "player" | "dealer" | "shoe",
+        _aiPlayers?: AIPlayer[],
+        _playerSeat?: number | null,
+        index?: number,
+        cardIndex?: number,
+      ) => getCardPosition(type, aiPlayers, playerSeat, index, cardIndex),
+      addSpeechBubble,
+      showEndOfHandReactions,
+      addDebugLog,
+    });
 
   // Calculate true count for bet tracking
-  const decksRemaining = calculateDecksRemaining(gameSettings.numberOfDecks * 52, cardsDealt);
-  const trueCount = decksRemaining > 0
-    ? calculateTrueCount(runningCount, decksRemaining)
-    : 0;
+  const decksRemaining = calculateDecksRemaining(
+    gameSettings.numberOfDecks * 52,
+    cardsDealt,
+  );
+  const trueCount =
+    decksRemaining > 0 ? calculateTrueCount(runningCount, decksRemaining) : 0;
 
   // Betting actions hook
   const { handleConfirmBet, handleClearBet, handleBetChange } =
@@ -271,28 +268,34 @@ export default function GamePage() {
 
   // Detect if player is counting cards (varying bet with count)
   // Check correlation between bet size and true count over last 10 hands
-  const isPlayerCounting = betHistory.length >= 5 && (() => {
-    // Calculate correlation between bets and true counts
-    const avgBet = betHistory.reduce((sum, h) => sum + h.bet, 0) / betHistory.length;
-    const avgCount = betHistory.reduce((sum, h) => sum + h.trueCount, 0) / betHistory.length;
+  const isPlayerCounting =
+    betHistory.length >= 5 &&
+    (() => {
+      // Calculate correlation between bets and true counts
+      const avgBet =
+        betHistory.reduce((sum, h) => sum + h.bet, 0) / betHistory.length;
+      const avgCount =
+        betHistory.reduce((sum, h) => sum + h.trueCount, 0) / betHistory.length;
 
-    let correlation = 0;
-    for (const hand of betHistory) {
-      const betDiff = hand.bet - avgBet;
-      const countDiff = hand.trueCount - avgCount;
-      correlation += betDiff * countDiff;
-    }
+      let correlation = 0;
+      betHistory.forEach((hand) => {
+        const betDiff = hand.bet - avgBet;
+        const countDiff = hand.trueCount - avgCount;
+        correlation += betDiff * countDiff;
+      });
 
-    // Positive correlation > threshold = counting
-    // If player consistently bets more when count is higher, they're counting
-    const isCorrelated = correlation > (minBet * betHistory.length * 0.5);
+      // Positive correlation > threshold = counting
+      // If player consistently bets more when count is higher, they're counting
+      const isCorrelated = correlation > minBet * betHistory.length * 0.5;
 
-    if (isCorrelated) {
-      addDebugLog(`Player IS counting (correlation: ${correlation.toFixed(2)})`);
-    }
+      if (isCorrelated) {
+        addDebugLog(
+          `Player IS counting (correlation: ${correlation.toFixed(2)})`,
+        );
+      }
 
-    return isCorrelated;
-  })();
+      return isCorrelated;
+    })();
 
   // Conversation handlers hook
   const { handleConversationResponse, handleConversationIgnore } =
@@ -318,11 +321,20 @@ export default function GamePage() {
       setPlayerInsuranceBet(insuranceCost);
       setPlayerChips(playerChips - insuranceCost);
       setInsuranceOffered(false);
-      addDebugLog(`Player chips after insurance: $${playerChips - insuranceCost}`);
+      addDebugLog(
+        `Player chips after insurance: $${playerChips - insuranceCost}`,
+      );
     } else {
       addDebugLog("Player cannot afford insurance!");
     }
-  }, [currentBet, playerChips, setPlayerChips, setPlayerInsuranceBet, setInsuranceOffered, addDebugLog]);
+  }, [
+    currentBet,
+    playerChips,
+    setPlayerChips,
+    setPlayerInsuranceBet,
+    setInsuranceOffered,
+    addDebugLog,
+  ]);
 
   const handleDeclineInsurance = useCallback(() => {
     addDebugLog("=== PLAYER DECLINES INSURANCE ===");
@@ -394,9 +406,16 @@ export default function GamePage() {
 
   // Heat map tracking hook - tracks pit boss proximity vs count for discretion analysis
   const { getHeatMapBuckets, getDiscretionScore, dataPointCount } = useHeatMap({
-    trueCount: calculateDecksRemaining(gameSettings.numberOfDecks * 52, cardsDealt) > 0
-      ? calculateTrueCount(runningCount, calculateDecksRemaining(gameSettings.numberOfDecks * 52, cardsDealt))
-      : 0,
+    trueCount:
+      calculateDecksRemaining(gameSettings.numberOfDecks * 52, cardsDealt) > 0
+        ? calculateTrueCount(
+            runningCount,
+            calculateDecksRemaining(
+              gameSettings.numberOfDecks * 52,
+              cardsDealt,
+            ),
+          )
+        : 0,
     pitBossDistance,
     currentBet,
     suspicionLevel,
@@ -504,11 +523,21 @@ export default function GamePage() {
     setPlayerFinished(false);
 
     // Clear AI player cards
-    setAIPlayers(prev => prev.map(ai => ({
-      ...ai,
-      hand: { cards: [], bet: 0 }
-    })));
-  }, [clearDebugLogs, setPlayerHand, setDealerHand, setCurrentBet, setDealerRevealed, setPlayerFinished, setAIPlayers]);
+    setAIPlayers((prev) =>
+      prev.map((ai) => ({
+        ...ai,
+        hand: { cards: [], bet: 0 },
+      })),
+    );
+  }, [
+    clearDebugLogs,
+    setPlayerHand,
+    setDealerHand,
+    setCurrentBet,
+    setDealerRevealed,
+    setPlayerFinished,
+    setAIPlayers,
+  ]);
 
   // Round end phase hook
   useRoundEndPhase({
