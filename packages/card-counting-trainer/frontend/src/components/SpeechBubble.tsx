@@ -15,12 +15,20 @@ export default function SpeechBubble({
   isDealer = false,
   playerPosition,
 }: SpeechBubbleProps) {
-  // Determine bubble placement:
-  // - Dealer (isDealer=true): bubble BELOW dealer position, arrow pointing UP
-  // - Players 0 & 7 (bottom corners): bubble ABOVE them, arrow pointing DOWN
-  // - Players 1-6 (sides): bubble ABOVE them, arrow pointing DOWN
-  const bubbleBelow = isDealer;
-  const arrowPointsUp = isDealer;
+  // Determine bubble placement and arrow direction:
+  // - Dealer (isDealer=true): bubble BELOW dealer, arrow at TOP of bubble pointing UP toward dealer
+  // - Players 0 & 7 (bottom corners): bubble WAY BELOW them, arrow at TOP of bubble pointing UP toward player
+  // - Players 1-6 (sides): bubble ABOVE them, arrow at BOTTOM of bubble pointing DOWN toward player
+  const isBottomCorner = playerPosition === 0 || playerPosition === 7;
+  const bubbleBelow = isDealer || isBottomCorner;
+
+  // Arrow position: if bubble is below character, arrow goes at TOP (pointing up to character)
+  // if bubble is above character, arrow goes at BOTTOM (pointing down to character)
+  const arrowAtTop = bubbleBelow; // Arrow at top of bubble when bubble is below character
+
+  // For positions 0 and 7, add extra vertical offset to position bubble below avatar
+  // Avatar is 150px tall, so we need to shift down by 75px (half avatar) + some margin
+  const verticalOffset = isBottomCorner ? "calc(100% + 95px)" : "0%";
 
   return (
     <div
@@ -30,7 +38,7 @@ export default function SpeechBubble({
         left: position.left,
         top: position.top,
         transform: bubbleBelow
-          ? "translate(-50%, 0%)"
+          ? `translate(-50%, ${verticalOffset})`
           : "translate(-50%, -100%)",
         zIndex: 1000,
         animation: bubbleBelow
@@ -61,14 +69,14 @@ export default function SpeechBubble({
         <div
           style={{
             position: "absolute",
-            ...(arrowPointsUp
+            ...(arrowAtTop
               ? {
-                  // Arrow pointing UP (at top of bubble)
+                  // Arrow at TOP of bubble, pointing UP toward character
                   top: "-14px",
                   borderBottom: "14px solid rgba(255, 255, 255, 0.98)",
                 }
               : {
-                  // Arrow pointing DOWN (at bottom of bubble)
+                  // Arrow at BOTTOM of bubble, pointing DOWN toward character
                   bottom: "-14px",
                   borderTop: "14px solid rgba(255, 255, 255, 0.98)",
                 }),
@@ -96,11 +104,11 @@ export default function SpeechBubble({
         @keyframes speechFadeInBelow {
           from {
             opacity: 0;
-            transform: translate(-50%, 0%) scale(0.8);
+            transform: translate(-50%, ${verticalOffset}) scale(0.8);
           }
           to {
             opacity: 1;
-            transform: translate(-50%, 0%) scale(1);
+            transform: translate(-50%, ${verticalOffset}) scale(1);
           }
         }
       `}</style>
