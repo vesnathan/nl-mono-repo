@@ -41,8 +41,14 @@ import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
 import BlackjackGameUI from "@/components/BlackjackGameUI";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import { WelcomeModal } from "@/components/WelcomeModal";
+import { AuthModal } from "@/components/auth/AuthModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function GamePage() {
+  // Auth state
+  const { isAuthenticated } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
   // Welcome modal state
   const [showWelcome, setShowWelcome] = useState(true);
   const [musicStarted, setMusicStarted] = useState(false);
@@ -563,9 +569,23 @@ export default function GamePage() {
     setMusicStarted(true);
   };
 
+  // Wrap setPlayerSeat to require authentication
+  const handleSeatClick = (seat: number) => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+    setPlayerSeat(seat);
+  };
+
   return (
     <>
       <WelcomeModal isOpen={showWelcome} onClose={handleWelcomeClose} />
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialMode="login"
+      />
       <BlackjackGameUI
         suspicionLevel={suspicionLevel}
         dealerSuspicion={dealerSuspicion}
@@ -615,7 +635,7 @@ export default function GamePage() {
         setShowLeaderboard={setShowLeaderboard}
         setShowStrategyCard={setShowStrategyCard}
         setShowHeatMap={setShowHeatMap}
-        setPlayerSeat={setPlayerSeat}
+        setPlayerSeat={handleSeatClick}
         addDebugLog={addDebugLog}
         startNewRound={startNewRound}
         hit={hit}
