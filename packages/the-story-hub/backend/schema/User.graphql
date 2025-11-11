@@ -76,3 +76,8 @@ type User @aws_iam @aws_cognito_user_pools {
   notificationSettings: UserNotificationSettings
   contentSettings: UserContentSettings
 }
+
+type UsernameAvailability @aws_iam @aws_cognito_user_pools {
+  available: Boolean!
+  username: String!
+}

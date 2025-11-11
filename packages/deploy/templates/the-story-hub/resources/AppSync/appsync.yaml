@@ -110,6 +110,19 @@ Resources:
         RuntimeVersion: 1.0.0
       CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Queries/Query.getUserProfile.js"
 
+  CheckUsernameAvailabilityResolver:
+    Type: AWS::AppSync::Resolver
+    Properties:
+      ApiId: !GetAtt GraphQlApi.ApiId
+      TypeName: Query
+      FieldName: checkUsernameAvailability
+      DataSourceName: !GetAtt MainTableDataSource.Name
+      Kind: UNIT
+      Runtime:
+        Name: APPSYNC_JS
+        RuntimeVersion: 1.0.0
+      CodeS3Location: !Sub "s3://${TemplateBucketName}/resolvers/${Stage}/${ResolversBuildHash}/users/Queries/Query.checkUsernameAvailability.js"
+
   # Story Resolvers
   GetStoryResolver:
     Type: AWS::AppSync::Resolver

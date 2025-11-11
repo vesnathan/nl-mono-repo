@@ -1,5 +1,6 @@
 import { client } from "@/lib/amplify";
 import { UserSchema, type User } from "@/types/ValidationSchemas";
+import { checkUsernameAvailability as checkUsernameAvailabilityQuery } from "@/graphql/users";
 
 // Custom query with all User fields including patreonInfo and settings
 const getUserProfileQuery = /* GraphQL */ `
@@ -57,4 +58,20 @@ export async function getUserProfileAPI(userId: string): Promise<User | null> {
   const { data } = result as { data: { getUserProfile: unknown } };
   if (!data.getUserProfile) return null;
   return UserSchema.parse(data.getUserProfile);
+}
+
+export async function checkUsernameAvailability(
+  username: string,
+): Promise<{ available: boolean; username: string }> {
+  const result = await client.graphql({
+    query: checkUsernameAvailabilityQuery,
+    variables: { username },
+  });
+
+  const { data } = result as {
+    data: {
+      checkUsernameAvailability: { available: boolean; username: string };
+    };
+  };
+  return data.checkUsernameAvailability;
 }

@@ -6,10 +6,6 @@ Parameters:
     Type: String
     Description: Application Name
     Default: tsh
-  # KMSKeyArn will be passed from the main TSH stack, which gets it from SharedKMSKeyArn output
-  KMSKeyArn:
-    Type: String
-    Description: ARN of the KMS key for encryption
 
 Resources:
   DynamoDBRole:
@@ -32,11 +28,6 @@ Resources:
                 Action:
                   - dynamodb:*
                 Resource: "*" # Scope down if possible
-              - Effect: Allow # Allow access to the specific KMS key
-                Action:
-                  - kms:Decrypt
-                  - kms:GenerateDataKey*
-                Resource: !Ref KMSKeyArn
 
   AppSyncDynamoDBRole:
     Type: AWS::IAM::Role
@@ -65,23 +56,19 @@ Resources:
                 Resource:
                   - !GetAtt TSHDataTable.Arn
                   - !Sub "${TSHDataTable.Arn}/*"
-              - Effect: Allow
-                Action:
-                  - kms:Decrypt
-                  - kms:GenerateDataKey
-                Resource: !Ref KMSKeyArn
 
   # Single-table design for story branching platform
   # Access Patterns:
   # 1. Get Story by ID: PK=STORY#{storyId}, SK=METADATA
-  # 2. Get all Chapters for Story: PK=STORY#{storyId}, SK begins_with CHAPTER#
+  # 2. Get all Chapters for Story: PK=STORY#{storyId}, SK begins_with NODE#
   # 3. Get User Profile: PK=USER#{userId}, SK=PROFILE#{userId}
   # 4. Get User's Stories: GSI1PK=USER#{userId}, GSI1SK begins_with STORY#
   # 5. Get User's Branches: GSI1PK=USER#{userId}, GSI1SK begins_with BRANCH#
   # 6. Get Bookmark: PK=USER#{userId}, SK=BOOKMARK#{storyId}
   # 7. Get Notifications: PK=USER#{userId}, SK begins_with NOTIFICATION#
-  # 8. Get Child Branches: PK=CHAPTER#{parentNodeId}, SK begins_with CHILD#
+  # 8. Get Child Branches: PK=NODE#{parentNodeId}, SK begins_with CHILD#
   # 9. Browse/Discover Stories: GSI1PK=STORY_LIST, GSI1SK={timestamp}#{storyId}
+  # 10. Username Lookup: GSI2PK=USERNAME#{username}, GSI2SK=USER#
   TSHDataTable:
     Type: AWS::DynamoDB::Table
     DependsOn: DynamoDBRole
@@ -95,6 +82,10 @@ Resources:
         - AttributeName: "GSI1PK"
           AttributeType: "S"
         - AttributeName: "GSI1SK"
+          AttributeType: "S"
+        - AttributeName: "GSI2PK"
+          AttributeType: "S"
+        - AttributeName: "GSI2SK"
           AttributeType: "S"
       BillingMode: PAY_PER_REQUEST
       KeySchema:
@@ -111,10 +102,16 @@ Resources:
               KeyType: "RANGE"
           Projection:
             ProjectionType: "ALL"
+        - IndexName: "GSI2"
+          KeySchema:
+            - AttributeName: "GSI2PK"
+              KeyType: "HASH"
+            - AttributeName: "GSI2SK"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
       SSESpecification:
-        SSEEnabled: true
-        SSEType: "KMS"
-        KMSMasterKeyId: !Ref KMSKeyArn
+        SSEEnabled: false
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
       StreamSpecification:

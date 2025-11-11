@@ -26,7 +26,7 @@ export function request(ctx: CTX) {
     operation: "UpdateItem",
     key: util.dynamodb.toMapValues({
       PK: `STORY#${input.storyId}`,
-      SK: `CHAPTER#${input.nodeId}`,
+      SK: `NODE#${input.nodeId}`,
     }),
     update: {
       expression: `SET #badges.#${badgeField} = :true`,

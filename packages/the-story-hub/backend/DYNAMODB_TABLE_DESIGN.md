@@ -44,7 +44,7 @@ This document describes the single-table design pattern used for the Story Hub a
   KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
   ExpressionAttributeValues: {
     ":pk": `STORY#${storyId}`,
-    ":sk": "CHAPTER#"
+    ":sk": "NODE#"
   }
 }
 ```
@@ -119,7 +119,7 @@ This document describes the single-table design pattern used for the Story Hub a
 {
   KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
   ExpressionAttributeValues: {
-    ":pk": `CHAPTER#${parentNodeId}`,
+    ":pk": `NODE#${parentNodeId}`,
     ":sk": "CHILD#"
   }
 }
@@ -177,7 +177,7 @@ This document describes the single-table design pattern used for the Story Hub a
 ```typescript
 {
   PK: "STORY#{storyId}",
-  SK: "CHAPTER#{nodeId}",
+  SK: "NODE#{nodeId}",
   GSI1PK: "USER#{authorId}",
   GSI1SK: "BRANCH#{createdAt}#{nodeId}",
 
@@ -286,7 +286,7 @@ This document describes the single-table design pattern used for the Story Hub a
 
 ```typescript
 {
-  PK: "CHAPTER#{parentNodeId}",
+  PK: "NODE#{parentNodeId}",
   SK: "CHILD#{order}#{nodeId}",
 
   // Minimal child reference

@@ -9,6 +9,8 @@ import React, {
   useMemo,
 } from "react";
 import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
+import { getUserProfileAPI } from "@/lib/api/users";
+import { useUserStore } from "@/stores/userStore";
 
 export interface AuthStatus {
   isAuthenticated: boolean;
@@ -25,6 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [username, setUsername] = useState<string | undefined>(undefined);
+  const setUser = useUserStore((state) => state.setUser);
 
   const checkAuthStatus = useCallback(async () => {
     try {
@@ -33,17 +36,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         getCurrentUser().catch(() => null),
       ]);
 
-      setIsAuthenticated(session.tokens !== undefined && user !== null);
+      const isAuth = session.tokens !== undefined && user !== null;
+      setIsAuthenticated(isAuth);
       setIsLoading(false);
       setUserId(user?.userId);
       setUsername(user?.username);
+
+      // Fetch user profile from DynamoDB and populate userStore
+      if (isAuth && user?.userId) {
+        try {
+          const userProfile = await getUserProfileAPI(user.userId);
+          if (userProfile) {
+            setUser(userProfile);
+            // Update username to use the one from DynamoDB
+            setUsername(userProfile.username);
+          }
+        } catch (error) {
+          console.error("Failed to fetch user profile:", error);
+          // Fall back to Cognito username if GraphQL fetch fails
+        }
+      }
     } catch {
       setIsAuthenticated(false);
       setIsLoading(false);
       setUserId(undefined);
       setUsername(undefined);
     }
-  }, []);
+  }, [setUser]);
 
   useEffect(() => {
     checkAuthStatus();
