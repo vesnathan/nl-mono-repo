@@ -64,13 +64,13 @@ export function generateInitialReactions(
     const hasBlackjack = isBlackjack(ai.hand.cards);
 
     // Determine reaction chance based on hand quality
-    let reactionChance = 0.05; // Default: only 5% chance to react
+    let reactionChance = 0.02; // Default: only 2% chance to react
     if (hasBlackjack) {
-      reactionChance = 0.4; // 40% chance to react to blackjack
+      reactionChance = 0.2; // 20% chance to react to blackjack
     } else if (handValue >= 20) {
-      reactionChance = 0.15; // 15% chance to react to 20-21
+      reactionChance = 0.08; // 8% chance to react to 20-21
     } else if (handValue <= 12) {
-      reactionChance = 0.1; // 10% chance to react to bad hand
+      reactionChance = 0.05; // 5% chance to react to bad hand
     }
 
     // Skip most reactions
