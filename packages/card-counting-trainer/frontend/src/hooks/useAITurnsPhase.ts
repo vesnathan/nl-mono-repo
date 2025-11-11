@@ -19,6 +19,7 @@ import { getBasicStrategyAction } from "@/lib/basicStrategy";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 import { DEFAULT_GAME_SETTINGS } from "@/types/gameSettings";
 import { generateBustReaction } from "@/utils/reactions";
+import { debugLog } from "@/utils/debug";
 
 interface UseAITurnsPhaseParams {
   phase: GamePhase;
@@ -67,7 +68,6 @@ interface UseAITurnsPhaseParams {
     reactionType?: "bust" | "hit21" | "goodHit" | "badStart" | "win" | "loss" | "dealer_blackjack" | "distraction",
     priority?: number
   ) => void;
-  addDebugLog: (message: string) => void;
 }
 
 /**
@@ -97,7 +97,6 @@ export function useAITurnsPhase({
   registerTimeout,
   getCardPositionForAnimation,
   addSpeechBubble,
-  addDebugLog,
 }: UseAITurnsPhaseParams) {
   const aiTurnProcessingRef = useRef<boolean>(false);
   const cardCounterRef = useRef(0);
@@ -108,7 +107,7 @@ export function useAITurnsPhase({
   useEffect(() => {
     // Reset playersFinished when entering AI_TURNS phase for the first time
     if (phase === "AI_TURNS" && prevPhaseRef.current !== "AI_TURNS" && !hasResetRef.current) {
-      addDebugLog("[AI_TURNS] Resetting playersFinished on phase entry");
+      debugLog('aiTurns', "[AI_TURNS] Resetting playersFinished on phase entry");
       setPlayersFinished(new Set());
       setActivePlayerIndex(null);
       hasResetRef.current = true;
@@ -127,17 +126,17 @@ export function useAITurnsPhase({
     prevPhaseRef.current = phase;
 
     if (activePlayerIndex !== null) {
-      addDebugLog(`[AI_TURNS Effect] Skipping - activePlayerIndex is ${activePlayerIndex}`);
+      debugLog('aiTurns',`[AI_TURNS Effect] Skipping - activePlayerIndex is ${activePlayerIndex}`);
       return;
     }
 
     if (aiTurnProcessingRef.current || isTransitioningRef.current) {
-      addDebugLog(`[AI_TURNS Effect] Skipping - processing=${aiTurnProcessingRef.current}, transitioning=${isTransitioningRef.current}`);
+      debugLog('aiTurns',`[AI_TURNS Effect] Skipping - processing=${aiTurnProcessingRef.current}, transitioning=${isTransitioningRef.current}`);
       return;
     }
 
-    addDebugLog(`[AI_TURNS Effect] Starting turn logic`);
-    addDebugLog(`[AI_TURNS Effect] playersFinished size: ${playersFinished.size}, contents: [${Array.from(playersFinished).join(", ")}]`);
+    debugLog('aiTurns', `[AI_TURNS Effect] Starting turn logic`);
+    debugLog('aiTurns', `[AI_TURNS Effect] playersFinished size: ${playersFinished.size}, contents: [${Array.from(playersFinished).join(", ")}]`);
 
     aiTurnProcessingRef.current = true;
 
@@ -146,19 +145,19 @@ export function useAITurnsPhase({
         .map((ai, idx) => ({ ai, idx, position: ai.position }))
         .sort((a, b) => a.position - b.position);
 
-      addDebugLog(
+      debugLog('aiTurns',
         `Turn order (sorted by position): ${playersByPosition.map((p) => `${p.ai.character.name} (idx:${p.idx}, seat:${p.position})`).join(", ")}`,
       );
-      addDebugLog(
+      debugLog('aiTurns',
         `Players finished: [${Array.from(playersFinished).join(", ")}]`,
       );
-      addDebugLog(
+      debugLog('aiTurns',
         `Dealer hand cards: ${dealerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")} (${dealerHand.cards.length} cards)`,
       );
 
       const nextPlayer = playersByPosition.find(({ ai, idx }) => {
         if (playersFinished.has(idx)) {
-          addDebugLog(
+          debugLog('aiTurns',
             `  ${ai.character.name} (idx:${idx}) - SKIPPED (already finished)`,
           );
           return false;
@@ -167,22 +166,22 @@ export function useAITurnsPhase({
         const handValue = calculateHandValue(ai.hand.cards);
         const isBust = isBusted(ai.hand.cards);
 
-        addDebugLog(
+        debugLog('aiTurns',
           `  ${ai.character.name} (idx:${idx}) - Hand: ${ai.hand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")} (value: ${handValue}, busted: ${isBust})`,
         );
 
         if (isBust) {
-          addDebugLog(`  ${ai.character.name} (idx:${idx}) - SKIPPED (busted)`);
+          debugLog('aiTurns',`  ${ai.character.name} (idx:${idx}) - SKIPPED (busted)`);
           return false;
         }
         if (handValue < 21) {
-          addDebugLog(
+          debugLog('aiTurns',
             `  ${ai.character.name} (idx:${idx}) - SELECTED (hand < 21)`,
           );
           return true;
         }
         if (handValue === 21) {
-          addDebugLog(
+          debugLog('aiTurns',
             `  ${ai.character.name} (idx:${idx}) - SELECTED (hand = 21)`,
           );
           return true;
@@ -192,20 +191,20 @@ export function useAITurnsPhase({
       });
 
       if (!nextPlayer) {
-        addDebugLog("=== ALL AI PLAYERS FINISHED ===");
-        addDebugLog(
+        debugLog('aiTurns',"=== ALL AI PLAYERS FINISHED ===");
+        debugLog('aiTurns',
           `Players finished: ${Array.from(playersFinished).join(", ")}`,
         );
 
         // Check if human player needs to act
         if (playerSeat !== null && !playerFinished && playerHand.cards.length > 0) {
-          addDebugLog(`Player in seat ${playerSeat} has not finished yet - transitioning to PLAYER_TURN`);
+          debugLog('aiTurns',`Player in seat ${playerSeat} has not finished yet - transitioning to PLAYER_TURN`);
           isTransitioningRef.current = true;
           registerTimeout(() => setPhase("PLAYER_TURN"), 1000);
           return;
         }
 
-        addDebugLog("Moving to DEALER_TURN phase");
+        debugLog('aiTurns',"Moving to DEALER_TURN phase");
         isTransitioningRef.current = true;
         registerTimeout(() => setPhase("DEALER_TURN"), 1000);
         return;
@@ -214,35 +213,35 @@ export function useAITurnsPhase({
       const { ai, idx } = nextPlayer;
 
       // Check if human player's turn comes before this AI player
-      addDebugLog(`=== CHECKING IF PLAYER SHOULD GO BEFORE AI ${idx} ===`);
-      addDebugLog(`  Player seat: ${playerSeat}`);
-      addDebugLog(`  Player finished: ${playerFinished}`);
-      addDebugLog(`  Player has cards: ${playerHand.cards.length > 0}`);
-      addDebugLog(`  AI player seat: ${ai.position}`);
-      addDebugLog(`  Player seat < AI seat: ${playerSeat !== null && ai.position > playerSeat}`);
+      debugLog('aiTurns',`=== CHECKING IF PLAYER SHOULD GO BEFORE AI ${idx} ===`);
+      debugLog('aiTurns',`  Player seat: ${playerSeat}`);
+      debugLog('aiTurns',`  Player finished: ${playerFinished}`);
+      debugLog('aiTurns',`  Player has cards: ${playerHand.cards.length > 0}`);
+      debugLog('aiTurns',`  AI player seat: ${ai.position}`);
+      debugLog('aiTurns',`  Player seat < AI seat: ${playerSeat !== null && ai.position > playerSeat}`);
 
       if (playerSeat !== null && !playerFinished && playerHand.cards.length > 0 && ai.position > playerSeat) {
-        addDebugLog(`✓ Player in seat ${playerSeat} should act BEFORE AI player in seat ${ai.position}`);
-        addDebugLog("→ Transitioning to PLAYER_TURN");
+        debugLog('aiTurns',`✓ Player in seat ${playerSeat} should act BEFORE AI player in seat ${ai.position}`);
+        debugLog('aiTurns',"→ Transitioning to PLAYER_TURN");
         isTransitioningRef.current = true;
         aiTurnProcessingRef.current = false;
         registerTimeout(() => setPhase("PLAYER_TURN"), 1000);
         return;
       } else {
-        addDebugLog(`✗ Player does NOT need to act before AI ${idx}`);
+        debugLog('aiTurns',`✗ Player does NOT need to act before AI ${idx}`);
       }
 
-      addDebugLog(
+      debugLog('aiTurns',
         `=== AI PLAYER ${idx} TURN (${ai.character.name}, Seat ${ai.position}) ===`,
       );
-      addDebugLog(
+      debugLog('aiTurns',
         `Current hand: ${ai.hand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
       );
 
       const handValue = calculateHandValue(ai.hand.cards);
       const isBust = isBusted(ai.hand.cards);
 
-      addDebugLog(`Hand value: ${handValue}, Busted: ${isBust}`);
+      debugLog('aiTurns',`Hand value: ${handValue}, Busted: ${isBust}`);
 
       let handDifficultyMultiplier = 1.0;
       if (isBust || handValue >= 20) {
@@ -296,10 +295,10 @@ export function useAITurnsPhase({
         action = "H";
       }
 
-      addDebugLog(`Dealer up card: ${dealerUpCard.rank}${dealerUpCard.suit}`);
-      addDebugLog(`Can split: ${canSplitHand}`);
-      addDebugLog(`Basic strategy says: ${basicStrategyAction} (converted D to H for AI)`);
-      addDebugLog(
+      debugLog('aiTurns',`Dealer up card: ${dealerUpCard.rank}${dealerUpCard.suit}`);
+      debugLog('aiTurns',`Can split: ${canSplitHand}`);
+      debugLog('aiTurns',`Basic strategy says: ${basicStrategyAction} (converted D to H for AI)`);
+      debugLog('aiTurns',
         `Follows basic strategy: ${followsBasicStrategy}, Final decision: ${action}`,
       );
 
@@ -334,7 +333,7 @@ export function useAITurnsPhase({
 
       // Handle SPLIT action
       if (action === "SP" && canSplitHand) {
-        addDebugLog(`AI Player ${idx} decision: SPLIT`);
+        debugLog('aiTurns',`AI Player ${idx} decision: SPLIT`);
 
         // Show SPLIT action indicator
         registerTimeout(() => {
@@ -344,7 +343,7 @@ export function useAITurnsPhase({
         // Execute split after short delay
         registerTimeout(() => {
           const [card1, card2] = ai.hand.cards;
-          addDebugLog(`Splitting ${card1.rank}${card1.suit} and ${card2.rank}${card2.suit}`);
+          debugLog('aiTurns',`Splitting ${card1.rank}${card1.suit} and ${card2.rank}${card2.suit}`);
 
           // Create two hands
           const hand1: PlayerHand = { cards: [card1], bet: ai.hand.bet };
@@ -354,13 +353,13 @@ export function useAITurnsPhase({
           registerTimeout(() => {
             const newCard1 = dealCardFromShoe();
             hand1.cards.push(newCard1);
-            addDebugLog(`Dealt to first hand: ${newCard1.rank}${newCard1.suit}`);
+            debugLog('aiTurns',`Dealt to first hand: ${newCard1.rank}${newCard1.suit}`);
 
             // Deal card to second hand
             registerTimeout(() => {
               const newCard2 = dealCardFromShoe();
               hand2.cards.push(newCard2);
-              addDebugLog(`Dealt to second hand: ${newCard2.rank}${newCard2.suit}`);
+              debugLog('aiTurns',`Dealt to second hand: ${newCard2.rank}${newCard2.suit}`);
 
               // Update AI player with split hands
               setAIPlayers((prev) => {
@@ -378,7 +377,7 @@ export function useAITurnsPhase({
                 return updated;
               });
 
-              addDebugLog("AI split complete - will play both hands");
+              debugLog('aiTurns',"AI split complete - will play both hands");
 
               // Clear action indicator and continue
               registerTimeout(() => {
@@ -452,7 +451,7 @@ export function useAITurnsPhase({
 
         registerTimeout(() => {
           const card = dealCardFromShoe();
-          addDebugLog(
+          debugLog('aiTurns',
             `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
           );
 
@@ -491,11 +490,11 @@ export function useAITurnsPhase({
             const newHandValue = calculateHandValue([...ai.hand.cards, card]);
             const busted = isBusted([...ai.hand.cards, card]);
 
-            addDebugLog(`New hand value: ${newHandValue}, Busted: ${busted}`);
+            debugLog('aiTurns',`New hand value: ${newHandValue}, Busted: ${busted}`);
 
             if (busted) {
-              addDebugLog(`AI Player ${idx} BUSTED!`);
-              addDebugLog(`Marking AI Player ${idx} as FINISHED (busted)`);
+              debugLog('aiTurns',`AI Player ${idx} BUSTED!`);
+              debugLog('aiTurns',`Marking AI Player ${idx} as FINISHED (busted)`);
 
               // Generate and show bust reaction with delay (after card lands)
               const updatedAI = {
@@ -507,7 +506,7 @@ export function useAITurnsPhase({
               };
               const bustReaction = generateBustReaction(updatedAI);
               if (bustReaction) {
-                addDebugLog(`Showing bust reaction: ${bustReaction.message}`);
+                debugLog('aiTurns',`Showing bust reaction: ${bustReaction.message}`);
                 registerTimeout(() => {
                   addSpeechBubble(
                     `bust-reaction-${idx}-${Date.now()}`,
@@ -549,12 +548,12 @@ export function useAITurnsPhase({
                   return newMap;
                 });
                 aiTurnProcessingRef.current = false;
-                addDebugLog("🔓 AI turn processing unlocked (bust)");
+                debugLog('aiTurns',"🔓 AI turn processing unlocked (bust)");
                 setActivePlayerIndex(null);
               }, CARD_ANIMATION_DURATION);
             } else if (newHandValue >= 21) {
-              addDebugLog(`AI Player ${idx} reached 21!`);
-              addDebugLog(`Marking AI Player ${idx} as FINISHED (21)`);
+              debugLog('aiTurns',`AI Player ${idx} reached 21!`);
+              debugLog('aiTurns',`Marking AI Player ${idx} as FINISHED (21)`);
 
               setPlayersFinished((prev) => new Set(prev).add(idx));
 
@@ -575,17 +574,17 @@ export function useAITurnsPhase({
                   return newMap;
                 });
                 aiTurnProcessingRef.current = false;
-                addDebugLog("🔓 AI turn processing unlocked (21)");
+                debugLog('aiTurns',"🔓 AI turn processing unlocked (21)");
                 setActivePlayerIndex(null);
               }, 600);
             } else {
               // Player continues - unlock to allow next decision
-              addDebugLog(`AI Player ${idx} continues with ${newHandValue}`);
+              debugLog('aiTurns',`AI Player ${idx} continues with ${newHandValue}`);
 
               registerTimeout(
                 () => {
                   aiTurnProcessingRef.current = false;
-                  addDebugLog("🔓 AI turn processing unlocked (continue)");
+                  debugLog('aiTurns',"🔓 AI turn processing unlocked (continue)");
                   setActivePlayerIndex(null);
                 },
                 800 + actionDisplay + turnClear,
@@ -607,8 +606,8 @@ export function useAITurnsPhase({
           decisionTime + 50 + 800 + actionDisplay,
         );
       } else {
-        addDebugLog(`AI Player ${idx} decision: STAND`);
-        addDebugLog(`Marking AI Player ${idx} as FINISHED (stand)`);
+        debugLog('aiTurns',`AI Player ${idx} decision: STAND`);
+        debugLog('aiTurns',`Marking AI Player ${idx} as FINISHED (stand)`);
 
         setPlayersFinished((prev) => new Set(prev).add(idx));
 
@@ -683,6 +682,6 @@ export function useAITurnsPhase({
     playersFinished,
     // Functions and complex objects intentionally omitted - they change on every render:
     // aiPlayers, dealerHand, dealCardFromShoe, registerTimeout,
-    // getCardPositionForAnimation, addDebugLog, addSpeechBubble
+    // getCardPositionForAnimation, addSpeechBubble
   ]);
 }

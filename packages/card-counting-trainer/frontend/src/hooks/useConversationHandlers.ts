@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { debugLog } from "@/utils/debug";
 import { ActiveConversation } from "@/types/gameState";
 import { DealerCharacter } from "@/data/dealerCharacters";
 import { increaseDealerSuspicion } from "./useDealerSuspicion";
@@ -13,7 +14,6 @@ interface UseConversationHandlersParams {
   currentDealer: DealerCharacter | null;
   isPlayerCounting: boolean; // Whether player is actually varying bets with count
   addSpeechBubble: (id: string, message: string, position: number) => void;
-  addDebugLog: (message: string) => void;
 }
 
 export function useConversationHandlers({
@@ -26,7 +26,6 @@ export function useConversationHandlers({
   currentDealer,
   isPlayerCounting,
   addSpeechBubble,
-  addDebugLog,
 }: UseConversationHandlersParams) {
   const handleConversationResponse = useCallback(
     (choiceIndex: number) => {
@@ -34,14 +33,14 @@ export function useConversationHandlers({
 
       const choice = activeConversation.choices[choiceIndex];
 
-      addDebugLog(`=== CONVERSATION RESPONSE (Choice ${choiceIndex}) ===`);
-      addDebugLog(`Player chose: "${choice.text}"`);
-      addDebugLog(`Suspicion change: ${choice.suspicionChange}`);
-      addDebugLog(`Is player counting: ${isPlayerCounting}`);
+      debugLog('conversations', `=== CONVERSATION RESPONSE (Choice ${choiceIndex}) ===`);
+      debugLog('conversations', `Player chose: "${choice.text}"`);
+      debugLog('conversations', `Suspicion change: ${choice.suspicionChange}`);
+      debugLog('conversations', `Is player counting: ${isPlayerCounting}`);
 
       // Apply pit boss suspicion change
       if (choice.suspicionChange !== 0) {
-        addDebugLog(`Pit boss suspicion: ${choice.suspicionChange > 0 ? "+" : ""}${choice.suspicionChange}`);
+        debugLog('conversations', `Pit boss suspicion: ${choice.suspicionChange > 0 ? "+" : ""}${choice.suspicionChange}`);
         setSuspicionLevel((prev) =>
           Math.max(0, Math.min(100, prev + choice.suspicionChange)),
         );
@@ -58,16 +57,16 @@ export function useConversationHandlers({
           // Friendly response while counting - slightly suspicious
           // Dealer thinks: "Why are they being so chatty while concentrating?"
           dealerSuspicionChange = 2;
-          addDebugLog(`Friendly response while counting → +2 dealer suspicion (${currentDealer.name})`);
+          debugLog('conversations', `Friendly response while counting → +2 dealer suspicion (${currentDealer.name})`);
         } else if (choiceIndex === 1) {
           // Neutral response while counting - minimal suspicion
           dealerSuspicionChange = 0.5;
-          addDebugLog(`Neutral response while counting → +0.5 dealer suspicion (${currentDealer.name})`);
+          debugLog('conversations', `Neutral response while counting → +0.5 dealer suspicion (${currentDealer.name})`);
         } else if (choiceIndex === 2) {
           // Dismissive response while counting - very suspicious
           // Dealer thinks: "They're too focused, must be counting"
           dealerSuspicionChange = 4;
-          addDebugLog(`Dismissive response while counting → +4 dealer suspicion (${currentDealer.name})`);
+          debugLog('conversations', `Dismissive response while counting → +4 dealer suspicion (${currentDealer.name})`);
         }
 
         if (dealerSuspicionChange > 0) {
@@ -75,18 +74,18 @@ export function useConversationHandlers({
         }
       } else if (isPlayerCounting && currentDealer && currentDealer.onYourSide) {
         // Dealer is on your side - they know you're counting but don't care
-        addDebugLog(`${currentDealer.name} is on your side - no dealer suspicion added`);
+        debugLog('conversations', `${currentDealer.name} is on your side - no dealer suspicion added`);
 
         // In fact, being social helps you blend in
         if (choiceIndex === 0) {
-          addDebugLog("Friendly response (dealer on your side) → helps camouflage");
+          debugLog('conversations', "Friendly response (dealer on your side) → helps camouflage");
         }
       } else if (!isPlayerCounting) {
         // Not counting - normal social behavior doesn't raise dealer suspicion
         // In fact, being friendly/social lowers dealer suspicion slightly
         if (choiceIndex === 0) {
           // Friendly response - dealer relaxes a bit
-          addDebugLog("Friendly response (not counting) → -1 dealer suspicion");
+          debugLog('conversations', "Friendly response (not counting) → -1 dealer suspicion");
           setDealerSuspicion((prev) => Math.max(0, prev - 1));
         }
       }
@@ -95,15 +94,15 @@ export function useConversationHandlers({
       if (choiceIndex === 0) {
         // Friendly response - people want to talk to you more
         setPlayerSociability((prev) => Math.min(100, prev + 3));
-        addDebugLog("Sociability: +3 (friendly)");
+        debugLog('conversations', "Sociability: +3 (friendly)");
       } else if (choiceIndex === 1) {
         // Neutral - small increase
         setPlayerSociability((prev) => Math.min(100, prev + 1));
-        addDebugLog("Sociability: +1 (neutral)");
+        debugLog('conversations', "Sociability: +1 (neutral)");
       } else if (choiceIndex === 2) {
         // Dismissive response - people talk to you less
         setPlayerSociability((prev) => Math.max(0, prev - 5));
-        addDebugLog("Sociability: -5 (dismissive)");
+        debugLog('conversations', "Sociability: -5 (dismissive)");
       }
 
       // Show speech bubble with player's response
@@ -124,22 +123,21 @@ export function useConversationHandlers({
       setPlayerSociability,
       setDealerSuspicion,
       setActiveConversation,
-      addDebugLog,
     ],
   );
 
   const handleConversationIgnore = useCallback(() => {
     if (!activeConversation) return;
 
-    addDebugLog(`=== CONVERSATION IGNORED ===`);
-    addDebugLog(`Is player counting: ${isPlayerCounting}`);
+    debugLog('conversations', `=== CONVERSATION IGNORED ===`);
+    debugLog('conversations', `Is player counting: ${isPlayerCounting}`);
 
     // Ignoring conversations raises pit boss suspicion significantly
-    addDebugLog("Pit boss suspicion: +8 (ignored conversation)");
+    debugLog('conversations', "Pit boss suspicion: +8 (ignored conversation)");
     setSuspicionLevel((prev) => Math.min(100, prev + 8));
 
     // Being unresponsive makes people avoid you
-    addDebugLog("Sociability: -8 (ignored)");
+    debugLog('conversations', "Sociability: -8 (ignored)");
     setPlayerSociability((prev) => Math.max(0, prev - 8));
 
     // Dealer notices when you ignore people - VERY suspicious if counting
@@ -148,15 +146,15 @@ export function useConversationHandlers({
       if (isPlayerCounting) {
         // Ignoring while counting = extremely suspicious
         // Dealer thinks: "They're too focused on the cards to even respond"
-        addDebugLog(`Ignored while counting → +6 dealer suspicion (${currentDealer.name})`);
+        debugLog('conversations', `Ignored while counting → +6 dealer suspicion (${currentDealer.name})`);
         increaseDealerSuspicion(currentDealer, 6, setDealerSuspicion);
       } else {
         // Ignoring while not counting = rude but not as suspicious
-        addDebugLog(`Ignored while not counting → +2 dealer suspicion (${currentDealer.name})`);
+        debugLog('conversations', `Ignored while not counting → +2 dealer suspicion (${currentDealer.name})`);
         increaseDealerSuspicion(currentDealer, 2, setDealerSuspicion);
       }
     } else if (currentDealer && currentDealer.onYourSide) {
-      addDebugLog(`${currentDealer.name} is on your side - ignoring doesn't raise dealer suspicion`);
+      debugLog('conversations', `${currentDealer.name} is on your side - ignoring doesn't raise dealer suspicion`);
     }
 
     // Show that player is too focused (suspicious)
@@ -175,7 +173,6 @@ export function useConversationHandlers({
     setPlayerSociability,
     setDealerSuspicion,
     setActiveConversation,
-    addDebugLog,
   ]);
 
   return {

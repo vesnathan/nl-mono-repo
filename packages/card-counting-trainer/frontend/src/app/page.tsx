@@ -45,6 +45,7 @@ import { WelcomeModal } from "@/components/WelcomeModal";
 import { AuthModal } from "@/components/auth/AuthModal";
 import AdminSettingsModal from "@/components/AdminSettingsModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { debugLog } from "@/utils/debug";
 
 export default function GamePage() {
   // Auth state
@@ -66,7 +67,6 @@ export default function GamePage() {
     debugLogs,
     showDebugLog,
     setShowDebugLog,
-    addDebugLog,
     clearDebugLogs,
   } = useDebugLogging();
 
@@ -179,7 +179,6 @@ export default function GamePage() {
       aiPlayers,
       dealerHand,
       blackjackPayout: gameSettings.blackjackPayout,
-      addDebugLog,
       audioQueue, // Pass audio queue to game interactions
     });
 
@@ -227,7 +226,6 @@ export default function GamePage() {
       ) => getCardPosition(type, aiPlayers, playerSeat, index, cardIndex),
       addSpeechBubble,
       showEndOfHandReactions,
-      addDebugLog,
     });
 
   // Calculate true count for bet tracking
@@ -259,7 +257,6 @@ export default function GamePage() {
       setAIPlayers,
       dealInitialCards,
       registerTimeout,
-      addDebugLog,
       trueCount,
       setBetHistory,
       currentDealer,
@@ -289,7 +286,7 @@ export default function GamePage() {
       const isCorrelated = correlation > minBet * betHistory.length * 0.5;
 
       if (isCorrelated) {
-        addDebugLog(
+        debugLog('insurance', 
           `Player IS counting (correlation: ${correlation.toFixed(2)})`,
         );
       }
@@ -309,23 +306,22 @@ export default function GamePage() {
       currentDealer,
       isPlayerCounting,
       addSpeechBubble,
-      addDebugLog,
     });
 
   // Insurance handlers
   const handleTakeInsurance = useCallback(() => {
     const insuranceCost = Math.floor(currentBet / 2);
-    addDebugLog(`=== PLAYER TAKES INSURANCE for $${insuranceCost} ===`);
+    debugLog('insurance', `=== PLAYER TAKES INSURANCE for $${insuranceCost} ===`);
 
     if (playerChips >= insuranceCost) {
       setPlayerInsuranceBet(insuranceCost);
       setPlayerChips(playerChips - insuranceCost);
       setInsuranceOffered(false);
-      addDebugLog(
+      debugLog('insurance', 
         `Player chips after insurance: $${playerChips - insuranceCost}`,
       );
     } else {
-      addDebugLog("Player cannot afford insurance!");
+      debugLog('insurance', "Player cannot afford insurance!");
     }
   }, [
     currentBet,
@@ -333,14 +329,13 @@ export default function GamePage() {
     setPlayerChips,
     setPlayerInsuranceBet,
     setInsuranceOffered,
-    addDebugLog,
   ]);
 
   const handleDeclineInsurance = useCallback(() => {
-    addDebugLog("=== PLAYER DECLINES INSURANCE ===");
+    debugLog('insurance', "=== PLAYER DECLINES INSURANCE ===");
     setPlayerInsuranceBet(0);
     setInsuranceOffered(false);
-  }, [setPlayerInsuranceBet, setInsuranceOffered, addDebugLog]);
+  }, [setPlayerInsuranceBet, setInsuranceOffered]);
 
   // Suspicion decay hook
   useSuspicionDecay(suspicionLevel, setSuspicionLevel);
@@ -448,12 +443,12 @@ export default function GamePage() {
   useEffect(() => {
     const shouldShowBetting =
       phase === "BETTING" && initialized && playerSeat !== null;
-    addDebugLog(`=== BETTING INTERFACE CHECK ===`);
-    addDebugLog(`Phase: ${phase}`);
-    addDebugLog(`Initialized: ${initialized}`);
-    addDebugLog(`Player seat: ${playerSeat}`);
-    addDebugLog(`Should show betting interface: ${shouldShowBetting}`);
-  }, [phase, initialized, playerSeat, addDebugLog]);
+    debugLog('betting', `=== BETTING INTERFACE CHECK ===`);
+    debugLog('betting', `Phase: ${phase}`);
+    debugLog('betting', `Initialized: ${initialized}`);
+    debugLog('betting', `Player seat: ${playerSeat}`);
+    debugLog('betting', `Should show betting interface: ${shouldShowBetting}`);
+  }, [phase, initialized, playerSeat]);
 
   // AI turns phase hook (handles its own reset logic internally)
   useAITurnsPhase({
@@ -479,7 +474,6 @@ export default function GamePage() {
       cardIndex?: number,
     ) => getCardPosition(type, aiPlayers, playerSeat, aiIndex, cardIndex),
     addSpeechBubble,
-    addDebugLog,
   });
 
   // Dealing phase hook - marks blackjack hands as finished
@@ -490,7 +484,6 @@ export default function GamePage() {
     setPlayersFinished,
     setPlayerActions,
     registerTimeout,
-    addDebugLog,
   });
 
   // Insurance phase hook - handles insurance decisions
@@ -505,7 +498,6 @@ export default function GamePage() {
     playerInsuranceBet,
     setPhase,
     registerTimeout,
-    addDebugLog,
   });
 
   // Next hand
@@ -577,7 +569,6 @@ export default function GamePage() {
       cardIndex?: number,
     ) => getCardPosition(type, aiPlayers, playerSeat, aiIndex, cardIndex),
     addSpeechBubble,
-    addDebugLog,
     audioQueue,
   });
 
@@ -608,7 +599,6 @@ export default function GamePage() {
     registerTimeout,
     showEndOfHandReactions,
     addSpeechBubble,
-    addDebugLog,
   });
 
   const handleWelcomeClose = () => {
@@ -688,7 +678,7 @@ export default function GamePage() {
         setShowStrategyCard={setShowStrategyCard}
         setShowHeatMap={setShowHeatMap}
         setPlayerSeat={handleSeatClick}
-        addDebugLog={addDebugLog}
+        
         startNewRound={startNewRound}
         hit={hit}
         stand={stand}

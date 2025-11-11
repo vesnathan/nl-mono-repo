@@ -11,6 +11,7 @@ import { dealCard, calculateHandValue, isBlackjack } from "@/lib/gameActions";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 import { GameSettings } from "@/types/gameSettings";
 import { getInitialHandReaction } from "@/data/dialogue";
+import { debugLog } from "@/utils/debug";
 
 // Module-level counter for unique card IDs
 let cardIdCounter = 0;
@@ -82,7 +83,6 @@ interface UseGameActionsParams {
   ) => { left: string; top: string };
   addSpeechBubble: (playerId: string, message: string, position: number) => void;
   showEndOfHandReactions: () => void;
-  addDebugLog: (message: string) => void;
 }
 
 // Return type for useGameActions
@@ -131,7 +131,6 @@ export function useGameActions({
   getCardPosition,
   addSpeechBubble,
   showEndOfHandReactions,
-  addDebugLog,
 }: UseGameActionsParams) {
   const startNewRound = useCallback(() => {
     setPhase("BETTING");
@@ -164,15 +163,15 @@ export function useGameActions({
     // Use parameter if provided, otherwise fall back to playerHand.bet
     const effectivePlayerBet = playerBetAmount ?? playerHand.bet;
 
-    addDebugLog("=== DEALING PHASE START ===");
-    addDebugLog(`Shoe cards remaining: ${shoe.length}`);
-    addDebugLog(`Cards dealt this shoe: ${cardsDealt}`);
-    addDebugLog(`Running count: ${runningCount}`);
-    addDebugLog(`Number of AI players: ${aiPlayers.length}`);
-    addDebugLog(
+    debugLog('gamePhases', "=== DEALING PHASE START ===");
+    debugLog('dealCards', `Shoe cards remaining: ${shoe.length}`);
+    debugLog('dealCards', `Cards dealt this shoe: ${cardsDealt}`);
+    debugLog('dealCards', `Running count: ${runningCount}`);
+    debugLog('dealCards', `Number of AI players: ${aiPlayers.length}`);
+    debugLog('dealCards',
       `Player seated: ${playerSeat !== null ? `Yes (Seat ${playerSeat})` : "No (observing)"}`,
     );
-    addDebugLog(`Player bet: $${effectivePlayerBet}`);
+    debugLog('dealCards', `Player bet: $${effectivePlayerBet}`);
 
     // Pre-deal all cards BEFORE animations to ensure uniqueness
     // We need to manually track the shoe state because React batches state updates
@@ -209,12 +208,12 @@ export function useGameActions({
       (a, b) => a.position - b.position,
     );
 
-    addDebugLog("--- First card round (right to left) ---");
+    debugLog('dealCards', "--- First card round (right to left) ---");
     // Deal first card to everyone (right to left, dealer last)
     sortedAIPlayers.forEach((ai) => {
       const idx = aiPlayers.indexOf(ai);
       const card = dealFromCurrentShoe();
-      addDebugLog(
+      debugLog('dealCards',
         `AI Player ${idx} (${ai.character.name}, Seat ${ai.position}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
       );
       dealtCards.push({ type: "ai", index: idx, card, cardIndex: 0 });
@@ -222,23 +221,23 @@ export function useGameActions({
     // Only deal to player if they're seated AND have placed a bet
     if (playerSeat !== null && effectivePlayerBet > 0) {
       const card = dealFromCurrentShoe();
-      addDebugLog(
+      debugLog('dealCards',
         `Player (Seat ${playerSeat}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
       );
       dealtCards.push({ type: "player", index: 0, card, cardIndex: 0 });
     }
     const dealerCard1 = dealFromCurrentShoe();
-    addDebugLog(
+    debugLog('dealCards',
       `Dealer card 1: ${dealerCard1.rank}${dealerCard1.suit} (value: ${dealerCard1.value}, count: ${dealerCard1.count}) [FACE UP] | Running count: ${currentRunningCount}`,
     );
     dealtCards.push({ type: "dealer", index: 0, card: dealerCard1, cardIndex: 0 });
 
-    addDebugLog("--- Second card round (right to left) ---");
+    debugLog('dealCards', "--- Second card round (right to left) ---");
     // Deal second card to everyone (right to left, dealer last)
     sortedAIPlayers.forEach((ai) => {
       const idx = aiPlayers.indexOf(ai);
       const card = dealFromCurrentShoe();
-      addDebugLog(
+      debugLog('dealCards',
         `AI Player ${idx} (${ai.character.name}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
       );
       dealtCards.push({ type: "ai", index: idx, card, cardIndex: 1 });
@@ -246,13 +245,13 @@ export function useGameActions({
     // Only deal second card to player if they're seated AND have placed a bet
     if (playerSeat !== null && effectivePlayerBet > 0) {
       const card = dealFromCurrentShoe();
-      addDebugLog(
+      debugLog('dealCards',
         `Player: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
       );
       dealtCards.push({ type: "player", index: 0, card, cardIndex: 1 });
     }
     const dealerCard2 = dealFromCurrentShoe();
-    addDebugLog(
+    debugLog('dealCards',
       `Dealer card 2: ${dealerCard2.rank}${dealerCard2.suit} (value: ${dealerCard2.value}, count: ${dealerCard2.count}) [FACE DOWN - not counting] | Running count: ${currentRunningCount}`,
     );
     dealtCards.push({ type: "dealer", index: 1, card: dealerCard2, cardIndex: 1 });
@@ -372,7 +371,7 @@ export function useGameActions({
     // After all cards are dealt, check for insurance and dealer blackjack
     registerTimeout(
       () => {
-        addDebugLog("All cards dealt and animations complete");
+        debugLog('dealCards', "All cards dealt and animations complete");
 
         // Check if dealer should peek for blackjack (American rules)
         const shouldPeek = gameSettings.dealerPeekRule === "AMERICAN_PEEK";
@@ -384,7 +383,7 @@ export function useGameActions({
           gameSettings.insuranceAvailable && dealerUpCard.rank === "A";
 
         if (shouldOfferInsurance) {
-          addDebugLog("Dealer showing Ace - OFFERING INSURANCE");
+          debugLog('insurance', "Dealer showing Ace - OFFERING INSURANCE");
           setInsuranceOffered(true);
           setPhase("INSURANCE");
           // Insurance phase hook will handle the flow
@@ -393,7 +392,7 @@ export function useGameActions({
 
         if (shouldPeek && canHaveBlackjack) {
           // Show "Peeking..." in speech bubble
-          addDebugLog(
+          debugLog('dealCards',
             `Dealer showing ${dealerUpCard.rank} - checking for blackjack...`,
           );
           addSpeechBubble("dealer", "Peeking...", -1);
@@ -403,7 +402,7 @@ export function useGameActions({
             const dealerCards = [dealerCard1, dealerCard2];
             const dealerValue = calculateHandValue(dealerCards);
             if (dealerValue === 21) {
-              addDebugLog(
+              debugLog('dealCards',
                 "DEALER BLACKJACK! Revealing hole card and moving to RESOLVING",
               );
               setDealerRevealed(true);
@@ -419,8 +418,8 @@ export function useGameActions({
                 setPhase("RESOLVING");
               }, 2000);
             } else {
-              addDebugLog(`Dealer showing: ${dealerCard1.rank}${dealerCard1.suit}`);
-              addDebugLog(
+              debugLog('dealCards', `Dealer showing: ${dealerCard1.rank}${dealerCard1.suit}`);
+              debugLog('dealCards',
                 `Dealer hole card: ${dealerCard2.rank}${dealerCard2.suit} [hidden]`,
               );
 
@@ -435,57 +434,57 @@ export function useGameActions({
         proceedAfterPeek();
 
         function proceedAfterPeek() {
-          addDebugLog(`Running count after dealing: ${currentRunningCount}`);
-          addDebugLog(`Shoe cards remaining: ${currentShoe.length}`);
-          addDebugLog("=== DEALING PHASE END ===");
+          debugLog('dealCards', `Running count after dealing: ${currentRunningCount}`);
+          debugLog('dealCards', `Shoe cards remaining: ${currentShoe.length}`);
+          debugLog('gamePhases', "=== DEALING PHASE END ===");
 
           // Determine turn order based on seat positions (first base to third base)
-          addDebugLog("=== DETERMINING TURN ORDER ===");
+          debugLog('gamePhases', "=== DETERMINING TURN ORDER ===");
 
           // Collect all occupied seats
           const occupiedSeats: number[] = [];
 
           // Add AI player seats
-          addDebugLog(`AI Players seated:`);
+          debugLog('gamePhases', `AI Players seated:`);
           aiPlayers.forEach((ai, idx) => {
             occupiedSeats.push(ai.position);
-            addDebugLog(`  AI ${idx} (${ai.character.name}) - Seat ${ai.position}`);
+            debugLog('gamePhases', `  AI ${idx} (${ai.character.name}) - Seat ${ai.position}`);
           });
 
           // Add human player seat if seated
           if (playerSeat !== null) {
             occupiedSeats.push(playerSeat);
-            addDebugLog(`Human player - Seat ${playerSeat}`);
+            debugLog('gamePhases', `Human player - Seat ${playerSeat}`);
           } else {
-            addDebugLog(`Human player - NOT SEATED`);
+            debugLog('gamePhases', `Human player - NOT SEATED`);
           }
 
           // Sort seats in ascending order (seat 0 = first base goes first)
           occupiedSeats.sort((a, b) => a - b);
 
-          addDebugLog(`Turn order (by seat): ${occupiedSeats.join(" → ")}`);
+          debugLog('gamePhases', `Turn order (by seat): ${occupiedSeats.join(" → ")}`);
 
           if (occupiedSeats.length === 0) {
-            addDebugLog("❌ No players seated, moving to DEALER_TURN");
+            debugLog('gamePhases', "❌ No players seated, moving to DEALER_TURN");
             setPhase("DEALER_TURN");
             return;
           }
 
           // Check if human player goes first
           const firstSeat = occupiedSeats[0];
-          addDebugLog(`First seat to act: ${firstSeat}`);
+          debugLog('gamePhases', `First seat to act: ${firstSeat}`);
 
           if (playerSeat !== null && firstSeat === playerSeat) {
-            addDebugLog(`✓ Player is in seat ${playerSeat} (FIRST TO ACT)`);
-            addDebugLog("→ Transitioning to PLAYER_TURN");
+            debugLog('gamePhases', `✓ Player is in seat ${playerSeat} (FIRST TO ACT)`);
+            debugLog('gamePhases', "→ Transitioning to PLAYER_TURN");
             setPhase("PLAYER_TURN");
           } else {
             const firstAI = aiPlayers.find(ai => ai.position === firstSeat);
-            addDebugLog(`✓ AI player "${firstAI?.character.name}" in seat ${firstSeat} acts first`);
+            debugLog('gamePhases', `✓ AI player "${firstAI?.character.name}" in seat ${firstSeat} acts first`);
             if (playerSeat !== null) {
-              addDebugLog(`  Player in seat ${playerSeat} will act when their turn comes`);
+              debugLog('gamePhases', `  Player in seat ${playerSeat} will act when their turn comes`);
             }
-            addDebugLog("→ Transitioning to AI_TURNS");
+            debugLog('gamePhases', "→ Transitioning to AI_TURNS");
             setPhase("AI_TURNS");
             setActivePlayerIndex(0); // Start with first AI player
           }
@@ -508,7 +507,6 @@ export function useGameActions({
     playerHand,
     getCardPosition,
     currentDealer,
-    addDebugLog,
     setShoe,
     setCardsDealt,
     setRunningCount,
@@ -525,21 +523,21 @@ export function useGameActions({
   ]);
 
   const hit = useCallback(() => {
-    addDebugLog("=== PLAYER ACTION: HIT ===");
+    debugLog('playerActions', "=== PLAYER ACTION: HIT ===");
 
     // Check if we're playing split hands
     if (playerHand.isSplit && playerHand.splitHands) {
       const activeIndex = playerHand.activeSplitHandIndex ?? 0;
       const activeHand = playerHand.splitHands[activeIndex];
 
-      addDebugLog(`Playing split hand ${activeIndex + 1}`);
-      addDebugLog(
+      debugLog('playerActions', `Playing split hand ${activeIndex + 1}`);
+      debugLog('playerActions',
         `Current hand: ${activeHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
       );
-      addDebugLog(`Current hand value: ${calculateHandValue(activeHand.cards)}`);
+      debugLog('playerActions', `Current hand value: ${calculateHandValue(activeHand.cards)}`);
 
       const card = dealCardFromShoe();
-      addDebugLog(
+      debugLog('playerActions',
         `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
       );
 
@@ -551,10 +549,10 @@ export function useGameActions({
       };
 
       const newHandValue = calculateHandValue(newSplitHands[activeIndex].cards);
-      addDebugLog(`New hand value: ${newHandValue}`);
+      debugLog('playerActions', `New hand value: ${newHandValue}`);
 
       if (newHandValue > 21) {
-        addDebugLog(`Hand ${activeIndex + 1} BUSTED!`);
+        debugLog('playerActions', `Hand ${activeIndex + 1} BUSTED!`);
         // Mark this hand as busted and finished
         setPlayerHand((prev) => ({
           ...prev,
@@ -564,13 +562,13 @@ export function useGameActions({
         // Move to next hand or finish
         registerTimeout(() => {
           if (activeIndex === 0) {
-            addDebugLog("Moving to second hand");
+            debugLog('playerActions', "Moving to second hand");
             setPlayerHand((prev) => ({
               ...prev,
               activeSplitHandIndex: 1,
             }));
           } else {
-            addDebugLog("Both hands complete - moving to DEALER_TURN");
+            debugLog('playerActions', "Both hands complete - moving to DEALER_TURN");
             setPlayerFinished(true);
             setPhase("DEALER_TURN");
           }
@@ -585,10 +583,10 @@ export function useGameActions({
     }
 
     // Normal (non-split) hit logic
-    addDebugLog(
+    debugLog('playerActions',
       `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
     );
-    addDebugLog(`Current hand value: ${calculateHandValue(playerHand.cards)}`);
+    debugLog('playerActions', `Current hand value: ${calculateHandValue(playerHand.cards)}`);
 
     // Mark player as finished to hide the action modal immediately
     setPlayerFinished(true);
@@ -596,7 +594,7 @@ export function useGameActions({
     // Add a delay before dealing the card to give a more realistic feel
     registerTimeout(() => {
       const card = dealCardFromShoe();
-      addDebugLog(
+      debugLog('playerActions',
         `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${runningCount + card.count}`,
       );
 
@@ -625,17 +623,17 @@ export function useGameActions({
         const newCards = [...playerHand.cards, card];
         const newHandValue = calculateHandValue(newCards);
 
-        addDebugLog(
+        debugLog('playerActions',
           `New hand: ${newCards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
         );
-        addDebugLog(`New hand value: ${newHandValue}`);
+        debugLog('playerActions', `New hand value: ${newHandValue}`);
 
         setPlayerHand((prev) => ({ ...prev, cards: newCards }));
         setFlyingCards((prev) => prev.filter((fc) => fc.id !== flyingCard.id));
 
         if (newHandValue > 21) {
-          addDebugLog("PLAYER BUSTED!");
-          addDebugLog("Marking player as finished");
+          debugLog('playerActions', "PLAYER BUSTED!");
+          debugLog('playerActions', "Marking player as finished");
           setPlayerFinished(true);
           // Show BUST indicator
           setPlayerActions((prev) => new Map(prev).set(-1, "BUST"));
@@ -648,7 +646,7 @@ export function useGameActions({
               newMap.delete(-1);
               return newMap;
             });
-            addDebugLog("Moving to DEALER_TURN phase");
+            debugLog('playerActions', "Moving to DEALER_TURN phase");
             setPhase("DEALER_TURN");
           }, 1500); // Show BUST for 1.5s then muck cards
         } else {
@@ -661,7 +659,6 @@ export function useGameActions({
     playerHand,
     dealCardFromShoe,
     getCardPosition,
-    addDebugLog,
     runningCount,
     aiPlayers,
     playerSeat,
@@ -674,29 +671,29 @@ export function useGameActions({
   ]);
 
   const stand = useCallback(() => {
-    addDebugLog("=== PLAYER ACTION: STAND ===");
+    debugLog('playerActions', "=== PLAYER ACTION: STAND ===");
 
     // Check if we're playing split hands
     if (playerHand.isSplit && playerHand.splitHands) {
       const activeIndex = playerHand.activeSplitHandIndex ?? 0;
       const activeHand = playerHand.splitHands[activeIndex];
 
-      addDebugLog(`Standing on split hand ${activeIndex + 1}`);
-      addDebugLog(
+      debugLog('playerActions', `Standing on split hand ${activeIndex + 1}`);
+      debugLog('playerActions',
         `Final hand: ${activeHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
       );
-      addDebugLog(`Final hand value: ${calculateHandValue(activeHand.cards)}`);
+      debugLog('playerActions', `Final hand value: ${calculateHandValue(activeHand.cards)}`);
 
       if (activeIndex === 0) {
         // Move to second hand
-        addDebugLog("Moving to second hand");
+        debugLog('playerActions', "Moving to second hand");
         setPlayerHand((prev) => ({
           ...prev,
           activeSplitHandIndex: 1,
         }));
       } else {
         // Both hands complete
-        addDebugLog("Both hands complete - moving to DEALER_TURN");
+        debugLog('playerActions', "Both hands complete - moving to DEALER_TURN");
         setPlayerFinished(true);
         setPhase("DEALER_TURN");
       }
@@ -704,24 +701,24 @@ export function useGameActions({
     }
 
     // Normal (non-split) stand logic
-    addDebugLog(
+    debugLog('playerActions',
       `Final hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
     );
-    addDebugLog(`Final hand value: ${calculateHandValue(playerHand.cards)}`);
-    addDebugLog("Marking player as finished");
+    debugLog('playerActions', `Final hand value: ${calculateHandValue(playerHand.cards)}`);
+    debugLog('playerActions', "Marking player as finished");
     setPlayerFinished(true);
-    addDebugLog("Moving to DEALER_TURN phase");
+    debugLog('playerActions', "Moving to DEALER_TURN phase");
     setPhase("DEALER_TURN");
-  }, [playerHand, addDebugLog, setPhase, setPlayerFinished]);
+  }, [playerHand, setPhase, setPlayerFinished]);
 
   const doubleDown = useCallback(() => {
-    addDebugLog("=== PLAYER ACTION: DOUBLE DOWN ===");
-    addDebugLog(
+    debugLog('playerActions', "=== PLAYER ACTION: DOUBLE DOWN ===");
+    debugLog('playerActions',
       `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
     );
-    addDebugLog(`Current hand value: ${calculateHandValue(playerHand.cards)}`);
-    addDebugLog(`Current bet: $${playerHand.bet}`);
-    addDebugLog(`Doubling bet to: $${playerHand.bet * 2}`);
+    debugLog('playerActions', `Current hand value: ${calculateHandValue(playerHand.cards)}`);
+    debugLog('playerActions', `Current bet: $${playerHand.bet}`);
+    debugLog('playerActions', `Doubling bet to: $${playerHand.bet * 2}`);
 
     // Mark player as finished to hide the action modal immediately
     setPlayerFinished(true);
@@ -734,7 +731,7 @@ export function useGameActions({
     // Add a delay before dealing the card
     registerTimeout(() => {
       const card = dealCardFromShoe();
-      addDebugLog(
+      debugLog('playerActions',
         `Dealt card: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${runningCount + card.count}`,
       );
 
@@ -762,16 +759,16 @@ export function useGameActions({
         const newCards = [...playerHand.cards, card];
         const newHandValue = calculateHandValue(newCards);
 
-        addDebugLog(
+        debugLog('playerActions',
           `Final hand: ${newCards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
         );
-        addDebugLog(`Final hand value: ${newHandValue}`);
+        debugLog('playerActions', `Final hand value: ${newHandValue}`);
 
         setPlayerHand((prev) => ({ ...prev, cards: newCards }));
         setFlyingCards((prev) => prev.filter((fc) => fc.id !== flyingCard.id));
 
         if (newHandValue > 21) {
-          addDebugLog("PLAYER BUSTED!");
+          debugLog('playerActions', "PLAYER BUSTED!");
           // Show BUST indicator
           setPlayerActions((prev) => new Map(prev).set(-1, "BUST"));
 
@@ -783,12 +780,12 @@ export function useGameActions({
               newMap.delete(-1);
               return newMap;
             });
-            addDebugLog("Moving to DEALER_TURN phase");
+            debugLog('playerActions', "Moving to DEALER_TURN phase");
             setPhase("DEALER_TURN");
           }, 1500);
         } else {
           // Player didn't bust, automatically stand (double down only gets one card)
-          addDebugLog("Player stands after double down");
+          debugLog('playerActions', "Player stands after double down");
           setTimeout(() => {
             setPlayerActions((prev) => {
               const newMap = new Map(prev);
@@ -804,7 +801,6 @@ export function useGameActions({
     playerHand,
     dealCardFromShoe,
     getCardPosition,
-    addDebugLog,
     runningCount,
     aiPlayers,
     playerSeat,
@@ -818,23 +814,23 @@ export function useGameActions({
   ]);
 
   const split = useCallback(() => {
-    addDebugLog("=== PLAYER ACTION: SPLIT ===");
-    addDebugLog(
+    debugLog('playerActions', "=== PLAYER ACTION: SPLIT ===");
+    debugLog('playerActions',
       `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
     );
-    addDebugLog(`Current bet: $${playerHand.bet}`);
+    debugLog('playerActions', `Current bet: $${playerHand.bet}`);
 
     // Verify player has enough chips for second bet
     if (playerChips < playerHand.bet) {
-      addDebugLog("ERROR: Not enough chips to split!");
+      debugLog('playerActions', "ERROR: Not enough chips to split!");
       return;
     }
 
     // Split the two cards into two hands
     const [card1, card2] = playerHand.cards;
 
-    addDebugLog(`Splitting ${card1.rank}${card1.suit} and ${card2.rank}${card2.suit}`);
-    addDebugLog(`Deducting $${playerHand.bet} from chips for second hand`);
+    debugLog('playerActions', `Splitting ${card1.rank}${card1.suit} and ${card2.rank}${card2.suit}`);
+    debugLog('playerActions', `Deducting $${playerHand.bet} from chips for second hand`);
 
     // Deduct chips for the second bet
     setPlayerChips((prev) => prev - playerHand.bet);
@@ -853,7 +849,7 @@ export function useGameActions({
     // Deal a card to the first hand
     registerTimeout(() => {
       const newCard1 = dealCardFromShoe();
-      addDebugLog(
+      debugLog('playerActions',
         `Dealing to first hand: ${newCard1.rank}${newCard1.suit} (value: ${newCard1.value})`,
       );
 
@@ -862,7 +858,7 @@ export function useGameActions({
       // Deal a card to the second hand
       registerTimeout(() => {
         const newCard2 = dealCardFromShoe();
-        addDebugLog(
+        debugLog('playerActions',
           `Dealing to second hand: ${newCard2.rank}${newCard2.suit} (value: ${newCard2.value})`,
         );
 
@@ -877,12 +873,12 @@ export function useGameActions({
           activeSplitHandIndex: 0,
         });
 
-        addDebugLog("Split complete - starting with first hand");
+        debugLog('playerActions', "Split complete - starting with first hand");
 
         // Check if first hand is blackjack (Ace + 10-value card after split)
         const hand1Value = calculateHandValue(hand1.cards);
         if (hand1Value === 21) {
-          addDebugLog("First hand has 21 - automatically standing");
+          debugLog('playerActions', "First hand has 21 - automatically standing");
           // Move to second hand
           setPlayerHand((prev) => ({
             ...prev,
@@ -895,7 +891,6 @@ export function useGameActions({
     playerHand,
     playerChips,
     dealCardFromShoe,
-    addDebugLog,
     registerTimeout,
     setPlayerHand,
     setPlayerChips,

@@ -29,7 +29,6 @@ interface UseGameInteractionsParams {
   aiPlayers: AIPlayer[];
   dealerHand: PlayerHand;
   blackjackPayout: BlackjackPayout;
-  addDebugLog: (message: string) => void;
   audioQueue: AudioQueueHook;
 }
 
@@ -41,7 +40,6 @@ export function useGameInteractions({
   aiPlayers,
   dealerHand,
   blackjackPayout,
-  addDebugLog,
   audioQueue,
 }: UseGameInteractionsParams) {
   const triggerConversation = useCallback(
@@ -77,7 +75,7 @@ export function useGameInteractions({
 
         // If player already has a visible bubble, skip this message
         if (existingBubble && existingBubble.visible) {
-          addDebugLog(`Skipping message for ${playerId} - bubble already active`);
+          debugLog('gamePhases', `Skipping message for ${playerId} - bubble already active`);
           return prev;
         }
 
@@ -87,7 +85,6 @@ export function useGameInteractions({
           message,
           position,
           aiPlayers,
-          addDebugLog,
         ).position;
 
         // Queue audio for reactions (pre-generated) or generate dynamically for dialogue
@@ -161,7 +158,7 @@ export function useGameInteractions({
         }
       });
     },
-    [aiPlayers, addDebugLog, setSpeechBubbles], // Removed audioQueue - callback uses current value
+    [aiPlayers, setSpeechBubbles], // Removed audioQueue - callback uses current value
   );
 
   const checkForInitialReactions = useCallback(() => {

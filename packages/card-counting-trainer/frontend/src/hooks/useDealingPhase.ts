@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { GamePhase, AIPlayer, PlayerHand } from "@/types/gameState";
 import { isBlackjack } from "@/lib/gameActions";
+import { debugLog } from "@/utils/debug";
 
 interface UseDealingPhaseParams {
   phase: GamePhase;
@@ -23,7 +24,6 @@ interface UseDealingPhaseParams {
         >),
   ) => void;
   registerTimeout: (callback: () => void, delay: number) => void;
-  addDebugLog: (message: string) => void;
 }
 
 /**
@@ -39,7 +39,6 @@ export function useDealingPhase({
   setPlayersFinished,
   setPlayerActions,
   registerTimeout,
-  addDebugLog,
 }: UseDealingPhaseParams) {
   const hasTriggeredReactions = useRef(false);
 
@@ -61,14 +60,14 @@ export function useDealingPhase({
       dealerHasCards &&
       !hasTriggeredReactions.current
     ) {
-      addDebugLog("All cards dealt, marking blackjack hands");
+      debugLog('dealCards',"All cards dealt, marking blackjack hands");
       hasTriggeredReactions.current = true;
 
       // Mark AI players with blackjack as finished and show BLACKJACK indicator
       // (Reactions are now shown during dealing, not after)
       aiPlayers.forEach((ai, idx) => {
         if (isBlackjack(ai.hand.cards)) {
-          addDebugLog(
+          debugLog('dealCards',
             `AI Player ${idx} (${ai.character.name}) has BLACKJACK - marking as finished`,
           );
           setPlayersFinished((prev) => new Set(prev).add(idx));
@@ -92,6 +91,5 @@ export function useDealingPhase({
     setPlayersFinished,
     setPlayerActions,
     registerTimeout,
-    addDebugLog,
-  ]);
+    ]);
 }

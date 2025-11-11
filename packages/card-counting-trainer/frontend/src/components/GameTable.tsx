@@ -43,7 +43,6 @@ interface GameTableProps {
 
   // Actions
   setPlayerSeat: (seat: number) => void;
-  addDebugLog: (message: string) => void;
   startNewRound: () => void;
   hit: () => void;
   stand: () => void;
@@ -73,7 +72,6 @@ export default function GameTable({
   flyingCards,
   showDealerInfo,
   setPlayerSeat,
-  addDebugLog,
   startNewRound,
   hit,
   stand,
@@ -150,7 +148,7 @@ export default function GameTable({
           activePlayerIndex={activePlayerIndex}
           playerActions={playerActions}
           onSeatClick={setPlayerSeat}
-          addDebugLog={addDebugLog}
+          
         />
 
         {/* Table Rules Placard */}

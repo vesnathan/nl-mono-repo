@@ -1,4 +1,5 @@
 import { ActiveConversation, SpeechBubble, AIPlayer } from "@/types/gameState";
+import { debugLog } from "@/utils/debug";
 import { getDealerPlayerLine, getPlayerEngagement } from "@/data/dialogue";
 import { TABLE_POSITIONS, DEALER_POSITION } from "@/constants/animations";
 import { calculateHandValue } from "@/lib/gameActions";
@@ -58,7 +59,6 @@ export function createConversation(
  * @param message - Message text to display
  * @param position - Table position (0-7, or -1 for dealer)
  * @param aiPlayers - Array of AI players (for logging purposes)
- * @param addDebugLog - Debug logging function
  * @returns SpeechBubble object ready to display
  */
 export function createSpeechBubble(
@@ -66,7 +66,6 @@ export function createSpeechBubble(
   message: string,
   position: number,
   aiPlayers: AIPlayer[],
-  addDebugLog?: (message: string) => void,
 ): SpeechBubble {
   // Find the character name and hand for logging
   const player = aiPlayers.find((p) => p.character.id === playerId);
@@ -75,11 +74,10 @@ export function createSpeechBubble(
   const handStr = hand.map((c) => `${c.rank}${c.suit}`).join(", ");
   const handValue = hand.length > 0 ? calculateHandValue(hand) : 0;
 
-  if (addDebugLog) {
-    addDebugLog(
-      `💬 ${characterName} [Hand: ${handStr} (${handValue})]: "${message}"`,
-    );
-  }
+  // Debug logging
+  debugLog('conversations',
+    `💬 ${characterName} [Hand: ${handStr} (${handValue})]: "${message}"`,
+  );
 
   // Use dealer position if position is -1, otherwise use table seat position
   const [x, y] = position === -1 ? DEALER_POSITION : (TABLE_POSITIONS[position] || TABLE_POSITIONS[0]);

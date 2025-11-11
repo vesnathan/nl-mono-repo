@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { debugLog } from "@/utils/debug";
 import { GamePhase, AIPlayer } from "@/types/gameState";
 import { GameSettings } from "@/types/gameSettings";
 
@@ -15,7 +16,6 @@ interface UseInsurancePhaseParams {
   playerInsuranceBet: number;
   setPhase: (phase: GamePhase) => void;
   registerTimeout: (callback: () => void, delay: number) => void;
-  addDebugLog: (message: string) => void;
 }
 
 /**
@@ -35,7 +35,6 @@ export function useInsurancePhase({
   playerInsuranceBet,
   setPhase,
   registerTimeout,
-  addDebugLog,
 }: UseInsurancePhaseParams) {
   const hasProcessedAI = useRef(false);
 
@@ -49,8 +48,8 @@ export function useInsurancePhase({
 
     // Process AI insurance decisions
     if (!hasProcessedAI.current) {
-      addDebugLog("=== INSURANCE PHASE START ===");
-      addDebugLog("Processing AI insurance decisions...");
+      debugLog('insurance', "=== INSURANCE PHASE START ===");
+      debugLog('insurance', "Processing AI insurance decisions...");
       hasProcessedAI.current = true;
 
       registerTimeout(() => {
@@ -63,7 +62,7 @@ export function useInsurancePhase({
             if (shouldTakeInsurance) {
               const insuranceCost = Math.floor(ai.hand.bet / 2);
               if (ai.chips >= insuranceCost) {
-                addDebugLog(
+                debugLog('insurance', 
                   `AI Player ${idx} (${ai.character.name}) TAKES insurance for $${insuranceCost}`,
                 );
                 return {
@@ -72,12 +71,12 @@ export function useInsurancePhase({
                   chips: ai.chips - insuranceCost,
                 };
               } else {
-                addDebugLog(
+                debugLog('insurance', 
                   `AI Player ${idx} (${ai.character.name}) cannot afford insurance`,
                 );
               }
             } else {
-              addDebugLog(
+              debugLog('insurance', 
                 `AI Player ${idx} (${ai.character.name}) DECLINES insurance`,
               );
             }
@@ -94,15 +93,15 @@ export function useInsurancePhase({
 
     if (playerDecided && hasProcessedAI.current) {
       registerTimeout(() => {
-        addDebugLog("All insurance decisions made");
-        addDebugLog("=== INSURANCE PHASE END ===");
+        debugLog('insurance', "All insurance decisions made");
+        debugLog('insurance', "=== INSURANCE PHASE END ===");
 
         // Move to player turn or AI turns depending on whether player is seated
         if (playerSeat === null) {
-          addDebugLog("Player not seated, moving to AI_TURNS");
+          debugLog('insurance', "Player not seated, moving to AI_TURNS");
           setPhase("AI_TURNS");
         } else {
-          addDebugLog("Moving to PLAYER_TURN");
+          debugLog('insurance', "Moving to PLAYER_TURN");
           setPhase("PLAYER_TURN");
         }
       }, 1500);
@@ -118,6 +117,5 @@ export function useInsurancePhase({
     setAIPlayers,
     setPhase,
     registerTimeout,
-    addDebugLog,
   ]);
 }

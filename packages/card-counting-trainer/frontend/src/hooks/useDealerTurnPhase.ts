@@ -38,7 +38,6 @@ interface UseDealerTurnPhaseParams {
     cardIndex?: number,
   ) => { left: string; top: string };
   addSpeechBubble: (id: string, message: string, position: number) => void;
-  addDebugLog: (message: string) => void;
   audioQueue: AudioQueueHook;
 }
 
@@ -64,7 +63,6 @@ export function useDealerTurnPhase({
   registerTimeout,
   getCardPositionForAnimation,
   addSpeechBubble,
-  addDebugLog,
   audioQueue,
 }: UseDealerTurnPhaseParams) {
   const dealerTurnProcessingRef = useRef(false);
@@ -82,13 +80,13 @@ export function useDealerTurnPhase({
 
     if (isEnteringDealerTurn) {
       // Reset flags when entering dealer turn phase
-      addDebugLog(`🔄 ENTERING DEALER_TURN - Resetting all flags`);
+      debugLog('dealCards', `🔄 ENTERING DEALER_TURN - Resetting all flags`);
       dealerTurnProcessingRef.current = false;
       dealerFinishedRef.current = false;
       hasStartedRef.current = false;
       audioQueuedRef.current = false; // Reset audio flag
-      addDebugLog(`   dealerFinishedRef: ${dealerFinishedRef.current}`);
-      addDebugLog(`   audioQueuedRef: ${audioQueuedRef.current}`);
+      debugLog('dealCards', `   dealerFinishedRef: ${dealerFinishedRef.current}`);
+      debugLog('dealCards', `   audioQueuedRef: ${audioQueuedRef.current}`);
       prevPhaseRef.current = phase;
     }
 
@@ -100,20 +98,20 @@ export function useDealerTurnPhase({
 
     // Guard against re-entry while processing or already started
     if (dealerTurnProcessingRef.current || hasStartedRef.current) {
-      addDebugLog(`⛔ DEALER_TURN re-entry blocked (processing: ${dealerTurnProcessingRef.current}, started: ${hasStartedRef.current})`);
+      debugLog('dealCards', `⛔ DEALER_TURN re-entry blocked (processing: ${dealerTurnProcessingRef.current}, started: ${hasStartedRef.current})`);
       return;
     }
 
-    addDebugLog(`✅ DEALER_TURN effect starting (processing: false → true, started: false → true)`);
+    debugLog('dealCards', `✅ DEALER_TURN effect starting (processing: false → true, started: false → true)`);
     dealerTurnProcessingRef.current = true;
     hasStartedRef.current = true;
 
     if (phase === "DEALER_TURN") {
-      addDebugLog("=== PHASE: DEALER_TURN START ===");
-      addDebugLog(
+      debugLog('dealCards', "=== PHASE: DEALER_TURN START ===");
+      debugLog('dealCards', 
         `Dealer hand: ${dealerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
       );
-      addDebugLog(`Dealer hand value: ${calculateHandValue(dealerHand.cards)}`);
+      debugLog('dealCards', `Dealer hand value: ${calculateHandValue(dealerHand.cards)}`);
       setDealerRevealed(true);
       dealerFinishedRef.current = false; // Reset flag when entering dealer turn
 
@@ -179,7 +177,7 @@ export function useDealerTurnPhase({
             dealingCardRef.current = true;
 
             const card = dealCardFromShoe();
-            addDebugLog(
+            debugLog('dealCards', 
               `Dealer HIT: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
             );
 
@@ -222,7 +220,7 @@ export function useDealerTurnPhase({
             }, adjustedAnimationDuration);
 
             const newValue = calculateHandValue(newHand);
-            addDebugLog(`Dealer hand value: ${newValue}`);
+            debugLog('dealCards', `Dealer hand value: ${newValue}`);
 
             // Wait for card animation to complete, then add fixed pause before next card
             registerTimeout(() => {
@@ -245,25 +243,25 @@ export function useDealerTurnPhase({
             const finalValue = calculateHandValue(currentHand);
             const isBust = isBusted(currentHand);
 
-            addDebugLog(`=== DEALER FINAL HAND ===`);
-            addDebugLog(
+            debugLog('dealCards', `=== DEALER FINAL HAND ===`);
+            debugLog('dealCards', 
               `Dealer cards: ${currentHand.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
             );
-            addDebugLog(`Dealer hand value: ${finalValue}`);
-            addDebugLog(`Dealer busted: ${isBust}`);
+            debugLog('dealCards', `Dealer hand value: ${finalValue}`);
+            debugLog('dealCards', `Dealer busted: ${isBust}`);
 
             // Only announce and queue audio once
             if (!audioQueuedRef.current) {
               audioQueuedRef.current = true;
               debugLog('dealerSpeech', `🔊 Queueing dealer audio (guard passed)`);
-              addDebugLog(`🔊 Queueing dealer audio (guard passed)`);
+              debugLog('dealCards', `🔊 Queueing dealer audio (guard passed)`);
 
               // Play dealer result audio (audio queue will handle speech bubble)
               if (currentDealer) {
                 if (isBust) {
                   const audioPath = getDealerAudioPath(currentDealer.id, "dealer_busts");
                   debugLog('dealerSpeech', `🎵 Queueing: ${audioPath}`);
-                  addDebugLog(`🎵 Queueing: ${audioPath}`);
+                  debugLog('dealCards', `🎵 Queueing: ${audioPath}`);
                   audioQueue.queueAudio({
                     id: `dealer-busts-${Date.now()}`,
                     audioPath,
@@ -281,7 +279,7 @@ export function useDealerTurnPhase({
 
                   const audioPath = getDealerAudioPath(currentDealer.id, voiceLine);
                   debugLog('dealerSpeech', `🎵 Queueing: ${audioPath} - "Dealer has ${finalValue}"`);
-                  addDebugLog(`🎵 Queueing: ${audioPath} - "Dealer has ${finalValue}"`);
+                  debugLog('dealCards', `🎵 Queueing: ${audioPath} - "Dealer has ${finalValue}"`);
                   audioQueue.queueAudio({
                     id: `dealer-result-${Date.now()}`,
                     audioPath,
@@ -293,13 +291,13 @@ export function useDealerTurnPhase({
               }
             } else {
               debugLog('dealerSpeech', `⛔ Audio queue BLOCKED by guard (already queued)`);
-              addDebugLog(`⛔ Audio queue BLOCKED by guard (already queued)`);
+              debugLog('dealCards', `⛔ Audio queue BLOCKED by guard (already queued)`);
             }
 
             // Move to resolving after brief delay
             registerTimeout(() => {
               dealerTurnProcessingRef.current = false; // Unlock before moving to next phase
-              addDebugLog("🔓 Dealer turn processing unlocked (finished)");
+              debugLog('dealCards', "🔓 Dealer turn processing unlocked (finished)");
               setPhase("RESOLVING");
             }, 1500); // Brief delay to show final dealer result
           }
@@ -312,7 +310,7 @@ export function useDealerTurnPhase({
   }, [
     phase,
     // Removed unstable dependencies to prevent duplicate card dealing:
-    // dealCardFromShoe, registerTimeout, addDebugLog, setDealerRevealed,
+    // dealCardFromShoe, registerTimeout, setDealerRevealed,
     // addSpeechBubble, setDealerHand, getCardPositionForAnimation,
     // setFlyingCards, setDealerCallout, setPhase, aiPlayers, dealerHand, gameSettings
   ]);

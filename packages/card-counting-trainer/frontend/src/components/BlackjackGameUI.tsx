@@ -80,7 +80,6 @@ interface BlackjackGameUIProps {
   setShowStrategyCard: (show: boolean) => void;
   setShowHeatMap: (show: boolean) => void;
   setPlayerSeat: (seat: number) => void;
-  addDebugLog: (message: string) => void;
   startNewRound: () => void;
   hit: () => void;
   stand: () => void;
@@ -149,7 +148,6 @@ export default function BlackjackGameUI({
   setShowStrategyCard,
   setShowHeatMap,
   setPlayerSeat,
-  addDebugLog,
   startNewRound,
   hit,
   stand,
@@ -221,7 +219,7 @@ export default function BlackjackGameUI({
         flyingCards={flyingCards}
         showDealerInfo={showDealerInfo}
         setPlayerSeat={setPlayerSeat}
-        addDebugLog={addDebugLog}
+        
         startNewRound={startNewRound}
         hit={hit}
         stand={stand}

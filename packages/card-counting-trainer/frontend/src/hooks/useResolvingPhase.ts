@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { debugLog } from "@/utils/debug";
 import {
   GamePhase,
   AIPlayer,
@@ -46,7 +47,6 @@ interface UseResolvingPhaseParams {
   registerTimeout: (callback: () => void, delay: number) => void;
   showEndOfHandReactions: () => void;
   addSpeechBubble: (id: string, message: string, position: number) => void;
-  addDebugLog: (message: string) => void;
 }
 
 /**
@@ -83,7 +83,6 @@ export function useResolvingPhase({
   registerTimeout,
   showEndOfHandReactions,
   addSpeechBubble,
-  addDebugLog,
 }: UseResolvingPhaseParams) {
   const hasResolvedRef = useRef(false);
 
@@ -97,18 +96,18 @@ export function useResolvingPhase({
         calculateHandValue(dealerHand.cards) === 21;
 
       if (dealerHasBlackjack) {
-        addDebugLog("=== DEALER HAS BLACKJACK - INSURANCE PAYOUTS ===");
+        debugLog('gamePhases', "=== DEALER HAS BLACKJACK - INSURANCE PAYOUTS ===");
 
         // Pay player insurance at 2:1
         if (playerInsuranceBet > 0) {
           const insurancePayout = playerInsuranceBet * 3; // Get back bet + 2:1 payout
-          addDebugLog(
+          debugLog('gamePhases', 
             `Player wins insurance: ${playerInsuranceBet} bet pays ${insurancePayout}`,
           );
           setPlayerChips((prev) => prev + insurancePayout);
           setPlayerInsuranceBet(0);
         } else {
-          addDebugLog("Player did not take insurance");
+          debugLog('gamePhases', "Player did not take insurance");
         }
 
         // Pay AI insurance at 2:1
@@ -116,7 +115,7 @@ export function useResolvingPhase({
           return prevPlayers.map((ai) => {
             if (ai.insuranceBet && ai.insuranceBet > 0) {
               const insurancePayout = ai.insuranceBet * 3;
-              addDebugLog(
+              debugLog('gamePhases', 
                 `AI ${ai.character.name} wins insurance: ${ai.insuranceBet} bet pays ${insurancePayout}`,
               );
               return {
@@ -131,7 +130,7 @@ export function useResolvingPhase({
       } else {
         // Dealer doesn't have blackjack - insurance bets are lost
         if (playerInsuranceBet > 0) {
-          addDebugLog(
+          debugLog('gamePhases', 
             `Dealer does not have blackjack - player loses insurance bet of ${playerInsuranceBet}`,
           );
           setPlayerInsuranceBet(0);
@@ -141,7 +140,7 @@ export function useResolvingPhase({
         setAIPlayers((prevPlayers) => {
           return prevPlayers.map((ai) => {
             if (ai.insuranceBet && ai.insuranceBet > 0) {
-              addDebugLog(
+              debugLog('gamePhases', 
                 `Dealer does not have blackjack - AI ${ai.character.name} loses insurance bet of ${ai.insuranceBet}`,
               );
             }
@@ -277,12 +276,12 @@ export function useResolvingPhase({
       addSpeechBubble("dealer-payout", callout, -1);
 
       // Create win/loss bubbles for all players
-      addDebugLog("=== CREATING WIN/LOSS BUBBLES ===");
+      debugLog('gamePhases', "=== CREATING WIN/LOSS BUBBLES ===");
       const newWinLossBubbles: WinLossBubbleData[] = [];
 
       // Add bubble for human player if they have cards
       if (playerSeat !== null && playerHand.cards.length > 0) {
-        addDebugLog(`Player has cards, creating bubble for seat ${playerSeat}`);
+        debugLog('gamePhases', `Player has cards, creating bubble for seat ${playerSeat}`);
 
         const [x, y] = TABLE_POSITIONS[playerSeat];
         let result: "win" | "lose" | "push" | "blackjack" = "lose";
@@ -305,10 +304,10 @@ export function useResolvingPhase({
       }
 
       // Add bubbles for AI players
-      addDebugLog(`Checking ${aiPlayers.length} AI players for bubbles`);
+      debugLog('gamePhases', `Checking ${aiPlayers.length} AI players for bubbles`);
       aiPlayers.forEach((ai) => {
         if (ai.hand.cards.length > 0) {
-          addDebugLog(
+          debugLog('gamePhases', 
             `AI Player ${ai.character.name} has ${ai.hand.cards.length} cards`,
           );
 
@@ -331,25 +330,25 @@ export function useResolvingPhase({
             result,
             position: { left: `${x}%`, top: `${y - 5}%` }, // Slightly above AI position
           });
-          addDebugLog(
+          debugLog('gamePhases', 
             `Added ${result} bubble for ${ai.character.name} at seat ${ai.position}`,
           );
         }
       });
 
-      addDebugLog(`Created ${newWinLossBubbles.length} total win/loss bubbles`);
+      debugLog('gamePhases', `Created ${newWinLossBubbles.length} total win/loss bubbles`);
       setWinLossBubbles(newWinLossBubbles);
 
       // Show end-of-hand reactions
       showEndOfHandReactions();
 
-      addDebugLog("Scheduling transition to ROUND_END in 5 seconds...");
+      debugLog('gamePhases', "Scheduling transition to ROUND_END in 5 seconds...");
       registerTimeout(() => {
-        addDebugLog("Timeout fired - moving to ROUND_END");
+        debugLog('gamePhases', "Timeout fired - moving to ROUND_END");
         setDealerCallout(null);
         setPhase("ROUND_END");
       }, 5000);
-      addDebugLog("Timeout registered successfully");
+      debugLog('gamePhases', "Timeout registered successfully");
     } else if (phase !== "RESOLVING") {
       // Reset the flag when we leave RESOLVING phase
       hasResolvedRef.current = false;
@@ -379,6 +378,5 @@ export function useResolvingPhase({
     setDealerCallout,
     setWinLossBubbles,
     setPhase,
-    addDebugLog,
   ]);
 }

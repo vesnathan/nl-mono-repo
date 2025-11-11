@@ -1,4 +1,5 @@
 import React from "react";
+import { debugLog } from "@/utils/debug";
 import { AIPlayer, PlayerHand, GamePhase } from "@/types/gameState";
 import { TABLE_POSITIONS } from "@/constants/animations";
 import PlayingCard from "@/components/PlayingCard";
@@ -16,7 +17,6 @@ interface TableSeatsProps {
   activePlayerIndex: number | null;
   playerActions: Map<number, PlayerAction>;
   onSeatClick: (seatIndex: number) => void;
-  addDebugLog: (message: string) => void;
 }
 
 export default function TableSeats({
@@ -27,7 +27,6 @@ export default function TableSeats({
   activePlayerIndex,
   playerActions,
   onSeatClick,
-  addDebugLog,
 }: TableSeatsProps) {
   return (
     <div
@@ -62,11 +61,11 @@ export default function TableSeats({
               <div
                 onClick={() => {
                   if (playerSeat === null) {
-                    addDebugLog(`=== PLAYER SITTING AT SEAT ${seatIndex} ===`);
-                    addDebugLog(`Phase before sitting: ${phase}`);
+                    debugLog('gamePhases', `=== PLAYER SITTING AT SEAT ${seatIndex} ===`);
+                    debugLog('gamePhases', `Phase before sitting: ${phase}`);
                     onSeatClick(seatIndex);
                   } else {
-                    addDebugLog(
+                    debugLog('gamePhases', 
                       `Cannot sit - player already seated at ${playerSeat}`,
                     );
                   }
