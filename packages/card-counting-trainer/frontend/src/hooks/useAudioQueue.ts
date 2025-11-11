@@ -46,6 +46,7 @@ export function useAudioQueue(): AudioQueueHook {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const processingRef = useRef(false);
+  const currentPlayerIdRef = useRef<string | null>(null);
 
   /**
    * Process the next item in the queue
@@ -109,6 +110,7 @@ export function useAudioQueue(): AudioQueueHook {
       return new Promise((resolve, reject) => {
         const audio = new Audio(audioPath);
         audioRef.current = audio;
+        currentPlayerIdRef.current = nextItem.playerId;
 
         // Set volume based on whether it's a dealer or player
         const volume = nextItem.playerId === "dealer"
@@ -255,6 +257,23 @@ export function useAudioQueue(): AudioQueueHook {
         audioRef.current.pause();
         audioRef.current = null;
       }
+    };
+  }, []);
+
+  // Listen for audio settings changes and update volume in real-time
+  useEffect(() => {
+    const handleVolumeChange = () => {
+      if (audioRef.current && currentPlayerIdRef.current) {
+        const newVolume = currentPlayerIdRef.current === "dealer"
+          ? getDealerSpeechVolume()
+          : getPlayerSpeechVolume();
+        audioRef.current.volume = newVolume;
+      }
+    };
+
+    window.addEventListener('audioSettingsChanged', handleVolumeChange);
+    return () => {
+      window.removeEventListener('audioSettingsChanged', handleVolumeChange);
     };
   }, []);
 

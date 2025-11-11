@@ -144,7 +144,7 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
     displayName: "Card Counting Trainer",
     templateDir: "card-counting-trainer",
     packageDir: "card-counting-trainer",
-    dependsOn: [StackType.Shared],
+    dependsOn: [],
     buckets: {
       templates: "nlmonorepo-cardcountingtrainer-templates-{stage}",
       frontend: "nlmonorepo-cardcountingtrainer-userfiles-{stage}",
@@ -153,6 +153,7 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
     hasFrontend: true,
     hasLambdas: false,
     hasResolvers: true,
+    requiresAdminUser: true,
   },
 };
 
