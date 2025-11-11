@@ -151,7 +151,7 @@ export function useGameInteractions({
         }
       });
     },
-    [aiPlayers, addDebugLog, setSpeechBubbles, audioQueue],
+    [aiPlayers, addDebugLog, setSpeechBubbles], // Removed audioQueue - callback uses current value
   );
 
   const checkForInitialReactions = useCallback(() => {
