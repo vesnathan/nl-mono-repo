@@ -40,7 +40,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
             alt="Backroom Blackjack"
             className="w-40 h-40 mb-2"
           />
-          <h2 className="text-3xl font-bold chip-gold">
+          <h2 className="text-3xl font-bold chip-gold text-center">
             Welcome to Backroom Blackjack!
           </h2>
         </ModalHeader>
