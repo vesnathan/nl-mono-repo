@@ -73,6 +73,7 @@ export function useDealerTurnPhase({
   const currentDealerHandRef = useRef<Card[]>([]);
   const prevPhaseRef = useRef<GamePhase | null>(null);
   const hasStartedRef = useRef(false);
+  const audioQueuedRef = useRef(false); // Track if we've queued audio for this dealer turn
 
   useEffect(() => {
     // Detect phase entry
@@ -83,6 +84,7 @@ export function useDealerTurnPhase({
       dealerTurnProcessingRef.current = false;
       dealerFinishedRef.current = false;
       hasStartedRef.current = false;
+      audioQueuedRef.current = false; // Reset audio flag
       prevPhaseRef.current = phase;
     }
 
@@ -247,8 +249,9 @@ export function useDealerTurnPhase({
             if (isBust) {
               addSpeechBubble("dealer-result", "Dealer busts", -1);
 
-              // Play dealer bust audio
-              if (currentDealer) {
+              // Play dealer bust audio (only once)
+              if (currentDealer && !audioQueuedRef.current) {
+                audioQueuedRef.current = true;
                 const audioPath = getDealerAudioPath(currentDealer.id, "dealer_busts");
                 audioQueue.queueAudio({
                   id: `dealer-busts-${Date.now()}`,
@@ -261,8 +264,9 @@ export function useDealerTurnPhase({
             } else {
               addSpeechBubble("dealer-result", `Dealer has ${finalValue}`, -1);
 
-              // Play dealer result audio
-              if (currentDealer) {
+              // Play dealer result audio (only once)
+              if (currentDealer && !audioQueuedRef.current) {
+                audioQueuedRef.current = true;
                 let voiceLine: "dealer_has_17" | "dealer_has_18" | "dealer_has_19" | "dealer_has_20" | "dealer_has_21";
                 if (finalValue === 17) voiceLine = "dealer_has_17";
                 else if (finalValue === 18) voiceLine = "dealer_has_18";

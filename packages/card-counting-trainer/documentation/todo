@@ -15,6 +15,7 @@
 - [ ] Fix image sizes
 - [ ] Set up ddb to track high scores etc, chip count, score etc.
 - [x] Logo and audio added (Background music with volume controls implemented)
+- [ ] Dealer speech bubble still has arrow pointing down. Position 0 and 7 still arent below the player. And card animations are still starting in the wrong spot. "Dealer has 20" displayed in bubble instead of dealer speech bubble.
 
 ## High Priority - MVP Features (Phase 1)
 

@@ -19,6 +19,7 @@ import { ResolverCompiler } from "../../utils/resolver-compiler";
 import { S3BucketManager } from "../../utils/s3-bucket-manager";
 import { OutputsManager } from "../../outputs-manager";
 import { addAppSyncBucketPolicy } from "../../utils/s3-resolver-validator";
+import { UserSetupManager } from "../../utils/user-setup";
 import { createReadStream, readdirSync, statSync, existsSync } from "fs";
 import * as path from "path";
 import { execSync } from "child_process";
@@ -559,6 +560,35 @@ export async function deployCardCountingTrainer(
     }
   } catch (error) {
     // Ignore error - this is just informational
+  }
+
+  // Create Cognito admin user if requested
+  if (!options.skipUserCreation) {
+    try {
+      const adminEmail = options.adminEmail || process.env.ADMIN_EMAIL;
+      if (!adminEmail) {
+        logger.info(
+          "No admin email provided (options.adminEmail or ADMIN_EMAIL). Skipping Cognito admin creation.",
+        );
+      } else {
+        logger.info(
+          `👤 Creating Cognito admin user for CCT: ${adminEmail}`,
+        );
+        const userManager = new UserSetupManager(region, "cct");
+        await userManager.createAdminUser({
+          stage: options.stage,
+          adminEmail,
+          region,
+          stackType: "cct",
+        });
+        logger.success("✓ Cognito admin user created for CCT");
+      }
+    } catch (userError: any) {
+      logger.error(
+        `CCT Cognito admin creation failed: ${userError instanceof Error ? userError.message : userError}`,
+      );
+      // don't throw to avoid failing the entire deploy; surface error to logs
+    }
   }
 
   logger.success("🎉 Card Counting Trainer deployment completed successfully!");

@@ -49,6 +49,9 @@ const ELEVEN_API_KEY = process.env.NEXT_PUBLIC_ELEVEN_API_KEY || 'sk_3b5ff415268
 // Session cache for CloudFront (blob URLs, cleared on page refresh)
 const audioCache = new Map<string, string>();
 
+// In-flight generation tracking to prevent duplicate API calls
+const inFlightGenerations = new Map<string, Promise<string>>();
+
 /**
  * Generate audio directly from browser (CloudFront only)
  */
@@ -61,41 +64,60 @@ async function generateAudioInBrowser(text: string, voiceId: string): Promise<st
     return audioCache.get(cacheKey)!;
   }
 
-  console.log(`[Dynamic TTS] Generating audio in browser for: "${text.substring(0, 50)}..."`);
-
-  const response = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`,
-    {
-      method: 'POST',
-      headers: {
-        'xi-api-key': ELEVEN_API_KEY,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model_id: 'eleven_multilingual_v2',
-        text,
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.82,
-          style: 0.15,
-          use_speaker_boost: true,
-        },
-        output_format: 'mp3_44100',
-      }),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`ElevenLabs API error: ${response.statusText}`);
+  // Check if this audio is already being generated
+  if (inFlightGenerations.has(cacheKey)) {
+    console.log(`[Dynamic TTS] Waiting for in-flight generation: "${text.substring(0, 50)}..."`);
+    return await inFlightGenerations.get(cacheKey)!;
   }
 
-  const audioBlob = await response.blob();
-  const blobUrl = URL.createObjectURL(audioBlob);
+  console.log(`[Dynamic TTS] Generating audio in browser for: "${text.substring(0, 50)}..."`);
 
-  // Cache for this session
-  audioCache.set(cacheKey, blobUrl);
+  // Create the generation promise
+  const generationPromise = (async () => {
+    try {
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`,
+        {
+          method: 'POST',
+          headers: {
+            'xi-api-key': ELEVEN_API_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model_id: 'eleven_multilingual_v2',
+            text,
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.82,
+              style: 0.15,
+              use_speaker_boost: true,
+            },
+            output_format: 'mp3_44100',
+          }),
+        }
+      );
 
-  return blobUrl;
+      if (!response.ok) {
+        throw new Error(`ElevenLabs API error: ${response.statusText}`);
+      }
+
+      const audioBlob = await response.blob();
+      const blobUrl = URL.createObjectURL(audioBlob);
+
+      // Cache for this session
+      audioCache.set(cacheKey, blobUrl);
+
+      return blobUrl;
+    } finally {
+      // Remove from in-flight tracking when done
+      inFlightGenerations.delete(cacheKey);
+    }
+  })();
+
+  // Track this generation
+  inFlightGenerations.set(cacheKey, generationPromise);
+
+  return await generationPromise;
 }
 
 /**
@@ -126,37 +148,55 @@ export async function getOrGenerateAudio(
   }
 
   // Local dev: Use API route to generate on-demand and cache on server
-  try {
-    const response = await fetch('/api/tts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text,
-        characterId,
-      }),
-    });
+  const cacheKey = `${voiceId}:${text}`;
 
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('[Dynamic TTS] API error:', error);
-      throw new Error(error.error || 'TTS generation failed');
-    }
-
-    const data: TTSResponse = await response.json();
-
-    if (data.cached) {
-      console.log(`[Dynamic TTS] Using cached audio for: "${text.substring(0, 50)}..."`);
-    } else {
-      console.log(`[Dynamic TTS] Generated new audio for: "${text.substring(0, 50)}..."`);
-    }
-
-    return data.audioUrl;
-  } catch (error) {
-    console.error('[Dynamic TTS] Failed to get/generate audio:', error);
-    return '';
+  // Check if this audio is already being generated
+  if (inFlightGenerations.has(cacheKey)) {
+    console.log(`[Dynamic TTS] Waiting for in-flight API request: "${text.substring(0, 50)}..."`);
+    return await inFlightGenerations.get(cacheKey)!;
   }
+
+  const generationPromise = (async () => {
+    try {
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          characterId,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('[Dynamic TTS] API error:', error);
+        throw new Error(error.error || 'TTS generation failed');
+      }
+
+      const data: TTSResponse = await response.json();
+
+      if (data.cached) {
+        console.log(`[Dynamic TTS] Using cached audio for: "${text.substring(0, 50)}..."`);
+      } else {
+        console.log(`[Dynamic TTS] Generated new audio for: "${text.substring(0, 50)}..."`);
+      }
+
+      return data.audioUrl;
+    } catch (error) {
+      console.error('[Dynamic TTS] Failed to get/generate audio:', error);
+      return '';
+    } finally {
+      // Remove from in-flight tracking when done
+      inFlightGenerations.delete(cacheKey);
+    }
+  })();
+
+  // Track this generation
+  inFlightGenerations.set(cacheKey, generationPromise);
+
+  return await generationPromise;
 }
 
 /**

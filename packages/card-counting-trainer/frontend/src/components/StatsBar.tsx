@@ -32,7 +32,7 @@ export default function StatsBar({
   onChartsClick,
 }: StatsBarProps) {
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { isAuthenticated, isLoading, user, refresh } = useAuth();
+  const { isAuthenticated, isLoading, user, isAdmin, refresh } = useAuth();
 
   const handleLogout = async () => {
     await signOut();
@@ -130,50 +130,54 @@ export default function StatsBar({
         </div>
       </div>
       <div className="flex gap-4 items-center">
-        <button
-          onClick={onSettingsClick}
-          style={{
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
-            color: "#FFF",
-            border: "2px solid #FFD700",
-            borderRadius: "8px",
-            padding: "8px 16px",
-            fontSize: "14px",
-            fontWeight: "bold",
-            cursor: "pointer",
-            transition: "all 0.2s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
-          }}
-        >
-          ⚙️ Settings
-        </button>
-        <button
-          onClick={onAdminClick}
-          style={{
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
-            color: "#FFF",
-            border: "2px solid #9C27B0",
-            borderRadius: "8px",
-            padding: "8px 16px",
-            fontSize: "14px",
-            fontWeight: "bold",
-            cursor: "pointer",
-            transition: "all 0.2s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(156, 39, 176, 0.3)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
-          }}
-        >
-          🎛️ Admin
-        </button>
+        {isAuthenticated && (
+          <button
+            onClick={onSettingsClick}
+            style={{
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
+              color: "#FFF",
+              border: "2px solid #FFD700",
+              borderRadius: "8px",
+              padding: "8px 16px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+            }}
+          >
+            ⚙️ Settings
+          </button>
+        )}
+        {isAdmin && (
+          <button
+            onClick={onAdminClick}
+            style={{
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
+              color: "#FFF",
+              border: "2px solid #9C27B0",
+              borderRadius: "8px",
+              padding: "8px 16px",
+              fontSize: "14px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(156, 39, 176, 0.3)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+            }}
+          >
+            🎛️ Admin
+          </button>
+        )}
         <button
           onClick={onLeaderboardClick}
           style={{

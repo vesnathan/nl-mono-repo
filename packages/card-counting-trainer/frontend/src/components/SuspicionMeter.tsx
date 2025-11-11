@@ -1,3 +1,6 @@
+/* eslint-disable sonarjs/no-duplicate-string */
+/* eslint-disable sonarjs/cognitive-complexity */
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,8 +12,6 @@ interface SuspicionMeterProps {
   dealerSuspicion?: number; // 0-100 - Dealer's awareness
   pitBossDistance?: number; // 0-100, higher = closer (more dangerous)
   currentDealer?: DealerCharacter | null; // Current dealer info
-  dealerName?: string;
-  dealerDetectionSkill?: number; // 0-100
   onYourSide?: boolean;
 }
 
@@ -20,9 +21,6 @@ export default function SuspicionMeter({
   dealerSuspicion = 0,
   pitBossDistance,
   currentDealer,
-  dealerName,
-  dealerDetectionSkill,
-  onYourSide,
 }: SuspicionMeterProps) {
   const [pulseAnimation, setPulseAnimation] = useState(false);
 
@@ -35,6 +33,7 @@ export default function SuspicionMeter({
       const timer = setTimeout(() => setPulseAnimation(false), 1000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [actualSuspicionLevel]);
 
   // Determine color and status based on suspicion level
@@ -71,13 +70,13 @@ export default function SuspicionMeter({
     };
   };
 
-  const { color, bgColor, status, message } = getStatusInfo();
+  const { color, status, message } = getStatusInfo();
 
   return (
     <div
       style={{
         position: "fixed",
-        top: "100px",
+        top: "80px",
         left: "20px",
         width: "220px",
         backgroundColor: "rgba(0, 0, 0, 0.95)",
@@ -270,7 +269,7 @@ export default function SuspicionMeter({
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes pulse-warning {
           0%,
           100% {

@@ -8,6 +8,13 @@ Parameters:
   AppName:
     Type: String
     Description: Application short name used in exported resource names
+  PostConfirmationLambdaArn:
+    Type: String
+    Description: ARN of the PostConfirmation Lambda function
+    Default: ""
+
+Conditions:
+  HasPostConfirmationLambda: !Not [!Equals [!Ref PostConfirmationLambdaArn, ""]]
 
 Resources:
   UserPool:
@@ -25,6 +32,11 @@ Resources:
       MfaConfiguration: "OFF"
       UserPoolTags:
         Stack: !Sub "nlmonorepo-cct-${Stage}"
+      LambdaConfig:
+        PostConfirmation: !If
+          - HasPostConfirmationLambda
+          - !Ref PostConfirmationLambdaArn
+          - !Ref AWS::NoValue
 
   # Cognito User Pool Domain (required for OAuth)
   UserPoolDomain:

@@ -39,5 +39,5 @@ export function useDealerVoice({
 
     // Update previous phase
     previousPhase.current = phase;
-  }, [phase, currentDealer, audioQueue]);
+  }, [phase, currentDealer]); // Removed audioQueue from deps - only trigger on phase/dealer change
 }
