@@ -20,12 +20,18 @@ export function useDealerVoice({
   audioQueue,
 }: UseDealerVoiceParams) {
   const previousPhase = useRef<GamePhase | null>(null);
+  const audioQueuedRef = useRef(false); // Track if we've queued audio for this betting phase
 
   useEffect(() => {
     // Detect when we enter BETTING phase
     if (phase === "BETTING" && previousPhase.current !== "BETTING") {
-      // Play "Place your bets" audio
-      if (currentDealer) {
+      // Reset audio flag when entering BETTING phase
+      audioQueuedRef.current = false;
+      previousPhase.current = phase;
+
+      // Play "Place your bets" audio (only once)
+      if (currentDealer && !audioQueuedRef.current) {
+        audioQueuedRef.current = true;
         const audioPath = getDealerAudioPath(currentDealer.id, "place_bets");
         audioQueue.queueAudio({
           id: `dealer-place-bets-${Date.now()}`,
@@ -35,9 +41,9 @@ export function useDealerVoice({
           message: "Place your bets",
         });
       }
+    } else if (phase !== "BETTING" && previousPhase.current === "BETTING") {
+      // Exiting BETTING phase
+      previousPhase.current = phase;
     }
-
-    // Update previous phase
-    previousPhase.current = phase;
   }, [phase, currentDealer]); // Removed audioQueue from deps - only trigger on phase/dealer change
 }
