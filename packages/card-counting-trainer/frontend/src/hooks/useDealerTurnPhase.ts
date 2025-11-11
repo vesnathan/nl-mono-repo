@@ -246,42 +246,45 @@ export function useDealerTurnPhase({
             addDebugLog(`Dealer hand value: ${finalValue}`);
             addDebugLog(`Dealer busted: ${isBust}`);
 
-            if (isBust) {
-              addSpeechBubble("dealer-result", "Dealer busts", -1);
+            // Only announce and queue audio once
+            if (!audioQueuedRef.current) {
+              audioQueuedRef.current = true;
 
-              // Play dealer bust audio (only once)
-              if (currentDealer && !audioQueuedRef.current) {
-                audioQueuedRef.current = true;
-                const audioPath = getDealerAudioPath(currentDealer.id, "dealer_busts");
-                audioQueue.queueAudio({
-                  id: `dealer-busts-${Date.now()}`,
-                  audioPath,
-                  priority: AudioPriority.HIGH,
-                  playerId: "dealer",
-                  message: "Dealer busts",
-                });
-              }
-            } else {
-              addSpeechBubble("dealer-result", `Dealer has ${finalValue}`, -1);
+              if (isBust) {
+                addSpeechBubble("dealer-result", "Dealer busts", -1);
 
-              // Play dealer result audio (only once)
-              if (currentDealer && !audioQueuedRef.current) {
-                audioQueuedRef.current = true;
-                let voiceLine: "dealer_has_17" | "dealer_has_18" | "dealer_has_19" | "dealer_has_20" | "dealer_has_21";
-                if (finalValue === 17) voiceLine = "dealer_has_17";
-                else if (finalValue === 18) voiceLine = "dealer_has_18";
-                else if (finalValue === 19) voiceLine = "dealer_has_19";
-                else if (finalValue === 20) voiceLine = "dealer_has_20";
-                else voiceLine = "dealer_has_21";
+                // Play dealer bust audio
+                if (currentDealer) {
+                  const audioPath = getDealerAudioPath(currentDealer.id, "dealer_busts");
+                  audioQueue.queueAudio({
+                    id: `dealer-busts-${Date.now()}`,
+                    audioPath,
+                    priority: AudioPriority.HIGH,
+                    playerId: "dealer",
+                    message: "Dealer busts",
+                  });
+                }
+              } else {
+                addSpeechBubble("dealer-result", `Dealer has ${finalValue}`, -1);
 
-                const audioPath = getDealerAudioPath(currentDealer.id, voiceLine);
-                audioQueue.queueAudio({
-                  id: `dealer-result-${Date.now()}`,
-                  audioPath,
-                  priority: AudioPriority.HIGH,
-                  playerId: "dealer",
-                  message: `Dealer has ${finalValue}`,
-                });
+                // Play dealer result audio
+                if (currentDealer) {
+                  let voiceLine: "dealer_has_17" | "dealer_has_18" | "dealer_has_19" | "dealer_has_20" | "dealer_has_21";
+                  if (finalValue === 17) voiceLine = "dealer_has_17";
+                  else if (finalValue === 18) voiceLine = "dealer_has_18";
+                  else if (finalValue === 19) voiceLine = "dealer_has_19";
+                  else if (finalValue === 20) voiceLine = "dealer_has_20";
+                  else voiceLine = "dealer_has_21";
+
+                  const audioPath = getDealerAudioPath(currentDealer.id, voiceLine);
+                  audioQueue.queueAudio({
+                    id: `dealer-result-${Date.now()}`,
+                    audioPath,
+                    priority: AudioPriority.HIGH,
+                    playerId: "dealer",
+                    message: `Dealer has ${finalValue}`,
+                  });
+                }
               }
             }
 
