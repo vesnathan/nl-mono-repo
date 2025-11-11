@@ -239,6 +239,7 @@ export function useDealerTurnPhase({
             const finalValue = calculateHandValue(currentHand);
             const isBust = isBusted(currentHand);
 
+            addDebugLog(`🎯 dealerFinishedRef set to true - should only see this once`);
             addDebugLog(`=== DEALER FINAL HAND ===`);
             addDebugLog(
               `Dealer cards: ${currentHand.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
@@ -249,12 +250,11 @@ export function useDealerTurnPhase({
             // Only announce and queue audio once
             if (!audioQueuedRef.current) {
               audioQueuedRef.current = true;
+              addDebugLog(`🔊 audioQueuedRef set to true - queueing dealer audio`);
 
-              if (isBust) {
-                addSpeechBubble("dealer-result", "Dealer busts", -1);
-
-                // Play dealer bust audio
-                if (currentDealer) {
+              // Play dealer result audio (audio queue will handle speech bubble)
+              if (currentDealer) {
+                if (isBust) {
                   const audioPath = getDealerAudioPath(currentDealer.id, "dealer_busts");
                   audioQueue.queueAudio({
                     id: `dealer-busts-${Date.now()}`,
@@ -263,12 +263,7 @@ export function useDealerTurnPhase({
                     playerId: "dealer",
                     message: "Dealer busts",
                   });
-                }
-              } else {
-                addSpeechBubble("dealer-result", `Dealer has ${finalValue}`, -1);
-
-                // Play dealer result audio
-                if (currentDealer) {
+                } else {
                   let voiceLine: "dealer_has_17" | "dealer_has_18" | "dealer_has_19" | "dealer_has_20" | "dealer_has_21";
                   if (finalValue === 17) voiceLine = "dealer_has_17";
                   else if (finalValue === 18) voiceLine = "dealer_has_18";
