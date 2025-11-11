@@ -50,6 +50,7 @@ interface GameTableProps {
   handleConversationIgnore: () => void;
   setWinLossBubbles: React.Dispatch<React.SetStateAction<WinLossBubbleData[]>>;
   setShowDealerInfo: (show: boolean) => void;
+  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
 }
 
 export default function GameTable({
@@ -79,6 +80,7 @@ export default function GameTable({
   handleConversationIgnore,
   setWinLossBubbles,
   setShowDealerInfo,
+  registerTimeout,
 }: GameTableProps) {
   return (
     <div
@@ -148,7 +150,7 @@ export default function GameTable({
           activePlayerIndex={activePlayerIndex}
           playerActions={playerActions}
           onSeatClick={setPlayerSeat}
-          
+          registerTimeout={registerTimeout}
         />
 
         {/* Table Rules Placard */}
@@ -170,6 +172,7 @@ export default function GameTable({
           handleConversationResponse={handleConversationResponse}
           handleConversationIgnore={handleConversationIgnore}
           setWinLossBubbles={setWinLossBubbles}
+          registerTimeout={registerTimeout}
         />
       </div>
 
@@ -179,6 +182,7 @@ export default function GameTable({
           dealer={currentDealer}
           onClose={() => setShowDealerInfo(false)}
           openAsModal
+          registerTimeout={registerTimeout}
         />
       )}
 

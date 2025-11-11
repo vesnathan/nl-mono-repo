@@ -22,7 +22,7 @@ export function getPlayerAudioPath(
     | "loss"
     | "dealer_blackjack"
     | "distraction",
-  variant?: number
+  variant?: number,
 ): string {
   // For single reactions (bust, hit21, goodHit, badStart), always use _01
   if (
@@ -74,7 +74,7 @@ export function getDealerAudioPath(
     | "react_tough_break"
     | "react_well_played"
     | "react_better_luck"
-    | "react_house_wins"
+    | "react_house_wins",
 ): string {
   return `/audio/dealers/${dealerId}/${voiceLine}_01.mp3`;
 }
@@ -88,7 +88,7 @@ export function getDealerAudioPath(
  */
 export function mapOutcomeToAudioType(
   outcomeType: "bigWin" | "smallWin" | "push" | "smallLoss" | "bigLoss",
-  context?: "bust" | "blackjack" | "dealerBlackjack" | "dealerWin" | "any"
+  context?: "bust" | "blackjack" | "dealerBlackjack" | "dealerWin" | "any",
 ): "bust" | "win" | "loss" | "dealer_blackjack" {
   // Context-specific mappings
   if (context === "bust") return "bust";

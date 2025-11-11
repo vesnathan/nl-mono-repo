@@ -44,7 +44,13 @@ const REACTION_PRIORITY_ORDER = [
 export function generateInitialReactions(
   aiPlayers: AIPlayer[],
   dealerUpCard?: { rank: string; suit: string },
-): Array<{ playerId: string; message: string; outcome: string; audioType?: "badStart" | "goodHit"; audioPriority?: number }> {
+): Array<{
+  playerId: string;
+  message: string;
+  outcome: string;
+  audioType?: "badStart" | "goodHit";
+  audioPriority?: number;
+}> {
   const reactions: Array<{
     playerId: string;
     message: string;
@@ -57,10 +63,28 @@ export function generateInitialReactions(
     const handValue = calculateHandValue(ai.hand.cards);
     const hasBlackjack = isBlackjack(ai.hand.cards);
 
+    // Determine reaction chance based on hand quality
+    let reactionChance = 0.05; // Default: only 5% chance to react
+    if (hasBlackjack) {
+      reactionChance = 0.4; // 40% chance to react to blackjack
+    } else if (handValue >= 20) {
+      reactionChance = 0.15; // 15% chance to react to 20-21
+    } else if (handValue <= 12) {
+      reactionChance = 0.1; // 10% chance to react to bad hand
+    }
+
+    // Skip most reactions
+    if (Math.random() > reactionChance) {
+      return;
+    }
+
     // Try dealer upcard reaction first (15% chance when dealer card is provided)
     let reaction: string | null = null;
     if (dealerUpCard && Math.random() < 0.15) {
-      reaction = getRandomDealerUpCardSaying(ai.character.id, dealerUpCard.rank);
+      reaction = getRandomDealerUpCardSaying(
+        ai.character.id,
+        dealerUpCard.rank,
+      );
     }
 
     // Fallback to hand reaction
@@ -118,7 +142,10 @@ export function generateBustReaction(ai: AIPlayer): Reaction | null {
   // Use personality-specific bust reaction from dialogue system
   // 70% chance to react to bust
   if (Math.random() < 0.7) {
-    const bustMessage = getPersonalityReaction(ai.character.personality, "bust");
+    const bustMessage = getPersonalityReaction(
+      ai.character.personality,
+      "bust",
+    );
     return {
       playerId: ai.character.id,
       message: bustMessage,

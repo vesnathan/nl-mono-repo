@@ -25,7 +25,8 @@ export function createConversation(
     question = getDealerPlayerLine("generic", "dealerQuestions");
   } else {
     // Try to get player engagement prompt first (30% chance)
-    const engagementPrompt = Math.random() < 0.3 ? getPlayerEngagement(speakerId) : null;
+    const engagementPrompt =
+      Math.random() < 0.3 ? getPlayerEngagement(speakerId) : null;
 
     if (engagementPrompt) {
       question = engagementPrompt;
@@ -75,12 +76,16 @@ export function createSpeechBubble(
   const handValue = hand.length > 0 ? calculateHandValue(hand) : 0;
 
   // Debug logging
-  debugLog('conversations',
+  debugLog(
+    "conversations",
     `💬 ${characterName} [Hand: ${handStr} (${handValue})]: "${message}"`,
   );
 
   // Use dealer position if position is -1, otherwise use table seat position
-  const [x, y] = position === -1 ? DEALER_POSITION : (TABLE_POSITIONS[position] || TABLE_POSITIONS[0]);
+  const [x, y] =
+    position === -1
+      ? DEALER_POSITION
+      : TABLE_POSITIONS[position] || TABLE_POSITIONS[0];
 
   return {
     playerId,

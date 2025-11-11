@@ -68,27 +68,39 @@ export class OutputsManager {
         ExportName: output.ExportName,
       }));
 
-      // Load existing outputs
-      let deploymentOutputs: DeploymentOutputs;
+      // Load existing outputs (handles nested stages structure)
+      let fullOutputs: any;
       try {
         const existingContent = await readFile(this.outputsFilePath, "utf8");
-        deploymentOutputs = JSON.parse(existingContent);
+        fullOutputs = JSON.parse(existingContent);
+        // Ensure nested structure exists
+        if (!fullOutputs.stages) {
+          fullOutputs = { stages: {} };
+        }
+        if (!fullOutputs.stages[stage]) {
+          fullOutputs.stages[stage] = {
+            lastUpdated: new Date().toISOString(),
+            stacks: {},
+          };
+        }
       } catch {
-        deploymentOutputs = {
-          stage,
-          lastUpdated: new Date().toISOString(),
-          stacks: {},
+        fullOutputs = {
+          stages: {
+            [stage]: {
+              lastUpdated: new Date().toISOString(),
+              stacks: {},
+            },
+          },
         };
       }
 
-      // Update the specific stack outputs
-      deploymentOutputs.stacks[stackType] = {
+      // Update the specific stack outputs for this stage
+      fullOutputs.stages[stage].stacks[stackType] = {
         region: stackRegion,
         stackName,
         outputs,
       };
-      deploymentOutputs.lastUpdated = new Date().toISOString();
-      deploymentOutputs.stage = stage;
+      fullOutputs.stages[stage].lastUpdated = new Date().toISOString();
 
       // Ensure directory exists
       await mkdir(join(__dirname), { recursive: true });
@@ -96,7 +108,7 @@ export class OutputsManager {
       // Save updated outputs
       await writeFile(
         this.outputsFilePath,
-        JSON.stringify(deploymentOutputs, null, 2),
+        JSON.stringify(fullOutputs, null, 2),
       );
 
       logger.debug(
@@ -113,10 +125,10 @@ export class OutputsManager {
 
   async removeStackOutputs(stackType: StackType, stage: string): Promise<void> {
     try {
-      let deploymentOutputs: DeploymentOutputs;
+      let fullOutputs: any;
       try {
         const existingContent = await readFile(this.outputsFilePath, "utf8");
-        deploymentOutputs = JSON.parse(existingContent);
+        fullOutputs = JSON.parse(existingContent);
       } catch {
         // File doesn't exist, nothing to remove
         logger.warning(
@@ -125,13 +137,13 @@ export class OutputsManager {
         return;
       }
 
-      if (deploymentOutputs.stacks[stackType]) {
-        delete deploymentOutputs.stacks[stackType];
-        deploymentOutputs.lastUpdated = new Date().toISOString();
+      if (fullOutputs.stages?.[stage]?.stacks?.[stackType]) {
+        delete fullOutputs.stages[stage].stacks[stackType];
+        fullOutputs.stages[stage].lastUpdated = new Date().toISOString();
 
         await writeFile(
           this.outputsFilePath,
-          JSON.stringify(deploymentOutputs, null, 2),
+          JSON.stringify(fullOutputs, null, 2),
         );
         logger.success(
           `Removed outputs for ${stackType} stack from ${this.outputsFilePath}`,
@@ -155,16 +167,17 @@ export class OutputsManager {
   ): Promise<StackOutput[] | null> {
     try {
       const content = await readFile(this.outputsFilePath, "utf8");
-      const deploymentOutputs: DeploymentOutputs = JSON.parse(content);
+      const fullOutputs: any = JSON.parse(content);
 
-      if (deploymentOutputs.stage !== stage) {
+      // Handle nested stages structure
+      if (!fullOutputs.stages || !fullOutputs.stages[stage]) {
         logger.warning(
-          `Outputs file is for stage ${deploymentOutputs.stage}, but requested stage ${stage}`,
+          `No outputs found for stage ${stage} in deployment outputs file`,
         );
         return null;
       }
 
-      return deploymentOutputs.stacks[stackType]?.outputs || null;
+      return fullOutputs.stages[stage].stacks[stackType]?.outputs || null;
     } catch (error: unknown) {
       logger.warning(
         `Could not read outputs for ${stackType}: ${(error as Error).message}`,
@@ -196,16 +209,16 @@ export class OutputsManager {
   ): Promise<string | null> {
     try {
       const content = await readFile(this.outputsFilePath, "utf8");
-      const deploymentOutputs: DeploymentOutputs = JSON.parse(content);
+      const fullOutputs: any = JSON.parse(content);
 
-      if (deploymentOutputs.stage !== stage) {
+      if (!fullOutputs.stages || !fullOutputs.stages[stage]) {
         logger.warning(
-          `Outputs file is for stage ${deploymentOutputs.stage}, but requested stage ${stage}`,
+          `No outputs found for stage ${stage} in deployment outputs file`,
         );
         return null;
       }
 
-      const stacks = deploymentOutputs.stacks || {};
+      const stacks = fullOutputs.stages[stage].stacks || {};
 
       for (const stackKey of Object.keys(stacks) as StackType[]) {
         const stackOutputs = stacks[stackKey]?.outputs || [];
@@ -233,16 +246,21 @@ export class OutputsManager {
   async getAllOutputs(stage: string): Promise<DeploymentOutputs | null> {
     try {
       const content = await readFile(this.outputsFilePath, "utf8");
-      const deploymentOutputs: DeploymentOutputs = JSON.parse(content);
+      const fullOutputs: any = JSON.parse(content);
 
-      if (deploymentOutputs.stage !== stage) {
+      if (!fullOutputs.stages || !fullOutputs.stages[stage]) {
         logger.warning(
-          `Outputs file is for stage ${deploymentOutputs.stage}, but requested stage ${stage}`,
+          `No outputs found for stage ${stage} in deployment outputs file`,
         );
         return null;
       }
 
-      return deploymentOutputs;
+      // Return the stage-specific outputs in the old format for backwards compatibility
+      return {
+        stage,
+        lastUpdated: fullOutputs.stages[stage].lastUpdated,
+        stacks: fullOutputs.stages[stage].stacks,
+      };
     } catch (error: unknown) {
       logger.warning(
         `Could not read deployment outputs: ${(error as Error).message}`,
@@ -295,16 +313,22 @@ export class OutputsManager {
   }
 
   async clearOutputs(stage: string): Promise<void> {
-    const emptyOutputs: DeploymentOutputs = {
-      stage,
+    // Read existing outputs to preserve other stages
+    let fullOutputs: any;
+    try {
+      const existingContent = await readFile(this.outputsFilePath, "utf8");
+      fullOutputs = JSON.parse(existingContent);
+    } catch {
+      fullOutputs = { stages: {} };
+    }
+
+    // Clear only the specified stage
+    fullOutputs.stages[stage] = {
       lastUpdated: new Date().toISOString(),
       stacks: {},
     };
 
-    await writeFile(
-      this.outputsFilePath,
-      JSON.stringify(emptyOutputs, null, 2),
-    );
+    await writeFile(this.outputsFilePath, JSON.stringify(fullOutputs, null, 2));
     logger.info(`Cleared deployment outputs for stage ${stage}`);
   }
 }

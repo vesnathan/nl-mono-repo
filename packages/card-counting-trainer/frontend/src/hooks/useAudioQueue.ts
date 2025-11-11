@@ -1,5 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { getPlayerSpeechVolume, getDealerSpeechVolume } from "@/components/AdminSettingsModal";
+import {
+  getPlayerSpeechVolume,
+  getDealerSpeechVolume,
+} from "@/components/AdminSettingsModal";
 import { getOrGenerateAudio } from "@/utils/dynamicTTS";
 import { debugLog } from "@/utils/debug";
 
@@ -21,6 +24,7 @@ export interface AudioQueueItem {
   playerId: string; // Character ID or "dealer"
   message: string; // Text to display in speech bubble
   position?: { left: string; top: string }; // Bubble position
+  onPlay?: () => void; // Callback when audio starts playing
   onComplete?: () => void; // Callback when audio finishes
 }
 
@@ -29,6 +33,10 @@ export interface AudioQueueHook {
   clearQueue: () => void;
   isPlaying: boolean;
   currentItem: AudioQueueItem | null;
+}
+
+interface UseAudioQueueParams {
+  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
 }
 
 /**
@@ -40,7 +48,10 @@ export interface AudioQueueHook {
  * - Equal priority queues in order
  * - When audio completes, process next item in queue
  */
-export function useAudioQueue(): AudioQueueHook {
+export function useAudioQueue({
+  registerTimeout,
+}: UseAudioQueueParams): AudioQueueHook {
+  // Queue state to trigger re-renders when items are added/removed
   const [queue, setQueue] = useState<AudioQueueItem[]>([]);
   const [currentItem, setCurrentItem] = useState<AudioQueueItem | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -48,33 +59,35 @@ export function useAudioQueue(): AudioQueueHook {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const processingRef = useRef(false);
   const currentPlayerIdRef = useRef<string | null>(null);
+  const queueRef = useRef<AudioQueueItem[]>([]);
 
   /**
    * Process the next item in the queue
    */
   const processQueue = useCallback(async () => {
     if (processingRef.current) {
-      debugLog('audioQueue', `[Audio Queue] ⛔ Already processing, returning`);
+      debugLog("audioQueue", `[Audio Queue] ⛔ Already processing, returning`);
       return;
     }
 
     // CRITICAL: Set processing flag FIRST to prevent re-entry
     processingRef.current = true;
-    debugLog('audioQueue', `[Audio Queue] 🔒 Set processingRef to true`);
+    debugLog("audioQueue", `[Audio Queue] 🔒 Set processingRef to true`);
 
-    // Get the current queue state by using a temporary variable
-    // We need to extract the item synchronously before setState
-    let currentQueueSnapshot: AudioQueueItem[] = [];
-    setQueue((currentQueue) => {
-      currentQueueSnapshot = currentQueue;
-      return currentQueue; // Don't modify yet
-    });
+    // Use queueRef for synchronous access to current queue
+    const currentQueueSnapshot = queueRef.current;
 
-    debugLog('audioQueue', `[Audio Queue] 📸 Queue snapshot (length: ${currentQueueSnapshot.length})`);
+    debugLog(
+      "audioQueue",
+      `[Audio Queue] 📸 Queue snapshot (length: ${currentQueueSnapshot.length})`,
+    );
 
     // If queue is empty, clear state and return early
     if (currentQueueSnapshot.length === 0) {
-      debugLog('audioQueue', `[Audio Queue] 📭 Queue empty, clearing state and resetting flag`);
+      debugLog(
+        "audioQueue",
+        `[Audio Queue] 📭 Queue empty, clearing state and resetting flag`,
+      );
       processingRef.current = false;
       setCurrentItem(null);
       setIsPlaying(false);
@@ -82,19 +95,35 @@ export function useAudioQueue(): AudioQueueHook {
     }
 
     // Get highest priority item from queue
-    const sortedQueue = [...currentQueueSnapshot].sort((a, b) => b.priority - a.priority);
+    const sortedQueue = [...currentQueueSnapshot].sort(
+      (a, b) => b.priority - a.priority,
+    );
     const itemToPlay = sortedQueue[0];
-    debugLog('audioQueue', `[Audio Queue] 📦 Next item: ${itemToPlay.id} - "${itemToPlay.message}"`);
+    debugLog(
+      "audioQueue",
+      `[Audio Queue] 📦 Next item: ${itemToPlay.id} - "${itemToPlay.message}"`,
+    );
 
     // Now remove it from queue
-    setQueue((currentQueue) => {
-      debugLog('audioQueue', `[Audio Queue] 🗑️  Removing item ${itemToPlay.id} from queue`);
-      const newQueue = currentQueue.filter((item) => item.id !== itemToPlay.id);
-      debugLog('audioQueue', `[Audio Queue] 📋 Queue after removal: ${newQueue.length} items`);
-      return newQueue;
-    });
+    const newQueue = currentQueueSnapshot.filter(
+      (item) => item.id !== itemToPlay.id,
+    );
+    debugLog(
+      "audioQueue",
+      `[Audio Queue] 🗑️  Removing item ${itemToPlay.id} from queue`,
+    );
+    debugLog(
+      "audioQueue",
+      `[Audio Queue] 📋 Queue after removal: ${newQueue.length} items`,
+    );
 
-    debugLog('audioQueue', `[Audio Queue] ✅ Got item to play: ${itemToPlay.id}`);
+    queueRef.current = newQueue;
+    setQueue(newQueue);
+
+    debugLog(
+      "audioQueue",
+      `[Audio Queue] ✅ Got item to play: ${itemToPlay.id}`,
+    );
 
     // Play the audio
     setCurrentItem(itemToPlay);
@@ -103,34 +132,52 @@ export function useAudioQueue(): AudioQueueHook {
     /**
      * Try to play audio, falling back to ElevenLabs if file is missing
      */
-    const tryPlayAudio = async (audioPath: string, usedFallback = false): Promise<void> => {
+    const tryPlayAudio = async (
+      audioPath: string,
+      usedFallback = false,
+    ): Promise<void> => {
       // Pre-flight check: verify the file exists before trying to play it
       // This prevents 404 errors in the browser console
-      if (!usedFallback && !audioPath.startsWith('blob:')) {
+      if (!usedFallback && !audioPath.startsWith("blob:")) {
         try {
-          const checkResponse = await fetch(audioPath, { method: 'HEAD' });
+          const checkResponse = await fetch(audioPath, { method: "HEAD" });
           if (!checkResponse.ok) {
-            debugLog('audioQueue', `[Audio Queue] Pre-flight check failed for: ${audioPath} (${checkResponse.status}), trying ElevenLabs fallback...`);
+            debugLog(
+              "audioQueue",
+              `[Audio Queue] Pre-flight check failed for: ${audioPath} (${checkResponse.status}), trying ElevenLabs fallback...`,
+            );
 
             // Try to generate with ElevenLabs
-            const generatedAudioUrl = await getOrGenerateAudio(itemToPlay.message, itemToPlay.playerId);
+            const generatedAudioUrl = await getOrGenerateAudio(
+              itemToPlay.message,
+              itemToPlay.playerId,
+            );
 
             if (generatedAudioUrl) {
-              debugLog('audioQueue', `[Audio Queue] Generated audio from ElevenLabs for: "${itemToPlay.message.substring(0, 50)}..."`);
+              debugLog(
+                "audioQueue",
+                `[Audio Queue] Generated audio from ElevenLabs for: "${itemToPlay.message.substring(0, 50)}..."`,
+              );
               // Retry with the generated URL
               return await tryPlayAudio(generatedAudioUrl, true);
             } else {
-              console.error(`[Audio Queue] ElevenLabs fallback failed to generate audio`);
+              console.error(
+                `[Audio Queue] ElevenLabs fallback failed to generate audio`,
+              );
               // Skip this audio and move to next
               setIsPlaying(false);
               setCurrentItem(null);
               processingRef.current = false;
-              setTimeout(() => processQueue(), 100);
+              registerTimeout(() => processQueue(), 100);
               return;
             }
           }
         } catch (checkError) {
-          debugLog('audioQueue', `[Audio Queue] Pre-flight check error for: ${audioPath}`, checkError);
+          debugLog(
+            "audioQueue",
+            `[Audio Queue] Pre-flight check error for: ${audioPath}`,
+            checkError,
+          );
           // Continue to try playing anyway - might be a CORS issue with HEAD
         }
       }
@@ -141,29 +188,37 @@ export function useAudioQueue(): AudioQueueHook {
         currentPlayerIdRef.current = itemToPlay.playerId;
 
         // Set volume based on whether it's a dealer or player
-        const volume = itemToPlay.playerId === "dealer"
-          ? getDealerSpeechVolume()
-          : getPlayerSpeechVolume();
+        const volume =
+          itemToPlay.playerId === "dealer"
+            ? getDealerSpeechVolume()
+            : getPlayerSpeechVolume();
         audio.volume = volume;
 
         // Explicitly set loop to false to prevent looping
         audio.loop = false;
 
-        debugLog('audioQueue', `[Audio Queue] 🎵 Created audio element for: ${audioPath}, loop=${audio.loop}, volume=${audio.volume}`);
+        debugLog(
+          "audioQueue",
+          `[Audio Queue] 🎵 Created audio element for: ${audioPath}, loop=${audio.loop}, volume=${audio.volume}`,
+        );
 
         // Log when audio actually starts playing
         audio.onplay = () => {
-          debugLog('audioQueue', `[Audio Queue] ▶️  PLAYING: ${audioPath}`);
+          debugLog("audioQueue", `[Audio Queue] ▶️  PLAYING: ${audioPath}`);
+          // Call onPlay callback if provided
+          if (itemToPlay.onPlay) {
+            itemToPlay.onPlay();
+          }
         };
 
         // Log when audio pauses
         audio.onpause = () => {
-          debugLog('audioQueue', `[Audio Queue] ⏸️  PAUSED: ${audioPath}`);
+          debugLog("audioQueue", `[Audio Queue] ⏸️  PAUSED: ${audioPath}`);
         };
 
         // Log when audio is seeking (might indicate unexpected behavior)
         audio.onseeking = () => {
-          debugLog('audioQueue', `[Audio Queue] ⏩ SEEKING: ${audioPath}`);
+          debugLog("audioQueue", `[Audio Queue] ⏩ SEEKING: ${audioPath}`);
         };
 
         // Track if onended has already fired to prevent double-processing
@@ -171,12 +226,14 @@ export function useAudioQueue(): AudioQueueHook {
 
         audio.onended = () => {
           if (endedFired) {
-            console.error(`[Audio Queue] ⚠️  DUPLICATE onended fired for: ${audioPath}`);
+            console.error(
+              `[Audio Queue] ⚠️  DUPLICATE onended fired for: ${audioPath}`,
+            );
             return;
           }
           endedFired = true;
 
-          debugLog('audioQueue', `[Audio Queue] ✅ Audio ENDED: ${audioPath}`);
+          debugLog("audioQueue", `[Audio Queue] ✅ Audio ENDED: ${audioPath}`);
 
           // Remove ALL event handlers to prevent any further events
           audio.onerror = null;
@@ -188,7 +245,10 @@ export function useAudioQueue(): AudioQueueHook {
           // Pause the audio but DON'T clear the source (which triggers Invalid URI error)
           // Just let it be garbage collected
           if (audioRef.current) {
-            debugLog('audioQueue', `[Audio Queue] 🧹 Cleaning up audio element`);
+            debugLog(
+              "audioQueue",
+              `[Audio Queue] 🧹 Cleaning up audio element`,
+            );
             audioRef.current.pause();
             // Don't set src = '' - this triggers "Invalid URI" error
             audioRef.current = null;
@@ -204,7 +264,7 @@ export function useAudioQueue(): AudioQueueHook {
           }
 
           // Process next item after a small delay
-          setTimeout(() => {
+          registerTimeout(() => {
             processQueue();
           }, 300); // 300ms gap between audio clips
 
@@ -214,43 +274,64 @@ export function useAudioQueue(): AudioQueueHook {
         audio.onerror = async (e) => {
           // If we haven't tried fallback yet, try to generate with ElevenLabs
           if (!usedFallback) {
-            debugLog('audioQueue', `[Audio Queue] Audio error for: ${audioPath}, trying ElevenLabs fallback...`);
+            debugLog(
+              "audioQueue",
+              `[Audio Queue] Audio error for: ${audioPath}, trying ElevenLabs fallback...`,
+            );
 
             try {
-              const generatedAudioUrl = await getOrGenerateAudio(itemToPlay.message, itemToPlay.playerId);
+              const generatedAudioUrl = await getOrGenerateAudio(
+                itemToPlay.message,
+                itemToPlay.playerId,
+              );
 
               if (generatedAudioUrl) {
-                debugLog('audioQueue', `[Audio Queue] Generated audio from ElevenLabs for: "${itemToPlay.message.substring(0, 50)}..."`);
+                debugLog(
+                  "audioQueue",
+                  `[Audio Queue] Generated audio from ElevenLabs for: "${itemToPlay.message.substring(0, 50)}..."`,
+                );
                 // Retry with the generated URL
                 await tryPlayAudio(generatedAudioUrl, true);
                 resolve();
                 return;
               }
             } catch (fallbackError) {
-              console.error(`[Audio Queue] ElevenLabs fallback failed:`, fallbackError);
+              console.error(
+                `[Audio Queue] ElevenLabs fallback failed:`,
+                fallbackError,
+              );
             }
           }
 
           // No fallback worked, skip this audio
-          console.error(`Failed to load audio (no fallback available): ${audioPath}`, e);
+          console.error(
+            `Failed to load audio (no fallback available): ${audioPath}`,
+            e,
+          );
           setIsPlaying(false);
           setCurrentItem(null);
           processingRef.current = false;
 
           // Try next item
-          setTimeout(() => {
+          registerTimeout(() => {
             processQueue();
           }, 100);
 
           reject(e);
         };
 
-        debugLog('audioQueue', `[Audio Queue] Playing: ${audioPath}${usedFallback ? ' (from ElevenLabs)' : ''}`);
+        debugLog(
+          "audioQueue",
+          `[Audio Queue] Playing: ${audioPath}${usedFallback ? " (from ElevenLabs)" : ""}`,
+        );
         audio.play().catch(async (err) => {
-          console.error(`[Audio Queue] Failed to play audio: ${audioPath}`, err);
+          console.error(
+            `[Audio Queue] Failed to play audio: ${audioPath}`,
+            err,
+          );
 
           // Trigger error handler for fallback
-          audio.onerror?.(new ErrorEvent('error'));
+          audio.onerror?.(new ErrorEvent("error"));
         });
       });
     };
@@ -260,21 +341,27 @@ export function useAudioQueue(): AudioQueueHook {
     } catch (error) {
       // Error already handled in tryPlayAudio
     }
-  }, []); // No dependencies - we use functional setState to get current queue
+  }, [registerTimeout]); // registerTimeout is stable from useCallback in parent
 
   /**
    * Queue audio for playback with priority handling
    */
   const queueAudio = useCallback(
     (item: AudioQueueItem) => {
-      debugLog('audioQueue', "[Audio Queue] queueAudio called");
-      debugLog('audioQueue', `[Audio Queue] 📥 Queueing audio: ${item.id} - "${item.message}" (priority: ${item.priority}, path: ${item.audioPath})`);
+      debugLog("audioQueue", "[Audio Queue] queueAudio called");
+      debugLog(
+        "audioQueue",
+        `[Audio Queue] 📥 Queueing audio: ${item.id} - "${item.message}" (priority: ${item.priority}, path: ${item.audioPath})`,
+      );
 
       // Check if we should interrupt current audio
       if (currentItem && isPlaying) {
         // Interrupt if new item has higher priority
         if (item.priority > currentItem.priority) {
-          debugLog('audioQueue', `[Audio Queue] ⚡ Interrupting current audio (priority ${currentItem.priority}) with higher priority (${item.priority})`);
+          debugLog(
+            "audioQueue",
+            `[Audio Queue] ⚡ Interrupting current audio (priority ${currentItem.priority}) with higher priority (${item.priority})`,
+          );
 
           // Stop current audio
           if (audioRef.current) {
@@ -287,10 +374,12 @@ export function useAudioQueue(): AudioQueueHook {
           setIsPlaying(false);
           setCurrentItem(null);
           processingRef.current = false;
-          setQueue((prev) => [item, ...prev]);
+          const newQueue = [item, ...queueRef.current];
+          queueRef.current = newQueue;
+          setQueue(newQueue);
 
           // Process immediately
-          setTimeout(() => {
+          registerTimeout(() => {
             processQueue();
           }, 50);
           return;
@@ -298,16 +387,22 @@ export function useAudioQueue(): AudioQueueHook {
       }
 
       // Otherwise, just add to queue
-      debugLog('audioQueue', `[Audio Queue] ➕ Added to queue (queue length will be ${queue.length + 1})`);
-      setQueue((prev) => [...prev, item]);
+      debugLog(
+        "audioQueue",
+        `[Audio Queue] ➕ Added to queue (queue length will be ${queueRef.current.length + 1})`,
+      );
+      const newQueue = [...queueRef.current, item];
+      queueRef.current = newQueue;
+      setQueue(newQueue);
     },
-    [currentItem, isPlaying, processQueue, queue.length]
+    [currentItem, isPlaying, processQueue, registerTimeout],
   );
 
   /**
    * Clear all queued audio and stop current playback
    */
   const clearQueue = useCallback(() => {
+    queueRef.current = [];
     setQueue([]);
 
     if (audioRef.current) {
@@ -324,15 +419,24 @@ export function useAudioQueue(): AudioQueueHook {
   useEffect(() => {
     // CRITICAL: Check processingRef FIRST to prevent re-entry during setState
     if (processingRef.current) {
-      debugLog('audioQueue', `[Audio Queue] ⛔ Effect blocked - already processing`);
+      debugLog(
+        "audioQueue",
+        `[Audio Queue] ⛔ Effect blocked - already processing`,
+      );
       return;
     }
 
     if (!isPlaying && queue.length > 0) {
-      debugLog('audioQueue', `[Audio Queue] 🔄 Queue changed (length: ${queue.length}), triggering processQueue`);
+      debugLog(
+        "audioQueue",
+        `[Audio Queue] 🔄 Queue changed (length: ${queue.length}), triggering processQueue`,
+      );
       processQueue();
     } else if (queue.length > 0) {
-      debugLog('audioQueue', `[Audio Queue] ⏸️  Queue has ${queue.length} items but blocked (isPlaying: ${isPlaying})`);
+      debugLog(
+        "audioQueue",
+        `[Audio Queue] ⏸️  Queue has ${queue.length} items but blocked (isPlaying: ${isPlaying})`,
+      );
     }
   }, [queue, isPlaying, processQueue]);
 
@@ -350,16 +454,17 @@ export function useAudioQueue(): AudioQueueHook {
   useEffect(() => {
     const handleVolumeChange = () => {
       if (audioRef.current && currentPlayerIdRef.current) {
-        const newVolume = currentPlayerIdRef.current === "dealer"
-          ? getDealerSpeechVolume()
-          : getPlayerSpeechVolume();
+        const newVolume =
+          currentPlayerIdRef.current === "dealer"
+            ? getDealerSpeechVolume()
+            : getPlayerSpeechVolume();
         audioRef.current.volume = newVolume;
       }
     };
 
-    window.addEventListener('audioSettingsChanged', handleVolumeChange);
+    window.addEventListener("audioSettingsChanged", handleVolumeChange);
     return () => {
-      window.removeEventListener('audioSettingsChanged', handleVolumeChange);
+      window.removeEventListener("audioSettingsChanged", handleVolumeChange);
     };
   }, []);
 

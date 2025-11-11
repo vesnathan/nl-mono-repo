@@ -24,9 +24,18 @@ interface UseConversationTriggersParams {
     id: string,
     message: string,
     position: number,
-    reactionType?: "bust" | "hit21" | "goodHit" | "badStart" | "win" | "loss" | "dealer_blackjack" | "distraction",
-    priority?: number
+    reactionType?:
+      | "bust"
+      | "hit21"
+      | "goodHit"
+      | "badStart"
+      | "win"
+      | "loss"
+      | "dealer_blackjack"
+      | "distraction",
+    priority?: number,
   ) => void;
+  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
 }
 
 /**
@@ -42,6 +51,7 @@ export function useConversationTriggers({
   phase,
   triggerConversation,
   addSpeechBubble,
+  registerTimeout,
 }: UseConversationTriggersParams) {
   // Periodic conversation triggers (frequency based on player sociability)
   useEffect(() => {
@@ -98,14 +108,14 @@ export function useConversationTriggers({
     const conversationInterval = setInterval(
       () => {
         // 30% chance for AI-to-AI conversation (increased from 15% for better visibility)
-        if (Math.random() < 0.30 && aiPlayers.length >= 2) {
+        if (Math.random() < 0.3 && aiPlayers.length >= 2) {
           const conversation = getRandomAIConversation(aiPlayers);
 
           // Only proceed if we got a valid conversation (all participants are at table)
           if (conversation) {
             // Play out the conversation turns with timing
             conversation.forEach((turn, index) => {
-              setTimeout(() => {
+              registerTimeout(() => {
                 // Find the AI player with this characterId
                 const speaker = aiPlayers.find(
                   (ai) => ai.character.id === turn.characterId,
@@ -124,7 +134,7 @@ export function useConversationTriggers({
           }
         }
         // 10% chance for simple banter (fallback)
-        else if (Math.random() < 0.10) {
+        else if (Math.random() < 0.1) {
           const randomAI =
             aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
 
@@ -134,11 +144,7 @@ export function useConversationTriggers({
           );
 
           if (message) {
-            addSpeechBubble(
-              `ai-banter-${Date.now()}`,
-              message,
-              randomAI.position,
-            );
+            addSpeechBubble(randomAI.character.id, message, randomAI.position);
           }
         }
       },

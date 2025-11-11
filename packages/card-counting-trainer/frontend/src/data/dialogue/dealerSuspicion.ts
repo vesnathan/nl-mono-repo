@@ -175,9 +175,7 @@ export const DEALER_SUSPICION_DIALOGUE: Record<
  * Get suspicion threshold for when dealer notices (0-100)
  * Lower number = dealer notices sooner
  */
-export function getDealerSuspicionThreshold(
-  dealer: DealerCharacter,
-): number {
+export function getDealerSuspicionThreshold(dealer: DealerCharacter): number {
   const thresholds: Record<DealerCharacter["personality"], number> = {
     counter: 100, // Maria never reports, threshold doesn't matter
     rookie: 90, // Jenny barely notices
@@ -193,9 +191,7 @@ export function getDealerSuspicionThreshold(
 /**
  * Get suspicion threshold for when dealer calls pit boss (0-100)
  */
-export function getDealerReportingThreshold(
-  dealer: DealerCharacter,
-): number {
+export function getDealerReportingThreshold(dealer: DealerCharacter): number {
   const thresholds: Record<DealerCharacter["personality"], number> = {
     counter: 999, // Maria NEVER reports
     rookie: 999, // Jenny doesn't know when to report

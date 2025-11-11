@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { DEBUG } from "@/utils/debug";
 
 interface AudioSettings {
   musicVolume: number;
@@ -8,6 +9,8 @@ interface AudioSettings {
   dealerSpeechVolume: number;
   masterVolume: number;
 }
+
+type DebugSettings = typeof DEBUG;
 
 interface AdminSettingsModalProps {
   isOpen: boolean;
@@ -26,8 +29,11 @@ export default function AdminSettingsModal({
   onClose,
 }: AdminSettingsModalProps) {
   const [audioSettings, setAudioSettings] = useState<AudioSettings>(
-    DEFAULT_AUDIO_SETTINGS
+    DEFAULT_AUDIO_SETTINGS,
   );
+  const [debugSettings, setDebugSettings] = useState<DebugSettings>({
+    ...DEBUG,
+  });
 
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -40,6 +46,18 @@ export default function AdminSettingsModal({
           console.error("Failed to load audio settings:", e);
         }
       }
+
+      const savedDebug = localStorage.getItem("debugSettings");
+      if (savedDebug) {
+        try {
+          const parsed = JSON.parse(savedDebug);
+          setDebugSettings(parsed);
+          // Apply to DEBUG object
+          Object.assign(DEBUG, parsed);
+        } catch (e) {
+          console.error("Failed to load debug settings:", e);
+        }
+      }
     }
   }, []);
 
@@ -50,10 +68,19 @@ export default function AdminSettingsModal({
 
       // Dispatch custom event so other components can react to volume changes
       window.dispatchEvent(
-        new CustomEvent("audioSettingsChanged", { detail: audioSettings })
+        new CustomEvent("audioSettingsChanged", { detail: audioSettings }),
       );
     }
   }, [audioSettings]);
+
+  // Save debug settings to localStorage and apply to DEBUG object
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("debugSettings", JSON.stringify(debugSettings));
+      // Apply to DEBUG object
+      Object.assign(DEBUG, debugSettings);
+    }
+  }, [debugSettings]);
 
   if (!isOpen) return null;
 
@@ -369,6 +396,69 @@ export default function AdminSettingsModal({
             </div>
           </div>
 
+          {/* Debug Console Logs */}
+          <div style={{ marginBottom: "24px" }}>
+            <h3
+              style={{
+                fontSize: "18px",
+                fontWeight: "bold",
+                color: "#FFF",
+                marginBottom: "16px",
+              }}
+            >
+              🐛 Debug Console Logs
+            </h3>
+            <div
+              style={{
+                backgroundColor: "rgba(255, 152, 0, 0.1)",
+                border: "2px solid rgba(255, 152, 0, 0.3)",
+                borderRadius: "12px",
+                padding: "16px",
+              }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                  gap: "12px",
+                }}
+              >
+                {Object.entries(debugSettings).map(([key, value]) => (
+                  <label
+                    key={key}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      color: value ? "#4CAF50" : "#AAA",
+                      transition: "color 0.2s ease",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={value}
+                      onChange={(e) =>
+                        setDebugSettings({
+                          ...debugSettings,
+                          [key]: e.target.checked,
+                        })
+                      }
+                      style={{
+                        width: "18px",
+                        height: "18px",
+                        accentColor: "#FF9800",
+                        cursor: "pointer",
+                      }}
+                    />
+                    {key.replace(/([A-Z])/g, " $1").trim()}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* Info Box */}
           <div
             style={{
@@ -392,8 +482,8 @@ export default function AdminSettingsModal({
                 levels.
               </div>
               <div>
-                Settings are saved automatically to your browser and will persist
-                between sessions.
+                Settings are saved automatically to your browser and will
+                persist between sessions.
               </div>
             </div>
           </div>

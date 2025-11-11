@@ -37,7 +37,29 @@ interface UseDealerTurnPhaseParams {
     aiIndex?: number,
     cardIndex?: number,
   ) => { left: string; top: string };
-  addSpeechBubble: (id: string, message: string, position: number) => void;
+  addSpeechBubble: (
+    playerId: string,
+    message: string,
+    position: number,
+    reactionType?:
+      | "bust"
+      | "hit21"
+      | "goodHit"
+      | "badStart"
+      | "win"
+      | "loss"
+      | "dealer_blackjack"
+      | "distraction",
+    priority?: AudioPriority,
+    dealerVoiceLine?:
+      | "place_bets"
+      | "dealer_busts"
+      | "dealer_has_17"
+      | "dealer_has_18"
+      | "dealer_has_19"
+      | "dealer_has_20"
+      | "dealer_has_21",
+  ) => void;
   audioQueue: AudioQueueHook;
 }
 
@@ -76,17 +98,21 @@ export function useDealerTurnPhase({
 
   useEffect(() => {
     // Detect phase entry
-    const isEnteringDealerTurn = phase === "DEALER_TURN" && prevPhaseRef.current !== "DEALER_TURN";
+    const isEnteringDealerTurn =
+      phase === "DEALER_TURN" && prevPhaseRef.current !== "DEALER_TURN";
 
     if (isEnteringDealerTurn) {
       // Reset flags when entering dealer turn phase
-      debugLog('dealCards', `🔄 ENTERING DEALER_TURN - Resetting all flags`);
+      debugLog("dealCards", `🔄 ENTERING DEALER_TURN - Resetting all flags`);
       dealerTurnProcessingRef.current = false;
       dealerFinishedRef.current = false;
       hasStartedRef.current = false;
       audioQueuedRef.current = false; // Reset audio flag
-      debugLog('dealCards', `   dealerFinishedRef: ${dealerFinishedRef.current}`);
-      debugLog('dealCards', `   audioQueuedRef: ${audioQueuedRef.current}`);
+      debugLog(
+        "dealCards",
+        `   dealerFinishedRef: ${dealerFinishedRef.current}`,
+      );
+      debugLog("dealCards", `   audioQueuedRef: ${audioQueuedRef.current}`);
       prevPhaseRef.current = phase;
     }
 
@@ -98,20 +124,30 @@ export function useDealerTurnPhase({
 
     // Guard against re-entry while processing or already started
     if (dealerTurnProcessingRef.current || hasStartedRef.current) {
-      debugLog('dealCards', `⛔ DEALER_TURN re-entry blocked (processing: ${dealerTurnProcessingRef.current}, started: ${hasStartedRef.current})`);
+      debugLog(
+        "dealCards",
+        `⛔ DEALER_TURN re-entry blocked (processing: ${dealerTurnProcessingRef.current}, started: ${hasStartedRef.current})`,
+      );
       return;
     }
 
-    debugLog('dealCards', `✅ DEALER_TURN effect starting (processing: false → true, started: false → true)`);
+    debugLog(
+      "dealCards",
+      `✅ DEALER_TURN effect starting (processing: false → true, started: false → true)`,
+    );
     dealerTurnProcessingRef.current = true;
     hasStartedRef.current = true;
 
     if (phase === "DEALER_TURN") {
-      debugLog('dealCards', "=== PHASE: DEALER_TURN START ===");
-      debugLog('dealCards', 
+      debugLog("dealCards", "=== PHASE: DEALER_TURN START ===");
+      debugLog(
+        "dealCards",
         `Dealer hand: ${dealerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
       );
-      debugLog('dealCards', `Dealer hand value: ${calculateHandValue(dealerHand.cards)}`);
+      debugLog(
+        "dealCards",
+        `Dealer hand value: ${calculateHandValue(dealerHand.cards)}`,
+      );
       setDealerRevealed(true);
       dealerFinishedRef.current = false; // Reset flag when entering dealer turn
 
@@ -126,7 +162,7 @@ export function useDealerTurnPhase({
           const randomBanter = pick(banterLines);
           registerTimeout(() => {
             addSpeechBubble(
-              `dealer-banter-${Date.now()}`,
+              randomAI.character.id,
               randomBanter,
               randomAI.position,
             );
@@ -177,7 +213,8 @@ export function useDealerTurnPhase({
             dealingCardRef.current = true;
 
             const card = dealCardFromShoe();
-            debugLog('dealCards', 
+            debugLog(
+              "dealCards",
               `Dealer HIT: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count})`,
             );
 
@@ -204,7 +241,8 @@ export function useDealerTurnPhase({
 
             // Apply dealer speed to animation duration
             const dealerSpeedMultiplier = currentDealer?.dealSpeed || 1.0;
-            const adjustedAnimationDuration = CARD_ANIMATION_DURATION / dealerSpeedMultiplier;
+            const adjustedAnimationDuration =
+              CARD_ANIMATION_DURATION / dealerSpeedMultiplier;
 
             // Add card to hand after animation completes
             registerTimeout(() => {
@@ -220,7 +258,7 @@ export function useDealerTurnPhase({
             }, adjustedAnimationDuration);
 
             const newValue = calculateHandValue(newHand);
-            debugLog('dealCards', `Dealer hand value: ${newValue}`);
+            debugLog("dealCards", `Dealer hand value: ${newValue}`);
 
             // Wait for card animation to complete, then add fixed pause before next card
             registerTimeout(() => {
@@ -243,61 +281,78 @@ export function useDealerTurnPhase({
             const finalValue = calculateHandValue(currentHand);
             const isBust = isBusted(currentHand);
 
-            debugLog('dealCards', `=== DEALER FINAL HAND ===`);
-            debugLog('dealCards', 
+            debugLog("dealCards", `=== DEALER FINAL HAND ===`);
+            debugLog(
+              "dealCards",
               `Dealer cards: ${currentHand.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
             );
-            debugLog('dealCards', `Dealer hand value: ${finalValue}`);
-            debugLog('dealCards', `Dealer busted: ${isBust}`);
+            debugLog("dealCards", `Dealer hand value: ${finalValue}`);
+            debugLog("dealCards", `Dealer busted: ${isBust}`);
 
             // Only announce and queue audio once
             if (!audioQueuedRef.current) {
               audioQueuedRef.current = true;
-              debugLog('dealerSpeech', `🔊 Queueing dealer audio (guard passed)`);
-              debugLog('dealCards', `🔊 Queueing dealer audio (guard passed)`);
+              debugLog(
+                "dealerSpeech",
+                `🔊 Creating dealer speech bubble and queueing audio`,
+              );
+              debugLog(
+                "dealCards",
+                `🔊 Creating dealer speech bubble and queueing audio`,
+              );
 
-              // Play dealer result audio (audio queue will handle speech bubble)
+              // Determine message and audio
               if (currentDealer) {
+                let message: string;
+                let voiceLine:
+                  | "dealer_busts"
+                  | "dealer_has_17"
+                  | "dealer_has_18"
+                  | "dealer_has_19"
+                  | "dealer_has_20"
+                  | "dealer_has_21";
+
                 if (isBust) {
-                  const audioPath = getDealerAudioPath(currentDealer.id, "dealer_busts");
-                  debugLog('dealerSpeech', `🎵 Queueing: ${audioPath}`);
-                  debugLog('dealCards', `🎵 Queueing: ${audioPath}`);
-                  audioQueue.queueAudio({
-                    id: `dealer-busts-${Date.now()}`,
-                    audioPath,
-                    priority: AudioPriority.HIGH,
-                    playerId: "dealer",
-                    message: "Dealer busts",
-                  });
+                  message = "Dealer busts";
+                  voiceLine = "dealer_busts";
                 } else {
-                  let voiceLine: "dealer_has_17" | "dealer_has_18" | "dealer_has_19" | "dealer_has_20" | "dealer_has_21";
+                  message = `Dealer has ${finalValue}`;
                   if (finalValue === 17) voiceLine = "dealer_has_17";
                   else if (finalValue === 18) voiceLine = "dealer_has_18";
                   else if (finalValue === 19) voiceLine = "dealer_has_19";
                   else if (finalValue === 20) voiceLine = "dealer_has_20";
                   else voiceLine = "dealer_has_21";
-
-                  const audioPath = getDealerAudioPath(currentDealer.id, voiceLine);
-                  debugLog('dealerSpeech', `🎵 Queueing: ${audioPath} - "Dealer has ${finalValue}"`);
-                  debugLog('dealCards', `🎵 Queueing: ${audioPath} - "Dealer has ${finalValue}"`);
-                  audioQueue.queueAudio({
-                    id: `dealer-result-${Date.now()}`,
-                    audioPath,
-                    priority: AudioPriority.HIGH,
-                    playerId: "dealer",
-                    message: `Dealer has ${finalValue}`,
-                  });
                 }
+
+                // Speech bubble handles both visual display AND audio queueing
+                // Position -1 for dealer, voiceLine specifies which audio file to use
+                addSpeechBubble(
+                  "dealer",
+                  message,
+                  -1,
+                  undefined,
+                  AudioPriority.HIGH,
+                  voiceLine,
+                );
               }
             } else {
-              debugLog('dealerSpeech', `⛔ Audio queue BLOCKED by guard (already queued)`);
-              debugLog('dealCards', `⛔ Audio queue BLOCKED by guard (already queued)`);
+              debugLog(
+                "dealerSpeech",
+                `⛔ Speech bubble BLOCKED by guard (already created)`,
+              );
+              debugLog(
+                "dealCards",
+                `⛔ Speech bubble BLOCKED by guard (already created)`,
+              );
             }
 
             // Move to resolving after brief delay
             registerTimeout(() => {
               dealerTurnProcessingRef.current = false; // Unlock before moving to next phase
-              debugLog('dealCards', "🔓 Dealer turn processing unlocked (finished)");
+              debugLog(
+                "dealCards",
+                "🔓 Dealer turn processing unlocked (finished)",
+              );
               setPhase("RESOLVING");
             }, 1500); // Brief delay to show final dealer result
           }

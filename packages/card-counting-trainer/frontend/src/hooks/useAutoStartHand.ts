@@ -18,7 +18,11 @@ interface UseAutoStartHandParams {
   setAIPlayers: (players: AIPlayer[]) => void;
   aiPlayers: AIPlayer[];
   dealInitialCards: (playerBetAmount?: number) => void;
-  addSpeechBubble: (playerId: string, message: string, position: number) => void;
+  addSpeechBubble: (
+    playerId: string,
+    message: string,
+    position: number,
+  ) => void;
   registerTimeout: (callback: () => void, delay: number) => void;
 }
 
@@ -63,15 +67,24 @@ export function useAutoStartHand({
     ) {
       // If player is seated, give them 10 seconds to bet. Otherwise start immediately.
       const delay = playerSeat !== null ? 10000 : 500;
-      debugLog('gamePhases', `[useAutoStartHand] Setting timer for first hand: ${delay}ms`);
+      debugLog(
+        "gamePhases",
+        `[useAutoStartHand] Setting timer for first hand: ${delay}ms`,
+      );
 
-      const timer = setTimeout(() => {
+      registerTimeout(() => {
         // Check if phase is still BETTING (user didn't manually confirm)
         if (phaseRef.current !== "BETTING") {
-          debugLog('gamePhases', '[useAutoStartHand] Phase already changed, skipping auto-start');
+          debugLog(
+            "gamePhases",
+            "[useAutoStartHand] Phase already changed, skipping auto-start",
+          );
           return;
         }
-        debugLog('gamePhases', '[useAutoStartHand] Timer fired - starting dealing phase');
+        debugLog(
+          "gamePhases",
+          "[useAutoStartHand] Timer fired - starting dealing phase",
+        );
         setPhase("DEALING");
         setDealerRevealed(false);
 
@@ -102,10 +115,6 @@ export function useAutoStartHand({
         // Call dealInitialCards on next tick, passing bet amount to avoid stale closure
         registerTimeout(() => dealInitialCards(playerBet), 0);
       }, delay);
-
-      return () => {
-        clearTimeout(timer);
-      };
     }
     // Only depend on values that determine WHEN to start the timer, not values used inside
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -123,15 +132,24 @@ export function useAutoStartHand({
     ) {
       // If player is seated, give them 10 seconds to bet. Otherwise start immediately.
       const delay = playerSeat !== null ? 10000 : 500;
-      debugLog('gamePhases', `[useAutoStartHand] Setting timer for hand ${handNumber}: ${delay}ms`);
+      debugLog(
+        "gamePhases",
+        `[useAutoStartHand] Setting timer for hand ${handNumber}: ${delay}ms`,
+      );
 
-      const timer = setTimeout(() => {
+      registerTimeout(() => {
         // Check if phase is still BETTING (user didn't manually confirm)
         if (phaseRef.current !== "BETTING") {
-          debugLog('gamePhases', `[useAutoStartHand] Phase already changed for hand ${handNumber}, skipping auto-start`);
+          debugLog(
+            "gamePhases",
+            `[useAutoStartHand] Phase already changed for hand ${handNumber}, skipping auto-start`,
+          );
           return;
         }
-        debugLog('gamePhases', `[useAutoStartHand] Timer fired for hand ${handNumber} - starting dealing phase`);
+        debugLog(
+          "gamePhases",
+          `[useAutoStartHand] Timer fired for hand ${handNumber} - starting dealing phase`,
+        );
         setPhase("DEALING");
         setDealerRevealed(false);
 
@@ -162,10 +180,6 @@ export function useAutoStartHand({
         // Call dealInitialCards on next tick, passing bet amount to avoid stale closure
         registerTimeout(() => dealInitialCards(playerBet), 0);
       }, delay);
-
-      return () => {
-        clearTimeout(timer);
-      };
     }
     // Only depend on values that determine WHEN to start the timer, not values used inside
     // eslint-disable-next-line react-hooks/exhaustive-deps

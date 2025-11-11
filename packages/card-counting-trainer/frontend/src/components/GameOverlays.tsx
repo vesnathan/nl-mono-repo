@@ -34,6 +34,7 @@ interface GameOverlaysProps {
   handleConversationResponse: (suspicionChange: number) => void;
   handleConversationIgnore: () => void;
   setWinLossBubbles: React.Dispatch<React.SetStateAction<WinLossBubbleData[]>>;
+  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
 }
 
 export default function GameOverlays({
@@ -51,6 +52,7 @@ export default function GameOverlays({
   handleConversationResponse,
   handleConversationIgnore,
   setWinLossBubbles,
+  registerTimeout,
 }: GameOverlaysProps) {
   return (
     <>
@@ -133,6 +135,7 @@ export default function GameOverlays({
           position={activeConversation.position}
           onResponse={handleConversationResponse}
           onIgnore={handleConversationIgnore}
+          registerTimeout={registerTimeout}
         />
       )}
 

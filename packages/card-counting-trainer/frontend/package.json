@@ -2,12 +2,12 @@
   "name": "cctfrontend",
   "version": "0.1.0",
   "scripts": {
-    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3001",
+    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3000",
     "tsc": "node ./node_modules/typescript/bin/tsc",
-    "dev:clean": "rm -rf .next && NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3001",
-    "dev:local": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3001",
+    "dev:clean": "rm -rf .next && NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3000",
+    "dev:local": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3000",
     "build": "next build",
-    "start": "next start -p 3001",
+    "start": "next start -p 3000",
     "lint": "next lint",
     "build-gql": "ts-node -TP ../../../tsconfig.node.json ./scripts/buildGql.ts",
     "update-env": "bash ./scripts/update-env-from-aws.sh"

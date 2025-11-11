@@ -133,11 +133,15 @@ export const clumsyClaire: CharacterDialogue = {
     ],
   },
   softHandSayings: {
-    "A,2": ["Got an Ace and a 2… I think this is the nudge number. Carefully… hit."],
+    "A,2": [
+      "Got an Ace and a 2… I think this is the nudge number. Carefully… hit.",
+    ],
     "A,3": ["Ace with a 3… I always bump the table here. Hit… gently."],
     "A,4": ["Ace-four… okay, okay—add one. Don't spill it, Claire."],
     "A,5": ["Ace and a 5… I always fumble this. Hit, and don't drop anything."],
-    "A,6": ["Ace with a 6… this always starts an argument. I'll just hit… sorry!"],
+    "A,6": [
+      "Ace with a 6… this always starts an argument. I'll just hit… sorry!",
+    ],
     "A,7": ["Ace-seven… I stand unless the dealer looks scary."],
     "A,8": ["Ace-eight—whew! I'm standing very still."],
     "A,9": ["Ace with a 9—stand and try not to drop anything, Claire."],

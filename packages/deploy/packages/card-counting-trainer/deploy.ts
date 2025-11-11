@@ -571,9 +571,7 @@ export async function deployCardCountingTrainer(
           "No admin email provided (options.adminEmail or ADMIN_EMAIL). Skipping Cognito admin creation.",
         );
       } else {
-        logger.info(
-          `👤 Creating Cognito admin user for CCT: ${adminEmail}`,
-        );
+        logger.info(`👤 Creating Cognito admin user for CCT: ${adminEmail}`);
         const userManager = new UserSetupManager(region, "cct");
         await userManager.createAdminUser({
           stage: options.stage,

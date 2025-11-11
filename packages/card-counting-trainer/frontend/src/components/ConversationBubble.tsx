@@ -10,6 +10,7 @@ interface ConversationBubbleProps {
   responseOptions?: ResponseOption[];
   onResponse?: (option: ResponseOption) => void;
   position?: { bottom: string; left: string }; // Position on screen
+  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
 }
 
 export default function ConversationBubble({
@@ -19,6 +20,7 @@ export default function ConversationBubble({
   responseOptions = [],
   onResponse,
   position = { bottom: "120px", left: "50%" },
+  registerTimeout,
 }: ConversationBubbleProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedOption, setSelectedOption] = useState<ResponseOption | null>(
@@ -27,21 +29,19 @@ export default function ConversationBubble({
 
   // Fade in animation
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+    registerTimeout(() => setIsVisible(true), 100);
+  }, [registerTimeout]);
 
   // Auto-dismiss after 8 seconds if no response required
   useEffect(() => {
     if (!requiresPlayerResponse) {
-      const timer = setTimeout(() => setIsVisible(false), 8000);
-      return () => clearTimeout(timer);
+      registerTimeout(() => setIsVisible(false), 8000);
     }
-  }, [requiresPlayerResponse]);
+  }, [requiresPlayerResponse, registerTimeout]);
 
   const handleResponse = (option: ResponseOption) => {
     setSelectedOption(option);
-    setTimeout(() => {
+    registerTimeout(() => {
       setIsVisible(false);
       onResponse?.(option);
     }, 500);

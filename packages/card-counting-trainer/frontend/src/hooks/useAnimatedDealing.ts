@@ -52,6 +52,7 @@ export function useAnimatedDealing(
     aiHands: { position: number; cards: any[] }[];
     dealerCards: any[];
   }) => void,
+  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout,
 ) {
   const [dealingState, setDealingState] = useState<DealingState>({
     dealerCards: [],
@@ -67,22 +68,11 @@ export function useAnimatedDealing(
     characterReactions: [],
   });
 
-  const dealingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const allTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
-
   const startDealing = useCallback(() => {
     if (dealingState.isDealing || aiPlayerPositions.length === 0) return;
 
-    // Clear ALL existing timeouts from previous hands
-    allTimeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
-    allTimeoutsRef.current = [];
-    if (dealingTimeoutRef.current) {
-      clearTimeout(dealingTimeoutRef.current);
-      dealingTimeoutRef.current = null;
-    }
-
     debugLog(
-      'dealCards',
+      "dealCards",
       "🎴 Starting turn-based game. AI positions:",
       aiPlayerPositions,
     );
@@ -116,13 +106,6 @@ export function useAnimatedDealing(
         cards: [],
       }));
 
-    // Helper to track all timeouts
-    const trackTimeout = (fn: () => void, delay: number): NodeJS.Timeout => {
-      const timeout = setTimeout(fn, delay);
-      allTimeoutsRef.current.push(timeout);
-      return timeout;
-    };
-
     // ============ PHASE 1: INITIAL DEAL ============
     const dealInitialCards = () => {
       let dealIndex = 0;
@@ -131,7 +114,7 @@ export function useAnimatedDealing(
       const dealNext = () => {
         if (dealIndex >= totalCards) {
           // Initial deal complete, pause then start player turns
-          trackTimeout(
+          registerTimeout(
             () => {
               startPlayerTurns();
             },
@@ -159,7 +142,7 @@ export function useAnimatedDealing(
             liveCardsDealt: totalCardsDealt,
           }));
 
-          trackTimeout(
+          registerTimeout(
             () => {
               aiHands[playerIndex].cards.push(card);
               setDealingState((prev) => ({
@@ -168,10 +151,7 @@ export function useAnimatedDealing(
                 flyingCard: null,
               }));
               dealIndex++;
-              dealingTimeoutRef.current = trackTimeout(
-                dealNext,
-                Math.floor(400 / dealSpeed),
-              );
+              registerTimeout(dealNext, Math.floor(400 / dealSpeed));
             },
             Math.floor(400 / dealSpeed),
           );
@@ -195,7 +175,7 @@ export function useAnimatedDealing(
             liveCardsDealt: totalCardsDealt,
           }));
 
-          trackTimeout(
+          registerTimeout(
             () => {
               dealerCards.push(card);
               setDealingState((prev) => ({
@@ -204,10 +184,7 @@ export function useAnimatedDealing(
                 flyingCard: null,
               }));
               dealIndex++;
-              dealingTimeoutRef.current = trackTimeout(
-                dealNext,
-                Math.floor(400 / dealSpeed),
-              );
+              registerTimeout(dealNext, Math.floor(400 / dealSpeed));
             },
             Math.floor(400 / dealSpeed),
           );
@@ -224,7 +201,7 @@ export function useAnimatedDealing(
       const playNextPlayer = () => {
         if (currentPlayerIndex >= decisionOrder.length) {
           // All players done, dealer's turn
-          trackTimeout(
+          registerTimeout(
             () => {
               dealerTurn();
             },
@@ -289,27 +266,27 @@ export function useAnimatedDealing(
 
         if (isBlackjack || isBusted || obviousStand || !shouldHit) {
           // STAND
-          trackTimeout(() => {
+          registerTimeout(() => {
             setDealingState((prev) => ({
               ...prev,
               actionBubble: { position, action: "STAND" },
               currentAction: `Spot ${position} stands`,
             }));
 
-            trackTimeout(() => {
+            registerTimeout(() => {
               setDealingState((prev) => ({
                 ...prev,
                 thinkingPlayer: null,
                 actionBubble: null,
               }));
               currentPlayerIndex++;
-              trackTimeout(playNextPlayer, 300);
+              registerTimeout(playNextPlayer, 300);
             }, 1000);
           }, thinkTime);
         } else {
           // HIT
 
-          trackTimeout(() => {
+          registerTimeout(() => {
             const { card, remainingShoe } = dealCard(currentShoe);
             currentShoe = remainingShoe;
             totalCardsDealt++;
@@ -323,7 +300,7 @@ export function useAnimatedDealing(
               liveCardsDealt: totalCardsDealt,
             }));
 
-            trackTimeout(() => {
+            registerTimeout(() => {
               aiHands[handIndex].cards.push(card);
               setDealingState((prev) => ({
                 ...prev,
@@ -332,7 +309,7 @@ export function useAnimatedDealing(
                 actionBubble: null,
               }));
 
-              trackTimeout(() => {
+              registerTimeout(() => {
                 // Check if player should go again
                 const newHandValue = aiHands[handIndex].cards.reduce(
                   (sum, c) => {
@@ -357,18 +334,18 @@ export function useAnimatedDealing(
                       : `Spot ${position} stands`,
                   }));
 
-                  trackTimeout(() => {
+                  registerTimeout(() => {
                     setDealingState((prev) => ({
                       ...prev,
                       thinkingPlayer: null,
                       actionBubble: null,
                     }));
                     currentPlayerIndex++;
-                    trackTimeout(playNextPlayer, 500);
+                    registerTimeout(playNextPlayer, 500);
                   }, 1500);
                 } else {
                   // Same player goes again
-                  trackTimeout(playNextPlayer, 1000);
+                  registerTimeout(playNextPlayer, 1000);
                 }
               }, 1200);
             }, 800);
@@ -388,7 +365,7 @@ export function useAnimatedDealing(
       }));
 
       // Reveal hole card
-      trackTimeout(
+      registerTimeout(
         () => {
           setDealingState((prev) => ({
             ...prev,
@@ -397,7 +374,7 @@ export function useAnimatedDealing(
           }));
           currentRunningCount += dealerCards[1].count; // Count the hole card now
 
-          trackTimeout(
+          registerTimeout(
             () => {
               dealerHits();
             },
@@ -437,7 +414,7 @@ export function useAnimatedDealing(
           currentAction: `Dealer hits (${dealerValue})`,
         }));
 
-        trackTimeout(
+        registerTimeout(
           () => {
             const { card, remainingShoe } = dealCard(currentShoe);
             currentShoe = remainingShoe;
@@ -450,7 +427,7 @@ export function useAnimatedDealing(
               liveCardsDealt: totalCardsDealt,
             }));
 
-            trackTimeout(
+            registerTimeout(
               () => {
                 dealerCards.push(card);
                 setDealingState((prev) => ({
@@ -459,7 +436,7 @@ export function useAnimatedDealing(
                   flyingCard: null,
                 }));
 
-                trackTimeout(dealerHits, Math.floor(1000 / dealSpeed));
+                registerTimeout(dealerHits, Math.floor(1000 / dealSpeed));
               },
               Math.floor(500 / dealSpeed),
             );
@@ -476,7 +453,7 @@ export function useAnimatedDealing(
               : `Dealer stands (${dealerValue})`,
         }));
 
-        trackTimeout(() => {
+        registerTimeout(() => {
           determineResults(dealerValue);
         }, 2000);
       }
@@ -518,7 +495,7 @@ export function useAnimatedDealing(
         currentAction: "Hand complete",
       }));
 
-      trackTimeout(() => {
+      registerTimeout(() => {
         completeDeal();
       }, 5000);
     };
@@ -545,7 +522,7 @@ export function useAnimatedDealing(
         dealerCards,
       });
 
-      trackTimeout(() => {
+      registerTimeout(() => {
         setDealingState({
           dealerCards: [],
           aiHands: [],
@@ -571,19 +548,8 @@ export function useAnimatedDealing(
     runningCount,
     numDecks,
     onDealingComplete,
+    registerTimeout,
   ]);
-
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => {
-      // Clear all tracked timeouts
-      allTimeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
-      allTimeoutsRef.current = [];
-      if (dealingTimeoutRef.current) {
-        clearTimeout(dealingTimeoutRef.current);
-      }
-    };
-  }, []);
 
   return {
     dealingState,

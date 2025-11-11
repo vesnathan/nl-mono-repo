@@ -25,7 +25,13 @@ interface UseBettingActionsParams {
   dealInitialCards: (playerBetAmount?: number) => void;
   registerTimeout: (callback: () => void, delay: number) => void;
   trueCount: number;
-  setBetHistory: (history: Array<{bet: number, trueCount: number}> | ((prev: Array<{bet: number, trueCount: number}>) => Array<{bet: number, trueCount: number}>)) => void;
+  setBetHistory: (
+    history:
+      | Array<{ bet: number; trueCount: number }>
+      | ((
+          prev: Array<{ bet: number; trueCount: number }>,
+        ) => Array<{ bet: number; trueCount: number }>),
+  ) => void;
   currentDealer: DealerCharacter | null;
   audioQueue: AudioQueueHook;
 }
@@ -55,12 +61,12 @@ export function useBettingActions({
   audioQueue,
 }: UseBettingActionsParams) {
   const handleConfirmBet = useCallback(() => {
-    debugLog('betting', "=== CONFIRM BET CLICKED ===");
-    debugLog('betting', `Current bet: $${currentBet}`);
-    debugLog('betting', `Min bet: $${minBet}, Max bet: $${maxBet}`);
-    debugLog('betting', `Player chips: $${playerChips}`);
-    debugLog('betting', `Phase: ${phase}`);
-    debugLog('betting', `Player seat: ${playerSeat}`);
+    debugLog("betting", "=== CONFIRM BET CLICKED ===");
+    debugLog("betting", `Current bet: $${currentBet}`);
+    debugLog("betting", `Min bet: $${minBet}, Max bet: $${maxBet}`);
+    debugLog("betting", `Player chips: $${playerChips}`);
+    debugLog("betting", `Phase: ${phase}`);
+    debugLog("betting", `Player seat: ${playerSeat}`);
 
     const canBet =
       currentBet >= minBet &&
@@ -68,10 +74,10 @@ export function useBettingActions({
       currentBet <= playerChips &&
       phase === "BETTING" &&
       playerSeat !== null;
-    debugLog('betting', `Can place bet: ${canBet}`);
+    debugLog("betting", `Can place bet: ${canBet}`);
 
     if (canBet) {
-      debugLog('betting', "✓ BET CONFIRMED - Starting dealing phase");
+      debugLog("betting", "✓ BET CONFIRMED - Starting dealing phase");
 
       // Track bet history for counting detection
       setBetHistory((prev) => {
@@ -82,7 +88,10 @@ export function useBettingActions({
         }
         return newHistory;
       });
-      debugLog('betting', `Bet tracked: $${currentBet} at true count ${trueCount.toFixed(2)}`);
+      debugLog(
+        "betting",
+        `Bet tracked: $${currentBet} at true count ${trueCount.toFixed(2)}`,
+      );
 
       // Dealer says "No more bets"
       if (currentDealer) {
@@ -101,7 +110,8 @@ export function useBettingActions({
       setPlayerHand({ cards: [], bet: currentBet });
       setDealerHand({ cards: [], bet: 0 });
       setPlayerChips((prev) => {
-        debugLog('betting', 
+        debugLog(
+          "betting",
           `Deducting bet: $${prev} - $${currentBet} = $${prev - currentBet}`,
         );
         return prev - currentBet;
@@ -119,15 +129,19 @@ export function useBettingActions({
       // Deal initial cards, passing the bet amount directly to avoid stale closure
       registerTimeout(() => dealInitialCards(currentBet), 0);
     } else {
-      debugLog('betting', "✗ BET NOT CONFIRMED - Requirements not met");
+      debugLog("betting", "✗ BET NOT CONFIRMED - Requirements not met");
       if (currentBet < minBet)
-        debugLog('betting', `  - Bet too low (${currentBet} < ${minBet})`);
+        debugLog("betting", `  - Bet too low (${currentBet} < ${minBet})`);
       if (currentBet > maxBet)
-        debugLog('betting', `  - Bet too high (${currentBet} > ${maxBet})`);
+        debugLog("betting", `  - Bet too high (${currentBet} > ${maxBet})`);
       if (currentBet > playerChips)
-        debugLog('betting', `  - Insufficient chips (${currentBet} > ${playerChips})`);
-      if (phase !== "BETTING") debugLog('betting', `  - Wrong phase (${phase})`);
-      if (playerSeat === null) debugLog('betting', `  - Player not seated`);
+        debugLog(
+          "betting",
+          `  - Insufficient chips (${currentBet} > ${playerChips})`,
+        );
+      if (phase !== "BETTING")
+        debugLog("betting", `  - Wrong phase (${phase})`);
+      if (playerSeat === null) debugLog("betting", `  - Player not seated`);
     }
   }, [
     currentBet,
@@ -154,13 +168,13 @@ export function useBettingActions({
   ]);
 
   const handleClearBet = useCallback(() => {
-    debugLog('betting', "CLEAR BET - Resetting bet to $0");
+    debugLog("betting", "CLEAR BET - Resetting bet to $0");
     setCurrentBet(0);
   }, [setCurrentBet]);
 
   const handleBetChange = useCallback(
     (newBet: number) => {
-      debugLog('betting', `BET CHANGED: $${currentBet} → $${newBet}`);
+      debugLog("betting", `BET CHANGED: $${currentBet} → $${newBet}`);
       setCurrentBet(newBet);
     },
     [currentBet, setCurrentBet],

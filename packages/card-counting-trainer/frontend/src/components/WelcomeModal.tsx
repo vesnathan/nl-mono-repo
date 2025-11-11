@@ -53,7 +53,8 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
 
             <div className="bg-gray-800/50 rounded-lg p-4 border border-casino-gold/20 text-center">
               <p className="text-gray-300 text-base mb-3">
-                Enjoying the game? Support us on Patreon to help keep development going!
+                Enjoying the game? Support us on Patreon to help keep
+                development going!
               </p>
               <a
                 href="https://www.patreon.com/backrealmblackjack"

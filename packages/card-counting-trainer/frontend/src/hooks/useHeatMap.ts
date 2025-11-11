@@ -71,7 +71,14 @@ export function useHeatMap({
     }
 
     lastRecordedPhaseRef.current = phase;
-  }, [phase, trueCount, pitBossDistance, currentBet, suspicionLevel, initialized]);
+  }, [
+    phase,
+    trueCount,
+    pitBossDistance,
+    currentBet,
+    suspicionLevel,
+    initialized,
+  ]);
 
   /**
    * Get aggregated heat map data grouped by count ranges

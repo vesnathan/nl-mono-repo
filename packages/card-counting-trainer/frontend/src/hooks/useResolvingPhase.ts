@@ -46,7 +46,29 @@ interface UseResolvingPhaseParams {
   setPhase: (phase: GamePhase) => void;
   registerTimeout: (callback: () => void, delay: number) => void;
   showEndOfHandReactions: () => void;
-  addSpeechBubble: (id: string, message: string, position: number) => void;
+  addSpeechBubble: (
+    playerId: string,
+    message: string,
+    position: number,
+    reactionType?:
+      | "bust"
+      | "hit21"
+      | "goodHit"
+      | "badStart"
+      | "win"
+      | "loss"
+      | "dealer_blackjack"
+      | "distraction",
+    priority?: import("@/hooks/useAudioQueue").AudioPriority,
+    dealerVoiceLine?:
+      | "place_bets"
+      | "dealer_busts"
+      | "dealer_has_17"
+      | "dealer_has_18"
+      | "dealer_has_19"
+      | "dealer_has_20"
+      | "dealer_has_21",
+  ) => void;
 }
 
 /**
@@ -96,18 +118,22 @@ export function useResolvingPhase({
         calculateHandValue(dealerHand.cards) === 21;
 
       if (dealerHasBlackjack) {
-        debugLog('gamePhases', "=== DEALER HAS BLACKJACK - INSURANCE PAYOUTS ===");
+        debugLog(
+          "gamePhases",
+          "=== DEALER HAS BLACKJACK - INSURANCE PAYOUTS ===",
+        );
 
         // Pay player insurance at 2:1
         if (playerInsuranceBet > 0) {
           const insurancePayout = playerInsuranceBet * 3; // Get back bet + 2:1 payout
-          debugLog('gamePhases', 
+          debugLog(
+            "gamePhases",
             `Player wins insurance: ${playerInsuranceBet} bet pays ${insurancePayout}`,
           );
           setPlayerChips((prev) => prev + insurancePayout);
           setPlayerInsuranceBet(0);
         } else {
-          debugLog('gamePhases', "Player did not take insurance");
+          debugLog("gamePhases", "Player did not take insurance");
         }
 
         // Pay AI insurance at 2:1
@@ -115,7 +141,8 @@ export function useResolvingPhase({
           return prevPlayers.map((ai) => {
             if (ai.insuranceBet && ai.insuranceBet > 0) {
               const insurancePayout = ai.insuranceBet * 3;
-              debugLog('gamePhases', 
+              debugLog(
+                "gamePhases",
                 `AI ${ai.character.name} wins insurance: ${ai.insuranceBet} bet pays ${insurancePayout}`,
               );
               return {
@@ -130,7 +157,8 @@ export function useResolvingPhase({
       } else {
         // Dealer doesn't have blackjack - insurance bets are lost
         if (playerInsuranceBet > 0) {
-          debugLog('gamePhases', 
+          debugLog(
+            "gamePhases",
             `Dealer does not have blackjack - player loses insurance bet of ${playerInsuranceBet}`,
           );
           setPlayerInsuranceBet(0);
@@ -140,7 +168,8 @@ export function useResolvingPhase({
         setAIPlayers((prevPlayers) => {
           return prevPlayers.map((ai) => {
             if (ai.insuranceBet && ai.insuranceBet > 0) {
-              debugLog('gamePhases', 
+              debugLog(
+                "gamePhases",
                 `Dealer does not have blackjack - AI ${ai.character.name} loses insurance bet of ${ai.insuranceBet}`,
               );
             }
@@ -246,7 +275,11 @@ export function useResolvingPhase({
 
         // Apply suspicion increase to dealer suspicion (which feeds to pit boss when dealer reports)
         if (suspicionIncrease > 0) {
-          increaseDealerSuspicion(currentDealer, suspicionIncrease, setDealerSuspicion);
+          increaseDealerSuspicion(
+            currentDealer,
+            suspicionIncrease,
+            setDealerSuspicion,
+          );
         }
 
         // Update previous bet for next hand
@@ -273,15 +306,18 @@ export function useResolvingPhase({
       }
 
       // Show dealer's callout in speech bubble instead of callout display
-      addSpeechBubble("dealer-payout", callout, -1);
+      addSpeechBubble("dealer", callout, -1);
 
       // Create win/loss bubbles for all players
-      debugLog('gamePhases', "=== CREATING WIN/LOSS BUBBLES ===");
+      debugLog("gamePhases", "=== CREATING WIN/LOSS BUBBLES ===");
       const newWinLossBubbles: WinLossBubbleData[] = [];
 
       // Add bubble for human player if they have cards
       if (playerSeat !== null && playerHand.cards.length > 0) {
-        debugLog('gamePhases', `Player has cards, creating bubble for seat ${playerSeat}`);
+        debugLog(
+          "gamePhases",
+          `Player has cards, creating bubble for seat ${playerSeat}`,
+        );
 
         const [x, y] = TABLE_POSITIONS[playerSeat];
         let result: "win" | "lose" | "push" | "blackjack" = "lose";
@@ -304,10 +340,14 @@ export function useResolvingPhase({
       }
 
       // Add bubbles for AI players
-      debugLog('gamePhases', `Checking ${aiPlayers.length} AI players for bubbles`);
+      debugLog(
+        "gamePhases",
+        `Checking ${aiPlayers.length} AI players for bubbles`,
+      );
       aiPlayers.forEach((ai) => {
         if (ai.hand.cards.length > 0) {
-          debugLog('gamePhases', 
+          debugLog(
+            "gamePhases",
             `AI Player ${ai.character.name} has ${ai.hand.cards.length} cards`,
           );
 
@@ -330,25 +370,32 @@ export function useResolvingPhase({
             result,
             position: { left: `${x}%`, top: `${y - 5}%` }, // Slightly above AI position
           });
-          debugLog('gamePhases', 
+          debugLog(
+            "gamePhases",
             `Added ${result} bubble for ${ai.character.name} at seat ${ai.position}`,
           );
         }
       });
 
-      debugLog('gamePhases', `Created ${newWinLossBubbles.length} total win/loss bubbles`);
+      debugLog(
+        "gamePhases",
+        `Created ${newWinLossBubbles.length} total win/loss bubbles`,
+      );
       setWinLossBubbles(newWinLossBubbles);
 
       // Show end-of-hand reactions
       showEndOfHandReactions();
 
-      debugLog('gamePhases', "Scheduling transition to ROUND_END in 5 seconds...");
+      debugLog(
+        "gamePhases",
+        "Scheduling transition to ROUND_END in 5 seconds...",
+      );
       registerTimeout(() => {
-        debugLog('gamePhases', "Timeout fired - moving to ROUND_END");
+        debugLog("gamePhases", "Timeout fired - moving to ROUND_END");
         setDealerCallout(null);
         setPhase("ROUND_END");
       }, 5000);
-      debugLog('gamePhases', "Timeout registered successfully");
+      debugLog("gamePhases", "Timeout registered successfully");
     } else if (phase !== "RESOLVING") {
       // Reset the flag when we leave RESOLVING phase
       hasResolvedRef.current = false;

@@ -5,39 +5,35 @@ import { useEffect, useState } from "react";
 interface ActionBubbleProps {
   action: "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK";
   onComplete?: () => void;
+  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
 }
 
 export default function ActionBubble({
   action,
   onComplete,
+  registerTimeout,
 }: ActionBubbleProps) {
   const [opacity, setOpacity] = useState(0);
   const [transitionDuration, setTransitionDuration] = useState("0.15s"); // Quick fade in
 
   useEffect(() => {
     // Fade in quickly
-    const fadeInTimer = setTimeout(() => {
+    registerTimeout(() => {
       setTransitionDuration("0.1s"); // Very quick fade in
       setOpacity(0.85); // Slightly transparent
     }, 30);
 
     // Brief hold, then fade out
-    const fadeOutTimer = setTimeout(() => {
+    registerTimeout(() => {
       setTransitionDuration("0.4s"); // Quick fade out
       setOpacity(0);
     }, 600); // Short display time - punchy!
 
     // Complete after fade out
-    const completeTimer = setTimeout(() => {
+    registerTimeout(() => {
       onComplete?.();
     }, 1100); // 600 + 500 (fade out duration + buffer)
-
-    return () => {
-      clearTimeout(fadeInTimer);
-      clearTimeout(fadeOutTimer);
-      clearTimeout(completeTimer);
-    };
-  }, [onComplete]);
+  }, [onComplete, registerTimeout]);
 
   const getActionColor = () => {
     switch (action) {

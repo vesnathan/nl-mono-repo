@@ -15,24 +15,28 @@ export function useGameInitialization(
   setInitialized: (initialized: boolean) => void,
 ) {
   useEffect(() => {
-    // Randomly select 3-4 AI players
-    const numAIPlayers = Math.floor(Math.random() * 2) + 3;
+    // Fill all 8 seats with AI players
+    const numAIPlayers = 8;
     const shuffledCharacters = [...AI_CHARACTERS].sort(
       () => Math.random() - 0.5,
     );
-    const selectedCharacters = shuffledCharacters.slice(0, numAIPlayers);
 
-    // Randomly assign available table positions (0-7)
+    // If we have fewer than 8 characters, repeat them to fill all seats
+    const selectedCharacters = [];
+    for (let i = 0; i < numAIPlayers; i++) {
+      selectedCharacters.push(
+        shuffledCharacters[i % shuffledCharacters.length],
+      );
+    }
+
+    // Assign all table positions (0-7)
     const availablePositions = [0, 1, 2, 3, 4, 5, 6, 7];
-    const shuffledPositions = availablePositions.sort(
-      () => Math.random() - 0.5,
-    );
 
     const aiPlayersWithSeats = selectedCharacters.map((char, idx) => ({
       character: char,
       hand: { cards: [], bet: 50 },
       chips: 1000,
-      position: shuffledPositions[idx],
+      position: availablePositions[idx],
     }));
 
     setAIPlayers(aiPlayersWithSeats);

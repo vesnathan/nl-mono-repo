@@ -124,9 +124,7 @@ export default function StatsBar({
           }}
         >
           SCORE:{" "}
-          <span style={{ color: "#FFF" }}>
-            {currentScore.toLocaleString()}
-          </span>
+          <span style={{ color: "#FFF" }}>{currentScore.toLocaleString()}</span>
         </div>
       </div>
       <div className="flex gap-4 items-center">
@@ -260,13 +258,14 @@ export default function StatsBar({
                 transition: "all 0.2s",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
+                e.currentTarget.style.backgroundColor =
+                  "rgba(255, 215, 0, 0.3)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
               }}
             >
-              👤 {user?.username || "Logout"}
+              🚪 Logout
             </button>
           ) : (
             <button
@@ -283,7 +282,8 @@ export default function StatsBar({
                 transition: "all 0.2s",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
+                e.currentTarget.style.backgroundColor =
+                  "rgba(255, 215, 0, 0.3)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";

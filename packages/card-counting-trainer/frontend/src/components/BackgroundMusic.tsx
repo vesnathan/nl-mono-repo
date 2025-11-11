@@ -7,7 +7,9 @@ interface BackgroundMusicProps {
   shouldPlay?: boolean;
 }
 
-export default function BackgroundMusic({ shouldPlay = false }: BackgroundMusicProps) {
+export default function BackgroundMusic({
+  shouldPlay = false,
+}: BackgroundMusicProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -44,9 +46,9 @@ export default function BackgroundMusic({ shouldPlay = false }: BackgroundMusicP
       }
     };
 
-    window.addEventListener('audioSettingsChanged', handleVolumeChange);
+    window.addEventListener("audioSettingsChanged", handleVolumeChange);
     return () => {
-      window.removeEventListener('audioSettingsChanged', handleVolumeChange);
+      window.removeEventListener("audioSettingsChanged", handleVolumeChange);
     };
   }, []);
 

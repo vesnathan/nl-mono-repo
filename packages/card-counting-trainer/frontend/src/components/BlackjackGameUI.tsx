@@ -92,6 +92,7 @@ interface BlackjackGameUIProps {
   handleBetChange: (amount: number) => void;
   handleConfirmBet: () => void;
   handleClearBet: () => void;
+  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
   setGameSettings: (settings: GameSettings) => void;
   setShowDebugLog: (show: boolean) => void;
   clearDebugLogs: () => void;
@@ -160,6 +161,7 @@ export default function BlackjackGameUI({
   handleBetChange,
   handleConfirmBet,
   handleClearBet,
+  registerTimeout,
   setGameSettings,
   setShowDebugLog,
   clearDebugLogs,
@@ -181,6 +183,7 @@ export default function BlackjackGameUI({
         dealerSuspicion={dealerSuspicion}
         pitBossDistance={pitBossDistance}
         currentDealer={currentDealer}
+        registerTimeout={registerTimeout}
       />
 
       {/* Stats Bar at Top */}
@@ -197,6 +200,28 @@ export default function BlackjackGameUI({
         onStrategyClick={() => setShowStrategyCard(true)}
         onChartsClick={() => setShowHeatMap(true)}
       />
+
+      {/* Phase Indicator (Dev Mode Only) */}
+      {process.env.NODE_ENV === "development" && (
+        <div
+          style={{
+            position: "fixed",
+            top: "70px",
+            left: "20px",
+            backgroundColor: "rgba(0, 0, 0, 0.9)",
+            color: "#00FF00",
+            border: "2px solid #00FF00",
+            borderRadius: "8px",
+            padding: "8px 16px",
+            fontSize: "14px",
+            fontWeight: "bold",
+            zIndex: 1001,
+            fontFamily: "monospace",
+          }}
+        >
+          PHASE: {phase}
+        </div>
+      )}
 
       {/* Full Viewport Game Table */}
       <GameTable
@@ -219,7 +244,6 @@ export default function BlackjackGameUI({
         flyingCards={flyingCards}
         showDealerInfo={showDealerInfo}
         setPlayerSeat={setPlayerSeat}
-        
         startNewRound={startNewRound}
         hit={hit}
         stand={stand}
@@ -227,6 +251,7 @@ export default function BlackjackGameUI({
         handleConversationIgnore={handleConversationIgnore}
         setWinLossBubbles={setWinLossBubbles}
         setShowDealerInfo={setShowDealerInfo}
+        registerTimeout={registerTimeout}
       />
 
       {/* All Game Modals */}

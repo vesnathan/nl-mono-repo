@@ -1,7 +1,4 @@
-import {
-  DynamoDBClient,
-  PutItemCommand,
-} from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { PostConfirmationTriggerEvent } from "aws-lambda";
 
 const dynamodb = new DynamoDBClient({
@@ -55,7 +52,9 @@ export const handler = async (
   } catch (error: any) {
     // If user already exists, that's okay - just log it
     if (error.name === "ConditionalCheckFailedException") {
-      console.log(`User ${userId} already exists in DynamoDB - skipping creation`);
+      console.log(
+        `User ${userId} already exists in DynamoDB - skipping creation`,
+      );
     } else {
       console.error("Error creating user in DynamoDB:", error);
       // Don't throw - we don't want to block user signup if DynamoDB fails

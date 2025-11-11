@@ -32,7 +32,7 @@ export const UserStoreSetup: FC<Props> = ({ userId, children }) => {
   });
 
   // Extract the user data
-  const User = data?.data?.getUser;
+  const User = data?.data?.getAWSEUser;
 
   // Set user in store when GraphQL data is available
   // The resolver already handles Cognito group to clientType mapping

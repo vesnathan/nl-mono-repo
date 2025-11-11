@@ -58,10 +58,7 @@ export function useDealerSuspicion({
       lastCommentLevel.current = currentThreshold;
 
       // Get appropriate comment for this suspicion level
-      const comment = getDealerSuspicionComment(
-        currentDealer,
-        dealerSuspicion,
-      );
+      const comment = getDealerSuspicionComment(currentDealer, dealerSuspicion);
 
       if (comment) {
         // Dealer position is -1 (top center)
@@ -93,10 +90,7 @@ export function useDealerSuspicion({
       hasReportedRef.current = true;
 
       // Dealer calls pit boss - show final comment
-      const comment = getDealerSuspicionComment(
-        currentDealer,
-        dealerSuspicion,
-      );
+      const comment = getDealerSuspicionComment(currentDealer, dealerSuspicion);
       if (comment) {
         addSpeechBubble(`dealer-report-${Date.now()}`, comment, -1);
       }

@@ -46,8 +46,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (isAuth && cognitoUser && session.tokens) {
         // Extract groups from access token payload
-        const groups = (session.tokens.accessToken.payload['cognito:groups'] as string[]) || [];
-        const isAdminUser = groups.includes('admin');
+        const groups =
+          (session.tokens.accessToken.payload["cognito:groups"] as string[]) ||
+          [];
+        const isAdminUser = groups.includes("admin");
 
         setUser({
           userId: cognitoUser.userId,

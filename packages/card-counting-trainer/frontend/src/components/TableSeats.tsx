@@ -17,6 +17,7 @@ interface TableSeatsProps {
   activePlayerIndex: number | null;
   playerActions: Map<number, PlayerAction>;
   onSeatClick: (seatIndex: number) => void;
+  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
 }
 
 export default function TableSeats({
@@ -27,6 +28,7 @@ export default function TableSeats({
   activePlayerIndex,
   playerActions,
   onSeatClick,
+  registerTimeout,
 }: TableSeatsProps) {
   return (
     <div
@@ -61,11 +63,15 @@ export default function TableSeats({
               <div
                 onClick={() => {
                   if (playerSeat === null) {
-                    debugLog('gamePhases', `=== PLAYER SITTING AT SEAT ${seatIndex} ===`);
-                    debugLog('gamePhases', `Phase before sitting: ${phase}`);
+                    debugLog(
+                      "gamePhases",
+                      `=== PLAYER SITTING AT SEAT ${seatIndex} ===`,
+                    );
+                    debugLog("gamePhases", `Phase before sitting: ${phase}`);
                     onSeatClick(seatIndex);
                   } else {
-                    debugLog('gamePhases', 
+                    debugLog(
+                      "gamePhases",
                       `Cannot sit - player already seated at ${playerSeat}`,
                     );
                   }
@@ -200,6 +206,7 @@ export default function TableSeats({
                               | "BUST"
                               | "BLACKJACK"
                           }
+                          registerTimeout={registerTimeout}
                         />
                       )}
 
@@ -318,6 +325,7 @@ export default function TableSeats({
                           | "BUST"
                           | "BLACKJACK"
                       }
+                      registerTimeout={registerTimeout}
                     />
                   )}
 

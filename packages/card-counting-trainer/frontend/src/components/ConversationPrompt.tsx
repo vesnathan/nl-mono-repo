@@ -17,6 +17,7 @@ interface ConversationPromptProps {
   isPatreon?: boolean; // Whether this conversation mentions Patreon
   onResponse: (choiceIndex: number) => void;
   onIgnore: () => void;
+  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
 }
 
 export default function ConversationPrompt({
@@ -29,6 +30,7 @@ export default function ConversationPrompt({
   isPatreon = false,
   onResponse,
   onIgnore,
+  registerTimeout,
 }: ConversationPromptProps) {
   const [timeRemaining, setTimeRemaining] = useState(timeLimit);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -51,7 +53,7 @@ export default function ConversationPrompt({
 
   const handleChoice = (index: number) => {
     setSelectedIndex(index);
-    setTimeout(() => {
+    registerTimeout(() => {
       onResponse(index);
     }, 300); // Brief pause to show selection
   };

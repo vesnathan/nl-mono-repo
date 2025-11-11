@@ -44,8 +44,10 @@ import BackgroundMusic from "@/components/BackgroundMusic";
 import { WelcomeModal } from "@/components/WelcomeModal";
 import { AuthModal } from "@/components/auth/AuthModal";
 import AdminSettingsModal from "@/components/AdminSettingsModal";
+import AudioDownloadButton from "@/components/AudioDownloadButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { debugLog } from "@/utils/debug";
+import { audioCache } from "@/utils/dynamicTTS";
 
 export default function GamePage() {
   // Auth state
@@ -63,12 +65,8 @@ export default function GamePage() {
 
   // Custom hooks
   const { registerTimeout } = useGameTimeouts();
-  const {
-    debugLogs,
-    showDebugLog,
-    setShowDebugLog,
-    clearDebugLogs,
-  } = useDebugLogging();
+  const { debugLogs, showDebugLog, setShowDebugLog, clearDebugLogs } =
+    useDebugLogging();
 
   const {
     shoe,
@@ -167,7 +165,7 @@ export default function GamePage() {
   // const prevAIHandsRef = useRef<Map<string, number>>(new Map()); // TODO: Use for reaction tracking
 
   // Audio queue hook - manages audio playback with priority
-  const audioQueue = useAudioQueue();
+  const audioQueue = useAudioQueue({ registerTimeout });
 
   // Game interactions hook - provides conversation and speech bubble functions
   const { triggerConversation, addSpeechBubble, showEndOfHandReactions } =
@@ -180,6 +178,7 @@ export default function GamePage() {
       dealerHand,
       blackjackPayout: gameSettings.blackjackPayout,
       audioQueue, // Pass audio queue to game interactions
+      currentDealer,
     });
 
   // Game actions hook - provides startNewRound, dealInitialCards, hit, stand, doubleDown, split
@@ -286,7 +285,8 @@ export default function GamePage() {
       const isCorrelated = correlation > minBet * betHistory.length * 0.5;
 
       if (isCorrelated) {
-        debugLog('insurance', 
+        debugLog(
+          "insurance",
           `Player IS counting (correlation: ${correlation.toFixed(2)})`,
         );
       }
@@ -311,17 +311,21 @@ export default function GamePage() {
   // Insurance handlers
   const handleTakeInsurance = useCallback(() => {
     const insuranceCost = Math.floor(currentBet / 2);
-    debugLog('insurance', `=== PLAYER TAKES INSURANCE for $${insuranceCost} ===`);
+    debugLog(
+      "insurance",
+      `=== PLAYER TAKES INSURANCE for $${insuranceCost} ===`,
+    );
 
     if (playerChips >= insuranceCost) {
       setPlayerInsuranceBet(insuranceCost);
       setPlayerChips(playerChips - insuranceCost);
       setInsuranceOffered(false);
-      debugLog('insurance', 
+      debugLog(
+        "insurance",
         `Player chips after insurance: $${playerChips - insuranceCost}`,
       );
     } else {
-      debugLog('insurance', "Player cannot afford insurance!");
+      debugLog("insurance", "Player cannot afford insurance!");
     }
   }, [
     currentBet,
@@ -332,7 +336,7 @@ export default function GamePage() {
   ]);
 
   const handleDeclineInsurance = useCallback(() => {
-    debugLog('insurance', "=== PLAYER DECLINES INSURANCE ===");
+    debugLog("insurance", "=== PLAYER DECLINES INSURANCE ===");
     setPlayerInsuranceBet(0);
     setInsuranceOffered(false);
   }, [setPlayerInsuranceBet, setInsuranceOffered]);
@@ -387,6 +391,7 @@ export default function GamePage() {
     phase,
     triggerConversation,
     addSpeechBubble,
+    registerTimeout,
   });
 
   // Pit boss movement hook
@@ -396,7 +401,7 @@ export default function GamePage() {
   useDealerVoice({
     phase,
     currentDealer,
-    audioQueue,
+    addSpeechBubble,
   });
 
   // Heat map tracking hook - tracks pit boss proximity vs count for discretion analysis
@@ -443,11 +448,11 @@ export default function GamePage() {
   useEffect(() => {
     const shouldShowBetting =
       phase === "BETTING" && initialized && playerSeat !== null;
-    debugLog('betting', `=== BETTING INTERFACE CHECK ===`);
-    debugLog('betting', `Phase: ${phase}`);
-    debugLog('betting', `Initialized: ${initialized}`);
-    debugLog('betting', `Player seat: ${playerSeat}`);
-    debugLog('betting', `Should show betting interface: ${shouldShowBetting}`);
+    debugLog("betting", `=== BETTING INTERFACE CHECK ===`);
+    debugLog("betting", `Phase: ${phase}`);
+    debugLog("betting", `Initialized: ${initialized}`);
+    debugLog("betting", `Player seat: ${playerSeat}`);
+    debugLog("betting", `Should show betting interface: ${shouldShowBetting}`);
   }, [phase, initialized, playerSeat]);
 
   // AI turns phase hook (handles its own reset logic internally)
@@ -678,7 +683,6 @@ export default function GamePage() {
         setShowStrategyCard={setShowStrategyCard}
         setShowHeatMap={setShowHeatMap}
         setPlayerSeat={handleSeatClick}
-        
         startNewRound={startNewRound}
         hit={hit}
         stand={stand}
@@ -691,11 +695,13 @@ export default function GamePage() {
         handleBetChange={handleBetChange}
         handleConfirmBet={handleConfirmBet}
         handleClearBet={handleClearBet}
+        registerTimeout={registerTimeout}
         setGameSettings={setGameSettings}
         setShowDebugLog={setShowDebugLog}
         clearDebugLogs={clearDebugLogs}
       />
       <BackgroundMusic shouldPlay={musicStarted} />
+      <AudioDownloadButton audioCache={audioCache} />
     </>
   );
 }

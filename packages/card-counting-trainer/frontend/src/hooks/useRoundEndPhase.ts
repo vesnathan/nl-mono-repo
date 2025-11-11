@@ -99,7 +99,11 @@ export function useRoundEndPhase({
                 setAIPlayers((prev) => [...prev, newPlayer]);
 
                 // Show dealer speech bubble
-                addSpeechBubble("dealer-join", `${newCharacter.name} joins the table!`, -1);
+                addSpeechBubble(
+                  "dealer-join",
+                  `${newCharacter.name} joins the table!`,
+                  -1,
+                );
               }
             }
           } else if (!shouldAdd && currentAICount > 2) {
@@ -112,7 +116,11 @@ export function useRoundEndPhase({
             );
 
             // Show dealer speech bubble
-            addSpeechBubble("dealer-leave", `${removedPlayer.character.name} leaves the table.`, -1);
+            addSpeechBubble(
+              "dealer-leave",
+              `${removedPlayer.character.name} leaves the table.`,
+              -1,
+            );
           }
         }
 

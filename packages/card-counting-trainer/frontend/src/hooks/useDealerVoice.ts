@@ -1,13 +1,34 @@
 import { useEffect, useRef } from "react";
 import { GamePhase } from "@/types/gameState";
 import { DealerCharacter } from "@/data/dealerCharacters";
-import { AudioQueueHook, AudioPriority } from "@/hooks/useAudioQueue";
-import { getDealerAudioPath } from "@/utils/audioHelpers";
+import { AudioPriority } from "@/hooks/useAudioQueue";
 
 interface UseDealerVoiceParams {
   phase: GamePhase;
   currentDealer: DealerCharacter | null;
-  audioQueue: AudioQueueHook;
+  addSpeechBubble: (
+    playerId: string,
+    message: string,
+    position: number,
+    reactionType?:
+      | "bust"
+      | "hit21"
+      | "goodHit"
+      | "badStart"
+      | "win"
+      | "loss"
+      | "dealer_blackjack"
+      | "distraction",
+    priority?: AudioPriority,
+    dealerVoiceLine?:
+      | "place_bets"
+      | "dealer_busts"
+      | "dealer_has_17"
+      | "dealer_has_18"
+      | "dealer_has_19"
+      | "dealer_has_20"
+      | "dealer_has_21",
+  ) => void;
 }
 
 /**
@@ -17,7 +38,7 @@ interface UseDealerVoiceParams {
 export function useDealerVoice({
   phase,
   currentDealer,
-  audioQueue,
+  addSpeechBubble,
 }: UseDealerVoiceParams) {
   const previousPhase = useRef<GamePhase | null>(null);
   const audioQueuedRef = useRef(false); // Track if we've queued audio for this betting phase
@@ -27,22 +48,26 @@ export function useDealerVoice({
     if (phase === "BETTING" && previousPhase.current !== "BETTING") {
       previousPhase.current = phase;
 
-      // Play "Place your bets" audio (only once)
+      // Show "Place your bets" speech bubble and queue audio (only once)
       if (currentDealer && !audioQueuedRef.current) {
         audioQueuedRef.current = true;
-        const audioPath = getDealerAudioPath(currentDealer.id, "place_bets");
-        audioQueue.queueAudio({
-          id: `dealer-place-bets-${Date.now()}`,
-          audioPath,
-          priority: AudioPriority.NORMAL,
-          playerId: "dealer",
-          message: "Place your bets",
-        });
+        const message = "Place your bets";
+
+        // Speech bubble handles both visual display AND audio queueing
+        // Position -1 for dealer, dealerVoiceLine specifies which audio file to use
+        addSpeechBubble(
+          "dealer",
+          message,
+          -1,
+          undefined,
+          AudioPriority.NORMAL,
+          "place_bets",
+        );
       }
     } else if (phase !== "BETTING" && previousPhase.current === "BETTING") {
       // Exiting BETTING phase - reset audio flag for next betting round
       audioQueuedRef.current = false;
       previousPhase.current = phase;
     }
-  }, [phase, currentDealer]); // Removed audioQueue from deps - only trigger on phase/dealer change
+  }, [phase]); // Only trigger on phase change - currentDealer and addSpeechBubble are stable
 }

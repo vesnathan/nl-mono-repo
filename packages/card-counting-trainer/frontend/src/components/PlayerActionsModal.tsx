@@ -119,11 +119,13 @@ export default function PlayerActionsModal({
               transition: "all 0.2s ease",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
+              e.currentTarget.style.backgroundColor =
+                "rgba(255, 255, 255, 0.2)";
               e.currentTarget.style.borderColor = "#FFF";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.1)";
+              e.currentTarget.style.backgroundColor =
+                "rgba(255, 255, 255, 0.1)";
               e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.3)";
             }}
           >

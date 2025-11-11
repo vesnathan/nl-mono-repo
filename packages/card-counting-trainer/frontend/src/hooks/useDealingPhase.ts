@@ -60,14 +60,15 @@ export function useDealingPhase({
       dealerHasCards &&
       !hasTriggeredReactions.current
     ) {
-      debugLog('dealCards',"All cards dealt, marking blackjack hands");
+      debugLog("dealCards", "All cards dealt, marking blackjack hands");
       hasTriggeredReactions.current = true;
 
       // Mark AI players with blackjack as finished and show BLACKJACK indicator
       // (Reactions are now shown during dealing, not after)
       aiPlayers.forEach((ai, idx) => {
         if (isBlackjack(ai.hand.cards)) {
-          debugLog('dealCards',
+          debugLog(
+            "dealCards",
             `AI Player ${idx} (${ai.character.name}) has BLACKJACK - marking as finished`,
           );
           setPlayersFinished((prev) => new Set(prev).add(idx));
@@ -91,5 +92,5 @@ export function useDealingPhase({
     setPlayersFinished,
     setPlayerActions,
     registerTimeout,
-    ]);
+  ]);
 }

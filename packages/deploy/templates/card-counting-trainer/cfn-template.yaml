@@ -23,6 +23,10 @@ Parameters:
     Type: Number
     Description: Number of days to retain CloudWatch Logs for nested stacks
     Default: 14
+  LambdaCodeKey:
+    Type: String
+    Description: S3 key for Lambda code zip file
+    Default: lambda/postConfirmation.zip
 
 Resources:
   # DynamoDB Tables
@@ -43,14 +47,29 @@ Resources:
         Stage: !Ref Stage
         AppName: !Ref AppName
 
+  # Lambda Functions
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: DynamoDBStack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Lambda/postConfirmation.yaml
+      Parameters:
+        Stage: !Ref Stage
+        AppName: !Ref AppName
+        TableName: !GetAtt DynamoDBStack.Outputs.DataTableName
+        LambdaCodeBucket: !Ref TemplateBucketName
+        LambdaCodeKey: !Ref LambdaCodeKey
+
   # Cognito Resources
   CognitoStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: LambdaStack
     Properties:
       TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/Cognito/cognito.yaml
       Parameters:
         Stage: !Ref Stage
         AppName: !Ref AppName
+        PostConfirmationLambdaArn: !GetAtt LambdaStack.Outputs.PostConfirmationFunctionArn
 
   # CloudFront Distribution
   CloudFrontStack:

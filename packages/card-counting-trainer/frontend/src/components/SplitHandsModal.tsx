@@ -214,7 +214,13 @@ export default function SplitHandsModal({
                     }}
                   >
                     {card.rank}
-                    {card.suit === "H" ? "♥" : card.suit === "D" ? "♦" : card.suit === "C" ? "♣" : "♠"}
+                    {card.suit === "H"
+                      ? "♥"
+                      : card.suit === "D"
+                        ? "♦"
+                        : card.suit === "C"
+                          ? "♣"
+                          : "♠"}
                   </div>
                 ))}
               </div>

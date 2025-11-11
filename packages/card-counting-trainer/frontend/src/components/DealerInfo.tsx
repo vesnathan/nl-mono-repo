@@ -7,25 +7,26 @@ interface DealerInfoProps {
   dealer: DealerCharacter;
   onClose?: () => void;
   openAsModal?: boolean; // If true, opens directly as modal instead of badge
+  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
 }
 
 export default function DealerInfo({
   dealer,
   onClose,
   openAsModal = false,
+  registerTimeout,
 }: DealerInfoProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [showModal, setShowModal] = useState(openAsModal);
 
   // Fade in animation
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
+    registerTimeout(() => setIsVisible(true), 50);
+  }, [registerTimeout]);
 
   const handleClose = () => {
     setIsVisible(false);
-    setTimeout(() => {
+    registerTimeout(() => {
       setShowModal(false);
       onClose?.();
     }, 300);

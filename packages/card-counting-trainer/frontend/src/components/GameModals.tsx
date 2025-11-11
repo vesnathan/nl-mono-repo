@@ -103,18 +103,22 @@ export default function GameModals({
   };
 
   // Helper functions to check if player can split or double
-  const canSplitHand = playerHand.cards.length === 2 &&
+  const canSplitHand =
+    playerHand.cards.length === 2 &&
     playerHand.cards[0].rank === playerHand.cards[1].rank &&
     playerChips >= playerHand.bet;
 
-  const canDoubleHand = playerHand.cards.length === 2 &&
-    playerChips >= playerHand.bet;
+  const canDoubleHand =
+    playerHand.cards.length === 2 && playerChips >= playerHand.bet;
 
   // State for split hands modal
   const [showSplitModal, setShowSplitModal] = useState(false);
 
   // Show split modal when player has split hands
-  const hasSplitHands = playerHand.isSplit && playerHand.splitHands && playerHand.splitHands.length > 0;
+  const hasSplitHands =
+    playerHand.isSplit &&
+    playerHand.splitHands &&
+    playerHand.splitHands.length > 0;
 
   // Calculate if split hands can be minimized (when it's not player's turn)
   const canMinimizeSplit = playerFinished || phase !== "PLAYER_TURN";
@@ -153,7 +157,7 @@ export default function GameModals({
             const handValue = hand.cards.reduce((sum, card) => {
               let value = sum + card.value;
               // Handle ace adjustment
-              let aces = hand.cards.filter(c => c.rank === "A").length;
+              let aces = hand.cards.filter((c) => c.rank === "A").length;
               while (value > 21 && aces > 0) {
                 value -= 10;
                 aces--;

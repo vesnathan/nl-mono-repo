@@ -2459,10 +2459,13 @@ function addDecisionComments(
 ) {
   // Add comments for hit/stand/split - double doesn't have specific commentary (AI doesn't use it)
   const comments =
-    decision === "hit" ? commentary.shouldHit :
-    decision === "stand" ? commentary.shouldStand :
-    decision === "split" ? commentary.shouldSplit :
-    undefined;
+    decision === "hit"
+      ? commentary.shouldHit
+      : decision === "stand"
+        ? commentary.shouldStand
+        : decision === "split"
+          ? commentary.shouldSplit
+          : undefined;
   if (comments) {
     const toAdd = maxCount ? comments.slice(0, maxCount) : comments;
     commentPool.push(...toAdd);

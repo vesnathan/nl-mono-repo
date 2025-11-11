@@ -29,7 +29,9 @@ export default function SpeechBubble({
         position: "fixed",
         left: position.left,
         top: position.top,
-        transform: bubbleBelow ? "translate(-50%, 0%)" : "translate(-50%, -100%)",
+        transform: bubbleBelow
+          ? "translate(-50%, 0%)"
+          : "translate(-50%, -100%)",
         zIndex: 1000,
         animation: bubbleBelow
           ? "speechFadeInBelow 0.3s ease-out"

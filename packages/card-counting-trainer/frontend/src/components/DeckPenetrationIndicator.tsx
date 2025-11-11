@@ -106,7 +106,8 @@ export default function DeckPenetrationIndicator({
             width: `${penetrationPercent}%`,
             height: "100%",
             backgroundColor: getColor(),
-            transition: "width 0.3s ease-in-out, background-color 0.3s ease-in-out",
+            transition:
+              "width 0.3s ease-in-out, background-color 0.3s ease-in-out",
             position: "relative",
             overflow: "hidden",
           }}

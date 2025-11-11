@@ -13,6 +13,7 @@ interface SuspicionMeterProps {
   pitBossDistance?: number; // 0-100, higher = closer (more dangerous)
   currentDealer?: DealerCharacter | null; // Current dealer info
   onYourSide?: boolean;
+  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
 }
 
 export default function SuspicionMeter({
@@ -21,6 +22,7 @@ export default function SuspicionMeter({
   dealerSuspicion = 0,
   pitBossDistance,
   currentDealer,
+  registerTimeout,
 }: SuspicionMeterProps) {
   const [pulseAnimation, setPulseAnimation] = useState(false);
 
@@ -30,11 +32,9 @@ export default function SuspicionMeter({
   useEffect(() => {
     if (actualSuspicionLevel >= 60) {
       setPulseAnimation(true);
-      const timer = setTimeout(() => setPulseAnimation(false), 1000);
-      return () => clearTimeout(timer);
+      registerTimeout(() => setPulseAnimation(false), 1000);
     }
-    return undefined;
-  }, [actualSuspicionLevel]);
+  }, [actualSuspicionLevel, registerTimeout]);
 
   // Determine color and status based on suspicion level
   const getStatusInfo = () => {
