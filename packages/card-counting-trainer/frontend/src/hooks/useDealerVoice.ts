@@ -25,8 +25,6 @@ export function useDealerVoice({
   useEffect(() => {
     // Detect when we enter BETTING phase
     if (phase === "BETTING" && previousPhase.current !== "BETTING") {
-      // Reset audio flag when entering BETTING phase
-      audioQueuedRef.current = false;
       previousPhase.current = phase;
 
       // Play "Place your bets" audio (only once)
@@ -42,7 +40,8 @@ export function useDealerVoice({
         });
       }
     } else if (phase !== "BETTING" && previousPhase.current === "BETTING") {
-      // Exiting BETTING phase
+      // Exiting BETTING phase - reset audio flag for next betting round
+      audioQueuedRef.current = false;
       previousPhase.current = phase;
     }
   }, [phase, currentDealer]); // Removed audioQueue from deps - only trigger on phase/dealer change
