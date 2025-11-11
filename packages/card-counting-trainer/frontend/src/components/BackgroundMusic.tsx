@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { getMusicVolume } from "./AdminSettingsModal";
 
 interface BackgroundMusicProps {
   shouldPlay?: boolean;
@@ -14,7 +15,7 @@ export default function BackgroundMusic({ shouldPlay = false }: BackgroundMusicP
     if (!audioRef.current) {
       audioRef.current = new Audio("/audio/background.mp3");
       audioRef.current.loop = true;
-      audioRef.current.volume = 0.3; // Default 30% volume
+      audioRef.current.volume = getMusicVolume(); // Get volume from settings
     }
 
     // Cleanup on unmount
@@ -34,6 +35,20 @@ export default function BackgroundMusic({ shouldPlay = false }: BackgroundMusicP
       });
     }
   }, [shouldPlay]);
+
+  // Listen for audio settings changes and update volume in real-time
+  useEffect(() => {
+    const handleVolumeChange = () => {
+      if (audioRef.current) {
+        audioRef.current.volume = getMusicVolume();
+      }
+    };
+
+    window.addEventListener('audioSettingsChanged', handleVolumeChange);
+    return () => {
+      window.removeEventListener('audioSettingsChanged', handleVolumeChange);
+    };
+  }, []);
 
   // No UI - audio plays in background
   return null;
