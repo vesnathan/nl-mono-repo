@@ -40,8 +40,13 @@ import { useHeatMap } from "@/hooks/useHeatMap";
 import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
 import BlackjackGameUI from "@/components/BlackjackGameUI";
 import BackgroundMusic from "@/components/BackgroundMusic";
+import { WelcomeModal } from "@/components/WelcomeModal";
 
 export default function GamePage() {
+  // Welcome modal state
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [musicStarted, setMusicStarted] = useState(false);
+
   // Game settings
   const [gameSettings, setGameSettings] = useState<GameSettings>(
     DEFAULT_GAME_SETTINGS,
@@ -553,8 +558,14 @@ export default function GamePage() {
     addDebugLog,
   });
 
+  const handleWelcomeClose = () => {
+    setShowWelcome(false);
+    setMusicStarted(true);
+  };
+
   return (
     <>
+      <WelcomeModal isOpen={showWelcome} onClose={handleWelcomeClose} />
       <BlackjackGameUI
         suspicionLevel={suspicionLevel}
         dealerSuspicion={dealerSuspicion}
@@ -622,7 +633,7 @@ export default function GamePage() {
         setShowDebugLog={setShowDebugLog}
         clearDebugLogs={clearDebugLogs}
       />
-      <BackgroundMusic />
+      <BackgroundMusic shouldPlay={musicStarted} />
     </>
   );
 }
