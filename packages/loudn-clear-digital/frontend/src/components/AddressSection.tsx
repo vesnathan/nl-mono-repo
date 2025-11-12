@@ -4,52 +4,52 @@ import { Icon } from "@iconify/react";
 
 export function AddressSection() {
   return (
-    <div className="bg-brand-green -mt-24 relative z-10">
+    <div className="bg-gray-900 -mt-24 relative z-10">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-3 gap-8 md:gap-6 items-center py-8">
-          {/* Address */}
+          {/* Service Area */}
           <div className="flex gap-4 items-start text-white justify-center md:justify-start">
             <div className="flex-shrink-0">
-              <Icon icon="mdi:map-marker" className="text-4xl text-white" />
+              <Icon icon="mdi:map-marker" className="text-4xl text-brand-green" />
             </div>
             <div className="text-center md:text-left">
               <p className="font-semibold text-white leading-tight">
-                Devonport & Surrounds
+                Nationwide Service
                 <br />
                 <span className="text-white/80 text-sm font-normal">
-                  Postcodes 7310 & 7306
+                  Remote & On-Site Available
                 </span>
               </p>
             </div>
           </div>
 
-          {/* Phone */}
+          {/* Email */}
           <div className="flex gap-4 items-start text-white justify-center md:justify-start">
             <div className="flex-shrink-0">
-              <Icon icon="mdi:phone" className="text-4xl text-white" />
+              <Icon icon="mdi:email" className="text-4xl text-brand-green" />
             </div>
             <div className="text-center md:text-left">
               <p className="font-semibold text-white leading-tight">
-                Contact for Quote
+                Get In Touch
                 <br />
                 <span className="text-white/80 text-sm font-normal">
-                  service@tommyslawnorder.com.au
+                  hello@loudncleardigital.com
                 </span>
               </p>
             </div>
           </div>
 
-          {/* Hours */}
+          {/* Services */}
           <div className="flex gap-4 items-start text-white justify-center md:justify-start">
             <div className="flex-shrink-0">
-              <Icon icon="mdi:clock-outline" className="text-4xl text-white" />
+              <Icon icon="mdi:lightbulb-on-outline" className="text-4xl text-brand-green" />
             </div>
             <div className="text-center md:text-left">
               <p className="font-semibold text-white leading-tight">
-                Mon - Sat 9:00 - 19:00
+                Digital Solutions
                 <br />
                 <span className="text-white/80 text-sm font-normal">
-                  Sunday Closed
+                  Web, Social Media & Marketing
                 </span>
               </p>
             </div>
