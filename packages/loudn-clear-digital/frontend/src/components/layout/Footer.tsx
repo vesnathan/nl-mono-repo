@@ -13,13 +13,12 @@ export function Footer() {
             <div className="text-center md:text-left">
               <h3 className="text-xl font-bold mb-4 font-josefin">About Us</h3>
               <p className="text-gray-300 mb-4 font-roboto-slab text-sm">
-                Professional property maintenance for Airbnb, Booking.com & VRBO
-                hosts in the Devonport area.
+                Full-service digital agency specializing in web development,
+                social media management, and digital marketing solutions.
               </p>
               <p className="text-gray-300 text-sm font-roboto-slab">
-                Supporting meaningful employment - Tommy is building his future
-                through quality work, supervised by qualified horticulturalists
-                and experienced 4.98★ Airbnb hosts.
+                We partner with businesses to create compelling digital experiences
+                that drive growth and engagement.
               </p>
               <ul className="flex gap-3 mt-4 justify-center md:justify-start">
                 <li>
@@ -57,50 +56,50 @@ export function Footer() {
               <ul className="space-y-2 text-gray-300 text-sm font-roboto-slab">
                 <li>
                   <Link
-                    href="/quote?service=LAWN_MOWING"
+                    href="/quote?service=WEB_DEVELOPMENT"
                     className="hover:text-brand-green transition-colors"
                   >
-                    Lawn Mowing
+                    Web Development
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/quote?service=WHIPPER_SNIPPERING"
+                    href="/quote?service=ECOMMERCE"
                     className="hover:text-brand-green transition-colors"
                   >
-                    Whipper Snippering
+                    E-Commerce Solutions
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/quote?service=GROUND_PRUNING"
+                    href="/quote?service=SOCIAL_MEDIA"
                     className="hover:text-brand-green transition-colors"
                   >
-                    Ground Level Pruning
+                    Social Media Management
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/quote?service=WASTE_REMOVAL"
+                    href="/quote?service=DIGITAL_MARKETING"
                     className="hover:text-brand-green transition-colors"
                   >
-                    Garden Waste Removal
+                    Digital Marketing
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/quote?service=GUTTER_CLEANING"
+                    href="/quote?service=BRANDING"
                     className="hover:text-brand-green transition-colors"
                   >
-                    Gutter Cleaning
+                    Brand Identity
                   </Link>
                 </li>
                 <li>
                   <Link
-                    href="/quote?service=PRESSURE_WASHING"
+                    href="/quote?service=SEO"
                     className="hover:text-brand-green transition-colors"
                   >
-                    Pressure Washing
+                    SEO & Analytics
                   </Link>
                 </li>
               </ul>
@@ -139,22 +138,24 @@ export function Footer() {
               </ul>
             </div>
 
-            {/* Service Area */}
+            {/* Contact */}
             <div className="text-center md:text-left">
               <h3 className="text-xl font-bold mb-4 font-josefin">
-                Service Area
+                Get In Touch
               </h3>
               <ul className="space-y-2 text-gray-300 text-sm font-roboto-slab">
                 <li className="flex items-center gap-2 justify-center md:justify-start">
-                  <span>📍</span> Devonport & Surrounds
+                  <span>📧</span> hello@loudncleardigital.com
                 </li>
-                <li>Postcodes: 7310 & 7306</li>
+                <li className="flex items-center gap-2 justify-center md:justify-start">
+                  <span>📍</span> Serving Businesses Nationally
+                </li>
                 <li className="pt-2">
                   <Link
                     href="/quote"
                     className="text-brand-green font-semibold hover:text-brand-green/80 transition-colors"
                   >
-                    → Get a Quote
+                    → Get a Free Quote
                   </Link>
                 </li>
               </ul>
@@ -167,11 +168,11 @@ export function Footer() {
         <div className="container mx-auto px-4">
           <div className="text-center text-gray-400 text-sm font-roboto-slab">
             <p>
-              &copy; {new Date().getFullYear()} Tommy's Law'n Order. All rights
+              &copy; {new Date().getFullYear()} Loud'n'Clear Digital. All rights
               reserved.
             </p>
             <p className="mt-2">
-              Servicing Holiday Rental Properties in Devonport, Tasmania
+              Web Development | Digital Marketing | Social Media Management
             </p>
           </div>
         </div>

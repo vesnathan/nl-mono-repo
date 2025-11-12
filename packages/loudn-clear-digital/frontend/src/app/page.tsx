@@ -9,38 +9,38 @@ import Link from "next/link";
 export default function HomePage() {
   const services = [
     {
-      icon: "mdi:lawn-mower",
-      title: "Lawn Mowing",
+      icon: "mdi:web",
+      title: "Web Development",
       description:
-        "Professional mowing to keep your rental property looking pristine for guest arrivals",
+        "Custom websites and web applications built with modern technologies for optimal performance",
     },
     {
-      icon: "mdi:grass",
-      title: "Whipper Snippering",
+      icon: "mdi:cellphone-link",
+      title: "Responsive Design",
       description:
-        "Neat edges and hard-to-reach areas for that professional finish",
+        "Mobile-first designs that look stunning on every device and screen size",
     },
     {
-      icon: "mdi:tree",
-      title: "Ground Level Pruning",
-      description: "Keep shrubs and hedges tidy and guest-ready",
+      icon: "mdi:cart",
+      title: "E-Commerce Solutions",
+      description: "Complete online stores with payment integration and inventory management",
     },
     {
-      icon: "mdi:delete-variant",
-      title: "Garden Waste Removal",
-      description: "Complete cleanup and removal of all garden waste",
+      icon: "mdi:instagram",
+      title: "Social Media Management",
+      description: "Strategic content creation and management across all major platforms",
     },
     {
-      icon: "mdi:home-roof",
-      title: "Gutter Cleaning",
+      icon: "mdi:google-ads",
+      title: "Digital Marketing",
       description:
-        "Prevent water damage and maintain your property's condition",
+        "SEO, PPC, and content marketing to grow your online presence and drive results",
     },
     {
-      icon: "mdi:water-pump",
-      title: "Pressure Washing",
+      icon: "mdi:palette",
+      title: "Brand Identity",
       description:
-        "Clean driveways, paths, and outdoor areas to impress your guests",
+        "Logo design, brand guidelines, and visual assets that make your business stand out",
     },
   ];
 
@@ -62,42 +62,42 @@ export default function HomePage() {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-4xl font-bold mb-2 font-josefin text-white">
-                About Tommy's Law'n Order
+                About Loud'n'Clear Digital
               </h2>
               <div className="w-16 h-1 bg-white mb-6 mx-auto"></div>
               <p className="mb-4 font-roboto-slab text-gray-200 leading-relaxed">
-                Supporting meaningful employment - Tommy is a dedicated young
-                man on the autism spectrum building his future through honest,
-                quality work.
+                We're a full-service digital agency passionate about helping businesses
+                thrive in the online world. From stunning websites to strategic social
+                media campaigns, we craft digital experiences that connect with your audience.
               </p>
               <p className="mb-8 font-roboto-slab text-gray-200 leading-relaxed">
-                Tommy's carers are qualified horticulturalists and 4.98★ rated
-                Airbnb hosts who understand exactly what your rental property
-                needs to get those 5-star reviews.
+                With years of experience in web development, design, and digital marketing,
+                we understand what it takes to build a strong online presence that drives
+                real business results.
               </p>
               <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
                 <div className="flex items-center gap-2 justify-center">
                   <i className="text-brand-green text-lg">✓</i>
                   <span className="font-roboto-slab text-sm text-white">
-                    Qualified Horticulturalists
+                    Modern Technologies
                   </span>
                 </div>
                 <div className="flex items-center gap-2 justify-center">
                   <i className="text-brand-green text-lg">✓</i>
                   <span className="font-roboto-slab text-sm text-white">
-                    4.98★ Airbnb Hosts
+                    Proven Results
                   </span>
                 </div>
                 <div className="flex items-center gap-2 justify-center">
                   <i className="text-brand-green text-lg">✓</i>
                   <span className="font-roboto-slab text-sm text-white">
-                    Local to Devonport
+                    Local Business Focus
                   </span>
                 </div>
                 <div className="flex items-center gap-2 justify-center">
                   <i className="text-brand-green text-lg">✓</i>
                   <span className="font-roboto-slab text-sm text-white">
-                    Reliable Service
+                    Ongoing Support
                   </span>
                 </div>
               </div>
@@ -115,9 +115,8 @@ export default function HomePage() {
               Our Services
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto mb-6 font-roboto-slab">
-              Everything you need to keep your Airbnb, Booking.com, and VRBO
-              rental property looking perfect for every guest arrival in the
-              Devonport area.
+              Comprehensive digital solutions to elevate your brand and grow your
+              business in the digital landscape.
             </p>
             <div className="w-16 h-1 bg-brand-green mx-auto"></div>
           </div>
@@ -158,13 +157,12 @@ export default function HomePage() {
             <div className="max-w-4xl mx-auto">
               <div className="text-left mb-12">
                 <h2 className="text-3xl font-bold text-white mb-2 font-josefin">
-                  Why Holiday Rental Hosts Choose Us
+                  Why Businesses Choose Loud'n'Clear
                 </h2>
                 <div className="w-16 h-1 bg-brand-green mb-6"></div>
                 <p className="text-gray-200 font-roboto-slab leading-relaxed">
-                  We understand the unique needs of Airbnb, Booking.com, and
-                  VRBO hosts. Your property needs to look perfect for every
-                  guest arrival.
+                  We're more than just a service provider - we're your digital
+                  growth partner. Here's what sets us apart.
                 </p>
               </div>
 
@@ -172,33 +170,33 @@ export default function HomePage() {
                 {[
                   {
                     icon: "✓",
-                    title: "Backed by 4.98★ Airbnb Hosts",
-                    desc: "Tommy's carers are experienced hosts who understand what your property needs",
+                    title: "Strategic Approach",
+                    desc: "Data-driven strategies tailored to your specific business goals and target audience",
                   },
                   {
                     icon: "✓",
-                    title: "Qualified Horticulturalists",
-                    desc: "Professional expertise ensuring proper care from people who know plants",
+                    title: "Modern Technology Stack",
+                    desc: "We use cutting-edge tools and frameworks to build fast, secure, and scalable solutions",
                   },
                   {
                     icon: "✓",
-                    title: "Local to Devonport",
-                    desc: "Servicing postcodes 7310 & 7306 - we're your local neighbours",
+                    title: "Transparent Communication",
+                    desc: "Regular updates and clear reporting so you always know what we're working on",
                   },
                   {
                     icon: "✓",
-                    title: "Supporting Meaningful Employment",
-                    desc: "Tommy is building his future through honest work",
+                    title: "Mobile-First Design",
+                    desc: "Beautiful, responsive designs that work flawlessly across all devices",
                   },
                   {
                     icon: "✓",
-                    title: "Reliable & Consistent",
-                    desc: "Scheduled maintenance between bookings so property is always guest-ready",
+                    title: "Ongoing Support",
+                    desc: "We don't disappear after launch - we're here to help your business grow",
                   },
                   {
                     icon: "✓",
-                    title: "Fair, Honest Pricing",
-                    desc: "Transparent pricing with no hidden fees - just quality work at a fair price",
+                    title: "Results-Focused",
+                    desc: "Every decision is driven by measurable outcomes and ROI for your business",
                   },
                 ].map((item, index) => (
                   <div key={index} className="flex gap-3 items-start">
@@ -240,13 +238,13 @@ export default function HomePage() {
         <div className="py-20 bg-brand-green text-white">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-4xl font-bold mb-6 font-josefin">
-              Keep Your Rental Property Guest-Ready
+              Ready to Grow Your Digital Presence?
             </h2>
             <p className="text-xl mb-4 font-roboto-slab">
-              Servicing Airbnb, Booking.com & VRBO properties in Devonport area
+              Let's build something amazing together
             </p>
             <p className="text-lg mb-8 text-white/90 font-roboto-slab">
-              Get a free quote for regular maintenance or one-off jobs
+              Get a free consultation and custom quote for your project
             </p>
             <Link
               href="/quote"
