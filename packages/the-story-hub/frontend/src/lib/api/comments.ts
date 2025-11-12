@@ -410,6 +410,7 @@ export async function createCommentAPI(
         parentCommentId,
       },
     },
+    authMode: "userPool",
   });
 
   // Validate response with Zod
@@ -434,6 +435,7 @@ export async function updateCommentAPI(
         content,
       },
     },
+    authMode: "userPool",
   });
 
   // Validate response with Zod
@@ -456,6 +458,7 @@ export async function deleteCommentAPI(
         nodeId,
       },
     },
+    authMode: "userPool",
   });
 
   return (
@@ -479,6 +482,7 @@ export async function voteOnCommentAPI(
       commentId,
       voteType,
     },
+    authMode: "userPool",
   });
 
   // Validate response with Zod

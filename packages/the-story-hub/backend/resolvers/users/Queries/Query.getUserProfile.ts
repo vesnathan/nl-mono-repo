@@ -5,10 +5,10 @@ import {
   PatreonTier,
   PatreonInfo,
   UserPrivacySettings,
-  UserNotificationSettings,
-  UserContentSettings,
   ProfileVisibility,
+  UserNotificationSettings,
   NotificationFrequency,
+  UserContentSettings,
   AgeRating,
 } from "gqlTypes";
 
@@ -32,7 +32,7 @@ export function request(ctx: CTX) {
   };
 }
 
-export function response(ctx: CTX): User | null {
+export function response(ctx: CTX): User {
   if (ctx.error) {
     console.error("Error fetching user profile:", ctx.error);
     return util.error(ctx.error.message, ctx.error.type);

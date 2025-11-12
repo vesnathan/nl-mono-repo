@@ -88,7 +88,6 @@ Resources:
         email: email
         name: name
         picture: picture
-        username: sub
 
   # Facebook Identity Provider
   FacebookIdentityProvider:

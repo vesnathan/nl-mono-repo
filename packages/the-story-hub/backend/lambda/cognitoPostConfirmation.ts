@@ -44,14 +44,19 @@ export const handler = async (
   if (userAttributes.name) {
     // OAuth providers like Google provide a 'name' attribute
     username = userAttributes.name;
+    console.log(`Using Google name attribute for username: ${username}`);
   } else if (userAttributes.given_name || userAttributes.family_name) {
     // Email/password signups might have given_name/family_name
     username =
       `${userAttributes.given_name || ""} ${userAttributes.family_name || ""}`.trim();
+    console.log(`Using given/family name for username: ${username}`);
   } else {
     // Fallback: generate from email
     username = email.split("@")[0];
+    console.log(`Using email prefix for username: ${username}`);
   }
+
+  console.log(`Final username to be stored: "${username}"`);
 
   const now = new Date().toISOString();
 

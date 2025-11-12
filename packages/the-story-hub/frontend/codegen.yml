@@ -1,4 +1,5 @@
 schema: "../backend/combined_schema.graphql"
+documents: "./src/graphql/**/*.ts"
 generates:
   ./src/types/gqlTypes.ts:
     plugins:

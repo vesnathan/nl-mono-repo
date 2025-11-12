@@ -31,6 +31,7 @@ export async function createChapterAPI(
   const result = await client.graphql({
     query: createChapter,
     variables: { input },
+    authMode: "userPool",
   });
   return ChapterNodeSchema.parse(result.data.createChapter);
 }
@@ -41,6 +42,7 @@ export async function createBranchAPI(
   const result = await client.graphql({
     query: createBranch,
     variables: { input },
+    authMode: "userPool",
   });
   return ChapterNodeSchema.parse(result.data.createBranch);
 }
@@ -51,6 +53,7 @@ export async function updateChapterAPI(
   const result = await client.graphql({
     query: updateChapter,
     variables: { input },
+    authMode: "userPool",
   });
   return ChapterNodeSchema.parse(result.data.updateChapter);
 }
@@ -63,6 +66,7 @@ export async function voteOnChapterAPI(
   const result = await client.graphql({
     query: voteOnChapter,
     variables: { storyId, nodeId, voteType },
+    authMode: "userPool",
   });
   return ChapterNodeSchema.parse(result.data.voteOnChapter);
 }
@@ -73,6 +77,7 @@ export async function awardBadgeAPI(
   const result = await client.graphql({
     query: awardBadge,
     variables: { input },
+    authMode: "userPool",
   });
   return ChapterNodeSchema.parse(result.data.awardBadge);
 }

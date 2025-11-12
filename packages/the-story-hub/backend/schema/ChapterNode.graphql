@@ -41,6 +41,7 @@ input CreateChapterInput {
 }
 
 input CreateBranchInput {
+  storyId: ID!
   parentNodeId: ID!
   paragraphIndex: Int
   branchDescription: String!
