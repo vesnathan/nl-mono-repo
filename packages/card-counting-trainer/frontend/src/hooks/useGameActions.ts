@@ -100,6 +100,7 @@ export interface GameActionsReturn {
   stand: () => void;
   doubleDown: () => void;
   split: () => void;
+  surrender: () => void;
 }
 
 export function useGameActions({
@@ -1040,6 +1041,18 @@ export function useGameActions({
           );
         }
 
+        // Check if split aces and cannot hit them (automatically stand on both)
+        const isSplitAces = hand1.cards[0].rank === "A";
+        if (isSplitAces && !gameSettings.hitSplitAces) {
+          debugLog(
+            "playerActions",
+            "Split Aces - cannot hit, automatically standing on both hands",
+          );
+          // Mark player as finished since they can't hit split aces
+          setPlayerFinished(true);
+          return;
+        }
+
         // Check if first hand is 21 (automatically stand)
         const hand1Value = calculateHandValue(hand1.cards);
         if (hand1Value === 21) {
@@ -1063,10 +1076,59 @@ export function useGameActions({
     playerChips,
     gameSettings.maxResplits,
     gameSettings.resplitAces,
+    gameSettings.hitSplitAces,
     dealCardFromShoe,
     registerTimeout,
     setPlayerHand,
     setPlayerChips,
+    setPlayerFinished,
+  ]);
+
+  const surrender = useCallback(() => {
+    debugLog("playerActions", "=== PLAYER ACTION: SURRENDER ===");
+
+    const handValue = calculateHandValue(playerHand.cards);
+    debugLog("playerActions", `Hand value: ${handValue}, Bet: $${playerHand.bet}`);
+
+    // Calculate refund (50% of bet, rounded down)
+    const refund = Math.floor(playerHand.bet / 2);
+    debugLog("playerActions", `Refunding $${refund} (50% of bet)`);
+
+    // Mark hand as finished and surrendered
+    setPlayerFinished(true);
+    setPlayerHand((prev) => ({
+      ...prev,
+      result: "SURRENDER",
+    }));
+
+    // Refund 50% of the bet
+    setPlayerChips((prev) => prev + refund);
+
+    // Record action
+    if (playerSeat !== null) {
+      setPlayerActions((prev) => {
+        const newActions = new Map(prev);
+        newActions.set(playerSeat, "STAND"); // Treat as stand for tracking purposes
+        return newActions;
+      });
+    }
+
+    debugLog("playerActions", "Surrender complete - moving to next phase");
+
+    // Move to next phase after brief delay
+    registerTimeout(() => {
+      setPhase("AI_TURNS");
+    }, 500);
+  }, [
+    playerHand,
+    playerSeat,
+    playerChips,
+    setPlayerHand,
+    setPlayerChips,
+    setPlayerFinished,
+    setPlayerActions,
+    setPhase,
+    registerTimeout,
   ]);
 
   return {
@@ -1076,5 +1138,6 @@ export function useGameActions({
     stand,
     doubleDown,
     split,
+    surrender,
   };
 }

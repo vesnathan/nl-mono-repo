@@ -50,6 +50,7 @@ export default function GameModals() {
     stand,
     doubleDown,
     split,
+    surrender,
     setGameSettings,
   } = useGameActions();
   // Helper function to check if player is busted
@@ -89,6 +90,10 @@ export default function GameModals() {
 
   const canDoubleHand =
     playerHand.cards.length === 2 && playerChips >= playerHand.bet;
+
+  // Check if player can surrender (only on first 2 cards, if enabled in settings)
+  const canSurrenderHand =
+    playerHand.cards.length === 2 && gameSettings.lateSurrenderAllowed;
 
   // State for split hands modal
 
@@ -168,8 +173,10 @@ export default function GameModals() {
             onStand={stand}
             onDouble={doubleDown}
             onSplit={split}
+            onSurrender={surrender}
             canDouble={canDoubleHand}
             canSplit={canSplitHand}
+            canSurrender={canSurrenderHand}
           />
         )}
 

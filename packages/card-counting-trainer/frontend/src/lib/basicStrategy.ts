@@ -248,12 +248,8 @@ export function getBasicStrategyAction(
       return "H";
     }
 
-    // If strategy says surrender but not allowed or available
+    // If strategy says surrender but not allowed, hit instead
     if (hardAction === "SU" && !settings.lateSurrenderAllowed) {
-      return "H";
-    }
-    if (hardAction === "SU") {
-      // Note: Surrender is not implemented in the game yet, so default to hit
       return "H";
     }
 

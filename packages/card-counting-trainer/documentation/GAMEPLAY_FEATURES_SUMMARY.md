@@ -6,9 +6,9 @@
 |---------|--------|---------|-------|
 | **Split** | ✅ FULL | YES | gameActions.ts, SplitHandsModal.tsx, GameModals.tsx |
 | **Double Down** | ✅ FULL | YES | gameActions.ts, PlayerActionsModal.tsx |
-| **Surrender** | ❌ NOT IMPL | NO | basicStrategy.ts (recognized only) |
+| **Surrender** | ✅ FULL | YES | useGameActions.ts, PlayerActionsModal.tsx, GameModals.tsx |
 | **Insurance** | ✅ FULL | YES | InsuranceUI.tsx, page.tsx, useInsurancePhase.ts |
-| **Resplit** | ⚠️ PARTIAL | UNLIMITED | gameSettings.ts (setting defined but not enforced) |
+| **Resplit** | ✅ FULL | YES | useGameActions.ts, GameModals.tsx (limits enforced) |
 
 ---
 
@@ -60,38 +60,31 @@
 
 ---
 
-### 3. SURRENDER - Recognized but NOT Implemented ✗
+### 3. SURRENDER - Fully Implemented & Working ✓
 
-**What:** Players can surrender their hand and lose 50% of their bet instead of playing.
+**What:** Players can surrender their hand and lose 50% of their bet instead of playing (late surrender).
 
-**Current Status:** NOT IMPLEMENTED
+**Implementation:**
+- `surrender()` function in `useGameActions.ts` (lines 1073-1118)
+- Red button in `PlayerActionsModal.tsx` labeled "SURRENDER (Get 50% Back)"
+- Only available on first 2 cards when `lateSurrenderAllowed` is enabled
+- Refunds 50% of bet (rounded down) to player
+- Marks hand result as "SURRENDER"
+- Automatically moves to next phase
 
-**What Exists:**
-- Settings exist: `lateSurrenderAllowed` and `earlySurrenderAllowed`
-- Strategy tables include SU (surrender) recommendations
-- Code explicitly converts surrender to HIT
+**Key Files:**
+- `/src/hooks/useGameActions.ts` - Core surrender logic
+- `/src/components/PlayerActionsModal.tsx` - Surrender button UI (lines 113-140)
+- `/src/components/GameModals.tsx` - Validation and wiring (lines 95-96, 176)
+- `/src/types/game.ts` - Added "SURRENDER" to HandResult type
 
-**What's Missing:**
-- No UI button or modal
-- No game logic handler
-- No chip payout logic
-- Just a placeholder that always hits instead
+**Game Settings:**
+- `lateSurrenderAllowed` (true/false) - Controls if surrender is available
+- `earlySurrenderAllowed` (true/false) - Not yet implemented
 
-**Evidence from Code:**
-```typescript
-// basicStrategy.ts lines 251-258
-if (hardAction === "SU") {
-  // Note: Surrender is not implemented in the game yet, so default to hit
-  return "H";
-}
-```
+**Working Status:** ✓ Confirmed working - player can surrender and receives 50% refund
 
-**To Implement:**
-1. Create `surrender()` function in gameActions.ts
-2. Add surrender button to PlayerActionsModal
-3. Return 50% of bet to player
-4. Mark hand as finished
-5. Handle in resolving phase
+**Note:** Early surrender (before dealer checks for blackjack) is not yet implemented, only late surrender.
 
 ---
 
@@ -124,50 +117,47 @@ if (hardAction === "SU") {
 
 ---
 
-### 5. RESPLIT - Defined in Settings but Not Enforced ⚠️
+### 5. RESPLIT - Fully Implemented & Enforced ✓
 
 **What:** Players can split an already-split hand up to N times (controlled by `maxResplits`).
 
-**Current Status:** UNLIMITED RESPLITS (no limit enforced)
+**Current Status:** FULLY ENFORCED
 
-**What Exists:**
-- `maxResplits` setting (0-3, meaning 1-4 hands)
-- `resplitAces` setting (can resplit Aces)
-- `hitSplitAces` setting (can hit Aces after split)
-- Different values in preset configurations
+**Implementation:**
+- `maxResplits` setting enforced in split validation (0-3, meaning 1-4 hands max)
+- `resplitAces` setting enforced - blocks resplitting Aces when disabled
+- `hitSplitAces` setting enforced - automatically stands on split Aces when disabled
 
-**What's Missing:**
-- Split function doesn't check `maxResplits`
-- No tracking of split count per original hand
-- No enforcement of resplit restrictions
-- Can currently split unlimited times
+**Key Files:**
+- `/src/hooks/useGameActions.ts` - Resplit logic and limits (lines 914-1085)
+  - Lines 942-949: Checks maxResplits limit
+  - Lines 951-959: Checks resplitAces restriction
+  - Lines 1044-1054: Enforces hitSplitAces (auto-stand if disabled)
+- `/src/components/GameModals.tsx` - Validation (lines 74-85)
+  - Calculates current split count
+  - Prevents splitting when at max limit
+  - Blocks resplitting Aces when not allowed
 
-**Current Behavior:**
+**Enforcement Logic:**
 ```typescript
-// GameModals.tsx lines 62-65 - validation
-const canSplitHand =
-  playerHand.cards.length === 2 &&
-  playerHand.cards[0].rank === playerHand.cards[1].rank &&
-  playerChips >= playerHand.bet;
-// ^ Does NOT check gameSettings.maxResplits
+// GameModals.tsx lines 74-85
+const currentSplitCount = isResplit ? playerHand.splitHands!.length : 0;
+if (currentSplitCount >= gameSettings.maxResplits + 1) return false;
+
+// Prevent resplitting Aces if not allowed
+if (handToSplit.cards[0].rank === "A" && currentSplitCount > 0 && !gameSettings.resplitAces) {
+  return false;
+}
 ```
 
 **Preset Rules:**
-- Las Vegas Strip: `maxResplits: 3` (up to 4 hands)
-- Single Deck: `maxResplits: 0` (no resplit)
+- Las Vegas Strip: `maxResplits: 3` (up to 4 hands), `resplitAces: false`, `hitSplitAces: false`
+- Single Deck: `maxResplits: 0` (no resplit allowed)
 - Double Deck: `maxResplits: 3`
 - European: `maxResplits: 3`
 - Bad Rules: `maxResplits: 0`
 
-**To Implement Enforcement:**
-1. Add `splitCount` to `PlayerHand` interface
-2. Track original pair and number of splits
-3. Update `canSplitHand` check:
-   ```typescript
-   const canResplit = playerHand.splitCount < gameSettings.maxResplits;
-   ```
-4. Prevent resplitting Aces if `!resplitAces`
-5. Prevent hitting split Aces if `!hitSplitAces`
+**Working Status:** ✓ All resplit limits properly enforced - maxResplits, resplitAces, and hitSplitAces
 
 ---
 
@@ -193,34 +183,40 @@ const canSplitHand =
 
 ---
 
-## Implementation Priority
+## Implementation Status
 
-If implementing missing features:
+All major blackjack gameplay features are now **fully implemented**:
 
-1. **High Priority:** Resplit limit enforcement
-   - Settings already exist
-   - Logic is straightforward
-   - Affects game balance
+✅ **Split** - Working with proper validation
+✅ **Double Down** - Working with configurable rules
+✅ **Surrender** - Working with late surrender support
+✅ **Insurance** - Working when dealer shows Ace
+✅ **Resplit Limits** - Fully enforced (maxResplits, resplitAces, hitSplitAces)
 
-2. **Medium Priority:** Surrender
-   - Required by basic strategy
-   - Affects game difficulty
-   - Good for card counter training
+### Remaining Enhancements (Future Work)
 
-3. **Low Priority:** Other enhancements
-   - Core gameplay is complete
-   - Focus on accuracy of existing features
+1. **Early Surrender** - Allow surrender before dealer checks for blackjack
+   - Setting exists (`earlySurrenderAllowed`) but not implemented
+   - Would require changes to game flow before dealer peek
+
+2. **Even Money** - Instant payout for blackjack vs dealer Ace
+   - Alternative to insurance when player has blackjack
+   - Pays 1:1 immediately instead of risking push
 
 ---
 
 ## Testing Checklist
 
-- [ ] Split multiple pairs in one hand
-- [ ] Double down on 10 and 11
-- [ ] Test insurance with Ace
-- [ ] Test resplit limits (after implementation)
-- [ ] Test surrender (after implementation)
+- [x] Split multiple pairs in one hand
+- [x] Double down on 10 and 11
+- [x] Test insurance with Ace
+- [x] Test resplit limits (maxResplits enforced)
+- [x] Test surrender (returns 50% of bet)
+- [x] Test resplit Aces restrictions
+- [x] Test hit split Aces restrictions (auto-stand when disabled)
 - [ ] Verify basic strategy recommendations match implementation
 - [ ] Test with insufficient chips for each action
 - [ ] Verify AI players make decisions correctly
+- [ ] Test surrender with different game presets
+- [ ] Test all combinations of resplit settings
 

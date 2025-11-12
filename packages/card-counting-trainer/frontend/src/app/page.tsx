@@ -191,8 +191,8 @@ export default function GamePage() {
       currentDealer,
     });
 
-  // Game actions hook - provides startNewRound, dealInitialCards, hit, stand, doubleDown, split
-  const { startNewRound, dealInitialCards, hit, stand, doubleDown, split } =
+  // Game actions hook - provides startNewRound, dealInitialCards, hit, stand, doubleDown, split, surrender
+  const { startNewRound, dealInitialCards, hit, stand, doubleDown, split, surrender } =
     useGameActions({
       phase,
       playerSeat,
@@ -821,6 +821,7 @@ export default function GamePage() {
               stand,
               doubleDown,
               split,
+              surrender,
               handleBetChange,
               handleConfirmBet,
               handleClearBet,
