@@ -1,0 +1,30 @@
+{
+  "name": "loudn-clear-digital-frontend",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3004",
+    "tsc": "node ./node_modules/typescript/bin/tsc",
+    "dev:clean": "rm -rf .next && NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3004",
+    "dev:local": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3004",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "build-gql": "ts-node -TP ../../../tsconfig.node.json ./scripts/buildGql.ts",
+    "update-env": "bash ./scripts/update-env-from-aws.sh"
+  },
+  "dependencies": {
+    "@iconify/react": "^5.0.2",
+    "@nextui-org/react": "2.4.6",
+    "next": "^15.0.2",
+    "react": "19.0.0-rc-02c0e824-20241028",
+    "swiper": "^11.0.5",
+    "tailwindcss": "^3.4.14"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "typescript": "^5"
+  }
+}

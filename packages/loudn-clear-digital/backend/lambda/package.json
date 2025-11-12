@@ -1,0 +1,13 @@
+{
+  "name": "lawn-order-lambda-functions",
+  "version": "1.0.0",
+  "description": "Lambda functions for Lawn Order",
+  "main": "index.js",
+  "scripts": {},
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.0.0"
+  },
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC"
+}
