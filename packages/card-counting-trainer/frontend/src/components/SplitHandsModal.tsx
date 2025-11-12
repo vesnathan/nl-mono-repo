@@ -32,15 +32,15 @@ export default function SplitHandsModal({
     let value = 0;
     let aces = 0;
 
-    for (const card of cards) {
+    cards.forEach((card) => {
       value += card.value;
-      if (card.rank === "A") aces++;
-    }
+      if (card.rank === "A") aces += 1;
+    });
 
     // Adjust for aces
     while (value > 21 && aces > 0) {
       value -= 10;
-      aces--;
+      aces -= 1;
     }
 
     return value;

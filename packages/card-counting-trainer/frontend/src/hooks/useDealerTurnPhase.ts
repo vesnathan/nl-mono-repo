@@ -231,7 +231,7 @@ export function useDealerTurnPhase({
             );
 
             const flyingCard: FlyingCardData = {
-              id: `hit-dealer-${Date.now()}-${cardCounterRef.current++}`,
+              id: `hit-dealer-${Date.now()}-${cardCounterRef.current += 1}`,
               card,
               fromPosition: shoePosition,
               toPosition: dealerPosition,

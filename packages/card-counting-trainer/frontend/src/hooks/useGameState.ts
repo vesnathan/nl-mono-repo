@@ -61,7 +61,7 @@ export function dealNewHandToAIPlayers(
     if (currentShoe.length === 0) break;
     const { card, remainingShoe } = dealCard(currentShoe);
     currentShoe = remainingShoe;
-    cardsDealt++;
+    cardsDealt += 1;
     if (i === 0) {
       // Only count first dealer card (face up)
       runningCount += card.count;
@@ -78,7 +78,7 @@ export function dealNewHandToAIPlayers(
       if (currentShoe.length === 0) break;
       const { card, remainingShoe } = dealCard(currentShoe);
       currentShoe = remainingShoe;
-      cardsDealt++;
+      cardsDealt += 1;
       runningCount += card.count;
       cards.push(card);
     }
@@ -104,7 +104,7 @@ export function dealNewHandToAIPlayers(
     if (shouldHit && currentShoe.length > 0) {
       const { card, remainingShoe } = dealCard(currentShoe);
       currentShoe = remainingShoe;
-      cardsDealt++;
+      cardsDealt += 1;
       runningCount += card.count;
       cards.push(card);
     }
@@ -160,7 +160,7 @@ export function simulateHandsInProgress(
 
       const { card, remainingShoe } = dealCard(currentShoe);
       currentShoe = remainingShoe;
-      cardsDealt++;
+      cardsDealt += 1;
       runningCount += card.count;
     }
   }
@@ -174,7 +174,7 @@ export function simulateHandsInProgress(
     if (currentShoe.length === 0) break;
     const { card, remainingShoe } = dealCard(currentShoe);
     currentShoe = remainingShoe;
-    cardsDealt++;
+    cardsDealt += 1;
     if (i === 0) {
       // Only count first dealer card (face up)
       runningCount += card.count;
@@ -191,7 +191,7 @@ export function simulateHandsInProgress(
       if (currentShoe.length === 0) break;
       const { card, remainingShoe } = dealCard(currentShoe);
       currentShoe = remainingShoe;
-      cardsDealt++;
+      cardsDealt += 1;
       runningCount += card.count;
       cards.push(card);
     }
@@ -217,7 +217,7 @@ export function simulateHandsInProgress(
     if (shouldHit && currentShoe.length > 0) {
       const { card, remainingShoe } = dealCard(currentShoe);
       currentShoe = remainingShoe;
-      cardsDealt++;
+      cardsDealt += 1;
       runningCount += card.count;
       cards.push(card);
     }

@@ -118,7 +118,7 @@ export default function GameModals() {
               let aces = hand.cards.filter((c) => c.rank === "A").length;
               while (value > 21 && aces > 0) {
                 value -= 10;
-                aces--;
+                aces -= 1;
               }
               return value;
             }, 0);

@@ -323,7 +323,7 @@ export function useGameActions({
           }
 
           const flyingCard: FlyingCardData = {
-            id: `deal-${dealData.type}-${dealData.index}-${Date.now()}-${cardIdCounter++}`,
+            id: `deal-${dealData.type}-${dealData.index}-${Date.now()}-${cardIdCounter += 1}`,
             card: dealData.card,
             fromPosition: shoePosition,
             toPosition: targetPosition,
@@ -688,7 +688,7 @@ export function useGameActions({
       );
 
       const flyingCard: FlyingCardData = {
-        id: `hit-player-${Date.now()}-${cardIdCounter++}`,
+        id: `hit-player-${Date.now()}-${cardIdCounter += 1}`,
         card,
         fromPosition: shoePosition,
         toPosition: playerPosition,
@@ -842,7 +842,7 @@ export function useGameActions({
       );
 
       const flyingCard: FlyingCardData = {
-        id: `double-player-${Date.now()}-${cardIdCounter++}`,
+        id: `double-player-${Date.now()}-${cardIdCounter += 1}`,
         card,
         fromPosition: shoePosition,
         toPosition: playerPosition,

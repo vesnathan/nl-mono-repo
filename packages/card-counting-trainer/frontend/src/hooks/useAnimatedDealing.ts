@@ -132,7 +132,7 @@ export function useAnimatedDealing(
           const position = aiPlayerPositions[playerIndex];
           const { card, remainingShoe } = dealCard(currentShoe);
           currentShoe = remainingShoe;
-          totalCardsDealt++;
+          totalCardsDealt += 1;
           currentRunningCount += card.count;
 
           setDealingState((prev) => ({
@@ -150,7 +150,7 @@ export function useAnimatedDealing(
                 aiHands: [...aiHands],
                 flyingCard: null,
               }));
-              dealIndex++;
+              dealIndex += 1;
               registerTimeout(dealNext, Math.floor(400 / dealSpeed));
             },
             Math.floor(400 / dealSpeed),
@@ -159,7 +159,7 @@ export function useAnimatedDealing(
           // Deal to dealer
           const { card, remainingShoe } = dealCard(currentShoe);
           currentShoe = remainingShoe;
-          totalCardsDealt++;
+          totalCardsDealt += 1;
           // Only count first dealer card (face up)
           if (round === 0) {
             currentRunningCount += card.count;
@@ -183,7 +183,7 @@ export function useAnimatedDealing(
                 dealerCards: [...dealerCards],
                 flyingCard: null,
               }));
-              dealIndex++;
+              dealIndex += 1;
               registerTimeout(dealNext, Math.floor(400 / dealSpeed));
             },
             Math.floor(400 / dealSpeed),
@@ -213,7 +213,7 @@ export function useAnimatedDealing(
         const position = decisionOrder[currentPlayerIndex];
         const handIndex = aiHands.findIndex((h) => h.position === position);
         if (handIndex === -1) {
-          currentPlayerIndex++;
+          currentPlayerIndex += 1;
           playNextPlayer();
           return;
         }
@@ -279,7 +279,7 @@ export function useAnimatedDealing(
                 thinkingPlayer: null,
                 actionBubble: null,
               }));
-              currentPlayerIndex++;
+              currentPlayerIndex += 1;
               registerTimeout(playNextPlayer, 300);
             }, 1000);
           }, thinkTime);
@@ -289,7 +289,7 @@ export function useAnimatedDealing(
           registerTimeout(() => {
             const { card, remainingShoe } = dealCard(currentShoe);
             currentShoe = remainingShoe;
-            totalCardsDealt++;
+            totalCardsDealt += 1;
             currentRunningCount += card.count;
 
             setDealingState((prev) => ({
@@ -340,7 +340,7 @@ export function useAnimatedDealing(
                       thinkingPlayer: null,
                       actionBubble: null,
                     }));
-                    currentPlayerIndex++;
+                    currentPlayerIndex += 1;
                     registerTimeout(playNextPlayer, 500);
                   }, 1500);
                 } else {
@@ -418,7 +418,7 @@ export function useAnimatedDealing(
           () => {
             const { card, remainingShoe } = dealCard(currentShoe);
             currentShoe = remainingShoe;
-            totalCardsDealt++;
+            totalCardsDealt += 1;
             currentRunningCount += card.count;
 
             setDealingState((prev) => ({
