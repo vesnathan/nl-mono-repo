@@ -4,6 +4,8 @@
  * Saves files to S3 for CloudFront deployments or locally for dev
  */
 
+/* eslint-disable no-console, no-restricted-syntax, no-await-in-loop, no-plusplus, no-promise-executor-return */
+
 import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
