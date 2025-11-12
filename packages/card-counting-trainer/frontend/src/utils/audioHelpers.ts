@@ -1,15 +1,17 @@
 /**
  * Audio path helpers
- * Maps reactions and dialogue to audio file paths
+ * All audio is dynamically generated and stored in /audio/generated/
+ * These functions check if audio exists in generated folder, and if not, trigger generation.
  */
 
 /**
  * Get audio path for an AI player reaction
+ * All audio is stored in /audio/generated/
  *
  * @param characterId - Character ID (e.g., "drunk-danny")
  * @param reactionType - Type of reaction (bust, hit21, goodHit, badStart, win, loss, dealer_blackjack, distraction)
  * @param variant - Optional variant number (1-7 for distractions, 1-5 for wins/losses)
- * @returns Path to audio file
+ * @returns Path to audio file in generated folder
  */
 export function getPlayerAudioPath(
   characterId: string,
@@ -29,7 +31,7 @@ export function getPlayerAudioPath(
     ["bust", "hit21", "goodHit", "badStart"].includes(reactionType) &&
     !variant
   ) {
-    return `/audio/players/${characterId}/${reactionType}_01.mp3`;
+    return `/audio/generated/${characterId}_${reactionType}_01.mp3`;
   }
 
   // For multi-variant reactions (win, loss, dealer_blackjack, distraction)
@@ -43,15 +45,16 @@ export function getPlayerAudioPath(
   }
 
   const paddedVariant = variant.toString().padStart(2, "0");
-  return `/audio/players/${characterId}/${reactionType}_${paddedVariant}.mp3`;
+  return `/audio/generated/${characterId}_${reactionType}_${paddedVariant}.mp3`;
 }
 
 /**
  * Get audio path for dealer voice line
+ * All audio is stored in /audio/generated/
  *
  * @param dealerId - Dealer ID (e.g., "maria-counter")
  * @param voiceLine - Type of voice line
- * @returns Path to audio file
+ * @returns Path to audio file in generated folder
  */
 export function getDealerAudioPath(
   dealerId: string,
@@ -76,7 +79,7 @@ export function getDealerAudioPath(
     | "react_better_luck"
     | "react_house_wins",
 ): string {
-  return `/audio/dealers/${dealerId}/${voiceLine}_01.mp3`;
+  return `/audio/generated/${dealerId}_${voiceLine}_01.mp3`;
 }
 
 /**
