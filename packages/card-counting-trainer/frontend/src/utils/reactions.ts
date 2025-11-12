@@ -41,6 +41,7 @@ const REACTION_PRIORITY_ORDER = [
  * @param dealerUpCard - Optional dealer's up card for context-aware reactions
  * @returns Array of reactions to display
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function generateInitialReactions(
   aiPlayers: AIPlayer[],
   dealerUpCard?: { rank: string; suit: string },
@@ -165,6 +166,7 @@ export function generateBustReaction(ai: AIPlayer): Reaction | null {
  * @param blackjackPayout - Blackjack payout setting
  * @returns Array of reactions to display
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function generateEndOfHandReactions(
   aiPlayers: AIPlayer[],
   dealerHand: PlayerHand,

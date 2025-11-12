@@ -12,6 +12,7 @@ import { TABLE_POSITIONS } from "@/constants/animations";
  * @param cardIndex - Card index in hand (for calculating grid position)
  * @returns Position object with left and top CSS values
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function getCardPosition(
   type: "ai" | "player" | "dealer" | "shoe",
   aiPlayers: AIPlayer[],

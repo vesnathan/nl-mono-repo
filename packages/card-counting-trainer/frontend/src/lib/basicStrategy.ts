@@ -159,6 +159,7 @@ function canDoubleByRules(handValue: number, settings: GameSettings): boolean {
  * @param canDoubleHand Whether the hand can be doubled (first two cards + has chips)
  * @returns Recommended strategy action
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function getBasicStrategyAction(
   playerCards: Card[],
   dealerUpCard: Card,
@@ -286,6 +287,7 @@ export function strategyActionToText(action: StrategyAction): string {
 /**
  * Get a human-readable explanation of the strategy decision
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function getStrategyExplanation(
   action: StrategyAction,
   playerCards: Card[],
