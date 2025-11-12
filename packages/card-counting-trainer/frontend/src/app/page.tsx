@@ -221,6 +221,7 @@ export default function GamePage() {
     gameSettings,
     currentDealer,
     playerChips,
+    selectedTestScenario,
     setPhase,
     setCurrentBet,
     setDealerRevealed,

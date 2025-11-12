@@ -13,6 +13,8 @@ import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 import { GameSettings } from "@/types/gameSettings";
 import { getInitialHandReaction } from "@/data/dialogue";
 import { debugLog } from "@/utils/debug";
+import { TestScenario } from "@/types/testScenarios";
+import { createCardFromScenario } from "@/lib/testScenarioHelpers";
 
 // Module-level counter for unique card IDs
 let cardIdCounter = 0;
@@ -31,6 +33,7 @@ interface UseGameActionsParams {
   gameSettings: GameSettings;
   currentDealer: DealerCharacter | null;
   playerChips: number;
+  selectedTestScenario: TestScenario | null;
 
   // Setters
   setPhase: (phase: GamePhase) => void;
@@ -114,6 +117,7 @@ export function useGameActions({
   gameSettings,
   currentDealer,
   playerChips,
+  selectedTestScenario,
   setPhase,
   setCurrentBet,
   setDealerRevealed,
@@ -194,21 +198,124 @@ export function useGameActions({
       let currentRunningCount = runningCount;
       let currentShoesDealt = shoesDealt;
 
-      // Helper to deal from the current shoe state
-      const dealFromCurrentShoe = () => {
-        const { card, remainingShoe, reshuffled } = dealCard(
-          currentShoe,
-          gameSettings.numberOfDecks,
-          gameSettings.countingSystem,
+      // Helper to deal from the current shoe state OR use forced cards from test scenario
+      // Create maps for forced cards by type and index
+      const forcedDealerCards: Map<number, GameCard> = new Map();
+      const forcedPlayerCards: Map<number, GameCard> = new Map();
+      const forcedAICards: Map<number, Map<number, GameCard>> = new Map(); // Map<aiIndex, Map<cardIndex, Card>>
+
+      // Pre-create all forced cards if a test scenario is selected
+      if (selectedTestScenario) {
+        debugLog(
+          "testScenario",
+          `🧪 Test scenario selected: ${selectedTestScenario.name}`,
         );
 
-        if (reshuffled) {
-          currentShoe = remainingShoe;
-          currentCardsDealt = 1;
-          currentRunningCount = card.count;
-          currentShoesDealt += 1;
+        // Create forced dealer upcard (first card only)
+        forcedDealerCards.set(
+          0,
+          createCardFromScenario(
+            selectedTestScenario.dealerUpCard.rank,
+            selectedTestScenario.dealerUpCard.suit,
+            gameSettings.countingSystem,
+          ),
+        );
+
+        // Create forced player cards (if player is seated)
+        if (selectedTestScenario.playerHands && playerSeat !== null) {
+          selectedTestScenario.playerHands.forEach((cardSpec, idx) => {
+            forcedPlayerCards.set(
+              idx,
+              createCardFromScenario(
+                cardSpec.rank,
+                cardSpec.suit,
+                gameSettings.countingSystem,
+              ),
+            );
+          });
+        }
+
+        // Create forced AI cards by position
+        if (selectedTestScenario.aiHands) {
+          Object.entries(selectedTestScenario.aiHands).forEach(
+            ([positionStr, cards]) => {
+              const position = parseInt(positionStr, 10);
+              // Find AI index for this position
+              const aiIndex = aiPlayers.findIndex(
+                (ai) => ai.position === position,
+              );
+              if (aiIndex !== -1) {
+                const aiCardMap: Map<number, GameCard> = new Map();
+                cards.forEach((cardSpec, idx) => {
+                  aiCardMap.set(
+                    idx,
+                    createCardFromScenario(
+                      cardSpec.rank,
+                      cardSpec.suit,
+                      gameSettings.countingSystem,
+                    ),
+                  );
+                });
+                forcedAICards.set(aiIndex, aiCardMap);
+              }
+            },
+          );
+        }
+      }
+
+      // Helper to deal card with optional forced override
+      const dealFromCurrentShoe = (
+        type: "dealer" | "player" | "ai",
+        index: number,
+        cardIndex: number,
+      ) => {
+        let card: GameCard | undefined;
+
+        // Check for forced cards based on type
+        if (type === "dealer" && forcedDealerCards.has(cardIndex)) {
+          card = forcedDealerCards.get(cardIndex);
+          debugLog(
+            "testScenario",
+            `Using forced dealer card ${cardIndex}: ${card?.rank}${card?.suit}`,
+          );
+        } else if (type === "player" && forcedPlayerCards.has(cardIndex)) {
+          card = forcedPlayerCards.get(cardIndex);
+          debugLog(
+            "testScenario",
+            `Using forced player card ${cardIndex}: ${card?.rank}${card?.suit}`,
+          );
+        } else if (type === "ai" && forcedAICards.has(index)) {
+          const aiCardMap = forcedAICards.get(index);
+          if (aiCardMap?.has(cardIndex)) {
+            card = aiCardMap.get(cardIndex);
+            debugLog(
+              "testScenario",
+              `Using forced AI ${index} card ${cardIndex}: ${card?.rank}${card?.suit}`,
+            );
+          }
+        }
+
+        // If no forced card, deal from shoe
+        if (!card) {
+          const { card: dealtCard, remainingShoe, reshuffled } = dealCard(
+            currentShoe,
+            gameSettings.numberOfDecks,
+            gameSettings.countingSystem,
+          );
+          card = dealtCard;
+
+          if (reshuffled) {
+            currentShoe = remainingShoe;
+            currentCardsDealt = 1;
+            currentRunningCount = card.count;
+            currentShoesDealt += 1;
+          } else {
+            currentShoe = remainingShoe;
+            currentCardsDealt += 1;
+            currentRunningCount += card.count;
+          }
         } else {
-          currentShoe = remainingShoe;
+          // For forced cards, still update counts
           currentCardsDealt += 1;
           currentRunningCount += card.count;
         }
@@ -225,7 +332,7 @@ export function useGameActions({
       // Deal first card to everyone (right to left, dealer last)
       sortedAIPlayers.forEach((ai) => {
         const idx = aiPlayers.indexOf(ai);
-        const card = dealFromCurrentShoe();
+        const card = dealFromCurrentShoe("ai", idx, 0);
         debugLog(
           "dealCards",
           `AI Player ${idx} (${ai.character.name}, Seat ${ai.position}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
@@ -234,14 +341,14 @@ export function useGameActions({
       });
       // Only deal to player if they're seated AND have placed a bet
       if (playerSeat !== null && effectivePlayerBet > 0) {
-        const card = dealFromCurrentShoe();
+        const card = dealFromCurrentShoe("player", 0, 0);
         debugLog(
           "dealCards",
           `Player (Seat ${playerSeat}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
         );
         dealtCards.push({ type: "player", index: 0, card, cardIndex: 0 });
       }
-      const dealerCard1 = dealFromCurrentShoe();
+      const dealerCard1 = dealFromCurrentShoe("dealer", 0, 0);
       debugLog(
         "dealCards",
         `Dealer card 1: ${dealerCard1.rank}${dealerCard1.suit} (value: ${dealerCard1.value}, count: ${dealerCard1.count}) [FACE UP] | Running count: ${currentRunningCount}`,
@@ -257,7 +364,7 @@ export function useGameActions({
       // Deal second card to everyone (right to left, dealer last)
       sortedAIPlayers.forEach((ai) => {
         const idx = aiPlayers.indexOf(ai);
-        const card = dealFromCurrentShoe();
+        const card = dealFromCurrentShoe("ai", idx, 1);
         debugLog(
           "dealCards",
           `AI Player ${idx} (${ai.character.name}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
@@ -266,14 +373,14 @@ export function useGameActions({
       });
       // Only deal second card to player if they're seated AND have placed a bet
       if (playerSeat !== null && effectivePlayerBet > 0) {
-        const card = dealFromCurrentShoe();
+        const card = dealFromCurrentShoe("player", 0, 1);
         debugLog(
           "dealCards",
           `Player: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
         );
         dealtCards.push({ type: "player", index: 0, card, cardIndex: 1 });
       }
-      const dealerCard2 = dealFromCurrentShoe();
+      const dealerCard2 = dealFromCurrentShoe("dealer", 0, 1);
       debugLog(
         "dealCards",
         `Dealer card 2: ${dealerCard2.rank}${dealerCard2.suit} (value: ${dealerCard2.value}, count: ${dealerCard2.count}) [FACE DOWN - not counting] | Running count: ${currentRunningCount}`,
@@ -575,6 +682,7 @@ export function useGameActions({
       playerHand,
       getCardPosition,
       currentDealer,
+      selectedTestScenario,
       setShoe,
       setCardsDealt,
       setRunningCount,
@@ -1088,7 +1196,10 @@ export function useGameActions({
     debugLog("playerActions", "=== PLAYER ACTION: SURRENDER ===");
 
     const handValue = calculateHandValue(playerHand.cards);
-    debugLog("playerActions", `Hand value: ${handValue}, Bet: $${playerHand.bet}`);
+    debugLog(
+      "playerActions",
+      `Hand value: ${handValue}, Bet: $${playerHand.bet}`,
+    );
 
     // Calculate refund (50% of bet, rounded down)
     const refund = Math.floor(playerHand.bet / 2);

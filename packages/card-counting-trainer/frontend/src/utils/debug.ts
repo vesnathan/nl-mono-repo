@@ -17,6 +17,7 @@ export const DEBUG = {
   insurance: false, // Insurance phase
   audioQueue: true, // Audio queue processing
   speechBubbles: true, // Speech bubble creation
+  testScenario: true, // Test scenario forced card dealing
 };
 
 /**
