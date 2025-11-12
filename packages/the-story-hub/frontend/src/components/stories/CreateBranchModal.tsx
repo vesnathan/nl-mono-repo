@@ -125,6 +125,7 @@ export function CreateBranchModal({
     }
 
     const input: CreateBranchInput = {
+      storyId,
       parentNodeId,
       branchDescription: branchDescription.trim(),
       content: content.trim(),

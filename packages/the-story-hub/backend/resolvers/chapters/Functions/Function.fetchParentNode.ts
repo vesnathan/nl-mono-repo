@@ -11,30 +11,15 @@ type CTX = Context<{ input: CreateBranchInput }, object, object, object, any>;
 export function request(ctx: CTX) {
   const { input } = ctx.args;
 
-  console.log(`Fetching parent node: ${input.parentNodeId}`);
+  console.log(`Fetching parent node: ${input.parentNodeId} from story: ${input.storyId}`);
 
-  // We need to query for the parent node
-  // Since we don't know the storyId yet, we need to use GSI1 or scan
-  // Better approach: Query using a pattern that works
-  // For now, we'll assume we need to pass storyId in the input
-  // OR we can use a Scan with filter (not ideal but works for pipeline demo)
-
-  // Alternative: Use Query on main table if we store parent references
-  // Let's query NODE# prefix items to find the parent
-
-  // Best approach: Store a reverse lookup or require storyId in input
-  // For this example, let's create a query that finds the chapter
-
+  // Use GetItem with the storyId from input
   return {
-    operation: "Query",
-    index: "GSI1",
-    query: {
-      expression: "SK = :sk",
-      expressionValues: util.dynamodb.toMapValues({
-        ":sk": `NODE#${input.parentNodeId}`,
-      }),
-    },
-    limit: 1,
+    operation: "GetItem",
+    key: util.dynamodb.toMapValues({
+      PK: `STORY#${input.storyId}`,
+      SK: `NODE#${input.parentNodeId}`,
+    }),
   };
 }
 
@@ -44,16 +29,14 @@ export function response(ctx: CTX) {
     return util.error(ctx.error.message, "ParentNodeFetchFailed");
   }
 
-  const items = ctx.result.items || [];
+  const parentNode = ctx.result;
 
-  if (items.length === 0) {
+  if (!parentNode || !parentNode.nodeId) {
     return util.error(
       `Parent node not found: ${ctx.args.input.parentNodeId}`,
       "ParentNodeNotFound",
     );
   }
-
-  const parentNode = items[0];
 
   console.log("Parent node fetched successfully:", parentNode.nodeId);
 

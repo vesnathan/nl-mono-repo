@@ -32,6 +32,7 @@ import { listCommentsAPI } from "@/lib/api/comments";
 import { PatreonBadge } from "@/components/common/PatreonBadge";
 import { OGBadge } from "@/components/common/OGBadge";
 import { CreateBranchModal } from "@/components/stories/CreateBranchModal";
+import { VoteButtons } from "@/components/stories/VoteButtons";
 
 // Component to display branch comment count
 function BranchCommentButton({
@@ -239,16 +240,7 @@ function ChapterSection({
               {sortedBranches.map((branch) => (
                 <div
                   key={branch.nodeId}
-                  onClick={() => handleBranchSelect(branch.nodeId)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handleBranchSelect(branch.nodeId);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  className="bg-gray-800 border border-gray-700 p-4 hover:bg-gray-750 transition-colors cursor-pointer relative"
+                  className="bg-gray-800 border border-gray-700 p-4 hover:bg-gray-750 transition-colors relative"
                 >
                   {/* AI Badge - Top Right */}
                   {branch.aiCreated && (
@@ -291,7 +283,7 @@ function ChapterSection({
                     </p>
                   )}
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-4 text-sm text-gray-400">
+                    <div className="flex items-center gap-4 text-sm text-gray-400 flex-wrap">
                       <div className="flex items-center gap-1">
                         <span>👤 by {branch.authorName}</span>
                         {branch.authorOGSupporter && <OGBadge size="sm" />}
@@ -299,8 +291,12 @@ function ChapterSection({
                           <PatreonBadge size="sm" />
                         )}
                       </div>
-                      <span>👍 {branch.stats?.upvotes || 0}</span>
-                      <span>👎 {branch.stats?.downvotes || 0}</span>
+                      <VoteButtons
+                        storyId={storyId}
+                        nodeId={branch.nodeId}
+                        upvotes={branch.stats?.upvotes || 0}
+                        downvotes={branch.stats?.downvotes || 0}
+                      />
                       <span>🌿 {branch.stats?.childBranches || 0}</span>
                       <BranchCommentButton
                         storyId={storyId}
@@ -316,6 +312,15 @@ function ChapterSection({
                         }}
                       />
                     </div>
+                    <Button
+                      size="sm"
+                      color="primary"
+                      variant="flat"
+                      onPress={() => handleBranchSelect(branch.nodeId)}
+                      className="ml-auto"
+                    >
+                      Read Branch →
+                    </Button>
                   </div>
 
                   {/* Branch Comments Section */}
