@@ -20,6 +20,7 @@ export default function StatsBar() {
     setShowStrategyCard,
     setShowHeatMap,
     setShowCountPeek,
+    strategyCardUsedThisHand,
   } = useUIState();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { isAuthenticated, isLoading, isAdmin, refresh } = useAuth();
@@ -235,25 +236,40 @@ export default function StatsBar() {
         <button
           type="button"
           onClick={() => setShowStrategyCard(true)}
+          disabled={strategyCardUsedThisHand}
+          title={
+            strategyCardUsedThisHand
+              ? "Strategy card already used this hand (cooldown active)"
+              : "View basic strategy chart (costs 10 chips)"
+          }
           style={{
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
-            color: "#FFF",
-            border: "2px solid #FFD700",
+            backgroundColor: strategyCardUsedThisHand
+              ? "rgba(0, 0, 0, 0.5)"
+              : "rgba(0, 0, 0, 0.8)",
+            color: strategyCardUsedThisHand ? "#666" : "#FFF",
+            border: strategyCardUsedThisHand
+              ? "2px solid #666"
+              : "2px solid #FFD700",
             borderRadius: "8px",
             padding: "8px 16px",
             fontSize: "14px",
             fontWeight: "bold",
-            cursor: "pointer",
+            cursor: strategyCardUsedThisHand ? "not-allowed" : "pointer",
             transition: "all 0.2s",
+            opacity: strategyCardUsedThisHand ? 0.5 : 1,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
+            if (!strategyCardUsedThisHand) {
+              e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+            if (!strategyCardUsedThisHand) {
+              e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+            }
           }}
         >
-          📊 Strategy
+          📊 Strategy {strategyCardUsedThisHand ? "(Used)" : "(10 chips)"}
         </button>
         <button
           type="button"

@@ -21,6 +21,7 @@ export default function GameModals() {
     maxBet,
     insuranceOffered,
     playerHand,
+    dealerHand,
     playerFinished,
     gameSettings,
     peakChips,
@@ -176,6 +177,10 @@ export default function GameModals() {
         isOpen={showStrategyCard}
         onClose={() => setShowStrategyCard(false)}
         settings={gameSettings}
+        playerHand={playerHand}
+        dealerUpCard={
+          dealerHand.cards.length > 0 ? dealerHand.cards[0] : undefined
+        }
       />
 
       {/* Debug Log Modal and Button */}

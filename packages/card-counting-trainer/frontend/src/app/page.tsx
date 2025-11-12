@@ -150,6 +150,8 @@ export default function GamePage() {
   const [showCountPeekResult, setShowCountPeekResult] = useState(false);
   const [showPenaltyFlash, setShowPenaltyFlash] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [strategyCardUsedThisHand, setStrategyCardUsedThisHand] =
+    useState(false);
   const [playerSeat, setPlayerSeat] = useState<number | null>(null); // null means not seated
 
   // Action bubbles and turn tracking
@@ -386,6 +388,47 @@ export default function GamePage() {
     setShowCountPeekConfirmation(false);
   }, []);
 
+  const handleShowStrategyCard = useCallback(
+    (show: boolean) => {
+      const strategyCost = 10;
+
+      // If closing the modal, just close it
+      if (!show) {
+        setShowStrategyCard(false);
+        return;
+      }
+
+      // Check cooldown - only allow once per hand
+      if (strategyCardUsedThisHand) {
+        debugLog(
+          "gamePhases",
+          "Cannot open strategy card - already used this hand (cooldown active)",
+        );
+        return;
+      }
+
+      // If opening, check if player has enough chips
+      if (playerChips < strategyCost) {
+        debugLog(
+          "gamePhases",
+          "Cannot open strategy card - insufficient chips",
+        );
+        return;
+      }
+
+      // Deduct chip cost, mark as used, and open modal
+      setPlayerChips(playerChips - strategyCost);
+      setStrategyCardUsedThisHand(true);
+      setShowStrategyCard(true);
+
+      debugLog(
+        "gamePhases",
+        `Strategy card opened - ${strategyCost} chips deducted. Remaining chips: ${playerChips - strategyCost}. Cooldown active for this hand.`,
+      );
+    },
+    [playerChips, setPlayerChips, strategyCardUsedThisHand],
+  );
+
   // Suspicion decay hook
   useSuspicionDecay(suspicionLevel, setSuspicionLevel);
 
@@ -556,6 +599,7 @@ export default function GamePage() {
     setPhase("BETTING");
     setSpeechBubbles([]); // Clear speech bubbles from previous hand
     clearDebugLogs(); // Clear debug logs at start of new hand
+    setStrategyCardUsedThisHand(false); // Reset strategy card cooldown for new hand
 
     // Clear cards from previous hand
     setPlayerHand({ cards: [], bet: 0 });
@@ -753,13 +797,14 @@ export default function GamePage() {
             showCountPeek,
             debugLogs,
             showDebugLog,
+            strategyCardUsedThisHand,
             heatMapBuckets: getHeatMapBuckets(),
             discretionScore: getDiscretionScore(),
             heatMapDataPointCount: dataPointCount,
             setShowSettings,
             setShowAdminSettings,
             setShowLeaderboard,
-            setShowStrategyCard,
+            setShowStrategyCard: handleShowStrategyCard,
             setShowHeatMap,
             setShowDealerInfo,
             setShowCountPeek,
