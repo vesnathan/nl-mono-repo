@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import BettingInterface from "@/components/BettingInterface";
 import InsuranceUI from "@/components/InsuranceUI";
 import PlayerActionsModal from "@/components/PlayerActionsModal";

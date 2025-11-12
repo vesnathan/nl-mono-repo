@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { DealerCharacter } from "@/data/dealerCharacters";
 import {
-  getDealerSuspicionThreshold,
   getDealerReportingThreshold,
   getDealerSuspicionComment,
 } from "@/data/dialogue/dealerSuspicion";
