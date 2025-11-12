@@ -20,7 +20,6 @@ export default function DeckPenetrationIndicator({
     return "#FF5722"; // Red - deep penetration
   };
 
-
   return (
     <div
       style={{

@@ -24,7 +24,6 @@ interface UseDealerSuspicionParams {
 export function useDealerSuspicion({
   currentDealer,
   dealerSuspicion,
-  suspicionLevel,
   playerSeat,
   initialized,
   setDealerSuspicion,

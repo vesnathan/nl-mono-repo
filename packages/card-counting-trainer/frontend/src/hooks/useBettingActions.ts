@@ -1,6 +1,11 @@
 import { useCallback } from "react";
 import { debugLog } from "@/utils/debug";
-import { AIPlayer, GamePhase, PlayerHand, SpeechBubble } from "@/types/gameState";
+import {
+  AIPlayer,
+  GamePhase,
+  PlayerHand,
+  SpeechBubble,
+} from "@/types/gameState";
 import { DealerCharacter } from "@/data/dealerCharacters";
 import { AudioQueueHook, AudioPriority } from "@/hooks/useAudioQueue";
 import { getDealerAudioPath } from "@/utils/audioHelpers";

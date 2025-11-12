@@ -11,8 +11,7 @@ import { Card } from "@/types/game";
 import { calculateHandValue, isBusted } from "@/lib/gameActions";
 import { CHARACTER_DIALOGUE, pick } from "@/data/dialogue";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
-import { AudioQueueHook, AudioPriority } from "@/hooks/useAudioQueue";
-import { getDealerAudioPath } from "@/utils/audioHelpers";
+import { AudioPriority } from "@/hooks/useAudioQueue";
 import { debugLog } from "@/utils/debug";
 
 interface UseDealerTurnPhaseParams {
@@ -25,7 +24,6 @@ interface UseDealerTurnPhaseParams {
   setDealerHand: (
     hand: PlayerHand | ((prev: PlayerHand) => PlayerHand),
   ) => void;
-  setDealerCallout: (callout: string | null) => void;
   setFlyingCards: (
     cards: FlyingCardData[] | ((prev: FlyingCardData[]) => FlyingCardData[]),
   ) => void;
@@ -60,7 +58,6 @@ interface UseDealerTurnPhaseParams {
       | "dealer_has_20"
       | "dealer_has_21",
   ) => void;
-  audioQueue: AudioQueueHook;
 }
 
 /**
@@ -78,14 +75,12 @@ export function useDealerTurnPhase({
   currentDealer,
   setDealerRevealed,
   setDealerHand,
-  setDealerCallout,
   setFlyingCards,
   setPhase,
   dealCardFromShoe,
   registerTimeout,
   getCardPositionForAnimation,
   addSpeechBubble,
-  audioQueue,
 }: UseDealerTurnPhaseParams) {
   const dealerTurnProcessingRef = useRef(false);
   const dealerFinishedRef = useRef(false);

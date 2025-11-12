@@ -293,7 +293,6 @@ export function getStrategyExplanation(
   action: StrategyAction,
   playerCards: Card[],
   dealerUpCard: Card,
-
 ): string {
   const handValue = calculateHandValue(playerCards);
   const dealerValue = dealerUpCard.rank === "A" ? 11 : dealerUpCard.value;

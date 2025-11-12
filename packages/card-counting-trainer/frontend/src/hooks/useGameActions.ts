@@ -100,10 +100,8 @@ export interface GameActionsReturn {
 }
 
 export function useGameActions({
-  phase,
   playerSeat,
   playerHand,
-  dealerHand,
   aiPlayers,
   shoe,
   cardsDealt,

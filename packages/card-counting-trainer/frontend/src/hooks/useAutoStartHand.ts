@@ -1,5 +1,10 @@
 import { useEffect, useRef } from "react";
-import { AIPlayer, GamePhase, PlayerHand, SpeechBubble } from "@/types/gameState";
+import {
+  AIPlayer,
+  GamePhase,
+  PlayerHand,
+  SpeechBubble,
+} from "@/types/gameState";
 import { debugLog } from "@/utils/debug";
 
 interface UseAutoStartHandParams {
