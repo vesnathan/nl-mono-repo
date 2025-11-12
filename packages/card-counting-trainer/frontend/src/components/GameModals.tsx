@@ -37,9 +37,6 @@ export default function GameModals() {
     showStrategyCard,
     setShowStrategyCard,
     debugLogs,
-    showDebugLog,
-    setShowDebugLog,
-    clearDebugLogs,
   } = useUIState();
 
   const {
