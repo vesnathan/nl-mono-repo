@@ -87,11 +87,11 @@
 - [ ] Speed control slider (0.25s - 2s per card)
 
 ### Gameplay Features
-- [ ] **Split gameplay** (splitting pairs into two hands)
+- [x] **Split gameplay** (splitting pairs into two hands) - Human and AI players
 - [x] Double down implementation
 - [ ] Surrender functionality
 - [x] Insurance when dealer shows Ace
-- [ ] Resplit option (up to 4 hands)
+- [x] Resplit option (up to 4 hands) - Fully implemented with game rules (maxResplits, resplitAces)
 
 ## Lower Priority - Polish & Future (Phase 3+)
 
