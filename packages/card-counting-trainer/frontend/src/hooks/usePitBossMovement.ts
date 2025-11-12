@@ -36,13 +36,12 @@ export function usePitBossMovement(
           } else if (newDistance > 60) {
             newDistance -= Math.random() * 8; // Pull back to medium
           }
-        } else {
+        } else if (newDistance < 20) {
           // Low suspicion: normal patrol behavior - stay farther away
-          if (newDistance < 20) {
-            // If very close, strongly push away
-            newDistance += Math.random() * 10;
-          } else if (newDistance > 50) {
-            // If far, moderately pull back toward comfortable distance
+          // If very close, strongly push away
+          newDistance += Math.random() * 10;
+        } else if (newDistance > 50) {
+          // If far, moderately pull back toward comfortable distance
             newDistance -= Math.random() * 8;
           } else if (newDistance > 40) {
             // If slightly far, gently pull back

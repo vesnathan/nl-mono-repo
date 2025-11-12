@@ -196,7 +196,6 @@ export function AuthModal({
           <button
             type="button"
             className="focus:outline-none"
-            type="button"
             onClick={togglePasswordVisibility}
           >
             {isPasswordVisible ? (
@@ -298,7 +297,6 @@ export function AuthModal({
             <button
               type="button"
               className="focus:outline-none"
-              type="button"
               onClick={togglePasswordVisibility}
             >
               {isPasswordVisible ? (
@@ -327,7 +325,6 @@ export function AuthModal({
             <button
               type="button"
               className="focus:outline-none"
-              type="button"
               onClick={toggleConfirmPasswordVisibility}
             >
               {isConfirmPasswordVisible ? (

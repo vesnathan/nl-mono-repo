@@ -142,7 +142,7 @@ export default function AdminSettingsModal({
             </h2>
             <button
               type="button"
-              type="button"
+              
               onClick={onClose}
               style={{
                 backgroundColor: "transparent",
@@ -494,7 +494,6 @@ export default function AdminSettingsModal({
           <div style={{ display: "flex", gap: "12px" }}>
             <button
               type="button"
-              type="button"
               onClick={handleReset}
               style={{
                 flex: 1,
@@ -520,7 +519,6 @@ export default function AdminSettingsModal({
               🔄 Reset to Defaults
             </button>
             <button
-              type="button"
               type="button"
               onClick={onClose}
               style={{

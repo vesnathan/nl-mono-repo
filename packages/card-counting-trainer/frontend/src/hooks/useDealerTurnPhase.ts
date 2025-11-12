@@ -315,14 +315,13 @@ export function useDealerTurnPhase({
                 if (isBust) {
                   message = "Dealer busts";
                   voiceLine = "dealer_busts";
-                } else {
+                } else if (finalValue === 17) {
                   // Use proper words for dealer callouts (matching audio files)
-                  if (finalValue === 17) {
-                    message = "Dealer has seventeen";
-                    voiceLine = "dealer_has_17";
-                  } else if (finalValue === 18) {
-                    message = "Dealer has eighteen";
-                    voiceLine = "dealer_has_18";
+                  message = "Dealer has seventeen";
+                  voiceLine = "dealer_has_17";
+                } else if (finalValue === 18) {
+                  message = "Dealer has eighteen";
+                  voiceLine = "dealer_has_18";
                   } else if (finalValue === 19) {
                     message = "Dealer has nineteen";
                     voiceLine = "dealer_has_19";
