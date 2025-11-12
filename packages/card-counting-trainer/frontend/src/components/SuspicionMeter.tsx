@@ -4,29 +4,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DealerCharacter } from "@/data/dealerCharacters";
+import { useGameState } from "@/contexts/GameStateContext";
+import { useGameActions } from "@/contexts/GameActionsContext";
 
-interface SuspicionMeterProps {
-  level: number; // 0-100 (alternate prop name) - Pit boss attention
-  suspicionLevel?: number; // 0-100 - Pit boss attention (alternate)
-  dealerSuspicion?: number; // 0-100 - Dealer's awareness
-  pitBossDistance?: number; // 0-100, higher = closer (more dangerous)
-  currentDealer?: DealerCharacter | null; // Current dealer info
-  onYourSide?: boolean;
-  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
-}
-
-export default function SuspicionMeter({
-  level,
-  suspicionLevel,
-  dealerSuspicion = 0,
-  pitBossDistance,
-  currentDealer,
-  registerTimeout,
-}: SuspicionMeterProps) {
+export default function SuspicionMeter() {
+  const { suspicionLevel, dealerSuspicion, pitBossDistance, currentDealer } =
+    useGameState();
+  const { registerTimeout } = useGameActions();
   const [pulseAnimation, setPulseAnimation] = useState(false);
 
-  const actualSuspicionLevel = level || suspicionLevel || 0;
+  const actualSuspicionLevel = suspicionLevel;
 
   // Trigger pulse when suspicion increases significantly
   useEffect(() => {

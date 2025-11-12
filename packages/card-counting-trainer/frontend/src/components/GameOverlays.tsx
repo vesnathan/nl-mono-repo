@@ -1,59 +1,30 @@
 import React from "react";
 import { Button } from "@nextui-org/react";
-import {
-  GamePhase,
-  PlayerHand,
-  SpeechBubble as SpeechBubbleType,
-  WinLossBubbleData,
-  ActiveConversation,
-  FlyingCardData,
-} from "@/types/gameState";
-import { isBusted } from "@/lib/gameActions";
 import WinLossBubble from "@/components/WinLossBubble";
 import SpeechBubble from "@/components/SpeechBubble";
 import ConversationPrompt from "@/components/ConversationPrompt";
 import FlyingCard from "@/components/FlyingCard";
+import { useGameState } from "@/contexts/GameStateContext";
+import { useGameActions } from "@/contexts/GameActionsContext";
 
-interface GameOverlaysProps {
-  // Player state
-  playerSeat: number | null;
-  playerHand: PlayerHand;
-  currentBet: number;
-  phase: GamePhase;
-
-  // Overlays
-  speechBubbles: SpeechBubbleType[];
-  winLossBubbles: WinLossBubbleData[];
-  activeConversation: ActiveConversation | null;
-  flyingCards: FlyingCardData[];
-
-  // Actions
-  startNewRound: () => void;
-  hit: () => void;
-  stand: () => void;
-  handleConversationResponse: (suspicionChange: number) => void;
-  handleConversationIgnore: () => void;
-  setWinLossBubbles: React.Dispatch<React.SetStateAction<WinLossBubbleData[]>>;
-  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
-}
-
-export default function GameOverlays({
-  playerSeat,
-  playerHand,
-  currentBet,
-  phase,
-  speechBubbles,
-  winLossBubbles,
-  activeConversation,
-  flyingCards,
-  startNewRound,
-  hit,
-  stand,
-  handleConversationResponse,
-  handleConversationIgnore,
-  setWinLossBubbles,
-  registerTimeout,
-}: GameOverlaysProps) {
+export default function GameOverlays() {
+  const {
+    playerSeat,
+    playerHand,
+    currentBet,
+    phase,
+    speechBubbles,
+    winLossBubbles,
+    activeConversation,
+    flyingCards,
+  } = useGameState();
+  const {
+    startNewRound,
+    handleConversationResponse,
+    handleConversationIgnore,
+    setWinLossBubbles,
+    registerTimeout,
+  } = useGameActions();
   return (
     <>
       {/* Action Buttons - Positioned below player spot */}

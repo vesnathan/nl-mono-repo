@@ -1,26 +1,14 @@
 import React from "react";
-import { DealerCharacter, getDealerAvatarPath } from "@/data/dealerCharacters";
-import { PlayerHand, GamePhase } from "@/types/gameState";
+import { getDealerAvatarPath } from "@/data/dealerCharacters";
 import TurnIndicator from "@/components/TurnIndicator";
 import PlayingCard from "@/components/PlayingCard";
+import { useGameState } from "@/contexts/GameStateContext";
+import { useUIState } from "@/contexts/UIStateContext";
 
-interface DealerSectionProps {
-  currentDealer: DealerCharacter | null;
-  dealerCallout: string | null;
-  phase: GamePhase;
-  dealerHand: PlayerHand;
-  dealerRevealed: boolean;
-  onDealerClick: () => void;
-}
-
-export default function DealerSection({
-  currentDealer,
-  dealerCallout,
-  phase,
-  dealerHand,
-  dealerRevealed,
-  onDealerClick,
-}: DealerSectionProps) {
+export default function DealerSection() {
+  const { currentDealer, dealerCallout, phase, dealerHand, dealerRevealed } =
+    useGameState();
+  const { setShowDealerInfo } = useUIState();
   return (
     <div
       style={{
@@ -73,7 +61,7 @@ export default function DealerSection({
           )}
 
           <div
-            onClick={onDealerClick}
+            onClick={() => setShowDealerInfo(true)}
             style={{
               width: "150px",
               height: "150px",

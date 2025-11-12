@@ -102,11 +102,15 @@ export default function SpeechBubble({
         @keyframes speechFadeInBelow {
           from {
             opacity: 0;
-            transform: ${isBottomCorner ? "translate(-50%, calc(150px + 14px)) scale(0.8)" : "translate(-50%, -40px) scale(0.8)"};
+            transform: ${isBottomCorner
+              ? "translate(-50%, calc(150px + 14px)) scale(0.8)"
+              : "translate(-50%, -40px) scale(0.8)"};
           }
           to {
             opacity: 1;
-            transform: ${isBottomCorner ? "translate(-50%, calc(150px + 14px)) scale(1)" : "translate(-50%, -40px) scale(1)"};
+            transform: ${isBottomCorner
+              ? "translate(-50%, calc(150px + 14px)) scale(1)"
+              : "translate(-50%, -40px) scale(1)"};
           }
         }
       `}</style>

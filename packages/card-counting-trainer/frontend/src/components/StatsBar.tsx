@@ -1,36 +1,26 @@
 import { useState } from "react";
-import { GameSettings } from "@/types/gameSettings";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { signOut } from "aws-amplify/auth";
+import { useGameState } from "@/contexts/GameStateContext";
+import { useUIState } from "@/contexts/UIStateContext";
 
-interface StatsBarProps {
-  gameSettings: GameSettings;
-  runningCount: number;
-  currentStreak: number;
-  playerChips: number;
-  currentScore: number;
-  scoreMultiplier: number;
-  onSettingsClick: () => void;
-  onAdminClick: () => void;
-  onLeaderboardClick: () => void;
-  onStrategyClick: () => void;
-  onChartsClick: () => void;
-}
-
-export default function StatsBar({
-  gameSettings,
-  runningCount,
-  currentStreak,
-  playerChips,
-  currentScore,
-  scoreMultiplier,
-  onSettingsClick,
-  onAdminClick,
-  onLeaderboardClick,
-  onStrategyClick,
-  onChartsClick,
-}: StatsBarProps) {
+export default function StatsBar() {
+  const {
+    gameSettings,
+    runningCount,
+    currentStreak,
+    playerChips,
+    currentScore,
+    scoreMultiplier,
+  } = useGameState();
+  const {
+    setShowSettings,
+    setShowAdminSettings,
+    setShowLeaderboard,
+    setShowStrategyCard,
+    setShowHeatMap,
+  } = useUIState();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { isAuthenticated, isLoading, user, isAdmin, refresh } = useAuth();
 
@@ -130,7 +120,7 @@ export default function StatsBar({
       <div className="flex gap-4 items-center">
         {isAuthenticated && (
           <button
-            onClick={onSettingsClick}
+            onClick={() => setShowSettings(true)}
             style={{
               backgroundColor: "rgba(0, 0, 0, 0.8)",
               color: "#FFF",
@@ -154,7 +144,7 @@ export default function StatsBar({
         )}
         {isAdmin && (
           <button
-            onClick={onAdminClick}
+            onClick={() => setShowAdminSettings(true)}
             style={{
               backgroundColor: "rgba(0, 0, 0, 0.8)",
               color: "#FFF",
@@ -177,7 +167,7 @@ export default function StatsBar({
           </button>
         )}
         <button
-          onClick={onLeaderboardClick}
+          onClick={() => setShowLeaderboard(true)}
           style={{
             backgroundColor: "rgba(0, 0, 0, 0.8)",
             color: "#FFF",
@@ -199,7 +189,7 @@ export default function StatsBar({
           🏆 Leaderboard
         </button>
         <button
-          onClick={onStrategyClick}
+          onClick={() => setShowStrategyCard(true)}
           style={{
             backgroundColor: "rgba(0, 0, 0, 0.8)",
             color: "#FFF",
@@ -221,7 +211,7 @@ export default function StatsBar({
           📊 Strategy
         </button>
         <button
-          onClick={onChartsClick}
+          onClick={() => setShowHeatMap(true)}
           style={{
             backgroundColor: "rgba(0, 0, 0, 0.8)",
             color: "#FFF",
