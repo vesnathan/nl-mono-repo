@@ -120,7 +120,7 @@ export default function SplitHandsModal({
 
           return (
             <div
-              key={index}
+              key={`hand-${index}`}
               style={{
                 flex: 1,
                 border: `3px solid ${isActive ? "#FFD700" : isBusted ? "#FF0000" : "#666"}`,

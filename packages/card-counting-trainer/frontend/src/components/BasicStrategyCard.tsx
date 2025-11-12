@@ -368,8 +368,8 @@ export default function BasicStrategyCard({
                   </tr>
                 </thead>
                 <tbody>
-                  {hardTotals.map((row, idx) => (
-                    <tr key={idx}>
+                  {hardTotals.map((row) => (
+                    <tr key={row[0]}>
                       <td
                         style={{
                           padding: "6px",
@@ -384,7 +384,7 @@ export default function BasicStrategyCard({
                       </td>
                       {row.actions.map((action, actionIdx) => (
                         <td
-                          key={actionIdx}
+                          key={dealerHeaders[actionIdx]}
                           style={{
                             padding: "6px",
                             backgroundColor: getActionColor(
@@ -454,8 +454,8 @@ export default function BasicStrategyCard({
                   </tr>
                 </thead>
                 <tbody>
-                  {softTotals.map((row, idx) => (
-                    <tr key={idx}>
+                  {softTotals.map((row) => (
+                    <tr key={row[0]}>
                       <td
                         style={{
                           padding: "6px",
@@ -470,7 +470,7 @@ export default function BasicStrategyCard({
                       </td>
                       {row.actions.map((action, actionIdx) => (
                         <td
-                          key={actionIdx}
+                          key={dealerHeaders[actionIdx]}
                           style={{
                             padding: "6px",
                             backgroundColor: getActionColor(
@@ -541,8 +541,8 @@ export default function BasicStrategyCard({
                 </tr>
               </thead>
               <tbody>
-                {pairSplits.map((row, idx) => (
-                  <tr key={idx}>
+                {pairSplits.map((row) => (
+                  <tr key={row[0]}>
                     <td
                       style={{
                         padding: "6px",

@@ -381,7 +381,7 @@ export default function PlayingCard({ card, faceDown }: PlayingCardProps) {
             >
               {pipLayout.map((pip, index) => (
                 <div
-                  key={index}
+                  key={`${pip}-${index}`}
                   style={{
                     display: "flex",
                     alignItems: "center",

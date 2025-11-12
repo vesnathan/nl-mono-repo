@@ -116,7 +116,7 @@ export default function ConversationPrompt({
           {choices.map((choice, index) => (
             <button
               type="button"
-              key={index}
+              key={choice}
               onClick={() => handleChoice(index)}
               disabled={selectedIndex !== null}
               style={{

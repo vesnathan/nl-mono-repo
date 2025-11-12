@@ -164,7 +164,7 @@ export default function TableSeats() {
                           //                  bottom = row * (98px + 4px gap) - anchor from bottom
                           return (
                             <div
-                              key={cardIdx}
+                              key={`${card.rank}${card.suit}-${cardIdx}`}
                               style={{
                                 position: "absolute",
                                 left: `${col * 74}px`,
