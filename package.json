@@ -14,7 +14,9 @@
     "packages/the-story-hub/frontend",
     "packages/the-story-hub/backend",
     "packages/card-counting-trainer/frontend",
-    "packages/card-counting-trainer/backend"
+    "packages/card-counting-trainer/backend",
+    "packages/lawn-order/frontend",
+    "packages/lawn-order/backend"
   ],
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.0.14",
@@ -59,6 +61,7 @@
     "jest": "29.7.0",
     "lerna": "^8.2.2",
     "prettier": "^3.1.0",
+    "sharp": "0.30.7",
     "ts-jest": "29.1.2",
     "ts-node": "10.9.2",
     "typescript": "5.5.4",
@@ -74,6 +77,8 @@
     "deploy:tsh:dev:update": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-tsh-quick.ts --strategy update --skip-user-creation",
     "deploy:cct:dev:replace": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-cct-quick.ts",
     "deploy:cct:dev:update": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-cct-quick.ts --strategy update --skip-user-creation",
+    "deploy:lawn-order:dev": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-lawn-order-quick.ts",
+    "deploy:lawn-order:dev:update": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-lawn-order-quick.ts --strategy update",
     "aws-package-manager": "node packages/aws-bootstrap/scripts/aws-package-manager.js",
     "build": "lerna run build --stream",
     "build:tsh": "yarn workspace tshfrontend build",
@@ -84,6 +89,7 @@
     "dev:cwl": "yarn workspace cwlfrontend dev:local",
     "dev:awse": "yarn workspace awsefrontend dev:local",
     "dev:tsh": "yarn workspace tshfrontend dev:local",
-    "dev:cct": "yarn workspace cctfrontend dev:local"
+    "dev:cct": "yarn workspace cctfrontend dev:local",
+    "dev:lawn-order": "yarn workspace lawn-order-frontend dev:local"
   }
 }

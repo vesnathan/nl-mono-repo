@@ -19,6 +19,7 @@ import { deployCwl } from "./packages/cwl/deploy";
 import { deployAwsExample } from "./packages/aws-example/deploy";
 import { deployTheStoryHub } from "./packages/the-story-hub/deploy";
 import { deployCardCountingTrainer } from "./packages/card-counting-trainer/deploy";
+import { deployLawnOrder } from "./packages/lawn-order/deploy";
 /**
  * Type for deploy handler functions
  */
@@ -36,6 +37,7 @@ const DEPLOY_HANDLERS: Record<StackType, DeployHandler> = {
   [StackType.AwsExample]: deployAwsExample,
   [StackType.TheStoryHub]: deployTheStoryHub,
   [StackType.CardCountingTrainer]: deployCardCountingTrainer,
+  [StackType.LawnOrder]: deployLawnOrder,
 };
 
 /**
