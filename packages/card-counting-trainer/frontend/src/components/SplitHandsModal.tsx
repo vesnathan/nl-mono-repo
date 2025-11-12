@@ -82,7 +82,7 @@ export default function SplitHandsModal({
           Split Hands
         </h2>
         {canMinimize && (
-          <button
+          <button type="button"
             onClick={onClose}
             style={{
               backgroundColor: "transparent",
@@ -240,7 +240,7 @@ export default function SplitHandsModal({
         !hands[activeHandIndex]?.busted &&
         calculateHandValue(hands[activeHandIndex]?.cards || []) <= 21 && (
           <div style={{ display: "flex", gap: "12px" }}>
-            <button
+            <button type="button"
               onClick={onStand}
               style={{
                 flex: 1,
@@ -268,7 +268,7 @@ export default function SplitHandsModal({
               STAND
             </button>
 
-            <button
+            <button type="button"
               onClick={onHit}
               style={{
                 flex: 1,

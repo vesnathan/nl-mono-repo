@@ -110,7 +110,7 @@ export default function ConversationBubble({
             }}
           >
             {responseOptions.map((option, idx) => (
-              <button
+              <button type="button"
                 key={idx}
                 onClick={() => handleResponse(option)}
                 disabled={selectedOption !== null}

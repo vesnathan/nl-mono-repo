@@ -140,7 +140,7 @@ export default function AdminSettingsModal({
             <h2 style={{ fontSize: "28px", fontWeight: "bold", color: "#FFF" }}>
               🎛️ Admin Settings
             </h2>
-            <button
+            <button type="button"
               type="button"
               onClick={onClose}
               style={{
@@ -491,7 +491,7 @@ export default function AdminSettingsModal({
 
           {/* Action Buttons */}
           <div style={{ display: "flex", gap: "12px" }}>
-            <button
+            <button type="button"
               type="button"
               onClick={handleReset}
               style={{
@@ -517,7 +517,7 @@ export default function AdminSettingsModal({
             >
               🔄 Reset to Defaults
             </button>
-            <button
+            <button type="button"
               type="button"
               onClick={onClose}
               style={{

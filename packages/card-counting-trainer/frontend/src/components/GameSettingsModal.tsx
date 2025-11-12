@@ -183,7 +183,7 @@ export default function GameSettingsModal({
             <h2 style={{ fontSize: "28px", fontWeight: "bold", color: "#FFF" }}>
               ⚙️ Game Settings
             </h2>
-            <button
+            <button type="button"
               onClick={onClose}
               style={{
                 backgroundColor: "transparent",
@@ -271,7 +271,7 @@ export default function GameSettingsModal({
                 { id: "european", label: "European", icon: "🇪🇺" },
                 { id: "bad", label: "Bad Rules", icon: "⚠️" },
               ].map((preset) => (
-                <button
+                <button type="button"
                   key={preset.id}
                   onClick={() => loadPreset(preset.id as any)}
                   style={{
@@ -326,7 +326,7 @@ export default function GameSettingsModal({
               </label>
               <div style={{ display: "flex", gap: "8px" }}>
                 {([1, 2, 4, 6, 8] as const).map((num) => (
-                  <button
+                  <button type="button"
                     key={num}
                     onClick={() =>
                       setSettings({ ...settings, numberOfDecks: num })
@@ -445,7 +445,7 @@ export default function GameSettingsModal({
                     : "Dealer Stands (S17) - Player Favored"}
                 </div>
               </div>
-              <button
+              <button type="button"
                 onClick={() =>
                   setSettings({
                     ...settings,
@@ -516,7 +516,7 @@ export default function GameSettingsModal({
                   { value: BlackjackPayout.TWO_TO_ONE, label: "2:1", note: "" },
                   { value: BlackjackPayout.EVEN_MONEY, label: "1:1", note: "" },
                 ].map(({ value, label, note }) => (
-                  <button
+                  <button type="button"
                     key={value}
                     onClick={() =>
                       setSettings({ ...settings, blackjackPayout: value })
@@ -575,7 +575,7 @@ export default function GameSettingsModal({
                   keyof typeof COUNTING_SYSTEMS
                 >
               ).map((system) => (
-                <button
+                <button type="button"
                   key={system}
                   onClick={() =>
                     setSettings({
@@ -647,7 +647,7 @@ export default function GameSettingsModal({
 
           {/* Action Buttons */}
           <div style={{ display: "flex", gap: "12px" }}>
-            <button
+            <button type="button"
               onClick={handleSave}
               style={{
                 flex: 1,
@@ -670,7 +670,7 @@ export default function GameSettingsModal({
             >
               💾 Save Settings
             </button>
-            <button
+            <button type="button"
               onClick={onClose}
               style={{
                 flex: 1,

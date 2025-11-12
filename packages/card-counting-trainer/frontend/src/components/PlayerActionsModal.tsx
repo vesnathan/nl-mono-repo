@@ -50,7 +50,7 @@ export default function PlayerActionsModal({
         {(canSplit || canDouble) && (
           <div style={{ display: "flex", gap: "12px" }}>
             {canSplit && onSplit && (
-              <button
+              <button type="button"
                 onClick={onSplit}
                 style={{
                   flex: 1,
@@ -75,7 +75,7 @@ export default function PlayerActionsModal({
               </button>
             )}
             {canDouble && onDouble && (
-              <button
+              <button type="button"
                 onClick={onDouble}
                 style={{
                   flex: 1,
@@ -104,7 +104,7 @@ export default function PlayerActionsModal({
 
         {/* Bottom row: Stand and Hit */}
         <div style={{ display: "flex", gap: "12px" }}>
-          <button
+          <button type="button"
             onClick={onStand}
             style={{
               flex: 1,
@@ -132,7 +132,7 @@ export default function PlayerActionsModal({
             STAND
           </button>
 
-          <button
+          <button type="button"
             onClick={onHit}
             style={{
               flex: 1,
