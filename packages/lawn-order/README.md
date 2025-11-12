@@ -7,6 +7,7 @@ A modern, full-stack lawn care and landscaping service platform built with Next.
 This project follows the same architecture pattern as The Story Hub (TSH) in the monorepo:
 
 ### Frontend
+
 - **Framework**: Next.js 15 with React 19 RC
 - **Styling**: Tailwind CSS with NextUI components
 - **State Management**: Zustand
@@ -15,6 +16,7 @@ This project follows the same architecture pattern as The Story Hub (TSH) in the
 - **GraphQL Client**: AWS Amplify GraphQL
 
 ### Backend
+
 - **API**: AWS AppSync (GraphQL)
 - **Database**: Amazon DynamoDB
 - **Authentication**: Amazon Cognito
@@ -60,6 +62,7 @@ lawn-order/
 ## Features
 
 ### Core Features
+
 - **Service Management**: Browse and manage lawn care services
 - **Quote Requests**: Customers can request quotes for services
 - **Booking System**: Schedule and manage service appointments
@@ -67,6 +70,7 @@ lawn-order/
 - **Admin Dashboard**: Manage services, bookings, and quotes
 
 ### Service Types
+
 - Lawn Mowing
 - Lawn Maintenance
 - Landscaping Design
@@ -81,6 +85,7 @@ lawn-order/
 ## GraphQL Schema
 
 ### Types
+
 - **User**: Customer and admin profiles
 - **Service**: Available lawn care services
 - **Booking**: Service appointments
@@ -88,6 +93,7 @@ lawn-order/
 - **Address**: Property addresses
 
 ### Key Mutations
+
 - `requestQuote`: Submit a quote request
 - `createBooking`: Schedule a service appointment
 - `updateBookingStatus`: Update booking status
@@ -96,6 +102,7 @@ lawn-order/
 ## Development
 
 ### Prerequisites
+
 - Node.js 20+
 - AWS Account
 - AWS CLI configured
@@ -103,19 +110,23 @@ lawn-order/
 ### Getting Started
 
 1. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 2. **Configure environment**
+
    - Set up AWS credentials
    - Configure deployment outputs in `packages/deploy`
 
 3. **Run frontend locally**
+
    ```bash
    cd frontend
    npm run dev
    ```
+
    The app will run on http://localhost:3003
 
 4. **Deploy backend infrastructure**
@@ -127,6 +138,7 @@ lawn-order/
 ### Environment Variables
 
 The frontend uses these environment variables (auto-configured via `next.config.js`):
+
 - `NEXT_PUBLIC_USER_POOL_ID`: Cognito User Pool ID
 - `NEXT_PUBLIC_USER_POOL_CLIENT_ID`: Cognito App Client ID
 - `NEXT_PUBLIC_IDENTITY_POOL_ID`: Cognito Identity Pool ID
@@ -135,6 +147,7 @@ The frontend uses these environment variables (auto-configured via `next.config.
 ## Tech Stack
 
 ### Frontend Dependencies
+
 - `next`: ^15.0.2
 - `react`: 19.0.0-rc
 - `tailwindcss`: ^3.4.14
@@ -145,6 +158,7 @@ The frontend uses these environment variables (auto-configured via `next.config.
 - `zod`: ^3.23.8
 
 ### Backend Dependencies
+
 - `@aws-appsync/utils`: ^1.10.1
 - `@aws-sdk/client-dynamodb`: 3.669.0
 - `@aws-sdk/lib-dynamodb`: 3.669.0
@@ -155,12 +169,14 @@ The frontend uses these environment variables (auto-configured via `next.config.
 The project uses AWS CloudFormation for infrastructure deployment:
 
 1. **Build frontend**
+
    ```bash
    cd frontend
    npm run build
    ```
 
 2. **Deploy infrastructure**
+
    ```bash
    cd packages/deploy
    npm run deploy
@@ -172,12 +188,14 @@ The project uses AWS CloudFormation for infrastructure deployment:
 ## Converting from HTML Template
 
 The original HTML template (in `html/` directory) has been converted to:
+
 - Modern React components with Tailwind CSS
 - Responsive Next.js pages
 - AWS serverless backend
 - GraphQL API
 
 ### Original Pages
+
 - Home (index.html) → `/` (app/page.tsx)
 - Services → `/services`
 - About → `/about`

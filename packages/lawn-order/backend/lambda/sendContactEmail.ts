@@ -1,9 +1,13 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 
-const ses = new SESClient({ region: process.env.AWS_REGION || "ap-southeast-2" });
+const ses = new SESClient({
+  region: process.env.AWS_REGION || "ap-southeast-2",
+});
 
 // reCAPTCHA secret key - store in environment variable
-const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY || '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'; // Test key
+const RECAPTCHA_SECRET_KEY =
+  process.env.RECAPTCHA_SECRET_KEY ||
+  "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"; // Test key
 
 interface ContactFormData {
   name?: string;
@@ -27,26 +31,32 @@ interface ContactFormData {
 // Verify reCAPTCHA token
 async function verifyRecaptcha(token: string): Promise<boolean> {
   if (!token) {
-    console.warn('No reCAPTCHA token provided');
+    console.warn("No reCAPTCHA token provided");
     return false;
   }
 
   try {
-    const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+    const response = await fetch(
+      "https://www.google.com/recaptcha/api/siteverify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `secret=${RECAPTCHA_SECRET_KEY}&response=${token}`,
       },
-      body: `secret=${RECAPTCHA_SECRET_KEY}&response=${token}`,
-    });
+    );
 
     const data = await response.json();
-    console.log('reCAPTCHA verification result:', data);
+    console.log("reCAPTCHA verification result:", data);
 
     // Accept if score is above 0.5 (or if using test keys)
-    return data.success && (data.score >= 0.5 || RECAPTCHA_SECRET_KEY.includes('Test'));
+    return (
+      data.success &&
+      (data.score >= 0.5 || RECAPTCHA_SECRET_KEY.includes("Test"))
+    );
   } catch (error) {
-    console.error('reCAPTCHA verification error:', error);
+    console.error("reCAPTCHA verification error:", error);
     return false;
   }
 }
@@ -69,21 +79,25 @@ export const handler = async (event: any) => {
     const body: ContactFormData = JSON.parse(event.body || "{}");
 
     // Verify reCAPTCHA token
-    const isVerified = await verifyRecaptcha(body.recaptchaToken || '');
+    const isVerified = await verifyRecaptcha(body.recaptchaToken || "");
     if (!isVerified) {
-      console.warn('reCAPTCHA verification failed');
+      console.warn("reCAPTCHA verification failed");
       return {
         statusCode: 400,
         headers: {
           "Access-Control-Allow-Origin": "*",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ error: "reCAPTCHA verification failed. Please try again." }),
+        body: JSON.stringify({
+          error: "reCAPTCHA verification failed. Please try again.",
+        }),
       };
     }
 
     // Determine if this is a contact form or quote form
-    const isQuoteForm = body.formType === 'quote' || (body.firstName && body.lastName && body.serviceType);
+    const isQuoteForm =
+      body.formType === "quote" ||
+      (body.firstName && body.lastName && body.serviceType);
     const subject = isQuoteForm
       ? "New Quote Request - Tommy's Law'n Order"
       : "New Contact Form Submission - Tommy's Law'n Order";

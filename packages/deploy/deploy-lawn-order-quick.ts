@@ -181,7 +181,9 @@ async function main() {
       // Check if stack exists
       let stackExists = false;
       try {
-        await cfnClient.send(new DescribeStacksCommand({ StackName: stackName }));
+        await cfnClient.send(
+          new DescribeStacksCommand({ StackName: stackName }),
+        );
         stackExists = true;
       } catch (error: any) {
         if (!error.message.includes("does not exist")) {

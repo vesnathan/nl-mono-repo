@@ -3,12 +3,21 @@ import { logger } from "../../utils/logger";
 import path from "path";
 import { DeploymentOptions } from "../../types";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { CloudFormationClient, CreateStackCommand, UpdateStackCommand, DescribeStacksCommand, waitUntilStackCreateComplete, waitUntilStackUpdateComplete } from "@aws-sdk/client-cloudformation";
+import {
+  CloudFormationClient,
+  CreateStackCommand,
+  UpdateStackCommand,
+  DescribeStacksCommand,
+  waitUntilStackCreateComplete,
+  waitUntilStackUpdateComplete,
+} from "@aws-sdk/client-cloudformation";
 import { readFileSync } from "fs";
 import { getAwsCredentials } from "../../utils/aws-credentials";
 import { S3BucketManager } from "../../utils/s3-bucket-manager";
 
-export async function deployLawnOrder(options: DeploymentOptions): Promise<void> {
+export async function deployLawnOrder(
+  options: DeploymentOptions,
+): Promise<void> {
   const { stage, region = "ap-southeast-2" } = options;
 
   logger.info("Starting Lawn Order deployment...");
@@ -26,14 +35,21 @@ export async function deployLawnOrder(options: DeploymentOptions): Promise<void>
   // 0. Ensure template bucket exists before uploading Lambda functions
   logger.info("Ensuring S3 template bucket exists...");
   const s3BucketManager = new S3BucketManager(region);
-  const bucketExists = await s3BucketManager.ensureBucketExists(templateBucketName);
+  const bucketExists =
+    await s3BucketManager.ensureBucketExists(templateBucketName);
   if (!bucketExists) {
     throw new Error(`Failed to create template bucket ${templateBucketName}`);
   }
 
   // 1. Compile Lambda functions
-  const baseLambdaDir = path.resolve(__dirname, "../../../lawn-order/backend/lambda");
-  const outputDir = path.resolve(__dirname, "../../../lawn-order/backend/lambda/dist");
+  const baseLambdaDir = path.resolve(
+    __dirname,
+    "../../../lawn-order/backend/lambda",
+  );
+  const outputDir = path.resolve(
+    __dirname,
+    "../../../lawn-order/backend/lambda/dist",
+  );
 
   const lambdaCompiler = new LambdaCompiler({
     logger,
@@ -61,17 +77,25 @@ export async function deployLawnOrder(options: DeploymentOptions): Promise<void>
   const templates = [
     { local: "cfn-template.yaml", s3Key: "cfn-template.yaml" },
     { local: "resources/S3/s3.yaml", s3Key: "resources/S3/s3.yaml" },
-    { local: "resources/Lambda/lambda.yaml", s3Key: "resources/Lambda/lambda.yaml" },
+    {
+      local: "resources/Lambda/lambda.yaml",
+      s3Key: "resources/Lambda/lambda.yaml",
+    },
   ];
 
   for (const template of templates) {
-    const content = readFileSync(path.join(templatesDir, template.local), "utf8");
-    await s3.send(new PutObjectCommand({
-      Bucket: templateBucketName,
-      Key: template.s3Key,
-      Body: content,
-      ContentType: "application/x-yaml",
-    }));
+    const content = readFileSync(
+      path.join(templatesDir, template.local),
+      "utf8",
+    );
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: templateBucketName,
+        Key: template.s3Key,
+        Body: content,
+        ContentType: "application/x-yaml",
+      }),
+    );
     logger.success(`✓ Uploaded ${template.local}`);
   }
 
@@ -90,7 +114,9 @@ export async function deployLawnOrder(options: DeploymentOptions): Promise<void>
     // Check if stack exists
     let stackExists = false;
     try {
-      await cloudformation.send(new DescribeStacksCommand({ StackName: stackName }));
+      await cloudformation.send(
+        new DescribeStacksCommand({ StackName: stackName }),
+      );
       stackExists = true;
     } catch (e: any) {
       if (!e.message.includes("does not exist")) {
@@ -100,33 +126,45 @@ export async function deployLawnOrder(options: DeploymentOptions): Promise<void>
 
     if (stackExists) {
       logger.info("Stack exists, updating...");
-      await cloudformation.send(new UpdateStackCommand({
-        StackName: stackName,
-        TemplateURL: templateUrl,
-        Parameters: parameters,
-        Capabilities: ["CAPABILITY_NAMED_IAM"],
-      }));
+      await cloudformation.send(
+        new UpdateStackCommand({
+          StackName: stackName,
+          TemplateURL: templateUrl,
+          Parameters: parameters,
+          Capabilities: ["CAPABILITY_NAMED_IAM"],
+        }),
+      );
 
       logger.info("Waiting for stack update to complete...");
-      await waitUntilStackUpdateComplete({ client: cloudformation, maxWaitTime: 600 }, { StackName: stackName });
+      await waitUntilStackUpdateComplete(
+        { client: cloudformation, maxWaitTime: 600 },
+        { StackName: stackName },
+      );
       logger.success("✓ Stack updated successfully");
     } else {
       logger.info("Creating new stack...");
-      await cloudformation.send(new CreateStackCommand({
-        StackName: stackName,
-        TemplateURL: templateUrl,
-        Parameters: parameters,
-        Capabilities: ["CAPABILITY_NAMED_IAM"],
-        DisableRollback: true,
-      }));
+      await cloudformation.send(
+        new CreateStackCommand({
+          StackName: stackName,
+          TemplateURL: templateUrl,
+          Parameters: parameters,
+          Capabilities: ["CAPABILITY_NAMED_IAM"],
+          DisableRollback: true,
+        }),
+      );
 
       logger.info("Waiting for stack creation to complete...");
-      await waitUntilStackCreateComplete({ client: cloudformation, maxWaitTime: 600 }, { StackName: stackName });
+      await waitUntilStackCreateComplete(
+        { client: cloudformation, maxWaitTime: 600 },
+        { StackName: stackName },
+      );
       logger.success("✓ Stack created successfully");
     }
 
     // Get stack outputs
-    const describeResult = await cloudformation.send(new DescribeStacksCommand({ StackName: stackName }));
+    const describeResult = await cloudformation.send(
+      new DescribeStacksCommand({ StackName: stackName }),
+    );
     const stack = describeResult.Stacks?.[0];
     if (stack?.Outputs) {
       logger.info("\nStack Outputs:");

@@ -8,7 +8,9 @@ import { Icon } from "@iconify/react";
 import { useState, useEffect } from "react";
 
 // reCAPTCHA site key - replace with your actual key from https://www.google.com/recaptcha/admin
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'; // Test key
+const RECAPTCHA_SITE_KEY =
+  process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ||
+  "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"; // Test key
 
 declare global {
   interface Window {
@@ -18,12 +20,14 @@ declare global {
 
 function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
   const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
 
   useEffect(() => {
     // Load reCAPTCHA script
-    const script = document.createElement('script');
+    const script = document.createElement("script");
     script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
     script.async = true;
     script.defer = true;
@@ -38,42 +42,47 @@ function ContactForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSubmitStatus('idle');
+    setSubmitStatus("idle");
 
     const formData = new FormData(e.currentTarget);
 
     try {
       // Get reCAPTCHA token
-      let recaptchaToken = '';
+      let recaptchaToken = "";
       if (recaptchaLoaded && window.grecaptcha) {
-        recaptchaToken = await window.grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'contact_form' });
+        recaptchaToken = await window.grecaptcha.execute(RECAPTCHA_SITE_KEY, {
+          action: "contact_form",
+        });
       }
 
       const data = {
-        name: formData.get('name'),
-        email: formData.get('email'),
-        phone: formData.get('phone'),
-        message: formData.get('message'),
+        name: formData.get("name"),
+        email: formData.get("email"),
+        phone: formData.get("phone"),
+        message: formData.get("message"),
         recaptchaToken,
       };
 
-      const response = await fetch('https://2pqtprxtj6zdhu7f52nitgp6ky0gwuvp.lambda-url.ap-southeast-2.on.aws/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        "https://2pqtprxtj6zdhu7f52nitgp6ky0gwuvp.lambda-url.ap-southeast-2.on.aws/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         },
-        body: JSON.stringify(data),
-      });
+      );
 
       if (response.ok) {
-        setSubmitStatus('success');
+        setSubmitStatus("success");
         (e.target as HTMLFormElement).reset();
       } else {
-        setSubmitStatus('error');
+        setSubmitStatus("error");
       }
     } catch (error) {
-      console.error('Form submission error:', error);
-      setSubmitStatus('error');
+      console.error("Form submission error:", error);
+      setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);
     }
@@ -97,7 +106,9 @@ function ContactForm() {
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto">
               <div className="text-center mb-8">
-                <h2 className="text-4xl font-bold text-white mb-4 font-josefin">Get in Touch</h2>
+                <h2 className="text-4xl font-bold text-white mb-4 font-josefin">
+                  Get in Touch
+                </h2>
                 <div className="w-16 h-1 bg-brand-green mb-6 mx-auto"></div>
                 <p className="text-xl text-white/90 font-roboto-slab mb-2">
                   Have a question? Send us a message
@@ -108,18 +119,19 @@ function ContactForm() {
               </div>
 
               <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-xl p-8">
-                {submitStatus === 'success' && (
+                {submitStatus === "success" && (
                   <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg font-roboto-slab">
-                    Thank you! Your message has been sent successfully. We'll get back to you within 24 hours.
+                    Thank you! Your message has been sent successfully. We'll
+                    get back to you within 24 hours.
                   </div>
                 )}
-                {submitStatus === 'error' && (
+                {submitStatus === "error" && (
                   <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg font-roboto-slab">
-                    Sorry, there was an error sending your message. Please try again or email us directly at service@tommyslawnorder.com.au
+                    Sorry, there was an error sending your message. Please try
+                    again or email us directly at service@tommyslawnorder.com.au
                   </div>
                 )}
                 <form onSubmit={handleSubmit} className="space-y-6">
-
                   <Input
                     label="Name"
                     name="name"
@@ -178,7 +190,7 @@ function ContactForm() {
                     isLoading={isSubmitting}
                     isDisabled={isSubmitting}
                   >
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                    {isSubmitting ? "Sending..." : "Send Message"}
                   </Button>
                 </form>
               </div>
@@ -218,7 +230,9 @@ function ContactForm() {
                   <div className="w-16 h-16 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-4">
                     <Icon icon="mdi:phone" className="text-3xl text-white" />
                   </div>
-                  <h3 className="font-bold text-gray-800 mb-2 font-roboto-slab">Phone</h3>
+                  <h3 className="font-bold text-gray-800 mb-2 font-roboto-slab">
+                    Phone
+                  </h3>
                   <p className="text-gray-600 font-roboto-slab text-sm">
                     Call us for immediate assistance
                   </p>
@@ -231,7 +245,9 @@ function ContactForm() {
                   <div className="w-16 h-16 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-4">
                     <Icon icon="mdi:email" className="text-3xl text-white" />
                   </div>
-                  <h3 className="font-bold text-gray-800 mb-2 font-roboto-slab">Email</h3>
+                  <h3 className="font-bold text-gray-800 mb-2 font-roboto-slab">
+                    Email
+                  </h3>
                   <p className="text-gray-600 font-roboto-slab text-sm">
                     Send us an email anytime
                   </p>
@@ -242,9 +258,14 @@ function ContactForm() {
 
                 <div className="text-center">
                   <div className="w-16 h-16 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Icon icon="mdi:map-marker" className="text-3xl text-white" />
+                    <Icon
+                      icon="mdi:map-marker"
+                      className="text-3xl text-white"
+                    />
                   </div>
-                  <h3 className="font-bold text-gray-800 mb-2 font-roboto-slab">Service Area</h3>
+                  <h3 className="font-bold text-gray-800 mb-2 font-roboto-slab">
+                    Service Area
+                  </h3>
                   <p className="text-gray-600 font-roboto-slab text-sm">
                     Devonport & Surrounds
                   </p>

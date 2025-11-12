@@ -18,8 +18,8 @@ const tailwindConfig = {
         "brand-dark": "#282828", // Dark background from original
       },
       fontFamily: {
-        'josefin': ['"Josefin Sans"', 'sans-serif'],
-        'roboto-slab': ['"Roboto Slab"', 'serif'],
+        josefin: ['"Josefin Sans"', "sans-serif"],
+        "roboto-slab": ['"Roboto Slab"', "serif"],
       },
     },
   },

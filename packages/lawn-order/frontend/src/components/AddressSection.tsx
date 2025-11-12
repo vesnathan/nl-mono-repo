@@ -14,8 +14,11 @@ export function AddressSection() {
             </div>
             <div className="text-center md:text-left">
               <p className="font-semibold text-white leading-tight">
-                Devonport & Surrounds<br />
-                <span className="text-white/80 text-sm font-normal">Postcodes 7310 & 7306</span>
+                Devonport & Surrounds
+                <br />
+                <span className="text-white/80 text-sm font-normal">
+                  Postcodes 7310 & 7306
+                </span>
               </p>
             </div>
           </div>
@@ -27,8 +30,11 @@ export function AddressSection() {
             </div>
             <div className="text-center md:text-left">
               <p className="font-semibold text-white leading-tight">
-                Contact for Quote<br />
-                <span className="text-white/80 text-sm font-normal">service@tommyslawnorder.com.au</span>
+                Contact for Quote
+                <br />
+                <span className="text-white/80 text-sm font-normal">
+                  service@tommyslawnorder.com.au
+                </span>
               </p>
             </div>
           </div>
@@ -40,8 +46,11 @@ export function AddressSection() {
             </div>
             <div className="text-center md:text-left">
               <p className="font-semibold text-white leading-tight">
-                Mon - Sat 9:00 - 19:00<br />
-                <span className="text-white/80 text-sm font-normal">Sunday Closed</span>
+                Mon - Sat 9:00 - 19:00
+                <br />
+                <span className="text-white/80 text-sm font-normal">
+                  Sunday Closed
+                </span>
               </p>
             </div>
           </div>
