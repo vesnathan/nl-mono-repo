@@ -32,16 +32,8 @@ export function useBlackjackGame(config?: GameConfig) {
     gameState,
     setGameState,
     resetGame,
-    updateCount,
     setPhase,
-    updateChips,
-    updateScore,
-    resetMultiplier,
-    increaseMultiplier,
-    updatePlayer,
-    setCurrentPlayer,
     setDealerRevealed,
-    incrementCardsDealt,
     aiHandsInProgress,
     dealerCardsInProgress,
     aiPlayerPositions,
@@ -120,7 +112,6 @@ export function useBlackjackGame(config?: GameConfig) {
   const getStrategyRecommendation = useCallback(
     (playerIndex: number = 1, handIndex: number = 0): StrategyAction => {
       const player = gameState.players[playerIndex];
-      const hand = player.hands[handIndex];
       const dealerUpCard = gameState.players[0].hands[0].cards[0];
 
       const canDoubleHand = canDouble(hand.cards, player.chips, hand.bet);
@@ -145,7 +136,6 @@ export function useBlackjackGame(config?: GameConfig) {
       const playerIndex = gameState.currentPlayerIndex;
       const handIndex = gameState.currentHandIndex;
       const player = gameState.players[playerIndex];
-      const hand = player.hands[handIndex];
 
       // Get optimal action for scoring
       const optimalAction = getStrategyRecommendation(playerIndex, handIndex);
@@ -263,7 +253,6 @@ export function useBlackjackGame(config?: GameConfig) {
       const playerIndex = gameState.currentPlayerIndex;
       const handIndex = gameState.currentHandIndex;
       const player = gameState.players[playerIndex];
-      const hand = player.hands[handIndex];
 
       switch (action) {
         case "HIT":
