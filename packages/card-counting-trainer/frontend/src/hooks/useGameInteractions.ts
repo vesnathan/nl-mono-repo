@@ -11,7 +11,6 @@ import {
   generateInitialReactions,
   generateEndOfHandReactions,
 } from "@/utils/reactions";
-import { AudioPriority } from "@/hooks/useAudioQueue";
 import { debugLog } from "@/utils/debug";
 import { DealerCharacter } from "@/data/dealerCharacters";
 
@@ -67,7 +66,6 @@ export function useGameInteractions({
         | "dealer_has_19"
         | "dealer_has_20"
         | "dealer_has_21",
-      _priority: AudioPriority = AudioPriority.NORMAL,
       // eslint-disable-next-line sonarjs/cognitive-complexity
     ) => {
       // Unified speech bubble implementation for all players (dealer and AI)
