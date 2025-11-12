@@ -209,7 +209,7 @@ AppSync resolvers run in a restricted JavaScript environment. Follow these conve
 
 ### GraphQL Schema Merging for AppSync
 
-- **CRITICAL**: LocalStack's AppSync does NOT support forward type references
+- **CRITICAL**: AppSync does NOT support forward type references
 - All types MUST be defined before they are used in the schema
 - Schema files are processed alphabetically by the merge script
 - **Solution**: Put shared enums and base types in `00-schema.graphql` so they're defined first
@@ -435,7 +435,7 @@ AppSync resolvers run in a restricted JavaScript environment. Follow these conve
 
 - **GraphQL Schema Parse Failure (2025-11-04)**:
   - Issue: "Failed to parse schema document" error during AppSync deployment
-  - Root cause: LocalStack AppSync doesn't support forward type references - `AgeRating` enum was defined in `Story.graphql` but used earlier in `ChapterNode.graphql` (alphabetical ordering)
+  - Root cause: AppSync doesn't support forward type references - `AgeRating` enum was defined in `Story.graphql` but used earlier in `ChapterNode.graphql` (alphabetical ordering)
   - Solution: Moved `AgeRating` enum to `00-schema.graphql` so it's defined before use
   - Lesson: Always define shared types in `00-schema.graphql` or files that sort alphabetically before their usage
 
