@@ -111,6 +111,7 @@ export function useBlackjackGame(config?: GameConfig) {
    */
   const getStrategyRecommendation = useCallback(
     (playerIndex: number = 1, handIndex: number = 0): StrategyAction => {
+      const player = gameState.players[playerIndex];
       const hand = player.hands[handIndex];
       const dealerUpCard = gameState.players[0].hands[0].cards[0];
 
