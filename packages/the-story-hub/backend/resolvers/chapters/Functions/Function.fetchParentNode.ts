@@ -11,7 +11,9 @@ type CTX = Context<{ input: CreateBranchInput }, object, object, object, any>;
 export function request(ctx: CTX) {
   const { input } = ctx.args;
 
-  console.log(`Fetching parent node: ${input.parentNodeId} from story: ${input.storyId}`);
+  console.log(
+    `Fetching parent node: ${input.parentNodeId} from story: ${input.storyId}`,
+  );
 
   // Use GetItem with the storyId from input
   return {

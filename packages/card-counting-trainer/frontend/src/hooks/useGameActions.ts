@@ -297,7 +297,11 @@ export function useGameActions({
 
         // If no forced card, deal from shoe
         if (!card) {
-          const { card: dealtCard, remainingShoe, reshuffled } = dealCard(
+          const {
+            card: dealtCard,
+            remainingShoe,
+            reshuffled,
+          } = dealCard(
             currentShoe,
             gameSettings.numberOfDecks,
             gameSettings.countingSystem,
