@@ -8,6 +8,7 @@ interface UIState {
   showLeaderboard: boolean;
   showStrategyCard: boolean;
   showHeatMap: boolean;
+  showCountPeek: boolean;
   debugLogs: string[];
   showDebugLog: boolean;
 
@@ -23,6 +24,7 @@ interface UIState {
   setShowStrategyCard: (show: boolean) => void;
   setShowHeatMap: (show: boolean) => void;
   setShowDealerInfo: (show: boolean) => void;
+  setShowCountPeek: (show: boolean) => void;
   setShowDebugLog: (show: boolean) => void;
   clearDebugLogs: () => void;
 }

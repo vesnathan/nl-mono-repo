@@ -24,7 +24,7 @@ export function usePlayerHand() {
   const [currentStreak, setCurrentStreak] = useState(0); // Consecutive correct decisions
   const [longestStreak, setLongestStreak] = useState(0);
   const [peakChips, setPeakChips] = useState(1000);
-  const [scoreMultiplier] = useState(1.0); // 1.0x - 2.0x based on counting accuracy
+  const [scoreMultiplier, setScoreMultiplier] = useState(1.0); // 1.0x - 2.0x based on counting accuracy
 
   /**
    * Award points for a correct decision and update streak
@@ -89,6 +89,7 @@ export function usePlayerHand() {
     peakChips,
     setPeakChips,
     scoreMultiplier,
+    setScoreMultiplier,
 
     // Functions
     awardCorrectDecisionPoints,
