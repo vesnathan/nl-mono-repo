@@ -44,10 +44,8 @@ import BackgroundMusic from "@/components/BackgroundMusic";
 import { WelcomeModal } from "@/components/WelcomeModal";
 import { AuthModal } from "@/components/auth/AuthModal";
 import AdminSettingsModal from "@/components/AdminSettingsModal";
-import AudioDownloadButton from "@/components/AudioDownloadButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { debugLog } from "@/utils/debug";
-import { audioCache } from "@/utils/dynamicTTS";
 
 export default function GamePage() {
   // Auth state
@@ -700,7 +698,6 @@ export default function GamePage() {
         clearDebugLogs={clearDebugLogs}
       />
       <BackgroundMusic shouldPlay={musicStarted} />
-      <AudioDownloadButton audioCache={audioCache} />
     </>
   );
 }

@@ -327,7 +327,13 @@ export function useAITurnsPhase({
       const actionDisplay = Math.round(baseActionDisplay / combinedSpeed);
       const turnClear = Math.round(baseTurnClear / combinedSpeed);
 
-      setActivePlayerIndex(idx);
+      // Check for blackjack - don't highlight player if they have blackjack (automatic stand)
+      const hasBlackjack = ai.hand.cards.length === 2 && handValue === 21;
+
+      // Only set active player if not blackjack
+      if (!hasBlackjack) {
+        setActivePlayerIndex(idx);
+      }
 
       const dealerUpCard = dealerHand.cards[0];
 

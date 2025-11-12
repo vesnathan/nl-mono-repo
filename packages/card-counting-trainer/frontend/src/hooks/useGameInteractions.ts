@@ -83,13 +83,13 @@ export function useGameInteractions({
       // Unified speech bubble implementation for all players (dealer and AI)
       // Pattern: Speech bubble ALWAYS created first, then audio queued if file exists
 
-      // Create position for the bubble (outside setState to avoid double-execution)
-      const bubblePosition = createSpeechBubble(
+      // Create full bubble object (outside setState to avoid double-execution)
+      const bubbleData = createSpeechBubble(
         playerId,
         message,
         position,
         aiPlayers,
-      ).position;
+      );
 
       // Create the speech bubble first (invisible, will be shown when audio plays)
       setSpeechBubbles((prev) => {
@@ -108,7 +108,14 @@ export function useGameInteractions({
         if (existingBubble) {
           return prev.map((b) =>
             b.playerId === playerId
-              ? { ...b, message, visible: false, hideTimeoutId: undefined }
+              ? {
+                  ...b,
+                  message,
+                  visible: false,
+                  hideTimeoutId: undefined,
+                  isDealer: bubbleData.isDealer,
+                  playerPosition: bubbleData.playerPosition,
+                }
               : b,
           );
         } else {
@@ -117,9 +124,11 @@ export function useGameInteractions({
             {
               playerId,
               message,
-              position: bubblePosition,
+              position: bubbleData.position,
               hideTimeoutId: undefined,
               visible: false, // Start invisible
+              isDealer: bubbleData.isDealer,
+              playerPosition: bubbleData.playerPosition,
             },
           ];
         }
