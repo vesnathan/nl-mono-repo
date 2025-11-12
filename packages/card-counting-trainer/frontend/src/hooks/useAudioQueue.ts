@@ -337,7 +337,7 @@ export function useAudioQueue({
 
     try {
       await tryPlayAudio(itemToPlay.audioPath);
-    } catch (error) {
+    } catch {
       // Error already handled in tryPlayAudio
     }
   }, [registerTimeout]); // registerTimeout is stable from useCallback in parent

@@ -237,7 +237,6 @@ export function simulateHandsInProgress(
 export function useGameState(config: GameConfig = DEFAULT_CONFIG) {
   const [gameState, setGameState] = useState<GameState>(() => {
     const shoe = createAndShuffleShoe(config.numDecks);
-    const totalCards = config.numDecks * 52;
     const cutCard = calculateCutCardPosition(
       config.numDecks,
       config.penetration,
@@ -344,7 +343,6 @@ export function useGameState(config: GameConfig = DEFAULT_CONFIG) {
    */
   const resetGame = useCallback(() => {
     const shoe = createAndShuffleShoe(config.numDecks);
-    const totalCards = config.numDecks * 52;
     const cutCard = calculateCutCardPosition(
       config.numDecks,
       config.penetration,
