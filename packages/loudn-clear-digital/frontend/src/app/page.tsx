@@ -200,72 +200,78 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why Choose Us Section */}
-      <section className="py-20 w-full bg-[#2C2F30]">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-left mb-12">
-              <h2 className="text-3xl font-bold text-white mb-2 font-josefin">
-                Why Businesses Choose Us
-              </h2>
-              <div className="w-16 h-1 bg-brand-green mb-6" />
-              <p className="text-gray-200 font-roboto-slab leading-relaxed">
-                We're more than just a service provider - we're your digital
-                growth partner. Here's what sets us apart.
-              </p>
-            </div>
+      {/* Why Choose Us Section with Parallax */}
+      <ParallaxGap
+        image="/images/hero-team-collaboration.jpg"
+        minHeight="auto"
+        overlay="linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.85) 100%)"
+      >
+        <section className="py-20 w-full">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-left mb-12">
+                <h2 className="text-3xl font-bold text-white mb-2 font-josefin">
+                  Why Businesses Choose Us
+                </h2>
+                <div className="w-16 h-1 bg-brand-green mb-6" />
+                <p className="text-gray-200 font-roboto-slab leading-relaxed">
+                  We're more than just a service provider - we're your digital
+                  growth partner. Here's what sets us apart.
+                </p>
+              </div>
 
-            <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
-              {[
-                {
-                  icon: "✓",
-                  title: "Strategic Approach",
-                  desc: "Data-driven strategies tailored to your specific business goals and target audience",
-                },
-                {
-                  icon: "✓",
-                  title: "Custom Solutions, Not Templates",
-                  desc: "We build fully custom solutions tailored to your business - no cookie-cutter WordPress sites",
-                },
-                {
-                  icon: "✓",
-                  title: "Transparent Communication",
-                  desc: "Regular updates and clear reporting so you always know what we're working on",
-                },
-                {
-                  icon: "✓",
-                  title: "Mobile-First Design",
-                  desc: "Beautiful, responsive designs that work flawlessly across all devices",
-                },
-                {
-                  icon: "✓",
-                  title: "Ongoing Support",
-                  desc: "We don't disappear after launch - we're here to help your business grow",
-                },
-                {
-                  icon: "✓",
-                  title: "Results-Focused",
-                  desc: "Every decision is driven by measurable outcomes and ROI for your business",
-                },
-              ].map((item, index) => (
-                <div key={index} className="flex gap-3 items-start">
-                  <div className="flex-shrink-0">
-                    <i className="text-brand-green text-xl">{item.icon}</i>
+              <div className="grid md:grid-cols-2 gap-x-8 gap-y-6">
+                {[
+                  {
+                    icon: "✓",
+                    title: "Strategic Approach",
+                    desc: "Data-driven strategies tailored to your specific business goals and target audience",
+                  },
+                  {
+                    icon: "✓",
+                    title: "Custom Solutions, Not Templates",
+                    desc: "We build fully custom solutions tailored to your business - no cookie-cutter WordPress sites",
+                  },
+                  {
+                    icon: "✓",
+                    title: "Transparent Communication",
+                    desc: "Regular updates and clear reporting so you always know what we're working on",
+                  },
+                  {
+                    icon: "✓",
+                    title: "Mobile-First Design",
+                    desc: "Beautiful, responsive designs that work flawlessly across all devices",
+                  },
+                  {
+                    icon: "✓",
+                    title: "Ongoing Support",
+                    desc: "We don't disappear after launch - we're here to help your business grow",
+                  },
+                  {
+                    icon: "✓",
+                    title: "Results-Focused",
+                    desc: "Every decision is driven by measurable outcomes and ROI for your business",
+                  },
+                ].map((item, index) => (
+                  <div key={index} className="flex gap-3 items-start">
+                    <div className="flex-shrink-0">
+                      <i className="text-brand-green text-xl">{item.icon}</i>
+                    </div>
+                    <div>
+                      <h6 className="font-bold text-white mb-1 font-roboto-slab">
+                        {item.title}
+                      </h6>
+                      <p className="text-gray-200 text-sm font-roboto-slab leading-relaxed">
+                        {item.desc}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h6 className="font-bold text-white mb-1 font-roboto-slab">
-                      {item.title}
-                    </h6>
-                    <p className="text-gray-200 text-sm font-roboto-slab leading-relaxed">
-                      {item.desc}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </ParallaxGap>
 
       {/* Tech Stack Section */}
       <section className="py-20 w-full bg-white">
