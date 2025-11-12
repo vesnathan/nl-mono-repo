@@ -23,7 +23,13 @@ export interface Card {
 }
 
 // Hand result types
-export type HandResult = "WIN" | "LOSE" | "PUSH" | "BLACKJACK" | "BUST" | "SURRENDER";
+export type HandResult =
+  | "WIN"
+  | "LOSE"
+  | "PUSH"
+  | "BLACKJACK"
+  | "BUST"
+  | "SURRENDER";
 
 // Hand types
 export interface Hand {
