@@ -561,7 +561,7 @@ export function useAITurnsPhase({
           );
 
           const flyingCard: FlyingCardData = {
-            id: `hit-ai-${idx}-${Date.now()}-${cardCounterRef.current += 1}`,
+            id: `hit-ai-${idx}-${Date.now()}-${(cardCounterRef.current += 1)}`,
             card,
             fromPosition: shoePosition,
             toPosition: aiPosition,
