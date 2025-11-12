@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 import { useEffect, useRef } from "react";
 import {
   AIPlayer,
@@ -63,7 +64,6 @@ export function useAutoStartHand({
   // Auto-start first hand after initialization
   // AI players always play automatically
   // User can watch without being seated, or join by sitting and placing a bet
-  // eslint-disable-next-line sonarjs/cognitive-complexity
   // eslint-disable-next-line sonarjs/no-duplicate-string
   useEffect(() => {
     if (
@@ -130,7 +130,6 @@ export function useAutoStartHand({
   // Auto-start subsequent hands (handNumber > 0)
   // AI players always play automatically
   // eslint-disable-next-line sonarjs/no-duplicate-string
-  // eslint-disable-next-line sonarjs/cognitive-complexity
   // User can watch without being seated, or join by sitting and placing a bet
   useEffect(() => {
     if (

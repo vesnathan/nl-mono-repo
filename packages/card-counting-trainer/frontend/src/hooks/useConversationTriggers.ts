@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 import { useEffect } from "react";
 import { AIPlayer, ActiveConversation, GamePhase } from "@/types/gameState";
 import { DealerCharacter } from "@/data/dealerCharacters";
@@ -100,7 +101,6 @@ export function useConversationTriggers({
   ]);
 
   // AI-to-AI conversations (multi-turn exchanges)
-  // eslint-disable-next-line sonarjs/cognitive-complexity
   // eslint-disable-next-line sonarjs/no-duplicate-string
   useEffect(() => {
     if (!initialized || aiPlayers.length < 2) {

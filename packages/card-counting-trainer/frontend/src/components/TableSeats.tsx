@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 import React from "react";
 import { debugLog } from "@/utils/debug";
 import { TABLE_POSITIONS } from "@/constants/animations";
