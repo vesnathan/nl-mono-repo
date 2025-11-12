@@ -109,7 +109,7 @@ function ContactForm() {
                 <h2 className="text-4xl font-bold text-white mb-4 font-josefin">
                   Get in Touch
                 </h2>
-                <div className="w-16 h-1 bg-brand-green mb-6 mx-auto"></div>
+                <div className="w-16 h-1 bg-brand-green mb-6 mx-auto" />
                 <p className="text-xl text-white/90 font-roboto-slab mb-2">
                   Have a question? Send us a message
                 </p>
@@ -222,7 +222,7 @@ function ContactForm() {
                 <h2 className="text-3xl font-bold text-gray-800 mb-2 font-josefin">
                   Other Ways to Reach Us
                 </h2>
-                <div className="w-16 h-1 bg-brand-green mb-6 mx-auto"></div>
+                <div className="w-16 h-1 bg-brand-green mb-6 mx-auto" />
               </div>
 
               <div className="grid md:grid-cols-3 gap-8">

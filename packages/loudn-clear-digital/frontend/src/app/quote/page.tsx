@@ -150,7 +150,7 @@ function ContactForm() {
                 <h2 className="text-4xl font-bold text-white mb-4 font-josefin">
                   Get a Free Quote
                 </h2>
-                <div className="w-16 h-1 bg-brand-green mb-6 mx-auto"></div>
+                <div className="w-16 h-1 bg-brand-green mb-6 mx-auto" />
                 <p className="text-xl text-white/90 font-roboto-slab mb-2">
                   Custom digital solutions tailored to your business needs
                 </p>
@@ -379,8 +379,8 @@ function ContactForm() {
                       }}
                     />
                     <p className="text-sm text-gray-500 mt-2 font-roboto-slab">
-                      Please include: project goals, features needed, budget range,
-                      and any existing systems or platforms
+                      Please include: project goals, features needed, budget
+                      range, and any existing systems or platforms
                     </p>
                   </div>
 
@@ -429,7 +429,7 @@ function ContactForm() {
                 <h2 className="text-3xl font-bold text-gray-800 mb-2 font-josefin">
                   Why Choose Loud'n'Clear Digital
                 </h2>
-                <div className="w-16 h-1 bg-brand-green mb-6"></div>
+                <div className="w-16 h-1 bg-brand-green mb-6" />
                 <p className="text-gray-600 font-roboto-slab leading-relaxed">
                   We're a full-service digital agency dedicated to helping
                   businesses thrive online through strategic digital solutions.

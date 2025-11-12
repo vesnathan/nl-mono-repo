@@ -31,17 +31,18 @@ export default function AboutPage() {
               solutions that drive real results.
             </p>
             <p className="mb-4">
-              With years of experience in web development, digital marketing, and
-              social media management, our team brings expertise, creativity, and
-              dedication to every project. We understand that your online presence
-              is more than just a website – it's your digital storefront, your
-              brand voice, and a key driver of business growth.
+              With years of experience in web development, digital marketing,
+              and social media management, our team brings expertise,
+              creativity, and dedication to every project. We understand that
+              your online presence is more than just a website – it's your
+              digital storefront, your brand voice, and a key driver of business
+              growth.
             </p>
             <p>
-              From building custom websites to managing comprehensive social media
-              campaigns, we're committed to exceeding expectations and creating
-              digital experiences that connect with your audience and drive
-              meaningful engagement.
+              From building custom websites to managing comprehensive social
+              media campaigns, we're committed to exceeding expectations and
+              creating digital experiences that connect with your audience and
+              drive meaningful engagement.
             </p>
           </div>
         </div>
@@ -62,8 +63,8 @@ export default function AboutPage() {
                 Modern Technology
               </h3>
               <p className="text-gray-700 text-center">
-                We use cutting-edge technologies and frameworks to deliver
-                fast, secure, and scalable digital solutions
+                We use cutting-edge technologies and frameworks to deliver fast,
+                secure, and scalable digital solutions
               </p>
             </div>
 

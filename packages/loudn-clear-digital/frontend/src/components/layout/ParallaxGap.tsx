@@ -8,6 +8,7 @@ type Props = {
   overlay?: string; // optional gradient overlay (e.g., "linear-gradient(0deg, rgba(0,0,0,0.35) 85%, rgb(0,0,0) 100%)")
   className?: string;
   children?: React.ReactNode;
+  greyscale?: boolean; // if true, applies dark grey pattern with greyscale image overlay
 };
 
 /**
@@ -21,6 +22,7 @@ export default function ParallaxGap({
   overlay,
   className = "",
   children,
+  greyscale = false,
 }: Props) {
   const bgRef = useRef<HTMLDivElement>(null);
 
@@ -39,6 +41,41 @@ export default function ParallaxGap({
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  if (greyscale) {
+    return (
+      <section
+        className={`relative w-full overflow-hidden bg-[#1a1a1a] ${className}`}
+        style={{
+          minHeight,
+        }}
+      >
+        {/* Dark gradient base */}
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-800/90 to-gray-900/95"
+          style={{ mixBlendMode: "multiply" }}
+        />
+
+        {/* Greyscale image overlay */}
+        <div
+          ref={bgRef}
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat bg-fixed"
+          style={{
+            backgroundImage: `url(${image})`,
+            filter: "grayscale(100%)",
+            opacity: 0.15,
+          }}
+        />
+
+        {/* Content (if any) */}
+        {children && (
+          <div className="relative z-10 flex items-start justify-center min-h-full">
+            {children}
+          </div>
+        )}
+      </section>
+    );
+  }
 
   return (
     <section

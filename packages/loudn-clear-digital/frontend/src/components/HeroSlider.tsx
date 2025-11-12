@@ -22,18 +22,26 @@ export function HeroSlider() {
         pagination={{
           clickable: true,
         }}
-        loop={true}
+        loop
         className="h-[650px] bg-gray-900"
       >
         {/* Slide 1 - Modern Office */}
         <SwiperSlide>
-          <div
-            className="h-full w-full bg-gray-900 bg-cover bg-center bg-no-repeat relative"
-            style={{
-              backgroundImage: "url(/images/hero-team-collaboration.jpg)",
-            }}
-          >
-            <div className="absolute inset-0 bg-black/40"></div>
+          <div className="h-full w-full bg-[#1a1a1a] bg-cover bg-center bg-no-repeat relative">
+            <div
+              className="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-800/90 to-gray-900/95"
+              style={{ mixBlendMode: "multiply" }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: "url(/images/hero-developer-workspace.jpg)",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                filter: "grayscale(100%)",
+                opacity: 0.15,
+              }}
+            />
             <div className="relative z-10 h-full flex items-center justify-center">
               <div className="text-center px-4 max-w-4xl">
                 <h1 className="text-white text-3xl md:text-5xl lg:text-6xl font-bold mb-4 font-josefin leading-tight">
@@ -60,11 +68,21 @@ export function HeroSlider() {
 
         {/* Slide 2 - Developer Workspace */}
         <SwiperSlide>
-          <div
-            className="h-full w-full bg-gray-900 bg-cover bg-center bg-no-repeat relative"
-            style={{ backgroundImage: "url(/images/hero-team-collaboration.jpg)" }}
-          >
-            <div className="absolute inset-0 bg-black/40"></div>
+          <div className="h-full w-full bg-[#1a1a1a] bg-cover bg-center bg-no-repeat relative">
+            <div
+              className="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-800/90 to-gray-900/95"
+              style={{ mixBlendMode: "multiply" }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: "url(/images/hero-developer-workspace.jpg)",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                filter: "grayscale(100%)",
+                opacity: 0.15,
+              }}
+            />
             <div className="relative z-10 h-full flex items-center justify-center">
               <div className="text-center px-4 max-w-4xl">
                 <h1 className="text-white text-3xl md:text-5xl lg:text-6xl font-bold mb-4 font-josefin leading-tight">
@@ -91,14 +109,21 @@ export function HeroSlider() {
 
         {/* Slide 3 - Social Media */}
         <SwiperSlide>
-          <div
-            className="h-full w-full bg-gray-900 bg-cover bg-center bg-no-repeat relative"
-            style={{
-              backgroundImage:
-                "url(/images/hero-team-collaboration.jpg)",
-            }}
-          >
-            <div className="absolute inset-0 bg-black/40"></div>
+          <div className="h-full w-full bg-[#1a1a1a] bg-cover bg-center bg-no-repeat relative">
+            <div
+              className="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-800/90 to-gray-900/95"
+              style={{ mixBlendMode: "multiply" }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: "url(/images/hero-developer-workspace.jpg)",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                filter: "grayscale(100%)",
+                opacity: 0.15,
+              }}
+            />
             <div className="relative z-10 h-full flex items-center justify-center">
               <div className="text-center px-4 max-w-4xl">
                 <h1 className="text-white text-3xl md:text-5xl lg:text-6xl font-bold mb-4 font-josefin leading-tight">

@@ -17,8 +17,8 @@ export function Footer() {
                 social media management, and digital marketing solutions.
               </p>
               <p className="text-gray-300 text-sm font-roboto-slab">
-                We partner with businesses to create compelling digital experiences
-                that drive growth and engagement.
+                We partner with businesses to create compelling digital
+                experiences that drive growth and engagement.
               </p>
               <ul className="flex gap-3 mt-4 justify-center md:justify-start">
                 <li>

@@ -22,15 +22,17 @@ export function Navbar() {
       >
         <div className="container mx-auto px-4">
           <div
-            className={`flex md:justify-between justify-center items-center transition-all duration-300 ${scrolled ? "py-2" : "py-4"}`}
+            className={`flex justify-between items-center transition-all duration-300 ${scrolled ? "py-2" : "py-4"}`}
           >
+            {/* Logo on the left */}
             <Link href="/" className="flex items-center">
               <img
-                src="/images/loudnclear-logo.webp"
-                alt="Loud'n'Clear Digital"
-                className={`w-auto object-contain transition-all duration-300 ${scrolled ? "h-16" : "h-32 md:h-48"}`}
+                src="/images/loudnclear-logo-small.png"
+                alt="Loud'n Clear Digital"
+                className="h-12 w-auto object-contain"
               />
             </Link>
+
             <div className="hidden md:flex items-center gap-6 h-16">
               <Link
                 href="/"
@@ -60,13 +62,13 @@ export function Navbar() {
             >
               <span
                 className={`w-6 h-0.5 bg-white transition-all duration-300 ${mobileMenuOpen ? "rotate-45 translate-y-2" : ""}`}
-              ></span>
+              />
               <span
                 className={`w-6 h-0.5 bg-white transition-all duration-300 ${mobileMenuOpen ? "opacity-0" : ""}`}
-              ></span>
+              />
               <span
                 className={`w-6 h-0.5 bg-white transition-all duration-300 ${mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""}`}
-              ></span>
+              />
             </button>
           </div>
         </div>

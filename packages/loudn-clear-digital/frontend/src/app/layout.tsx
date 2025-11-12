@@ -17,7 +17,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           name="description"
           content="Professional web development and digital solutions. We build modern, responsive websites and web applications tailored to your business needs."
         />
-        <link rel="icon" href="/images/loudnclear-logo.webp" type="image/webp" />
+        <link
+          rel="icon"
+          href="/images/loudnclear-logo.webp"
+          type="image/webp"
+        />
         <link
           href="https://fonts.googleapis.com/css?family=Josefin+Sans:100,100italic,300,300italic,400,400italic,600,600italic,700,700italic"
           rel="stylesheet"

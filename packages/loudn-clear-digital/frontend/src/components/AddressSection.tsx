@@ -4,13 +4,13 @@ import { Icon } from "@iconify/react";
 
 export function AddressSection() {
   return (
-    <div className="bg-gray-900 -mt-24 relative z-10">
+    <div className="bg-brand-green -mt-24 relative z-10">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-3 gap-8 md:gap-6 items-center py-8">
           {/* Service Area */}
           <div className="flex gap-4 items-start text-white justify-center md:justify-start">
             <div className="flex-shrink-0">
-              <Icon icon="mdi:map-marker" className="text-4xl text-brand-green" />
+              <Icon icon="mdi:map-marker" className="text-4xl text-white" />
             </div>
             <div className="text-center md:text-left">
               <p className="font-semibold text-white leading-tight">
@@ -26,7 +26,7 @@ export function AddressSection() {
           {/* Email */}
           <div className="flex gap-4 items-start text-white justify-center md:justify-start">
             <div className="flex-shrink-0">
-              <Icon icon="mdi:email" className="text-4xl text-brand-green" />
+              <Icon icon="mdi:email" className="text-4xl text-white" />
             </div>
             <div className="text-center md:text-left">
               <p className="font-semibold text-white leading-tight">
@@ -42,7 +42,10 @@ export function AddressSection() {
           {/* Services */}
           <div className="flex gap-4 items-start text-white justify-center md:justify-start">
             <div className="flex-shrink-0">
-              <Icon icon="mdi:lightbulb-on-outline" className="text-4xl text-brand-green" />
+              <Icon
+                icon="mdi:lightbulb-on-outline"
+                className="text-4xl text-white"
+              />
             </div>
             <div className="text-center md:text-left">
               <p className="font-semibold text-white leading-tight">
