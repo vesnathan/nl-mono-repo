@@ -519,8 +519,8 @@ export default function GameSettingsModal({
               💰 Payout Rules
             </h3>
 
-            <div>
-              <label
+            <fieldset style={{ border: "none", padding: 0 }}>
+              <legend
                 style={{
                   fontSize: "14px",
                   color: "#AAA",
@@ -529,7 +529,7 @@ export default function GameSettingsModal({
                 }}
               >
                 Blackjack Payout
-              </label>
+              </legend>
               <div
                 style={{
                   display: "grid",
@@ -587,7 +587,7 @@ export default function GameSettingsModal({
                   </button>
                 ))}
               </div>
-            </div>
+            </fieldset>
           </div>
 
           {/* Counting System */}
