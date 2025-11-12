@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Lawn Order Lambda Functions"
+Description: "Loud'n Clear Digital Lambda Functions"
 
 Parameters:
   Stage:
@@ -33,8 +33,8 @@ Resources:
       Description: "Handles contact and quote form submissions via SES"
       Environment:
         Variables:
-          FROM_EMAIL: noreply@tommyslawnorder.com.au
-          TO_EMAIL: "vesnathan+tlo@gmail.com"
+          FROM_EMAIL: noreply@loudncleardigital.com
+          TO_EMAIL: "hello@loudncleardigital.com"
       Tags:
         - Key: "Project"
           Value: !Ref AppName

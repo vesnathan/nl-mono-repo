@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Lawn Order - Simple Static Website with Contact Form"
+Description: "Loud'n Clear Digital - Static Website with Contact and Quote Forms"
 
 Parameters:
   Stage:
@@ -9,7 +9,7 @@ Parameters:
   AppName:
     Type: String
     Description: Application short name
-    Default: lawnorder
+    Default: loudncleardigital
   TemplateBucketName:
     Type: String
     Description: Name of the S3 bucket containing nested stack templates

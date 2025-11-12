@@ -180,5 +180,5 @@ export async function deployLoudnClearDigital(
     throw error;
   }
 
-  logger.success("\nLawn Order deployment completed successfully");
+  logger.success("\nLoud'n Clear Digital deployment completed successfully");
 }

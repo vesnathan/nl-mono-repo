@@ -20,11 +20,11 @@ interface ContactFormData {
   firstName?: string;
   lastName?: string;
   serviceType?: string;
-  rentalPlatform?: string;
-  isRegularBookings?: string;
-  propertyAddress?: string;
-  city?: string;
-  postcode?: string;
+  businessType?: string;
+  currentWebsite?: string;
+  companyName?: string;
+  industry?: string;
+  timeline?: string;
   description?: string;
 }
 
@@ -47,13 +47,17 @@ async function verifyRecaptcha(token: string): Promise<boolean> {
       },
     );
 
-    const data = await response.json();
+    const data = (await response.json()) as {
+      success: boolean;
+      score?: number;
+      [key: string]: any;
+    };
     console.log("reCAPTCHA verification result:", data);
 
     // Accept if score is above 0.5 (or if using test keys)
     return (
       data.success &&
-      (data.score >= 0.5 || RECAPTCHA_SECRET_KEY.includes("Test"))
+      ((data.score && data.score >= 0.5) || RECAPTCHA_SECRET_KEY.includes("Test"))
     );
   } catch (error) {
     console.error("reCAPTCHA verification error:", error);
@@ -99,8 +103,8 @@ export const handler = async (event: any) => {
       body.formType === "quote" ||
       (body.firstName && body.lastName && body.serviceType);
     const subject = isQuoteForm
-      ? "New Quote Request - Tommy's Law'n Order"
-      : "New Contact Form Submission - Tommy's Law'n Order";
+      ? "New Quote Request - Loud'n Clear Digital"
+      : "New Contact Form Submission - Loud'n Clear Digital";
 
     // Build email body
     let emailBody = "";
@@ -113,17 +117,17 @@ Name: ${body.firstName} ${body.lastName}
 Email: ${body.email}
 Phone: ${body.phone || "Not provided"}
 
+BUSINESS INFORMATION:
+Business Type: ${body.businessType || "Not provided"}
+Company Name: ${body.companyName || "Not provided"}
+Industry: ${body.industry || "Not provided"}
+Current Website: ${body.currentWebsite || "None"}
+
 SERVICE DETAILS:
 Service Type: ${body.serviceType}
-Rental Platform: ${body.rentalPlatform}
-Regular Bookings: ${body.isRegularBookings === "yes" ? "Yes - I have regular guests" : "No - occasional bookings"}
+Timeline: ${body.timeline || "Not specified"}
 
-PROPERTY ADDRESS:
-${body.propertyAddress}
-${body.city}, ${body.postcode}
-Tasmania, Australia
-
-PROPERTY DETAILS:
+PROJECT DETAILS:
 ${body.description}
       `.trim();
     } else {
@@ -141,9 +145,9 @@ ${body.message}
 
     // Send email via SES
     const command = new SendEmailCommand({
-      Source: process.env.FROM_EMAIL || "noreply@tommyslawnorder.com.au",
+      Source: process.env.FROM_EMAIL || "noreply@loudncleardigital.com",
       Destination: {
-        ToAddresses: [process.env.TO_EMAIL || "vesnathan+tlo@gmail.com"],
+        ToAddresses: [process.env.TO_EMAIL || "hello@loudncleardigital.com"],
       },
       Message: {
         Subject: {
