@@ -117,10 +117,12 @@ export default function SplitHandsModal({
           const handValue = calculateHandValue(hand.cards);
           const isActive = index === activeHandIndex;
           const isBusted = hand.busted || handValue > 21;
+          // Generate unique key based on hand cards
+          const handKey = hand.cards.map((c) => `${c.rank}${c.suit}`).join("-");
 
           return (
             <div
-              key={`hand-${index}`}
+              key={handKey}
               style={{
                 flex: 1,
                 border: `3px solid ${isActive ? "#FFD700" : isBusted ? "#FF0000" : "#666"}`,
@@ -197,9 +199,9 @@ export default function SplitHandsModal({
                   minHeight: "80px",
                 }}
               >
-                {hand.cards.map((card, cardIndex) => (
+                {hand.cards.map((card) => (
                   <div
-                    key={cardIndex}
+                    key={`${card.rank}${card.suit}`}
                     style={{
                       width: "50px",
                       height: "70px",

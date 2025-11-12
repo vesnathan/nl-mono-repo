@@ -209,53 +209,57 @@ export default function AdminSettingsModal({
 
               {/* Music Volume */}
               <div style={{ marginBottom: "20px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "8px",
-                  }}
+                <label
+                  htmlFor="music-volume"
+                  style={{ display: "block", width: "100%" }}
                 >
-                  <label
-                    htmlFor="music-volume"
+                  <div
                     style={{
-                      fontSize: "14px",
-                      color: "#AAA",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "8px",
                     }}
                   >
-                    🎵 Background Music
-                  </label>
-                  <span
+                    <span
+                      style={{
+                        fontSize: "14px",
+                        color: "#AAA",
+                      }}
+                    >
+                      🎵 Background Music
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        color: "#FFF",
+                        minWidth: "45px",
+                        textAlign: "right",
+                      }}
+                    >
+                      {audioSettings.musicVolume}%
+                    </span>
+                  </div>
+                  <input
+                    id="music-volume"
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={audioSettings.musicVolume}
+                    onChange={(e) =>
+                      setAudioSettings({
+                        ...audioSettings,
+                        musicVolume: parseInt(e.target.value, 10),
+                      })
+                    }
                     style={{
-                      fontSize: "16px",
-                      fontWeight: "bold",
-                      color: "#FFF",
-                      minWidth: "45px",
-                      textAlign: "right",
+                      width: "100%",
+                      accentColor: "#4A90E2",
                     }}
-                  >
-                    {audioSettings.musicVolume}%
-                  </span>
-                </div>
-                <input
-                  id="music-volume"
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="5"
-                  value={audioSettings.musicVolume}
-                  onChange={(e) =>
-                    setAudioSettings({
-                      ...audioSettings,
-                      musicVolume: parseInt(e.target.value, 10),
-                    })
-                  }
-                  style={{
-                    width: "100%",
-                    accentColor: "#4A90E2",
-                  }}
-                />
+                  />
+                </label>
               </div>
             </div>
 
