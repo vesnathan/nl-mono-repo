@@ -136,10 +136,10 @@ export function useDealerTurnPhase({
 
     if (phase === "DEALER_TURN") {
       debugLog("dealCards", "=== PHASE: DEALER_TURN START ===");
-      debugLog(
-        "dealCards",
-        `Dealer hand: ${dealerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-      );
+      const dealerHandStr = dealerHand.cards
+        .map((c) => `${c.rank}${c.suit}`)
+        .join(", ");
+      debugLog("dealCards", `Dealer hand: ${dealerHandStr}`);
       debugLog(
         "dealCards",
         `Dealer hand value: ${calculateHandValue(dealerHand.cards)}`,
@@ -278,10 +278,10 @@ export function useDealerTurnPhase({
             const isBust = isBusted(currentHand);
 
             debugLog("dealCards", `=== DEALER FINAL HAND ===`);
-            debugLog(
-              "dealCards",
-              `Dealer cards: ${currentHand.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-            );
+            const dealerCardsStr = currentHand
+              .map((c) => `${c.rank}${c.suit}`)
+              .join(", ");
+            debugLog("dealCards", `Dealer cards: ${dealerCardsStr}`);
             debugLog("dealCards", `Dealer hand value: ${finalValue}`);
             debugLog("dealCards", `Dealer busted: ${isBust}`);
 

@@ -175,10 +175,9 @@ export function useGameActions({
       debugLog("dealCards", `Cards dealt this shoe: ${cardsDealt}`);
       debugLog("dealCards", `Running count: ${runningCount}`);
       debugLog("dealCards", `Number of AI players: ${aiPlayers.length}`);
-      debugLog(
-        "dealCards",
-        `Player seated: ${playerSeat !== null ? `Yes (Seat ${playerSeat})` : "No (observing)"}`,
-      );
+      const playerSeatedStr =
+        playerSeat !== null ? `Yes (Seat ${playerSeat})` : "No (observing)";
+      debugLog("dealCards", `Player seated: ${playerSeatedStr}`);
       debugLog("dealCards", `Player bet: $${effectivePlayerBet}`);
 
       // Pre-deal all cards BEFORE animations to ensure uniqueness
@@ -600,10 +599,10 @@ export function useGameActions({
       const activeHand = playerHand.splitHands[activeIndex];
 
       debugLog("playerActions", `Playing split hand ${activeIndex + 1}`);
-      debugLog(
-        "playerActions",
-        `Current hand: ${activeHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-      );
+      const currentHandStr = activeHand.cards
+        .map((c) => `${c.rank}${c.suit}`)
+        .join(", ");
+      debugLog("playerActions", `Current hand: ${currentHandStr}`);
       debugLog(
         "playerActions",
         `Current hand value: ${calculateHandValue(activeHand.cards)}`,
@@ -660,10 +659,10 @@ export function useGameActions({
     }
 
     // Normal (non-split) hit logic
-    debugLog(
-      "playerActions",
-      `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-    );
+    const playerHandStr = playerHand.cards
+      .map((c) => `${c.rank}${c.suit}`)
+      .join(", ");
+    debugLog("playerActions", `Current hand: ${playerHandStr}`);
     debugLog(
       "playerActions",
       `Current hand value: ${calculateHandValue(playerHand.cards)}`,
@@ -705,10 +704,8 @@ export function useGameActions({
         const newCards = [...playerHand.cards, card];
         const newHandValue = calculateHandValue(newCards);
 
-        debugLog(
-          "playerActions",
-          `New hand: ${newCards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-        );
+        const newHandStr = newCards.map((c) => `${c.rank}${c.suit}`).join(", ");
+        debugLog("playerActions", `New hand: ${newHandStr}`);
         debugLog("playerActions", `New hand value: ${newHandValue}`);
 
         setPlayerHand((prev) => ({ ...prev, cards: newCards }));
@@ -765,12 +762,12 @@ export function useGameActions({
       debugLog("playerActions", `Standing on split hand ${activeIndex + 1}`);
       debugLog(
         "playerActions",
-        `Final hand: ${activeHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-      );
-      debugLog(
-        "playerActions",
         `Final hand value: ${calculateHandValue(activeHand.cards)}`,
       );
+      const finalHandStr = activeHand.cards
+        .map((c) => `${c.rank}${c.suit}`)
+        .join(", ");
+      debugLog("playerActions", `Final hand: ${finalHandStr}`);
 
       if (activeIndex === 0) {
         // Move to second hand
@@ -794,12 +791,12 @@ export function useGameActions({
     // Normal (non-split) stand logic
     debugLog(
       "playerActions",
-      `Final hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-    );
-    debugLog(
-      "playerActions",
       `Final hand value: ${calculateHandValue(playerHand.cards)}`,
     );
+    const playerFinalHandStr = playerHand.cards
+      .map((c) => `${c.rank}${c.suit}`)
+      .join(", ");
+    debugLog("playerActions", `Final hand: ${playerFinalHandStr}`);
     debugLog("playerActions", "Marking player as finished");
     setPlayerFinished(true);
     debugLog("playerActions", "Moving to DEALER_TURN phase");
@@ -810,12 +807,12 @@ export function useGameActions({
     debugLog("playerActions", "=== PLAYER ACTION: DOUBLE DOWN ===");
     debugLog(
       "playerActions",
-      `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-    );
-    debugLog(
-      "playerActions",
       `Current hand value: ${calculateHandValue(playerHand.cards)}`,
     );
+    const doubleDownHandStr = playerHand.cards
+      .map((c) => `${c.rank}${c.suit}`)
+      .join(", ");
+    debugLog("playerActions", `Current hand: ${doubleDownHandStr}`);
     debugLog("playerActions", `Current bet: $${playerHand.bet}`);
     debugLog("playerActions", `Doubling bet to: $${playerHand.bet * 2}`);
 
@@ -861,9 +858,12 @@ export function useGameActions({
 
         debugLog(
           "playerActions",
-          `Final hand: ${newCards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
+          `Final hand value: ${newHandValue}`,
         );
-        debugLog("playerActions", `Final hand value: ${newHandValue}`);
+        const finalCardsStr = newCards
+          .map((c) => `${c.rank}${c.suit}`)
+          .join(", ");
+        debugLog("playerActions", `Final hand: ${finalCardsStr}`);
 
         setPlayerHand((prev) => ({ ...prev, cards: newCards }));
         setFlyingCards((prev) => prev.filter((fc) => fc.id !== flyingCard.id));
@@ -916,10 +916,10 @@ export function useGameActions({
 
   const split = useCallback(() => {
     debugLog("playerActions", "=== PLAYER ACTION: SPLIT ===");
-    debugLog(
-      "playerActions",
-      `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-    );
+    const splitHandStr = playerHand.cards
+      .map((c) => `${c.rank}${c.suit}`)
+      .join(", ");
+    debugLog("playerActions", `Current hand: ${splitHandStr}`);
     debugLog("playerActions", `Current bet: $${playerHand.bet}`);
 
     // Verify player has enough chips for second bet
