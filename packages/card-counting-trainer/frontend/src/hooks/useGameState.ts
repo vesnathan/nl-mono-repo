@@ -64,11 +64,11 @@ export function dealNewHandToAIPlayers(
   }
 
   // Deal 2 cards to each AI player (right-to-left order)
-  for (const position of aiPlayerPositions) {
+  aiPlayerPositions.forEach((position) => {
     const cards: Card[] = [];
 
     // Deal initial 2 cards
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 2; i += 1) {
       if (currentShoe.length === 0) break;
       const { card, remainingShoe } = dealCard(currentShoe);
       currentShoe = remainingShoe;
@@ -81,7 +81,7 @@ export function dealNewHandToAIPlayers(
     const handValue = cards.reduce((sum, card) => {
       if (card.rank === "A") return sum + 11;
       if (["J", "Q", "K"].includes(card.rank)) return sum + 10;
-      return sum + parseInt(card.rank);
+      return sum + parseInt(card.rank, 10);
     }, 0);
 
     // Realistic play: never hit on 17+, sometimes hit on 12-16
@@ -104,7 +104,7 @@ export function dealNewHandToAIPlayers(
     }
 
     aiHands.push({ position, cards });
-  }
+  });
 
   // Calculate true count
   const totalCards = numDecks * 52;
@@ -177,11 +177,11 @@ export function simulateHandsInProgress(
   }
 
   // Deal 2 cards to each AI player, then let them make decisions
-  for (const position of aiPlayerPositions) {
+  aiPlayerPositions.forEach((position) => {
     const cards: Card[] = [];
 
     // Deal initial 2 cards
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 2; i += 1) {
       if (currentShoe.length === 0) break;
       const { card, remainingShoe } = dealCard(currentShoe);
       currentShoe = remainingShoe;
@@ -194,7 +194,7 @@ export function simulateHandsInProgress(
     const handValue = cards.reduce((sum, card) => {
       if (card.rank === "A") return sum + 11;
       if (["J", "Q", "K"].includes(card.rank)) return sum + 10;
-      return sum + parseInt(card.rank);
+      return sum + parseInt(card.rank, 10);
     }, 0);
 
     // Realistic play: never hit on 17+, sometimes hit on 12-16
@@ -217,7 +217,7 @@ export function simulateHandsInProgress(
     }
 
     aiHands.push({ position, cards });
-  }
+  });
 
   // Calculate true count
   const totalCards = numDecks * 52;

@@ -121,8 +121,8 @@ export function useHeatMap({
 
     // Sort by count (lowest to highest)
     return result.sort((a, b) => {
-      const aCount = parseInt(a.countRange.split(" ")[0]);
-      const bCount = parseInt(b.countRange.split(" ")[0]);
+      const aCount = parseInt(a.countRange.split(" ")[0], 10);
+      const bCount = parseInt(b.countRange.split(" ")[0], 10);
       return aCount - bCount;
     });
   };

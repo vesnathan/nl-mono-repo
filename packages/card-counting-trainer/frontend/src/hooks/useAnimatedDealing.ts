@@ -231,7 +231,7 @@ export function useAnimatedDealing(
         const handValue = hand.reduce((sum, card) => {
           if (card.rank === "A") return sum + 11;
           if (["J", "Q", "K"].includes(card.rank)) return sum + 10;
-          return sum + parseInt(card.rank);
+          return sum + parseInt(card.rank, 10);
         }, 0);
 
         const isBlackjack = hand.length === 2 && handValue === 21;
@@ -315,7 +315,7 @@ export function useAnimatedDealing(
                   (sum, c) => {
                     if (c.rank === "A") return sum + 11;
                     if (["J", "Q", "K"].includes(c.rank)) return sum + 10;
-                    return sum + parseInt(c.rank);
+                    return sum + parseInt(c.rank, 10);
                   },
                   0,
                 );
@@ -388,19 +388,19 @@ export function useAnimatedDealing(
     const calculateDealerValue = (cards: Card[]) => {
       let value = 0;
       let aces = 0;
-      for (const card of cards) {
+      cards.forEach((card) => {
         if (card.rank === "A") {
-          aces++;
+          aces += 1;
           value += 11;
         } else if (["J", "Q", "K"].includes(card.rank)) {
           value += 10;
         } else {
-          value += parseInt(card.rank);
+          value += parseInt(card.rank, 10);
         }
-      }
+      });
       while (value > 21 && aces > 0) {
         value -= 10;
-        aces--;
+        aces -= 1;
       }
       return value;
     };

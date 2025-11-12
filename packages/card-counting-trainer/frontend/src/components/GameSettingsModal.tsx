@@ -382,7 +382,7 @@ export default function GameSettingsModal({
                 onChange={(e) =>
                   setSettings({
                     ...settings,
-                    deckPenetration: parseInt(e.target.value),
+                    deckPenetration: parseInt(e.target.value, 10),
                   })
                 }
                 style={{
