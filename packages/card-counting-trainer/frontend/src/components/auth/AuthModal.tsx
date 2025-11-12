@@ -193,7 +193,8 @@ export function AuthModal({
         }}
         isDisabled={loginController.signInMutation.isPending}
         endContent={
-          <button type="button"
+          <button
+            type="button"
             className="focus:outline-none"
             type="button"
             onClick={togglePasswordVisibility}
@@ -294,7 +295,8 @@ export function AuthModal({
           }}
           isDisabled={registrationController.signUpMutation.isPending}
           endContent={
-            <button type="button"
+            <button
+              type="button"
               className="focus:outline-none"
               type="button"
               onClick={togglePasswordVisibility}
@@ -322,7 +324,8 @@ export function AuthModal({
           }}
           isDisabled={registrationController.signUpMutation.isPending}
           endContent={
-            <button type="button"
+            <button
+              type="button"
               className="focus:outline-none"
               type="button"
               onClick={toggleConfirmPasswordVisibility}

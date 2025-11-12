@@ -158,7 +158,8 @@ export default function LeaderboardModal({
             >
               🏆 Leaderboards
             </h2>
-            <button type="button"
+            <button
+              type="button"
               onClick={onClose}
               style={{
                 backgroundColor: "transparent",
@@ -274,7 +275,8 @@ export default function LeaderboardModal({
               }}
             >
               {categories.map((cat) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
                   style={{

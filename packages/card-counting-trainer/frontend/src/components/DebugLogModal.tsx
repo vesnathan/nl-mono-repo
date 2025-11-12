@@ -29,7 +29,8 @@ export default function DebugLogModal({
             zIndex: 10000,
           }}
         >
-          <button type="button"
+          <button
+            type="button"
             onClick={() => {
               navigator.clipboard.writeText(debugLogs.join("\n"));
             }}

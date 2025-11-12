@@ -119,7 +119,8 @@ export default function StatsBar() {
       </div>
       <div className="flex gap-4 items-center">
         {isAuthenticated && (
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setShowSettings(true)}
             style={{
               backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -143,7 +144,8 @@ export default function StatsBar() {
           </button>
         )}
         {isAdmin && (
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setShowAdminSettings(true)}
             style={{
               backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -166,7 +168,8 @@ export default function StatsBar() {
             🎛️ Admin
           </button>
         )}
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setShowLeaderboard(true)}
           style={{
             backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -188,7 +191,8 @@ export default function StatsBar() {
         >
           🏆 Leaderboard
         </button>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setShowStrategyCard(true)}
           style={{
             backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -210,7 +214,8 @@ export default function StatsBar() {
         >
           📊 Strategy
         </button>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setShowHeatMap(true)}
           style={{
             backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -234,7 +239,8 @@ export default function StatsBar() {
         </button>
         {!isLoading &&
           (isAuthenticated ? (
-            <button type="button"
+            <button
+              type="button"
               onClick={handleLogout}
               style={{
                 backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -258,7 +264,8 @@ export default function StatsBar() {
               🚪 Logout
             </button>
           ) : (
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setShowAuthModal(true)}
               style={{
                 backgroundColor: "rgba(0, 0, 0, 0.8)",

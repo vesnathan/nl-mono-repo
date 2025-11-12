@@ -99,7 +99,8 @@ export default function DealerInfo({
         }}
       >
         {/* Close button */}
-        <button type="button"
+        <button
+          type="button"
           onClick={handleClose}
           style={{
             position: "absolute",

@@ -114,7 +114,8 @@ export default function ConversationPrompt({
         {/* Response choices */}
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {choices.map((choice, index) => (
-            <button type="button"
+            <button
+              type="button"
               key={index}
               onClick={() => handleChoice(index)}
               disabled={selectedIndex !== null}

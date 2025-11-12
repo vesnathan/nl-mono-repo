@@ -107,7 +107,8 @@ export default function BettingInterface({
           const isSelected = selectedChipValue === value;
 
           return (
-            <button type="button"
+            <button
+              type="button"
               key={value}
               onClick={() => isAffordable && handleChipClick(value)}
               disabled={!isAffordable}
@@ -198,7 +199,8 @@ export default function BettingInterface({
           marginTop: "8px",
         }}
       >
-        <button type="button"
+        <button
+          type="button"
           onClick={onClearBet}
           disabled={currentBet === 0}
           style={{
@@ -229,7 +231,8 @@ export default function BettingInterface({
           Clear Bet
         </button>
 
-        <button type="button"
+        <button
+          type="button"
           onClick={onConfirmBet}
           disabled={!canPlaceBet}
           style={{

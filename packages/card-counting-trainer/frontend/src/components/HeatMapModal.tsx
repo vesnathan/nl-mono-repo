@@ -102,7 +102,8 @@ export default function HeatMapModal() {
           <h2 style={{ color: "#FFF", margin: 0, fontSize: "24px" }}>
             📊 Pit Boss Heat Map
           </h2>
-          <button type="button"
+          <button
+            type="button"
             onClick={onClose}
             style={{
               background: "none",
