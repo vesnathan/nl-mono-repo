@@ -196,58 +196,7 @@ export default function AdminSettingsModal({
                 padding: "20px",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "12px",
-                }}
-              >
-                <label
-                  htmlFor="master-volume"
-                  style={{
-                    fontSize: "14px",
-                    color: "#AAA",
-                  }}
-                >
-                  Master Volume
-                </label>
-                <span
-                  style={{
-                    fontSize: "20px",
-                    fontWeight: "bold",
-                    color: "#9C27B0",
-                    minWidth: "50px",
-                    textAlign: "right",
-                  }}
-                >
-                  {audioSettings.masterVolume}%
-                </span>
-              </div>
-              <input
-                id="master-volume"
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                value={audioSettings.masterVolume}
-                onChange={(e) =>
-                  setAudioSettings({
-                    ...audioSettings,
-                    masterVolume: parseInt(e.target.value, 10),
-                  })
-                }
-                style={{
-                  width: "100%",
-                  accentColor: "#9C27B0",
-                  height: "8px",
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Audio Levels */}
+              {/* Audio Levels */}
           <div style={{ marginBottom: "24px" }}>
             <h3
               style={{
@@ -310,111 +259,10 @@ export default function AdminSettingsModal({
                 }}
               />
             </div>
-
-            {/* Player Speech Volume */}
-            <div style={{ marginBottom: "20px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "8px",
-                }}
-              >
-                <label
-                  htmlFor="player-speech-volume"
-                  style={{
-                    fontSize: "14px",
-                    color: "#AAA",
-                  }}
-                >
-                  👥 Player Speech
-                </label>
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    color: "#FFF",
-                    minWidth: "45px",
-                    textAlign: "right",
-                  }}
-                >
-                  {audioSettings.playerSpeechVolume}%
-                </span>
-              </div>
-              <input
-                id="player-speech-volume"
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                value={audioSettings.playerSpeechVolume}
-                onChange={(e) =>
-                  setAudioSettings({
-                    ...audioSettings,
-                    playerSpeechVolume: parseInt(e.target.value, 10),
-                  })
-                }
-                style={{
-                  width: "100%",
-                  accentColor: "#4CAF50",
-                }}
-              />
-            </div>
-
-            {/* Dealer Speech Volume */}
-            <div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "8px",
-                }}
-              >
-                <label
-                  htmlFor="dealer-speech-volume"
-                  style={{
-                    fontSize: "14px",
-                    color: "#AAA",
-                  }}
-                >
-                  👔 Dealer Speech
-                </label>
-                <span
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    color: "#FFF",
-                    minWidth: "45px",
-                    textAlign: "right",
-                  }}
-                >
-                  {audioSettings.dealerSpeechVolume}%
-                </span>
-              </div>
-              <input
-                id="dealer-speech-volume"
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                value={audioSettings.dealerSpeechVolume}
-                onChange={(e) =>
-                  setAudioSettings({
-                    ...audioSettings,
-                    dealerSpeechVolume: parseInt(e.target.value, 10),
-                  })
-                }
-                style={{
-                  width: "100%",
-                  accentColor: "#FF9800",
-                }}
-              />
-            </div>
           </div>
+        </div>
 
-          {/* Debug Console Logs */}
+        {/* Debug Console Logs */}
           <div style={{ marginBottom: "24px" }}>
             <h3
               style={{
