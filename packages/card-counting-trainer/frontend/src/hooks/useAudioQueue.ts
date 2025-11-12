@@ -169,7 +169,7 @@ export function useAudioQueue({
             setCurrentItem(null);
             processingRef.current = false;
             registerTimeout(() => processQueue(), 100);
-            return;
+            return undefined;
           }
         } catch (checkError) {
           debugLog(

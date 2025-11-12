@@ -55,7 +55,9 @@ export function useConversationTriggers({
 }: UseConversationTriggersParams) {
   // Periodic conversation triggers (frequency based on player sociability)
   useEffect(() => {
-    if (!initialized || playerSeat === null || activeConversation) return;
+    if (!initialized || playerSeat === null || activeConversation) {
+      return undefined;
+    }
 
     const baseTriggerChance = 0.3;
     const sociabilityMultiplier = playerSociability / 50;
@@ -103,7 +105,9 @@ export function useConversationTriggers({
 
   // AI-to-AI conversations (multi-turn exchanges)
   useEffect(() => {
-    if (!initialized || aiPlayers.length < 2) return;
+    if (!initialized || aiPlayers.length < 2) {
+      return undefined;
+    }
 
     const conversationInterval = setInterval(
       () => {
