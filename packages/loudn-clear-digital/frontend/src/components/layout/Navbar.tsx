@@ -26,8 +26,8 @@ export function Navbar() {
           >
             <Link href="/" className="flex items-center">
               <img
-                src="/images/logo.png"
-                alt="Tommy's Law'n Order"
+                src="/images/loudnclear-logo.webp"
+                alt="Loud'n'Clear Digital"
                 className={`w-auto object-contain transition-all duration-300 ${scrolled ? "h-16" : "h-32 md:h-48"}`}
               />
             </Link>

@@ -183,7 +183,7 @@ export function Footer() {
           style={{ bottom: "5px", right: "8px" }}
         >
           <Image
-            src="/images/loudnclear-logo.png"
+            src="/images/loudnclear-logo.webp"
             alt="Loud'n Clear Digital"
             width={360}
             height={90}
@@ -198,7 +198,7 @@ export function Footer() {
             className="inline-flex items-center hover:opacity-80 transition-opacity"
           >
             <Image
-              src="/images/loudnclear-logo.png"
+              src="/images/loudnclear-logo.webp"
               alt="Loud'n Clear Digital"
               width={360}
               height={90}

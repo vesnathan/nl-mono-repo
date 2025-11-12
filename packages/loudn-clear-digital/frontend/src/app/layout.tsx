@@ -11,13 +11,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <title>
-          Tommy's Law'n Order - Property Maintenance for Holiday Rental Hosts
+          Loud'n'Clear Digital - Web Development & Digital Solutions
         </title>
         <meta
           name="description"
-          content="Professional property maintenance for Airbnb, Booking.com & VRBO hosts in Devonport area (7310 & 7306). Lawn mowing, whipper snippering, pruning, gutter cleaning, pressure washing."
+          content="Professional web development and digital solutions. We build modern, responsive websites and web applications tailored to your business needs."
         />
-        <link rel="icon" href="/images/logo.png" type="image/png" />
+        <link rel="icon" href="/images/loudnclear-logo.webp" type="image/webp" />
         <link
           href="https://fonts.googleapis.com/css?family=Josefin+Sans:100,100italic,300,300italic,400,400italic,600,600italic,700,700italic"
           rel="stylesheet"
