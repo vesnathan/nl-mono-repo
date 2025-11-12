@@ -1,11 +1,11 @@
 {
-  "name": "lawn-order-frontend",
+  "name": "loudn-clear-digital-frontend",
   "version": "0.1.0",
   "scripts": {
-    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3003",
+    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3004",
     "tsc": "node ./node_modules/typescript/bin/tsc",
-    "dev:clean": "rm -rf .next && NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3003",
-    "dev:local": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3003",
+    "dev:clean": "rm -rf .next && NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3004",
+    "dev:local": "NODE_ENV=development NEXT_PUBLIC_ENVIRONMENT=dev NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3004",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

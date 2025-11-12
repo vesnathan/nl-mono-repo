@@ -20,6 +20,7 @@ import { deployAwsExample } from "./packages/aws-example/deploy";
 import { deployTheStoryHub } from "./packages/the-story-hub/deploy";
 import { deployCardCountingTrainer } from "./packages/card-counting-trainer/deploy";
 import { deployLawnOrder } from "./packages/lawn-order/deploy";
+import { deployLoudnClearDigital } from "./packages/loudn-clear-digital/deploy";
 /**
  * Type for deploy handler functions
  */
@@ -38,6 +39,7 @@ const DEPLOY_HANDLERS: Record<StackType, DeployHandler> = {
   [StackType.TheStoryHub]: deployTheStoryHub,
   [StackType.CardCountingTrainer]: deployCardCountingTrainer,
   [StackType.LawnOrder]: deployLawnOrder,
+  [StackType.LoudnClearDigital]: deployLoudnClearDigital,
 };
 
 /**

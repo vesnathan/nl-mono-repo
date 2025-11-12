@@ -42,6 +42,7 @@ export enum StackType {
   TheStoryHub = "TheStoryHub",
   CardCountingTrainer = "CardCountingTrainer",
   LawnOrder = "LawnOrder",
+  LoudnClearDigital = "LoudnClearDigital",
 }
 
 export const STACK_ORDER: StackType[] = [
@@ -52,6 +53,7 @@ export const STACK_ORDER: StackType[] = [
   StackType.TheStoryHub,
   StackType.CardCountingTrainer,
   StackType.LawnOrder,
+  StackType.LoudnClearDigital,
 ];
 
 export const TEMPLATE_PATHS: Record<StackType, string> = {
@@ -74,6 +76,10 @@ export const TEMPLATE_PATHS: Record<StackType, string> = {
     __dirname,
     "templates/lawn-order/cfn-template.yaml",
   ),
+  [StackType.LoudnClearDigital]: join(
+    __dirname,
+    "templates/loudn-clear-digital/cfn-template.yaml",
+  ),
 };
 
 export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
@@ -87,6 +93,10 @@ export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
     "templates/card-counting-trainer/",
   ),
   [StackType.LawnOrder]: join(__dirname, "templates/lawn-order/"),
+  [StackType.LoudnClearDigital]: join(
+    __dirname,
+    "templates/loudn-clear-digital/",
+  ),
 };
 
 export const getStackName = (stackType: StackType, stage: string) =>

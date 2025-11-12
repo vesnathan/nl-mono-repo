@@ -178,6 +178,26 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
     hasResolvers: false,
     requiresAdminUser: false,
   },
+
+  [StackType.LoudnClearDigital]: {
+    stackType: StackType.LoudnClearDigital,
+    displayName: "Loud'n'Clear Digital",
+    templateDir: "loudn-clear-digital",
+    packageDir: "loudn-clear-digital",
+    dependsOn: [], // No dependencies - standalone project
+    buckets: {
+      templates: "nlmonorepo-loudncleardigital-templates-{stage}",
+      frontend: "nlmonorepo-loudncleardigital-frontend-{stage}",
+      additional: [
+        "nlmonorepo-{stage}-cfn-templates-{region}",
+        "nlmonorepo-loudncleardigital-uploads-{stage}",
+      ],
+    },
+    hasFrontend: true,
+    hasLambdas: true,
+    hasResolvers: false,
+    requiresAdminUser: false,
+  },
 };
 
 /**
