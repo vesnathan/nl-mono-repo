@@ -8,7 +8,6 @@ import { getAIAvatarPath } from "@/data/aiCharacters";
 import { useGameState } from "@/contexts/GameStateContext";
 import { useGameActions } from "@/contexts/GameActionsContext";
 
-type PlayerAction = "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK";
 
 export default function TableSeats() {
   const {

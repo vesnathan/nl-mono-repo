@@ -248,6 +248,7 @@ export default function ConversationPrompt({
         }}
       />
 
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         @keyframes fadeInScale {
           0% {
