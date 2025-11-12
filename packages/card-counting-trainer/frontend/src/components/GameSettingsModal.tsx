@@ -6,6 +6,7 @@ import {
   CountingSystem,
   BlackjackPayout,
 } from "@/types/gameSettings";
+import { useUIState } from "@/contexts/UIStateContext";
 
 interface GameSettingsModalProps {
   isOpen: boolean;
@@ -49,6 +50,7 @@ export default function GameSettingsModal({
   onSave,
 }: GameSettingsModalProps) {
   const [settings, setSettings] = useState<GameSettings>(currentSettings);
+  const { devTestingMode, setDevTestingMode } = useUIState();
 
   if (!isOpen) return null;
 
@@ -680,6 +682,98 @@ export default function GameSettingsModal({
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Developer Testing Mode */}
+          <div style={{ marginBottom: "24px" }}>
+            <h3
+              style={{
+                fontSize: "18px",
+                fontWeight: "bold",
+                color: "#FFF",
+                marginBottom: "12px",
+              }}
+            >
+              🧪 Developer Testing
+            </h3>
+
+            <div
+              style={{
+                backgroundColor: "rgba(255, 152, 0, 0.1)",
+                border: "2px solid rgba(255, 152, 0, 0.3)",
+                borderRadius: "12px",
+                padding: "16px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    color: "#FFF",
+                  }}
+                >
+                  Enable Testing Mode
+                </div>
+                <div
+                  style={{ fontSize: "12px", color: "#AAA", marginTop: "4px" }}
+                >
+                  {devTestingMode
+                    ? "Test AI decisions with forced hands and probability display"
+                    : "Activate to access AI testing scenarios"}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDevTestingMode(!devTestingMode)}
+                style={{
+                  backgroundColor: devTestingMode
+                    ? "#FF9800"
+                    : "rgba(255, 255, 255, 0.1)",
+                  color: "#FFF",
+                  border: "2px solid",
+                  borderColor: devTestingMode
+                    ? "#FF9800"
+                    : "rgba(255, 255, 255, 0.3)",
+                  borderRadius: "8px",
+                  padding: "10px 20px",
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  minWidth: "80px",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = devTestingMode
+                    ? "#F57C00"
+                    : "rgba(255, 255, 255, 0.2)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = devTestingMode
+                    ? "#FF9800"
+                    : "rgba(255, 255, 255, 0.1)";
+                }}
+              >
+                {devTestingMode ? "ON" : "OFF"}
+              </button>
+            </div>
+
+            {devTestingMode && (
+              <div
+                style={{
+                  marginTop: "12px",
+                  fontSize: "12px",
+                  color: "#FF9800",
+                  fontStyle: "italic",
+                  textAlign: "center",
+                }}
+              >
+                ⚠️ Testing UI will appear at the start of each hand
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}

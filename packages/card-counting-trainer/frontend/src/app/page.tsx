@@ -48,6 +48,8 @@ import CountPeekModal from "@/components/CountPeekModal";
 import CountPeekConfirmation from "@/components/CountPeekConfirmation";
 import { useAuth } from "@/contexts/AuthContext";
 import { debugLog } from "@/utils/debug";
+import { TestScenario } from "@/types/testScenarios";
+import TestScenarioSelector from "@/components/TestScenarioSelector";
 import { GameStateProvider } from "@/contexts/GameStateContext";
 import { UIStateProvider } from "@/contexts/UIStateContext";
 import { GameActionsProvider } from "@/contexts/GameActionsContext";
@@ -145,6 +147,11 @@ export default function GamePage() {
   const [showStrategyCard, setShowStrategyCard] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(false);
   const [showCountPeek, setShowCountPeek] = useState(false);
+  const [devTestingMode, setDevTestingMode] = useState(false);
+  const [showTestScenarioSelector, setShowTestScenarioSelector] =
+    useState(false);
+  const [selectedTestScenario, setSelectedTestScenario] =
+    useState<TestScenario | null>(null);
   const [showCountPeekConfirmation, setShowCountPeekConfirmation] =
     useState(false);
   const [showCountPeekResult, setShowCountPeekResult] = useState(false);
@@ -189,53 +196,61 @@ export default function GamePage() {
       dealerHand,
       blackjackPayout: gameSettings.blackjackPayout,
       currentDealer,
+      devTestingMode,
     });
 
   // Game actions hook - provides startNewRound, dealInitialCards, hit, stand, doubleDown, split, surrender
-  const { startNewRound, dealInitialCards, hit, stand, doubleDown, split, surrender } =
-    useGameActions({
-      phase,
-      playerSeat,
-      playerHand,
-      dealerHand,
-      aiPlayers,
-      shoe,
-      cardsDealt,
-      runningCount,
-      shoesDealt,
-      gameSettings,
-      currentDealer,
-      playerChips,
-      setPhase,
-      setCurrentBet,
-      setDealerRevealed,
-      setDealerCallout,
-      setPlayerHand,
-      setDealerHand,
-      setSpeechBubbles,
-      setAIPlayers,
-      setFlyingCards,
-      setPlayerActions,
-      setShoe,
-      setCardsDealt,
-      setRunningCount,
-      setShoesDealt,
-      setInsuranceOffered,
-      setActivePlayerIndex,
-      setPlayerFinished,
-      setPlayerChips,
-      dealCardFromShoe,
-      registerTimeout,
-      getCardPosition: (
-        type: "ai" | "player" | "dealer" | "shoe",
-        _aiPlayers?: AIPlayer[],
-        _playerSeat?: number | null,
-        index?: number,
-        cardIndex?: number,
-      ) => getCardPosition(type, aiPlayers, playerSeat, index, cardIndex),
-      addSpeechBubble,
-      showEndOfHandReactions,
-    });
+  const {
+    startNewRound,
+    dealInitialCards,
+    hit,
+    stand,
+    doubleDown,
+    split,
+    surrender,
+  } = useGameActions({
+    phase,
+    playerSeat,
+    playerHand,
+    dealerHand,
+    aiPlayers,
+    shoe,
+    cardsDealt,
+    runningCount,
+    shoesDealt,
+    gameSettings,
+    currentDealer,
+    playerChips,
+    setPhase,
+    setCurrentBet,
+    setDealerRevealed,
+    setDealerCallout,
+    setPlayerHand,
+    setDealerHand,
+    setSpeechBubbles,
+    setAIPlayers,
+    setFlyingCards,
+    setPlayerActions,
+    setShoe,
+    setCardsDealt,
+    setRunningCount,
+    setShoesDealt,
+    setInsuranceOffered,
+    setActivePlayerIndex,
+    setPlayerFinished,
+    setPlayerChips,
+    dealCardFromShoe,
+    registerTimeout,
+    getCardPosition: (
+      type: "ai" | "player" | "dealer" | "shoe",
+      _aiPlayers?: AIPlayer[],
+      _playerSeat?: number | null,
+      index?: number,
+      cardIndex?: number,
+    ) => getCardPosition(type, aiPlayers, playerSeat, index, cardIndex),
+    addSpeechBubble,
+    showEndOfHandReactions,
+  });
 
   // Calculate true count for bet tracking
   const decksRemaining = calculateDecksRemaining(
@@ -466,7 +481,12 @@ export default function GamePage() {
   );
 
   // Game initialization hook
-  useGameInitialization(setAIPlayers, setCurrentDealer, setInitialized);
+  useGameInitialization(
+    setAIPlayers,
+    setCurrentDealer,
+    setInitialized,
+    devTestingMode,
+  );
 
   // Conversation triggers hook
   useConversationTriggers({
@@ -542,6 +562,13 @@ export default function GamePage() {
     debugLog("betting", `Player seat: ${playerSeat}`);
     debugLog("betting", `Should show betting interface: ${shouldShowBetting}`);
   }, [phase, initialized, playerSeat]);
+
+  // Show test scenario selector when entering BETTING phase in dev mode
+  useEffect(() => {
+    if (phase === "BETTING" && devTestingMode && !showTestScenarioSelector) {
+      setShowTestScenarioSelector(true);
+    }
+  }, [phase, devTestingMode, showTestScenarioSelector]);
 
   // AI turns phase hook (handles its own reset logic internally)
   useAITurnsPhase({
@@ -736,6 +763,14 @@ export default function GamePage() {
         decksRemaining={calculateDecksRemaining(shoe.length, cardsDealt)}
         onClose={() => setShowCountPeekResult(false)}
       />
+      <TestScenarioSelector
+        isOpen={showTestScenarioSelector}
+        onClose={() => setShowTestScenarioSelector(false)}
+        onSelectScenario={(scenario) => {
+          setSelectedTestScenario(scenario);
+          setShowTestScenarioSelector(false);
+        }}
+      />
       {/* Penalty Flash Effect */}
       {showPenaltyFlash && (
         <div
@@ -799,6 +834,7 @@ export default function GamePage() {
             debugLogs,
             showDebugLog,
             strategyCardUsedThisHand,
+            devTestingMode,
             heatMapBuckets: getHeatMapBuckets(),
             discretionScore: getDiscretionScore(),
             heatMapDataPointCount: dataPointCount,
@@ -810,6 +846,7 @@ export default function GamePage() {
             setShowDealerInfo,
             setShowCountPeek,
             setShowDebugLog,
+            setDevTestingMode,
             clearDebugLogs,
           }}
         >

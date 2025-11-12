@@ -418,13 +418,13 @@ export function useAITurnsPhase({
           gameSettings.resplitAces,
         );
 
-      // Get basic strategy action (considers split, hit, stand - skip double for AI)
+      // Get basic strategy action (includes surrender, but not double - we don't care about AI bet sizes)
       const basicStrategyAction = getBasicStrategyAction(
         currentHand.cards,
         dealerUpCard,
         gameSettings,
         canSplitHand,
-        false, // Don't suggest double for AI - bet size doesn't matter
+        false, // Don't suggest double for AI
       );
 
       // Determine if AI follows basic strategy based on skill level
@@ -438,9 +438,20 @@ export function useAITurnsPhase({
         action = handValue < 17 ? "H" : "S";
       }
 
-      // Convert double to hit for AI (in case basic strategy still suggests it)
+      // AI decision-making for advanced actions
+      // Double down: Convert to hit (we don't care about AI bet sizes)
       if (action === "D") {
         action = "H";
+      }
+
+      // Surrender: AI will surrender if basic strategy says so AND surrender is allowed
+      if (action === "SU") {
+        if (followsBasicStrategy && gameSettings.lateSurrenderAllowed) {
+          // Keep surrender action
+        } else {
+          // Not following strategy or surrender not allowed - convert to hit
+          action = "H";
+        }
       }
 
       debugLog(
@@ -448,10 +459,7 @@ export function useAITurnsPhase({
         `Dealer up card: ${dealerUpCard.rank}${dealerUpCard.suit}`,
       );
       debugLog("aiTurns", `Can split: ${canSplitHand}`);
-      debugLog(
-        "aiTurns",
-        `Basic strategy says: ${basicStrategyAction} (converted D to H for AI)`,
-      );
+      debugLog("aiTurns", `Basic strategy says: ${basicStrategyAction}`);
       debugLog(
         "aiTurns",
         `Follows basic strategy: ${followsBasicStrategy}, Final decision: ${action}`,
@@ -610,6 +618,54 @@ export function useAITurnsPhase({
         }, decisionTime + 50);
 
         return; // Exit early for split
+      }
+
+      // Handle SURRENDER action
+      if (action === "SU") {
+        debugLog("aiTurns", `AI Player ${idx} decision: SURRENDER`);
+
+        registerTimeout(() => {
+          setPlayerActions((prev) => new Map(prev).set(idx, "STAND")); // Show as STAND (no separate surrender indicator yet)
+        }, decisionTime);
+
+        registerTimeout(() => {
+          // Mark hand as surrendered and refund 50% of bet
+          const refund = Math.floor(currentHand.bet / 2);
+          setAIPlayers((prev) => {
+            const updated = [...prev];
+            updated[idx] = {
+              ...updated[idx],
+              hand: {
+                ...updated[idx].hand,
+                result: "SURRENDER",
+              },
+              chips: updated[idx].chips + refund,
+            };
+            return updated;
+          });
+
+          setPlayerActions((prev) => {
+            const newMap = new Map(prev);
+            newMap.delete(idx);
+            return newMap;
+          });
+        }, decisionTime + actionDisplay);
+
+        registerTimeout(
+          () => {
+            // Mark player as finished
+            debugLog(
+              "aiTurns",
+              `Marking AI Player ${idx} as FINISHED (surrendered)`,
+            );
+            setPlayersFinished((prev) => new Set(prev).add(idx));
+            aiTurnProcessingRef.current = false;
+            setActivePlayerIndex(null);
+          },
+          decisionTime + actionDisplay + 500,
+        );
+
+        return; // Exit early for surrender
       }
 
       // Handle HIT action

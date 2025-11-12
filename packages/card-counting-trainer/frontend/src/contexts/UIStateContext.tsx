@@ -13,6 +13,9 @@ interface UIState {
   showDebugLog: boolean;
   strategyCardUsedThisHand: boolean;
 
+  // Dev/Testing mode
+  devTestingMode: boolean;
+
   // Heat map
   heatMapBuckets: HeatMapBucket[];
   discretionScore: number;
@@ -27,6 +30,7 @@ interface UIState {
   setShowDealerInfo: (show: boolean) => void;
   setShowCountPeek: (show: boolean) => void;
   setShowDebugLog: (show: boolean) => void;
+  setDevTestingMode: (enabled: boolean) => void;
   clearDebugLogs: () => void;
 }
 
