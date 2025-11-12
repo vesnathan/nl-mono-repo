@@ -25,26 +25,25 @@ export function HeroSlider() {
         loop={true}
         className="h-[650px] bg-gray-900"
       >
-        {/* Slide 1 - Garden Maintenance */}
+        {/* Slide 1 - Modern Office */}
         <SwiperSlide>
           <div
             className="h-full w-full bg-gray-900 bg-cover bg-center bg-no-repeat relative"
             style={{
-              backgroundImage: "url(/images/hero-garden-maintenance.png)",
+              backgroundImage: "url(/images/hero-modern-office.jpg)",
             }}
           >
             <div className="absolute inset-0 bg-black/40"></div>
             <div className="relative z-10 h-full flex items-center justify-center">
               <div className="text-center px-4 max-w-4xl">
                 <h1 className="text-white text-3xl md:text-5xl lg:text-6xl font-bold mb-4 font-josefin leading-tight">
-                  Keep Your Rental Property
+                  Transform Your
                   <br className="hidden sm:block" />
-                  <span className="text-brand-yellow">Guest-Ready</span>
+                  <span className="text-brand-yellow">Digital Presence</span>
                 </h1>
                 <p className="text-white text-base md:text-lg mb-6 md:mb-8 font-roboto-slab max-w-2xl mx-auto">
-                  Servicing Devonport & surrounds (postcodes 7310 & 7306).
-                  Professional maintenance backed by qualified horticulturalists
-                  and 4.98★ Airbnb hosts.
+                  Full-service digital agency specializing in web development,
+                  social media management, and strategic digital marketing.
                 </p>
                 <div className="flex gap-4 justify-center">
                   <Link
@@ -59,23 +58,23 @@ export function HeroSlider() {
           </div>
         </SwiperSlide>
 
-        {/* Slide 2 - Pool & Garden */}
+        {/* Slide 2 - Developer Workspace */}
         <SwiperSlide>
           <div
             className="h-full w-full bg-gray-900 bg-cover bg-center bg-no-repeat relative"
-            style={{ backgroundImage: "url(/images/hero-pool-garden.png)" }}
+            style={{ backgroundImage: "url(/images/hero-developer-workspace.jpg)" }}
           >
             <div className="absolute inset-0 bg-black/40"></div>
             <div className="relative z-10 h-full flex items-center justify-center">
               <div className="text-center px-4 max-w-4xl">
                 <h1 className="text-white text-3xl md:text-5xl lg:text-6xl font-bold mb-4 font-josefin leading-tight">
-                  Professional Garden Care
+                  Custom Web Development
                   <br className="hidden sm:block" />
-                  <span className="text-brand-yellow">For Your Property</span>
+                  <span className="text-brand-yellow">Built for Growth</span>
                 </h1>
                 <p className="text-white text-base md:text-lg mb-6 md:mb-8 font-roboto-slab max-w-2xl mx-auto">
-                  Quality maintenance between guest bookings. Supporting
-                  meaningful employment with Tommy's Law'n Order.
+                  Modern, responsive websites and applications built with
+                  cutting-edge technology for optimal performance.
                 </p>
                 <div className="flex gap-4 justify-center">
                   <Link
@@ -90,26 +89,26 @@ export function HeroSlider() {
           </div>
         </SwiperSlide>
 
-        {/* Slide 3 - Backyard Weeding */}
+        {/* Slide 3 - Social Media */}
         <SwiperSlide>
           <div
             className="h-full w-full bg-gray-900 bg-cover bg-center bg-no-repeat relative"
             style={{
               backgroundImage:
-                "url(/images/hero2_backyard_weeding_1872x800.jpg)",
+                "url(/images/hero-social-media.jpg)",
             }}
           >
             <div className="absolute inset-0 bg-black/40"></div>
             <div className="relative z-10 h-full flex items-center justify-center">
               <div className="text-center px-4 max-w-4xl">
                 <h1 className="text-white text-3xl md:text-5xl lg:text-6xl font-bold mb-4 font-josefin leading-tight">
-                  Complete Garden Solutions
+                  Social Media That
                   <br className="hidden sm:block" />
-                  <span className="text-brand-yellow">For Airbnb Hosts</span>
+                  <span className="text-brand-yellow">Drives Results</span>
                 </h1>
                 <p className="text-white text-base md:text-lg mb-6 md:mb-8 font-roboto-slab max-w-2xl mx-auto">
-                  From lawn mowing to garden waste removal - we handle it all so
-                  you can focus on your guests.
+                  Strategic content creation and management across all major
+                  platforms to grow your online presence.
                 </p>
                 <div className="flex gap-4 justify-center">
                   <Link
