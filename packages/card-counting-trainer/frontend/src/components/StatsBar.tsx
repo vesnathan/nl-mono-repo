@@ -6,14 +6,20 @@ import { useGameState } from "@/contexts/GameStateContext";
 import { useUIState } from "@/contexts/UIStateContext";
 
 export default function StatsBar() {
-  const { runningCount, currentStreak, playerChips, currentScore } =
-    useGameState();
+  const {
+    runningCount,
+    currentStreak,
+    playerChips,
+    currentScore,
+    scoreMultiplier,
+  } = useGameState();
   const {
     setShowSettings,
     setShowAdminSettings,
     setShowLeaderboard,
     setShowStrategyCard,
     setShowHeatMap,
+    setShowCountPeek,
   } = useUIState();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const { isAuthenticated, isLoading, isAdmin, refresh } = useAuth();
@@ -112,6 +118,44 @@ export default function StatsBar() {
           SCORE:{" "}
           <span style={{ color: "#FFF" }}>{currentScore.toLocaleString()}</span>
         </div>
+        {/* Show Count Button */}
+        <button
+          type="button"
+          onClick={() => setShowCountPeek(true)}
+          title={
+            scoreMultiplier > 1.0
+              ? "Peek at count (resets score multiplier to 1.0x)"
+              : "Peek at count"
+          }
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            color: "#FFF",
+            border:
+              scoreMultiplier > 1.0 ? "2px solid #F59E0B" : "2px solid #4A90E2",
+            borderRadius: "8px",
+            padding: "6px 12px",
+            fontSize: "14px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            transition: "all 0.2s",
+            boxShadow:
+              scoreMultiplier > 1.0
+                ? "0 0 10px rgba(245, 158, 11, 0.5)"
+                : "none",
+          }}
+          onMouseEnter={(e) => {
+            if (scoreMultiplier > 1.0) {
+              e.currentTarget.style.backgroundColor = "rgba(245, 158, 11, 0.3)";
+            } else {
+              e.currentTarget.style.backgroundColor = "rgba(74, 144, 226, 0.3)";
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+          }}
+        >
+          👁️ Show Count
+        </button>
       </div>
       <div className="flex gap-4 items-center">
         {isAuthenticated && (

@@ -44,6 +44,8 @@ import BackgroundMusic from "@/components/BackgroundMusic";
 import { WelcomeModal } from "@/components/WelcomeModal";
 import { AuthModal } from "@/components/auth/AuthModal";
 import AdminSettingsModal from "@/components/AdminSettingsModal";
+import CountPeekModal from "@/components/CountPeekModal";
+import CountPeekConfirmation from "@/components/CountPeekConfirmation";
 import { useAuth } from "@/contexts/AuthContext";
 import { debugLog } from "@/utils/debug";
 import { GameStateProvider } from "@/contexts/GameStateContext";
@@ -97,6 +99,7 @@ export default function GamePage() {
     longestStreak,
     peakChips,
     scoreMultiplier,
+    setScoreMultiplier,
   } = usePlayerHand();
 
   // AI players state
@@ -141,6 +144,11 @@ export default function GamePage() {
   const [showAdminSettings, setShowAdminSettings] = useState(false);
   const [showStrategyCard, setShowStrategyCard] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(false);
+  const [showCountPeek, setShowCountPeek] = useState(false);
+  const [showCountPeekConfirmation, setShowCountPeekConfirmation] =
+    useState(false);
+  const [showCountPeekResult, setShowCountPeekResult] = useState(false);
+  const [showPenaltyFlash, setShowPenaltyFlash] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [playerSeat, setPlayerSeat] = useState<number | null>(null); // null means not seated
 
@@ -340,6 +348,43 @@ export default function GamePage() {
     setPlayerInsuranceBet(0);
     setInsuranceOffered(false);
   }, [setPlayerInsuranceBet, setInsuranceOffered]);
+
+  // Count Peek handlers
+  useEffect(() => {
+    if (showCountPeek) {
+      if (scoreMultiplier > 1.0) {
+        // Show confirmation dialog
+        setShowCountPeekConfirmation(true);
+      } else {
+        // Directly show count reveal
+        setShowCountPeekResult(true);
+      }
+      setShowCountPeek(false);
+    }
+  }, [showCountPeek, scoreMultiplier]);
+
+  const handleCountPeekConfirm = useCallback(() => {
+    // Reset multiplier to 1.0x
+    const oldMultiplier = scoreMultiplier;
+    setScoreMultiplier(1.0);
+
+    // Show penalty flash
+    setShowPenaltyFlash(true);
+    setTimeout(() => setShowPenaltyFlash(false), 1000); // Flash for 1 second
+
+    // Show result modal
+    setShowCountPeekConfirmation(false);
+    setShowCountPeekResult(true);
+
+    debugLog(
+      "gamePhases",
+      `Score multiplier reset from ${oldMultiplier}x to 1.0x due to count peek`,
+    );
+  }, [scoreMultiplier, setScoreMultiplier]);
+
+  const handleCountPeekCancel = useCallback(() => {
+    setShowCountPeekConfirmation(false);
+  }, []);
 
   // Suspicion decay hook
   useSuspicionDecay(suspicionLevel, setSuspicionLevel);
@@ -630,6 +675,38 @@ export default function GamePage() {
         isOpen={showAdminSettings}
         onClose={() => setShowAdminSettings(false)}
       />
+      <CountPeekConfirmation
+        isOpen={showCountPeekConfirmation}
+        currentMultiplier={scoreMultiplier}
+        onConfirm={handleCountPeekConfirm}
+        onCancel={handleCountPeekCancel}
+      />
+      <CountPeekModal
+        isOpen={showCountPeekResult}
+        runningCount={runningCount}
+        trueCount={calculateTrueCount(
+          runningCount,
+          calculateDecksRemaining(shoe.length, cardsDealt),
+        )}
+        decksRemaining={calculateDecksRemaining(shoe.length, cardsDealt)}
+        onClose={() => setShowCountPeekResult(false)}
+      />
+      {/* Penalty Flash Effect */}
+      {showPenaltyFlash && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(239, 68, 68, 0.4)",
+            zIndex: 2000,
+            pointerEvents: "none",
+            animation: "penaltyPulse 1s ease-in-out",
+          }}
+        />
+      )}
       <GameStateProvider
         value={{
           suspicionLevel,
@@ -673,6 +750,7 @@ export default function GamePage() {
             showLeaderboard,
             showStrategyCard,
             showHeatMap,
+            showCountPeek,
             debugLogs,
             showDebugLog,
             heatMapBuckets: getHeatMapBuckets(),
@@ -684,6 +762,7 @@ export default function GamePage() {
             setShowStrategyCard,
             setShowHeatMap,
             setShowDealerInfo,
+            setShowCountPeek,
             setShowDebugLog,
             clearDebugLogs,
           }}
