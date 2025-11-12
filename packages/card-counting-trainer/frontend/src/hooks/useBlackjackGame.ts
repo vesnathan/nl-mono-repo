@@ -179,6 +179,10 @@ export function useBlackjackGame(config?: GameConfig) {
         case "STAND":
           // No state change for stand
           break;
+
+        default:
+          // Unknown action, no state change
+          break;
       }
 
       // Update score

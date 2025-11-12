@@ -405,73 +405,7 @@ export function useGameActions({
         () => {
           debugLog("dealCards", "All cards dealt and animations complete");
 
-          // Check if dealer should peek for blackjack (American rules)
-          const shouldPeek = gameSettings.dealerPeekRule === "AMERICAN_PEEK";
-          const dealerUpCard = dealerCard1;
-          const canHaveBlackjack =
-            dealerUpCard.rank === "A" || dealerUpCard.value === 10;
-
-          // Offer insurance if enabled and dealer shows Ace
-          const shouldOfferInsurance =
-            gameSettings.insuranceAvailable && dealerUpCard.rank === "A";
-
-          if (shouldOfferInsurance) {
-            debugLog("insurance", "Dealer showing Ace - OFFERING INSURANCE");
-            setInsuranceOffered(true);
-            setPhase("INSURANCE");
-            // Insurance phase hook will handle the flow
-            return;
-          }
-
-          if (shouldPeek && canHaveBlackjack) {
-            // Show "Peeking..." in speech bubble
-            debugLog(
-              "dealCards",
-              `Dealer showing ${dealerUpCard.rank} - checking for blackjack...`,
-            );
-            addSpeechBubble("dealer", "Peeking...", -1);
-
-            registerTimeout(() => {
-              // Check for dealer blackjack (natural 21 with 2 cards)
-              const dealerCards = [dealerCard1, dealerCard2];
-              const dealerValue = calculateHandValue(dealerCards);
-              if (dealerValue === 21) {
-                debugLog(
-                  "dealCards",
-                  "DEALER BLACKJACK! Revealing hole card and moving to RESOLVING",
-                );
-                setDealerRevealed(true);
-                addSpeechBubble("dealer", "Blackjack!", -1);
-
-                // Trigger AI player reactions to dealer blackjack
-                registerTimeout(() => {
-                  showEndOfHandReactions();
-                }, 500);
-
-                // Skip player turn and AI turns, go straight to resolving
-                registerTimeout(() => {
-                  setPhase("RESOLVING");
-                }, 2000);
-              } else {
-                debugLog(
-                  "dealCards",
-                  `Dealer showing: ${dealerCard1.rank}${dealerCard1.suit}`,
-                );
-                debugLog(
-                  "dealCards",
-                  `Dealer hole card: ${dealerCard2.rank}${dealerCard2.suit} [hidden]`,
-                );
-
-                // Move to next phase after peek
-                proceedAfterPeek();
-              }
-            }, 1500); // Peek delay
-            return; // Exit early, will continue after peek
-          }
-
-          // No peek needed
-          proceedAfterPeek();
-
+          // Define proceedAfterPeek function before using it
           function proceedAfterPeek() {
             debugLog(
               "dealCards",
@@ -552,6 +486,73 @@ export function useGameActions({
               setActivePlayerIndex(0); // Start with first AI player
             }
           }
+
+          // Check if dealer should peek for blackjack (American rules)
+          const shouldPeek = gameSettings.dealerPeekRule === "AMERICAN_PEEK";
+          const dealerUpCard = dealerCard1;
+          const canHaveBlackjack =
+            dealerUpCard.rank === "A" || dealerUpCard.value === 10;
+
+          // Offer insurance if enabled and dealer shows Ace
+          const shouldOfferInsurance =
+            gameSettings.insuranceAvailable && dealerUpCard.rank === "A";
+
+          if (shouldOfferInsurance) {
+            debugLog("insurance", "Dealer showing Ace - OFFERING INSURANCE");
+            setInsuranceOffered(true);
+            setPhase("INSURANCE");
+            // Insurance phase hook will handle the flow
+            return;
+          }
+
+          if (shouldPeek && canHaveBlackjack) {
+            // Show "Peeking..." in speech bubble
+            debugLog(
+              "dealCards",
+              `Dealer showing ${dealerUpCard.rank} - checking for blackjack...`,
+            );
+            addSpeechBubble("dealer", "Peeking...", -1);
+
+            registerTimeout(() => {
+              // Check for dealer blackjack (natural 21 with 2 cards)
+              const dealerCards = [dealerCard1, dealerCard2];
+              const dealerValue = calculateHandValue(dealerCards);
+              if (dealerValue === 21) {
+                debugLog(
+                  "dealCards",
+                  "DEALER BLACKJACK! Revealing hole card and moving to RESOLVING",
+                );
+                setDealerRevealed(true);
+                addSpeechBubble("dealer", "Blackjack!", -1);
+
+                // Trigger AI player reactions to dealer blackjack
+                registerTimeout(() => {
+                  showEndOfHandReactions();
+                }, 500);
+
+                // Skip player turn and AI turns, go straight to resolving
+                registerTimeout(() => {
+                  setPhase("RESOLVING");
+                }, 2000);
+              } else {
+                debugLog(
+                  "dealCards",
+                  `Dealer showing: ${dealerCard1.rank}${dealerCard1.suit}`,
+                );
+                debugLog(
+                  "dealCards",
+                  `Dealer hole card: ${dealerCard2.rank}${dealerCard2.suit} [hidden]`,
+                );
+
+                // Move to next phase after peek
+                proceedAfterPeek();
+              }
+            }, 1500); // Peek delay
+            return; // Exit early, will continue after peek
+          }
+
+          // No peek needed
+          proceedAfterPeek();
         },
         delay + CARD_ANIMATION_DURATION + 500,
       );
