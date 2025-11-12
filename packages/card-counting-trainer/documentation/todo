@@ -57,11 +57,11 @@
 - [ ] Leaderboard integration
 
 ### Count Peek Feature
-- [ ] "Show Count" button with warning
-- [ ] Confirmation dialog when multiplier >1.0x
-- [ ] Score multiplier reset penalty
-- [ ] Count reveal modal (running count, true count, decks remaining)
-- [ ] Penalty visual effects
+- [x] "Show Count" button with warning
+- [x] Confirmation dialog when multiplier >1.0x
+- [x] Score multiplier reset penalty
+- [x] Count reveal modal (running count, true count, decks remaining)
+- [x] Penalty visual effects
 
 ### Strategy Card System
 - [x] "Strategy Card" button during player turn
