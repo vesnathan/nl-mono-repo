@@ -22,7 +22,7 @@ import {
 } from "@/data/dialogue";
 import { getBasicStrategyAction } from "@/lib/basicStrategy";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
-import { DEFAULT_GAME_SETTINGS } from "@/types/gameSettings";
+import { GameSettings } from "@/types/gameSettings";
 import { generateBustReaction } from "@/utils/reactions";
 import { debugLog } from "@/utils/debug";
 
@@ -35,6 +35,7 @@ interface UseAITurnsPhaseParams {
   playerSeat: number | null;
   playerHand: PlayerHand;
   playerFinished: boolean;
+  gameSettings: GameSettings;
   setActivePlayerIndex: (index: number | null) => void;
   setPlayersFinished: (
     finished: Set<number> | ((prev: Set<number>) => Set<number>),
@@ -100,6 +101,7 @@ export function useAITurnsPhase({
   playerSeat,
   playerHand,
   playerFinished,
+  gameSettings,
   setActivePlayerIndex,
   setPlayersFinished,
   setPlayerActions,
@@ -200,6 +202,50 @@ export function useAITurnsPhase({
           return false;
         }
 
+        // Check if player has split hands
+        if (ai.hand.isSplit && ai.hand.splitHands) {
+          const activeHandIdx = ai.hand.activeSplitHandIndex ?? 0;
+          const activeHand = ai.hand.splitHands[activeHandIdx];
+
+          // Check if there are more hands to play
+          if (activeHandIdx < ai.hand.splitHands.length) {
+            const handValue = calculateHandValue(activeHand.cards);
+            const isBust = isBusted(activeHand.cards);
+
+            const handStr = activeHand.cards
+              .map((c) => `${c.rank}${c.suit}`)
+              .join(", ");
+            debugLog(
+              "aiTurns",
+              `  ${ai.character.name} (idx:${idx}) - Split hand ${activeHandIdx + 1}/${ai.hand.splitHands.length}: ${handStr} (value: ${handValue}, busted: ${isBust})`,
+            );
+
+            // If current split hand is done, check if more hands remain
+            if (isBust || handValue >= 21) {
+              if (activeHandIdx + 1 < ai.hand.splitHands.length) {
+                debugLog(
+                  "aiTurns",
+                  `  ${ai.character.name} (idx:${idx}) - SELECTED (more split hands to play)`,
+                );
+                return true;
+              }
+              debugLog(
+                "aiTurns",
+                `  ${ai.character.name} (idx:${idx}) - SKIPPED (all split hands finished)`,
+              );
+              return false;
+            }
+
+            // Current hand can still play
+            debugLog(
+              "aiTurns",
+              `  ${ai.character.name} (idx:${idx}) - SELECTED (split hand < 21)`,
+            );
+            return true;
+          }
+        }
+
+        // Regular hand logic
         const handValue = calculateHandValue(ai.hand.cards);
         const isBust = isBusted(ai.hand.cards);
 
@@ -302,13 +348,29 @@ export function useAITurnsPhase({
         "aiTurns",
         `=== AI PLAYER ${idx} TURN (${ai.character.name}, Seat ${ai.position}) ===`,
       );
-      const currentHandStr = ai.hand.cards
+
+      // Determine which hand to play (split hand or regular hand)
+      const isPlayingSplitHands = ai.hand.isSplit && ai.hand.splitHands;
+      const activeHandIdx = ai.hand.activeSplitHandIndex ?? 0;
+      const currentHand = isPlayingSplitHands
+        ? ai.hand.splitHands![activeHandIdx]
+        : ai.hand;
+
+      const currentHandStr = currentHand.cards
         .map((c) => `${c.rank}${c.suit}`)
         .join(", ");
-      debugLog("aiTurns", `Current hand: ${currentHandStr}`);
 
-      const handValue = calculateHandValue(ai.hand.cards);
-      const isBust = isBusted(ai.hand.cards);
+      if (isPlayingSplitHands) {
+        debugLog(
+          "aiTurns",
+          `Playing split hand ${activeHandIdx + 1}/${ai.hand.splitHands!.length}: ${currentHandStr}`,
+        );
+      } else {
+        debugLog("aiTurns", `Current hand: ${currentHandStr}`);
+      }
+
+      const handValue = calculateHandValue(currentHand.cards);
+      const isBust = isBusted(currentHand.cards);
 
       debugLog("aiTurns", `Hand value: ${handValue}, Busted: ${isBust}`);
 
@@ -343,15 +405,24 @@ export function useAITurnsPhase({
 
       const dealerUpCard = dealerHand.cards[0];
 
-      // Check if AI can split (AI has unlimited chips, but we skip double since bet size doesn't matter)
+      // Check if AI can split (considering resplit rules)
+      const currentSplitCount = isPlayingSplitHands
+        ? ai.hand.splitHands!.length
+        : 0;
       const canSplitHand =
-        ai.hand.cards.length === 2 && canSplitCards(ai.hand.cards);
+        currentHand.cards.length === 2 &&
+        canSplitCards(
+          currentHand.cards,
+          gameSettings.maxResplits,
+          currentSplitCount,
+          gameSettings.resplitAces,
+        );
 
       // Get basic strategy action (considers split, hit, stand - skip double for AI)
       const basicStrategyAction = getBasicStrategyAction(
-        ai.hand.cards,
+        currentHand.cards,
         dealerUpCard,
-        DEFAULT_GAME_SETTINGS,
+        gameSettings,
         canSplitHand,
         false, // Don't suggest double for AI - bet size doesn't matter
       );
@@ -417,7 +488,11 @@ export function useAITurnsPhase({
 
       // Handle SPLIT action
       if (action === "SP" && canSplitHand) {
-        debugLog("aiTurns", `AI Player ${idx} decision: SPLIT`);
+        const isResplit = isPlayingSplitHands;
+        debugLog(
+          "aiTurns",
+          `AI Player ${idx} decision: ${isResplit ? "RESPLIT" : "SPLIT"}`,
+        );
 
         // Show SPLIT action indicator
         registerTimeout(() => {
@@ -426,15 +501,15 @@ export function useAITurnsPhase({
 
         // Execute split after short delay
         registerTimeout(() => {
-          const [card1, card2] = ai.hand.cards;
+          const [card1, card2] = currentHand.cards;
           debugLog(
             "aiTurns",
             `Splitting ${card1.rank}${card1.suit} and ${card2.rank}${card2.suit}`,
           );
 
           // Create two hands
-          const hand1: PlayerHand = { cards: [card1], bet: ai.hand.bet };
-          const hand2: PlayerHand = { cards: [card2], bet: ai.hand.bet };
+          const hand1: PlayerHand = { cards: [card1], bet: currentHand.bet };
+          const hand2: PlayerHand = { cards: [card2], bet: currentHand.bet };
 
           // Deal card to first hand
           registerTimeout(() => {
@@ -457,20 +532,68 @@ export function useAITurnsPhase({
               // Update AI player with split hands
               setAIPlayers((prev) => {
                 const updated = [...prev];
-                updated[idx] = {
-                  ...updated[idx],
-                  hand: {
-                    cards: [],
-                    bet: ai.hand.bet,
-                    isSplit: true,
-                    splitHands: [hand1, hand2],
-                    activeSplitHandIndex: 0,
-                  },
-                };
+                if (isResplit) {
+                  // Resplit: Replace current split hand with two new hands
+                  const newSplitHands = [...ai.hand.splitHands!];
+                  newSplitHands.splice(activeHandIdx, 1, hand1, hand2);
+
+                  updated[idx] = {
+                    ...updated[idx],
+                    hand: {
+                      cards: [],
+                      bet: ai.hand.bet,
+                      isSplit: true,
+                      splitHands: newSplitHands,
+                      activeSplitHandIndex: activeHandIdx, // Stay on first new hand
+                    },
+                  };
+
+                  debugLog(
+                    "aiTurns",
+                    `AI resplit complete - now have ${newSplitHands.length} hands`,
+                  );
+                } else {
+                  // Initial split: Create split state
+                  updated[idx] = {
+                    ...updated[idx],
+                    hand: {
+                      cards: [],
+                      bet: ai.hand.bet,
+                      isSplit: true,
+                      splitHands: [hand1, hand2],
+                      activeSplitHandIndex: 0,
+                    },
+                  };
+
+                  debugLog(
+                    "aiTurns",
+                    "AI split complete - will play both hands",
+                  );
+                }
                 return updated;
               });
 
-              debugLog("aiTurns", "AI split complete - will play both hands");
+              // Check if first hand is 21 (automatically move to next hand)
+              const hand1Value = calculateHandValue(hand1.cards);
+              if (hand1Value === 21) {
+                debugLog(
+                  "aiTurns",
+                  "First split hand has 21 - moving to next hand",
+                );
+                setAIPlayers((prev) => {
+                  const updated = [...prev];
+                  const currentActiveSplitIdx =
+                    updated[idx].hand.activeSplitHandIndex ?? 0;
+                  updated[idx] = {
+                    ...updated[idx],
+                    hand: {
+                      ...updated[idx].hand,
+                      activeSplitHandIndex: currentActiveSplitIdx + 1,
+                    },
+                  };
+                  return updated;
+                });
+              }
 
               // Clear action indicator and continue
               registerTimeout(() => {
@@ -564,7 +687,7 @@ export function useAITurnsPhase({
           const aiPosition = getCardPositionForAnimation(
             "ai",
             idx,
-            ai.hand.cards.length,
+            currentHand.cards.length,
           );
 
           const flyingCard: FlyingCardData = {
@@ -579,21 +702,41 @@ export function useAITurnsPhase({
           registerTimeout(() => {
             setAIPlayers((prev) => {
               const updated = [...prev];
-              updated[idx] = {
-                ...updated[idx],
-                hand: {
-                  ...updated[idx].hand,
-                  cards: [...updated[idx].hand.cards, card],
-                },
-              };
+              if (isPlayingSplitHands) {
+                // Update specific split hand
+                const newSplitHands = [...updated[idx].hand.splitHands!];
+                newSplitHands[activeHandIdx] = {
+                  ...newSplitHands[activeHandIdx],
+                  cards: [...newSplitHands[activeHandIdx].cards, card],
+                };
+                updated[idx] = {
+                  ...updated[idx],
+                  hand: {
+                    ...updated[idx].hand,
+                    splitHands: newSplitHands,
+                  },
+                };
+              } else {
+                // Update regular hand
+                updated[idx] = {
+                  ...updated[idx],
+                  hand: {
+                    ...updated[idx].hand,
+                    cards: [...updated[idx].hand.cards, card],
+                  },
+                };
+              }
               return updated;
             });
             setFlyingCards((prev) =>
               prev.filter((fc) => fc.id !== flyingCard.id),
             );
 
-            const newHandValue = calculateHandValue([...ai.hand.cards, card]);
-            const busted = isBusted([...ai.hand.cards, card]);
+            const newHandValue = calculateHandValue([
+              ...currentHand.cards,
+              card,
+            ]);
+            const busted = isBusted([...currentHand.cards, card]);
 
             debugLog(
               "aiTurns",
@@ -601,18 +744,14 @@ export function useAITurnsPhase({
             );
 
             if (busted) {
-              debugLog("aiTurns", `AI Player ${idx} BUSTED!`);
-              debugLog(
-                "aiTurns",
-                `Marking AI Player ${idx} as FINISHED (busted)`,
-              );
+              debugLog("aiTurns", `AI Player ${idx} split hand BUSTED!`);
 
               // Generate and show bust reaction with delay (after card lands)
               const updatedAI = {
                 ...ai,
                 hand: {
                   ...ai.hand,
-                  cards: [...ai.hand.cards, card],
+                  cards: [...currentHand.cards, card],
                 },
               };
               const bustReaction = generateBustReaction(updatedAI);
@@ -623,16 +762,14 @@ export function useAITurnsPhase({
                 );
                 registerTimeout(() => {
                   addSpeechBubble(
-                    updatedAI.character.id, // Use actual character ID for audio generation
+                    updatedAI.character.id,
                     bustReaction.message,
                     bustReaction.position,
-                    "bust", // Audio type for bust reaction
-                    3, // IMMEDIATE priority - interrupts everything
+                    "bust",
+                    3,
                   );
-                }, 800); // Delay 800ms after card lands
+                }, 800);
               }
-
-              setPlayersFinished((prev) => new Set(prev).add(idx));
 
               setPlayerActions((prev) => {
                 const newMap = new Map(prev);
@@ -645,17 +782,45 @@ export function useAITurnsPhase({
               }, 100);
 
               registerTimeout(() => {
-                setAIPlayers((prev) => {
-                  const updated = [...prev];
-                  updated[idx] = {
-                    ...updated[idx],
-                    hand: {
-                      ...updated[idx].hand,
-                      cards: [],
-                    },
-                  };
-                  return updated;
-                });
+                // Check if there are more split hands to play
+                if (
+                  isPlayingSplitHands &&
+                  activeHandIdx + 1 < ai.hand.splitHands!.length
+                ) {
+                  debugLog(
+                    "aiTurns",
+                    `Moving to next split hand ${activeHandIdx + 2}/${ai.hand.splitHands!.length}`,
+                  );
+                  setAIPlayers((prev) => {
+                    const updated = [...prev];
+                    updated[idx] = {
+                      ...updated[idx],
+                      hand: {
+                        ...updated[idx].hand,
+                        activeSplitHandIndex: activeHandIdx + 1,
+                      },
+                    };
+                    return updated;
+                  });
+                } else {
+                  // All hands finished
+                  debugLog("aiTurns", `Marking AI Player ${idx} as FINISHED`);
+                  setPlayersFinished((prev) => new Set(prev).add(idx));
+                  if (!isPlayingSplitHands) {
+                    setAIPlayers((prev) => {
+                      const updated = [...prev];
+                      updated[idx] = {
+                        ...updated[idx],
+                        hand: {
+                          ...updated[idx].hand,
+                          cards: [],
+                        },
+                      };
+                      return updated;
+                    });
+                  }
+                }
+
                 setPlayerActions((prev) => {
                   const newMap = new Map(prev);
                   newMap.delete(idx);
@@ -667,9 +832,6 @@ export function useAITurnsPhase({
               }, CARD_ANIMATION_DURATION);
             } else if (newHandValue >= 21) {
               debugLog("aiTurns", `AI Player ${idx} reached 21!`);
-              debugLog("aiTurns", `Marking AI Player ${idx} as FINISHED (21)`);
-
-              setPlayersFinished((prev) => new Set(prev).add(idx));
 
               setPlayerActions((prev) => {
                 const newMap = new Map(prev);
@@ -682,6 +844,35 @@ export function useAITurnsPhase({
               }, 100);
 
               registerTimeout(() => {
+                // Check if there are more split hands to play
+                if (
+                  isPlayingSplitHands &&
+                  activeHandIdx + 1 < ai.hand.splitHands!.length
+                ) {
+                  debugLog(
+                    "aiTurns",
+                    `Moving to next split hand ${activeHandIdx + 2}/${ai.hand.splitHands!.length}`,
+                  );
+                  setAIPlayers((prev) => {
+                    const updated = [...prev];
+                    updated[idx] = {
+                      ...updated[idx],
+                      hand: {
+                        ...updated[idx].hand,
+                        activeSplitHandIndex: activeHandIdx + 1,
+                      },
+                    };
+                    return updated;
+                  });
+                } else {
+                  // All hands finished
+                  debugLog(
+                    "aiTurns",
+                    `Marking AI Player ${idx} as FINISHED (21)`,
+                  );
+                  setPlayersFinished((prev) => new Set(prev).add(idx));
+                }
+
                 setPlayerActions((prev) => {
                   const newMap = new Map(prev);
                   newMap.delete(idx);
@@ -727,21 +918,18 @@ export function useAITurnsPhase({
         );
       } else {
         debugLog("aiTurns", `AI Player ${idx} decision: STAND`);
-        debugLog("aiTurns", `Marking AI Player ${idx} as FINISHED (stand)`);
-
-        setPlayersFinished((prev) => new Set(prev).add(idx));
 
         // Show hand-based dialogue when standing (50% chance)
         if (Math.random() < 0.5) {
           let dialogue: string | null = null;
 
           // Try to get hand-specific dialogue
-          const isSoft = isSoftHand(ai.hand.cards);
+          const isSoft = isSoftHand(currentHand.cards);
 
-          if (isSoft && ai.hand.cards.length === 2) {
+          if (isSoft && currentHand.cards.length === 2) {
             // Get soft hand saying (A,7 through A,9 typically stand)
-            const aceCard = ai.hand.cards.find((c) => c.rank === "A");
-            const otherCard = ai.hand.cards.find((c) => c.rank !== "A");
+            const aceCard = currentHand.cards.find((c) => c.rank === "A");
+            const otherCard = currentHand.cards.find((c) => c.rank !== "A");
             if (
               aceCard &&
               otherCard &&
@@ -799,6 +987,35 @@ export function useAITurnsPhase({
 
         registerTimeout(
           () => {
+            // Check if there are more split hands to play
+            if (
+              isPlayingSplitHands &&
+              activeHandIdx + 1 < ai.hand.splitHands!.length
+            ) {
+              debugLog(
+                "aiTurns",
+                `Moving to next split hand ${activeHandIdx + 2}/${ai.hand.splitHands!.length}`,
+              );
+              setAIPlayers((prev) => {
+                const updated = [...prev];
+                updated[idx] = {
+                  ...updated[idx],
+                  hand: {
+                    ...updated[idx].hand,
+                    activeSplitHandIndex: activeHandIdx + 1,
+                  },
+                };
+                return updated;
+              });
+            } else {
+              // All hands finished
+              debugLog(
+                "aiTurns",
+                `Marking AI Player ${idx} as FINISHED (stand)`,
+              );
+              setPlayersFinished((prev) => new Set(prev).add(idx));
+            }
+
             aiTurnProcessingRef.current = false;
             setActivePlayerIndex(null);
           },

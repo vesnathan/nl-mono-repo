@@ -65,11 +65,11 @@
 
 ### Strategy Card System
 - [x] "Strategy Card" button during player turn
-- [x] 10 chip cost per peek
+- [ ] 10 chip cost per peek
 - [x] Strategy recommendation overlay (basic strategy chart modal)
-- [x] Highlighted optimal action
-- [x] Brief explanation text
-- [x] Cooldown (once per hand)
+- [ ] Highlighted optimal action
+- [ ] Brief explanation text
+- [ ] Cooldown (once per hand)
 
 ### Multiple Counting Systems
 - [x] KO (Knock-Out) counting system
@@ -87,11 +87,11 @@
 - [ ] Speed control slider (0.25s - 2s per card)
 
 ### Gameplay Features
-- [x] **Split gameplay** (splitting pairs into two hands)
+- [x] **Split gameplay** (splitting pairs into two hands) - Human and AI players
 - [x] Double down implementation
 - [ ] Surrender functionality
 - [x] Insurance when dealer shows Ace
-- [ ] Resplit option (up to 4 hands)
+- [x] Resplit option (up to 4 hands) - Fully implemented with game rules (maxResplits, resplitAces)
 
 ## Lower Priority - Polish & Future (Phase 3+)
 

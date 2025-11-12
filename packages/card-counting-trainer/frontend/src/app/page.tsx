@@ -553,6 +553,7 @@ export default function GamePage() {
     playerSeat,
     playerHand,
     playerFinished,
+    gameSettings,
     setActivePlayerIndex,
     setPlayersFinished,
     setPlayerActions,

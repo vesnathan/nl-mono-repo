@@ -59,10 +59,33 @@ export default function GameModals() {
   };
 
   // Helper functions to check if player can split or double
-  const canSplitHand =
-    playerHand.cards.length === 2 &&
-    playerHand.cards[0].rank === playerHand.cards[1].rank &&
-    playerChips >= playerHand.bet;
+  const canSplitHand = (() => {
+    // Get the hand to check (current split hand or main hand)
+    const isResplit = playerHand.isSplit && playerHand.splitHands;
+    const handToCheck = isResplit
+      ? playerHand.splitHands![playerHand.activeSplitHandIndex ?? 0]
+      : playerHand;
+
+    // Basic checks: must have exactly 2 cards with matching ranks
+    if (handToCheck.cards.length !== 2) return false;
+    if (handToCheck.cards[0].rank !== handToCheck.cards[1].rank) return false;
+    if (playerChips < handToCheck.bet) return false;
+
+    // Check resplit limits
+    const currentSplitCount = isResplit ? playerHand.splitHands!.length : 0;
+    if (currentSplitCount >= gameSettings.maxResplits + 1) return false;
+
+    // Check resplit aces restriction
+    if (
+      handToCheck.cards[0].rank === "A" &&
+      currentSplitCount > 0 &&
+      !gameSettings.resplitAces
+    ) {
+      return false;
+    }
+
+    return true;
+  })();
 
   const canDoubleHand =
     playerHand.cards.length === 2 && playerChips >= playerHand.bet;
