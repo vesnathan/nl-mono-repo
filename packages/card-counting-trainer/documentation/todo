@@ -65,11 +65,11 @@
 
 ### Strategy Card System
 - [x] "Strategy Card" button during player turn
-- [ ] 10 chip cost per peek
+- [x] 10 chip cost per peek
 - [x] Strategy recommendation overlay (basic strategy chart modal)
-- [ ] Highlighted optimal action
-- [ ] Brief explanation text
-- [ ] Cooldown (once per hand)
+- [x] Highlighted optimal action
+- [x] Brief explanation text
+- [x] Cooldown (once per hand)
 
 ### Multiple Counting Systems
 - [x] KO (Knock-Out) counting system

@@ -11,6 +11,7 @@ interface UIState {
   showCountPeek: boolean;
   debugLogs: string[];
   showDebugLog: boolean;
+  strategyCardUsedThisHand: boolean;
 
   // Heat map
   heatMapBuckets: HeatMapBucket[];

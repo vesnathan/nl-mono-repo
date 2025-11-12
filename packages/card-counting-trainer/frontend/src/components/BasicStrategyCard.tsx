@@ -1,20 +1,57 @@
+/* eslint-disable sonarjs/no-duplicate-string */
+
 "use client";
 
 import { GameSettings } from "@/types/gameSettings";
-import { StrategyAction } from "@/types/game";
+import { StrategyAction, Card } from "@/types/game";
+import { PlayerHand } from "@/types/gameState";
+import { getBasicStrategyAction } from "@/lib/basicStrategy";
+import { calculateHandValue, isSoftHand, canSplit } from "@/lib/gameActions";
 
 interface BasicStrategyCardProps {
   isOpen: boolean;
   onClose: () => void;
   settings: GameSettings;
+  playerHand?: PlayerHand;
+  dealerUpCard?: Card;
 }
 
 export default function BasicStrategyCard({
   isOpen,
   onClose,
   settings,
+  playerHand,
+  dealerUpCard,
 }: BasicStrategyCardProps) {
   if (!isOpen) return null;
+
+  // Calculate recommended action if we have player hand and dealer card
+  let recommendedAction: StrategyAction | null = null;
+  let playerHandValue = 0;
+  let isSoft = false;
+  let isPair = false;
+  let dealerCardValue = 0;
+
+  if (playerHand && playerHand.cards.length > 0 && dealerUpCard) {
+    playerHandValue = calculateHandValue(playerHand.cards);
+    isSoft = isSoftHand(playerHand.cards);
+    isPair = canSplit(playerHand.cards);
+    dealerCardValue = dealerUpCard.rank === "A" ? 11 : dealerUpCard.value;
+
+    recommendedAction = getBasicStrategyAction(
+      playerHand.cards,
+      dealerUpCard,
+      settings,
+      isPair,
+      true, // canDoubleDown - assume true for now
+    );
+  }
+
+  // Constants for table cell styling
+  const HIGHLIGHTED_BORDER = "3px solid #FFD700";
+  const HIGHLIGHTED_GLOW = "0 0 15px rgba(255, 215, 0, 0.8)";
+  const NORMAL_BORDER = "1px solid #444";
+  const NO_TRANSFORM = "none";
 
   const getActionColor = (action: StrategyAction): string => {
     switch (action) {
@@ -31,6 +68,89 @@ export default function BasicStrategyCard({
       default:
         return "#6B7280";
     }
+  };
+
+  const getActionExplanation = (action: StrategyAction | null): string => {
+    if (!action) return "";
+
+    switch (action) {
+      case "H":
+        return "Hit - Take another card to improve your hand";
+      case "S":
+        return "Stand - Keep your current hand total";
+      case "D":
+        return "Double Down - Double your bet and receive exactly one more card";
+      case "SP":
+        return "Split - Separate your pair into two hands with separate bets";
+      case "SU":
+        return "Surrender - Forfeit half your bet and end the hand immediately";
+      default:
+        return "";
+    }
+  };
+
+  // Helper function to check if a cell should be highlighted
+  const shouldHighlightCell = (
+    tableType: "hard" | "soft" | "pair",
+    playerValue: string | number,
+    dealerIdx: number,
+    // eslint-disable-next-line sonarjs/cognitive-complexity
+  ): boolean => {
+    if (!playerHand || !dealerUpCard || !recommendedAction) return false;
+
+    // Get dealer card index (2-9, 10, A)
+    const dealerCardIdx = dealerCardValue === 11 ? 9 : dealerCardValue - 2;
+    if (dealerCardIdx !== dealerIdx) return false;
+
+    // Check if this is the right table and row
+    if (isPair && tableType === "pair") {
+      const pairValue = playerHand.cards[0].rank;
+      return (
+        playerValue === `${pairValue},${pairValue}` ||
+        playerValue ===
+          `${pairValue.replace("1", "10")},${pairValue.replace("1", "10")}`
+      );
+    }
+
+    if (isSoft && tableType === "soft") {
+      // For soft hands, check if the value matches
+      if (typeof playerValue === "string" && playerValue.startsWith("A,")) {
+        const softValue = parseInt(playerValue.split(",")[1], 10);
+        const nonAceValue = playerHandValue - 11;
+        return softValue === nonAceValue;
+      }
+      // Handle ranges like "A,2-3"
+      if (typeof playerValue === "string" && playerValue.includes("-")) {
+        const range = playerValue
+          .split(",")[1]
+          .split("-")
+          .map((v) => parseInt(v, 10));
+        const nonAceValue = playerHandValue - 11;
+        return nonAceValue >= range[0] && nonAceValue <= range[1];
+      }
+    }
+
+    if (!isSoft && !isPair && tableType === "hard") {
+      // For hard hands
+      if (typeof playerValue === "number") {
+        return playerHandValue === playerValue;
+      }
+      // Handle ranges like "13-14"
+      if (typeof playerValue === "string" && playerValue.includes("-")) {
+        const range = playerValue.split("-").map((v) => parseInt(v, 10));
+        return playerHandValue >= range[0] && playerHandValue <= range[1];
+      }
+      // Handle "17+"
+      if (playerValue === "17+") {
+        return playerHandValue >= 17;
+      }
+      // Handle "5-8"
+      if (playerValue === "5-8") {
+        return playerHandValue >= 5 && playerHandValue <= 8;
+      }
+    }
+
+    return false;
   };
 
   const hardTotals = [
@@ -232,7 +352,64 @@ export default function BasicStrategyCard({
             - {settings.doubleAfterSplit ? "DAS allowed" : "No DAS"}
             {settings.lateSurrenderAllowed && " - Surrender allowed"}
           </div>
+          <div
+            style={{
+              fontSize: "12px",
+              color: "#F59E0B",
+              marginTop: "8px",
+              fontWeight: "bold",
+            }}
+          >
+            💰 Cost: 10 chips per peek
+          </div>
         </div>
+
+        {/* Recommended Action */}
+        {recommendedAction && playerHand && dealerUpCard && (
+          <div
+            style={{
+              marginBottom: "20px",
+              padding: "16px",
+              backgroundColor: "rgba(16, 185, 129, 0.15)",
+              border: "2px solid #10B981",
+              borderRadius: "8px",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "14px",
+                fontWeight: "bold",
+                color: "#10B981",
+                marginBottom: "8px",
+              }}
+            >
+              💡 RECOMMENDED ACTION
+            </div>
+            <div
+              style={{
+                fontSize: "16px",
+                color: "#FFF",
+                fontWeight: "bold",
+                marginBottom: "8px",
+              }}
+            >
+              Your Hand: {playerHandValue}
+              {isSoft && " (Soft)"}
+              {isPair && ` (Pair of ${playerHand.cards[0].rank}s)`} • Dealer
+              Shows: {dealerUpCard.rank}
+            </div>
+            <div
+              style={{
+                fontSize: "18px",
+                color: getActionColor(recommendedAction),
+                fontWeight: "bold",
+                marginBottom: "8px",
+              }}
+            >
+              → {getActionExplanation(recommendedAction)}
+            </div>
+          </div>
+        )}
 
         <div
           style={{
@@ -346,7 +523,7 @@ export default function BasicStrategyCard({
                         backgroundColor: "#2a2a2a",
                         color: "#AAA",
                         // eslint-disable-next-line sonarjs/no-duplicate-string
-                        border: "1px solid #444",
+                        border: NORMAL_BORDER,
                       }}
                     >
                       Player
@@ -358,7 +535,7 @@ export default function BasicStrategyCard({
                           padding: "6px",
                           backgroundColor: "#2a2a2a",
                           color: "#FFD700",
-                          border: "1px solid #444",
+                          border: NORMAL_BORDER,
                           fontSize: "11px",
                         }}
                       >
@@ -376,29 +553,46 @@ export default function BasicStrategyCard({
                           backgroundColor: "#2a2a2a",
                           color: "#FFF",
                           fontWeight: "bold",
-                          border: "1px solid #444",
+                          border: NORMAL_BORDER,
                           textAlign: "center",
                         }}
                       >
                         {row.player}
                       </td>
-                      {row.actions.map((action, actionIdx) => (
-                        <td
-                          key={dealerHeaders[actionIdx]}
-                          style={{
-                            padding: "6px",
-                            backgroundColor: getActionColor(
-                              action as StrategyAction,
-                            ),
-                            color: "#FFFFFF",
-                            fontWeight: "bold",
-                            border: "1px solid #444",
-                            textAlign: "center",
-                          }}
-                        >
-                          {action}
-                        </td>
-                      ))}
+                      {row.actions.map((action, actionIdx) => {
+                        const isHighlighted = shouldHighlightCell(
+                          "hard",
+                          row.player,
+                          actionIdx,
+                        );
+                        return (
+                          <td
+                            key={dealerHeaders[actionIdx]}
+                            style={{
+                              padding: "6px",
+                              backgroundColor: getActionColor(
+                                action as StrategyAction,
+                              ),
+                              color: "#FFFFFF",
+                              fontWeight: "bold",
+                              border: isHighlighted
+                                ? HIGHLIGHTED_BORDER
+                                : NORMAL_BORDER,
+                              textAlign: "center",
+                              boxShadow: isHighlighted
+                                ? HIGHLIGHTED_GLOW
+                                : NO_TRANSFORM,
+                              transform: isHighlighted
+                                ? "scale(1.1)"
+                                : NO_TRANSFORM,
+                              position: "relative",
+                              zIndex: isHighlighted ? 10 : 1,
+                            }}
+                          >
+                            {action}
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))}
                 </tbody>
@@ -432,7 +626,7 @@ export default function BasicStrategyCard({
                         padding: "6px",
                         backgroundColor: "#2a2a2a",
                         color: "#AAA",
-                        border: "1px solid #444",
+                        border: NORMAL_BORDER,
                       }}
                     >
                       Player
@@ -444,7 +638,7 @@ export default function BasicStrategyCard({
                           padding: "6px",
                           backgroundColor: "#2a2a2a",
                           color: "#FFD700",
-                          border: "1px solid #444",
+                          border: NORMAL_BORDER,
                           fontSize: "11px",
                         }}
                       >
@@ -462,29 +656,46 @@ export default function BasicStrategyCard({
                           backgroundColor: "#2a2a2a",
                           color: "#FFF",
                           fontWeight: "bold",
-                          border: "1px solid #444",
+                          border: NORMAL_BORDER,
                           textAlign: "center",
                         }}
                       >
                         {row.player}
                       </td>
-                      {row.actions.map((action, actionIdx) => (
-                        <td
-                          key={dealerHeaders[actionIdx]}
-                          style={{
-                            padding: "6px",
-                            backgroundColor: getActionColor(
-                              action as StrategyAction,
-                            ),
-                            color: "#FFFFFF",
-                            fontWeight: "bold",
-                            border: "1px solid #444",
-                            textAlign: "center",
-                          }}
-                        >
-                          {action}
-                        </td>
-                      ))}
+                      {row.actions.map((action, actionIdx) => {
+                        const isHighlighted = shouldHighlightCell(
+                          "soft",
+                          row.player,
+                          actionIdx,
+                        );
+                        return (
+                          <td
+                            key={dealerHeaders[actionIdx]}
+                            style={{
+                              padding: "6px",
+                              backgroundColor: getActionColor(
+                                action as StrategyAction,
+                              ),
+                              color: "#FFFFFF",
+                              fontWeight: "bold",
+                              border: isHighlighted
+                                ? HIGHLIGHTED_BORDER
+                                : NORMAL_BORDER,
+                              textAlign: "center",
+                              boxShadow: isHighlighted
+                                ? HIGHLIGHTED_GLOW
+                                : NO_TRANSFORM,
+                              transform: isHighlighted
+                                ? "scale(1.1)"
+                                : NO_TRANSFORM,
+                              position: "relative",
+                              zIndex: isHighlighted ? 10 : 1,
+                            }}
+                          >
+                            {action}
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))}
                 </tbody>
@@ -519,7 +730,7 @@ export default function BasicStrategyCard({
                       padding: "6px",
                       backgroundColor: "#2a2a2a",
                       color: "#AAA",
-                      border: "1px solid #444",
+                      border: NORMAL_BORDER,
                     }}
                   >
                     Pair
@@ -531,7 +742,7 @@ export default function BasicStrategyCard({
                         padding: "6px",
                         backgroundColor: "#2a2a2a",
                         color: "#FFD700",
-                        border: "1px solid #444",
+                        border: NORMAL_BORDER,
                         fontSize: "11px",
                       }}
                     >
@@ -549,29 +760,46 @@ export default function BasicStrategyCard({
                         backgroundColor: "#2a2a2a",
                         color: "#FFF",
                         fontWeight: "bold",
-                        border: "1px solid #444",
+                        border: NORMAL_BORDER,
                         textAlign: "center",
                       }}
                     >
                       {row.player}
                     </td>
-                    {row.actions.map((action, actionIdx) => (
-                      <td
-                        key={dealerHeaders[actionIdx]}
-                        style={{
-                          padding: "6px",
-                          backgroundColor: getActionColor(
-                            action as StrategyAction,
-                          ),
-                          color: "#FFFFFF",
-                          fontWeight: "bold",
-                          border: "1px solid #444",
-                          textAlign: "center",
-                        }}
-                      >
-                        {action}
-                      </td>
-                    ))}
+                    {row.actions.map((action, actionIdx) => {
+                      const isHighlighted = shouldHighlightCell(
+                        "pair",
+                        row.player,
+                        actionIdx,
+                      );
+                      return (
+                        <td
+                          key={dealerHeaders[actionIdx]}
+                          style={{
+                            padding: "6px",
+                            backgroundColor: getActionColor(
+                              action as StrategyAction,
+                            ),
+                            color: "#FFFFFF",
+                            fontWeight: "bold",
+                            border: isHighlighted
+                              ? HIGHLIGHTED_BORDER
+                              : NORMAL_BORDER,
+                            textAlign: "center",
+                            boxShadow: isHighlighted
+                              ? HIGHLIGHTED_GLOW
+                              : NO_TRANSFORM,
+                            transform: isHighlighted
+                              ? "scale(1.1)"
+                              : NO_TRANSFORM,
+                            position: "relative",
+                            zIndex: isHighlighted ? 10 : 1,
+                          }}
+                        >
+                          {action}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>

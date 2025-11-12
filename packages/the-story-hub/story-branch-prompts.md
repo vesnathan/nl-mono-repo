@@ -3117,7 +3117,7 @@ Set up deployment pipeline:
 - Local development with:
   - AWS SAM CLI for Lambda testing
   - DynamoDB Local
-  - S3 Local (LocalStack)
+  - S3 for local development
 - Environment variables in .env.local
 
 **Staging Environment:**
