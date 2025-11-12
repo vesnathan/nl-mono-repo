@@ -354,9 +354,8 @@ export function useAudioQueue({
       );
 
       // Check if we should interrupt current audio
-      if (currentItem && isPlaying) {
+      if (currentItem && isPlaying && item.priority > currentItem.priority) {
         // Interrupt if new item has higher priority
-        if (item.priority > currentItem.priority) {
           debugLog(
             "audioQueue",
             `[Audio Queue] ⚡ Interrupting current audio (priority ${currentItem.priority}) with higher priority (${item.priority})`,

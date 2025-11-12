@@ -203,19 +203,17 @@ export function getBasicStrategyAction(
       } else if (
         handValue === 19 &&
         dealerIndex === 4 &&
-        settings.dealerHitsSoft17
+        settings.dealerHitsSoft17 &&
+        canDoubleHand &&
+        canDoubleByRules(handValue, settings)
       ) {
         // A-8 vs 6: Double if dealer hits soft 17 (H17)
-        if (canDoubleHand && canDoubleByRules(handValue, settings)) {
-          softAction = "D";
-        }
+        softAction = "D";
       }
 
       // If strategy says double but can't (by rules or chips), hit instead
-      if (softAction === "D") {
-        if (!canDoubleHand || !canDoubleByRules(handValue, settings)) {
-          return "H";
-        }
+      if (softAction === "D" && (!canDoubleHand || !canDoubleByRules(handValue, settings))) {
+        return "H";
       }
       return softAction;
     }
@@ -233,26 +231,23 @@ export function getBasicStrategyAction(
     } else if (
       handValue === 15 &&
       dealerIndex === 8 &&
-      !settings.dealerHitsSoft17
+      !settings.dealerHitsSoft17 &&
+      hardAction === "SU"
     ) {
       // 15 vs 10: Don't surrender if dealer stands on soft 17 (S17)
-      if (hardAction === "SU") {
-        hardAction = "H";
-      }
+      hardAction = "H";
     }
 
     // If strategy says double but can't (by rules or chips), hit instead
-    if (hardAction === "D") {
-      if (!canDoubleHand || !canDoubleByRules(handValue, settings)) {
-        return "H";
-      }
+    if (hardAction === "D" && (!canDoubleHand || !canDoubleByRules(handValue, settings))) {
+      return "H";
     }
 
     // If strategy says surrender but not allowed or available
+    if (hardAction === "SU" && !settings.lateSurrenderAllowed) {
+      return "H";
+    }
     if (hardAction === "SU") {
-      if (!settings.lateSurrenderAllowed) {
-        return "H";
-      }
       // Note: Surrender is not implemented in the game yet, so default to hit
       return "H";
     }
