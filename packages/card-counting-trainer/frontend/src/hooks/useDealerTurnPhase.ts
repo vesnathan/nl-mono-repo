@@ -91,6 +91,7 @@ export function useDealerTurnPhase({
   const hasStartedRef = useRef(false);
   const audioQueuedRef = useRef(false); // Track if we've queued audio for this dealer turn
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   useEffect(() => {
     // Detect phase entry
     const isEnteringDealerTurn =

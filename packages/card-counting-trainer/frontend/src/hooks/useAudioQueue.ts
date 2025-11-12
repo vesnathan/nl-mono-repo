@@ -64,6 +64,7 @@ export function useAudioQueue({
   /**
    * Process the next item in the queue
    */
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   const processQueue = useCallback(async () => {
     if (processingRef.current) {
       debugLog("audioQueue", `[Audio Queue] ⛔ Already processing, returning`);

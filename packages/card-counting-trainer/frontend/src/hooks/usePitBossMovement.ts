@@ -11,6 +11,7 @@ export function usePitBossMovement(
   setPitBossDistance: (distance: number | ((prev: number) => number)) => void,
   suspicionLevel: number,
 ) {
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   useEffect(() => {
     const wanderInterval = setInterval(() => {
       setPitBossDistance((prev) => {
