@@ -51,6 +51,7 @@ export default function FlyingCard({
           }}
         />
       </div>
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         @keyframes fly-to-position {
           0% {

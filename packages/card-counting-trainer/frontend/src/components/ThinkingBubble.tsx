@@ -173,7 +173,6 @@ export default function ThinkingBubble({
         }}
       />
       {/* eslint-disable-next-line react/no-unknown-property */}
-
       <style jsx>{`
         @keyframes bounce {
           0%,
