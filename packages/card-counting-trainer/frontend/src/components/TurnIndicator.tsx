@@ -37,6 +37,7 @@ export default function TurnIndicator({ isActive }: TurnIndicatorProps) {
         }}
       />
 
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         @keyframes pulse-glow {
           0%,

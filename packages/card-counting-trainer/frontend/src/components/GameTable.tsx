@@ -88,6 +88,7 @@ export default function GameTable() {
       )}
 
       {/* CSS Animations */}
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx global>{`
         @keyframes fadeInScale {
           from {

@@ -109,9 +109,10 @@ export default function ConversationBubble({
               justifyContent: "center",
             }}
           >
-            {responseOptions.map((option, idx) => (
+            {responseOptions.map((option) => (
               <button
-                key={idx}
+                type="button"
+                key={option.text}
                 onClick={() => handleResponse(option)}
                 disabled={selectedOption !== null}
                 style={{

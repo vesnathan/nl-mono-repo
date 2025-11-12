@@ -104,7 +104,14 @@ export default function LeaderboardModal({
     <>
       {/* Backdrop */}
       <div
+        role="button"
+        tabIndex={0}
         onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            onClose();
+          }
+        }}
         style={{
           position: "fixed",
           top: 0,
@@ -159,6 +166,7 @@ export default function LeaderboardModal({
               🏆 Leaderboards
             </h2>
             <button
+              type="button"
               onClick={onClose}
               style={{
                 backgroundColor: "transparent",
@@ -172,6 +180,7 @@ export default function LeaderboardModal({
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor =
+                  // eslint-disable-next-line sonarjs/no-duplicate-string
                   "rgba(255, 255, 255, 0.1)";
                 e.currentTarget.style.borderColor = "#FFF";
               }}
@@ -275,6 +284,7 @@ export default function LeaderboardModal({
             >
               {categories.map((cat) => (
                 <button
+                  type="button"
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
                   style={{

@@ -32,16 +32,8 @@ export function useBlackjackGame(config?: GameConfig) {
     gameState,
     setGameState,
     resetGame,
-    updateCount,
     setPhase,
-    updateChips,
-    updateScore,
-    resetMultiplier,
-    increaseMultiplier,
-    updatePlayer,
-    setCurrentPlayer,
     setDealerRevealed,
-    incrementCardsDealt,
     aiHandsInProgress,
     dealerCardsInProgress,
     aiPlayerPositions,
@@ -144,8 +136,6 @@ export function useBlackjackGame(config?: GameConfig) {
     (action: PlayerAction) => {
       const playerIndex = gameState.currentPlayerIndex;
       const handIndex = gameState.currentHandIndex;
-      const player = gameState.players[playerIndex];
-      const hand = player.hands[handIndex];
 
       // Get optimal action for scoring
       const optimalAction = getStrategyRecommendation(playerIndex, handIndex);
@@ -188,6 +178,10 @@ export function useBlackjackGame(config?: GameConfig) {
 
         case "STAND":
           // No state change for stand
+          break;
+
+        default:
+          // Unknown action, no state change
           break;
       }
 

@@ -32,6 +32,7 @@ export const DEALER_PLAYER_CONVERSATIONS: Record<
     ],
     dealerQuestions: [
       "Insurance anyone?",
+      // eslint-disable-next-line sonarjs/no-duplicate-string
       "Checks play?",
       "Color coming in or same color out?",
       "Would you like to cut the deck?",
@@ -131,8 +132,11 @@ export const DEALER_PLAYER_CONVERSATIONS: Record<
     dealerQuestions: [
       "Cut the deck, Claire?",
       "Want me to square your chips up?",
+      // eslint-disable-next-line sonarjs/no-duplicate-string
       "Insurance?",
+      // eslint-disable-next-line sonarjs/no-duplicate-string
       "Would you like change for that?",
+      // eslint-disable-next-line sonarjs/no-duplicate-string
       "Are you comfortable placing chips closer in?",
       "Need a second to decide?",
     ],

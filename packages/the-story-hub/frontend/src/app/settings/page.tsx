@@ -73,7 +73,7 @@ function SettingsContent() {
     notifyOnReply: true,
     notifyOnUpvote: true,
     notifyOnStoryUpdate: true,
-    notificationFrequency: NotificationFrequency.IMMEDIATELY,
+    notificationFrequency: NotificationFrequency.IMMEDIATE,
   });
   const [contentSettings, setContentSettings] = useState({
     defaultAgeRatingFilter: AgeRating.M,
@@ -692,20 +692,20 @@ function SettingsContent() {
                 }}
               >
                 <SelectItem
-                  key={NotificationFrequency.IMMEDIATELY}
-                  value={NotificationFrequency.IMMEDIATELY}
+                  key={NotificationFrequency.IMMEDIATE}
+                  value={NotificationFrequency.IMMEDIATE}
                 >
                   Immediate
                 </SelectItem>
                 <SelectItem
-                  key={NotificationFrequency.DAILY}
-                  value={NotificationFrequency.DAILY}
+                  key={NotificationFrequency.DAILY_DIGEST}
+                  value={NotificationFrequency.DAILY_DIGEST}
                 >
                   Daily Digest
                 </SelectItem>
                 <SelectItem
-                  key={NotificationFrequency.WEEKLY}
-                  value={NotificationFrequency.WEEKLY}
+                  key={NotificationFrequency.WEEKLY_DIGEST}
+                  value={NotificationFrequency.WEEKLY_DIGEST}
                 >
                   Weekly Digest
                 </SelectItem>

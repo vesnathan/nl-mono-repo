@@ -61,7 +61,14 @@ export default function DealerSection() {
           )}
 
           <div
+            role="button"
+            tabIndex={0}
             onClick={() => setShowDealerInfo(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                setShowDealerInfo(true);
+              }
+            }}
             style={{
               width: "150px",
               height: "150px",
@@ -128,7 +135,7 @@ export default function DealerSection() {
           >
             {dealerHand.cards.map((card, idx) => (
               <div
-                key={idx}
+                key={`${card.rank}${card.suit}`}
                 style={{
                   position: "absolute",
                   left: `${idx * 74}px`, // 70px card + 4px gap

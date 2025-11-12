@@ -202,10 +202,10 @@ export function resolveHands(
   let totalPayout = 0;
 
   // Resolve each player's hands
-  for (let i = 1; i < updatedPlayers.length; i++) {
+  for (let i = 1; i < updatedPlayers.length; i += 1) {
     const player = updatedPlayers[i];
 
-    for (let j = 0; j < player.hands.length; j++) {
+    for (let j = 0; j < player.hands.length; j += 1) {
       const hand = player.hands[j];
       const result = determineHandResult(hand, dealerHand);
       const payout = calculatePayout(hand, result, blackjackPayout);

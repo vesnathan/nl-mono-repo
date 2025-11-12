@@ -1,15 +1,10 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback } from "react";
 import { dealCard } from "@/lib/gameActions";
 import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
 import { debugLog } from "@/utils/debug";
-
-interface Card {
-  rank: string;
-  suit: string;
-  count: number;
-}
+import { Card } from "@/types/game";
 
 interface DealingState {
   dealerCards: Card[];
@@ -38,21 +33,21 @@ interface DealingState {
 }
 
 export function useAnimatedDealing(
-  shoe: any[],
+  shoe: Card[],
   numDecks: number,
   cardsDealt: number,
   runningCount: number,
   aiPlayerPositions: number[],
-  dealSpeed: number = 1.0, // Multiplier for dealer speed (0.8 = slow, 1.5 = fast)
   onDealingComplete: (result: {
-    updatedShoe: any[];
+    updatedShoe: Card[];
     newCardsDealt: number;
     runningCount: number;
     trueCount: number;
-    aiHands: { position: number; cards: any[] }[];
-    dealerCards: any[];
+    aiHands: { position: number; cards: Card[] }[];
+    dealerCards: Card[];
   }) => void,
   registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout,
+  dealSpeed: number = 1.0, // Multiplier for dealer speed (0.8 = slow, 1.5 = fast)
 ) {
   const [dealingState, setDealingState] = useState<DealingState>({
     dealerCards: [],
@@ -68,6 +63,7 @@ export function useAnimatedDealing(
     characterReactions: [],
   });
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   const startDealing = useCallback(() => {
     if (dealingState.isDealing || aiPlayerPositions.length === 0) return;
 
@@ -132,7 +128,7 @@ export function useAnimatedDealing(
           const position = aiPlayerPositions[playerIndex];
           const { card, remainingShoe } = dealCard(currentShoe);
           currentShoe = remainingShoe;
-          totalCardsDealt++;
+          totalCardsDealt += 1;
           currentRunningCount += card.count;
 
           setDealingState((prev) => ({
@@ -150,7 +146,7 @@ export function useAnimatedDealing(
                 aiHands: [...aiHands],
                 flyingCard: null,
               }));
-              dealIndex++;
+              dealIndex += 1;
               registerTimeout(dealNext, Math.floor(400 / dealSpeed));
             },
             Math.floor(400 / dealSpeed),
@@ -159,7 +155,7 @@ export function useAnimatedDealing(
           // Deal to dealer
           const { card, remainingShoe } = dealCard(currentShoe);
           currentShoe = remainingShoe;
-          totalCardsDealt++;
+          totalCardsDealt += 1;
           // Only count first dealer card (face up)
           if (round === 0) {
             currentRunningCount += card.count;
@@ -183,7 +179,7 @@ export function useAnimatedDealing(
                 dealerCards: [...dealerCards],
                 flyingCard: null,
               }));
-              dealIndex++;
+              dealIndex += 1;
               registerTimeout(dealNext, Math.floor(400 / dealSpeed));
             },
             Math.floor(400 / dealSpeed),
@@ -213,7 +209,7 @@ export function useAnimatedDealing(
         const position = decisionOrder[currentPlayerIndex];
         const handIndex = aiHands.findIndex((h) => h.position === position);
         if (handIndex === -1) {
-          currentPlayerIndex++;
+          currentPlayerIndex += 1;
           playNextPlayer();
           return;
         }
@@ -231,7 +227,7 @@ export function useAnimatedDealing(
         const handValue = hand.reduce((sum, card) => {
           if (card.rank === "A") return sum + 11;
           if (["J", "Q", "K"].includes(card.rank)) return sum + 10;
-          return sum + parseInt(card.rank);
+          return sum + parseInt(card.rank, 10);
         }, 0);
 
         const isBlackjack = hand.length === 2 && handValue === 21;
@@ -279,7 +275,7 @@ export function useAnimatedDealing(
                 thinkingPlayer: null,
                 actionBubble: null,
               }));
-              currentPlayerIndex++;
+              currentPlayerIndex += 1;
               registerTimeout(playNextPlayer, 300);
             }, 1000);
           }, thinkTime);
@@ -289,7 +285,7 @@ export function useAnimatedDealing(
           registerTimeout(() => {
             const { card, remainingShoe } = dealCard(currentShoe);
             currentShoe = remainingShoe;
-            totalCardsDealt++;
+            totalCardsDealt += 1;
             currentRunningCount += card.count;
 
             setDealingState((prev) => ({
@@ -315,7 +311,7 @@ export function useAnimatedDealing(
                   (sum, c) => {
                     if (c.rank === "A") return sum + 11;
                     if (["J", "Q", "K"].includes(c.rank)) return sum + 10;
-                    return sum + parseInt(c.rank);
+                    return sum + parseInt(c.rank, 10);
                   },
                   0,
                 );
@@ -340,7 +336,7 @@ export function useAnimatedDealing(
                       thinkingPlayer: null,
                       actionBubble: null,
                     }));
-                    currentPlayerIndex++;
+                    currentPlayerIndex += 1;
                     registerTimeout(playNextPlayer, 500);
                   }, 1500);
                 } else {
@@ -388,19 +384,19 @@ export function useAnimatedDealing(
     const calculateDealerValue = (cards: Card[]) => {
       let value = 0;
       let aces = 0;
-      for (const card of cards) {
+      cards.forEach((card) => {
         if (card.rank === "A") {
-          aces++;
+          aces += 1;
           value += 11;
         } else if (["J", "Q", "K"].includes(card.rank)) {
           value += 10;
         } else {
-          value += parseInt(card.rank);
+          value += parseInt(card.rank, 10);
         }
-      }
+      });
       while (value > 21 && aces > 0) {
         value -= 10;
-        aces--;
+        aces -= 1;
       }
       return value;
     };
@@ -418,7 +414,7 @@ export function useAnimatedDealing(
           () => {
             const { card, remainingShoe } = dealCard(currentShoe);
             currentShoe = remainingShoe;
-            totalCardsDealt++;
+            totalCardsDealt += 1;
             currentRunningCount += card.count;
 
             setDealingState((prev) => ({
@@ -472,12 +468,7 @@ export function useAnimatedDealing(
 
         if (handValue > 21) {
           results.push({ position: hand.position, result: "lose" });
-        } else if (dealerValue > 21) {
-          results.push({
-            position: hand.position,
-            result: isBlackjack ? "blackjack" : "win",
-          });
-        } else if (handValue > dealerValue) {
+        } else if (dealerValue > 21 || handValue > dealerValue) {
           results.push({
             position: hand.position,
             result: isBlackjack ? "blackjack" : "win",

@@ -159,6 +159,7 @@ function canDoubleByRules(handValue: number, settings: GameSettings): boolean {
  * @param canDoubleHand Whether the hand can be doubled (first two cards + has chips)
  * @returns Recommended strategy action
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function getBasicStrategyAction(
   playerCards: Card[],
   dealerUpCard: Card,
@@ -178,14 +179,13 @@ export function getBasicStrategyAction(
     // Adjust split strategy based on settings
     if (action === "SP") {
       // If no double after split, be more conservative with 2-2, 3-3, 6-6
-      if (!settings.doubleAfterSplit) {
-        if ((pairRank === "2" || pairRank === "3") && dealerIndex >= 5) {
-          // Don't split 2s/3s vs 7+ if no DAS
-          action = "H";
-        } else if (pairRank === "6" && dealerIndex >= 4) {
-          // Don't split 6s vs 6+ if no DAS
-          action = "H";
-        }
+      if (
+        !settings.doubleAfterSplit &&
+        (((pairRank === "2" || pairRank === "3") && dealerIndex >= 5) ||
+          (pairRank === "6" && dealerIndex >= 4))
+      ) {
+        // Don't split 2s/3s vs 7+ or 6s vs 6+ if no DAS
+        action = "H";
       }
       if (action === "SP") return action;
     }
@@ -202,19 +202,20 @@ export function getBasicStrategyAction(
       } else if (
         handValue === 19 &&
         dealerIndex === 4 &&
-        settings.dealerHitsSoft17
+        settings.dealerHitsSoft17 &&
+        canDoubleHand &&
+        canDoubleByRules(handValue, settings)
       ) {
         // A-8 vs 6: Double if dealer hits soft 17 (H17)
-        if (canDoubleHand && canDoubleByRules(handValue, settings)) {
-          softAction = "D";
-        }
+        softAction = "D";
       }
 
       // If strategy says double but can't (by rules or chips), hit instead
-      if (softAction === "D") {
-        if (!canDoubleHand || !canDoubleByRules(handValue, settings)) {
-          return "H";
-        }
+      if (
+        softAction === "D" &&
+        (!canDoubleHand || !canDoubleByRules(handValue, settings))
+      ) {
+        return "H";
       }
       return softAction;
     }
@@ -232,26 +233,26 @@ export function getBasicStrategyAction(
     } else if (
       handValue === 15 &&
       dealerIndex === 8 &&
-      !settings.dealerHitsSoft17
+      !settings.dealerHitsSoft17 &&
+      hardAction === "SU"
     ) {
       // 15 vs 10: Don't surrender if dealer stands on soft 17 (S17)
-      if (hardAction === "SU") {
-        hardAction = "H";
-      }
+      hardAction = "H";
     }
 
     // If strategy says double but can't (by rules or chips), hit instead
-    if (hardAction === "D") {
-      if (!canDoubleHand || !canDoubleByRules(handValue, settings)) {
-        return "H";
-      }
+    if (
+      hardAction === "D" &&
+      (!canDoubleHand || !canDoubleByRules(handValue, settings))
+    ) {
+      return "H";
     }
 
     // If strategy says surrender but not allowed or available
+    if (hardAction === "SU" && !settings.lateSurrenderAllowed) {
+      return "H";
+    }
     if (hardAction === "SU") {
-      if (!settings.lateSurrenderAllowed) {
-        return "H";
-      }
       // Note: Surrender is not implemented in the game yet, so default to hit
       return "H";
     }
@@ -286,11 +287,11 @@ export function strategyActionToText(action: StrategyAction): string {
 /**
  * Get a human-readable explanation of the strategy decision
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function getStrategyExplanation(
   action: StrategyAction,
   playerCards: Card[],
   dealerUpCard: Card,
-  settings: GameSettings,
 ): string {
   const handValue = calculateHandValue(playerCards);
   const dealerValue = dealerUpCard.rank === "A" ? 11 : dealerUpCard.value;

@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { DealerCharacter } from "@/data/dealerCharacters";
 import {
-  getDealerSuspicionThreshold,
   getDealerReportingThreshold,
   getDealerSuspicionComment,
 } from "@/data/dialogue/dealerSuspicion";
@@ -25,7 +24,6 @@ interface UseDealerSuspicionParams {
 export function useDealerSuspicion({
   currentDealer,
   dealerSuspicion,
-  suspicionLevel,
   playerSeat,
   initialized,
   setDealerSuspicion,
@@ -121,11 +119,13 @@ export function useDealerSuspicion({
 
   // Gradual dealer suspicion decay over time (slower than pit boss decay)
   useEffect(() => {
-    if (!initialized || !currentDealer || playerSeat === null) return;
+    if (!initialized || !currentDealer || playerSeat === null) {
+      return undefined;
+    }
 
     // Dealers on your side don't build suspicion
     if (currentDealer.onYourSide) {
-      return;
+      return undefined;
     }
 
     const decayInterval = setInterval(() => {

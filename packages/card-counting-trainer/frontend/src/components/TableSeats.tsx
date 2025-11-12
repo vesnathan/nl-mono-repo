@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/cognitive-complexity */
 import React from "react";
 import { debugLog } from "@/utils/debug";
 import { TABLE_POSITIONS } from "@/constants/animations";
@@ -7,8 +8,6 @@ import ActionBubble from "@/components/ActionBubble";
 import { getAIAvatarPath } from "@/data/aiCharacters";
 import { useGameState } from "@/contexts/GameStateContext";
 import { useGameActions } from "@/contexts/GameActionsContext";
-
-type PlayerAction = "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK";
 
 export default function TableSeats() {
   const {
@@ -44,6 +43,7 @@ export default function TableSeats() {
               position: "absolute",
               left: `${x}%`,
               top: `${y}%`,
+              // eslint-disable-next-line sonarjs/no-duplicate-string
               transform: "translate(-50%, 0)",
               textAlign: "center",
             }}
@@ -51,6 +51,8 @@ export default function TableSeats() {
             {/* Empty Seat - Clickable */}
             {isEmpty && (
               <div
+                role="button"
+                tabIndex={0}
                 onClick={() => {
                   if (playerSeat === null) {
                     debugLog(
@@ -64,6 +66,14 @@ export default function TableSeats() {
                       "gamePhases",
                       `Cannot sit - player already seated at ${playerSeat}`,
                     );
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (
+                    (e.key === "Enter" || e.key === " ") &&
+                    playerSeat === null
+                  ) {
+                    setPlayerSeat(seatIndex);
                   }
                 }}
                 style={{
@@ -154,7 +164,7 @@ export default function TableSeats() {
                           //                  bottom = row * (98px + 4px gap) - anchor from bottom
                           return (
                             <div
-                              key={cardIdx}
+                              key={`${card.rank}${card.suit}`}
                               style={{
                                 position: "absolute",
                                 left: `${col * 74}px`,
@@ -275,7 +285,7 @@ export default function TableSeats() {
                       //                  bottom = row * (98px + 4px gap) - anchor from bottom
                       return (
                         <div
-                          key={cardIdx}
+                          key={`${card.rank}${card.suit}`}
                           style={{
                             position: "absolute",
                             left: `${col * 74}px`,

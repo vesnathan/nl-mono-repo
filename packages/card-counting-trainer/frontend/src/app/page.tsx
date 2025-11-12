@@ -563,7 +563,6 @@ export default function GamePage() {
     currentDealer,
     setDealerRevealed,
     setDealerHand,
-    setDealerCallout,
     setFlyingCards,
     setPhase,
     dealCardFromShoe,
@@ -574,7 +573,6 @@ export default function GamePage() {
       cardIndex?: number,
     ) => getCardPosition(type, aiPlayers, playerSeat, aiIndex, cardIndex),
     addSpeechBubble,
-    audioQueue,
   });
 
   // Resolving phase hook

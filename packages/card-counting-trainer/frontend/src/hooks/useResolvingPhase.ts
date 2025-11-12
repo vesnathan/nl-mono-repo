@@ -108,6 +108,7 @@ export function useResolvingPhase({
 }: UseResolvingPhaseParams) {
   const hasResolvedRef = useRef(false);
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   useEffect(() => {
     if (phase === "RESOLVING" && !hasResolvedRef.current) {
       hasResolvedRef.current = true;

@@ -4,17 +4,11 @@ import { GamePhase } from "@/types/gameState";
 interface DebugLogModalProps {
   debugLogs: string[];
   phase: GamePhase;
-  showDebugLog: boolean;
-  onShowDebugLog: (show: boolean) => void;
-  onClearDebugLogs: () => void;
 }
 
 export default function DebugLogModal({
   debugLogs,
   phase,
-  showDebugLog,
-  onShowDebugLog,
-  onClearDebugLogs,
 }: DebugLogModalProps) {
   return (
     <>
@@ -30,6 +24,7 @@ export default function DebugLogModal({
           }}
         >
           <button
+            type="button"
             onClick={() => {
               navigator.clipboard.writeText(debugLogs.join("\n"));
             }}

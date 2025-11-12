@@ -194,8 +194,8 @@ export function AuthModal({
         isDisabled={loginController.signInMutation.isPending}
         endContent={
           <button
-            className="focus:outline-none"
             type="button"
+            className="focus:outline-none"
             onClick={togglePasswordVisibility}
           >
             {isPasswordVisible ? (
@@ -212,9 +212,9 @@ export function AuthModal({
 
       {/* Divider */}
       <div className="flex items-center gap-4 my-4">
-        <div className="flex-1 h-px bg-gray-700"></div>
+        <div className="flex-1 h-px bg-gray-700" />
         <span className="text-gray-400 text-sm">or continue with</span>
-        <div className="flex-1 h-px bg-gray-700"></div>
+        <div className="flex-1 h-px bg-gray-700" />
       </div>
 
       {/* Google Sign-In Button */}
@@ -295,8 +295,8 @@ export function AuthModal({
           isDisabled={registrationController.signUpMutation.isPending}
           endContent={
             <button
-              className="focus:outline-none"
               type="button"
+              className="focus:outline-none"
               onClick={togglePasswordVisibility}
             >
               {isPasswordVisible ? (
@@ -323,8 +323,8 @@ export function AuthModal({
           isDisabled={registrationController.signUpMutation.isPending}
           endContent={
             <button
-              className="focus:outline-none"
               type="button"
+              className="focus:outline-none"
               onClick={toggleConfirmPasswordVisibility}
             >
               {isConfirmPasswordVisible ? (
@@ -349,9 +349,9 @@ export function AuthModal({
 
         {/* Divider */}
         <div className="flex items-center gap-4 my-4">
-          <div className="flex-1 h-px bg-gray-700"></div>
+          <div className="flex-1 h-px bg-gray-700" />
           <span className="text-gray-400 text-sm">or continue with</span>
-          <div className="flex-1 h-px bg-gray-700"></div>
+          <div className="flex-1 h-px bg-gray-700" />
         </div>
 
         {/* Google Sign-Up Button */}

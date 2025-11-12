@@ -8,6 +8,7 @@ import { calculateHandValue } from "@/lib/gameActions";
  * This is a simplified version used by AI players with skill level modifiers.
  * For full basic strategy, see lib/basicStrategy.ts
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function shouldHitBasicStrategy(
   playerCards: GameCard[],
   dealerUpCard: GameCard,

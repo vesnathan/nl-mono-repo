@@ -51,6 +51,7 @@ export default function PlayerActionsModal({
           <div style={{ display: "flex", gap: "12px" }}>
             {canSplit && onSplit && (
               <button
+                type="button"
                 onClick={onSplit}
                 style={{
                   flex: 1,
@@ -62,6 +63,7 @@ export default function PlayerActionsModal({
                   fontSize: "16px",
                   fontWeight: "bold",
                   cursor: "pointer",
+                  // eslint-disable-next-line sonarjs/no-duplicate-string
                   transition: "all 0.2s ease",
                 }}
                 onMouseEnter={(e) => {
@@ -76,6 +78,7 @@ export default function PlayerActionsModal({
             )}
             {canDouble && onDouble && (
               <button
+                type="button"
                 onClick={onDouble}
                 style={{
                   flex: 1,
@@ -105,6 +108,7 @@ export default function PlayerActionsModal({
         {/* Bottom row: Stand and Hit */}
         <div style={{ display: "flex", gap: "12px" }}>
           <button
+            type="button"
             onClick={onStand}
             style={{
               flex: 1,
@@ -133,6 +137,7 @@ export default function PlayerActionsModal({
           </button>
 
           <button
+            type="button"
             onClick={onHit}
             style={{
               flex: 1,

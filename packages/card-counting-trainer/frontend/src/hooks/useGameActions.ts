@@ -4,6 +4,7 @@ import {
   PlayerHand,
   GamePhase,
   FlyingCardData,
+  SpeechBubble,
 } from "@/types/gameState";
 import { Card as GameCard } from "@/types/game";
 import { DealerCharacter } from "@/data/dealerCharacters";
@@ -42,7 +43,9 @@ interface UseGameActionsParams {
   setDealerHand: (
     hand: PlayerHand | ((prev: PlayerHand) => PlayerHand),
   ) => void;
-  setSpeechBubbles: (bubbles: any[]) => void;
+  setSpeechBubbles: (
+    bubbles: SpeechBubble[] | ((prev: SpeechBubble[]) => SpeechBubble[]),
+  ) => void;
   setAIPlayers: (
     players: AIPlayer[] | ((prev: AIPlayer[]) => AIPlayer[]),
   ) => void;
@@ -100,10 +103,8 @@ export interface GameActionsReturn {
 }
 
 export function useGameActions({
-  phase,
   playerSeat,
   playerHand,
-  dealerHand,
   aiPlayers,
   shoe,
   cardsDealt,
@@ -164,6 +165,7 @@ export function useGameActions({
   ]);
 
   const dealInitialCards = useCallback(
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     (playerBetAmount?: number) => {
       // Use parameter if provided, otherwise fall back to playerHand.bet
       const effectivePlayerBet = playerBetAmount ?? playerHand.bet;
@@ -173,10 +175,9 @@ export function useGameActions({
       debugLog("dealCards", `Cards dealt this shoe: ${cardsDealt}`);
       debugLog("dealCards", `Running count: ${runningCount}`);
       debugLog("dealCards", `Number of AI players: ${aiPlayers.length}`);
-      debugLog(
-        "dealCards",
-        `Player seated: ${playerSeat !== null ? `Yes (Seat ${playerSeat})` : "No (observing)"}`,
-      );
+      const playerSeatedStr =
+        playerSeat !== null ? `Yes (Seat ${playerSeat})` : "No (observing)";
+      debugLog("dealCards", `Player seated: ${playerSeatedStr}`);
       debugLog("dealCards", `Player bet: $${effectivePlayerBet}`);
 
       // Pre-deal all cards BEFORE animations to ensure uniqueness
@@ -323,7 +324,7 @@ export function useGameActions({
           }
 
           const flyingCard: FlyingCardData = {
-            id: `deal-${dealData.type}-${dealData.index}-${Date.now()}-${cardIdCounter++}`,
+            id: `deal-${dealData.type}-${dealData.index}-${Date.now()}-${(cardIdCounter += 1)}`,
             card: dealData.card,
             fromPosition: shoePosition,
             toPosition: targetPosition,
@@ -406,73 +407,7 @@ export function useGameActions({
         () => {
           debugLog("dealCards", "All cards dealt and animations complete");
 
-          // Check if dealer should peek for blackjack (American rules)
-          const shouldPeek = gameSettings.dealerPeekRule === "AMERICAN_PEEK";
-          const dealerUpCard = dealerCard1;
-          const canHaveBlackjack =
-            dealerUpCard.rank === "A" || dealerUpCard.value === 10;
-
-          // Offer insurance if enabled and dealer shows Ace
-          const shouldOfferInsurance =
-            gameSettings.insuranceAvailable && dealerUpCard.rank === "A";
-
-          if (shouldOfferInsurance) {
-            debugLog("insurance", "Dealer showing Ace - OFFERING INSURANCE");
-            setInsuranceOffered(true);
-            setPhase("INSURANCE");
-            // Insurance phase hook will handle the flow
-            return;
-          }
-
-          if (shouldPeek && canHaveBlackjack) {
-            // Show "Peeking..." in speech bubble
-            debugLog(
-              "dealCards",
-              `Dealer showing ${dealerUpCard.rank} - checking for blackjack...`,
-            );
-            addSpeechBubble("dealer", "Peeking...", -1);
-
-            registerTimeout(() => {
-              // Check for dealer blackjack (natural 21 with 2 cards)
-              const dealerCards = [dealerCard1, dealerCard2];
-              const dealerValue = calculateHandValue(dealerCards);
-              if (dealerValue === 21) {
-                debugLog(
-                  "dealCards",
-                  "DEALER BLACKJACK! Revealing hole card and moving to RESOLVING",
-                );
-                setDealerRevealed(true);
-                addSpeechBubble("dealer", "Blackjack!", -1);
-
-                // Trigger AI player reactions to dealer blackjack
-                registerTimeout(() => {
-                  showEndOfHandReactions();
-                }, 500);
-
-                // Skip player turn and AI turns, go straight to resolving
-                registerTimeout(() => {
-                  setPhase("RESOLVING");
-                }, 2000);
-              } else {
-                debugLog(
-                  "dealCards",
-                  `Dealer showing: ${dealerCard1.rank}${dealerCard1.suit}`,
-                );
-                debugLog(
-                  "dealCards",
-                  `Dealer hole card: ${dealerCard2.rank}${dealerCard2.suit} [hidden]`,
-                );
-
-                // Move to next phase after peek
-                proceedAfterPeek();
-              }
-            }, 1500); // Peek delay
-            return; // Exit early, will continue after peek
-          }
-
-          // No peek needed
-          proceedAfterPeek();
-
+          // Define proceedAfterPeek function before using it
           function proceedAfterPeek() {
             debugLog(
               "dealCards",
@@ -553,6 +488,73 @@ export function useGameActions({
               setActivePlayerIndex(0); // Start with first AI player
             }
           }
+
+          // Check if dealer should peek for blackjack (American rules)
+          const shouldPeek = gameSettings.dealerPeekRule === "AMERICAN_PEEK";
+          const dealerUpCard = dealerCard1;
+          const canHaveBlackjack =
+            dealerUpCard.rank === "A" || dealerUpCard.value === 10;
+
+          // Offer insurance if enabled and dealer shows Ace
+          const shouldOfferInsurance =
+            gameSettings.insuranceAvailable && dealerUpCard.rank === "A";
+
+          if (shouldOfferInsurance) {
+            debugLog("insurance", "Dealer showing Ace - OFFERING INSURANCE");
+            setInsuranceOffered(true);
+            setPhase("INSURANCE");
+            // Insurance phase hook will handle the flow
+            return;
+          }
+
+          if (shouldPeek && canHaveBlackjack) {
+            // Show "Peeking..." in speech bubble
+            debugLog(
+              "dealCards",
+              `Dealer showing ${dealerUpCard.rank} - checking for blackjack...`,
+            );
+            addSpeechBubble("dealer", "Peeking...", -1);
+
+            registerTimeout(() => {
+              // Check for dealer blackjack (natural 21 with 2 cards)
+              const dealerCards = [dealerCard1, dealerCard2];
+              const dealerValue = calculateHandValue(dealerCards);
+              if (dealerValue === 21) {
+                debugLog(
+                  "dealCards",
+                  "DEALER BLACKJACK! Revealing hole card and moving to RESOLVING",
+                );
+                setDealerRevealed(true);
+                addSpeechBubble("dealer", "Blackjack!", -1);
+
+                // Trigger AI player reactions to dealer blackjack
+                registerTimeout(() => {
+                  showEndOfHandReactions();
+                }, 500);
+
+                // Skip player turn and AI turns, go straight to resolving
+                registerTimeout(() => {
+                  setPhase("RESOLVING");
+                }, 2000);
+              } else {
+                debugLog(
+                  "dealCards",
+                  `Dealer showing: ${dealerCard1.rank}${dealerCard1.suit}`,
+                );
+                debugLog(
+                  "dealCards",
+                  `Dealer hole card: ${dealerCard2.rank}${dealerCard2.suit} [hidden]`,
+                );
+
+                // Move to next phase after peek
+                proceedAfterPeek();
+              }
+            }, 1500); // Peek delay
+            return; // Exit early, will continue after peek
+          }
+
+          // No peek needed
+          proceedAfterPeek();
         },
         delay + CARD_ANIMATION_DURATION + 500,
       );
@@ -597,10 +599,10 @@ export function useGameActions({
       const activeHand = playerHand.splitHands[activeIndex];
 
       debugLog("playerActions", `Playing split hand ${activeIndex + 1}`);
-      debugLog(
-        "playerActions",
-        `Current hand: ${activeHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-      );
+      const currentHandStr = activeHand.cards
+        .map((c) => `${c.rank}${c.suit}`)
+        .join(", ");
+      debugLog("playerActions", `Current hand: ${currentHandStr}`);
       debugLog(
         "playerActions",
         `Current hand value: ${calculateHandValue(activeHand.cards)}`,
@@ -657,10 +659,10 @@ export function useGameActions({
     }
 
     // Normal (non-split) hit logic
-    debugLog(
-      "playerActions",
-      `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-    );
+    const playerHandStr = playerHand.cards
+      .map((c) => `${c.rank}${c.suit}`)
+      .join(", ");
+    debugLog("playerActions", `Current hand: ${playerHandStr}`);
     debugLog(
       "playerActions",
       `Current hand value: ${calculateHandValue(playerHand.cards)}`,
@@ -688,7 +690,7 @@ export function useGameActions({
       );
 
       const flyingCard: FlyingCardData = {
-        id: `hit-player-${Date.now()}-${cardIdCounter++}`,
+        id: `hit-player-${Date.now()}-${(cardIdCounter += 1)}`,
         card,
         fromPosition: shoePosition,
         toPosition: playerPosition,
@@ -702,10 +704,8 @@ export function useGameActions({
         const newCards = [...playerHand.cards, card];
         const newHandValue = calculateHandValue(newCards);
 
-        debugLog(
-          "playerActions",
-          `New hand: ${newCards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-        );
+        const newHandStr = newCards.map((c) => `${c.rank}${c.suit}`).join(", ");
+        debugLog("playerActions", `New hand: ${newHandStr}`);
         debugLog("playerActions", `New hand value: ${newHandValue}`);
 
         setPlayerHand((prev) => ({ ...prev, cards: newCards }));
@@ -726,6 +726,7 @@ export function useGameActions({
               newMap.delete(-1);
               return newMap;
             });
+            // eslint-disable-next-line sonarjs/no-duplicate-string
             debugLog("playerActions", "Moving to DEALER_TURN phase");
             setPhase("DEALER_TURN");
           }, 1500); // Show BUST for 1.5s then muck cards
@@ -761,12 +762,12 @@ export function useGameActions({
       debugLog("playerActions", `Standing on split hand ${activeIndex + 1}`);
       debugLog(
         "playerActions",
-        `Final hand: ${activeHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-      );
-      debugLog(
-        "playerActions",
         `Final hand value: ${calculateHandValue(activeHand.cards)}`,
       );
+      const finalHandStr = activeHand.cards
+        .map((c) => `${c.rank}${c.suit}`)
+        .join(", ");
+      debugLog("playerActions", `Final hand: ${finalHandStr}`);
 
       if (activeIndex === 0) {
         // Move to second hand
@@ -790,12 +791,12 @@ export function useGameActions({
     // Normal (non-split) stand logic
     debugLog(
       "playerActions",
-      `Final hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-    );
-    debugLog(
-      "playerActions",
       `Final hand value: ${calculateHandValue(playerHand.cards)}`,
     );
+    const playerFinalHandStr = playerHand.cards
+      .map((c) => `${c.rank}${c.suit}`)
+      .join(", ");
+    debugLog("playerActions", `Final hand: ${playerFinalHandStr}`);
     debugLog("playerActions", "Marking player as finished");
     setPlayerFinished(true);
     debugLog("playerActions", "Moving to DEALER_TURN phase");
@@ -806,12 +807,12 @@ export function useGameActions({
     debugLog("playerActions", "=== PLAYER ACTION: DOUBLE DOWN ===");
     debugLog(
       "playerActions",
-      `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-    );
-    debugLog(
-      "playerActions",
       `Current hand value: ${calculateHandValue(playerHand.cards)}`,
     );
+    const doubleDownHandStr = playerHand.cards
+      .map((c) => `${c.rank}${c.suit}`)
+      .join(", ");
+    debugLog("playerActions", `Current hand: ${doubleDownHandStr}`);
     debugLog("playerActions", `Current bet: $${playerHand.bet}`);
     debugLog("playerActions", `Doubling bet to: $${playerHand.bet * 2}`);
 
@@ -842,7 +843,7 @@ export function useGameActions({
       );
 
       const flyingCard: FlyingCardData = {
-        id: `double-player-${Date.now()}-${cardIdCounter++}`,
+        id: `double-player-${Date.now()}-${(cardIdCounter += 1)}`,
         card,
         fromPosition: shoePosition,
         toPosition: playerPosition,
@@ -855,11 +856,11 @@ export function useGameActions({
         const newCards = [...playerHand.cards, card];
         const newHandValue = calculateHandValue(newCards);
 
-        debugLog(
-          "playerActions",
-          `Final hand: ${newCards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-        );
         debugLog("playerActions", `Final hand value: ${newHandValue}`);
+        const finalCardsStr = newCards
+          .map((c) => `${c.rank}${c.suit}`)
+          .join(", ");
+        debugLog("playerActions", `Final hand: ${finalCardsStr}`);
 
         setPlayerHand((prev) => ({ ...prev, cards: newCards }));
         setFlyingCards((prev) => prev.filter((fc) => fc.id !== flyingCard.id));
@@ -912,10 +913,10 @@ export function useGameActions({
 
   const split = useCallback(() => {
     debugLog("playerActions", "=== PLAYER ACTION: SPLIT ===");
-    debugLog(
-      "playerActions",
-      `Current hand: ${playerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-    );
+    const splitHandStr = playerHand.cards
+      .map((c) => `${c.rank}${c.suit}`)
+      .join(", ");
+    debugLog("playerActions", `Current hand: ${splitHandStr}`);
     debugLog("playerActions", `Current bet: $${playerHand.bet}`);
 
     // Verify player has enough chips for second bet

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import BettingInterface from "@/components/BettingInterface";
 import InsuranceUI from "@/components/InsuranceUI";
 import PlayerActionsModal from "@/components/PlayerActionsModal";
@@ -37,9 +37,6 @@ export default function GameModals() {
     showStrategyCard,
     setShowStrategyCard,
     debugLogs,
-    showDebugLog,
-    setShowDebugLog,
-    clearDebugLogs,
   } = useUIState();
 
   const {
@@ -55,7 +52,7 @@ export default function GameModals() {
     setGameSettings,
   } = useGameActions();
   // Helper function to check if player is busted
-  const isBusted = (cards: any[]) => {
+  const isBusted = (cards: { value: number }[]) => {
     const value = cards.reduce((sum, card) => sum + card.value, 0);
     return value > 21;
   };
@@ -70,7 +67,6 @@ export default function GameModals() {
     playerHand.cards.length === 2 && playerChips >= playerHand.bet;
 
   // State for split hands modal
-  const [showSplitModal, setShowSplitModal] = useState(false);
 
   // Show split modal when player has split hands
   const hasSplitHands =
@@ -109,7 +105,7 @@ export default function GameModals() {
       {/* Split Hands Modal - shown when player has split hands */}
       {hasSplitHands && (
         <SplitHandsModal
-          isOpen={true}
+          isOpen
           hands={playerHand.splitHands!.map((hand, index) => {
             const activeIndex = playerHand.activeSplitHandIndex ?? 0;
             const handValue = hand.cards.reduce((sum, card) => {
@@ -118,7 +114,7 @@ export default function GameModals() {
               let aces = hand.cards.filter((c) => c.rank === "A").length;
               while (value > 21 && aces > 0) {
                 value -= 10;
-                aces--;
+                aces -= 1;
               }
               return value;
             }, 0);
@@ -132,7 +128,7 @@ export default function GameModals() {
           activeHandIndex={playerHand.activeSplitHandIndex ?? 0}
           onHit={hit}
           onStand={stand}
-          onClose={() => setShowSplitModal(false)}
+          onClose={() => {}}
           canMinimize={canMinimizeSplit}
         />
       )}
@@ -183,13 +179,7 @@ export default function GameModals() {
       />
 
       {/* Debug Log Modal and Button */}
-      <DebugLogModal
-        debugLogs={debugLogs}
-        phase={phase}
-        showDebugLog={showDebugLog}
-        onShowDebugLog={setShowDebugLog}
-        onClearDebugLogs={clearDebugLogs}
-      />
+      <DebugLogModal debugLogs={debugLogs} phase={phase} />
     </>
   );
 }

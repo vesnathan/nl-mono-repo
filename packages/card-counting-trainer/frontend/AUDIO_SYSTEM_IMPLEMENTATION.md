@@ -1,15 +1,18 @@
 # AI Player Audio System Implementation
 
 ## Overview
+
 Comprehensive audio system for AI player characters with priority-based queuing and automatic speech bubble synchronization.
 
 ## Architecture
 
 ### 1. Audio Generation
+
 - **208 audio files** generated via ElevenLabs API for 8 AI characters
 - **File Organization**: `/audio/players/{character-id}/{type}_{variant}.mp3`
 
 **Breakdown by type:**
+
 - 7 distraction files per character (56 total)
 - 4 personality reactions per character (32 total): bust, hit21, goodHit, badStart
 - 5 win reactions per character (40 total)
@@ -19,12 +22,14 @@ Comprehensive audio system for AI player characters with priority-based queuing 
 ### 2. Audio Queue System (`useAudioQueue.ts`)
 
 **Priority Levels:**
+
 - `IMMEDIATE (3)` - Bust, blackjack (interrupt everything)
 - `HIGH (2)` - Dealer blackjack, important events
 - `NORMAL (1)` - Win/loss reactions, conversations
 - `LOW (0)` - Distractions, casual comments
 
 **Features:**
+
 - Only one audio plays at a time
 - Higher priority audio interrupts lower priority
 - Interrupted HIGH/IMMEDIATE audio re-queues
@@ -32,6 +37,7 @@ Comprehensive audio system for AI player characters with priority-based queuing 
 - Automatic error handling with fallback
 
 **Usage:**
+
 ```typescript
 const { queueAudio, isPlaying, currentItem } = useAudioQueue();
 
@@ -42,19 +48,21 @@ queueAudio({
   playerId: "drunk-danny",
   message: "*hiccup* BUSTED! Fuck!",
   position: { left: "50%", top: "50%" },
-  onComplete: () => console.log("Audio finished")
+  onComplete: () => console.log("Audio finished"),
 });
 ```
 
 ### 3. Audio Path Helpers (`audioHelpers.ts`)
 
 **Functions:**
+
 - `getPlayerAudioPath(characterId, reactionType, variant?)` - Get path to AI player audio
 - `getDealerAudioPath(dealerId, voiceLine)` - Get path to dealer audio
 - `mapOutcomeToAudioType(outcomeType, context)` - Map reaction outcomes to audio types
 - `getRandomDistractionAudio(characterId)` - Random distraction for character
 
 **Example:**
+
 ```typescript
 // Get bust reaction audio
 const audioPath = getPlayerAudioPath("drunk-danny", "bust");
@@ -72,11 +80,18 @@ const distractionPath = getPlayerAudioPath("chatty-carlos", "distraction");
 ### 4. Integration Points (To Be Implemented)
 
 #### A. Modify `useGameInteractions.ts`
+
 Add audio queue integration to `addSpeechBubble`:
 
 ```typescript
 const addSpeechBubble = useCallback(
-  (playerId: string, message: string, position: number, reactionType?: string, priority: AudioPriority = AudioPriority.NORMAL) => {
+  (
+    playerId: string,
+    message: string,
+    position: number,
+    reactionType?: string,
+    priority: AudioPriority = AudioPriority.NORMAL,
+  ) => {
     // Existing speech bubble logic...
 
     // NEW: Queue audio if reaction type provided
@@ -92,65 +107,98 @@ const addSpeechBubble = useCallback(
       });
     }
   },
-  [setSpeechBubbles, queueAudio]
+  [setSpeechBubbles, queueAudio],
 );
 ```
 
 #### B. Update Reaction Callers
+
 Modify all calls to `addSpeechBubble` to include reaction type and priority:
 
 **Bust reactions (IMMEDIATE priority):**
+
 ```typescript
 // In useAITurnsPhase.ts or wherever bust happens
-addSpeechBubble(ai.character.id, bustMessage, ai.position, "bust", AudioPriority.IMMEDIATE);
+addSpeechBubble(
+  ai.character.id,
+  bustMessage,
+  ai.position,
+  "bust",
+  AudioPriority.IMMEDIATE,
+);
 ```
 
 **Win/Loss reactions (NORMAL priority):**
+
 ```typescript
 // In endOfHandReactions
-addSpeechBubble(ai.character.id, reactionMessage, ai.position, "win", AudioPriority.NORMAL);
+addSpeechBubble(
+  ai.character.id,
+  reactionMessage,
+  ai.position,
+  "win",
+  AudioPriority.NORMAL,
+);
 ```
 
 **Dealer blackjack (HIGH priority):**
+
 ```typescript
 // When dealer reveals blackjack
-addSpeechBubble(ai.character.id, dealerBJMessage, ai.position, "dealer_blackjack", AudioPriority.HIGH);
+addSpeechBubble(
+  ai.character.id,
+  dealerBJMessage,
+  ai.position,
+  "dealer_blackjack",
+  AudioPriority.HIGH,
+);
 ```
 
 **Distractions (LOW priority):**
+
 ```typescript
 // Random AI banter
-addSpeechBubble(ai.character.id, distraction, ai.position, "distraction", AudioPriority.LOW);
+addSpeechBubble(
+  ai.character.id,
+  distraction,
+  ai.position,
+  "distraction",
+  AudioPriority.LOW,
+);
 ```
 
 #### C. Update Main Component (`page.tsx`)
+
 Add audio queue hook:
 
 ```typescript
 const audioQueue = useAudioQueue();
 
 // Pass to useGameInteractions
-const { addSpeechBubble, showInitialReactions, showEndOfHandReactions } = useGameInteractions({
-  // ... existing params
-  audioQueue,
-});
+const { addSpeechBubble, showInitialReactions, showEndOfHandReactions } =
+  useGameInteractions({
+    // ... existing params
+    audioQueue,
+  });
 ```
 
 ## Audio File Mapping
 
 ### AI Character Voice IDs
-| Character | Voice ID |
-|-----------|----------|
-| Drunk Danny | `Vr1ZyHpAtTpW6DEVZwwI` |
-| Clumsy Claire | `ef1T91Fo2YqVYGug3C2p` |
-| Chatty Carlos | `MnqYh9UZerXWcrKflGOg` |
+
+| Character           | Voice ID                                   |
+| ------------------- | ------------------------------------------ |
+| Drunk Danny         | `Vr1ZyHpAtTpW6DEVZwwI`                     |
+| Clumsy Claire       | `ef1T91Fo2YqVYGug3C2p`                     |
+| Chatty Carlos       | `MnqYh9UZerXWcrKflGOg`                     |
 | Superstitious Susan | `8t6aWwL1WUiIpGgYJKnOYrXLriTqHsJZvuBMRrvc` |
-| Cocky Kyle | `XiPuSi02djl3mdNjSaio` |
-| Nervous Nancy | `lo7AgX1athQfnbY9sVMj` |
-| Lucky Larry | `xefN48Dq40rKHHpNo8gn` |
-| Unlucky Ursula | `ADk3UhQjkXzfOux4ovHq` |
+| Cocky Kyle          | `XiPuSi02djl3mdNjSaio`                     |
+| Nervous Nancy       | `lo7AgX1athQfnbY9sVMj`                     |
+| Lucky Larry         | `xefN48Dq40rKHHpNo8gn`                     |
+| Unlucky Ursula      | `ADk3UhQjkXzfOux4ovHq`                     |
 
 ### Audio File Structure
+
 ```
 /audio/
   /background/
@@ -186,12 +234,14 @@ const { addSpeechBubble, showInitialReactions, showEndOfHandReactions } = useGam
 ## Generation Scripts
 
 ### Generate AI Player Manifest
+
 ```bash
 cd packages/card-counting-trainer/frontend/src/audio/scripts
 python3 generate-player-manifest.py
 ```
 
 ### Generate Audio Files
+
 ```bash
 cd packages/card-counting-trainer/frontend/src/audio/scripts
 export ELEVEN_API_KEY="your_api_key_here"
@@ -206,6 +256,7 @@ export ELEVEN_API_KEY="your_api_key_here"
 ## Testing
 
 ### Test Audio Queue
+
 ```typescript
 // In dev tools console
 const testQueue = () => {
@@ -234,6 +285,7 @@ const testQueue = () => {
 ```
 
 ### Test Audio Files
+
 ```bash
 # Check if all files were generated
 cd packages/card-counting-trainer/frontend/src/audio/players

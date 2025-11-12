@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface WinLossBubbleProps {
   result?: "win" | "lose" | "push" | "blackjack";
@@ -92,6 +92,7 @@ export default function WinLossBubble({
       >
         {getMessage()}
       </div>
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         @keyframes rise-fade {
           0% {

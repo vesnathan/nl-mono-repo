@@ -63,6 +63,8 @@ export default function HeatMapModal() {
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       style={{
         position: "fixed",
         top: 0,
@@ -76,8 +78,14 @@ export default function HeatMapModal() {
         zIndex: 1000,
       }}
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          onClose();
+        }
+      }}
     >
       <div
+        role="presentation"
         style={{
           backgroundColor: "#1a1a1a",
           border: "3px solid #333",
@@ -89,6 +97,7 @@ export default function HeatMapModal() {
           overflow: "auto",
         }}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
@@ -103,6 +112,7 @@ export default function HeatMapModal() {
             📊 Pit Boss Heat Map
           </h2>
           <button
+            type="button"
             onClick={onClose}
             style={{
               background: "none",
@@ -314,6 +324,7 @@ export default function HeatMapModal() {
           <div>
             <span
               style={{
+                // eslint-disable-next-line sonarjs/no-duplicate-string
                 display: "inline-block",
                 width: "12px",
                 height: "12px",

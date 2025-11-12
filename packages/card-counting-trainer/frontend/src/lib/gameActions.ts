@@ -1,4 +1,4 @@
-import { Card, GameState, Hand, Player } from "@/types/game";
+import { Card, GameState, Hand } from "@/types/game";
 import { createAndShuffleShoe } from "@/lib/deck";
 import { CountingSystem } from "@/types/gameSettings";
 
@@ -46,17 +46,17 @@ export function calculateHandValue(cards: Card[]): number {
   let aces = 0;
 
   // First pass: add all values and count aces
-  for (const card of cards) {
+  cards.forEach((card) => {
     total += card.value;
     if (card.rank === "A") {
-      aces++;
+      aces += 1;
     }
-  }
+  });
 
   // Convert Aces from 11 to 1 if busting
   while (total > 21 && aces > 0) {
     total -= 10; // Convert one Ace from 11 to 1
-    aces--;
+    aces -= 1;
   }
 
   return total;
@@ -94,12 +94,12 @@ export function isSoftHand(cards: Card[]): boolean {
   let total = 0;
   let hasAce = false;
 
-  for (const card of cards) {
+  cards.forEach((card) => {
     total += card.value;
     if (card.rank === "A") {
       hasAce = true;
     }
-  }
+  });
 
   // If total is <= 21 and has an Ace, it's soft
   return hasAce && total <= 21;
@@ -147,13 +147,13 @@ export function dealInitialCards(
   let { runningCount } = gameState;
 
   // First card to each player (face up)
-  for (const playerIndex of playerIndices) {
+  playerIndices.forEach((playerIndex) => {
     const { card, remainingShoe, reshuffled } = dealCard(
       shoe,
       gameState.numDecks,
     );
     shoe = remainingShoe;
-    cardsDealt++;
+    cardsDealt += 1;
 
     // Reset count if reshuffled mid-hand
     if (reshuffled) {
@@ -171,16 +171,16 @@ export function dealInitialCards(
     if (!updatedPlayers[playerIndex].isDealer) {
       runningCount += card.count;
     }
-  }
+  });
 
   // Second card to each player (face up)
-  for (const playerIndex of playerIndices) {
+  playerIndices.forEach((playerIndex) => {
     const { card, remainingShoe, reshuffled } = dealCard(
       shoe,
       gameState.numDecks,
     );
     shoe = remainingShoe;
-    cardsDealt++;
+    cardsDealt += 1;
 
     // Reset count if reshuffled mid-hand
     if (reshuffled) {
@@ -192,12 +192,13 @@ export function dealInitialCards(
 
     // Update running count for visible cards
     // For dealer, only count the first (face-up) card
-    if (!updatedPlayers[playerIndex].isDealer) {
-      runningCount += card.count;
-    } else if (updatedPlayers[playerIndex].hands[0].cards.length === 1) {
+    if (
+      !updatedPlayers[playerIndex].isDealer ||
+      updatedPlayers[playerIndex].hands[0].cards.length === 1
+    ) {
       runningCount += card.count;
     }
-  }
+  });
 
   return {
     ...gameState,

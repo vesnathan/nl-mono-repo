@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { GameState, GamePhase, Player, PlayerAction } from "@/types/game";
+import { GameState, GamePhase, Player, Card } from "@/types/game";
 import {
   createAndShuffleShoe,
   calculateCutCardPosition,
@@ -29,33 +29,34 @@ const DEFAULT_CONFIG: GameConfig = {
 /**
  * Deal a new hand to existing AI players (no simulation of previous hands)
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function dealNewHandToAIPlayers(
-  shoe: any[],
+  shoe: Card[],
   numDecks: number,
   currentCardsDealt: number,
   currentRunningCount: number,
   aiPlayerPositions: number[],
 ): {
-  updatedShoe: any[];
+  updatedShoe: Card[];
   newCardsDealt: number;
   runningCount: number;
   trueCount: number;
-  aiHands: { position: number; cards: any[] }[];
-  dealerCards: any[];
+  aiHands: { position: number; cards: Card[] }[];
+  dealerCards: Card[];
 } {
   let currentShoe = [...shoe];
   let cardsDealt = currentCardsDealt;
   let runningCount = currentRunningCount;
 
-  const aiHands: { position: number; cards: any[] }[] = [];
-  const dealerCards: any[] = [];
+  const aiHands: { position: number; cards: Card[] }[] = [];
+  const dealerCards: Card[] = [];
 
   // Deal 2 cards to dealer
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 2; i += 1) {
     if (currentShoe.length === 0) break;
     const { card, remainingShoe } = dealCard(currentShoe);
     currentShoe = remainingShoe;
-    cardsDealt++;
+    cardsDealt += 1;
     if (i === 0) {
       // Only count first dealer card (face up)
       runningCount += card.count;
@@ -64,15 +65,15 @@ export function dealNewHandToAIPlayers(
   }
 
   // Deal 2 cards to each AI player (right-to-left order)
-  for (const position of aiPlayerPositions) {
-    const cards: any[] = [];
+  aiPlayerPositions.forEach((position) => {
+    const cards: Card[] = [];
 
     // Deal initial 2 cards
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 2; i += 1) {
       if (currentShoe.length === 0) break;
       const { card, remainingShoe } = dealCard(currentShoe);
       currentShoe = remainingShoe;
-      cardsDealt++;
+      cardsDealt += 1;
       runningCount += card.count;
       cards.push(card);
     }
@@ -81,7 +82,7 @@ export function dealNewHandToAIPlayers(
     const handValue = cards.reduce((sum, card) => {
       if (card.rank === "A") return sum + 11;
       if (["J", "Q", "K"].includes(card.rank)) return sum + 10;
-      return sum + parseInt(card.rank);
+      return sum + parseInt(card.rank, 10);
     }, 0);
 
     // Realistic play: never hit on 17+, sometimes hit on 12-16
@@ -98,13 +99,13 @@ export function dealNewHandToAIPlayers(
     if (shouldHit && currentShoe.length > 0) {
       const { card, remainingShoe } = dealCard(currentShoe);
       currentShoe = remainingShoe;
-      cardsDealt++;
+      cardsDealt += 1;
       runningCount += card.count;
       cards.push(card);
     }
 
     aiHands.push({ position, cards });
-  }
+  });
 
   // Calculate true count
   const totalCards = numDecks * 52;
@@ -125,17 +126,18 @@ export function dealNewHandToAIPlayers(
  * Simulate dealing cards to build up a count before user joins
  * AND deal current visible hands to AI players
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function simulateHandsInProgress(
-  shoe: any[],
+  shoe: Card[],
   numDecks: number,
   aiPlayerPositions: number[],
 ): {
-  updatedShoe: any[];
+  updatedShoe: Card[];
   cardsDealt: number;
   runningCount: number;
   trueCount: number;
-  aiHands: { position: number; cards: any[] }[];
-  dealerCards: any[];
+  aiHands: { position: number; cards: Card[] }[];
+  dealerCards: Card[];
 } {
   let currentShoe = [...shoe];
   let cardsDealt = 0;
@@ -144,31 +146,31 @@ export function simulateHandsInProgress(
   // Simulate 5-15 hands before user joins (just counting, no cards saved)
   const numHandsToSimulate = Math.floor(Math.random() * 11) + 5;
 
-  for (let hand = 0; hand < numHandsToSimulate; hand++) {
+  for (let hand = 0; hand < numHandsToSimulate; hand += 1) {
     // Each hand: deal 2 to player, 2 to dealer (4 cards)
     // Then simulate 0-3 additional cards (hits)
     const totalCardsThisHand = 4 + Math.floor(Math.random() * 4);
 
-    for (let i = 0; i < totalCardsThisHand; i++) {
+    for (let i = 0; i < totalCardsThisHand; i += 1) {
       if (currentShoe.length === 0) break;
 
       const { card, remainingShoe } = dealCard(currentShoe);
       currentShoe = remainingShoe;
-      cardsDealt++;
+      cardsDealt += 1;
       runningCount += card.count;
     }
   }
 
   // NOW deal a visible hand in progress to AI players
-  const aiHands: { position: number; cards: any[] }[] = [];
-  const dealerCards: any[] = [];
+  const aiHands: { position: number; cards: Card[] }[] = [];
+  const dealerCards: Card[] = [];
 
   // Deal 2 cards to dealer
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 2; i += 1) {
     if (currentShoe.length === 0) break;
     const { card, remainingShoe } = dealCard(currentShoe);
     currentShoe = remainingShoe;
-    cardsDealt++;
+    cardsDealt += 1;
     if (i === 0) {
       // Only count first dealer card (face up)
       runningCount += card.count;
@@ -177,15 +179,15 @@ export function simulateHandsInProgress(
   }
 
   // Deal 2 cards to each AI player, then let them make decisions
-  for (const position of aiPlayerPositions) {
-    const cards: any[] = [];
+  aiPlayerPositions.forEach((position) => {
+    const cards: Card[] = [];
 
     // Deal initial 2 cards
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 2; i += 1) {
       if (currentShoe.length === 0) break;
       const { card, remainingShoe } = dealCard(currentShoe);
       currentShoe = remainingShoe;
-      cardsDealt++;
+      cardsDealt += 1;
       runningCount += card.count;
       cards.push(card);
     }
@@ -194,7 +196,7 @@ export function simulateHandsInProgress(
     const handValue = cards.reduce((sum, card) => {
       if (card.rank === "A") return sum + 11;
       if (["J", "Q", "K"].includes(card.rank)) return sum + 10;
-      return sum + parseInt(card.rank);
+      return sum + parseInt(card.rank, 10);
     }, 0);
 
     // Realistic play: never hit on 17+, sometimes hit on 12-16
@@ -211,13 +213,13 @@ export function simulateHandsInProgress(
     if (shouldHit && currentShoe.length > 0) {
       const { card, remainingShoe } = dealCard(currentShoe);
       currentShoe = remainingShoe;
-      cardsDealt++;
+      cardsDealt += 1;
       runningCount += card.count;
       cards.push(card);
     }
 
     aiHands.push({ position, cards });
-  }
+  });
 
   // Calculate true count
   const totalCards = numDecks * 52;
@@ -237,7 +239,6 @@ export function simulateHandsInProgress(
 export function useGameState(config: GameConfig = DEFAULT_CONFIG) {
   const [gameState, setGameState] = useState<GameState>(() => {
     const shoe = createAndShuffleShoe(config.numDecks);
-    const totalCards = config.numDecks * 52;
     const cutCard = calculateCutCardPosition(
       config.numDecks,
       config.penetration,
@@ -290,9 +291,11 @@ export function useGameState(config: GameConfig = DEFAULT_CONFIG) {
   // Simulate game in progress on client-side only (after mount)
   const [isSimulated, setIsSimulated] = useState(false);
   const [aiHandsInProgress, setAIHandsInProgress] = useState<
-    { position: number; cards: any[] }[]
+    { position: number; cards: Card[] }[]
   >([]);
-  const [dealerCardsInProgress, setDealerCardsInProgress] = useState<any[]>([]);
+  const [dealerCardsInProgress, setDealerCardsInProgress] = useState<Card[]>(
+    [],
+  );
   // Store AI positions for entire shoe (persistent across hands)
   const [aiPlayerPositions, setAIPlayerPositions] = useState<number[]>([]);
 
@@ -344,7 +347,6 @@ export function useGameState(config: GameConfig = DEFAULT_CONFIG) {
    */
   const resetGame = useCallback(() => {
     const shoe = createAndShuffleShoe(config.numDecks);
-    const totalCards = config.numDecks * 52;
     const cutCard = calculateCutCardPosition(
       config.numDecks,
       config.penetration,

@@ -151,7 +151,14 @@ export default function BasicStrategyCard({
   return (
     <>
       <div
+        role="button"
+        tabIndex={0}
         onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            onClose();
+          }
+        }}
         style={{
           position: "fixed",
           top: 0,
@@ -205,6 +212,7 @@ export default function BasicStrategyCard({
               Basic Strategy Chart
             </h2>
             <button
+              type="button"
               onClick={onClose}
               style={{
                 backgroundColor: "transparent",
@@ -337,6 +345,7 @@ export default function BasicStrategyCard({
                         padding: "6px",
                         backgroundColor: "#2a2a2a",
                         color: "#AAA",
+                        // eslint-disable-next-line sonarjs/no-duplicate-string
                         border: "1px solid #444",
                       }}
                     >
@@ -359,8 +368,8 @@ export default function BasicStrategyCard({
                   </tr>
                 </thead>
                 <tbody>
-                  {hardTotals.map((row, idx) => (
-                    <tr key={idx}>
+                  {hardTotals.map((row) => (
+                    <tr key={row.player}>
                       <td
                         style={{
                           padding: "6px",
@@ -375,7 +384,7 @@ export default function BasicStrategyCard({
                       </td>
                       {row.actions.map((action, actionIdx) => (
                         <td
-                          key={actionIdx}
+                          key={dealerHeaders[actionIdx]}
                           style={{
                             padding: "6px",
                             backgroundColor: getActionColor(
@@ -445,8 +454,8 @@ export default function BasicStrategyCard({
                   </tr>
                 </thead>
                 <tbody>
-                  {softTotals.map((row, idx) => (
-                    <tr key={idx}>
+                  {softTotals.map((row) => (
+                    <tr key={row.player}>
                       <td
                         style={{
                           padding: "6px",
@@ -461,7 +470,7 @@ export default function BasicStrategyCard({
                       </td>
                       {row.actions.map((action, actionIdx) => (
                         <td
-                          key={actionIdx}
+                          key={dealerHeaders[actionIdx]}
                           style={{
                             padding: "6px",
                             backgroundColor: getActionColor(
@@ -532,8 +541,8 @@ export default function BasicStrategyCard({
                 </tr>
               </thead>
               <tbody>
-                {pairSplits.map((row, idx) => (
-                  <tr key={idx}>
+                {pairSplits.map((row) => (
+                  <tr key={row.player}>
                     <td
                       style={{
                         padding: "6px",
@@ -548,7 +557,7 @@ export default function BasicStrategyCard({
                     </td>
                     {row.actions.map((action, actionIdx) => (
                       <td
-                        key={actionIdx}
+                        key={dealerHeaders[actionIdx]}
                         style={{
                           padding: "6px",
                           backgroundColor: getActionColor(
@@ -572,6 +581,7 @@ export default function BasicStrategyCard({
 
         <div style={{ marginTop: "24px", textAlign: "center" }}>
           <button
+            type="button"
             onClick={onClose}
             style={{
               backgroundColor: "#FFD700",

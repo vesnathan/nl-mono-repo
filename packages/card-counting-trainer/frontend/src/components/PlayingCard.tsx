@@ -379,30 +379,35 @@ export default function PlayingCard({ card, faceDown }: PlayingCardProps) {
                 textAlign: "center",
               }}
             >
-              {pipLayout.map((pip, index) => (
-                <div
-                  key={index}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                    height: "100%",
-                  }}
-                >
-                  {pip === "X" && (
-                    <div
-                      style={{
-                        fontSize: "18px",
-                        color: suitColor,
-                        lineHeight: 1,
-                      }}
-                    >
-                      {suitSymbol}
-                    </div>
-                  )}
-                </div>
-              ))}
+              {pipLayout.map((pip, index) => {
+                // Calculate grid position for unique key (3 columns, 5 rows)
+                const gridRow = Math.floor(index / 3);
+                const gridCol = index % 3;
+                return (
+                  <div
+                    key={`${pip}-r${gridRow}c${gridCol}`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "100%",
+                      height: "100%",
+                    }}
+                  >
+                    {pip === "X" && (
+                      <div
+                        style={{
+                          fontSize: "18px",
+                          color: suitColor,
+                          lineHeight: 1,
+                        }}
+                      >
+                        {suitSymbol}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

@@ -17,17 +17,18 @@ export default function ThinkingBubble({
 
   useEffect(() => {
     // Animate dots: . -> .. -> ... -> . (only for thinking bubbles)
-    if (type === "thinking") {
-      const interval = setInterval(() => {
-        setDots((prev) => {
-          if (prev === ".") return "..";
-          if (prev === "..") return "...";
-          return ".";
-        });
-      }, 500);
-
-      return () => clearInterval(interval);
+    if (type !== "thinking") {
+      return undefined;
     }
+    const interval = setInterval(() => {
+      setDots((prev) => {
+        if (prev === ".") return "..";
+        if (prev === "..") return "...";
+        return ".";
+      });
+    }, 500);
+
+    return () => clearInterval(interval);
   }, [type]);
 
   const getColor = () => {
@@ -45,6 +46,7 @@ export default function ThinkingBubble({
           position: "absolute",
           left: position.left,
           top: position.top,
+          // eslint-disable-next-line sonarjs/no-duplicate-string
           transform: "translateX(-50%)",
           zIndex: 2000,
           animation: "rise-fade 2s ease-out forwards",
@@ -66,6 +68,7 @@ export default function ThinkingBubble({
         >
           {message}
         </div>
+        {/* eslint-disable-next-line react/no-unknown-property */}
         <style jsx>{`
           @keyframes rise-fade {
             0% {
@@ -99,7 +102,9 @@ export default function ThinkingBubble({
         style={{
           position: "relative",
           backgroundColor: "#FFFFFF",
+          // eslint-disable-next-line sonarjs/no-duplicate-string
           border: "2px solid #333",
+          // eslint-disable-next-line sonarjs/no-duplicate-string
           borderRadius: "20px",
           padding: "12px 20px",
           fontSize: "16px",
@@ -167,7 +172,7 @@ export default function ThinkingBubble({
           borderRadius: "50%",
         }}
       />
-
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         @keyframes bounce {
           0%,

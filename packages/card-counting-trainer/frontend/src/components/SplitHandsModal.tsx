@@ -32,15 +32,15 @@ export default function SplitHandsModal({
     let value = 0;
     let aces = 0;
 
-    for (const card of cards) {
+    cards.forEach((card) => {
       value += card.value;
-      if (card.rank === "A") aces++;
-    }
+      if (card.rank === "A") aces += 1;
+    });
 
     // Adjust for aces
     while (value > 21 && aces > 0) {
       value -= 10;
-      aces--;
+      aces -= 1;
     }
 
     return value;
@@ -83,6 +83,7 @@ export default function SplitHandsModal({
         </h2>
         {canMinimize && (
           <button
+            type="button"
             onClick={onClose}
             style={{
               backgroundColor: "transparent",
@@ -93,6 +94,7 @@ export default function SplitHandsModal({
               fontSize: "14px",
               fontWeight: "bold",
               cursor: "pointer",
+              // eslint-disable-next-line sonarjs/no-duplicate-string
               transition: "all 0.2s ease",
             }}
             onMouseEnter={(e) => {
@@ -109,14 +111,18 @@ export default function SplitHandsModal({
 
       {/* Display both hands */}
       <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
+        {/* eslint-disable-next-line sonarjs/no-duplicate-string */}
+        {/* eslint-disable sonarjs/cognitive-complexity */}
         {hands.map((hand, index) => {
           const handValue = calculateHandValue(hand.cards);
           const isActive = index === activeHandIndex;
           const isBusted = hand.busted || handValue > 21;
+          // Generate unique key based on hand cards
+          const handKey = hand.cards.map((c) => `${c.rank}${c.suit}`).join("-");
 
           return (
             <div
-              key={index}
+              key={handKey}
               style={{
                 flex: 1,
                 border: `3px solid ${isActive ? "#FFD700" : isBusted ? "#FF0000" : "#666"}`,
@@ -193,9 +199,9 @@ export default function SplitHandsModal({
                   minHeight: "80px",
                 }}
               >
-                {hand.cards.map((card, cardIndex) => (
+                {hand.cards.map((card) => (
                   <div
-                    key={cardIndex}
+                    key={`${card.rank}${card.suit}`}
                     style={{
                       width: "50px",
                       height: "70px",
@@ -233,6 +239,7 @@ export default function SplitHandsModal({
             </div>
           );
         })}
+        {/* eslint-enable sonarjs/cognitive-complexity */}
       </div>
 
       {/* Action buttons - only shown for active hand */}
@@ -241,6 +248,7 @@ export default function SplitHandsModal({
         calculateHandValue(hands[activeHandIndex]?.cards || []) <= 21 && (
           <div style={{ display: "flex", gap: "12px" }}>
             <button
+              type="button"
               onClick={onStand}
               style={{
                 flex: 1,
@@ -269,6 +277,7 @@ export default function SplitHandsModal({
             </button>
 
             <button
+              type="button"
               onClick={onHit}
               style={{
                 flex: 1,

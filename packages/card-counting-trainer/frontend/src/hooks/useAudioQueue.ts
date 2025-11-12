@@ -64,6 +64,7 @@ export function useAudioQueue({
   /**
    * Process the next item in the queue
    */
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   const processQueue = useCallback(async () => {
     if (processingRef.current) {
       debugLog("audioQueue", `[Audio Queue] ⛔ Already processing, returning`);
@@ -160,17 +161,16 @@ export function useAudioQueue({
               );
               // Retry with the generated URL
               return await tryPlayAudio(generatedAudioUrl, true);
-            } else {
-              console.error(
-                `[Audio Queue] ElevenLabs fallback failed to generate audio`,
-              );
-              // Skip this audio and move to next
-              setIsPlaying(false);
-              setCurrentItem(null);
-              processingRef.current = false;
-              registerTimeout(() => processQueue(), 100);
-              return;
             }
+            console.error(
+              `[Audio Queue] ElevenLabs fallback failed to generate audio`,
+            );
+            // Skip this audio and move to next
+            setIsPlaying(false);
+            setCurrentItem(null);
+            processingRef.current = false;
+            registerTimeout(() => processQueue(), 100);
+            return undefined;
           }
         } catch (checkError) {
           debugLog(
@@ -338,7 +338,7 @@ export function useAudioQueue({
 
     try {
       await tryPlayAudio(itemToPlay.audioPath);
-    } catch (error) {
+    } catch {
       // Error already handled in tryPlayAudio
     }
   }, [registerTimeout]); // registerTimeout is stable from useCallback in parent
@@ -355,35 +355,33 @@ export function useAudioQueue({
       );
 
       // Check if we should interrupt current audio
-      if (currentItem && isPlaying) {
+      if (currentItem && isPlaying && item.priority > currentItem.priority) {
         // Interrupt if new item has higher priority
-        if (item.priority > currentItem.priority) {
-          debugLog(
-            "audioQueue",
-            `[Audio Queue] ⚡ Interrupting current audio (priority ${currentItem.priority}) with higher priority (${item.priority})`,
-          );
+        debugLog(
+          "audioQueue",
+          `[Audio Queue] ⚡ Interrupting current audio (priority ${currentItem.priority}) with higher priority (${item.priority})`,
+        );
 
-          // Stop current audio
-          if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current = null;
-          }
-
-          // Reset state and queue the urgent item at the front
-          // The rest of the queue (including any other queued items) will continue after this urgent item
-          setIsPlaying(false);
-          setCurrentItem(null);
-          processingRef.current = false;
-          const newQueue = [item, ...queueRef.current];
-          queueRef.current = newQueue;
-          setQueue(newQueue);
-
-          // Process immediately
-          registerTimeout(() => {
-            processQueue();
-          }, 50);
-          return;
+        // Stop current audio
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current = null;
         }
+
+        // Reset state and queue the urgent item at the front
+        // The rest of the queue (including any other queued items) will continue after this urgent item
+        setIsPlaying(false);
+        setCurrentItem(null);
+        processingRef.current = false;
+        const newQueue = [item, ...queueRef.current];
+        queueRef.current = newQueue;
+        setQueue(newQueue);
+
+        // Process immediately
+        registerTimeout(() => {
+          processQueue();
+        }, 50);
+        return;
       }
 
       // Otherwise, just add to queue

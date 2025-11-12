@@ -11,8 +11,7 @@ import { Card } from "@/types/game";
 import { calculateHandValue, isBusted } from "@/lib/gameActions";
 import { CHARACTER_DIALOGUE, pick } from "@/data/dialogue";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
-import { AudioQueueHook, AudioPriority } from "@/hooks/useAudioQueue";
-import { getDealerAudioPath } from "@/utils/audioHelpers";
+import { AudioPriority } from "@/hooks/useAudioQueue";
 import { debugLog } from "@/utils/debug";
 
 interface UseDealerTurnPhaseParams {
@@ -25,7 +24,6 @@ interface UseDealerTurnPhaseParams {
   setDealerHand: (
     hand: PlayerHand | ((prev: PlayerHand) => PlayerHand),
   ) => void;
-  setDealerCallout: (callout: string | null) => void;
   setFlyingCards: (
     cards: FlyingCardData[] | ((prev: FlyingCardData[]) => FlyingCardData[]),
   ) => void;
@@ -60,7 +58,6 @@ interface UseDealerTurnPhaseParams {
       | "dealer_has_20"
       | "dealer_has_21",
   ) => void;
-  audioQueue: AudioQueueHook;
 }
 
 /**
@@ -78,14 +75,12 @@ export function useDealerTurnPhase({
   currentDealer,
   setDealerRevealed,
   setDealerHand,
-  setDealerCallout,
   setFlyingCards,
   setPhase,
   dealCardFromShoe,
   registerTimeout,
   getCardPositionForAnimation,
   addSpeechBubble,
-  audioQueue,
 }: UseDealerTurnPhaseParams) {
   const dealerTurnProcessingRef = useRef(false);
   const dealerFinishedRef = useRef(false);
@@ -96,6 +91,7 @@ export function useDealerTurnPhase({
   const hasStartedRef = useRef(false);
   const audioQueuedRef = useRef(false); // Track if we've queued audio for this dealer turn
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   useEffect(() => {
     // Detect phase entry
     const isEnteringDealerTurn =
@@ -140,10 +136,10 @@ export function useDealerTurnPhase({
 
     if (phase === "DEALER_TURN") {
       debugLog("dealCards", "=== PHASE: DEALER_TURN START ===");
-      debugLog(
-        "dealCards",
-        `Dealer hand: ${dealerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-      );
+      const dealerHandStr = dealerHand.cards
+        .map((c) => `${c.rank}${c.suit}`)
+        .join(", ");
+      debugLog("dealCards", `Dealer hand: ${dealerHandStr}`);
       debugLog(
         "dealCards",
         `Dealer hand value: ${calculateHandValue(dealerHand.cards)}`,
@@ -231,7 +227,7 @@ export function useDealerTurnPhase({
             );
 
             const flyingCard: FlyingCardData = {
-              id: `hit-dealer-${Date.now()}-${cardCounterRef.current++}`,
+              id: `hit-dealer-${Date.now()}-${(cardCounterRef.current += 1)}`,
               card,
               fromPosition: shoePosition,
               toPosition: dealerPosition,
@@ -282,10 +278,10 @@ export function useDealerTurnPhase({
             const isBust = isBusted(currentHand);
 
             debugLog("dealCards", `=== DEALER FINAL HAND ===`);
-            debugLog(
-              "dealCards",
-              `Dealer cards: ${currentHand.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-            );
+            const dealerCardsStr = currentHand
+              .map((c) => `${c.rank}${c.suit}`)
+              .join(", ");
+            debugLog("dealCards", `Dealer cards: ${dealerCardsStr}`);
             debugLog("dealCards", `Dealer hand value: ${finalValue}`);
             debugLog("dealCards", `Dealer busted: ${isBust}`);
 
@@ -315,24 +311,22 @@ export function useDealerTurnPhase({
                 if (isBust) {
                   message = "Dealer busts";
                   voiceLine = "dealer_busts";
-                } else {
+                } else if (finalValue === 17) {
                   // Use proper words for dealer callouts (matching audio files)
-                  if (finalValue === 17) {
-                    message = "Dealer has seventeen";
-                    voiceLine = "dealer_has_17";
-                  } else if (finalValue === 18) {
-                    message = "Dealer has eighteen";
-                    voiceLine = "dealer_has_18";
-                  } else if (finalValue === 19) {
-                    message = "Dealer has nineteen";
-                    voiceLine = "dealer_has_19";
-                  } else if (finalValue === 20) {
-                    message = "Dealer has twenty";
-                    voiceLine = "dealer_has_20";
-                  } else {
-                    message = "Dealer has twenty-one";
-                    voiceLine = "dealer_has_21";
-                  }
+                  message = "Dealer has seventeen";
+                  voiceLine = "dealer_has_17";
+                } else if (finalValue === 18) {
+                  message = "Dealer has eighteen";
+                  voiceLine = "dealer_has_18";
+                } else if (finalValue === 19) {
+                  message = "Dealer has nineteen";
+                  voiceLine = "dealer_has_19";
+                } else if (finalValue === 20) {
+                  message = "Dealer has twenty";
+                  voiceLine = "dealer_has_20";
+                } else {
+                  message = "Dealer has twenty-one";
+                  voiceLine = "dealer_has_21";
                 }
 
                 // Speech bubble handles both visual display AND audio queueing

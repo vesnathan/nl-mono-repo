@@ -28,6 +28,7 @@ export function useConversationHandlers({
   addSpeechBubble,
 }: UseConversationHandlersParams) {
   const handleConversationResponse = useCallback(
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     (choiceIndex: number) => {
       if (!activeConversation) return;
 
@@ -109,17 +110,15 @@ export function useConversationHandlers({
             "Friendly response (dealer on your side) → helps camouflage",
           );
         }
-      } else if (!isPlayerCounting) {
+      } else if (!isPlayerCounting && choiceIndex === 0) {
         // Not counting - normal social behavior doesn't raise dealer suspicion
         // In fact, being friendly/social lowers dealer suspicion slightly
-        if (choiceIndex === 0) {
-          // Friendly response - dealer relaxes a bit
-          debugLog(
-            "conversations",
-            "Friendly response (not counting) → -1 dealer suspicion",
-          );
-          setDealerSuspicion((prev) => Math.max(0, prev - 1));
-        }
+        // Friendly response - dealer relaxes a bit
+        debugLog(
+          "conversations",
+          "Friendly response (not counting) → -1 dealer suspicion",
+        );
+        setDealerSuspicion((prev) => Math.max(0, prev - 1));
       }
 
       // Adjust sociability based on response type

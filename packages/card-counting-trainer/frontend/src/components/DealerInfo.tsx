@@ -36,7 +36,14 @@ export default function DealerInfo({
   if (!showModal) {
     return (
       <div
+        role="button"
+        tabIndex={0}
         onClick={() => setShowModal(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            setShowModal(true);
+          }
+        }}
         style={{
           backgroundColor: "#1a1a1a",
           border: "2px solid #FFD700",
@@ -65,7 +72,14 @@ export default function DealerInfo({
     <>
       {/* Backdrop */}
       <div
+        role="button"
+        tabIndex={0}
         onClick={handleClose}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            handleClose();
+          }
+        }}
         style={{
           position: "fixed",
           top: 0,
@@ -100,6 +114,7 @@ export default function DealerInfo({
       >
         {/* Close button */}
         <button
+          type="button"
           onClick={handleClose}
           style={{
             position: "absolute",
@@ -113,8 +128,12 @@ export default function DealerInfo({
             padding: "4px 8px",
             lineHeight: 1,
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#FFF")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#999")}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "#FFF";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "#999";
+          }}
         >
           ×
         </button>
@@ -138,7 +157,7 @@ export default function DealerInfo({
               fontStyle: "italic",
             }}
           >
-            "{dealer.nickname}"
+            &quot;{dealer.nickname}&quot;
           </div>
         </div>
 

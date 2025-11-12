@@ -1,19 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 
 interface FlyingCardProps {
-  rank: string;
-  suit: string;
   fromPosition: { left: string; top: string };
   toPosition: { left: string; top: string };
   onAnimationComplete?: () => void;
 }
 
 export default function FlyingCard({
-  rank,
-  suit,
   fromPosition,
   toPosition,
   onAnimationComplete,
@@ -53,6 +49,7 @@ export default function FlyingCard({
           }}
         />
       </div>
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         @keyframes fly-to-position {
           0% {

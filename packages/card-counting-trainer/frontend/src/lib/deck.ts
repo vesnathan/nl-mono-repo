@@ -128,16 +128,16 @@ export function createDeck(
   ];
   const deck: Card[] = [];
 
-  for (const suit of suits) {
-    for (const rank of ranks) {
+  suits.forEach((suit) => {
+    ranks.forEach((rank) => {
       deck.push({
         suit,
         rank,
         value: getCardValue(rank),
         count: getCountValue(rank, countingSystem),
       });
-    }
-  }
+    });
+  });
 
   return deck;
 }
@@ -153,7 +153,7 @@ export function createShoe(
 ): Card[] {
   const shoe: Card[] = [];
 
-  for (let i = 0; i < numDecks; i++) {
+  for (let i = 0; i < numDecks; i += 1) {
     shoe.push(...createDeck(countingSystem));
   }
 
@@ -167,7 +167,7 @@ export function createShoe(
 export function shuffleCards(cards: Card[]): Card[] {
   const shuffled = [...cards]; // Create a copy to avoid mutation
 
-  for (let i = shuffled.length - 1; i > 0; i--) {
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
 
     // Swap cards[i] with cards[j]

@@ -38,6 +38,7 @@ export function useInsurancePhase({
 }: UseInsurancePhaseParams) {
   const hasProcessedAI = useRef(false);
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   useEffect(() => {
     if (phase !== "INSURANCE") {
       hasProcessedAI.current = false;
@@ -71,12 +72,11 @@ export function useInsurancePhase({
                   insuranceBet: insuranceCost,
                   chips: ai.chips - insuranceCost,
                 };
-              } else {
-                debugLog(
-                  "insurance",
-                  `AI Player ${idx} (${ai.character.name}) cannot afford insurance`,
-                );
               }
+              debugLog(
+                "insurance",
+                `AI Player ${idx} (${ai.character.name}) cannot afford insurance`,
+              );
             } else {
               debugLog(
                 "insurance",

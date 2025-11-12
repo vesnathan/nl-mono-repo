@@ -117,6 +117,7 @@ export function useAITurnsPhase({
   const prevPhaseRef = useRef<GamePhase | null>(null);
   const hasResetRef = useRef<boolean>(false);
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   useEffect(() => {
     // Reset playersFinished when entering AI_TURNS phase for the first time
     if (
@@ -174,17 +175,20 @@ export function useAITurnsPhase({
         .map((ai, idx) => ({ ai, idx, position: ai.position }))
         .sort((a, b) => a.position - b.position);
 
-      debugLog(
-        "aiTurns",
-        `Turn order (sorted by position): ${playersByPosition.map((p) => `${p.ai.character.name} (idx:${p.idx}, seat:${p.position})`).join(", ")}`,
-      );
+      const turnOrderStr = playersByPosition
+        .map((p) => `${p.ai.character.name} (idx:${p.idx}, seat:${p.position})`)
+        .join(", ");
+      debugLog("aiTurns", `Turn order (sorted by position): ${turnOrderStr}`);
       debugLog(
         "aiTurns",
         `Players finished: [${Array.from(playersFinished).join(", ")}]`,
       );
+      const dealerCardsStr = dealerHand.cards
+        .map((c) => `${c.rank}${c.suit}`)
+        .join(", ");
       debugLog(
         "aiTurns",
-        `Dealer hand cards: ${dealerHand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")} (${dealerHand.cards.length} cards)`,
+        `Dealer hand cards: ${dealerCardsStr} (${dealerHand.cards.length} cards)`,
       );
 
       const nextPlayer = playersByPosition.find(({ ai, idx }) => {
@@ -199,9 +203,12 @@ export function useAITurnsPhase({
         const handValue = calculateHandValue(ai.hand.cards);
         const isBust = isBusted(ai.hand.cards);
 
+        const aiHandStr = ai.hand.cards
+          .map((c) => `${c.rank}${c.suit}`)
+          .join(", ");
         debugLog(
           "aiTurns",
-          `  ${ai.character.name} (idx:${idx}) - Hand: ${ai.hand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")} (value: ${handValue}, busted: ${isBust})`,
+          `  ${ai.character.name} (idx:${idx}) - Hand: ${aiHandStr} (value: ${handValue}, busted: ${isBust})`,
         );
 
         if (isBust) {
@@ -288,18 +295,17 @@ export function useAITurnsPhase({
         aiTurnProcessingRef.current = false;
         registerTimeout(() => setPhase("PLAYER_TURN"), 1000);
         return;
-      } else {
-        debugLog("aiTurns", `✗ Player does NOT need to act before AI ${idx}`);
       }
+      debugLog("aiTurns", `✗ Player does NOT need to act before AI ${idx}`);
 
       debugLog(
         "aiTurns",
         `=== AI PLAYER ${idx} TURN (${ai.character.name}, Seat ${ai.position}) ===`,
       );
-      debugLog(
-        "aiTurns",
-        `Current hand: ${ai.hand.cards.map((c) => `${c.rank}${c.suit}`).join(", ")}`,
-      );
+      const currentHandStr = ai.hand.cards
+        .map((c) => `${c.rank}${c.suit}`)
+        .join(", ");
+      debugLog("aiTurns", `Current hand: ${currentHandStr}`);
 
       const handValue = calculateHandValue(ai.hand.cards);
       const isBust = isBusted(ai.hand.cards);
@@ -562,7 +568,7 @@ export function useAITurnsPhase({
           );
 
           const flyingCard: FlyingCardData = {
-            id: `hit-ai-${idx}-${Date.now()}-${cardCounterRef.current++}`,
+            id: `hit-ai-${idx}-${Date.now()}-${(cardCounterRef.current += 1)}`,
             card,
             fromPosition: shoePosition,
             toPosition: aiPosition,

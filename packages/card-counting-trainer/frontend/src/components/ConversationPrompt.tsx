@@ -8,7 +8,7 @@ export interface ConversationChoice {
 }
 
 interface ConversationPromptProps {
-  speakerId: string; // Who's asking (AI character id or "dealer")
+  // Who's asking (AI character id or "dealer")
   speakerName: string;
   question: string;
   choices: ConversationChoice[];
@@ -21,7 +21,6 @@ interface ConversationPromptProps {
 }
 
 export default function ConversationPrompt({
-  speakerId,
   speakerName,
   question,
   choices,
@@ -115,7 +114,8 @@ export default function ConversationPrompt({
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {choices.map((choice, index) => (
             <button
-              key={index}
+              type="button"
+              key={choice.text}
               onClick={() => handleChoice(index)}
               disabled={selectedIndex !== null}
               style={{
@@ -247,6 +247,7 @@ export default function ConversationPrompt({
         }}
       />
 
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         @keyframes fadeInScale {
           0% {

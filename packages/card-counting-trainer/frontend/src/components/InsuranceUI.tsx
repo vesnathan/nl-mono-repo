@@ -68,6 +68,7 @@ export default function InsuranceUI({
 
       <div style={{ display: "flex", gap: "16px" }}>
         <button
+          type="button"
           onClick={onDeclineInsurance}
           style={{
             flex: 1,
@@ -94,6 +95,7 @@ export default function InsuranceUI({
         </button>
 
         <button
+          type="button"
           onClick={onTakeInsurance}
           disabled={!canAffordInsurance}
           style={{

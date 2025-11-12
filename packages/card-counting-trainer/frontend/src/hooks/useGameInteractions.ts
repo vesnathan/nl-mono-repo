@@ -6,16 +6,11 @@ import {
   PlayerHand,
 } from "@/types/gameState";
 import { BlackjackPayout } from "@/types/gameSettings";
-import {
-  createConversation,
-  createSpeechBubble,
-} from "@/utils/conversationHelpers";
+import { createSpeechBubble } from "@/utils/conversationHelpers";
 import {
   generateInitialReactions,
   generateEndOfHandReactions,
 } from "@/utils/reactions";
-import { AudioPriority } from "@/hooks/useAudioQueue";
-import { mapOutcomeToAudioType } from "@/utils/audioHelpers";
 import { debugLog } from "@/utils/debug";
 import { DealerCharacter } from "@/data/dealerCharacters";
 
@@ -40,45 +35,21 @@ export function useGameInteractions({
   aiPlayers,
   dealerHand,
   blackjackPayout,
-  currentDealer,
 }: UseGameInteractionsParams) {
-  const triggerConversation = useCallback(
-    (speakerId: string, speakerName: string, position: number) => {
-      // DISABLED FOR TESTING: All player conversations disabled
-      return;
-
-      // Don't trigger if there's already an active conversation
-      // if (activeConversation) return;
-
-      // const conversation = createConversation(speakerId, speakerName, position);
-      // setActiveConversation(conversation);
-    },
-    [activeConversation, setActiveConversation],
-  );
+  const triggerConversation = useCallback(() => {
+    // DISABLED FOR TESTING: All player conversations disabled
+    // Don't trigger if there's already an active conversation
+    // if (activeConversation) return;
+    // const conversation = createConversation(speakerId, speakerName, position);
+    // setActiveConversation(conversation);
+  }, [activeConversation, setActiveConversation]);
 
   const addSpeechBubble = useCallback(
     (
       playerId: string,
       message: string,
       position: number,
-      reactionType?:
-        | "bust"
-        | "hit21"
-        | "goodHit"
-        | "badStart"
-        | "win"
-        | "loss"
-        | "dealer_blackjack"
-        | "distraction",
-      priority: AudioPriority = AudioPriority.NORMAL,
-      dealerVoiceLine?:
-        | "place_bets"
-        | "dealer_busts"
-        | "dealer_has_17"
-        | "dealer_has_18"
-        | "dealer_has_19"
-        | "dealer_has_20"
-        | "dealer_has_21",
+      // eslint-disable-next-line sonarjs/cognitive-complexity
     ) => {
       // Unified speech bubble implementation for all players (dealer and AI)
       // Pattern: Speech bubble ALWAYS created first, then audio queued if file exists
@@ -118,20 +89,19 @@ export function useGameInteractions({
                 }
               : b,
           );
-        } else {
-          return [
-            ...prev,
-            {
-              playerId,
-              message,
-              position: bubbleData.position,
-              hideTimeoutId: undefined,
-              visible: false, // Start invisible
-              isDealer: bubbleData.isDealer,
-              playerPosition: bubbleData.playerPosition,
-            },
-          ];
         }
+        return [
+          ...prev,
+          {
+            playerId,
+            message,
+            position: bubbleData.position,
+            hideTimeoutId: undefined,
+            visible: false, // Start invisible
+            isDealer: bubbleData.isDealer,
+            playerPosition: bubbleData.playerPosition,
+          },
+        ];
       });
 
       // Show speech bubble immediately (no audio)
@@ -170,8 +140,6 @@ export function useGameInteractions({
             reaction.playerId,
             reaction.message,
             aiPlayer.position,
-            reaction.audioType, // Pass audio type
-            reaction.audioPriority, // Pass priority
           );
         }
       }, idx * 600);
@@ -191,8 +159,6 @@ export function useGameInteractions({
           reaction.playerId, // Use playerId directly
           reaction.message,
           reaction.position,
-          reaction.audioType, // Pass audio type from reaction
-          reaction.audioPriority, // Pass priority from reaction
         );
       }, idx * 1000); // Stagger by 1 second to avoid overlap
     });

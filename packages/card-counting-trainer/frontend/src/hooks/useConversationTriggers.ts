@@ -1,11 +1,8 @@
-import { useEffect, useRef } from "react";
+/* eslint-disable sonarjs/cognitive-complexity */
+import { useEffect } from "react";
 import { AIPlayer, ActiveConversation, GamePhase } from "@/types/gameState";
 import { DealerCharacter } from "@/data/dealerCharacters";
-import {
-  getDealerPlayerLine,
-  getRandomAIConversation,
-  getPlayerEngagement,
-} from "@/data/dialogue";
+import { getDealerPlayerLine, getRandomAIConversation } from "@/data/dialogue";
 
 interface UseConversationTriggersParams {
   initialized: boolean;
@@ -55,7 +52,9 @@ export function useConversationTriggers({
 }: UseConversationTriggersParams) {
   // Periodic conversation triggers (frequency based on player sociability)
   useEffect(() => {
-    if (!initialized || playerSeat === null || activeConversation) return;
+    if (!initialized || playerSeat === null || activeConversation) {
+      return undefined;
+    }
 
     const baseTriggerChance = 0.3;
     const sociabilityMultiplier = playerSociability / 50;
@@ -102,8 +101,11 @@ export function useConversationTriggers({
   ]);
 
   // AI-to-AI conversations (multi-turn exchanges)
+  // eslint-disable-next-line sonarjs/no-duplicate-string
   useEffect(() => {
-    if (!initialized || aiPlayers.length < 2) return;
+    if (!initialized || aiPlayers.length < 2) {
+      return undefined;
+    }
 
     const conversationInterval = setInterval(
       () => {

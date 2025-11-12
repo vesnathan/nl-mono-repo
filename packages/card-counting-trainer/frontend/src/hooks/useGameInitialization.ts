@@ -23,7 +23,7 @@ export function useGameInitialization(
 
     // If we have fewer than 8 characters, repeat them to fill all seats
     const selectedCharacters = [];
-    for (let i = 0; i < numAIPlayers; i++) {
+    for (let i = 0; i < numAIPlayers; i += 1) {
       selectedCharacters.push(
         shuffledCharacters[i % shuffledCharacters.length],
       );
