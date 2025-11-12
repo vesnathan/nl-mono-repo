@@ -72,7 +72,10 @@ export async function deployLoudnClearDigital(
 
   // 2. Upload CloudFormation templates
   logger.info("Uploading CloudFormation templates...");
-  const templatesDir = path.resolve(__dirname, "../../templates/loudn-clear-digital");
+  const templatesDir = path.resolve(
+    __dirname,
+    "../../templates/loudn-clear-digital",
+  );
 
   const templates = [
     { local: "cfn-template.yaml", s3Key: "cfn-template.yaml" },
