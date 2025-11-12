@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 
 interface FlyingCardProps {

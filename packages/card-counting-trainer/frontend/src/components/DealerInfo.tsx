@@ -143,7 +143,7 @@ export default function DealerInfo({
               fontStyle: "italic",
             }}
           >
-            "{dealer.nickname}"
+            &quot;{dealer.nickname}&quot;
           </div>
         </div>
 

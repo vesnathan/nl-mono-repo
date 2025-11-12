@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface WinLossBubbleProps {
   result?: "win" | "lose" | "push" | "blackjack";
