@@ -1,87 +1,20 @@
 import React from "react";
-import {
-  GamePhase,
-  AIPlayer,
-  PlayerHand,
-  SpeechBubble,
-  WinLossBubbleData,
-  ActiveConversation,
-  FlyingCardData,
-} from "@/types/gameState";
-import { GameSettings, calculateCutCardPosition } from "@/types/gameSettings";
-import { DealerCharacter } from "@/data/dealerCharacters";
+import { calculateCutCardPosition } from "@/types/gameSettings";
 import Shoe from "@/components/Shoe";
 import DealerSection from "@/components/DealerSection";
 import TableSeats from "@/components/TableSeats";
 import GameOverlays from "@/components/GameOverlays";
 import DealerInfo from "@/components/DealerInfo";
 import TableRules from "@/components/TableRules";
+import { useGameState } from "@/contexts/GameStateContext";
+import { useUIState } from "@/contexts/UIStateContext";
+import { useGameActions } from "@/contexts/GameActionsContext";
 
-interface GameTableProps {
-  // Game state
-  gameSettings: GameSettings;
-  cardsDealt: number;
-  currentDealer: DealerCharacter | null;
-  dealerCallout: string | null;
-  phase: GamePhase;
-  dealerHand: PlayerHand;
-  dealerRevealed: boolean;
-  aiPlayers: AIPlayer[];
-  playerSeat: number | null;
-  playerHand: PlayerHand;
-  currentBet: number;
-  activePlayerIndex: number | null;
-  playerActions: Map<
-    number,
-    "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK"
-  >;
-  speechBubbles: SpeechBubble[];
-  winLossBubbles: WinLossBubbleData[];
-  activeConversation: ActiveConversation | null;
-  flyingCards: FlyingCardData[];
-  showDealerInfo: boolean;
-
-  // Actions
-  setPlayerSeat: (seat: number) => void;
-  startNewRound: () => void;
-  hit: () => void;
-  stand: () => void;
-  handleConversationResponse: (suspicionChange: number) => void;
-  handleConversationIgnore: () => void;
-  setWinLossBubbles: React.Dispatch<React.SetStateAction<WinLossBubbleData[]>>;
-  setShowDealerInfo: (show: boolean) => void;
-  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
-}
-
-export default function GameTable({
-  gameSettings,
-  cardsDealt,
-  currentDealer,
-  dealerCallout,
-  phase,
-  dealerHand,
-  dealerRevealed,
-  aiPlayers,
-  playerSeat,
-  playerHand,
-  currentBet,
-  activePlayerIndex,
-  playerActions,
-  speechBubbles,
-  winLossBubbles,
-  activeConversation,
-  flyingCards,
-  showDealerInfo,
-  setPlayerSeat,
-  startNewRound,
-  hit,
-  stand,
-  handleConversationResponse,
-  handleConversationIgnore,
-  setWinLossBubbles,
-  setShowDealerInfo,
-  registerTimeout,
-}: GameTableProps) {
+export default function GameTable() {
+  const { gameSettings, cardsDealt, currentDealer, showDealerInfo } =
+    useGameState();
+  const { setShowDealerInfo } = useUIState();
+  const { registerTimeout } = useGameActions();
   return (
     <div
       style={{
@@ -132,48 +65,16 @@ export default function GameTable({
         />
 
         {/* Dealer Section - Top Center with Avatar */}
-        <DealerSection
-          currentDealer={currentDealer}
-          dealerCallout={dealerCallout}
-          phase={phase}
-          dealerHand={dealerHand}
-          dealerRevealed={dealerRevealed}
-          onDealerClick={() => setShowDealerInfo(true)}
-        />
+        <DealerSection />
 
         {/* Player Spots - Using exact positions from reference project */}
-        <TableSeats
-          aiPlayers={aiPlayers}
-          playerSeat={playerSeat}
-          playerHand={playerHand}
-          phase={phase}
-          activePlayerIndex={activePlayerIndex}
-          playerActions={playerActions}
-          onSeatClick={setPlayerSeat}
-          registerTimeout={registerTimeout}
-        />
+        <TableSeats />
 
         {/* Table Rules Placard */}
         <TableRules gameSettings={gameSettings} />
 
         {/* Game Overlays: Action Buttons, Bubbles, Conversations, Flying Cards */}
-        <GameOverlays
-          playerSeat={playerSeat}
-          playerHand={playerHand}
-          currentBet={currentBet}
-          phase={phase}
-          speechBubbles={speechBubbles}
-          winLossBubbles={winLossBubbles}
-          activeConversation={activeConversation}
-          flyingCards={flyingCards}
-          startNewRound={startNewRound}
-          hit={hit}
-          stand={stand}
-          handleConversationResponse={handleConversationResponse}
-          handleConversationIgnore={handleConversationIgnore}
-          setWinLossBubbles={setWinLossBubbles}
-          registerTimeout={registerTimeout}
-        />
+        <GameOverlays />
       </div>
 
       {/* Dealer Info Modal */}

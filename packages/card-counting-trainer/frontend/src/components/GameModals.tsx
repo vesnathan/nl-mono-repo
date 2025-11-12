@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { GameSettings } from "@/types/gameSettings";
-import { GamePhase, PlayerHand } from "@/types/gameState";
 import BettingInterface from "@/components/BettingInterface";
 import InsuranceUI from "@/components/InsuranceUI";
 import PlayerActionsModal from "@/components/PlayerActionsModal";
@@ -9,93 +7,53 @@ import GameSettingsModal from "@/components/GameSettingsModal";
 import LeaderboardModal from "@/components/LeaderboardModal";
 import BasicStrategyCard from "@/components/BasicStrategyCard";
 import DebugLogModal from "@/components/DebugLogModal";
+import { useGameState } from "@/contexts/GameStateContext";
+import { useUIState } from "@/contexts/UIStateContext";
+import { useGameActions } from "@/contexts/GameActionsContext";
 
-interface GameModalsProps {
-  // Betting
-  phase: GamePhase;
-  initialized: boolean;
-  playerSeat: number | null;
-  playerChips: number;
-  currentBet: number;
-  minBet: number;
-  maxBet: number;
-  handleBetChange: (amount: number) => void;
-  handleConfirmBet: () => void;
-  handleClearBet: () => void;
+export default function GameModals() {
+  const {
+    phase,
+    playerSeat,
+    playerChips,
+    currentBet,
+    minBet,
+    maxBet,
+    insuranceOffered,
+    playerHand,
+    playerFinished,
+    gameSettings,
+    peakChips,
+    longestStreak,
+    currentScore,
+  } = useGameState();
 
-  // Insurance
-  insuranceOffered: boolean;
-  handleTakeInsurance: () => void;
-  handleDeclineInsurance: () => void;
+  const {
+    initialized,
+    showSettings,
+    setShowSettings,
+    showLeaderboard,
+    setShowLeaderboard,
+    showStrategyCard,
+    setShowStrategyCard,
+    debugLogs,
+    showDebugLog,
+    setShowDebugLog,
+    clearDebugLogs,
+  } = useUIState();
 
-  // Player actions
-  playerHand: PlayerHand;
-  playerFinished: boolean;
-  hit: () => void;
-  stand: () => void;
-  doubleDown: () => void;
-  split: () => void;
-
-  // Settings
-  showSettings: boolean;
-  setShowSettings: (show: boolean) => void;
-  gameSettings: GameSettings;
-  setGameSettings: (settings: GameSettings) => void;
-
-  // Leaderboard
-  showLeaderboard: boolean;
-  setShowLeaderboard: (show: boolean) => void;
-  peakChips: number;
-  longestStreak: number;
-  currentScore: number;
-
-  // Strategy Card
-  showStrategyCard: boolean;
-  setShowStrategyCard: (show: boolean) => void;
-
-  // Debug Log
-  debugLogs: string[];
-  showDebugLog: boolean;
-  setShowDebugLog: (show: boolean) => void;
-  clearDebugLogs: () => void;
-}
-
-export default function GameModals({
-  phase,
-  initialized,
-  playerSeat,
-  playerChips,
-  currentBet,
-  minBet,
-  maxBet,
-  handleBetChange,
-  handleConfirmBet,
-  handleClearBet,
-  insuranceOffered,
-  handleTakeInsurance,
-  handleDeclineInsurance,
-  playerHand,
-  playerFinished,
-  hit,
-  stand,
-  doubleDown,
-  split,
-  showSettings,
-  setShowSettings,
-  gameSettings,
-  setGameSettings,
-  showLeaderboard,
-  setShowLeaderboard,
-  peakChips,
-  longestStreak,
-  currentScore,
-  showStrategyCard,
-  setShowStrategyCard,
-  debugLogs,
-  showDebugLog,
-  setShowDebugLog,
-  clearDebugLogs,
-}: GameModalsProps) {
+  const {
+    handleBetChange,
+    handleConfirmBet,
+    handleClearBet,
+    handleTakeInsurance,
+    handleDeclineInsurance,
+    hit,
+    stand,
+    doubleDown,
+    split,
+    setGameSettings,
+  } = useGameActions();
   // Helper function to check if player is busted
   const isBusted = (cards: any[]) => {
     const value = cards.reduce((sum, card) => sum + card.value, 0);

@@ -1,35 +1,25 @@
 import React from "react";
 import { debugLog } from "@/utils/debug";
-import { AIPlayer, PlayerHand, GamePhase } from "@/types/gameState";
 import { TABLE_POSITIONS } from "@/constants/animations";
 import PlayingCard from "@/components/PlayingCard";
 import TurnIndicator from "@/components/TurnIndicator";
 import ActionBubble from "@/components/ActionBubble";
 import { getAIAvatarPath } from "@/data/aiCharacters";
+import { useGameState } from "@/contexts/GameStateContext";
+import { useGameActions } from "@/contexts/GameActionsContext";
 
 type PlayerAction = "HIT" | "STAND" | "DOUBLE" | "SPLIT" | "BUST" | "BLACKJACK";
 
-interface TableSeatsProps {
-  aiPlayers: AIPlayer[];
-  playerSeat: number | null;
-  playerHand: PlayerHand;
-  phase: GamePhase;
-  activePlayerIndex: number | null;
-  playerActions: Map<number, PlayerAction>;
-  onSeatClick: (seatIndex: number) => void;
-  registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout;
-}
-
-export default function TableSeats({
-  aiPlayers,
-  playerSeat,
-  playerHand,
-  phase,
-  activePlayerIndex,
-  playerActions,
-  onSeatClick,
-  registerTimeout,
-}: TableSeatsProps) {
+export default function TableSeats() {
+  const {
+    aiPlayers,
+    playerSeat,
+    playerHand,
+    phase,
+    activePlayerIndex,
+    playerActions,
+  } = useGameState();
+  const { setPlayerSeat, registerTimeout } = useGameActions();
   return (
     <div
       style={{
@@ -68,7 +58,7 @@ export default function TableSeats({
                       `=== PLAYER SITTING AT SEAT ${seatIndex} ===`,
                     );
                     debugLog("gamePhases", `Phase before sitting: ${phase}`);
-                    onSeatClick(seatIndex);
+                    setPlayerSeat(seatIndex);
                   } else {
                     debugLog(
                       "gamePhases",

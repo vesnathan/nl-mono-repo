@@ -129,82 +129,13 @@ export default function BlackjackGameUI() {
       )}
 
       {/* Full Viewport Game Table */}
-      <GameTable
-        gameSettings={gameSettings}
-        cardsDealt={cardsDealt}
-        currentDealer={currentDealer}
-        dealerCallout={dealerCallout}
-        phase={phase}
-        dealerHand={dealerHand}
-        dealerRevealed={dealerRevealed}
-        aiPlayers={aiPlayers}
-        playerSeat={playerSeat}
-        playerHand={playerHand}
-        currentBet={currentBet}
-        activePlayerIndex={activePlayerIndex}
-        playerActions={playerActions}
-        speechBubbles={speechBubbles}
-        winLossBubbles={winLossBubbles}
-        activeConversation={activeConversation}
-        flyingCards={flyingCards}
-        showDealerInfo={showDealerInfo}
-        setPlayerSeat={setPlayerSeat}
-        startNewRound={startNewRound}
-        hit={hit}
-        stand={stand}
-        handleConversationResponse={handleConversationResponse}
-        handleConversationIgnore={handleConversationIgnore}
-        setWinLossBubbles={setWinLossBubbles}
-        setShowDealerInfo={setShowDealerInfo}
-        registerTimeout={registerTimeout}
-      />
+      <GameTable />
 
       {/* All Game Modals */}
-      <GameModals
-        phase={phase}
-        initialized={initialized}
-        playerSeat={playerSeat}
-        playerChips={playerChips}
-        currentBet={currentBet}
-        minBet={minBet}
-        maxBet={maxBet}
-        handleBetChange={handleBetChange}
-        handleConfirmBet={handleConfirmBet}
-        handleClearBet={handleClearBet}
-        insuranceOffered={insuranceOffered}
-        handleTakeInsurance={handleTakeInsurance}
-        handleDeclineInsurance={handleDeclineInsurance}
-        playerHand={playerHand}
-        playerFinished={playerFinished}
-        hit={hit}
-        stand={stand}
-        doubleDown={doubleDown}
-        split={split}
-        showSettings={showSettings}
-        setShowSettings={setShowSettings}
-        gameSettings={gameSettings}
-        setGameSettings={setGameSettings}
-        showLeaderboard={showLeaderboard}
-        setShowLeaderboard={setShowLeaderboard}
-        peakChips={peakChips}
-        longestStreak={longestStreak}
-        currentScore={currentScore}
-        showStrategyCard={showStrategyCard}
-        setShowStrategyCard={setShowStrategyCard}
-        debugLogs={debugLogs}
-        showDebugLog={showDebugLog}
-        setShowDebugLog={setShowDebugLog}
-        clearDebugLogs={clearDebugLogs}
-      />
+      <GameModals />
 
       {/* Heat Map Modal */}
-      <HeatMapModal
-        isOpen={showHeatMap}
-        onClose={() => setShowHeatMap(false)}
-        heatMapBuckets={heatMapBuckets}
-        discretionScore={discretionScore}
-        dataPointCount={heatMapDataPointCount}
-      />
+      <HeatMapModal />
     </div>
   );
 }

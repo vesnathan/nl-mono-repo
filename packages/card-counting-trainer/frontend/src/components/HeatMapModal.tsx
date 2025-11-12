@@ -1,22 +1,19 @@
 "use client";
 
-import { HeatMapBucket } from "@/hooks/useHeatMap";
+import { useUIState } from "@/contexts/UIStateContext";
 
-interface HeatMapModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  heatMapBuckets: HeatMapBucket[];
-  discretionScore: number;
-  dataPointCount: number;
-}
+export default function HeatMapModal() {
+  const {
+    showHeatMap,
+    setShowHeatMap,
+    heatMapBuckets,
+    discretionScore,
+    heatMapDataPointCount,
+  } = useUIState();
 
-export default function HeatMapModal({
-  isOpen,
-  onClose,
-  heatMapBuckets,
-  discretionScore,
-  dataPointCount,
-}: HeatMapModalProps) {
+  const isOpen = showHeatMap;
+  const onClose = () => setShowHeatMap(false);
+  const dataPointCount = heatMapDataPointCount;
   if (!isOpen) return null;
 
   // Get score color and interpretation
