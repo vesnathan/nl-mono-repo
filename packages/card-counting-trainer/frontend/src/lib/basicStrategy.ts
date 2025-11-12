@@ -180,11 +180,11 @@ export function getBasicStrategyAction(
     if (action === "SP") {
       // If no double after split, be more conservative with 2-2, 3-3, 6-6
       if (!settings.doubleAfterSplit) {
-        if ((pairRank === "2" || pairRank === "3") && dealerIndex >= 5) {
-          // Don't split 2s/3s vs 7+ if no DAS
-          action = "H";
-        } else if (pairRank === "6" && dealerIndex >= 4) {
-          // Don't split 6s vs 6+ if no DAS
+        if (
+          ((pairRank === "2" || pairRank === "3") && dealerIndex >= 5) ||
+          (pairRank === "6" && dealerIndex >= 4)
+        ) {
+          // Don't split 2s/3s vs 7+ or 6s vs 6+ if no DAS
           action = "H";
         }
       }

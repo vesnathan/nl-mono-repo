@@ -192,9 +192,10 @@ export function dealInitialCards(
 
     // Update running count for visible cards
     // For dealer, only count the first (face-up) card
-    if (!updatedPlayers[playerIndex].isDealer) {
-      runningCount += card.count;
-    } else if (updatedPlayers[playerIndex].hands[0].cards.length === 1) {
+    if (
+      !updatedPlayers[playerIndex].isDealer ||
+      updatedPlayers[playerIndex].hands[0].cards.length === 1
+    ) {
       runningCount += card.count;
     }
   });
