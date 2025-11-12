@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { GameState, GamePhase, Player, PlayerAction } from "@/types/game";
+import {
+  GameState,
+  GamePhase,
+  Player,
+  PlayerAction,
+  Card,
+} from "@/types/game";
 import {
   createAndShuffleShoe,
   calculateCutCardPosition,
@@ -30,25 +36,25 @@ const DEFAULT_CONFIG: GameConfig = {
  * Deal a new hand to existing AI players (no simulation of previous hands)
  */
 export function dealNewHandToAIPlayers(
-  shoe: any[],
+  shoe: Card[],
   numDecks: number,
   currentCardsDealt: number,
   currentRunningCount: number,
   aiPlayerPositions: number[],
 ): {
-  updatedShoe: any[];
+  updatedShoe: Card[];
   newCardsDealt: number;
   runningCount: number;
   trueCount: number;
-  aiHands: { position: number; cards: any[] }[];
-  dealerCards: any[];
+  aiHands: { position: number; cards: Card[] }[];
+  dealerCards: Card[];
 } {
   let currentShoe = [...shoe];
   let cardsDealt = currentCardsDealt;
   let runningCount = currentRunningCount;
 
-  const aiHands: { position: number; cards: any[] }[] = [];
-  const dealerCards: any[] = [];
+  const aiHands: { position: number; cards: Card[] }[] = [];
+  const dealerCards: Card[] = [];
 
   // Deal 2 cards to dealer
   for (let i = 0; i < 2; i++) {
@@ -65,7 +71,7 @@ export function dealNewHandToAIPlayers(
 
   // Deal 2 cards to each AI player (right-to-left order)
   for (const position of aiPlayerPositions) {
-    const cards: any[] = [];
+    const cards: Card[] = [];
 
     // Deal initial 2 cards
     for (let i = 0; i < 2; i++) {
@@ -126,16 +132,16 @@ export function dealNewHandToAIPlayers(
  * AND deal current visible hands to AI players
  */
 export function simulateHandsInProgress(
-  shoe: any[],
+  shoe: Card[],
   numDecks: number,
   aiPlayerPositions: number[],
 ): {
-  updatedShoe: any[];
+  updatedShoe: Card[];
   cardsDealt: number;
   runningCount: number;
   trueCount: number;
-  aiHands: { position: number; cards: any[] }[];
-  dealerCards: any[];
+  aiHands: { position: number; cards: Card[] }[];
+  dealerCards: Card[];
 } {
   let currentShoe = [...shoe];
   let cardsDealt = 0;
@@ -160,8 +166,8 @@ export function simulateHandsInProgress(
   }
 
   // NOW deal a visible hand in progress to AI players
-  const aiHands: { position: number; cards: any[] }[] = [];
-  const dealerCards: any[] = [];
+  const aiHands: { position: number; cards: Card[] }[] = [];
+  const dealerCards: Card[] = [];
 
   // Deal 2 cards to dealer
   for (let i = 0; i < 2; i++) {
@@ -178,7 +184,7 @@ export function simulateHandsInProgress(
 
   // Deal 2 cards to each AI player, then let them make decisions
   for (const position of aiPlayerPositions) {
-    const cards: any[] = [];
+    const cards: Card[] = [];
 
     // Deal initial 2 cards
     for (let i = 0; i < 2; i++) {
@@ -290,7 +296,7 @@ export function useGameState(config: GameConfig = DEFAULT_CONFIG) {
   // Simulate game in progress on client-side only (after mount)
   const [isSimulated, setIsSimulated] = useState(false);
   const [aiHandsInProgress, setAIHandsInProgress] = useState<
-    { position: number; cards: any[] }[]
+    { position: number; cards: Card[] }[]
   >([]);
   const [dealerCardsInProgress, setDealerCardsInProgress] = useState<any[]>([]);
   // Store AI positions for entire shoe (persistent across hands)
