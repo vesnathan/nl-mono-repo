@@ -30,7 +30,7 @@ export function HeroSlider() {
           <div
             className="h-full w-full bg-gray-900 bg-cover bg-center bg-no-repeat relative"
             style={{
-              backgroundImage: "url(/images/hero-modern-office.jpg)",
+              backgroundImage: "url(/images/hero-team-collaboration.jpg)",
             }}
           >
             <div className="absolute inset-0 bg-black/40"></div>
@@ -62,7 +62,7 @@ export function HeroSlider() {
         <SwiperSlide>
           <div
             className="h-full w-full bg-gray-900 bg-cover bg-center bg-no-repeat relative"
-            style={{ backgroundImage: "url(/images/hero-developer-workspace.jpg)" }}
+            style={{ backgroundImage: "url(/images/hero-team-collaboration.jpg)" }}
           >
             <div className="absolute inset-0 bg-black/40"></div>
             <div className="relative z-10 h-full flex items-center justify-center">
@@ -95,7 +95,7 @@ export function HeroSlider() {
             className="h-full w-full bg-gray-900 bg-cover bg-center bg-no-repeat relative"
             style={{
               backgroundImage:
-                "url(/images/hero-social-media.jpg)",
+                "url(/images/hero-team-collaboration.jpg)",
             }}
           >
             <div className="absolute inset-0 bg-black/40"></div>

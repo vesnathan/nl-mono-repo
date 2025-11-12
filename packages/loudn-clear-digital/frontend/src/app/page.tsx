@@ -148,7 +148,7 @@ export default function HomePage() {
 
       {/* Why Choose Us Section with Parallax Background */}
       <ParallaxGap
-        image="/images/hero-analytics-dashboard.jpg"
+        image="/images/hero-team-collaboration.jpg"
         minHeight="auto"
         overlay="linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.7) 100%)"
       >

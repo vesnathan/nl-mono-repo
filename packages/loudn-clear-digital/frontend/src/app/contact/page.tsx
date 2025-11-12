@@ -98,7 +98,7 @@ function ContactForm() {
 
       {/* Contact Form in Parallax Gap */}
       <ParallaxGap
-        image="/images/hero-developer-workspace.jpg"
+        image="/images/hero-team-collaboration.jpg"
         minHeight="auto"
         overlay="linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.85) 100%)"
       >
