@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { GameState, GamePhase, Player, PlayerAction, Card } from "@/types/game";
+import { GameState, GamePhase, Player, Card } from "@/types/game";
 import {
   createAndShuffleShoe,
   calculateCutCardPosition,

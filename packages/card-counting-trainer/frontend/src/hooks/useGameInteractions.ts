@@ -6,16 +6,12 @@ import {
   PlayerHand,
 } from "@/types/gameState";
 import { BlackjackPayout } from "@/types/gameSettings";
-import {
-  createConversation,
-  createSpeechBubble,
-} from "@/utils/conversationHelpers";
+import { createSpeechBubble } from "@/utils/conversationHelpers";
 import {
   generateInitialReactions,
   generateEndOfHandReactions,
 } from "@/utils/reactions";
 import { AudioPriority } from "@/hooks/useAudioQueue";
-import { mapOutcomeToAudioType } from "@/utils/audioHelpers";
 import { debugLog } from "@/utils/debug";
 import { DealerCharacter } from "@/data/dealerCharacters";
 
@@ -40,10 +36,9 @@ export function useGameInteractions({
   aiPlayers,
   dealerHand,
   blackjackPayout,
-  currentDealer,
 }: UseGameInteractionsParams) {
   const triggerConversation = useCallback(
-    (speakerId: string, speakerName: string, position: number) => {
+    () => {
       // DISABLED FOR TESTING: All player conversations disabled
       // Don't trigger if there's already an active conversation
       // if (activeConversation) return;
@@ -75,7 +70,7 @@ export function useGameInteractions({
         | "dealer_has_19"
         | "dealer_has_20"
         | "dealer_has_21",
-      priority: AudioPriority = AudioPriority.NORMAL,
+      _priority: AudioPriority = AudioPriority.NORMAL,
       // eslint-disable-next-line sonarjs/cognitive-complexity
     ) => {
       // Unified speech bubble implementation for all players (dealer and AI)
