@@ -1,4 +1,4 @@
-import { Card, GameState, Hand, Player } from "@/types/game";
+import { Card, GameState, Hand } from "@/types/game";
 import { createAndShuffleShoe } from "@/lib/deck";
 import { CountingSystem } from "@/types/gameSettings";
 

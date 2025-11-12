@@ -35,16 +35,17 @@ export function getPlayerAudioPath(
   }
 
   // For multi-variant reactions (win, loss, dealer_blackjack, distraction)
-  if (!variant) {
+  let selectedVariant = variant;
+  if (!selectedVariant) {
     // Random variant
     let maxVariant = 5; // Default for win/loss/dealer_blackjack
     if (reactionType === "distraction") {
       maxVariant = 7;
     }
-    variant = Math.floor(Math.random() * maxVariant) + 1;
+    selectedVariant = Math.floor(Math.random() * maxVariant) + 1;
   }
 
-  const paddedVariant = variant.toString().padStart(2, "0");
+  const paddedVariant = selectedVariant.toString().padStart(2, "0");
   return `/audio/generated/${characterId}_${reactionType}_${paddedVariant}.mp3`;
 }
 

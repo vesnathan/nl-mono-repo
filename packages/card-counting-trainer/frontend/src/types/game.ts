@@ -22,14 +22,15 @@ export interface Card {
   count: number; // Hi-Lo count value (-1, 0, +1)
 }
 
+// Hand result types
+export type HandResult = "WIN" | "LOSE" | "PUSH" | "BLACKJACK" | "BUST";
+
 // Hand types
 export interface Hand {
   cards: Card[];
   bet: number;
   result?: HandResult;
 }
-
-export type HandResult = "WIN" | "LOSE" | "PUSH" | "BLACKJACK" | "BUST";
 
 // Player types
 export interface Player {

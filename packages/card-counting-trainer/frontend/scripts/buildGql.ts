@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { execCommandAsPromise } from "shared/scripts/execCommandAsPromise";
-import { mergeGraphqlFiles } from "shared/scripts/mergeGraphqlFiles";
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 const buildGql = async () => {
   // Merge package-local schema files into the combined schema used for codegen
   // Use custom merge script that consolidates 'extend type' declarations for AppSync compatibility

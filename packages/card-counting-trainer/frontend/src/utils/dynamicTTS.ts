@@ -17,11 +17,6 @@
 
 import { debugLog } from "@/utils/debug";
 
-interface TTSResponse {
-  audioUrl: string;
-  cached: boolean;
-}
-
 // Voice ID mapping - same as server-side
 const VOICE_IDS: Record<string, string> = {
   "chatty-carlos": "nPczCjzI2devNBz1zQrb",
@@ -84,7 +79,7 @@ async function tryLoadPreGeneratedAudio(
       );
       return audioUrl;
     }
-  } catch (error) {
+  } catch {
     // File doesn't exist, will fall back to generation
   }
 
@@ -122,7 +117,7 @@ async function generateAudioInBrowser(
       "audioQueue",
       `[Dynamic TTS] Waiting for in-flight generation: "${text.substring(0, 50)}..."`,
     );
-    return await inFlightGenerations.get(cacheKey)!;
+    return inFlightGenerations.get(cacheKey)!;
   }
 
   debugLog(
@@ -185,7 +180,7 @@ async function generateAudioInBrowser(
   // Track this generation
   inFlightGenerations.set(cacheKey, generationPromise);
 
-  return await generationPromise;
+  return generationPromise;
 }
 
 /**
@@ -211,7 +206,7 @@ export async function getOrGenerateAudio(
   // Use AudioDownloadButton to download generated audio files
   if (USE_BROWSER_GENERATION) {
     try {
-      return await generateAudioInBrowser(text, voiceId);
+      return generateAudioInBrowser(text, voiceId);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("[Dynamic TTS] Browser generation failed:", error);
