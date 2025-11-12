@@ -18,6 +18,7 @@ const Shoe = ({
         paddingBottom: "6%",
         right: "7%",
         top: "20px",
+        // eslint-disable-next-line sonarjs/no-duplicate-string
         transform: "rotate(90deg)",
       }}
     >

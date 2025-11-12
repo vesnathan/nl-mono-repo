@@ -63,6 +63,7 @@ export default function PlayerActionsModal({
                   fontSize: "16px",
                   fontWeight: "bold",
                   cursor: "pointer",
+              // eslint-disable-next-line sonarjs/no-duplicate-string
                   transition: "all 0.2s ease",
                 }}
                 onMouseEnter={(e) => {

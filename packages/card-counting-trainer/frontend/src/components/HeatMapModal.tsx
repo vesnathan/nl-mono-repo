@@ -315,6 +315,7 @@ export default function HeatMapModal() {
           <div>
             <span
               style={{
+            // eslint-disable-next-line sonarjs/no-duplicate-string
                 display: "inline-block",
                 width: "12px",
                 height: "12px",

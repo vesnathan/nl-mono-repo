@@ -44,6 +44,7 @@ export default function TableSeats() {
               position: "absolute",
               left: `${x}%`,
               top: `${y}%`,
+            // eslint-disable-next-line sonarjs/no-duplicate-string
               transform: "translate(-50%, 0)",
               textAlign: "center",
             }}

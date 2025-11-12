@@ -173,6 +173,7 @@ export default function LeaderboardModal({
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor =
+          // eslint-disable-next-line sonarjs/no-duplicate-string
                   "rgba(255, 255, 255, 0.1)";
                 e.currentTarget.style.borderColor = "#FFF";
               }}

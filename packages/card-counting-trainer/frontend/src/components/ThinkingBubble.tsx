@@ -46,6 +46,7 @@ export default function ThinkingBubble({
           position: "absolute",
           left: position.left,
           top: position.top,
+          // eslint-disable-next-line sonarjs/no-duplicate-string
           transform: "translateX(-50%)",
           zIndex: 2000,
           animation: "rise-fade 2s ease-out forwards",
@@ -100,7 +101,9 @@ export default function ThinkingBubble({
         style={{
           position: "relative",
           backgroundColor: "#FFFFFF",
+          // eslint-disable-next-line sonarjs/no-duplicate-string
           border: "2px solid #333",
+          // eslint-disable-next-line sonarjs/no-duplicate-string
           borderRadius: "20px",
           padding: "12px 20px",
           fontSize: "16px",

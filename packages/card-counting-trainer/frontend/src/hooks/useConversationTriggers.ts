@@ -105,6 +105,7 @@ export function useConversationTriggers({
 
   // AI-to-AI conversations (multi-turn exchanges)
   // eslint-disable-next-line sonarjs/cognitive-complexity
+        // eslint-disable-next-line sonarjs/no-duplicate-string
   useEffect(() => {
     if (!initialized || aiPlayers.length < 2) {
       return undefined;

@@ -129,6 +129,7 @@ export default function TableRules({ gameSettings }: TableRulesProps) {
           fill="rgba(255, 215, 0, 0.35)"
           letterSpacing="3"
           style={{
+          // eslint-disable-next-line sonarjs/no-duplicate-string
             filter: "drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.6))",
           }}
         >

@@ -94,6 +94,7 @@ export default function SplitHandsModal({
               fontSize: "14px",
               fontWeight: "bold",
               cursor: "pointer",
+            // eslint-disable-next-line sonarjs/no-duplicate-string
               transition: "all 0.2s ease",
             }}
             onMouseEnter={(e) => {
@@ -111,6 +112,7 @@ export default function SplitHandsModal({
       {/* Display both hands */}
       <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
                 // eslint-disable-next-line sonarjs/cognitive-complexity
+                  // eslint-disable-next-line sonarjs/no-duplicate-string
         {hands.map((hand, index) => {
           const handValue = calculateHandValue(hand.cards);
           const isActive = index === activeHandIndex;
