@@ -114,8 +114,12 @@ export default function DealerInfo({
             padding: "4px 8px",
             lineHeight: 1,
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#FFF")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#999")}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "#FFF";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "#999";
+          }}
         >
           ×
         </button>
