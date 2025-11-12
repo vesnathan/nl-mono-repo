@@ -369,7 +369,7 @@ export default function BasicStrategyCard({
                 </thead>
                 <tbody>
                   {hardTotals.map((row) => (
-                    <tr key={row[0]}>
+                    <tr key={row.player}>
                       <td
                         style={{
                           padding: "6px",
@@ -455,7 +455,7 @@ export default function BasicStrategyCard({
                 </thead>
                 <tbody>
                   {softTotals.map((row) => (
-                    <tr key={row[0]}>
+                    <tr key={row.player}>
                       <td
                         style={{
                           padding: "6px",
@@ -542,7 +542,7 @@ export default function BasicStrategyCard({
               </thead>
               <tbody>
                 {pairSplits.map((row) => (
-                  <tr key={row[0]}>
+                  <tr key={row.player}>
                     <td
                       style={{
                         padding: "6px",

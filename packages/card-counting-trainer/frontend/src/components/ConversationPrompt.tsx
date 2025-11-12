@@ -22,7 +22,6 @@ interface ConversationPromptProps {
 
 export default function ConversationPrompt({
   speakerName,
-  speakerName,
   question,
   choices,
   position,
@@ -116,7 +115,7 @@ export default function ConversationPrompt({
           {choices.map((choice, index) => (
             <button
               type="button"
-              key={choice}
+              key={choice.text}
               onClick={() => handleChoice(index)}
               disabled={selectedIndex !== null}
               style={{

@@ -99,7 +99,6 @@ export default function GameOverlays() {
       {/* Active Conversation Prompt */}
       {activeConversation && (
         <ConversationPrompt
-          speakerId={activeConversation.speakerId}
           speakerName={activeConversation.speakerName}
           question={activeConversation.question}
           choices={activeConversation.choices}
@@ -114,8 +113,6 @@ export default function GameOverlays() {
       {flyingCards.map((flyingCard) => (
         <FlyingCard
           key={flyingCard.id}
-          rank={flyingCard.card.rank}
-          suit={flyingCard.card.suit}
           fromPosition={flyingCard.fromPosition}
           toPosition={flyingCard.toPosition}
           onAnimationComplete={() => {

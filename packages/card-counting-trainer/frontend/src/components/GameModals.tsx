@@ -182,13 +182,7 @@ export default function GameModals() {
       />
 
       {/* Debug Log Modal and Button */}
-      <DebugLogModal
-        debugLogs={debugLogs}
-        phase={phase}
-        showDebugLog={showDebugLog}
-        onShowDebugLog={setShowDebugLog}
-        onClearDebugLogs={clearDebugLogs}
-      />
+      <DebugLogModal debugLogs={debugLogs} phase={phase} />
     </>
   );
 }

@@ -140,8 +140,6 @@ export function useGameInteractions({
             reaction.playerId,
             reaction.message,
             aiPlayer.position,
-            reaction.audioType, // Pass audio type
-            reaction.audioPriority, // Pass priority
           );
         }
       }, idx * 600);
@@ -161,8 +159,6 @@ export function useGameInteractions({
           reaction.playerId, // Use playerId directly
           reaction.message,
           reaction.position,
-          reaction.audioType, // Pass audio type from reaction
-          reaction.audioPriority, // Pass priority from reaction
         );
       }, idx * 1000); // Stagger by 1 second to avoid overlap
     });

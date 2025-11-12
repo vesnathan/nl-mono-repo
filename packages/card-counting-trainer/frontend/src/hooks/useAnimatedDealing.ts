@@ -4,12 +4,7 @@ import { useState, useCallback } from "react";
 import { dealCard } from "@/lib/gameActions";
 import { calculateDecksRemaining, calculateTrueCount } from "@/lib/deck";
 import { debugLog } from "@/utils/debug";
-
-interface Card {
-  rank: string;
-  suit: string;
-  count: number;
-}
+import { Card } from "@/types/game";
 
 interface DealingState {
   dealerCards: Card[];
