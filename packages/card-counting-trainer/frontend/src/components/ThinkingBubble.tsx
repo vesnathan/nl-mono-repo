@@ -68,6 +68,7 @@ export default function ThinkingBubble({
         >
           {message}
         </div>
+        {/* eslint-disable-next-line react/no-unknown-property */}
         <style jsx>{`
           @keyframes rise-fade {
             0% {
@@ -171,6 +172,7 @@ export default function ThinkingBubble({
           borderRadius: "50%",
         }}
       />
+      {/* eslint-disable-next-line react/no-unknown-property */}
 
       <style jsx>{`
         @keyframes bounce {

@@ -88,6 +88,7 @@ export default function SpeechBubble({
         />
       </div>
 
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         @keyframes speechFadeInAbove {
           from {

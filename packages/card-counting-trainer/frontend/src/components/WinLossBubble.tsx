@@ -92,6 +92,7 @@ export default function WinLossBubble({
       >
         {getMessage()}
       </div>
+      {/* eslint-disable-next-line react/no-unknown-property */}
       <style jsx>{`
         @keyframes rise-fade {
           0% {

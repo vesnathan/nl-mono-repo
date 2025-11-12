@@ -1,7 +1,5 @@
 "use client";
 
-
-
 export interface LeaderboardEntry {
   rank: number;
   username: string;

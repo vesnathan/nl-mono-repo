@@ -6,12 +6,8 @@ import { useGameState } from "@/contexts/GameStateContext";
 import { useUIState } from "@/contexts/UIStateContext";
 
 export default function StatsBar() {
-  const {
-    runningCount,
-    currentStreak,
-    playerChips,
-    currentScore,
-  } = useGameState();
+  const { runningCount, currentStreak, playerChips, currentScore } =
+    useGameState();
   const {
     setShowSettings,
     setShowAdminSettings,
