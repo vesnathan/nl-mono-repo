@@ -92,6 +92,15 @@ Resources:
           - Content-Type
         MaxAge: 300
 
+  # Permission to allow public invocation via Function URL
+  SendContactEmailFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SendContactEmailFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
 Outputs:
   SendContactEmailFunctionUrl:
     Value: !GetAtt SendContactEmailFunctionUrl.FunctionUrl
