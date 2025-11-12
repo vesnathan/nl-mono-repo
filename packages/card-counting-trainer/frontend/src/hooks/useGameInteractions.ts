@@ -49,23 +49,6 @@ export function useGameInteractions({
       playerId: string,
       message: string,
       position: number,
-      reactionType?:
-        | "bust"
-        | "hit21"
-        | "goodHit"
-        | "badStart"
-        | "win"
-        | "loss"
-        | "dealer_blackjack"
-        | "distraction",
-      dealerVoiceLine?:
-        | "place_bets"
-        | "dealer_busts"
-        | "dealer_has_17"
-        | "dealer_has_18"
-        | "dealer_has_19"
-        | "dealer_has_20"
-        | "dealer_has_21",
       // eslint-disable-next-line sonarjs/cognitive-complexity
     ) => {
       // Unified speech bubble implementation for all players (dealer and AI)
