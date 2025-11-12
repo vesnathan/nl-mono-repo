@@ -40,6 +40,7 @@ export enum StackType {
   CWL = "CWL",
   AwsExample = "AwsExample",
   TheStoryHub = "TheStoryHub",
+  LawnOrder = "LawnOrder",
 }
 
 export const STACK_ORDER: StackType[] = [
@@ -48,6 +49,7 @@ export const STACK_ORDER: StackType[] = [
   StackType.CWL,
   StackType.AwsExample,
   StackType.TheStoryHub,
+  StackType.LawnOrder,
 ];
 
 export const TEMPLATE_PATHS: Record<StackType, string> = {
@@ -62,6 +64,10 @@ export const TEMPLATE_PATHS: Record<StackType, string> = {
     __dirname,
     "templates/the-story-hub/cfn-template.yaml",
   ),
+  [StackType.LawnOrder]: join(
+    __dirname,
+    "templates/lawn-order/cfn-template.yaml",
+  ),
 };
 
 export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
@@ -70,6 +76,7 @@ export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
   [StackType.CWL]: join(__dirname, "templates/cwl/"),
   [StackType.AwsExample]: join(__dirname, "templates/aws-example/"),
   [StackType.TheStoryHub]: join(__dirname, "templates/the-story-hub/"),
+  [StackType.LawnOrder]: join(__dirname, "templates/lawn-order/"),
 };
 
 export const getStackName = (stackType: StackType, stage: string) =>

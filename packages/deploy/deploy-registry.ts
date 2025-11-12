@@ -18,6 +18,7 @@ import { deployShared } from "./packages/shared/shared";
 import { deployCwl } from "./packages/cwl/deploy";
 import { deployAwsExample } from "./packages/aws-example/deploy";
 import { deployTheStoryHub } from "./packages/the-story-hub/deploy";
+import { deployLawnOrder } from "./packages/lawn-order/deploy";
 /**
  * Type for deploy handler functions
  */
@@ -34,6 +35,7 @@ const DEPLOY_HANDLERS: Record<StackType, DeployHandler> = {
   [StackType.CWL]: deployCwl,
   [StackType.AwsExample]: deployAwsExample,
   [StackType.TheStoryHub]: deployTheStoryHub,
+  [StackType.LawnOrder]: deployLawnOrder,
 };
 
 /**

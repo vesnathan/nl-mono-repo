@@ -141,6 +141,26 @@ export const PROJECT_CONFIGS: Record<StackType, ProjectConfig> = {
     hasLambdas: true,
     hasResolvers: true,
   },
+
+  [StackType.LawnOrder]: {
+    stackType: StackType.LawnOrder,
+    displayName: "Lawn Order",
+    templateDir: "lawn-order",
+    packageDir: "lawn-order",
+    dependsOn: [], // No dependencies - standalone project
+    buckets: {
+      templates: "nlmonorepo-lawnorder-templates-{stage}",
+      frontend: "nlmonorepo-lawnorder-frontend-{stage}",
+      additional: [
+        "nlmonorepo-{stage}-cfn-templates-{region}",
+        "nlmonorepo-lawnorder-uploads-{stage}",
+      ],
+    },
+    hasFrontend: true,
+    hasLambdas: true,
+    hasResolvers: true,
+    requiresAdminUser: true,
+  },
 };
 
 /**

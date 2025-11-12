@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Lawn Order S3 Static Website"
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  AppName:
+    Type: String
+    Description: Application short name used in resource naming
+
+Resources:
+  # S3 Bucket for static website hosting
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "nlmonorepo-${AppName}-website-${Stage}"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      Tags:
+        - Key: "Project"
+          Value: !Ref AppName
+        - Key: "Environment"
+          Value: !Ref Stage
+        - Key: "ManagedBy"
+          Value: "CloudFormation"
+        - Key: "Purpose"
+          Value: "Static Website Hosting"
+
+  # Bucket policy to allow public read access
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "${FrontendBucket.Arn}/*"
+
+Outputs:
+  FrontendBucketName:
+    Description: Name of the frontend bucket
+    Value: !Ref FrontendBucket
+
+  FrontendBucketArn:
+    Description: ARN of the frontend S3 bucket
+    Value: !GetAtt FrontendBucket.Arn
+
+  WebsiteURL:
+    Description: S3 static website URL
+    Value: !GetAtt FrontendBucket.WebsiteURL
