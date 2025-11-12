@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { AIPlayer, GamePhase } from "@/types/gameState";
+import { AIPlayer, GamePhase, PlayerHand, SpeechBubble } from "@/types/gameState";
 import { debugLog } from "@/utils/debug";
 
 interface UseAutoStartHandParams {
@@ -11,10 +11,10 @@ interface UseAutoStartHandParams {
   currentBet: number;
   setPhase: (phase: GamePhase) => void;
   setDealerRevealed: (revealed: boolean) => void;
-  setPlayerHand: (hand: any) => void;
-  setDealerHand: (hand: any) => void;
+  setPlayerHand: (hand: PlayerHand) => void;
+  setDealerHand: (hand: PlayerHand) => void;
   setPlayerChips: (chips: number | ((prev: number) => number)) => void;
-  setSpeechBubbles: (bubbles: any[]) => void;
+  setSpeechBubbles: (bubbles: SpeechBubble[]) => void;
   setAIPlayers: (players: AIPlayer[]) => void;
   aiPlayers: AIPlayer[];
   dealInitialCards: (playerBetAmount?: number) => void;

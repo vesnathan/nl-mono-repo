@@ -38,18 +38,18 @@ interface DealingState {
 }
 
 export function useAnimatedDealing(
-  shoe: any[],
+  shoe: Card[],
   numDecks: number,
   cardsDealt: number,
   runningCount: number,
   aiPlayerPositions: number[],
   onDealingComplete: (result: {
-    updatedShoe: any[];
+    updatedShoe: Card[];
     newCardsDealt: number;
     runningCount: number;
     trueCount: number;
-    aiHands: { position: number; cards: any[] }[];
-    dealerCards: any[];
+    aiHands: { position: number; cards: Card[] }[];
+    dealerCards: Card[];
   }) => void,
   registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout,
   dealSpeed: number = 1.0, // Multiplier for dealer speed (0.8 = slow, 1.5 = fast)
@@ -473,12 +473,7 @@ export function useAnimatedDealing(
 
         if (handValue > 21) {
           results.push({ position: hand.position, result: "lose" });
-        } else if (dealerValue > 21) {
-          results.push({
-            position: hand.position,
-            result: isBlackjack ? "blackjack" : "win",
-          });
-        } else if (handValue > dealerValue) {
+        } else if (dealerValue > 21 || handValue > dealerValue) {
           results.push({
             position: hand.position,
             result: isBlackjack ? "blackjack" : "win",

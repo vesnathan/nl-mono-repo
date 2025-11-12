@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { debugLog } from "@/utils/debug";
-import { AIPlayer, GamePhase } from "@/types/gameState";
+import { AIPlayer, GamePhase, PlayerHand, SpeechBubble } from "@/types/gameState";
 import { DealerCharacter } from "@/data/dealerCharacters";
 import { AudioQueueHook, AudioPriority } from "@/hooks/useAudioQueue";
 import { getDealerAudioPath } from "@/utils/audioHelpers";
@@ -17,10 +17,10 @@ interface UseBettingActionsParams {
   aiPlayers: AIPlayer[];
   setPhase: (phase: GamePhase) => void;
   setDealerRevealed: (revealed: boolean) => void;
-  setPlayerHand: (hand: any) => void;
-  setDealerHand: (hand: any) => void;
+  setPlayerHand: (hand: PlayerHand) => void;
+  setDealerHand: (hand: PlayerHand) => void;
   setPreviousBet: (bet: number) => void;
-  setSpeechBubbles: (bubbles: any[]) => void;
+  setSpeechBubbles: (bubbles: SpeechBubble[]) => void;
   setAIPlayers: (players: AIPlayer[]) => void;
   dealInitialCards: (playerBetAmount?: number) => void;
   registerTimeout: (callback: () => void, delay: number) => void;
