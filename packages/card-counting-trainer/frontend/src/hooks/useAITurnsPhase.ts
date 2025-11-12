@@ -22,7 +22,7 @@ import {
 } from "@/data/dialogue";
 import { getBasicStrategyAction } from "@/lib/basicStrategy";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
-import { DEFAULT_GAME_SETTINGS, GameSettings } from "@/types/gameSettings";
+import { GameSettings } from "@/types/gameSettings";
 import { generateBustReaction } from "@/utils/reactions";
 import { debugLog } from "@/utils/debug";
 
@@ -228,13 +228,12 @@ export function useAITurnsPhase({
                   `  ${ai.character.name} (idx:${idx}) - SELECTED (more split hands to play)`,
                 );
                 return true;
-              } else {
-                debugLog(
-                  "aiTurns",
-                  `  ${ai.character.name} (idx:${idx}) - SKIPPED (all split hands finished)`,
-                );
-                return false;
               }
+              debugLog(
+                "aiTurns",
+                `  ${ai.character.name} (idx:${idx}) - SKIPPED (all split hands finished)`,
+              );
+              return false;
             }
 
             // Current hand can still play
@@ -566,7 +565,10 @@ export function useAITurnsPhase({
                     },
                   };
 
-                  debugLog("aiTurns", "AI split complete - will play both hands");
+                  debugLog(
+                    "aiTurns",
+                    "AI split complete - will play both hands",
+                  );
                 }
                 return updated;
               });
@@ -730,7 +732,10 @@ export function useAITurnsPhase({
               prev.filter((fc) => fc.id !== flyingCard.id),
             );
 
-            const newHandValue = calculateHandValue([...currentHand.cards, card]);
+            const newHandValue = calculateHandValue([
+              ...currentHand.cards,
+              card,
+            ]);
             const busted = isBusted([...currentHand.cards, card]);
 
             debugLog(
@@ -861,7 +866,10 @@ export function useAITurnsPhase({
                   });
                 } else {
                   // All hands finished
-                  debugLog("aiTurns", `Marking AI Player ${idx} as FINISHED (21)`);
+                  debugLog(
+                    "aiTurns",
+                    `Marking AI Player ${idx} as FINISHED (21)`,
+                  );
                   setPlayersFinished((prev) => new Set(prev).add(idx));
                 }
 
@@ -1001,7 +1009,10 @@ export function useAITurnsPhase({
               });
             } else {
               // All hands finished
-              debugLog("aiTurns", `Marking AI Player ${idx} as FINISHED (stand)`);
+              debugLog(
+                "aiTurns",
+                `Marking AI Player ${idx} as FINISHED (stand)`,
+              );
               setPlayersFinished((prev) => new Set(prev).add(idx));
             }
 

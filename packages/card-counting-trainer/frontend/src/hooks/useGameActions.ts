@@ -1034,7 +1034,10 @@ export function useGameActions({
             activeSplitHandIndex: 0,
           });
 
-          debugLog("playerActions", "Split complete - starting with first hand");
+          debugLog(
+            "playerActions",
+            "Split complete - starting with first hand",
+          );
         }
 
         // Check if first hand is 21 (automatically stand)
