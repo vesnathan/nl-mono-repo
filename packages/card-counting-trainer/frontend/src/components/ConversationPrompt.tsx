@@ -8,7 +8,7 @@ export interface ConversationChoice {
 }
 
 interface ConversationPromptProps {
-// Who's asking (AI character id or "dealer")
+  // Who's asking (AI character id or "dealer")
   speakerName: string;
   question: string;
   choices: ConversationChoice[];
@@ -21,7 +21,7 @@ interface ConversationPromptProps {
 }
 
 export default function ConversationPrompt({
-  ...props
+  speakerName,
   speakerName,
   question,
   choices,
