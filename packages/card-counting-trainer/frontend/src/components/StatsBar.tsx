@@ -7,12 +7,10 @@ import { useUIState } from "@/contexts/UIStateContext";
 
 export default function StatsBar() {
   const {
-    gameSettings,
     runningCount,
     currentStreak,
     playerChips,
     currentScore,
-    scoreMultiplier,
   } = useGameState();
   const {
     setShowSettings,
@@ -22,7 +20,7 @@ export default function StatsBar() {
     setShowHeatMap,
   } = useUIState();
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { isAuthenticated, isLoading, user, isAdmin, refresh } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin, refresh } = useAuth();
 
   const handleLogout = async () => {
     await signOut();

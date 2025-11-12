@@ -12,8 +12,8 @@ interface FlyingCardProps {
 }
 
 export default function FlyingCard({
-  rank,
-  suit,
+  _rank,
+  _suit,
   fromPosition,
   toPosition,
   onAnimationComplete,

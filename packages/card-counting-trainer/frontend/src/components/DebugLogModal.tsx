@@ -12,9 +12,9 @@ interface DebugLogModalProps {
 export default function DebugLogModal({
   debugLogs,
   phase,
-  showDebugLog,
-  onShowDebugLog,
-  onClearDebugLogs,
+  showDebugLog: _showDebugLog,
+  onShowDebugLog: _onShowDebugLog,
+  onClearDebugLogs: _onClearDebugLogs,
 }: DebugLogModalProps) {
   return (
     <>

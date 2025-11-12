@@ -70,7 +70,6 @@ export default function GameModals() {
     playerHand.cards.length === 2 && playerChips >= playerHand.bet;
 
   // State for split hands modal
-  const [showSplitModal, setShowSplitModal] = useState(false);
 
   // Show split modal when player has split hands
   const hasSplitHands =
@@ -132,7 +131,7 @@ export default function GameModals() {
           activeHandIndex={playerHand.activeSplitHandIndex ?? 0}
           onHit={hit}
           onStand={stand}
-          onClose={() => setShowSplitModal(false)}
+          onClose={() => {}}
           canMinimize={canMinimizeSplit}
         />
       )}

@@ -12,7 +12,6 @@ export default function DeckPenetrationIndicator({
   showShuffle = false,
 }: DeckPenetrationIndicatorProps) {
   const cardsRemaining = totalCards - cardsDealt;
-  const percentRemaining = ((cardsRemaining / totalCards) * 100).toFixed(1);
 
   // Color coding based on how deep into the shoe we are
   const getColor = () => {
@@ -21,11 +20,6 @@ export default function DeckPenetrationIndicator({
     return "#FF5722"; // Red - deep penetration
   };
 
-  const getBackgroundColor = () => {
-    if (penetrationPercent < 50) return "rgba(76, 175, 80, 0.1)";
-    if (penetrationPercent < 75) return "rgba(255, 193, 7, 0.1)";
-    return "rgba(255, 87, 34, 0.1)";
-  };
 
   return (
     <div
