@@ -46,6 +46,9 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import AdminSettingsModal from "@/components/AdminSettingsModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { debugLog } from "@/utils/debug";
+import { GameStateProvider } from "@/contexts/GameStateContext";
+import { UIStateProvider } from "@/contexts/UIStateContext";
+import { GameActionsProvider } from "@/contexts/GameActionsContext";
 
 export default function GamePage() {
   // Auth state
@@ -629,74 +632,88 @@ export default function GamePage() {
         isOpen={showAdminSettings}
         onClose={() => setShowAdminSettings(false)}
       />
-      <BlackjackGameUI
-        suspicionLevel={suspicionLevel}
-        dealerSuspicion={dealerSuspicion}
-        pitBossDistance={pitBossDistance}
-        gameSettings={gameSettings}
-        runningCount={runningCount}
-        currentStreak={currentStreak}
-        playerChips={playerChips}
-        currentScore={currentScore}
-        scoreMultiplier={scoreMultiplier}
-        cardsDealt={cardsDealt}
-        currentDealer={currentDealer}
-        dealerCallout={dealerCallout}
-        phase={phase}
-        dealerHand={dealerHand}
-        dealerRevealed={dealerRevealed}
-        aiPlayers={aiPlayers}
-        playerSeat={playerSeat}
-        playerHand={playerHand}
-        playerFinished={playerFinished}
-        currentBet={currentBet}
-        activePlayerIndex={activePlayerIndex}
-        playerActions={playerActions}
-        speechBubbles={speechBubbles}
-        winLossBubbles={winLossBubbles}
-        activeConversation={activeConversation}
-        flyingCards={flyingCards}
-        showDealerInfo={showDealerInfo}
-        initialized={initialized}
-        minBet={minBet}
-        maxBet={maxBet}
-        showSettings={showSettings}
-        showLeaderboard={showLeaderboard}
-        peakChips={peakChips}
-        longestStreak={longestStreak}
-        showStrategyCard={showStrategyCard}
-        showHeatMap={showHeatMap}
-        heatMapBuckets={getHeatMapBuckets()}
-        discretionScore={getDiscretionScore()}
-        heatMapDataPointCount={dataPointCount}
-        debugLogs={debugLogs}
-        showDebugLog={showDebugLog}
-        insuranceOffered={insuranceOffered}
-        handleTakeInsurance={handleTakeInsurance}
-        handleDeclineInsurance={handleDeclineInsurance}
-        setShowSettings={setShowSettings}
-        setShowAdminSettings={setShowAdminSettings}
-        setShowLeaderboard={setShowLeaderboard}
-        setShowStrategyCard={setShowStrategyCard}
-        setShowHeatMap={setShowHeatMap}
-        setPlayerSeat={handleSeatClick}
-        startNewRound={startNewRound}
-        hit={hit}
-        stand={stand}
-        doubleDown={doubleDown}
-        split={split}
-        handleConversationResponse={handleConversationResponse}
-        handleConversationIgnore={handleConversationIgnore}
-        setWinLossBubbles={setWinLossBubbles}
-        setShowDealerInfo={setShowDealerInfo}
-        handleBetChange={handleBetChange}
-        handleConfirmBet={handleConfirmBet}
-        handleClearBet={handleClearBet}
-        registerTimeout={registerTimeout}
-        setGameSettings={setGameSettings}
-        setShowDebugLog={setShowDebugLog}
-        clearDebugLogs={clearDebugLogs}
-      />
+      <GameStateProvider
+        value={{
+          suspicionLevel,
+          dealerSuspicion,
+          pitBossDistance,
+          gameSettings,
+          runningCount,
+          currentStreak,
+          playerChips,
+          currentScore,
+          scoreMultiplier,
+          cardsDealt,
+          currentDealer,
+          dealerCallout,
+          phase,
+          dealerHand,
+          dealerRevealed,
+          aiPlayers,
+          playerSeat,
+          playerHand,
+          playerFinished,
+          currentBet,
+          activePlayerIndex,
+          playerActions,
+          speechBubbles,
+          winLossBubbles,
+          activeConversation,
+          flyingCards,
+          showDealerInfo,
+          insuranceOffered,
+          minBet,
+          maxBet,
+          peakChips,
+          longestStreak,
+        }}
+      >
+        <UIStateProvider
+          value={{
+            initialized,
+            showSettings,
+            showLeaderboard,
+            showStrategyCard,
+            showHeatMap,
+            debugLogs,
+            showDebugLog,
+            heatMapBuckets: getHeatMapBuckets(),
+            discretionScore: getDiscretionScore(),
+            heatMapDataPointCount: dataPointCount,
+            setShowSettings,
+            setShowAdminSettings,
+            setShowLeaderboard,
+            setShowStrategyCard,
+            setShowHeatMap,
+            setShowDealerInfo,
+            setShowDebugLog,
+            clearDebugLogs,
+          }}
+        >
+          <GameActionsProvider
+            value={{
+              setPlayerSeat: handleSeatClick,
+              startNewRound,
+              hit,
+              stand,
+              doubleDown,
+              split,
+              handleBetChange,
+              handleConfirmBet,
+              handleClearBet,
+              handleTakeInsurance,
+              handleDeclineInsurance,
+              handleConversationResponse,
+              handleConversationIgnore,
+              setGameSettings,
+              setWinLossBubbles,
+              registerTimeout,
+            }}
+          >
+            <BlackjackGameUI />
+          </GameActionsProvider>
+        </UIStateProvider>
+      </GameStateProvider>
       <BackgroundMusic shouldPlay={musicStarted} />
     </>
   );
