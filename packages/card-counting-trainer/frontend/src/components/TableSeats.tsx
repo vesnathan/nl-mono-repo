@@ -68,10 +68,11 @@ export default function TableSeats() {
                   }
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    if (playerSeat === null) {
-                      setPlayerSeat(seatIndex);
-                    }
+                  if (
+                    (e.key === "Enter" || e.key === " ") &&
+                    playerSeat === null
+                  ) {
+                    setPlayerSeat(seatIndex);
                   }
                 }}
                 style={{

@@ -98,6 +98,7 @@ export default function HeatMapModal() {
           overflow: "auto",
         }}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
