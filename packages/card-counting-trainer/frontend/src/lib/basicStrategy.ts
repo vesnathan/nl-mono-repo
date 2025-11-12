@@ -212,7 +212,10 @@ export function getBasicStrategyAction(
       }
 
       // If strategy says double but can't (by rules or chips), hit instead
-      if (softAction === "D" && (!canDoubleHand || !canDoubleByRules(handValue, settings))) {
+      if (
+        softAction === "D" &&
+        (!canDoubleHand || !canDoubleByRules(handValue, settings))
+      ) {
         return "H";
       }
       return softAction;
@@ -239,7 +242,10 @@ export function getBasicStrategyAction(
     }
 
     // If strategy says double but can't (by rules or chips), hit instead
-    if (hardAction === "D" && (!canDoubleHand || !canDoubleByRules(handValue, settings))) {
+    if (
+      hardAction === "D" &&
+      (!canDoubleHand || !canDoubleByRules(handValue, settings))
+    ) {
       return "H";
     }
 

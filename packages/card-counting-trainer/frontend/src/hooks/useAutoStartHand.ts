@@ -59,7 +59,7 @@ export function useAutoStartHand({
   // AI players always play automatically
   // User can watch without being seated, or join by sitting and placing a bet
   // eslint-disable-next-line sonarjs/cognitive-complexity
-        // eslint-disable-next-line sonarjs/no-duplicate-string
+  // eslint-disable-next-line sonarjs/no-duplicate-string
   useEffect(() => {
     if (
       initialized &&
@@ -124,7 +124,7 @@ export function useAutoStartHand({
 
   // Auto-start subsequent hands (handNumber > 0)
   // AI players always play automatically
-        // eslint-disable-next-line sonarjs/no-duplicate-string
+  // eslint-disable-next-line sonarjs/no-duplicate-string
   // eslint-disable-next-line sonarjs/cognitive-complexity
   // User can watch without being seated, or join by sitting and placing a bet
   useEffect(() => {

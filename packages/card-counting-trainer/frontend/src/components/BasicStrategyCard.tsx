@@ -338,7 +338,7 @@ export default function BasicStrategyCard({
                         padding: "6px",
                         backgroundColor: "#2a2a2a",
                         color: "#AAA",
-                  // eslint-disable-next-line sonarjs/no-duplicate-string
+                        // eslint-disable-next-line sonarjs/no-duplicate-string
                         border: "1px solid #444",
                       }}
                     >

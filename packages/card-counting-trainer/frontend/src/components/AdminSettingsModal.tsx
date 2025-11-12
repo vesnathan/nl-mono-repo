@@ -143,7 +143,6 @@ export default function AdminSettingsModal({
             </h2>
             <button
               type="button"
-              
               onClick={onClose}
               style={{
                 backgroundColor: "transparent",
@@ -153,7 +152,7 @@ export default function AdminSettingsModal({
                 padding: "8px 16px",
                 fontSize: "16px",
                 cursor: "pointer",
-            // eslint-disable-next-line sonarjs/no-duplicate-string
+                // eslint-disable-next-line sonarjs/no-duplicate-string
                 transition: "all 0.2s ease",
               }}
               onMouseEnter={(e) => {

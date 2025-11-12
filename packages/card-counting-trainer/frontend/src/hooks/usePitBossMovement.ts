@@ -42,11 +42,10 @@ export function usePitBossMovement(
           newDistance += Math.random() * 10;
         } else if (newDistance > 50) {
           // If far, moderately pull back toward comfortable distance
-            newDistance -= Math.random() * 8;
-          } else if (newDistance > 40) {
-            // If slightly far, gently pull back
-            newDistance -= Math.random() * 4;
-          }
+          newDistance -= Math.random() * 8;
+        } else if (newDistance > 40) {
+          // If slightly far, gently pull back
+          newDistance -= Math.random() * 4;
         }
 
         return Math.round(newDistance);

@@ -727,7 +727,7 @@ export function useGameActions({
               newMap.delete(-1);
               return newMap;
             });
-                          // eslint-disable-next-line sonarjs/no-duplicate-string
+            // eslint-disable-next-line sonarjs/no-duplicate-string
             debugLog("playerActions", "Moving to DEALER_TURN phase");
             setPhase("DEALER_TURN");
           }, 1500); // Show BUST for 1.5s then muck cards

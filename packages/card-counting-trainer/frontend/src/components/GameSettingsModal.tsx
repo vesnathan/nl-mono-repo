@@ -195,15 +195,15 @@ export default function GameSettingsModal({
                 padding: "8px 16px",
                 fontSize: "16px",
                 cursor: "pointer",
-            // eslint-disable-next-line sonarjs/no-duplicate-string
+                // eslint-disable-next-line sonarjs/no-duplicate-string
                 transition: "all 0.2s ease",
               }}
               onMouseEnter={(e) => {
-          // eslint-disable-next-line sonarjs/no-duplicate-string
+                // eslint-disable-next-line sonarjs/no-duplicate-string
                 e.currentTarget.style.backgroundColor =
-          // eslint-disable-next-line sonarjs/no-duplicate-string
+                  // eslint-disable-next-line sonarjs/no-duplicate-string
                   "rgba(255, 255, 255, 0.1)";
-          // eslint-disable-next-line sonarjs/no-duplicate-string
+                // eslint-disable-next-line sonarjs/no-duplicate-string
                 e.currentTarget.style.borderColor = "#FFF";
               }}
               onMouseLeave={(e) => {
@@ -348,10 +348,10 @@ export default function GameSettingsModal({
                       border: "2px solid",
                       borderColor:
                         settings.numberOfDecks === num
-            // eslint-disable-next-line sonarjs/no-duplicate-string
-                          ? "#FFF"
-            // eslint-disable-next-line sonarjs/no-duplicate-string
-                          : "rgba(255, 255, 255, 0.2)",
+                          ? // eslint-disable-next-line sonarjs/no-duplicate-string
+                            "#FFF"
+                          : // eslint-disable-next-line sonarjs/no-duplicate-string
+                            "rgba(255, 255, 255, 0.2)",
                       borderRadius: "8px",
                       padding: "10px 20px",
                       fontSize: "14px",
@@ -427,8 +427,8 @@ export default function GameSettingsModal({
             </h3>
 
             <div
-                // eslint-disable-next-line sonarjs/no-duplicate-string
-                // eslint-disable-next-line sonarjs/no-duplicate-string
+              // eslint-disable-next-line sonarjs/no-duplicate-string
+              // eslint-disable-next-line sonarjs/no-duplicate-string
               style={{
                 // eslint-disable-next-line sonarjs/no-duplicate-string
                 backgroundColor: "rgba(255, 255, 255, 0.05)",

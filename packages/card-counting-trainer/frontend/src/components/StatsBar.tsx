@@ -51,7 +51,7 @@ export default function StatsBar() {
             // eslint-disable-next-line sonarjs/no-duplicate-string
             backgroundColor: "rgba(0, 0, 0, 0.8)",
             color: "#FFF",
-          // eslint-disable-next-line sonarjs/no-duplicate-string
+            // eslint-disable-next-line sonarjs/no-duplicate-string
             border: "2px solid #FFD700",
             borderRadius: "8px",
             padding: "6px 12px",
@@ -136,7 +136,7 @@ export default function StatsBar() {
               transition: "all 0.2s",
             }}
             onMouseEnter={(e) => {
-                                    // eslint-disable-next-line sonarjs/no-duplicate-string
+              // eslint-disable-next-line sonarjs/no-duplicate-string
               e.currentTarget.style.backgroundColor = "rgba(255, 215, 0, 0.3)";
             }}
             onMouseLeave={(e) => {

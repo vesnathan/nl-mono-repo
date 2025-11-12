@@ -356,32 +356,31 @@ export function useAudioQueue({
       // Check if we should interrupt current audio
       if (currentItem && isPlaying && item.priority > currentItem.priority) {
         // Interrupt if new item has higher priority
-          debugLog(
-            "audioQueue",
-            `[Audio Queue] ⚡ Interrupting current audio (priority ${currentItem.priority}) with higher priority (${item.priority})`,
-          );
+        debugLog(
+          "audioQueue",
+          `[Audio Queue] ⚡ Interrupting current audio (priority ${currentItem.priority}) with higher priority (${item.priority})`,
+        );
 
-          // Stop current audio
-          if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current = null;
-          }
-
-          // Reset state and queue the urgent item at the front
-          // The rest of the queue (including any other queued items) will continue after this urgent item
-          setIsPlaying(false);
-          setCurrentItem(null);
-          processingRef.current = false;
-          const newQueue = [item, ...queueRef.current];
-          queueRef.current = newQueue;
-          setQueue(newQueue);
-
-          // Process immediately
-          registerTimeout(() => {
-            processQueue();
-          }, 50);
-          return;
+        // Stop current audio
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current = null;
         }
+
+        // Reset state and queue the urgent item at the front
+        // The rest of the queue (including any other queued items) will continue after this urgent item
+        setIsPlaying(false);
+        setCurrentItem(null);
+        processingRef.current = false;
+        const newQueue = [item, ...queueRef.current];
+        queueRef.current = newQueue;
+        setQueue(newQueue);
+
+        // Process immediately
+        registerTimeout(() => {
+          processQueue();
+        }, 50);
+        return;
       }
 
       // Otherwise, just add to queue

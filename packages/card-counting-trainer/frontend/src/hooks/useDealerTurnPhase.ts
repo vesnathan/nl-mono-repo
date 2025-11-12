@@ -322,16 +322,15 @@ export function useDealerTurnPhase({
                 } else if (finalValue === 18) {
                   message = "Dealer has eighteen";
                   voiceLine = "dealer_has_18";
-                  } else if (finalValue === 19) {
-                    message = "Dealer has nineteen";
-                    voiceLine = "dealer_has_19";
-                  } else if (finalValue === 20) {
-                    message = "Dealer has twenty";
-                    voiceLine = "dealer_has_20";
-                  } else {
-                    message = "Dealer has twenty-one";
-                    voiceLine = "dealer_has_21";
-                  }
+                } else if (finalValue === 19) {
+                  message = "Dealer has nineteen";
+                  voiceLine = "dealer_has_19";
+                } else if (finalValue === 20) {
+                  message = "Dealer has twenty";
+                  voiceLine = "dealer_has_20";
+                } else {
+                  message = "Dealer has twenty-one";
+                  voiceLine = "dealer_has_21";
                 }
 
                 // Speech bubble handles both visual display AND audio queueing
