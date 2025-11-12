@@ -26,21 +26,22 @@ declare global {
 }
 
 const SERVICE_TYPES = [
-  { value: "LAWN_MOWING", label: "Lawn Mowing" },
-  { value: "WHIPPER_SNIPPERING", label: "Whipper Snippering" },
-  { value: "GROUND_PRUNING", label: "Ground Level Pruning" },
-  { value: "WASTE_REMOVAL", label: "Garden Waste Removal" },
-  { value: "GUTTER_CLEANING", label: "Gutter Cleaning" },
-  { value: "PRESSURE_WASHING", label: "Pressure Washing" },
-  { value: "PACKAGE", label: "Full Property Package" },
+  { value: "WEB_DEVELOPMENT", label: "Web Development" },
+  { value: "ECOMMERCE", label: "E-Commerce Solutions" },
+  { value: "SOCIAL_MEDIA", label: "Social Media Management" },
+  { value: "DIGITAL_MARKETING", label: "Digital Marketing & SEO" },
+  { value: "BRANDING", label: "Brand Identity & Design" },
+  { value: "CONTENT_CREATION", label: "Content Creation" },
+  { value: "CONSULTING", label: "Digital Strategy Consulting" },
   { value: "OTHER", label: "Other - Please Describe" },
 ];
 
-const RENTAL_PLATFORMS = [
-  { value: "AIRBNB", label: "Airbnb" },
-  { value: "BOOKING_COM", label: "Booking.com" },
-  { value: "VRBO", label: "VRBO / Stayz" },
-  { value: "MULTIPLE", label: "Multiple Platforms" },
+const BUSINESS_TYPES = [
+  { value: "STARTUP", label: "Startup / New Business" },
+  { value: "SMALL_BUSINESS", label: "Small Business" },
+  { value: "ECOMMERCE", label: "E-Commerce / Online Store" },
+  { value: "PROFESSIONAL", label: "Professional Services" },
+  { value: "NONPROFIT", label: "Non-Profit Organization" },
   { value: "OTHER", label: "Other" },
 ];
 
@@ -151,10 +152,10 @@ function ContactForm() {
                 </h2>
                 <div className="w-16 h-1 bg-brand-green mb-6 mx-auto"></div>
                 <p className="text-xl text-white/90 font-roboto-slab mb-2">
-                  For Airbnb, Booking.com & VRBO Properties in Devonport Area
+                  Custom digital solutions tailored to your business needs
                 </p>
                 <p className="text-white/80 font-roboto-slab">
-                  Postcodes 7310 & 7306
+                  Serving businesses nationwide
                 </p>
               </div>
 
@@ -170,18 +171,17 @@ function ContactForm() {
                   <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg font-roboto-slab">
                     Sorry, there was an error submitting your quote request.
                     Please try again or email us directly at
-                    service@tommyslawnorder.com.au
+                    hello@loudncleardigital.com
                   </div>
                 )}
 
                 <div className="mb-8 p-4 bg-brand-green/10 rounded-lg border-2 border-brand-green/30">
                   <p className="text-gray-700 text-center font-roboto-slab">
                     <strong className="text-brand-green font-josefin">
-                      Holiday Rental Hosts:
+                      Ready to Grow Your Business?
                     </strong>{" "}
-                    We know you need reliable service between guest bookings.
-                    Tell us about your property and we'll provide a custom
-                    quote.
+                    Tell us about your project and we'll provide a custom quote
+                    tailored to your specific needs and budget.
                   </p>
                 </div>
 
@@ -244,34 +244,40 @@ function ContactForm() {
                     </div>
                   </div>
 
-                  {/* Rental Platform */}
+                  {/* Business Type */}
                   <div>
                     <h3 className="text-xl font-semibold text-brand-green mb-4 font-josefin">
-                      Rental Platform
+                      Business Information
                     </h3>
                     <Select
-                      label="Where do you list your property?"
-                      placeholder="Select platform"
-                      name="rentalPlatform"
+                      label="What type of business do you have?"
+                      placeholder="Select business type"
+                      name="businessType"
                       required
                       size="lg"
                       classNames={{
                         label: "font-roboto-slab",
                       }}
                     >
-                      {RENTAL_PLATFORMS.map((platform) => (
-                        <SelectItem key={platform.value} value={platform.value}>
-                          {platform.label}
+                      {BUSINESS_TYPES.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
                         </SelectItem>
                       ))}
                     </Select>
 
                     <div className="mt-4">
-                      <Checkbox name="isRegularBookings" value="yes">
-                        <span className="text-gray-700 font-roboto-slab">
-                          I have regular bookings and need ongoing maintenance
-                        </span>
-                      </Checkbox>
+                      <Input
+                        label="Website (if you have one)"
+                        name="currentWebsite"
+                        placeholder="https://example.com"
+                        type="url"
+                        size="lg"
+                        classNames={{
+                          input: "font-roboto-slab",
+                          label: "font-roboto-slab",
+                        }}
+                      />
                     </div>
                   </div>
 
@@ -301,15 +307,15 @@ function ContactForm() {
                     </Select>
                   </div>
 
-                  {/* Property Address */}
+                  {/* Company Details */}
                   <div>
                     <h3 className="text-xl font-semibold text-brand-green mb-4 font-josefin">
-                      Rental Property Address
+                      Company Details
                     </h3>
                     <Input
-                      label="Street Address"
-                      name="propertyAddress"
-                      placeholder="123 Main Street"
+                      label="Company Name"
+                      name="companyName"
+                      placeholder="Your Company Pty Ltd"
                       required
                       size="lg"
                       className="mb-4"
@@ -320,40 +326,50 @@ function ContactForm() {
                     />
                     <div className="grid md:grid-cols-2 gap-4">
                       <Input
-                        label="City/Suburb"
-                        name="city"
-                        placeholder="Devonport"
-                        defaultValue="Devonport"
-                        required
+                        label="Industry"
+                        name="industry"
+                        placeholder="e.g., Retail, Healthcare, etc."
                         size="lg"
                         classNames={{
                           input: "font-roboto-slab",
                           label: "font-roboto-slab",
                         }}
                       />
-                      <Input
-                        label="Postcode"
-                        name="postcode"
-                        placeholder="7310 or 7306"
+                      <Select
+                        label="Timeline"
+                        placeholder="When do you need this?"
+                        name="timeline"
                         required
                         size="lg"
                         classNames={{
-                          input: "font-roboto-slab",
                           label: "font-roboto-slab",
                         }}
-                      />
+                      >
+                        <SelectItem key="ASAP" value="ASAP">
+                          ASAP
+                        </SelectItem>
+                        <SelectItem key="1_MONTH" value="1_MONTH">
+                          Within 1 Month
+                        </SelectItem>
+                        <SelectItem key="3_MONTHS" value="3_MONTHS">
+                          Within 3 Months
+                        </SelectItem>
+                        <SelectItem key="FLEXIBLE" value="FLEXIBLE">
+                          Flexible Timeline
+                        </SelectItem>
+                      </Select>
                     </div>
                   </div>
 
-                  {/* Additional Details */}
+                  {/* Project Details */}
                   <div>
                     <h3 className="text-xl font-semibold text-brand-green mb-4 font-josefin">
-                      Property Details
+                      Project Details
                     </h3>
                     <Textarea
-                      label="Tell us about your property"
+                      label="Tell us about your project"
                       name="description"
-                      placeholder="e.g., 3 bedroom house with small front lawn and back garden. Currently getting bookings twice a month and need lawn mowed between guests..."
+                      placeholder="e.g., We need a new website for our online store with payment integration and inventory management. We currently have 100+ products..."
                       minRows={5}
                       required
                       size="lg"
@@ -363,8 +379,8 @@ function ContactForm() {
                       }}
                     />
                     <p className="text-sm text-gray-500 mt-2 font-roboto-slab">
-                      Please include: property size, current booking frequency,
-                      specific areas needing attention
+                      Please include: project goals, features needed, budget range,
+                      and any existing systems or platforms
                     </p>
                   </div>
 
@@ -411,13 +427,12 @@ function ContactForm() {
             <div className="max-w-4xl mx-auto">
               <div className="text-left mb-12">
                 <h2 className="text-3xl font-bold text-gray-800 mb-2 font-josefin">
-                  About Tommy's Law'n Order
+                  Why Choose Loud'n'Clear Digital
                 </h2>
                 <div className="w-16 h-1 bg-brand-green mb-6"></div>
                 <p className="text-gray-600 font-roboto-slab leading-relaxed">
-                  Supporting meaningful employment - Tommy is a dedicated young
-                  man on the autism spectrum building his future through honest,
-                  quality work.
+                  We're a full-service digital agency dedicated to helping
+                  businesses thrive online through strategic digital solutions.
                 </p>
               </div>
 
@@ -425,33 +440,33 @@ function ContactForm() {
                 {[
                   {
                     icon: "✓",
-                    title: "Qualified Horticulturalists",
-                    desc: "Our supervisors are qualified horticulturalists who know exactly what your rental property needs",
+                    title: "Modern Technology Stack",
+                    desc: "We use cutting-edge technologies to build fast, secure, and scalable solutions",
                   },
                   {
                     icon: "✓",
-                    title: "4.98★ Rated Airbnb Hosts",
-                    desc: "Tommy's carers are experienced hosts who understand what gets those 5-star reviews",
+                    title: "Full-Service Agency",
+                    desc: "From web development to social media - we handle all your digital needs",
                   },
                   {
                     icon: "✓",
-                    title: "Local to Devonport",
-                    desc: "We're your neighbours servicing postcodes 7310 & 7306",
+                    title: "Nationwide Service",
+                    desc: "We work with businesses across Australia, providing remote and on-site support",
                   },
                   {
                     icon: "✓",
-                    title: "Supporting Meaningful Work",
-                    desc: "Tommy is building his future through honest work - not stuck in a sheltered workshop",
+                    title: "Strategic Approach",
+                    desc: "Data-driven strategies tailored to your specific business goals",
                   },
                   {
                     icon: "✓",
-                    title: "Reliable & Consistent",
-                    desc: "Scheduled maintenance between bookings so property is always guest-ready",
+                    title: "Ongoing Support",
+                    desc: "We don't disappear after launch - we're here to help your business grow",
                   },
                   {
                     icon: "✓",
-                    title: "Fair, Honest Pricing",
-                    desc: "Transparent pricing with no hidden fees - just quality work at a fair price",
+                    title: "Transparent Pricing",
+                    desc: "Clear, upfront pricing with no hidden fees - just honest, quality work",
                   },
                 ].map((item, index) => (
                   <div key={index} className="flex gap-3 items-start">

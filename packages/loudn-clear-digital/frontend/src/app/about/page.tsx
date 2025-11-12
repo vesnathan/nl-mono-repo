@@ -10,10 +10,10 @@ export default function AboutPage() {
       <section className="bg-gradient-to-r from-brand-green to-brand-lime py-20">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-5xl font-bold text-white mb-4">
-            About Lawn Order
+            About Loud'n'Clear Digital
           </h1>
           <p className="text-xl text-white/90">
-            Your trusted partner in lawn care and landscaping excellence
+            Your trusted partner in digital transformation and online growth
           </p>
         </div>
       </section>
@@ -26,21 +26,22 @@ export default function AboutPage() {
           </h2>
           <div className="prose prose-lg max-w-none text-gray-700">
             <p className="mb-4">
-              Lawn Order was founded with a simple mission: to provide
-              exceptional lawn care and landscaping services that transform
-              outdoor spaces into beautiful, healthy environments.
+              Loud'n'Clear Digital was founded with a simple mission: to help
+              businesses thrive in the digital age through strategic, innovative
+              solutions that drive real results.
             </p>
             <p className="mb-4">
-              With years of experience in the industry, our team of dedicated
-              professionals brings expertise, passion, and attention to detail
-              to every project. We understand that your lawn is more than just
-              grass – it's an extension of your home and a reflection of your
-              care.
+              With years of experience in web development, digital marketing, and
+              social media management, our team brings expertise, creativity, and
+              dedication to every project. We understand that your online presence
+              is more than just a website – it's your digital storefront, your
+              brand voice, and a key driver of business growth.
             </p>
             <p>
-              From routine maintenance to complete landscape transformations,
-              we're committed to exceeding your expectations and creating
-              outdoor spaces you'll love.
+              From building custom websites to managing comprehensive social media
+              campaigns, we're committed to exceeding expectations and creating
+              digital experiences that connect with your audience and drive
+              meaningful engagement.
             </p>
           </div>
         </div>
@@ -55,39 +56,40 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-lg shadow-md">
               <div className="w-16 h-16 bg-brand-lime rounded-full flex items-center justify-center mb-4 mx-auto">
-                <span className="text-3xl">🌟</span>
+                <span className="text-3xl">💻</span>
               </div>
               <h3 className="text-xl font-semibold text-brand-green mb-3 text-center">
-                Quality Service
+                Modern Technology
               </h3>
               <p className="text-gray-700 text-center">
-                We use professional-grade equipment and techniques to deliver
-                outstanding results
+                We use cutting-edge technologies and frameworks to deliver
+                fast, secure, and scalable digital solutions
               </p>
             </div>
 
             <div className="bg-white p-8 rounded-lg shadow-md">
               <div className="w-16 h-16 bg-brand-lime rounded-full flex items-center justify-center mb-4 mx-auto">
-                <span className="text-3xl">🌱</span>
+                <span className="text-3xl">📊</span>
               </div>
               <h3 className="text-xl font-semibold text-brand-green mb-3 text-center">
-                Eco-Friendly
+                Data-Driven Strategy
               </h3>
               <p className="text-gray-700 text-center">
-                Sustainable practices that protect your lawn and the environment
+                Strategic approaches backed by analytics and insights to ensure
+                measurable results and ROI
               </p>
             </div>
 
             <div className="bg-white p-8 rounded-lg shadow-md">
               <div className="w-16 h-16 bg-brand-lime rounded-full flex items-center justify-center mb-4 mx-auto">
-                <span className="text-3xl">💚</span>
+                <span className="text-3xl">🤝</span>
               </div>
               <h3 className="text-xl font-semibold text-brand-green mb-3 text-center">
-                Customer First
+                Partnership Approach
               </h3>
               <p className="text-gray-700 text-center">
-                Your satisfaction is our priority, backed by our service
-                guarantee
+                We don't just deliver projects – we partner with you for
+                long-term success and ongoing support
               </p>
             </div>
           </div>
@@ -98,10 +100,10 @@ export default function AboutPage() {
       <section className="py-16 bg-brand-green">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Transform Your Lawn?
+            Ready to Transform Your Digital Presence?
           </h2>
           <p className="text-xl text-white/90 mb-8">
-            Contact us today for a free consultation and quote
+            Contact us today for a free consultation and custom quote
           </p>
           <Link href="/contact">
             <Button

@@ -128,7 +128,7 @@ function ContactForm() {
                 {submitStatus === "error" && (
                   <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg font-roboto-slab">
                     Sorry, there was an error sending your message. Please try
-                    again or email us directly at service@tommyslawnorder.com.au
+                    again or email us directly at hello@loudncleardigital.com
                   </div>
                 )}
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -234,10 +234,10 @@ function ContactForm() {
                     Phone
                   </h3>
                   <p className="text-gray-600 font-roboto-slab text-sm">
-                    Call us for immediate assistance
+                    Call us to discuss your project
                   </p>
                   <p className="text-brand-green font-semibold mt-2 font-roboto-slab">
-                    service@tommyslawnorder.com.au
+                    Coming Soon
                   </p>
                 </div>
 
@@ -249,10 +249,10 @@ function ContactForm() {
                     Email
                   </h3>
                   <p className="text-gray-600 font-roboto-slab text-sm">
-                    Send us an email anytime
+                    Email us about your project
                   </p>
                   <p className="text-brand-green font-semibold mt-2 font-roboto-slab">
-                    service@tommyslawnorder.com.au
+                    hello@loudncleardigital.com
                   </p>
                 </div>
 
@@ -267,10 +267,10 @@ function ContactForm() {
                     Service Area
                   </h3>
                   <p className="text-gray-600 font-roboto-slab text-sm">
-                    Devonport & Surrounds
+                    Serving businesses nationally
                   </p>
                   <p className="text-brand-green font-semibold mt-2 font-roboto-slab">
-                    Postcodes 7310 & 7306
+                    Remote & On-Site Available
                   </p>
                 </div>
               </div>
