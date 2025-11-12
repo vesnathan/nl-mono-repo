@@ -36,7 +36,14 @@ export default function DealerInfo({
   if (!showModal) {
     return (
       <div
+        role="button"
+        tabIndex={0}
         onClick={() => setShowModal(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            setShowModal(true);
+          }
+        }}
         style={{
           backgroundColor: "#1a1a1a",
           border: "2px solid #FFD700",
@@ -65,7 +72,14 @@ export default function DealerInfo({
     <>
       {/* Backdrop */}
       <div
+        role="button"
+        tabIndex={0}
         onClick={handleClose}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            handleClose();
+          }
+        }}
         style={{
           position: "fixed",
           top: 0,

@@ -50,6 +50,8 @@ export default function TableSeats() {
             {/* Empty Seat - Clickable */}
             {isEmpty && (
               <div
+                role="button"
+                tabIndex={0}
                 onClick={() => {
                   if (playerSeat === null) {
                     debugLog(
@@ -63,6 +65,13 @@ export default function TableSeats() {
                       "gamePhases",
                       `Cannot sit - player already seated at ${playerSeat}`,
                     );
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    if (playerSeat === null) {
+                      setPlayerSeat(seatIndex);
+                    }
                   }
                 }}
                 style={{

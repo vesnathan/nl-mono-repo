@@ -92,7 +92,14 @@ export default function AdminSettingsModal({
     <>
       {/* Backdrop */}
       <div
+        role="button"
+        tabIndex={0}
         onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            onClose();
+          }
+        }}
         style={{
           position: "fixed",
           top: 0,
@@ -198,6 +205,7 @@ export default function AdminSettingsModal({
                 }}
               >
                 <label
+                  htmlFor="master-volume"
                   style={{
                     fontSize: "14px",
                     color: "#AAA",
@@ -218,6 +226,7 @@ export default function AdminSettingsModal({
                 </span>
               </div>
               <input
+                id="master-volume"
                 type="range"
                 min="0"
                 max="100"
@@ -262,6 +271,7 @@ export default function AdminSettingsModal({
                 }}
               >
                 <label
+                  htmlFor="music-volume"
                   style={{
                     fontSize: "14px",
                     color: "#AAA",
@@ -282,6 +292,7 @@ export default function AdminSettingsModal({
                 </span>
               </div>
               <input
+                id="music-volume"
                 type="range"
                 min="0"
                 max="100"
@@ -311,6 +322,7 @@ export default function AdminSettingsModal({
                 }}
               >
                 <label
+                  htmlFor="player-speech-volume"
                   style={{
                     fontSize: "14px",
                     color: "#AAA",
@@ -331,6 +343,7 @@ export default function AdminSettingsModal({
                 </span>
               </div>
               <input
+                id="player-speech-volume"
                 type="range"
                 min="0"
                 max="100"
@@ -360,6 +373,7 @@ export default function AdminSettingsModal({
                 }}
               >
                 <label
+                  htmlFor="dealer-speech-volume"
                   style={{
                     fontSize: "14px",
                     color: "#AAA",
@@ -380,6 +394,7 @@ export default function AdminSettingsModal({
                 </span>
               </div>
               <input
+                id="dealer-speech-volume"
                 type="range"
                 min="0"
                 max="100"
@@ -429,6 +444,7 @@ export default function AdminSettingsModal({
                 {Object.entries(debugSettings).map(([key, value]) => (
                   <label
                     key={key}
+                    htmlFor={`debug-${key}`}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -440,6 +456,7 @@ export default function AdminSettingsModal({
                     }}
                   >
                     <input
+                      id={`debug-${key}`}
                       type="checkbox"
                       checked={value}
                       onChange={(e) =>

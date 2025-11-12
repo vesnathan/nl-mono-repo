@@ -135,7 +135,14 @@ export default function GameSettingsModal({
     <>
       {/* Backdrop */}
       <div
+        role="button"
+        tabIndex={0}
         onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            onClose();
+          }
+        }}
         style={{
           position: "fixed",
           top: 0,
@@ -329,8 +336,10 @@ export default function GameSettingsModal({
             </h3>
 
             {/* Number of Decks */}
-            <div style={{ marginBottom: "16px" }}>
-              <label
+            <fieldset
+              style={{ marginBottom: "16px", border: "none", padding: 0 }}
+            >
+              <legend
                 style={{
                   fontSize: "14px",
                   color: "#AAA",
@@ -339,7 +348,7 @@ export default function GameSettingsModal({
                 }}
               >
                 Number of Decks
-              </label>
+              </legend>
               <div style={{ display: "flex", gap: "8px" }}>
                 {([1, 2, 4, 6, 8] as const).map((num) => (
                   <button
@@ -375,11 +384,12 @@ export default function GameSettingsModal({
                   </button>
                 ))}
               </div>
-            </div>
+            </fieldset>
 
             {/* Deck Penetration */}
             <div>
               <label
+                htmlFor="deck-penetration"
                 style={{
                   fontSize: "14px",
                   color: "#AAA",
@@ -390,6 +400,7 @@ export default function GameSettingsModal({
                 Deck Penetration: {settings.deckPenetration}%
               </label>
               <input
+                id="deck-penetration"
                 type="range"
                 min="40"
                 max="90"

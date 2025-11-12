@@ -104,7 +104,14 @@ export default function LeaderboardModal({
     <>
       {/* Backdrop */}
       <div
+        role="button"
+        tabIndex={0}
         onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            onClose();
+          }
+        }}
         style={{
           position: "fixed",
           top: 0,

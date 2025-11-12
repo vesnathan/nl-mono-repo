@@ -61,7 +61,14 @@ export default function DealerSection() {
           )}
 
           <div
+            role="button"
+            tabIndex={0}
             onClick={() => setShowDealerInfo(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                setShowDealerInfo(true);
+              }
+            }}
             style={{
               width: "150px",
               height: "150px",

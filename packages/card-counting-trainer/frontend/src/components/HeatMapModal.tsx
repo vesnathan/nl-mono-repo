@@ -63,6 +63,8 @@ export default function HeatMapModal() {
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       style={{
         position: "fixed",
         top: 0,
@@ -76,8 +78,15 @@ export default function HeatMapModal() {
         zIndex: 1000,
       }}
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          onClose();
+        }
+      }}
     >
       <div
+        role="dialog"
+        tabIndex={-1}
         style={{
           backgroundColor: "#1a1a1a",
           border: "3px solid #333",
