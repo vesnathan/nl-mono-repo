@@ -51,7 +51,7 @@ export function dealNewHandToAIPlayers(
   const dealerCards: Card[] = [];
 
   // Deal 2 cards to dealer
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 2; i += 1) {
     if (currentShoe.length === 0) break;
     const { card, remainingShoe } = dealCard(currentShoe);
     currentShoe = remainingShoe;
@@ -144,12 +144,12 @@ export function simulateHandsInProgress(
   // Simulate 5-15 hands before user joins (just counting, no cards saved)
   const numHandsToSimulate = Math.floor(Math.random() * 11) + 5;
 
-  for (let hand = 0; hand < numHandsToSimulate; hand++) {
+  for (let hand = 0; hand < numHandsToSimulate; hand += 1) {
     // Each hand: deal 2 to player, 2 to dealer (4 cards)
     // Then simulate 0-3 additional cards (hits)
     const totalCardsThisHand = 4 + Math.floor(Math.random() * 4);
 
-    for (let i = 0; i < totalCardsThisHand; i++) {
+    for (let i = 0; i < totalCardsThisHand; i += 1) {
       if (currentShoe.length === 0) break;
 
       const { card, remainingShoe } = dealCard(currentShoe);
@@ -164,7 +164,7 @@ export function simulateHandsInProgress(
   const dealerCards: Card[] = [];
 
   // Deal 2 cards to dealer
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 2; i += 1) {
     if (currentShoe.length === 0) break;
     const { card, remainingShoe } = dealCard(currentShoe);
     currentShoe = remainingShoe;
