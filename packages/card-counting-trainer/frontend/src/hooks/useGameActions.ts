@@ -856,10 +856,7 @@ export function useGameActions({
         const newCards = [...playerHand.cards, card];
         const newHandValue = calculateHandValue(newCards);
 
-        debugLog(
-          "playerActions",
-          `Final hand value: ${newHandValue}`,
-        );
+        debugLog("playerActions", `Final hand value: ${newHandValue}`);
         const finalCardsStr = newCards
           .map((c) => `${c.rank}${c.suit}`)
           .join(", ");
