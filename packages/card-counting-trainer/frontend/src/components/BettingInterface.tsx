@@ -102,8 +102,8 @@ export default function BettingInterface({
           justifyContent: "center",
         }}
       >
-        {/* eslint-disable-next-line sonarjs/cognitive-complexity */}
         {/* eslint-disable-next-line sonarjs/no-duplicate-string */}
+        {/* eslint-disable sonarjs/cognitive-complexity */}
         {CHIP_VALUES.map((value) => {
           const isAffordable = canAddChip(value);
           const isSelected = selectedChipValue === value;
@@ -193,6 +193,7 @@ export default function BettingInterface({
             </button>
           );
         })}
+        {/* eslint-enable sonarjs/cognitive-complexity */}
       </div>
 
       {/* Action Buttons */}

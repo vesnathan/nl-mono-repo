@@ -111,8 +111,8 @@ export default function SplitHandsModal({
 
       {/* Display both hands */}
       <div style={{ display: "flex", gap: "24px", marginBottom: "24px" }}>
-        {/* eslint-disable-next-line sonarjs/cognitive-complexity */}
         {/* eslint-disable-next-line sonarjs/no-duplicate-string */}
+        {/* eslint-disable sonarjs/cognitive-complexity */}
         {hands.map((hand, index) => {
           const handValue = calculateHandValue(hand.cards);
           const isActive = index === activeHandIndex;
@@ -237,6 +237,7 @@ export default function SplitHandsModal({
             </div>
           );
         })}
+        {/* eslint-enable sonarjs/cognitive-complexity */}
       </div>
 
       {/* Action buttons - only shown for active hand */}
