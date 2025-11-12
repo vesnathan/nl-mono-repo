@@ -141,6 +141,7 @@ export default function AdminSettingsModal({
               🎛️ Admin Settings
             </h2>
             <button
+              type="button"
               onClick={onClose}
               style={{
                 backgroundColor: "transparent",
@@ -223,7 +224,7 @@ export default function AdminSettingsModal({
                 onChange={(e) =>
                   setAudioSettings({
                     ...audioSettings,
-                    masterVolume: parseInt(e.target.value),
+                    masterVolume: parseInt(e.target.value, 10),
                   })
                 }
                 style={{
@@ -287,7 +288,7 @@ export default function AdminSettingsModal({
                 onChange={(e) =>
                   setAudioSettings({
                     ...audioSettings,
-                    musicVolume: parseInt(e.target.value),
+                    musicVolume: parseInt(e.target.value, 10),
                   })
                 }
                 style={{
@@ -336,7 +337,7 @@ export default function AdminSettingsModal({
                 onChange={(e) =>
                   setAudioSettings({
                     ...audioSettings,
-                    playerSpeechVolume: parseInt(e.target.value),
+                    playerSpeechVolume: parseInt(e.target.value, 10),
                   })
                 }
                 style={{
@@ -385,7 +386,7 @@ export default function AdminSettingsModal({
                 onChange={(e) =>
                   setAudioSettings({
                     ...audioSettings,
-                    dealerSpeechVolume: parseInt(e.target.value),
+                    dealerSpeechVolume: parseInt(e.target.value, 10),
                   })
                 }
                 style={{
@@ -491,6 +492,7 @@ export default function AdminSettingsModal({
           {/* Action Buttons */}
           <div style={{ display: "flex", gap: "12px" }}>
             <button
+              type="button"
               onClick={handleReset}
               style={{
                 flex: 1,
@@ -516,6 +518,7 @@ export default function AdminSettingsModal({
               🔄 Reset to Defaults
             </button>
             <button
+              type="button"
               onClick={onClose}
               style={{
                 flex: 1,
@@ -553,7 +556,7 @@ export function getAudioSettings(): AudioSettings {
   if (saved) {
     try {
       return JSON.parse(saved);
-    } catch (e) {
+    } catch {
       return DEFAULT_AUDIO_SETTINGS;
     }
   }
