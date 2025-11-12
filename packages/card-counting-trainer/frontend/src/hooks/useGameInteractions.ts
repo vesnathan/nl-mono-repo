@@ -67,7 +67,6 @@ export function useGameInteractions({
         | "loss"
         | "dealer_blackjack"
         | "distraction",
-      priority: AudioPriority = AudioPriority.NORMAL,
       dealerVoiceLine?:
         | "place_bets"
         | "dealer_busts"
@@ -76,6 +75,7 @@ export function useGameInteractions({
         | "dealer_has_19"
         | "dealer_has_20"
         | "dealer_has_21",
+      priority: AudioPriority = AudioPriority.NORMAL,
     ) => {
       // Unified speech bubble implementation for all players (dealer and AI)
       // Pattern: Speech bubble ALWAYS created first, then audio queued if file exists

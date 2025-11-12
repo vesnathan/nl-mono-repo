@@ -43,7 +43,6 @@ export function useAnimatedDealing(
   cardsDealt: number,
   runningCount: number,
   aiPlayerPositions: number[],
-  dealSpeed: number = 1.0, // Multiplier for dealer speed (0.8 = slow, 1.5 = fast)
   onDealingComplete: (result: {
     updatedShoe: any[];
     newCardsDealt: number;
@@ -53,6 +52,7 @@ export function useAnimatedDealing(
     dealerCards: any[];
   }) => void,
   registerTimeout: (callback: () => void, delay: number) => NodeJS.Timeout,
+  dealSpeed: number = 1.0, // Multiplier for dealer speed (0.8 = slow, 1.5 = fast)
 ) {
   const [dealingState, setDealingState] = useState<DealingState>({
     dealerCards: [],
