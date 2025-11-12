@@ -85,8 +85,7 @@ export default function HeatMapModal() {
       }}
     >
       <div
-        role="dialog"
-        tabIndex={-1}
+        role="presentation"
         style={{
           backgroundColor: "#1a1a1a",
           border: "3px solid #333",
