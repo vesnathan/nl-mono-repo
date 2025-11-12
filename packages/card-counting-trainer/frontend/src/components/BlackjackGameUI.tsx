@@ -101,28 +101,10 @@ export default function BlackjackGameUI() {
       }}
     >
       {/* Suspicion Meter - Fixed position */}
-      <SuspicionMeter
-        level={suspicionLevel}
-        dealerSuspicion={dealerSuspicion}
-        pitBossDistance={pitBossDistance}
-        currentDealer={currentDealer}
-        registerTimeout={registerTimeout}
-      />
+      <SuspicionMeter />
 
       {/* Stats Bar at Top */}
-      <StatsBar
-        gameSettings={gameSettings}
-        runningCount={runningCount}
-        currentStreak={currentStreak}
-        playerChips={playerChips}
-        currentScore={currentScore}
-        scoreMultiplier={scoreMultiplier}
-        onSettingsClick={() => setShowSettings(true)}
-        onAdminClick={() => setShowAdminSettings(true)}
-        onLeaderboardClick={() => setShowLeaderboard(true)}
-        onStrategyClick={() => setShowStrategyCard(true)}
-        onChartsClick={() => setShowHeatMap(true)}
-      />
+      <StatsBar />
 
       {/* Phase Indicator (Dev Mode Only) */}
       {process.env.NODE_ENV === "development" && (
