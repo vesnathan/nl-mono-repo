@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { User } from "@/types/gqlTypes";
 
 const createDefaultUser = (): User => ({
-  __typename: "AWSEUser",
+  __typename: "User",
   userId: "",
   userEmail: "",
   userFirstName: "",
