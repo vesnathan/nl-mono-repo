@@ -224,8 +224,8 @@ export default function HomePage() {
                 },
                 {
                   icon: "✓",
-                  title: "Modern Technology Stack",
-                  desc: "We use cutting-edge tools and frameworks to build fast, secure, and scalable solutions",
+                  title: "Custom Solutions, Not Templates",
+                  desc: "We build fully custom solutions tailored to your business - no cookie-cutter WordPress sites",
                 },
                 {
                   icon: "✓",
@@ -262,6 +262,97 @@ export default function HomePage() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Tech Stack Section */}
+      <section className="py-20 w-full bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-800 mb-2 font-josefin">
+                Our Tech Stack
+              </h2>
+              <div className="w-16 h-1 bg-brand-green mb-6 mx-auto" />
+              <p className="text-gray-600 font-roboto-slab leading-relaxed max-w-3xl mx-auto">
+                We use modern, cutting-edge technologies to build fast, secure, and scalable solutions.
+                No cookie-cutter WordPress sites - we create fully custom applications tailored to your business needs.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  category: "Frontend",
+                  icon: "mdi:react",
+                  technologies: [
+                    "React & Next.js",
+                    "TypeScript",
+                    "TailwindCSS",
+                    "Vue.js",
+                  ],
+                },
+                {
+                  category: "Backend",
+                  icon: "mdi:server",
+                  technologies: [
+                    "Node.js",
+                    "Python",
+                    "GraphQL & REST APIs",
+                    "Serverless (AWS Lambda)",
+                  ],
+                },
+                {
+                  category: "Infrastructure",
+                  icon: "mdi:cloud",
+                  technologies: [
+                    "AWS Cloud Services",
+                    "CloudFront CDN",
+                    "CI/CD Pipelines",
+                    "Docker & Kubernetes",
+                  ],
+                },
+              ].map((stack, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-50 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex items-center mb-4">
+                    <Icon
+                      icon={stack.icon}
+                      className="text-4xl text-brand-green mr-3"
+                    />
+                    <h3 className="text-xl font-bold text-gray-800 font-josefin">
+                      {stack.category}
+                    </h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {stack.technologies.map((tech, techIndex) => (
+                      <li
+                        key={techIndex}
+                        className="text-gray-600 font-roboto-slab flex items-start"
+                      >
+                        <Icon
+                          icon="mdi:check-circle"
+                          className="text-brand-green mr-2 mt-0.5 flex-shrink-0"
+                        />
+                        <span>{tech}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-12 text-center">
+              <p className="text-gray-700 font-roboto-slab text-lg mb-4">
+                <strong className="text-brand-green">100% Custom Development</strong> - Every project is built from the ground up to match your exact requirements
+              </p>
+              <p className="text-gray-600 font-roboto-slab">
+                No themes, no templates, no limitations - just powerful, scalable solutions designed for your success.
+              </p>
             </div>
           </div>
         </div>
