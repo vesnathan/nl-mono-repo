@@ -557,7 +557,7 @@ export default function BasicStrategyCard({
                     </td>
                     {row.actions.map((action, actionIdx) => (
                       <td
-                        key={actionIdx}
+                        key={dealerHeaders[actionIdx]}
                         style={{
                           padding: "6px",
                           backgroundColor: getActionColor(
