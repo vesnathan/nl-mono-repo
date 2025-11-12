@@ -177,7 +177,6 @@ export default function GamePage() {
       aiPlayers,
       dealerHand,
       blackjackPayout: gameSettings.blackjackPayout,
-      audioQueue, // Pass audio queue to game interactions
       currentDealer,
     });
 

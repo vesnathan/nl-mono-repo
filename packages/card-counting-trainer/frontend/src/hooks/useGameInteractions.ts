@@ -14,13 +14,8 @@ import {
   generateInitialReactions,
   generateEndOfHandReactions,
 } from "@/utils/reactions";
-import { AudioQueueHook, AudioPriority } from "@/hooks/useAudioQueue";
-import {
-  getPlayerAudioPath,
-  getDealerAudioPath,
-  mapOutcomeToAudioType,
-} from "@/utils/audioHelpers";
-import { getOrGenerateAudio } from "@/utils/dynamicTTS";
+import { AudioPriority } from "@/hooks/useAudioQueue";
+import { mapOutcomeToAudioType } from "@/utils/audioHelpers";
 import { debugLog } from "@/utils/debug";
 import { DealerCharacter } from "@/data/dealerCharacters";
 
@@ -34,7 +29,6 @@ interface UseGameInteractionsParams {
   aiPlayers: AIPlayer[];
   dealerHand: PlayerHand;
   blackjackPayout: BlackjackPayout;
-  audioQueue: AudioQueueHook;
   currentDealer: DealerCharacter | null;
 }
 
@@ -46,7 +40,6 @@ export function useGameInteractions({
   aiPlayers,
   dealerHand,
   blackjackPayout,
-  audioQueue,
   currentDealer,
 }: UseGameInteractionsParams) {
   const triggerConversation = useCallback(
@@ -132,148 +125,21 @@ export function useGameInteractions({
         }
       });
 
-      // Callback to show bubble when audio starts playing
-      const showBubble = () => {
+      // Show speech bubble immediately (no audio)
+      setSpeechBubbles((bubbles) =>
+        bubbles.map((b) =>
+          b.playerId === playerId ? { ...b, visible: true } : b,
+        ),
+      );
+
+      // Schedule hide after 5 seconds
+      registerTimeout(() => {
         setSpeechBubbles((bubbles) =>
           bubbles.map((b) =>
-            b.playerId === playerId ? { ...b, visible: true } : b,
+            b.playerId === playerId ? { ...b, visible: false } : b,
           ),
         );
-
-        // Schedule hide after 5 seconds from when audio starts
-        registerTimeout(() => {
-          setSpeechBubbles((bubbles) =>
-            bubbles.map((b) =>
-              b.playerId === playerId ? { ...b, visible: false } : b,
-            ),
-          );
-        }, 5000);
-      };
-
-      // Queue audio - unified for both dealer and AI players (outside setState to avoid double-execution)
-      if (playerId === "dealer" && dealerVoiceLine && currentDealer) {
-        // Dealer audio - check if pre-generated file exists
-        const audioPath = getDealerAudioPath(currentDealer.id, dealerVoiceLine);
-        debugLog(
-          "audioQueue",
-          `[Audio Queue] Checking dealer audio: ${audioPath}`,
-        );
-
-        fetch(audioPath, { method: "HEAD" })
-          .then((response) => {
-            if (response.ok) {
-              // File exists, queue it
-              debugLog(
-                "audioQueue",
-                `[Audio Queue] File exists, queueing dealer audio: ${audioPath} (priority: ${priority})`,
-              );
-              audioQueue.queueAudio({
-                id: `dealer-${Date.now()}`,
-                audioPath,
-                priority,
-                playerId,
-                message,
-                onPlay: showBubble,
-              });
-            } else {
-              debugLog(
-                "audioQueue",
-                `[Audio Queue] Dealer file not found: ${audioPath} - generating for future use`,
-              );
-              // Generate the audio for next time (don't queue it this time)
-              getOrGenerateAudio(message, currentDealer.id).catch((error) => {
-                debugLog(
-                  "audioQueue",
-                  `[Audio Queue] Failed to generate ${audioPath}:`,
-                  error,
-                );
-              });
-            }
-          })
-          .catch((error) => {
-            debugLog(
-              "audioQueue",
-              `[Audio Queue] Error checking dealer file: ${audioPath}`,
-              error,
-            );
-          });
-      } else if (playerId !== "dealer") {
-        // AI player audio
-        if (reactionType) {
-          // Check if pre-generated audio file exists, queue only if it does
-          const audioPath = getPlayerAudioPath(playerId, reactionType);
-          debugLog(
-            "audioQueue",
-            `[Audio Queue] Checking pre-generated audio for ${playerId}: ${audioPath}`,
-          );
-
-          fetch(audioPath, { method: "HEAD" })
-            .then((response) => {
-              if (response.ok) {
-                // File exists, queue it
-                debugLog(
-                  "audioQueue",
-                  `[Audio Queue] File exists, queueing for ${playerId}: ${audioPath} (priority: ${priority})`,
-                );
-                audioQueue.queueAudio({
-                  id: `${playerId}-${Date.now()}`,
-                  audioPath,
-                  priority,
-                  playerId,
-                  message,
-                  position: bubblePosition,
-                  onPlay: showBubble,
-                });
-              } else {
-                debugLog(
-                  "audioQueue",
-                  `[Audio Queue] File not found for ${playerId}: ${audioPath} - generating for future use`,
-                );
-                // Generate the audio for next time (don't queue it this time)
-                getOrGenerateAudio(message, playerId).catch((error) => {
-                  debugLog(
-                    "audioQueue",
-                    `[Audio Queue] Failed to generate ${audioPath}:`,
-                    error,
-                  );
-                });
-              }
-            })
-            .catch((error) => {
-              debugLog(
-                "audioQueue",
-                `[Audio Queue] Error checking file for ${playerId}: ${audioPath}`,
-                error,
-              );
-            });
-        } else {
-          // Generate audio dynamically for dialogue/conversations
-          getOrGenerateAudio(message, playerId)
-            .then((audioUrl) => {
-              if (audioUrl) {
-                debugLog(
-                  "audioQueue",
-                  `[Audio Queue] Queueing dynamic audio for ${playerId}: ${audioUrl} (priority: ${priority})`,
-                );
-                audioQueue.queueAudio({
-                  id: `${playerId}-${Date.now()}`,
-                  audioPath: audioUrl,
-                  priority,
-                  playerId,
-                  message,
-                  position: bubblePosition,
-                  onPlay: showBubble,
-                });
-              }
-            })
-            .catch((error) => {
-              console.error(
-                `[Audio Queue] Failed to generate audio for ${playerId}:`,
-                error,
-              );
-            });
-        }
-      }
+      }, 5000);
     },
     [aiPlayers, setSpeechBubbles], // Removed audioQueue - callback uses current value
   );
