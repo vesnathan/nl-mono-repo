@@ -913,20 +913,53 @@ export function useGameActions({
 
   const split = useCallback(() => {
     debugLog("playerActions", "=== PLAYER ACTION: SPLIT ===");
-    const splitHandStr = playerHand.cards
+
+    // Check if this is a resplit (already in split mode)
+    const isResplit = playerHand.isSplit && playerHand.splitHands;
+    const currentSplitCount = isResplit ? playerHand.splitHands!.length : 0;
+
+    // Get the hand being split
+    const handToSplit = isResplit
+      ? playerHand.splitHands![playerHand.activeSplitHandIndex!]
+      : playerHand;
+
+    const splitHandStr = handToSplit.cards
       .map((c) => `${c.rank}${c.suit}`)
       .join(", ");
     debugLog("playerActions", `Current hand: ${splitHandStr}`);
-    debugLog("playerActions", `Current bet: $${playerHand.bet}`);
+    debugLog("playerActions", `Current bet: $${handToSplit.bet}`);
+    debugLog(
+      "playerActions",
+      `Is resplit: ${isResplit}, current split count: ${currentSplitCount}`,
+    );
 
     // Verify player has enough chips for second bet
-    if (playerChips < playerHand.bet) {
+    if (playerChips < handToSplit.bet) {
       debugLog("playerActions", "ERROR: Not enough chips to split!");
       return;
     }
 
+    // Check resplit limits
+    if (currentSplitCount >= gameSettings.maxResplits + 1) {
+      debugLog(
+        "playerActions",
+        `ERROR: Cannot resplit - already at max splits (${gameSettings.maxResplits})`,
+      );
+      return;
+    }
+
+    // Check resplit aces restriction
+    if (
+      handToSplit.cards[0].rank === "A" &&
+      currentSplitCount > 0 &&
+      !gameSettings.resplitAces
+    ) {
+      debugLog("playerActions", "ERROR: Cannot resplit aces (not allowed)");
+      return;
+    }
+
     // Split the two cards into two hands
-    const [card1, card2] = playerHand.cards;
+    const [card1, card2] = handToSplit.cards;
 
     debugLog(
       "playerActions",
@@ -934,21 +967,21 @@ export function useGameActions({
     );
     debugLog(
       "playerActions",
-      `Deducting $${playerHand.bet} from chips for second hand`,
+      `Deducting $${handToSplit.bet} from chips for second hand`,
     );
 
     // Deduct chips for the second bet
-    setPlayerChips((prev) => prev - playerHand.bet);
+    setPlayerChips((prev) => prev - handToSplit.bet);
 
     // Create two hands, each with one card
     const hand1: PlayerHand = {
       cards: [card1],
-      bet: playerHand.bet,
+      bet: handToSplit.bet,
     };
 
     const hand2: PlayerHand = {
       cards: [card2],
-      bet: playerHand.bet,
+      bet: handToSplit.bet,
     };
 
     // Deal a card to the first hand
@@ -971,35 +1004,62 @@ export function useGameActions({
 
         hand2.cards.push(newCard2);
 
-        // Update player hand to split state
-        setPlayerHand({
-          cards: [], // Clear main hand
-          bet: playerHand.bet,
-          isSplit: true,
-          splitHands: [hand1, hand2],
-          activeSplitHandIndex: 0,
-        });
+        if (isResplit) {
+          // Resplit: Replace current hand with two new hands
+          const newSplitHands = [...playerHand.splitHands!];
+          const activeIndex = playerHand.activeSplitHandIndex!;
 
-        debugLog("playerActions", "Split complete - starting with first hand");
+          // Replace the current hand with hand1 and insert hand2 after it
+          newSplitHands.splice(activeIndex, 1, hand1, hand2);
 
-        // Check if first hand is blackjack (Ace + 10-value card after split)
+          setPlayerHand({
+            cards: [], // Clear main hand
+            bet: playerHand.bet,
+            isSplit: true,
+            splitHands: newSplitHands,
+            activeSplitHandIndex: activeIndex, // Stay on first new hand
+          });
+
+          debugLog(
+            "playerActions",
+            `Resplit complete - now have ${newSplitHands.length} hands, playing hand ${activeIndex + 1}`,
+          );
+        } else {
+          // Initial split: Create split state
+          setPlayerHand({
+            cards: [], // Clear main hand
+            bet: playerHand.bet,
+            isSplit: true,
+            splitHands: [hand1, hand2],
+            activeSplitHandIndex: 0,
+          });
+
+          debugLog("playerActions", "Split complete - starting with first hand");
+        }
+
+        // Check if first hand is 21 (automatically stand)
         const hand1Value = calculateHandValue(hand1.cards);
         if (hand1Value === 21) {
           debugLog(
             "playerActions",
             "First hand has 21 - automatically standing",
           );
-          // Move to second hand
-          setPlayerHand((prev) => ({
-            ...prev,
-            activeSplitHandIndex: 1,
-          }));
+          // Move to next hand
+          setPlayerHand((prev) => {
+            const nextIndex = (prev.activeSplitHandIndex || 0) + 1;
+            return {
+              ...prev,
+              activeSplitHandIndex: nextIndex,
+            };
+          });
         }
       }, CARD_ANIMATION_DURATION + 200);
     }, 500);
   }, [
     playerHand,
     playerChips,
+    gameSettings.maxResplits,
+    gameSettings.resplitAces,
     dealCardFromShoe,
     registerTimeout,
     setPlayerHand,

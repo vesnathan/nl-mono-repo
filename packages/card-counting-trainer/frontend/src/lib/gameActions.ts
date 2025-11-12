@@ -108,11 +108,29 @@ export function isSoftHand(cards: Card[]): boolean {
 /**
  * Check if a hand can be split (two cards of same rank)
  * @param cards Array of cards in the hand
+ * @param maxResplits Maximum number of resplits allowed (0-3)
+ * @param currentSplitCount Number of times already split (0 for initial hand)
+ * @param resplitAces Whether resplitting aces is allowed
  * @returns True if hand can be split
  */
-export function canSplit(cards: Card[]): boolean {
+export function canSplit(
+  cards: Card[],
+  maxResplits: number = 3,
+  currentSplitCount: number = 0,
+  resplitAces: boolean = false,
+): boolean {
   if (cards.length !== 2) return false;
-  return cards[0].rank === cards[1].rank;
+  if (cards[0].rank !== cards[1].rank) return false;
+
+  // Check if already at max splits (maxResplits + 1 total hands)
+  if (currentSplitCount >= maxResplits + 1) return false;
+
+  // Check resplit aces restriction
+  if (cards[0].rank === "A" && currentSplitCount > 0 && !resplitAces) {
+    return false;
+  }
+
+  return true;
 }
 
 /**
