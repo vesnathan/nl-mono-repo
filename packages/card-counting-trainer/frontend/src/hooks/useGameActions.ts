@@ -4,6 +4,7 @@ import {
   PlayerHand,
   GamePhase,
   FlyingCardData,
+  SpeechBubble,
 } from "@/types/gameState";
 import { Card as GameCard } from "@/types/game";
 import { DealerCharacter } from "@/data/dealerCharacters";
@@ -42,7 +43,9 @@ interface UseGameActionsParams {
   setDealerHand: (
     hand: PlayerHand | ((prev: PlayerHand) => PlayerHand),
   ) => void;
-  setSpeechBubbles: (bubbles: any[]) => void;
+  setSpeechBubbles: (
+    bubbles: SpeechBubble[] | ((prev: SpeechBubble[]) => SpeechBubble[]),
+  ) => void;
   setAIPlayers: (
     players: AIPlayer[] | ((prev: AIPlayer[]) => AIPlayer[]),
   ) => void;

@@ -4,8 +4,6 @@ import { useState } from "react";
 import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 
 interface FlyingCardProps {
-  rank: string;
-  suit: string;
   fromPosition: { left: string; top: string };
   toPosition: { left: string; top: string };
   onAnimationComplete?: () => void;

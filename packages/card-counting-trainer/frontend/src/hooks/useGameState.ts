@@ -293,7 +293,9 @@ export function useGameState(config: GameConfig = DEFAULT_CONFIG) {
   const [aiHandsInProgress, setAIHandsInProgress] = useState<
     { position: number; cards: Card[] }[]
   >([]);
-  const [dealerCardsInProgress, setDealerCardsInProgress] = useState<any[]>([]);
+  const [dealerCardsInProgress, setDealerCardsInProgress] = useState<Card[]>(
+    [],
+  );
   // Store AI positions for entire shoe (persistent across hands)
   const [aiPlayerPositions, setAIPlayerPositions] = useState<number[]>([]);
 

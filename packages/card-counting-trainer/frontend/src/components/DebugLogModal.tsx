@@ -4,9 +4,6 @@ import { GamePhase } from "@/types/gameState";
 interface DebugLogModalProps {
   debugLogs: string[];
   phase: GamePhase;
-  showDebugLog: boolean;
-  onShowDebugLog: (show: boolean) => void;
-  onClearDebugLogs: () => void;
 }
 
 export default function DebugLogModal({

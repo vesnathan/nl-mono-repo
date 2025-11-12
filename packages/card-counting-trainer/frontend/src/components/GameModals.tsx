@@ -55,7 +55,7 @@ export default function GameModals() {
     setGameSettings,
   } = useGameActions();
   // Helper function to check if player is busted
-  const isBusted = (cards: any[]) => {
+  const isBusted = (cards: { value: number }[]) => {
     const value = cards.reduce((sum, card) => sum + card.value, 0);
     return value > 21;
   };

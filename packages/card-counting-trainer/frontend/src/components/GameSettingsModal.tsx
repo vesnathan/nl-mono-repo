@@ -280,7 +280,16 @@ export default function GameSettingsModal({
                 <button
                   type="button"
                   key={preset.id}
-                  onClick={() => loadPreset(preset.id as any)}
+                  onClick={() =>
+                    loadPreset(
+                      preset.id as
+                        | "vegas"
+                        | "single"
+                        | "double"
+                        | "european"
+                        | "bad",
+                    )
+                  }
                   style={{
                     backgroundColor: "rgba(74, 144, 226, 0.2)",
                     color: "#FFF",
