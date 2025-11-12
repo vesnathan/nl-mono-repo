@@ -205,6 +205,7 @@ export default function BasicStrategyCard({
               Basic Strategy Chart
             </h2>
             <button
+              type="button"
               onClick={onClose}
               style={{
                 backgroundColor: "transparent",
@@ -572,6 +573,7 @@ export default function BasicStrategyCard({
 
         <div style={{ marginTop: "24px", textAlign: "center" }}>
           <button
+            type="button"
             onClick={onClose}
             style={{
               backgroundColor: "#FFD700",

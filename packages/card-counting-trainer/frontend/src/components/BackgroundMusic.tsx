@@ -32,8 +32,8 @@ export default function BackgroundMusic({
   // Play audio when shouldPlay becomes true
   useEffect(() => {
     if (shouldPlay && audioRef.current) {
-      audioRef.current.play().catch((error) => {
-        console.log("Audio playback failed:", error);
+      audioRef.current.play().catch(() => {
+        // Audio playback failed - user interaction may be required
       });
     }
   }, [shouldPlay]);
