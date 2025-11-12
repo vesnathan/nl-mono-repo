@@ -105,7 +105,7 @@ export function generateInitialReactions(
           : "smallWin";
 
       // Determine audio type based on hand value
-      let audioType: "badStart" | "goodHit" | undefined = undefined;
+      let audioType: "badStart" | "goodHit" | undefined;
       if (handValue <= 12) {
         audioType = "badStart";
       } else if (handValue >= 19) {

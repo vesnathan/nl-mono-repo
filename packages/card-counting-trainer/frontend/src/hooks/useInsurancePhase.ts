@@ -71,12 +71,11 @@ export function useInsurancePhase({
                   insuranceBet: insuranceCost,
                   chips: ai.chips - insuranceCost,
                 };
-              } else {
-                debugLog(
-                  "insurance",
-                  `AI Player ${idx} (${ai.character.name}) cannot afford insurance`,
-                );
               }
+              debugLog(
+                "insurance",
+                `AI Player ${idx} (${ai.character.name}) cannot afford insurance`,
+              );
             } else {
               debugLog(
                 "insurance",

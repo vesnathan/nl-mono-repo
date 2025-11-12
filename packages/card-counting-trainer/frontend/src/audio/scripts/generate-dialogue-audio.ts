@@ -27,7 +27,7 @@ const VOICE_IDS: Record<string, string> = {
   "veteran-lisa": "q7bZH4lKxX0vZvOvobyX",
 };
 
-const ELEVEN_API_KEY = process.env.ELEVEN_API_KEY;
+const { ELEVEN_API_KEY } = process.env;
 const IS_PRODUCTION =
   process.env.STAGE === "prod" ||
   process.env.NEXT_PUBLIC_ENVIRONMENT === "prod";
@@ -158,7 +158,7 @@ function extractDialogueLines(): DialogueLine[] {
     for (const charMatch of characterMatches) {
       lines.push({
         characterId: charMatch[1],
-        text: text,
+        text,
       });
     }
   }

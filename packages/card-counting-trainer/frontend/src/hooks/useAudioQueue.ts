@@ -160,17 +160,16 @@ export function useAudioQueue({
               );
               // Retry with the generated URL
               return await tryPlayAudio(generatedAudioUrl, true);
-            } else {
-              console.error(
-                `[Audio Queue] ElevenLabs fallback failed to generate audio`,
-              );
-              // Skip this audio and move to next
-              setIsPlaying(false);
-              setCurrentItem(null);
-              processingRef.current = false;
-              registerTimeout(() => processQueue(), 100);
-              return;
             }
+            console.error(
+              `[Audio Queue] ElevenLabs fallback failed to generate audio`,
+            );
+            // Skip this audio and move to next
+            setIsPlaying(false);
+            setCurrentItem(null);
+            processingRef.current = false;
+            registerTimeout(() => processQueue(), 100);
+            return;
           }
         } catch (checkError) {
           debugLog(

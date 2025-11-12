@@ -288,9 +288,8 @@ export function useAITurnsPhase({
         aiTurnProcessingRef.current = false;
         registerTimeout(() => setPhase("PLAYER_TURN"), 1000);
         return;
-      } else {
-        debugLog("aiTurns", `✗ Player does NOT need to act before AI ${idx}`);
       }
+      debugLog("aiTurns", `✗ Player does NOT need to act before AI ${idx}`);
 
       debugLog(
         "aiTurns",

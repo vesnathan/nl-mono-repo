@@ -25,7 +25,7 @@ export function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
       onClose={onClose}
       size="lg"
       isDismissable={false}
-      hideCloseButton={true}
+      hideCloseButton
       classNames={{
         base: "bg-gray-900 border border-casino-gold/30",
         header: "border-b border-casino-gold/30",

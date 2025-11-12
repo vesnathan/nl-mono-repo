@@ -109,7 +109,7 @@ export default function GameModals() {
       {/* Split Hands Modal - shown when player has split hands */}
       {hasSplitHands && (
         <SplitHandsModal
-          isOpen={true}
+          isOpen
           hands={playerHand.splitHands!.map((hand, index) => {
             const activeIndex = playerHand.activeSplitHandIndex ?? 0;
             const handValue = hand.cards.reduce((sum, card) => {

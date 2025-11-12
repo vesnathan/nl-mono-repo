@@ -45,11 +45,8 @@ export function useGameInteractions({
   const triggerConversation = useCallback(
     (speakerId: string, speakerName: string, position: number) => {
       // DISABLED FOR TESTING: All player conversations disabled
-      return;
-
       // Don't trigger if there's already an active conversation
       // if (activeConversation) return;
-
       // const conversation = createConversation(speakerId, speakerName, position);
       // setActiveConversation(conversation);
     },
@@ -118,20 +115,19 @@ export function useGameInteractions({
                 }
               : b,
           );
-        } else {
-          return [
-            ...prev,
-            {
-              playerId,
-              message,
-              position: bubbleData.position,
-              hideTimeoutId: undefined,
-              visible: false, // Start invisible
-              isDealer: bubbleData.isDealer,
-              playerPosition: bubbleData.playerPosition,
-            },
-          ];
         }
+        return [
+          ...prev,
+          {
+            playerId,
+            message,
+            position: bubbleData.position,
+            hideTimeoutId: undefined,
+            visible: false, // Start invisible
+            isDealer: bubbleData.isDealer,
+            playerPosition: bubbleData.playerPosition,
+          },
+        ];
       });
 
       // Show speech bubble immediately (no audio)
