@@ -17,6 +17,14 @@ Parameters:
     Type: Number
     Description: Number of days to retain CloudWatch Logs
     Default: 14
+  DomainName:
+    Type: String
+    Description: Custom domain name (e.g., loudn-clear.com or www.loudn-clear.com). Leave empty to use CloudFront domain only.
+    Default: ""
+  CertificateArn:
+    Type: String
+    Description: ARN of ACM certificate for the custom domain (must be in us-east-1). Required if DomainName is provided.
+    Default: ""
 
 Resources:
   # S3 Bucket for static website
@@ -39,6 +47,20 @@ Resources:
         TemplateBucketName: !Ref TemplateBucketName
         LogRetentionInDays: !Ref LogRetentionInDays
 
+  # CloudFront distribution for website
+  CloudFrontStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: S3Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucketName}.s3.${AWS::Region}.amazonaws.com/resources/CloudFront/cloudfront.yaml
+      Parameters:
+        Stage: !Ref Stage
+        AppName: !Ref AppName
+        FrontendBucketName: !GetAtt S3Stack.Outputs.FrontendBucketName
+        FrontendBucketRegionalDomainName: !GetAtt S3Stack.Outputs.FrontendBucketRegionalDomainName
+        DomainName: !Ref DomainName
+        CertificateArn: !Ref CertificateArn
+
 Outputs:
   WebsiteBucket:
     Description: "S3 bucket for static website"
@@ -46,9 +68,21 @@ Outputs:
     Export:
       Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-bucket"
 
+  CloudFrontDistributionId:
+    Description: "CloudFront Distribution ID"
+    Value: !GetAtt CloudFrontStack.Outputs.CloudFrontDistributionId
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-cloudfront-id"
+
+  CloudFrontURL:
+    Description: "CloudFront Distribution URL"
+    Value: !GetAtt CloudFrontStack.Outputs.CloudFrontURL
+    Export:
+      Name: !Sub "nlmonorepo-${AppName}-${Stage}-cloudfront-url"
+
   WebsiteURL:
-    Description: "Website URL"
-    Value: !GetAtt S3Stack.Outputs.WebsiteURL
+    Description: "Website URL (CloudFront or Custom Domain)"
+    Value: !GetAtt CloudFrontStack.Outputs.CloudFrontURL
     Export:
       Name: !Sub "nlmonorepo-${AppName}-${Stage}-website-url"
 

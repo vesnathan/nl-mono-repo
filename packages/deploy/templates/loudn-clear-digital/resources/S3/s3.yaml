@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Lawn Order S3 Static Website"
+Description: "Loud'n Clear Digital S3 Static Website"
 
 Parameters:
   Stage:
@@ -11,21 +11,18 @@ Parameters:
     Description: Application short name used in resource naming
 
 Resources:
-  # S3 Bucket for static website hosting
+  # S3 Bucket for static website hosting (private, accessed via CloudFront)
   FrontendBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
       BucketName: !Sub "nlmonorepo-${AppName}-website-${Stage}"
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: index.html
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
-        IgnorePublicAcls: false
-        RestrictPublicBuckets: false
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       Tags:
         - Key: "Project"
           Value: !Ref AppName
@@ -36,29 +33,21 @@ Resources:
         - Key: "Purpose"
           Value: "Static Website Hosting"
 
-  # Bucket policy to allow public read access
-  FrontendBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref FrontendBucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: PublicReadGetObject
-            Effect: Allow
-            Principal: "*"
-            Action: s3:GetObject
-            Resource: !Sub "${FrontendBucket.Arn}/*"
-
 Outputs:
   FrontendBucketName:
     Description: Name of the frontend bucket
     Value: !Ref FrontendBucket
+    Export:
+      Name: !Sub "${AWS::StackName}-BucketName"
 
   FrontendBucketArn:
     Description: ARN of the frontend S3 bucket
     Value: !GetAtt FrontendBucket.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-BucketArn"
 
-  WebsiteURL:
-    Description: S3 static website URL
-    Value: !GetAtt FrontendBucket.WebsiteURL
+  FrontendBucketRegionalDomainName:
+    Description: Regional domain name of the frontend S3 bucket
+    Value: !GetAtt FrontendBucket.RegionalDomainName
+    Export:
+      Name: !Sub "${AWS::StackName}-RegionalDomainName"

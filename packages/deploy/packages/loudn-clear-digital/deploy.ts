@@ -84,6 +84,10 @@ export async function deployLoudnClearDigital(
       local: "resources/Lambda/lambda.yaml",
       s3Key: "resources/Lambda/lambda.yaml",
     },
+    {
+      local: "resources/CloudFront/cloudfront.yaml",
+      s3Key: "resources/CloudFront/cloudfront.yaml",
+    },
   ];
 
   for (const template of templates) {
