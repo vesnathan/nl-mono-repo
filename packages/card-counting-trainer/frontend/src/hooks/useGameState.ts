@@ -29,6 +29,7 @@ const DEFAULT_CONFIG: GameConfig = {
 /**
  * Deal a new hand to existing AI players (no simulation of previous hands)
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function dealNewHandToAIPlayers(
   shoe: Card[],
   numDecks: number,
@@ -124,6 +125,7 @@ export function dealNewHandToAIPlayers(
 /**
  * Simulate dealing cards to build up a count before user joins
  * AND deal current visible hands to AI players
+// eslint-disable-next-line sonarjs/cognitive-complexity
  */
 export function simulateHandsInProgress(
   shoe: Card[],

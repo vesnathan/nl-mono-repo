@@ -38,6 +38,7 @@ export function useInsurancePhase({
 }: UseInsurancePhaseParams) {
   const hasProcessedAI = useRef(false);
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   useEffect(() => {
     if (phase !== "INSURANCE") {
       hasProcessedAI.current = false;

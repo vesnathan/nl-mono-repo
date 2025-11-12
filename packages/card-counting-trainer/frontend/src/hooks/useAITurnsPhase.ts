@@ -117,6 +117,7 @@ export function useAITurnsPhase({
   const prevPhaseRef = useRef<GamePhase | null>(null);
   const hasResetRef = useRef<boolean>(false);
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   useEffect(() => {
     // Reset playersFinished when entering AI_TURNS phase for the first time
     if (

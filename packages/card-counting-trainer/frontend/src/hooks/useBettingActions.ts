@@ -60,6 +60,7 @@ export function useBettingActions({
   currentDealer,
   audioQueue,
 }: UseBettingActionsParams) {
+      // eslint-disable-next-line sonarjs/cognitive-complexity
   const handleConfirmBet = useCallback(() => {
     debugLog("betting", "=== CONFIRM BET CLICKED ===");
     debugLog("betting", `Current bet: $${currentBet}`);

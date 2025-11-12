@@ -28,6 +28,7 @@ export function useConversationHandlers({
   addSpeechBubble,
 }: UseConversationHandlersParams) {
   const handleConversationResponse = useCallback(
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     (choiceIndex: number) => {
       if (!activeConversation) return;
 

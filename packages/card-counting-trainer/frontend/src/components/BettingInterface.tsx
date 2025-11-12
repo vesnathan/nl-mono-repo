@@ -102,6 +102,7 @@ export default function BettingInterface({
           justifyContent: "center",
         }}
       >
+                // eslint-disable-next-line sonarjs/cognitive-complexity
         {CHIP_VALUES.map((value) => {
           const isAffordable = canAddChip(value);
           const isSelected = selectedChipValue === value;

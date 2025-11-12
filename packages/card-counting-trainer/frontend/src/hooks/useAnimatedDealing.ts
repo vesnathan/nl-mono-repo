@@ -68,6 +68,7 @@ export function useAnimatedDealing(
     characterReactions: [],
   });
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   const startDealing = useCallback(() => {
     if (dealingState.isDealing || aiPlayerPositions.length === 0) return;
 

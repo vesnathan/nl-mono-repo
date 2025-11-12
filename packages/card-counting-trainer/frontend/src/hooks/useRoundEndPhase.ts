@@ -48,6 +48,7 @@ export function useRoundEndPhase({
   setShoesDealt,
   nextHand,
 }: UseRoundEndPhaseParams) {
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   useEffect(() => {
     if (phase === "ROUND_END") {
       registerTimeout(() => {

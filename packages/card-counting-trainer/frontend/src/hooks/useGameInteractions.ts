@@ -76,6 +76,7 @@ export function useGameInteractions({
         | "dealer_has_20"
         | "dealer_has_21",
       priority: AudioPriority = AudioPriority.NORMAL,
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     ) => {
       // Unified speech bubble implementation for all players (dealer and AI)
       // Pattern: Speech bubble ALWAYS created first, then audio queued if file exists

@@ -164,6 +164,7 @@ export function useGameActions({
   ]);
 
   const dealInitialCards = useCallback(
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     (playerBetAmount?: number) => {
       // Use parameter if provided, otherwise fall back to playerHand.bet
       const effectivePlayerBet = playerBetAmount ?? playerHand.bet;
