@@ -9,11 +9,12 @@ export function useSuspicionDecay(
   setSuspicionLevel: (level: number | ((prev: number) => number)) => void,
 ) {
   useEffect(() => {
-    if (suspicionLevel > 0) {
-      const decayInterval = setInterval(() => {
-        setSuspicionLevel((prev) => Math.max(0, prev - 1));
-      }, 3000);
-      return () => clearInterval(decayInterval);
+    if (suspicionLevel <= 0) {
+      return undefined;
     }
+    const decayInterval = setInterval(() => {
+      setSuspicionLevel((prev) => Math.max(0, prev - 1));
+    }, 3000);
+    return () => clearInterval(decayInterval);
   }, [suspicionLevel, setSuspicionLevel]);
 }

@@ -17,17 +17,18 @@ export default function ThinkingBubble({
 
   useEffect(() => {
     // Animate dots: . -> .. -> ... -> . (only for thinking bubbles)
-    if (type === "thinking") {
-      const interval = setInterval(() => {
-        setDots((prev) => {
-          if (prev === ".") return "..";
-          if (prev === "..") return "...";
-          return ".";
-        });
-      }, 500);
-
-      return () => clearInterval(interval);
+    if (type !== "thinking") {
+      return undefined;
     }
+    const interval = setInterval(() => {
+      setDots((prev) => {
+        if (prev === ".") return "..";
+        if (prev === "..") return "...";
+        return ".";
+      });
+    }, 500);
+
+    return () => clearInterval(interval);
   }, [type]);
 
   const getColor = () => {
