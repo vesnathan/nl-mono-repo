@@ -5,90 +5,13 @@ import GameTable from "@/components/GameTable";
 import GameModals from "@/components/GameModals";
 import HeatMapModal from "@/components/HeatMapModal";
 import { useGameState } from "@/contexts/GameStateContext";
-import { useUIState } from "@/contexts/UIStateContext";
-import { useGameActions } from "@/contexts/GameActionsContext";
 
 export default function BlackjackGameUI() {
   // Get all state from contexts
   const gameState = useGameState();
-  const uiState = useUIState();
-  const actions = useGameActions();
 
   // Destructure what we need
-  const {
-    suspicionLevel,
-    dealerSuspicion,
-    pitBossDistance,
-    gameSettings,
-    runningCount,
-    currentStreak,
-    playerChips,
-    currentScore,
-    scoreMultiplier,
-    cardsDealt,
-    currentDealer,
-    dealerCallout,
-    phase,
-    dealerHand,
-    dealerRevealed,
-    aiPlayers,
-    playerSeat,
-    playerHand,
-    playerFinished,
-    currentBet,
-    activePlayerIndex,
-    playerActions,
-    speechBubbles,
-    winLossBubbles,
-    activeConversation,
-    flyingCards,
-    showDealerInfo,
-    insuranceOffered,
-    minBet,
-    maxBet,
-    peakChips,
-    longestStreak,
-  } = gameState;
-
-  const {
-    initialized,
-    showSettings,
-    showLeaderboard,
-    showStrategyCard,
-    showHeatMap,
-    heatMapBuckets,
-    discretionScore,
-    heatMapDataPointCount,
-    debugLogs,
-    showDebugLog,
-    setShowSettings,
-    setShowAdminSettings,
-    setShowLeaderboard,
-    setShowStrategyCard,
-    setShowHeatMap,
-    setShowDealerInfo,
-    setShowDebugLog,
-    clearDebugLogs,
-  } = uiState;
-
-  const {
-    setPlayerSeat,
-    startNewRound,
-    hit,
-    stand,
-    doubleDown,
-    split,
-    handleBetChange,
-    handleConfirmBet,
-    handleClearBet,
-    handleTakeInsurance,
-    handleDeclineInsurance,
-    handleConversationResponse,
-    handleConversationIgnore,
-    setWinLossBubbles,
-    registerTimeout,
-    setGameSettings,
-  } = actions;
+  const { phase } = gameState;
   return (
     <div
       style={{
