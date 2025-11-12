@@ -37,16 +37,13 @@ export function useGameInteractions({
   dealerHand,
   blackjackPayout,
 }: UseGameInteractionsParams) {
-  const triggerConversation = useCallback(
-    () => {
-      // DISABLED FOR TESTING: All player conversations disabled
-      // Don't trigger if there's already an active conversation
-      // if (activeConversation) return;
-      // const conversation = createConversation(speakerId, speakerName, position);
-      // setActiveConversation(conversation);
-    },
-    [activeConversation, setActiveConversation],
-  );
+  const triggerConversation = useCallback(() => {
+    // DISABLED FOR TESTING: All player conversations disabled
+    // Don't trigger if there's already an active conversation
+    // if (activeConversation) return;
+    // const conversation = createConversation(speakerId, speakerName, position);
+    // setActiveConversation(conversation);
+  }, [activeConversation, setActiveConversation]);
 
   const addSpeechBubble = useCallback(
     (
