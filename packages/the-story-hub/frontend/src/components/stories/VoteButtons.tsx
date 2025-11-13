@@ -62,7 +62,9 @@ export function VoteButtons({
         isIconOnly
         isDisabled={isVoting}
         isLoading={votingType === VoteType.UP && isVoting}
-        onPress={(e) => handleVote(VoteType.UP, e as unknown as React.MouseEvent)}
+        onPress={(e) =>
+          handleVote(VoteType.UP, e as unknown as React.MouseEvent)
+        }
         className="min-w-0 h-auto p-1 text-gray-400 hover:text-green-400 hover:bg-green-400/10"
         title={isAuthenticated ? "Upvote" : "Login to vote"}
       >
@@ -78,7 +80,9 @@ export function VoteButtons({
         isIconOnly
         isDisabled={isVoting}
         isLoading={votingType === VoteType.DOWN && isVoting}
-        onPress={(e) => handleVote(VoteType.DOWN, e as unknown as React.MouseEvent)}
+        onPress={(e) =>
+          handleVote(VoteType.DOWN, e as unknown as React.MouseEvent)
+        }
         className="min-w-0 h-auto p-1 text-gray-400 hover:text-red-400 hover:bg-red-400/10"
         title={isAuthenticated ? "Downvote" : "Login to vote"}
       >
