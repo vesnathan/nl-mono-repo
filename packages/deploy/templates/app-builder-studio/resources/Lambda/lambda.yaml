@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "App Builder Studio Lambda Functions"
+
+Parameters:
+  Stage:
+    Type: String
+    Description: Deployment stage (e.g., dev, prod)
+    AllowedPattern: ^[a-zA-Z0-9-]+$
+  AppName:
+    Type: String
+    Description: Application Name
+  TemplateBucketName:
+    Type: String
+    Description: S3 bucket name for Lambda code
+  LogRetentionInDays:
+    Type: Number
+    Description: Number of days to retain CloudWatch Logs for Lambda functions
+    Default: 14
+
+Resources:
+  # Contact Form Email Lambda (uses SES)
+  SendContactEmailFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "nlmonorepo-${AppName}-send-contact-email-${Stage}"
+      Handler: index.handler
+      Runtime: nodejs20.x
+      Timeout: 30
+      Role: !GetAtt SendContactEmailRole.Arn
+      Code:
+        S3Bucket: !Ref TemplateBucketName
+        S3Key: !Sub "lambdas/${Stage}/sendContactEmail.zip"
+      Description: "Handles contact and quote form submissions via SES"
+      Environment:
+        Variables:
+          FROM_EMAIL: noreply@appbuilderstudio.com
+          TO_EMAIL: "hello@appbuilderstudio.com"
+      Tags:
+        - Key: "Project"
+          Value: !Ref AppName
+        - Key: "Environment"
+          Value: !Ref Stage
+        - Key: "ManagedBy"
+          Value: "CloudFormation"
+        - Key: "Purpose"
+          Value: "Contact Form Email Handler"
+
+  SendContactEmailRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "nlmonorepo-${AppName}-send-contact-email-role-${Stage}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SESAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ses:SendEmail
+                  - ses:SendRawEmail
+                Resource: "*"
+
+  SendContactEmailFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Retain
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${SendContactEmailFunction}"
+      RetentionInDays: !Ref LogRetentionInDays
+
+  # Lambda Function URL for public access (no auth required)
+  SendContactEmailFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      AuthType: NONE
+      TargetFunctionArn: !GetAtt SendContactEmailFunction.Arn
+      Cors:
+        AllowOrigins:
+          - "*"
+        AllowMethods:
+          - POST
+        AllowHeaders:
+          - Content-Type
+        MaxAge: 300
+
+  # Permission to allow public invocation via Function URL
+  SendContactEmailFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SendContactEmailFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+Outputs:
+  SendContactEmailFunctionUrl:
+    Value: !GetAtt SendContactEmailFunctionUrl.FunctionUrl
+    Description: Lambda Function URL for contact/quote form submissions
+    Export:
+      Name: !Sub "${AWS::StackName}-SendContactEmailFunctionUrl"
