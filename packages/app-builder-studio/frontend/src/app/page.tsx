@@ -283,8 +283,10 @@ export default function HomePage() {
               </h2>
               <div className="w-16 h-1 bg-brand-green mb-6 mx-auto" />
               <p className="text-gray-600 font-roboto-slab leading-relaxed max-w-3xl mx-auto">
-                We use modern, cutting-edge technologies to build fast, secure, and scalable solutions.
-                No cookie-cutter WordPress sites - we create fully custom applications tailored to your business needs.
+                We use modern, cutting-edge technologies to build fast, secure,
+                and scalable solutions. No cookie-cutter WordPress sites - we
+                create fully custom applications tailored to your business
+                needs.
               </p>
             </div>
 
@@ -354,10 +356,15 @@ export default function HomePage() {
 
             <div className="mt-12 text-center">
               <p className="text-gray-700 font-roboto-slab text-lg mb-4">
-                <strong className="text-brand-green">100% Custom Development</strong> - Every project is built from the ground up to match your exact requirements
+                <strong className="text-brand-green">
+                  100% Custom Development
+                </strong>{" "}
+                - Every project is built from the ground up to match your exact
+                requirements
               </p>
               <p className="text-gray-600 font-roboto-slab">
-                No themes, no templates, no limitations - just powerful, scalable solutions designed for your success.
+                No themes, no templates, no limitations - just powerful,
+                scalable solutions designed for your success.
               </p>
             </div>
           </div>

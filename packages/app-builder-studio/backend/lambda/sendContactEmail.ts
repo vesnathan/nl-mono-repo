@@ -57,7 +57,8 @@ async function verifyRecaptcha(token: string): Promise<boolean> {
     // Accept if score is above 0.5 (or if using test keys)
     return (
       data.success &&
-      ((data.score && data.score >= 0.5) || RECAPTCHA_SECRET_KEY.includes("Test"))
+      ((data.score && data.score >= 0.5) ||
+        RECAPTCHA_SECRET_KEY.includes("Test"))
     );
   } catch (error) {
     console.error("reCAPTCHA verification error:", error);

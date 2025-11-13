@@ -10,9 +10,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <title>
-          App Builder Studio - Web Development & Digital Solutions
-        </title>
+        <title>App Builder Studio - Web Development & Digital Solutions</title>
         <meta
           name="description"
           content="Professional web development and digital solutions. We build modern, responsive websites and web applications tailored to your business needs."
