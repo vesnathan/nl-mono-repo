@@ -42,7 +42,7 @@ export enum StackType {
   TheStoryHub = "TheStoryHub",
   CardCountingTrainer = "CardCountingTrainer",
   LawnOrder = "LawnOrder",
-  LoudnClearDigital = "LoudnClearDigital",
+  AppBuilderStudio = "AppBuilderStudio",
 }
 
 export const STACK_ORDER: StackType[] = [
@@ -53,7 +53,7 @@ export const STACK_ORDER: StackType[] = [
   StackType.TheStoryHub,
   StackType.CardCountingTrainer,
   StackType.LawnOrder,
-  StackType.LoudnClearDigital,
+  StackType.AppBuilderStudio,
 ];
 
 export const TEMPLATE_PATHS: Record<StackType, string> = {
@@ -76,9 +76,9 @@ export const TEMPLATE_PATHS: Record<StackType, string> = {
     __dirname,
     "templates/lawn-order/cfn-template.yaml",
   ),
-  [StackType.LoudnClearDigital]: join(
+  [StackType.AppBuilderStudio]: join(
     __dirname,
-    "templates/loudn-clear-digital/cfn-template.yaml",
+    "templates/app-builder-studio/cfn-template.yaml",
   ),
 };
 
@@ -93,9 +93,9 @@ export const TEMPLATE_RESOURCES_PATHS: Record<StackType, string> = {
     "templates/card-counting-trainer/",
   ),
   [StackType.LawnOrder]: join(__dirname, "templates/lawn-order/"),
-  [StackType.LoudnClearDigital]: join(
+  [StackType.AppBuilderStudio]: join(
     __dirname,
-    "templates/loudn-clear-digital/",
+    "templates/app-builder-studio/",
   ),
 };
 

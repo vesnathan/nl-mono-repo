@@ -17,8 +17,8 @@
     "packages/card-counting-trainer/backend",
     "packages/lawn-order/frontend",
     "packages/lawn-order/backend",
-    "packages/loudn-clear-digital/frontend",
-    "packages/loudn-clear-digital/backend"
+    "packages/app-builder-studio/frontend",
+    "packages/app-builder-studio/backend"
   ],
   "dependencies": {
     "@anthropic-ai/claude-code": "^2.0.14",
@@ -81,8 +81,8 @@
     "deploy:cct:dev:update": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-cct-quick.ts --strategy update --skip-user-creation",
     "deploy:lawn-order:dev": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-lawn-order-quick.ts",
     "deploy:lawn-order:dev:update": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-lawn-order-quick.ts --strategy update",
-    "deploy:loudn-clear:dev": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-loudn-clear-digital-quick.ts",
-    "deploy:loudn-clear:dev:update": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-loudn-clear-digital-quick.ts --strategy update",
+    "deploy:abs:dev": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-app-builder-studio-quick.ts",
+    "deploy:abs:dev:update": "DOTENV_CONFIG_PATH=.env npx ts-node packages/deploy/deploy-app-builder-studio-quick.ts --strategy update",
     "aws-package-manager": "node packages/aws-bootstrap/scripts/aws-package-manager.js",
     "build": "lerna run build --stream",
     "build:tsh": "yarn workspace tshfrontend build",
@@ -95,6 +95,6 @@
     "dev:tsh": "yarn workspace tshfrontend dev:local",
     "dev:cct": "yarn workspace cctfrontend dev:local",
     "dev:lawn-order": "yarn workspace lawn-order-frontend dev:local",
-    "dev:loudn-clear": "yarn workspace loudn-clear-digital-frontend dev:local"
+    "dev:abs": "yarn workspace app-builder-studio-frontend dev:local"
   }
 }
