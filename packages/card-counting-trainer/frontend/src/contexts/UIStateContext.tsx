@@ -1,5 +1,6 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import { HeatMapBucket } from "@/hooks/useHeatMap";
+import { TestScenario } from "@/types/testScenarios";
 
 interface UIState {
   // Modal state
@@ -15,6 +16,7 @@ interface UIState {
 
   // Dev/Testing mode
   devTestingMode: boolean;
+  selectedTestScenario: TestScenario | null;
 
   // Heat map
   heatMapBuckets: HeatMapBucket[];

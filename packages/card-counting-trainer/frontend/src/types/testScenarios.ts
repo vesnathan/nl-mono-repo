@@ -106,6 +106,12 @@ export const TEST_SCENARIOS: TestScenario[] = [
       { rank: "A", suit: "S" },
       { rank: "A", suit: "H" },
     ],
+    aiHands: {
+      2: [
+        { rank: "A", suit: "C" },
+        { rank: "A", suit: "D" },
+      ],
+    },
     expectedAction: "SP",
   },
   {

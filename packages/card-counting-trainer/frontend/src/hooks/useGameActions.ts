@@ -463,6 +463,14 @@ export function useGameActions({
             } else {
               setAIPlayers((prev) => {
                 const updated = [...prev];
+                // Safety check: Ensure the AI player still exists at this index
+                if (!updated[dealData.index]) {
+                  debugLog(
+                    "dealCards",
+                    `⚠️ AI player at index ${dealData.index} no longer exists - skipping card update`,
+                  );
+                  return prev; // Return unchanged if player doesn't exist
+                }
                 updated[dealData.index] = {
                   ...updated[dealData.index],
                   hand: {
@@ -479,7 +487,16 @@ export function useGameActions({
               // Show initial reaction after AI receives their second card
               if (dealData.cardIndex === 1) {
                 registerTimeout(() => {
+                  // Safety check: Ensure AI player still exists
                   const ai = aiPlayers[dealData.index];
+                  if (!ai) {
+                    debugLog(
+                      "dealCards",
+                      `⚠️ AI player at index ${dealData.index} no longer exists - skipping reaction`,
+                    );
+                    return;
+                  }
+
                   // Get the two cards this AI has now
                   const firstCard = dealtCards.find(
                     (d) =>
@@ -1097,92 +1114,80 @@ export function useGameActions({
       bet: handToSplit.bet,
     };
 
-    // Deal a card to the first hand
-    registerTimeout(() => {
-      const newCard1 = dealCardFromShoe();
+    // Deal cards to both hands immediately (no animation for splits)
+    const newCard1 = dealCardFromShoe();
+    debugLog(
+      "playerActions",
+      `Dealing to first hand: ${newCard1.rank}${newCard1.suit} (value: ${newCard1.value})`,
+    );
+    hand1.cards.push(newCard1);
+
+    const newCard2 = dealCardFromShoe();
+    debugLog(
+      "playerActions",
+      `Dealing to second hand: ${newCard2.rank}${newCard2.suit} (value: ${newCard2.value})`,
+    );
+    hand2.cards.push(newCard2);
+
+    // Update state immediately
+    if (isResplit) {
+      // Resplit: Replace current hand with two new hands
+      const newSplitHands = [...playerHand.splitHands!];
+      const activeIndex = playerHand.activeSplitHandIndex!;
+
+      // Replace the current hand with hand2 and insert hand1 after it
+      newSplitHands.splice(activeIndex, 1, hand2, hand1);
+
+      setPlayerHand({
+        cards: [], // Clear main hand
+        bet: playerHand.bet,
+        isSplit: true,
+        splitHands: newSplitHands,
+        activeSplitHandIndex: activeIndex, // Stay on first new hand
+      });
+
       debugLog(
         "playerActions",
-        `Dealing to first hand: ${newCard1.rank}${newCard1.suit} (value: ${newCard1.value})`,
+        `Resplit complete - now have ${newSplitHands.length} hands, playing hand ${activeIndex + 1}`,
       );
+    } else {
+      // Initial split: Create split state (hand2 on left, hand1 on right)
+      setPlayerHand({
+        cards: [], // Clear main hand
+        bet: playerHand.bet,
+        isSplit: true,
+        splitHands: [hand2, hand1],
+        activeSplitHandIndex: 0,
+      });
 
-      hand1.cards.push(newCard1);
+      debugLog("playerActions", "Split complete - starting with first hand");
+    }
 
-      // Deal a card to the second hand
-      registerTimeout(() => {
-        const newCard2 = dealCardFromShoe();
-        debugLog(
-          "playerActions",
-          `Dealing to second hand: ${newCard2.rank}${newCard2.suit} (value: ${newCard2.value})`,
-        );
+    // Check if split aces and cannot hit them (automatically stand on both)
+    const isSplitAces = hand1.cards[0].rank === "A";
+    if (isSplitAces && !gameSettings.hitSplitAces) {
+      debugLog(
+        "playerActions",
+        "Split Aces - cannot hit, automatically standing on both hands",
+      );
+      // Mark player as finished since they can't hit split aces
+      setPlayerFinished(true);
+      return;
+    }
 
-        hand2.cards.push(newCard2);
-
-        if (isResplit) {
-          // Resplit: Replace current hand with two new hands
-          const newSplitHands = [...playerHand.splitHands!];
-          const activeIndex = playerHand.activeSplitHandIndex!;
-
-          // Replace the current hand with hand1 and insert hand2 after it
-          newSplitHands.splice(activeIndex, 1, hand1, hand2);
-
-          setPlayerHand({
-            cards: [], // Clear main hand
-            bet: playerHand.bet,
-            isSplit: true,
-            splitHands: newSplitHands,
-            activeSplitHandIndex: activeIndex, // Stay on first new hand
-          });
-
-          debugLog(
-            "playerActions",
-            `Resplit complete - now have ${newSplitHands.length} hands, playing hand ${activeIndex + 1}`,
-          );
-        } else {
-          // Initial split: Create split state
-          setPlayerHand({
-            cards: [], // Clear main hand
-            bet: playerHand.bet,
-            isSplit: true,
-            splitHands: [hand1, hand2],
-            activeSplitHandIndex: 0,
-          });
-
-          debugLog(
-            "playerActions",
-            "Split complete - starting with first hand",
-          );
-        }
-
-        // Check if split aces and cannot hit them (automatically stand on both)
-        const isSplitAces = hand1.cards[0].rank === "A";
-        if (isSplitAces && !gameSettings.hitSplitAces) {
-          debugLog(
-            "playerActions",
-            "Split Aces - cannot hit, automatically standing on both hands",
-          );
-          // Mark player as finished since they can't hit split aces
-          setPlayerFinished(true);
-          return;
-        }
-
-        // Check if first hand is 21 (automatically stand)
-        const hand1Value = calculateHandValue(hand1.cards);
-        if (hand1Value === 21) {
-          debugLog(
-            "playerActions",
-            "First hand has 21 - automatically standing",
-          );
-          // Move to next hand
-          setPlayerHand((prev) => {
-            const nextIndex = (prev.activeSplitHandIndex || 0) + 1;
-            return {
-              ...prev,
-              activeSplitHandIndex: nextIndex,
-            };
-          });
-        }
-      }, CARD_ANIMATION_DURATION + 200);
-    }, 500);
+    // Check if first hand is 21 (automatically stand)
+    const hand1Value = calculateHandValue(hand1.cards);
+    if (hand1Value === 21) {
+      debugLog("playerActions", "First hand has 21 - automatically standing");
+      // Move to next hand
+      setPlayerHand((prev) => {
+        const nextIndex = (prev.activeSplitHandIndex || 0) + 1;
+        return {
+          ...prev,
+          activeSplitHandIndex: nextIndex,
+        };
+      });
+    }
   }, [
     playerHand,
     playerChips,
