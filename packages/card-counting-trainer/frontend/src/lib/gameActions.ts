@@ -368,6 +368,39 @@ export function split(
 }
 
 /**
+ * Surrender - give up half the bet and end the hand
+ * @param gameState Current game state
+ * @param playerIndex Index of player surrendering
+ * @param handIndex Index of hand to surrender
+ * @returns Updated game state with bet refunded (50%) and hand marked as finished
+ */
+export function surrender(
+  gameState: GameState,
+  playerIndex: number,
+  handIndex: number,
+): GameState {
+  const player = gameState.players[playerIndex];
+  const hand = player.hands[handIndex];
+
+  // Calculate refund (50% of bet)
+  const refund = Math.floor(hand.bet / 2);
+
+  const updatedPlayers = [...gameState.players];
+
+  // Mark hand as surrendered with a specific result
+  updatedPlayers[playerIndex].hands[handIndex].result = "SURRENDER";
+
+  // Refund half the bet
+  updatedPlayers[playerIndex].chips += refund;
+
+  return {
+    ...gameState,
+    players: updatedPlayers,
+    chips: gameState.chips + refund,
+  };
+}
+
+/**
  * Place a bet for the current hand
  * @param gameState Current game state
  * @param playerIndex Index of player betting

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import { HeatMapBucket } from "@/hooks/useHeatMap";
+import { TestScenario } from "@/types/testScenarios";
 
 interface UIState {
   // Modal state
@@ -12,6 +13,10 @@ interface UIState {
   debugLogs: string[];
   showDebugLog: boolean;
   strategyCardUsedThisHand: boolean;
+
+  // Dev/Testing mode
+  devTestingMode: boolean;
+  selectedTestScenario: TestScenario | null;
 
   // Heat map
   heatMapBuckets: HeatMapBucket[];
@@ -27,6 +32,7 @@ interface UIState {
   setShowDealerInfo: (show: boolean) => void;
   setShowCountPeek: (show: boolean) => void;
   setShowDebugLog: (show: boolean) => void;
+  setDevTestingMode: (enabled: boolean) => void;
   clearDebugLogs: () => void;
 }
 

@@ -15,6 +15,8 @@ type DebugSettings = typeof DEBUG;
 interface AdminSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  devTestingMode: boolean;
+  setDevTestingMode: (enabled: boolean) => void;
 }
 
 const DEFAULT_AUDIO_SETTINGS: AudioSettings = {
@@ -27,6 +29,8 @@ const DEFAULT_AUDIO_SETTINGS: AudioSettings = {
 export default function AdminSettingsModal({
   isOpen,
   onClose,
+  devTestingMode,
+  setDevTestingMode,
 }: AdminSettingsModalProps) {
   const [audioSettings, setAudioSettings] = useState<AudioSettings>(
     DEFAULT_AUDIO_SETTINGS,
@@ -326,6 +330,125 @@ export default function AdminSettingsModal({
                     </label>
                   ))}
                 </div>
+              </div>
+            </div>
+
+            {/* Dev Testing Mode */}
+            <div style={{ marginBottom: "24px" }}>
+              <h3
+                style={{
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  color: "#FFF",
+                  marginBottom: "16px",
+                }}
+              >
+                🧪 Dev Testing Mode
+              </h3>
+              <div
+                style={{
+                  backgroundColor: "rgba(255, 152, 0, 0.1)",
+                  border: "2px solid rgba(255, 152, 0, 0.3)",
+                  borderRadius: "12px",
+                  padding: "20px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        color: "#FFF",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      Enable Testing Mode
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "#AAA",
+                        marginTop: "4px",
+                      }}
+                    >
+                      {devTestingMode
+                        ? "Test AI decisions with forced hands and probability display"
+                        : "Activate to access AI testing scenarios"}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setDevTestingMode(!devTestingMode)}
+                    style={{
+                      backgroundColor: devTestingMode
+                        ? "#FF9800"
+                        : "rgba(255, 255, 255, 0.1)",
+                      color: "#FFF",
+                      border: "2px solid",
+                      borderColor: devTestingMode
+                        ? "#FF9800"
+                        : "rgba(255, 255, 255, 0.3)",
+                      borderRadius: "8px",
+                      padding: "10px 20px",
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      minWidth: "80px",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = devTestingMode
+                        ? "#F57C00"
+                        : "rgba(255, 255, 255, 0.2)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = devTestingMode
+                        ? "#FF9800"
+                        : "rgba(255, 255, 255, 0.1)";
+                    }}
+                  >
+                    {devTestingMode ? "ON" : "OFF"}
+                  </button>
+                </div>
+
+                {devTestingMode && (
+                  <div
+                    style={{
+                      marginTop: "12px",
+                      fontSize: "12px",
+                      color: "#FF9800",
+                      backgroundColor: "rgba(255, 152, 0, 0.2)",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255, 152, 0, 0.4)",
+                    }}
+                  >
+                    <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
+                      🎯 Testing Mode Active:
+                    </div>
+                    <ul
+                      style={{
+                        margin: "4px 0 0 20px",
+                        padding: 0,
+                        listStyle: "disc",
+                      }}
+                    >
+                      <li>Only 2 AI players (for easier observation)</li>
+                      <li>Choose specific test scenarios for each hand</li>
+                      <li>
+                        Test dealer blackjack, player blackjack, splits, and
+                        more
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
 

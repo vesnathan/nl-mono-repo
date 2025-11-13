@@ -1,0 +1,156 @@
+Console was cleared. useDebugLogging.ts:22:21
+Shoe cards remaining: 307 debug.ts:34:17
+Cards dealt this shoe: 8 debug.ts:34:17
+Running count: -5 debug.ts:34:17
+Number of AI players: 2 debug.ts:34:17
+Player seated: No (observing) debug.ts:34:17
+Player bet: $0 debug.ts:34:17
+🧪 Test scenario selected: Split 8s vs Dealer 10 debug.ts:34:17
+--- First card round (right to left) --- debug.ts:34:17
+Using forced AI 0 card 0: 8C debug.ts:34:17
+AI Player 0 (Claire Thompson, Seat 2): 8C (value: 8, count: 0) | Running count: -5 debug.ts:34:17
+AI Player 1 (Danny Martinez, Seat 4): 5D (value: 5, count: 1) | Running count: -4 debug.ts:34:17
+Using forced dealer card 0: 10S debug.ts:34:17
+Dealer card 1: 10S (value: 10, count: -1) [FACE UP] | Running count: -5 debug.ts:34:17
+--- Second card round (right to left) --- debug.ts:34:17
+Using forced AI 0 card 1: 8S debug.ts:34:17
+AI Player 0 (Claire Thompson): 8S (value: 8, count: 0) | Running count: -5 debug.ts:34:17
+AI Player 1 (Danny Martinez): 6D (value: 6, count: 1) | Running count: -4 debug.ts:34:17
+Dealer card 2: 2D (value: 2, count: 1) [FACE DOWN - not counting] | Running count: -3 debug.ts:34:17
+All cards dealt, marking blackjack hands debug.ts:34:17
+All cards dealt and animations complete debug.ts:34:17
+Dealer showing 10 - checking for blackjack... debug.ts:34:17
+Dealer showing: 10S debug.ts:34:17
+Dealer hole card: 2D [hidden] debug.ts:34:17
+Running count after dealing: -3 debug.ts:34:17
+Shoe cards remaining: 304 debug.ts:34:17
+[AI_TURNS] Resetting playersFinished on phase entry debug.ts:34:17
+[AI_TURNS Effect] Starting turn logic debug.ts:34:17
+[AI_TURNS Effect] playersFinished size: 0, contents: [] debug.ts:34:17
+Turn order (sorted by position): Claire Thompson (idx:0, seat:2), Danny Martinez (idx:1, seat:4) debug.ts:34:17
+Players finished: [] debug.ts:34:17
+Dealer hand cards: 10S, 2D (2 cards) debug.ts:34:17
+  Claire Thompson (idx:0) - Hand: 8C, 8S (value: 16, busted: false) debug.ts:34:17
+  Claire Thompson (idx:0) - SELECTED (hand < 21) debug.ts:34:17
+=== CHECKING IF PLAYER SHOULD GO BEFORE AI 0 === debug.ts:34:17
+  Player seat: null debug.ts:34:17
+  Player finished: false debug.ts:34:17
+  Player has cards: false debug.ts:34:17
+  AI player seat: 2 debug.ts:34:17
+  Player seat < AI seat: false debug.ts:34:17
+✗ Player does NOT need to act before AI 0 debug.ts:34:17
+=== AI PLAYER 0 TURN (Claire Thompson, Seat 2) === debug.ts:34:17
+Current hand: 8C, 8S debug.ts:34:17
+Hand value: 16, Busted: false debug.ts:34:17
+Dealer up card: 10S debug.ts:34:17
+Can split: true debug.ts:34:17
+Basic strategy says: SP debug.ts:34:17
+Follows basic strategy: true, Final decision: SP debug.ts:34:17
+AI Player 0 decision: SPLIT debug.ts:34:17
+[AI_TURNS Effect] Skipping - activePlayerIndex is 0 debug.ts:34:17
+Splitting 8C and 8S debug.ts:34:17
+Dealt to first hand: 6S debug.ts:34:17
+Dealt to second hand: KS debug.ts:34:17
+AI split complete - will play both hands 2 debug.ts:34:17
+[AI_TURNS Effect] Starting turn logic debug.ts:34:17
+[AI_TURNS Effect] playersFinished size: 0, contents: [] debug.ts:34:17
+Turn order (sorted by position): Claire Thompson (idx:0, seat:2), Danny Martinez (idx:1, seat:4) debug.ts:34:17
+Players finished: [] debug.ts:34:17
+Dealer hand cards: 10S, 2D (2 cards) debug.ts:34:17
+  Claire Thompson (idx:0) - Split hand 1/2: 8C, 6S (value: 14, busted: false) debug.ts:34:17
+  Claire Thompson (idx:0) - SELECTED (split hand < 21) debug.ts:34:17
+=== CHECKING IF PLAYER SHOULD GO BEFORE AI 0 === debug.ts:34:17
+  Player seat: null debug.ts:34:17
+  Player finished: false debug.ts:34:17
+  Player has cards: false debug.ts:34:17
+  AI player seat: 2 debug.ts:34:17
+  Player seat < AI seat: false debug.ts:34:17
+✗ Player does NOT need to act before AI 0 debug.ts:34:17
+=== AI PLAYER 0 TURN (Claire Thompson, Seat 2) === debug.ts:34:17
+Playing split hand 1/2: 8C, 6S debug.ts:34:17
+Hand value: 14, Busted: false debug.ts:34:17
+Dealer up card: 10S debug.ts:34:17
+Can split: false debug.ts:34:17
+Basic strategy says: H debug.ts:34:17
+Follows basic strategy: false, Final decision: H debug.ts:34:17
+[AI_TURNS Effect] Skipping - activePlayerIndex is 0 debug.ts:34:17
+Dealt card: 2C (value: 2, count: 1) debug.ts:34:17
+New hand value: 16, Busted: false debug.ts:34:17
+AI Player 0 continues with 16 debug.ts:34:17
+🔓 AI turn processing unlocked (continue) debug.ts:34:17
+[AI_TURNS Effect] Starting turn logic debug.ts:34:17
+[AI_TURNS Effect] playersFinished size: 0, contents: [] debug.ts:34:17
+Turn order (sorted by position): Claire Thompson (idx:0, seat:2), Danny Martinez (idx:1, seat:4) debug.ts:34:17
+Players finished: [] debug.ts:34:17
+Dealer hand cards: 10S, 2D (2 cards) debug.ts:34:17
+  Claire Thompson (idx:0) - Split hand 1/2: 8C, 6S, 2C (value: 16, busted: false) debug.ts:34:17
+  Claire Thompson (idx:0) - SELECTED (split hand < 21) debug.ts:34:17
+=== CHECKING IF PLAYER SHOULD GO BEFORE AI 0 === debug.ts:34:17
+  Player seat: null debug.ts:34:17
+  Player finished: false debug.ts:34:17
+  Player has cards: false debug.ts:34:17
+  AI player seat: 2 debug.ts:34:17
+  Player seat < AI seat: false debug.ts:34:17
+✗ Player does NOT need to act before AI 0 debug.ts:34:17
+=== AI PLAYER 0 TURN (Claire Thompson, Seat 2) === debug.ts:34:17
+Playing split hand 1/2: 8C, 6S, 2C debug.ts:34:17
+Hand value: 16, Busted: false debug.ts:34:17
+Dealer up card: 10S debug.ts:34:17
+Can split: false debug.ts:34:17
+Basic strategy says: H debug.ts:34:17
+Follows basic strategy: false, Final decision: H debug.ts:34:17
+[AI_TURNS Effect] Skipping - activePlayerIndex is 0 debug.ts:34:17
+Dealt card: KC (value: 10, count: -1) debug.ts:34:17
+New hand value: 26, Busted: true debug.ts:34:17
+AI Player 0 split hand BUSTED! debug.ts:34:17
+Showing bust reaction: Oh no! I busted! *drops cards* debug.ts:34:17
+Moving to next split hand 2/2 debug.ts:34:17
+🔓 AI turn processing unlocked (bust) debug.ts:34:17
+[AI_TURNS Effect] Starting turn logic debug.ts:34:17
+[AI_TURNS Effect] playersFinished size: 0, contents: [] debug.ts:34:17
+Turn order (sorted by position): Claire Thompson (idx:0, seat:2), Danny Martinez (idx:1, seat:4) debug.ts:34:17
+Players finished: [] debug.ts:34:17
+Dealer hand cards: 10S, 2D (2 cards) debug.ts:34:17
+  Claire Thompson (idx:0) - Split hand 2/2: 8S, KS (value: 18, busted: false) debug.ts:34:17
+  Claire Thompson (idx:0) - SELECTED (split hand < 21) debug.ts:34:17
+=== CHECKING IF PLAYER SHOULD GO BEFORE AI 0 === debug.ts:34:17
+  Player seat: null debug.ts:34:17
+  Player finished: false debug.ts:34:17
+  Player has cards: false debug.ts:34:17
+  AI player seat: 2 debug.ts:34:17
+  Player seat < AI seat: false debug.ts:34:17
+✗ Player does NOT need to act before AI 0 debug.ts:34:17
+=== AI PLAYER 0 TURN (Claire Thompson, Seat 2) === debug.ts:34:17
+Playing split hand 2/2: 8S, KS debug.ts:34:17
+Hand value: 18, Busted: false debug.ts:34:17
+Dealer up card: 10S debug.ts:34:17
+Can split: false debug.ts:34:17
+Basic strategy says: S debug.ts:34:17
+Follows basic strategy: false, Final decision: S debug.ts:34:17
+AI Player 0 decision: STAND debug.ts:34:17
+[AI_TURNS Effect] Skipping - activePlayerIndex is 0 debug.ts:34:17
+Marking AI Player 0 as FINISHED (stand) debug.ts:34:17
+[AI_TURNS Effect] Starting turn logic debug.ts:34:17
+[AI_TURNS Effect] playersFinished size: 1, contents: [0] debug.ts:34:17
+Turn order (sorted by position): Claire Thompson (idx:0, seat:2), Danny Martinez (idx:1, seat:4) debug.ts:34:17
+Players finished: [0] debug.ts:34:17
+Dealer hand cards: 10S, 2D (2 cards) debug.ts:34:17
+  Claire Thompson (idx:0) - SKIPPED (already finished) debug.ts:34:17
+  Danny Martinez (idx:1) - Hand: 5D, 6D (value: 11, busted: false) debug.ts:34:17
+  Danny Martinez (idx:1) - SELECTED (hand < 21) debug.ts:34:17
+=== CHECKING IF PLAYER SHOULD GO BEFORE AI 1 === debug.ts:34:17
+  Player seat: null debug.ts:34:17
+  Player finished: false debug.ts:34:17
+  Player has cards: false debug.ts:34:17
+  AI player seat: 4 debug.ts:34:17
+  Player seat < AI seat: false debug.ts:34:17
+✗ Player does NOT need to act before AI 1 debug.ts:34:17
+=== AI PLAYER 1 TURN (Danny Martinez, Seat 4) === debug.ts:34:17
+Current hand: 5D, 6D debug.ts:34:17
+Hand value: 11, Busted: false debug.ts:34:17
+Dealer up card: 10S debug.ts:34:17
+Can split: false debug.ts:34:17
+Basic strategy says: H debug.ts:34:17
+Follows basic strategy: false, Final decision: H debug.ts:34:17
+[AI_TURNS Effect] Skipping - activePlayerIndex is 1 debug.ts:34:17
+Dealt card: AS (value: 11, count: -1) debug.ts:34:17

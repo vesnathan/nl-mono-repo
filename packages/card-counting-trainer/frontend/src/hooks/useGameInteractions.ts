@@ -25,6 +25,7 @@ interface UseGameInteractionsParams {
   dealerHand: PlayerHand;
   blackjackPayout: BlackjackPayout;
   currentDealer: DealerCharacter | null;
+  devTestingMode?: boolean;
 }
 
 export function useGameInteractions({
@@ -35,6 +36,7 @@ export function useGameInteractions({
   aiPlayers,
   dealerHand,
   blackjackPayout,
+  devTestingMode = false,
 }: UseGameInteractionsParams) {
   const triggerConversation = useCallback(() => {
     // DISABLED FOR TESTING: All player conversations disabled
@@ -51,6 +53,11 @@ export function useGameInteractions({
       position: number,
       // eslint-disable-next-line sonarjs/cognitive-complexity
     ) => {
+      // Skip speech bubbles in dev testing mode
+      if (devTestingMode) {
+        return;
+      }
+
       // Unified speech bubble implementation for all players (dealer and AI)
       // Pattern: Speech bubble ALWAYS created first, then audio queued if file exists
 
@@ -120,7 +127,7 @@ export function useGameInteractions({
         );
       }, 5000);
     },
-    [aiPlayers, setSpeechBubbles], // Removed audioQueue - callback uses current value
+    [aiPlayers, setSpeechBubbles, registerTimeout, devTestingMode],
   );
 
   const checkForInitialReactions = useCallback(() => {

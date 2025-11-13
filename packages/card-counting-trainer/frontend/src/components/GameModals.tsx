@@ -50,8 +50,32 @@ export default function GameModals() {
     stand,
     doubleDown,
     split,
+    surrender,
     setGameSettings,
   } = useGameActions();
+
+  // State to track if split modal is minimized
+  const [splitModalMinimized, setSplitModalMinimized] = React.useState(false);
+
+  // Auto-minimize modal when player finishes their turn or phase changes
+  React.useEffect(() => {
+    // Show split hands if player has split hands and the split hands have cards dealt
+    const hasSplitHands =
+      playerHand.isSplit &&
+      playerHand.splitHands &&
+      playerHand.splitHands.length > 0;
+    if (!hasSplitHands) {
+      // Reset when no split hands
+      setSplitModalMinimized(false);
+    } else if (playerFinished || phase !== "PLAYER_TURN") {
+      // Minimize when player finishes or it's not their turn
+      setSplitModalMinimized(true);
+    } else {
+      // Show modal when it's player's turn and they haven't finished
+      setSplitModalMinimized(false);
+    }
+  }, [playerHand.isSplit, playerHand.splitHands, playerFinished, phase]);
+
   // Helper function to check if player is busted
   const isBusted = (cards: { value: number }[]) => {
     const value = cards.reduce((sum, card) => sum + card.value, 0);
@@ -89,6 +113,10 @@ export default function GameModals() {
 
   const canDoubleHand =
     playerHand.cards.length === 2 && playerChips >= playerHand.bet;
+
+  // Check if player can surrender (only on first 2 cards, if enabled in settings)
+  const canSurrenderHand =
+    playerHand.cards.length === 2 && gameSettings.lateSurrenderAllowed;
 
   // State for split hands modal
 
@@ -128,33 +156,69 @@ export default function GameModals() {
 
       {/* Split Hands Modal - shown when player has split hands */}
       {hasSplitHands && (
-        <SplitHandsModal
-          isOpen
-          hands={playerHand.splitHands!.map((hand, index) => {
-            const activeIndex = playerHand.activeSplitHandIndex ?? 0;
-            const handValue = hand.cards.reduce((sum, card) => {
-              let value = sum + card.value;
-              // Handle ace adjustment
-              let aces = hand.cards.filter((c) => c.rank === "A").length;
-              while (value > 21 && aces > 0) {
-                value -= 10;
-                aces -= 1;
-              }
-              return value;
-            }, 0);
-            return {
-              cards: hand.cards,
-              bet: hand.bet,
-              finished: index < activeIndex || handValue > 21,
-              busted: handValue > 21,
-            };
-          })}
-          activeHandIndex={playerHand.activeSplitHandIndex ?? 0}
-          onHit={hit}
-          onStand={stand}
-          onClose={() => {}}
-          canMinimize={canMinimizeSplit}
-        />
+        <>
+          <SplitHandsModal
+            isOpen={!splitModalMinimized}
+            hands={playerHand.splitHands!.map((hand, index) => {
+              const activeIndex = playerHand.activeSplitHandIndex ?? 0;
+              const handValue = hand.cards.reduce((sum, card) => {
+                let value = sum + card.value;
+                // Handle ace adjustment
+                let aces = hand.cards.filter((c) => c.rank === "A").length;
+                while (value > 21 && aces > 0) {
+                  value -= 10;
+                  aces -= 1;
+                }
+                return value;
+              }, 0);
+              return {
+                cards: hand.cards,
+                bet: hand.bet,
+                finished: index < activeIndex || handValue > 21,
+                busted: handValue > 21,
+              };
+            })}
+            activeHandIndex={playerHand.activeSplitHandIndex ?? 0}
+            onHit={hit}
+            onStand={stand}
+            onClose={() => setSplitModalMinimized(true)}
+            canMinimize={canMinimizeSplit}
+          />
+
+          {/* Button to reopen split modal when minimized */}
+          {splitModalMinimized && (
+            <button
+              type="button"
+              onClick={() => setSplitModalMinimized(false)}
+              style={{
+                position: "fixed",
+                bottom: "20px",
+                right: "20px",
+                zIndex: 9999,
+                backgroundColor: "#FFD700",
+                color: "#000",
+                border: "none",
+                borderRadius: "8px",
+                padding: "12px 24px",
+                fontSize: "16px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.5)",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#FFA500";
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#FFD700";
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+            >
+              View Split Hands
+            </button>
+          )}
+        </>
       )}
 
       {/* Player Actions Modal - shown during PLAYER_TURN when player has cards and hasn't finished (non-split) */}
@@ -168,8 +232,10 @@ export default function GameModals() {
             onStand={stand}
             onDouble={doubleDown}
             onSplit={split}
+            onSurrender={surrender}
             canDouble={canDoubleHand}
             canSplit={canSplitHand}
+            canSurrender={canSurrenderHand}
           />
         )}
 

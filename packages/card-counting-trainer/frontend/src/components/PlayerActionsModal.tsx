@@ -5,8 +5,10 @@ interface PlayerActionsModalProps {
   onStand: () => void;
   onDouble?: () => void;
   onSplit?: () => void;
+  onSurrender?: () => void;
   canDouble: boolean;
   canSplit: boolean;
+  canSurrender: boolean;
 }
 
 export default function PlayerActionsModal({
@@ -14,8 +16,10 @@ export default function PlayerActionsModal({
   onStand,
   onDouble,
   onSplit,
+  onSurrender,
   canDouble,
   canSplit,
+  canSurrender,
 }: PlayerActionsModalProps) {
   return (
     <div
@@ -102,6 +106,36 @@ export default function PlayerActionsModal({
                 DOUBLE
               </button>
             )}
+          </div>
+        )}
+
+        {/* Surrender button row (if available) */}
+        {canSurrender && onSurrender && (
+          <div style={{ display: "flex", gap: "12px" }}>
+            <button
+              type="button"
+              onClick={onSurrender}
+              style={{
+                width: "100%",
+                backgroundColor: "#F44336",
+                color: "#FFF",
+                border: "none",
+                borderRadius: "8px",
+                padding: "12px 24px",
+                fontSize: "16px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#D32F2F";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#F44336";
+              }}
+            >
+              SURRENDER (Get 50% Back)
+            </button>
           </div>
         )}
 

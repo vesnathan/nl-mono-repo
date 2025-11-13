@@ -5,20 +5,44 @@ import { TABLE_POSITIONS } from "@/constants/animations";
 import PlayingCard from "@/components/PlayingCard";
 import TurnIndicator from "@/components/TurnIndicator";
 import ActionBubble from "@/components/ActionBubble";
+import PlayerDecisionInfo from "@/components/PlayerDecisionInfo";
+import AIDecisionInfo from "@/components/AIDecisionInfo";
 import { getAIAvatarPath } from "@/data/aiCharacters";
 import { useGameState } from "@/contexts/GameStateContext";
 import { useGameActions } from "@/contexts/GameActionsContext";
+import { useUIState } from "@/contexts/UIStateContext";
+import { getBasicStrategyAction } from "@/lib/basicStrategy";
 
 export default function TableSeats() {
   const {
     aiPlayers,
     playerSeat,
     playerHand,
+    dealerHand,
     phase,
     activePlayerIndex,
     playerActions,
+    gameSettings,
   } = useGameState();
   const { setPlayerSeat, registerTimeout } = useGameActions();
+  const { devTestingMode, selectedTestScenario } = useUIState();
+
+  // Determine which AI player is being tested (has forced cards in test scenario)
+  const getTestedAIIndex = () => {
+    if (!selectedTestScenario?.aiHands) return null;
+
+    // Find the first AI player position that has forced cards
+    const testedPositions = Object.keys(selectedTestScenario.aiHands).map(
+      Number,
+    );
+    if (testedPositions.length === 0) return null;
+
+    const testedPosition = testedPositions[0]; // Use first tested position
+    const aiIndex = aiPlayers.findIndex((ai) => ai.position === testedPosition);
+    return aiIndex >= 0 ? aiIndex : null;
+  };
+
+  const testedAIIndex = getTestedAIIndex();
   return (
     <div
       style={{
@@ -142,42 +166,109 @@ export default function TableSeats() {
                       alignItems: "center",
                     }}
                   >
-                    {/* Cards positioned absolutely above - fixed positions */}
-                    {aiPlayer.hand.cards.length > 0 && (
+                    {/* Cards positioned absolutely above - handle both regular and split hands */}
+                    {(aiPlayer.hand.cards.length > 0 ||
+                      (aiPlayer.hand.splitHands &&
+                        aiPlayer.hand.splitHands.length > 0)) && (
                       <div
                         style={{
                           position: "absolute",
-                          bottom: "calc(100% + 54px)", // 50px higher (was 4px, now 54px above avatar)
+                          bottom: "calc(100% + 54px)",
                           left: "50%",
-                          transform: "translate(-50%, 0)", // Center horizontally, anchor to bottom
-                          width: "230px", // 3 cards * 70px + 2 gaps * 4px
-                          height: "210px", // Reserve space for 2 rows
+                          transform: "translate(-50%, 0)",
+                          display: "flex",
+                          gap: "20px",
+                          justifyContent: "center",
                         }}
                       >
-                        {/* Render each card in a fixed position - first row at bottom */}
-                        {aiPlayer.hand.cards.map((card, cardIdx) => {
-                          // Calculate row and column for this card (3 cards per row)
-                          const row = Math.floor(cardIdx / 3); // Row 0 = first 3 cards, Row 1 = next 3, etc
-                          const col = cardIdx % 3;
-                          // Position from bottom: row 0 at bottom, row 1 above it, etc
-                          // Fixed positions: left = col * (70px + 4px gap)
-                          //                  bottom = row * (98px + 4px gap) - anchor from bottom
-                          return (
+                        {/* Regular hand (not split) */}
+                        {!aiPlayer.hand.splitHands &&
+                          aiPlayer.hand.cards.length > 0 && (
                             <div
-                              key={`${card.rank}${card.suit}`}
                               style={{
-                                position: "absolute",
-                                left: `${col * 74}px`,
-                                bottom: `${row * 102}px`, // Row 0 at bottom, higher rows stack above
-                                width: "70px",
-                                height: "98px",
-                                zIndex: 10,
+                                position: "relative",
+                                width: "230px",
+                                height: "210px",
                               }}
                             >
-                              <PlayingCard card={card} />
+                              {aiPlayer.hand.cards.map((card, cardIdx) => {
+                                const row = Math.floor(cardIdx / 3);
+                                const col = cardIdx % 3;
+                                return (
+                                  <div
+                                    key={`${card.rank}${card.suit}-${cardIdx}`}
+                                    style={{
+                                      position: "absolute",
+                                      left: `${col * 74}px`,
+                                      bottom: `${row * 102}px`,
+                                      width: "70px",
+                                      height: "98px",
+                                      zIndex: 10,
+                                    }}
+                                  >
+                                    <PlayingCard card={card} />
+                                  </div>
+                                );
+                              })}
                             </div>
-                          );
-                        })}
+                          )}
+
+                        {/* Split hands - render side by side */}
+                        {aiPlayer.hand.splitHands &&
+                          aiPlayer.hand.splitHands.map((splitHand, handIdx) => (
+                            <div
+                              key={`split-${handIdx}`}
+                              style={{
+                                position: "relative",
+                                width: "150px",
+                                height: "210px",
+                                opacity:
+                                  aiPlayer.hand.activeSplitHandIndex === handIdx
+                                    ? 1
+                                    : 0.6,
+                                border:
+                                  aiPlayer.hand.activeSplitHandIndex === handIdx
+                                    ? "2px solid #FFD700"
+                                    : "2px solid transparent",
+                                borderRadius: "8px",
+                                padding: "4px",
+                              }}
+                            >
+                              {/* Hand number label */}
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: "-20px",
+                                  left: "50%",
+                                  transform: "translateX(-50%)",
+                                  fontSize: "12px",
+                                  color: "#FFD700",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                Hand {handIdx + 1}
+                              </div>
+                              {splitHand.cards.map((card, cardIdx) => {
+                                const row = Math.floor(cardIdx / 2);
+                                const col = cardIdx % 2;
+                                return (
+                                  <div
+                                    key={`${card.rank}${card.suit}-${cardIdx}`}
+                                    style={{
+                                      position: "absolute",
+                                      left: `${col * 74}px`,
+                                      bottom: `${row * 102}px`,
+                                      width: "70px",
+                                      height: "98px",
+                                      zIndex: 10,
+                                    }}
+                                  >
+                                    <PlayingCard card={card} />
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ))}
                       </div>
                     )}
                     {/* Avatar with indicators */}
@@ -189,6 +280,37 @@ export default function TableSeats() {
                         marginBottom: "6px",
                       }}
                     >
+                      {/* AI Decision Info - shows decision stats in dev mode for tested AI only */}
+                      {devTestingMode &&
+                        phase === "AI_TURNS" &&
+                        activePlayerIndex === aiPlayerIndex &&
+                        aiPlayerIndex === testedAIIndex &&
+                        aiPlayer.hand.cards.length >= 2 &&
+                        dealerHand.cards.length > 0 &&
+                        !aiPlayer.hand.splitHands && (
+                          <AIDecisionInfo
+                            character={aiPlayer.character}
+                            playerCards={aiPlayer.hand.cards}
+                            dealerUpCard={dealerHand.cards[0]}
+                            basicStrategyAction={getBasicStrategyAction(
+                              aiPlayer.hand.cards,
+                              dealerHand.cards[0],
+                              gameSettings,
+                              aiPlayer.hand.cards.length === 2 &&
+                                aiPlayer.hand.cards[0].rank ===
+                                  aiPlayer.hand.cards[1].rank,
+                              aiPlayer.hand.cards.length === 2,
+                            )}
+                            canSplit={
+                              aiPlayer.hand.cards.length === 2 &&
+                              aiPlayer.hand.cards[0].rank ===
+                                aiPlayer.hand.cards[1].rank
+                            }
+                            canDouble={aiPlayer.hand.cards.length === 2}
+                            canSurrender={gameSettings.lateSurrenderAllowed}
+                          />
+                        )}
+
                       {/* Turn Indicator */}
                       <TurnIndicator
                         isActive={activePlayerIndex === aiPlayerIndex}
@@ -263,42 +385,108 @@ export default function TableSeats() {
                   alignItems: "center",
                 }}
               >
-                {/* Cards positioned absolutely above - fixed positions */}
-                {playerHand.cards.length > 0 && (
+                {/* Cards positioned absolutely above - handle both regular and split hands */}
+                {(playerHand.cards.length > 0 ||
+                  (playerHand.splitHands &&
+                    playerHand.splitHands.length > 0)) && (
                   <div
                     style={{
                       position: "absolute",
-                      bottom: "calc(100% + 54px)", // 50px higher (was 4px, now 54px above avatar)
+                      bottom: "calc(100% + 54px)",
                       left: "50%",
-                      transform: "translate(-50%, 0)", // Center horizontally, anchor to bottom
-                      width: "230px", // 3 cards * 70px + 2 gaps * 4px
-                      height: "210px", // Reserve space for 2 rows
+                      transform: "translate(-50%, 0)",
+                      display: "flex",
+                      gap: "20px",
+                      justifyContent: "center",
                     }}
                   >
-                    {/* Render each card in a fixed position - first row at bottom */}
-                    {playerHand.cards.map((card, cardIdx) => {
-                      // Calculate row and column for this card (3 cards per row)
-                      const row = Math.floor(cardIdx / 3); // Row 0 = first 3 cards, Row 1 = next 3, etc
-                      const col = cardIdx % 3;
-                      // Position from bottom: row 0 at bottom, row 1 above it, etc
-                      // Fixed positions: left = col * (70px + 4px gap)
-                      //                  bottom = row * (98px + 4px gap) - anchor from bottom
-                      return (
+                    {/* Regular hand (not split) */}
+                    {!playerHand.splitHands && playerHand.cards.length > 0 && (
+                      <div
+                        style={{
+                          position: "relative",
+                          width: "230px",
+                          height: "210px",
+                        }}
+                      >
+                        {playerHand.cards.map((card, cardIdx) => {
+                          const row = Math.floor(cardIdx / 3);
+                          const col = cardIdx % 3;
+                          return (
+                            <div
+                              key={`${card.rank}${card.suit}-${cardIdx}`}
+                              style={{
+                                position: "absolute",
+                                left: `${col * 74}px`,
+                                bottom: `${row * 102}px`,
+                                width: "70px",
+                                height: "98px",
+                                zIndex: 10,
+                              }}
+                            >
+                              <PlayingCard card={card} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Split hands - render side by side */}
+                    {playerHand.splitHands &&
+                      playerHand.splitHands.map((splitHand, handIdx) => (
                         <div
-                          key={`${card.rank}${card.suit}`}
+                          key={`split-${handIdx}`}
                           style={{
-                            position: "absolute",
-                            left: `${col * 74}px`,
-                            bottom: `${row * 102}px`, // Row 0 at bottom, higher rows stack above
-                            width: "70px",
-                            height: "98px",
-                            zIndex: 10,
+                            position: "relative",
+                            width: "150px",
+                            height: "210px",
+                            opacity:
+                              playerHand.activeSplitHandIndex === handIdx
+                                ? 1
+                                : 0.6,
+                            border:
+                              playerHand.activeSplitHandIndex === handIdx
+                                ? "2px solid #FFD700"
+                                : "2px solid transparent",
+                            borderRadius: "8px",
+                            padding: "4px",
                           }}
                         >
-                          <PlayingCard card={card} />
+                          {/* Hand number label */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "-20px",
+                              left: "50%",
+                              transform: "translateX(-50%)",
+                              fontSize: "12px",
+                              color: "#FFD700",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            Hand {handIdx + 1}
+                          </div>
+                          {splitHand.cards.map((card, cardIdx) => {
+                            const row = Math.floor(cardIdx / 2);
+                            const col = cardIdx % 2;
+                            return (
+                              <div
+                                key={`${card.rank}${card.suit}-${cardIdx}`}
+                                style={{
+                                  position: "absolute",
+                                  left: `${col * 74}px`,
+                                  bottom: `${row * 102}px`,
+                                  width: "70px",
+                                  height: "98px",
+                                  zIndex: 10,
+                                }}
+                              >
+                                <PlayingCard card={card} />
+                              </div>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
+                      ))}
                   </div>
                 )}
                 {/* Avatar with indicators */}
@@ -310,6 +498,32 @@ export default function TableSeats() {
                     marginBottom: "6px",
                   }}
                 >
+                  {/* Player Decision Info - shows basic strategy recommendation in dev mode */}
+                  {devTestingMode &&
+                    phase === "PLAYER_TURN" &&
+                    playerHand.cards.length >= 2 &&
+                    dealerHand.cards.length > 0 && (
+                      <PlayerDecisionInfo
+                        playerCards={playerHand.cards}
+                        dealerUpCard={dealerHand.cards[0]}
+                        basicStrategyAction={getBasicStrategyAction(
+                          playerHand.cards,
+                          dealerHand.cards[0],
+                          gameSettings,
+                          playerHand.cards.length === 2 &&
+                            playerHand.cards[0].rank ===
+                              playerHand.cards[1].rank,
+                          playerHand.cards.length === 2,
+                        )}
+                        canSplit={
+                          playerHand.cards.length === 2 &&
+                          playerHand.cards[0].rank === playerHand.cards[1].rank
+                        }
+                        canDouble={playerHand.cards.length === 2}
+                        canSurrender={gameSettings.lateSurrenderAllowed}
+                      />
+                    )}
+
                   {/* Turn Indicator - active during PLAYER_TURN phase */}
                   <TurnIndicator isActive={phase === "PLAYER_TURN"} />
 

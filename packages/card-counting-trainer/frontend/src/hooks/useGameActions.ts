@@ -13,6 +13,8 @@ import { CARD_ANIMATION_DURATION } from "@/constants/animations";
 import { GameSettings } from "@/types/gameSettings";
 import { getInitialHandReaction } from "@/data/dialogue";
 import { debugLog } from "@/utils/debug";
+import { TestScenario } from "@/types/testScenarios";
+import { createCardFromScenario } from "@/lib/testScenarioHelpers";
 
 // Module-level counter for unique card IDs
 let cardIdCounter = 0;
@@ -31,6 +33,7 @@ interface UseGameActionsParams {
   gameSettings: GameSettings;
   currentDealer: DealerCharacter | null;
   playerChips: number;
+  selectedTestScenario: TestScenario | null;
 
   // Setters
   setPhase: (phase: GamePhase) => void;
@@ -100,6 +103,7 @@ export interface GameActionsReturn {
   stand: () => void;
   doubleDown: () => void;
   split: () => void;
+  surrender: () => void;
 }
 
 export function useGameActions({
@@ -113,6 +117,7 @@ export function useGameActions({
   gameSettings,
   currentDealer,
   playerChips,
+  selectedTestScenario,
   setPhase,
   setCurrentBet,
   setDealerRevealed,
@@ -193,21 +198,128 @@ export function useGameActions({
       let currentRunningCount = runningCount;
       let currentShoesDealt = shoesDealt;
 
-      // Helper to deal from the current shoe state
-      const dealFromCurrentShoe = () => {
-        const { card, remainingShoe, reshuffled } = dealCard(
-          currentShoe,
-          gameSettings.numberOfDecks,
-          gameSettings.countingSystem,
+      // Helper to deal from the current shoe state OR use forced cards from test scenario
+      // Create maps for forced cards by type and index
+      const forcedDealerCards: Map<number, GameCard> = new Map();
+      const forcedPlayerCards: Map<number, GameCard> = new Map();
+      const forcedAICards: Map<number, Map<number, GameCard>> = new Map(); // Map<aiIndex, Map<cardIndex, Card>>
+
+      // Pre-create all forced cards if a test scenario is selected
+      if (selectedTestScenario) {
+        debugLog(
+          "testScenario",
+          `🧪 Test scenario selected: ${selectedTestScenario.name}`,
         );
 
-        if (reshuffled) {
-          currentShoe = remainingShoe;
-          currentCardsDealt = 1;
-          currentRunningCount = card.count;
-          currentShoesDealt += 1;
+        // Create forced dealer upcard (first card only)
+        forcedDealerCards.set(
+          0,
+          createCardFromScenario(
+            selectedTestScenario.dealerUpCard.rank,
+            selectedTestScenario.dealerUpCard.suit,
+            gameSettings.countingSystem,
+          ),
+        );
+
+        // Create forced player cards (if player is seated)
+        if (selectedTestScenario.playerHands && playerSeat !== null) {
+          selectedTestScenario.playerHands.forEach((cardSpec, idx) => {
+            forcedPlayerCards.set(
+              idx,
+              createCardFromScenario(
+                cardSpec.rank,
+                cardSpec.suit,
+                gameSettings.countingSystem,
+              ),
+            );
+          });
+        }
+
+        // Create forced AI cards by position
+        if (selectedTestScenario.aiHands) {
+          Object.entries(selectedTestScenario.aiHands).forEach(
+            ([positionStr, cards]) => {
+              const position = parseInt(positionStr, 10);
+              // Find AI index for this position
+              const aiIndex = aiPlayers.findIndex(
+                (ai) => ai.position === position,
+              );
+              if (aiIndex !== -1) {
+                const aiCardMap: Map<number, GameCard> = new Map();
+                cards.forEach((cardSpec, idx) => {
+                  aiCardMap.set(
+                    idx,
+                    createCardFromScenario(
+                      cardSpec.rank,
+                      cardSpec.suit,
+                      gameSettings.countingSystem,
+                    ),
+                  );
+                });
+                forcedAICards.set(aiIndex, aiCardMap);
+              }
+            },
+          );
+        }
+      }
+
+      // Helper to deal card with optional forced override
+      const dealFromCurrentShoe = (
+        type: "dealer" | "player" | "ai",
+        index: number,
+        cardIndex: number,
+      ) => {
+        let card: GameCard | undefined;
+
+        // Check for forced cards based on type
+        if (type === "dealer" && forcedDealerCards.has(cardIndex)) {
+          card = forcedDealerCards.get(cardIndex);
+          debugLog(
+            "testScenario",
+            `Using forced dealer card ${cardIndex}: ${card?.rank}${card?.suit}`,
+          );
+        } else if (type === "player" && forcedPlayerCards.has(cardIndex)) {
+          card = forcedPlayerCards.get(cardIndex);
+          debugLog(
+            "testScenario",
+            `Using forced player card ${cardIndex}: ${card?.rank}${card?.suit}`,
+          );
+        } else if (type === "ai" && forcedAICards.has(index)) {
+          const aiCardMap = forcedAICards.get(index);
+          if (aiCardMap?.has(cardIndex)) {
+            card = aiCardMap.get(cardIndex);
+            debugLog(
+              "testScenario",
+              `Using forced AI ${index} card ${cardIndex}: ${card?.rank}${card?.suit}`,
+            );
+          }
+        }
+
+        // If no forced card, deal from shoe
+        if (!card) {
+          const {
+            card: dealtCard,
+            remainingShoe,
+            reshuffled,
+          } = dealCard(
+            currentShoe,
+            gameSettings.numberOfDecks,
+            gameSettings.countingSystem,
+          );
+          card = dealtCard;
+
+          if (reshuffled) {
+            currentShoe = remainingShoe;
+            currentCardsDealt = 1;
+            currentRunningCount = card.count;
+            currentShoesDealt += 1;
+          } else {
+            currentShoe = remainingShoe;
+            currentCardsDealt += 1;
+            currentRunningCount += card.count;
+          }
         } else {
-          currentShoe = remainingShoe;
+          // For forced cards, still update counts
           currentCardsDealt += 1;
           currentRunningCount += card.count;
         }
@@ -224,7 +336,7 @@ export function useGameActions({
       // Deal first card to everyone (right to left, dealer last)
       sortedAIPlayers.forEach((ai) => {
         const idx = aiPlayers.indexOf(ai);
-        const card = dealFromCurrentShoe();
+        const card = dealFromCurrentShoe("ai", idx, 0);
         debugLog(
           "dealCards",
           `AI Player ${idx} (${ai.character.name}, Seat ${ai.position}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
@@ -233,14 +345,14 @@ export function useGameActions({
       });
       // Only deal to player if they're seated AND have placed a bet
       if (playerSeat !== null && effectivePlayerBet > 0) {
-        const card = dealFromCurrentShoe();
+        const card = dealFromCurrentShoe("player", 0, 0);
         debugLog(
           "dealCards",
           `Player (Seat ${playerSeat}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
         );
         dealtCards.push({ type: "player", index: 0, card, cardIndex: 0 });
       }
-      const dealerCard1 = dealFromCurrentShoe();
+      const dealerCard1 = dealFromCurrentShoe("dealer", 0, 0);
       debugLog(
         "dealCards",
         `Dealer card 1: ${dealerCard1.rank}${dealerCard1.suit} (value: ${dealerCard1.value}, count: ${dealerCard1.count}) [FACE UP] | Running count: ${currentRunningCount}`,
@@ -256,7 +368,7 @@ export function useGameActions({
       // Deal second card to everyone (right to left, dealer last)
       sortedAIPlayers.forEach((ai) => {
         const idx = aiPlayers.indexOf(ai);
-        const card = dealFromCurrentShoe();
+        const card = dealFromCurrentShoe("ai", idx, 1);
         debugLog(
           "dealCards",
           `AI Player ${idx} (${ai.character.name}): ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
@@ -265,14 +377,14 @@ export function useGameActions({
       });
       // Only deal second card to player if they're seated AND have placed a bet
       if (playerSeat !== null && effectivePlayerBet > 0) {
-        const card = dealFromCurrentShoe();
+        const card = dealFromCurrentShoe("player", 0, 1);
         debugLog(
           "dealCards",
           `Player: ${card.rank}${card.suit} (value: ${card.value}, count: ${card.count}) | Running count: ${currentRunningCount}`,
         );
         dealtCards.push({ type: "player", index: 0, card, cardIndex: 1 });
       }
-      const dealerCard2 = dealFromCurrentShoe();
+      const dealerCard2 = dealFromCurrentShoe("dealer", 0, 1);
       debugLog(
         "dealCards",
         `Dealer card 2: ${dealerCard2.rank}${dealerCard2.suit} (value: ${dealerCard2.value}, count: ${dealerCard2.count}) [FACE DOWN - not counting] | Running count: ${currentRunningCount}`,
@@ -351,6 +463,14 @@ export function useGameActions({
             } else {
               setAIPlayers((prev) => {
                 const updated = [...prev];
+                // Safety check: Ensure the AI player still exists at this index
+                if (!updated[dealData.index]) {
+                  debugLog(
+                    "dealCards",
+                    `⚠️ AI player at index ${dealData.index} no longer exists - skipping card update`,
+                  );
+                  return prev; // Return unchanged if player doesn't exist
+                }
                 updated[dealData.index] = {
                   ...updated[dealData.index],
                   hand: {
@@ -367,7 +487,16 @@ export function useGameActions({
               // Show initial reaction after AI receives their second card
               if (dealData.cardIndex === 1) {
                 registerTimeout(() => {
+                  // Safety check: Ensure AI player still exists
                   const ai = aiPlayers[dealData.index];
+                  if (!ai) {
+                    debugLog(
+                      "dealCards",
+                      `⚠️ AI player at index ${dealData.index} no longer exists - skipping reaction`,
+                    );
+                    return;
+                  }
+
                   // Get the two cards this AI has now
                   const firstCard = dealtCards.find(
                     (d) =>
@@ -574,6 +703,7 @@ export function useGameActions({
       playerHand,
       getCardPosition,
       currentDealer,
+      selectedTestScenario,
       setShoe,
       setCardsDealt,
       setRunningCount,
@@ -984,89 +1114,141 @@ export function useGameActions({
       bet: handToSplit.bet,
     };
 
-    // Deal a card to the first hand
-    registerTimeout(() => {
-      const newCard1 = dealCardFromShoe();
+    // Deal cards to both hands immediately (no animation for splits)
+    const newCard1 = dealCardFromShoe();
+    debugLog(
+      "playerActions",
+      `Dealing to first hand: ${newCard1.rank}${newCard1.suit} (value: ${newCard1.value})`,
+    );
+    hand1.cards.push(newCard1);
+
+    const newCard2 = dealCardFromShoe();
+    debugLog(
+      "playerActions",
+      `Dealing to second hand: ${newCard2.rank}${newCard2.suit} (value: ${newCard2.value})`,
+    );
+    hand2.cards.push(newCard2);
+
+    // Update state immediately
+    if (isResplit) {
+      // Resplit: Replace current hand with two new hands
+      const newSplitHands = [...playerHand.splitHands!];
+      const activeIndex = playerHand.activeSplitHandIndex!;
+
+      // Replace the current hand with hand2 and insert hand1 after it
+      newSplitHands.splice(activeIndex, 1, hand2, hand1);
+
+      setPlayerHand({
+        cards: [], // Clear main hand
+        bet: playerHand.bet,
+        isSplit: true,
+        splitHands: newSplitHands,
+        activeSplitHandIndex: activeIndex, // Stay on first new hand
+      });
+
       debugLog(
         "playerActions",
-        `Dealing to first hand: ${newCard1.rank}${newCard1.suit} (value: ${newCard1.value})`,
+        `Resplit complete - now have ${newSplitHands.length} hands, playing hand ${activeIndex + 1}`,
       );
+    } else {
+      // Initial split: Create split state (hand2 on left, hand1 on right)
+      setPlayerHand({
+        cards: [], // Clear main hand
+        bet: playerHand.bet,
+        isSplit: true,
+        splitHands: [hand2, hand1],
+        activeSplitHandIndex: 0,
+      });
 
-      hand1.cards.push(newCard1);
+      debugLog("playerActions", "Split complete - starting with first hand");
+    }
 
-      // Deal a card to the second hand
-      registerTimeout(() => {
-        const newCard2 = dealCardFromShoe();
-        debugLog(
-          "playerActions",
-          `Dealing to second hand: ${newCard2.rank}${newCard2.suit} (value: ${newCard2.value})`,
-        );
+    // Check if split aces and cannot hit them (automatically stand on both)
+    const isSplitAces = hand1.cards[0].rank === "A";
+    if (isSplitAces && !gameSettings.hitSplitAces) {
+      debugLog(
+        "playerActions",
+        "Split Aces - cannot hit, automatically standing on both hands",
+      );
+      // Mark player as finished since they can't hit split aces
+      setPlayerFinished(true);
+      return;
+    }
 
-        hand2.cards.push(newCard2);
-
-        if (isResplit) {
-          // Resplit: Replace current hand with two new hands
-          const newSplitHands = [...playerHand.splitHands!];
-          const activeIndex = playerHand.activeSplitHandIndex!;
-
-          // Replace the current hand with hand1 and insert hand2 after it
-          newSplitHands.splice(activeIndex, 1, hand1, hand2);
-
-          setPlayerHand({
-            cards: [], // Clear main hand
-            bet: playerHand.bet,
-            isSplit: true,
-            splitHands: newSplitHands,
-            activeSplitHandIndex: activeIndex, // Stay on first new hand
-          });
-
-          debugLog(
-            "playerActions",
-            `Resplit complete - now have ${newSplitHands.length} hands, playing hand ${activeIndex + 1}`,
-          );
-        } else {
-          // Initial split: Create split state
-          setPlayerHand({
-            cards: [], // Clear main hand
-            bet: playerHand.bet,
-            isSplit: true,
-            splitHands: [hand1, hand2],
-            activeSplitHandIndex: 0,
-          });
-
-          debugLog(
-            "playerActions",
-            "Split complete - starting with first hand",
-          );
-        }
-
-        // Check if first hand is 21 (automatically stand)
-        const hand1Value = calculateHandValue(hand1.cards);
-        if (hand1Value === 21) {
-          debugLog(
-            "playerActions",
-            "First hand has 21 - automatically standing",
-          );
-          // Move to next hand
-          setPlayerHand((prev) => {
-            const nextIndex = (prev.activeSplitHandIndex || 0) + 1;
-            return {
-              ...prev,
-              activeSplitHandIndex: nextIndex,
-            };
-          });
-        }
-      }, CARD_ANIMATION_DURATION + 200);
-    }, 500);
+    // Check if first hand is 21 (automatically stand)
+    const hand1Value = calculateHandValue(hand1.cards);
+    if (hand1Value === 21) {
+      debugLog("playerActions", "First hand has 21 - automatically standing");
+      // Move to next hand
+      setPlayerHand((prev) => {
+        const nextIndex = (prev.activeSplitHandIndex || 0) + 1;
+        return {
+          ...prev,
+          activeSplitHandIndex: nextIndex,
+        };
+      });
+    }
   }, [
     playerHand,
     playerChips,
     gameSettings.maxResplits,
     gameSettings.resplitAces,
+    gameSettings.hitSplitAces,
     dealCardFromShoe,
     registerTimeout,
     setPlayerHand,
     setPlayerChips,
+    setPlayerFinished,
+  ]);
+
+  const surrender = useCallback(() => {
+    debugLog("playerActions", "=== PLAYER ACTION: SURRENDER ===");
+
+    const handValue = calculateHandValue(playerHand.cards);
+    debugLog(
+      "playerActions",
+      `Hand value: ${handValue}, Bet: $${playerHand.bet}`,
+    );
+
+    // Calculate refund (50% of bet, rounded down)
+    const refund = Math.floor(playerHand.bet / 2);
+    debugLog("playerActions", `Refunding $${refund} (50% of bet)`);
+
+    // Mark hand as finished and surrendered
+    setPlayerFinished(true);
+    setPlayerHand((prev) => ({
+      ...prev,
+      result: "SURRENDER",
+    }));
+
+    // Refund 50% of the bet
+    setPlayerChips((prev) => prev + refund);
+
+    // Record action
+    if (playerSeat !== null) {
+      setPlayerActions((prev) => {
+        const newActions = new Map(prev);
+        newActions.set(playerSeat, "STAND"); // Treat as stand for tracking purposes
+        return newActions;
+      });
+    }
+
+    debugLog("playerActions", "Surrender complete - moving to next phase");
+
+    // Move to next phase after brief delay
+    registerTimeout(() => {
+      setPhase("AI_TURNS");
+    }, 500);
+  }, [
+    playerHand,
+    playerSeat,
+    playerChips,
+    setPlayerHand,
+    setPlayerChips,
+    setPlayerFinished,
+    setPlayerActions,
+    setPhase,
+    registerTimeout,
   ]);
 
   return {
@@ -1076,5 +1258,6 @@ export function useGameActions({
     stand,
     doubleDown,
     split,
+    surrender,
   };
 }

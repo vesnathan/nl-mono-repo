@@ -15,6 +15,8 @@ interface UseAutoStartHandParams {
   phase: GamePhase;
   playerSeat: number | null;
   currentBet: number;
+  devTestingMode?: boolean;
+  showTestScenarioSelector?: boolean;
   setPhase: (phase: GamePhase) => void;
   setDealerRevealed: (revealed: boolean) => void;
   setPlayerHand: (hand: PlayerHand) => void;
@@ -42,6 +44,8 @@ export function useAutoStartHand({
   phase,
   playerSeat,
   currentBet,
+  devTestingMode,
+  showTestScenarioSelector,
   setPhase,
   setDealerRevealed,
   setPlayerHand,
@@ -54,18 +58,32 @@ export function useAutoStartHand({
   addSpeechBubble,
   registerTimeout,
 }: UseAutoStartHandParams) {
-  // Use ref to track current phase inside timeout
+  // Use refs to track current values inside timeouts
   const phaseRef = useRef(phase);
+  const showTestScenarioSelectorRef = useRef(showTestScenarioSelector);
 
   useEffect(() => {
     phaseRef.current = phase;
   }, [phase]);
+
+  useEffect(() => {
+    showTestScenarioSelectorRef.current = showTestScenarioSelector;
+  }, [showTestScenarioSelector]);
 
   // Auto-start first hand after initialization
   // AI players always play automatically
   // User can watch without being seated, or join by sitting and placing a bet
   // eslint-disable-next-line sonarjs/no-duplicate-string
   useEffect(() => {
+    // Don't auto-start if dev testing mode is on and test scenario selector is open
+    if (devTestingMode && showTestScenarioSelector) {
+      debugLog(
+        "gamePhases",
+        "[useAutoStartHand] Pausing auto-start - test scenario selector is open",
+      );
+      return;
+    }
+
     if (
       initialized &&
       aiPlayersLength > 0 &&
@@ -88,6 +106,16 @@ export function useAutoStartHand({
           );
           return;
         }
+
+        // Check if test scenario selector is open in dev mode
+        if (devTestingMode && showTestScenarioSelectorRef.current) {
+          debugLog(
+            "gamePhases",
+            "[useAutoStartHand] Test scenario selector is open, skipping auto-start",
+          );
+          return;
+        }
+
         debugLog(
           "gamePhases",
           "[useAutoStartHand] Timer fired - starting dealing phase",
@@ -125,13 +153,30 @@ export function useAutoStartHand({
     }
     // Only depend on values that determine WHEN to start the timer, not values used inside
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialized, aiPlayersLength, handNumber, phase, playerSeat]);
+  }, [
+    initialized,
+    aiPlayersLength,
+    handNumber,
+    phase,
+    playerSeat,
+    devTestingMode,
+    showTestScenarioSelector,
+  ]);
 
   // Auto-start subsequent hands (handNumber > 0)
   // AI players always play automatically
   // eslint-disable-next-line sonarjs/no-duplicate-string
   // User can watch without being seated, or join by sitting and placing a bet
   useEffect(() => {
+    // Don't auto-start if dev testing mode is on and test scenario selector is open
+    if (devTestingMode && showTestScenarioSelector) {
+      debugLog(
+        "gamePhases",
+        "[useAutoStartHand] Pausing auto-start - test scenario selector is open",
+      );
+      return;
+    }
+
     if (
       initialized &&
       aiPlayersLength > 0 &&
@@ -154,6 +199,16 @@ export function useAutoStartHand({
           );
           return;
         }
+
+        // Check if test scenario selector is open in dev mode
+        if (devTestingMode && showTestScenarioSelectorRef.current) {
+          debugLog(
+            "gamePhases",
+            `[useAutoStartHand] Test scenario selector is open for hand ${handNumber}, skipping auto-start`,
+          );
+          return;
+        }
+
         debugLog(
           "gamePhases",
           `[useAutoStartHand] Timer fired for hand ${handNumber} - starting dealing phase`,
@@ -191,5 +246,13 @@ export function useAutoStartHand({
     }
     // Only depend on values that determine WHEN to start the timer, not values used inside
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialized, aiPlayersLength, handNumber, phase, playerSeat]);
+  }, [
+    initialized,
+    aiPlayersLength,
+    handNumber,
+    phase,
+    playerSeat,
+    devTestingMode,
+    showTestScenarioSelector,
+  ]);
 }

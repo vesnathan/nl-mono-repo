@@ -5,7 +5,7 @@ import { AIPlayer } from "@/types/gameState";
 
 /**
  * Hook to handle game initialization on mount
- * - Randomly selects and seats 3-4 AI players
+ * - Randomly selects and seats AI players
  * - Assigns random dealer
  * - Sets initialized flag
  */
@@ -13,10 +13,12 @@ export function useGameInitialization(
   setAIPlayers: (players: AIPlayer[]) => void,
   setCurrentDealer: (dealer: DealerCharacter) => void,
   setInitialized: (initialized: boolean) => void,
+  devTestingMode: boolean = false,
 ) {
   useEffect(() => {
-    // Fill all 8 seats with AI players
-    const numAIPlayers = 8;
+    // Dev mode: only 2 AI players for easier testing
+    // Normal mode: all 8 seats filled with AI players
+    const numAIPlayers = devTestingMode ? 2 : 8;
     const shuffledCharacters = [...AI_CHARACTERS].sort(
       () => Math.random() - 0.5,
     );
@@ -29,8 +31,12 @@ export function useGameInitialization(
       );
     }
 
-    // Assign all table positions (0-7)
-    const availablePositions = [0, 1, 2, 3, 4, 5, 6, 7];
+    // Assign table positions
+    // Dev mode: use positions 2 and 4 (spread out for visibility)
+    // Normal mode: all 8 positions (0-7)
+    const availablePositions = devTestingMode
+      ? [2, 4]
+      : [0, 1, 2, 3, 4, 5, 6, 7];
 
     const aiPlayersWithSeats = selectedCharacters.map((char, idx) => ({
       character: char,
@@ -44,5 +50,5 @@ export function useGameInitialization(
     const initialDealer = getRandomDealer();
     setCurrentDealer(initialDealer);
     setInitialized(true);
-  }, [setAIPlayers, setCurrentDealer, setInitialized]);
+  }, [setAIPlayers, setCurrentDealer, setInitialized, devTestingMode]);
 }

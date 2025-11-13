@@ -10,6 +10,7 @@ interface GameActions {
   stand: () => void;
   doubleDown: () => void;
   split: () => void;
+  surrender: () => void;
   handleBetChange: (amount: number) => void;
   handleConfirmBet: () => void;
   handleClearBet: () => void;

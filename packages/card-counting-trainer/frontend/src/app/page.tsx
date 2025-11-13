@@ -48,6 +48,8 @@ import CountPeekModal from "@/components/CountPeekModal";
 import CountPeekConfirmation from "@/components/CountPeekConfirmation";
 import { useAuth } from "@/contexts/AuthContext";
 import { debugLog } from "@/utils/debug";
+import { TestScenario } from "@/types/testScenarios";
+import TestScenarioSelector from "@/components/TestScenarioSelector";
 import { GameStateProvider } from "@/contexts/GameStateContext";
 import { UIStateProvider } from "@/contexts/UIStateContext";
 import { GameActionsProvider } from "@/contexts/GameActionsContext";
@@ -67,7 +69,7 @@ export default function GamePage() {
   );
 
   // Custom hooks
-  const { registerTimeout } = useGameTimeouts();
+  const { registerTimeout, clearAllTimeouts } = useGameTimeouts();
   const { debugLogs, showDebugLog, setShowDebugLog, clearDebugLogs } =
     useDebugLogging();
 
@@ -145,6 +147,11 @@ export default function GamePage() {
   const [showStrategyCard, setShowStrategyCard] = useState(false);
   const [showHeatMap, setShowHeatMap] = useState(false);
   const [showCountPeek, setShowCountPeek] = useState(false);
+  const [devTestingMode, setDevTestingMode] = useState(false);
+  const [showTestScenarioSelector, setShowTestScenarioSelector] =
+    useState(false);
+  const [selectedTestScenario, setSelectedTestScenario] =
+    useState<TestScenario | null>(null);
   const [showCountPeekConfirmation, setShowCountPeekConfirmation] =
     useState(false);
   const [showCountPeekResult, setShowCountPeekResult] = useState(false);
@@ -189,53 +196,62 @@ export default function GamePage() {
       dealerHand,
       blackjackPayout: gameSettings.blackjackPayout,
       currentDealer,
+      devTestingMode,
     });
 
-  // Game actions hook - provides startNewRound, dealInitialCards, hit, stand, doubleDown, split
-  const { startNewRound, dealInitialCards, hit, stand, doubleDown, split } =
-    useGameActions({
-      phase,
-      playerSeat,
-      playerHand,
-      dealerHand,
-      aiPlayers,
-      shoe,
-      cardsDealt,
-      runningCount,
-      shoesDealt,
-      gameSettings,
-      currentDealer,
-      playerChips,
-      setPhase,
-      setCurrentBet,
-      setDealerRevealed,
-      setDealerCallout,
-      setPlayerHand,
-      setDealerHand,
-      setSpeechBubbles,
-      setAIPlayers,
-      setFlyingCards,
-      setPlayerActions,
-      setShoe,
-      setCardsDealt,
-      setRunningCount,
-      setShoesDealt,
-      setInsuranceOffered,
-      setActivePlayerIndex,
-      setPlayerFinished,
-      setPlayerChips,
-      dealCardFromShoe,
-      registerTimeout,
-      getCardPosition: (
-        type: "ai" | "player" | "dealer" | "shoe",
-        _aiPlayers?: AIPlayer[],
-        _playerSeat?: number | null,
-        index?: number,
-        cardIndex?: number,
-      ) => getCardPosition(type, aiPlayers, playerSeat, index, cardIndex),
-      addSpeechBubble,
-      showEndOfHandReactions,
-    });
+  // Game actions hook - provides startNewRound, dealInitialCards, hit, stand, doubleDown, split, surrender
+  const {
+    startNewRound,
+    dealInitialCards,
+    hit,
+    stand,
+    doubleDown,
+    split,
+    surrender,
+  } = useGameActions({
+    phase,
+    playerSeat,
+    playerHand,
+    dealerHand,
+    aiPlayers,
+    shoe,
+    cardsDealt,
+    runningCount,
+    shoesDealt,
+    gameSettings,
+    currentDealer,
+    playerChips,
+    selectedTestScenario,
+    setPhase,
+    setCurrentBet,
+    setDealerRevealed,
+    setDealerCallout,
+    setPlayerHand,
+    setDealerHand,
+    setSpeechBubbles,
+    setAIPlayers,
+    setFlyingCards,
+    setPlayerActions,
+    setShoe,
+    setCardsDealt,
+    setRunningCount,
+    setShoesDealt,
+    setInsuranceOffered,
+    setActivePlayerIndex,
+    setPlayerFinished,
+    setPlayerChips,
+    dealCardFromShoe,
+    registerTimeout,
+    getCardPosition: (
+      type: "ai" | "player" | "dealer" | "shoe",
+      _aiPlayers?: AIPlayer[],
+      _playerSeat?: number | null,
+      index?: number,
+      cardIndex?: number,
+    ) => getCardPosition(type, aiPlayers, playerSeat, index, cardIndex),
+    addSpeechBubble,
+    showEndOfHandReactions,
+  });
 
   // Calculate true count for bet tracking
   const decksRemaining = calculateDecksRemaining(
@@ -466,7 +482,12 @@ export default function GamePage() {
   );
 
   // Game initialization hook
-  useGameInitialization(setAIPlayers, setCurrentDealer, setInitialized);
+  useGameInitialization(
+    setAIPlayers,
+    setCurrentDealer,
+    setInitialized,
+    devTestingMode,
+  );
 
   // Conversation triggers hook
   useConversationTriggers({
@@ -519,6 +540,8 @@ export default function GamePage() {
     phase,
     playerSeat,
     currentBet,
+    devTestingMode,
+    showTestScenarioSelector,
     setPhase,
     setDealerRevealed,
     setPlayerHand,
@@ -542,6 +565,66 @@ export default function GamePage() {
     debugLog("betting", `Player seat: ${playerSeat}`);
     debugLog("betting", `Should show betting interface: ${shouldShowBetting}`);
   }, [phase, initialized, playerSeat]);
+
+  // Load devTestingMode from localStorage on mount
+  // TODO: Move to DynamoDB user settings in the future for persistence across devices
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("devTestingMode");
+      if (saved !== null) {
+        setDevTestingMode(saved === "true");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
+
+  // Save devTestingMode to localStorage whenever it changes
+  // TODO: Move to DynamoDB user settings in the future for persistence across devices
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("devTestingMode", String(devTestingMode));
+    }
+  }, [devTestingMode]);
+
+  // Show test scenario selector when entering BETTING phase in dev mode
+  // Only trigger when phase changes TO betting, not while staying in betting
+  useEffect(() => {
+    if (phase === "BETTING" && devTestingMode) {
+      setShowTestScenarioSelector(true);
+    }
+  }, [phase, devTestingMode]); // Removed showTestScenarioSelector from dependencies
+
+  // Clear all timeouts and reset game state when dev mode changes
+  useEffect(() => {
+    // Skip on initial mount - only run when devTestingMode actually changes
+    if (!initialized) return;
+
+    debugLog(
+      "testScenario",
+      `Dev mode changed to ${devTestingMode ? "ON" : "OFF"} - clearing animations and resetting game`,
+    );
+
+    // Clear all pending timeouts (stops any in-flight card animations)
+    clearAllTimeouts();
+
+    // Clear flying cards
+    setFlyingCards([]);
+
+    // Reset to BETTING phase
+    setPhase("BETTING");
+
+    // Clear hands
+    setPlayerHand({ cards: [], bet: 0 });
+    setDealerHand({ cards: [], bet: 0 });
+    setCurrentBet(0);
+    setDealerRevealed(false);
+    setPlayerFinished(false);
+    setSpeechBubbles([]);
+    setWinLossBubbles([]);
+
+    // Note: aiPlayers will be reset by useGameInitialization hook which also runs on devTestingMode change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [devTestingMode]);
 
   // AI turns phase hook (handles its own reset logic internally)
   useAITurnsPhase({
@@ -719,6 +802,8 @@ export default function GamePage() {
       <AdminSettingsModal
         isOpen={showAdminSettings}
         onClose={() => setShowAdminSettings(false)}
+        devTestingMode={devTestingMode}
+        setDevTestingMode={setDevTestingMode}
       />
       <CountPeekConfirmation
         isOpen={showCountPeekConfirmation}
@@ -735,6 +820,14 @@ export default function GamePage() {
         )}
         decksRemaining={calculateDecksRemaining(shoe.length, cardsDealt)}
         onClose={() => setShowCountPeekResult(false)}
+      />
+      <TestScenarioSelector
+        isOpen={showTestScenarioSelector}
+        onClose={() => setShowTestScenarioSelector(false)}
+        onSelectScenario={(scenario) => {
+          setSelectedTestScenario(scenario);
+          setShowTestScenarioSelector(false);
+        }}
       />
       {/* Penalty Flash Effect */}
       {showPenaltyFlash && (
@@ -799,6 +892,8 @@ export default function GamePage() {
             debugLogs,
             showDebugLog,
             strategyCardUsedThisHand,
+            devTestingMode,
+            selectedTestScenario,
             heatMapBuckets: getHeatMapBuckets(),
             discretionScore: getDiscretionScore(),
             heatMapDataPointCount: dataPointCount,
@@ -810,6 +905,7 @@ export default function GamePage() {
             setShowDealerInfo,
             setShowCountPeek,
             setShowDebugLog,
+            setDevTestingMode,
             clearDebugLogs,
           }}
         >
@@ -821,6 +917,7 @@ export default function GamePage() {
               stand,
               doubleDown,
               split,
+              surrender,
               handleBetChange,
               handleConfirmBet,
               handleClearBet,
